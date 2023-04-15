@@ -1,0 +1,11 @@
+.ignore
+/.helix
+/.venv
+/.vscode
+/build
+*.exe
+
+/.lvenv
+**/compile_commands.json
+
+project_structure.txt
