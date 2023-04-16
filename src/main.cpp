@@ -1,10 +1,7 @@
 
 #include <iostream>
 #include <string>
-// #include "hel"
-#include "../include/helixlib/ReadFile.h"
-// #include "helixlib/ReadFile.h"
-// #include "heli"
+#include "helixlib/ReadFile.h"
 
 
 int main(int count, char** params)

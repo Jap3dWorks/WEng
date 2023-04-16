@@ -4,6 +4,7 @@
 /.vscode
 /build
 *.exe
+/.cache
 
 /.lvenv
 **/compile_commands.json
