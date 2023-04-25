@@ -5,8 +5,9 @@
 /build
 *.exe
 /.cache
-
+environment.bat
 /.lvenv
 **/compile_commands.json
-
+web/
 project_structure.txt
+emcc.lua
