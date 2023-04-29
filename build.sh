@@ -7,7 +7,7 @@ export CXX=clang++
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-cmake  -S . -B ./build 
-cmake --build ./build
+emcmake cmake  -S . -B ./build 
+# cmake --build ./build
 
 exit 0
