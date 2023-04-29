@@ -1,7 +1,8 @@
 
 #include <iostream>
 #include <string>
-// #include "helixlib/ReadFile.h"
+#include "helixlib/ReadFile.h"
+// #include "emscripten/emscripten.h"
 
 
 template<typename T>
@@ -43,9 +44,24 @@ void MyFunction(const T& InValue)
 int main(int count, char** params)
 {
 	
+	FILE *file = fopen("test/hello_workd_file.txt", "rb");
+	if (!file)
+	{
+		printf("Cannot open file\n.");
+		return 1;
+	}
+
+	while(!feof(file))
+	{
+		char c = fgetc(file);
+		if (c != EOF)
+		{
+			putchar(c);
+		}
+	}
+
+	fclose(file);
 	MyFunction(MyStruct<int>());
-	
-	printf("Hello World\n");
 	
 	return 0;
 
