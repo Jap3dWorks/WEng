@@ -1,7 +1,7 @@
 
 cmake_minimum_required (VERSION 3.26.2)
 
-project (StorageResolver)
+project (WebAssemblyProject)
 
 
 # Generates a `compile_commands.json` that can be used for autocompletion
@@ -17,7 +17,7 @@ if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif ()
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # add_subdirectory(include)
 # add_executable(src/main.cpp)
@@ -28,5 +28,6 @@ include_directories(include)
 # include_directories("${FOO_INCLUDE_DIR}")
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../emsdk/upstream/emscripten/cache/sysroot/include)
 
-add_executable(StorageResolver src/main.cpp)
+
+add_executable(WebAssemblyProject src/main.cpp)
 

@@ -11,3 +11,5 @@ environment.bat
 web/
 project_structure.txt
 emcc.lua
+ThirdParty/
+
