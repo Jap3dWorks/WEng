@@ -2,17 +2,13 @@
 #include <iostream>
 #include <string>
 #include "helixlib/ReadFile.h"
-<<<<<<< Updated upstream
-// #include "emscripten/emscripten.h"
-=======
-#include <string> 
 
+// #include "emscripten/emscripten.h"
+#include <string> 
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
->>>>>>> Stashed changes
-
 
 template<typename T>
 struct MyStruct
@@ -48,35 +44,6 @@ void MyFunction(const T& InValue)
 {
 	
 }
-
-
-<<<<<<< Updated upstream
-int main(int count, char** params)
-{
-	
-	FILE *file = fopen("test/hello_workd_file.txt", "rb");
-	if (!file)
-	{
-		printf("Cannot open file\n.");
-		return 1;
-	}
-
-	while(!feof(file))
-	{
-		char c = fgetc(file);
-		if (c != EOF)
-		{
-			putchar(c);
-		}
-	}
-
-	fclose(file);
-	MyFunction(MyStruct<int>());
-	
-	return 0;
-=======
-class MyClass{};
->>>>>>> Stashed changes
 
 
 int main(int argc, char** argv)

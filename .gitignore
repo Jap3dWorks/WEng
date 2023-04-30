@@ -12,4 +12,7 @@ web/
 project_structure.txt
 emcc.lua
 ThirdParty/
+*.bak
+sh.exe.stackdump
+
 
