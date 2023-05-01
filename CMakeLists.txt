@@ -2,28 +2,42 @@ cmake_minimum_required (VERSION 3.26.2)
 
 project(WEng)
 
-
 if (EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif ()
 
-
-MACRO(SUBDIRLIST result curdir)
-  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+macro(FIND_CMAKE_LISTS result curdir)
+  FILE(GLOB_RECURSE children ABSOLUTE ${curdir} ${curdir}/*/CMakeLists.txt)
   SET(dirlist "")
-  FOREACH(child ${children})
-    IF(IS_DIRECTORY ${curdir}/${child})
-      LIST(APPEND dirlist ${child})
-    ENDIF()
-  ENDFOREACH()
+  foreach(child ${children})
+    message(STATUS "CMakeLists.txt file found, ${child}.")
+    cmake_path(GET child PARENT_PATH subdir)
+    LIST(APPEND dirlist ${subdir})
+  endforeach()
   SET(${result} ${dirlist})
-ENDMACRO()
+endmacro()
 
+# Collect project modules
+message(STATUS "Start collecting modules.")
+find_cmake_lists(SUBDIRS "${PROJECT_SOURCE_DIR}/source")
 
-SUBDIRLIST(SUBDIRS ${MY_CURRENT_DIR})
+foreach(subdir ${SUBDIRS})
+  message(STATUS "Add subdirectory, ${subdir}.")
+  add_subdirectory(${subdir})
+endforeach()
 
-FOREACH(subdir ${SUBDIRS})
-  ADD_SUBDIRECTORY(${subdir})
-ENDFOREACH()
+message(STATUS "Start collecting plugins.")
+# Collect plugins
+if(WENG_PLUGINS_PATHS)
+  foreach(plugins_directories ${WENG_PLUGINS_PATHS})
+    FIND_CMAKE_LISTS(plugins_dir ${plugins_directories})
+    foreach(subdir ${plugins_dir})
+      message(STATUS "Add subdirectory, ${subdir}.")
+      add_subdirectory(${subdir})
+    endforeach()
+  endforeach()
+endif()
+
+# include_directories(D:/_docs/Weng/emsdk/upstream/emscripten/cache/sysroot/include)
