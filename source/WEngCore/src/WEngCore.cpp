@@ -1,17 +1,14 @@
-
 #include <iostream>
 #include <string>
 #include "WEng/WEng.h"
 #include "GLES3/gl3.h"
+#include "EGL/egl.h"
 
-// #include "emscripten/emscripten.h"
 #include <string> 
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
-
-
 
 
 int main(int argc, char** argv)
