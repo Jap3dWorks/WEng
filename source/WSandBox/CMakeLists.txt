@@ -1,17 +1,20 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-project(WSandBox)
+# project(WSandBox)
+add_executable(WSandBox src/WSandBox.cpp)
 
 if (EMSCRIPTEN)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    target_compile_definitions(WSandBox PUBLIC MODULE_NAME=WSANDBOX)
+    target_compile_definitions(WSandBox PUBLIC WSANDBOX_API)
+
+    target_compile_options(WSandBox BEFORE PRIVATE -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS=["bmp","png","xpm"] -sUSE_SDL_NET=2)
+    target_link_options(WSandBox BEFORE PRIVATE -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS=["bmp","png","xpm"] -sUSE_SDL_NET=2)
+    target_include_directories(WSandBox PUBLIC include)
+else()
+    find_package(glm REQUIRED)
+    target_include_directories(WSandBox PUBLIC include ${GLM_INCLUDE_DIRS})
 endif ()
 
-# find_package(glm REQUIRED)
-
-# include_directories(include ${GLM_INCLUDE_DIRS})
-
-add_executable(WSandBox src/WSandBox.cpp)
-# target_link_libraries(WSandBox glm)
-
+if(NOT EMSCRIPTEN)
+    target_link_libraries(WSandBox glm)
+endif()

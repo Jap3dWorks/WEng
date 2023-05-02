@@ -1,7 +1,3 @@
-// namespace std {
-//     typedef decltype(nullptr) nullptr_t;
-// }
-
 #include <iostream>
 
 

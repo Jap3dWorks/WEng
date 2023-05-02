@@ -7,9 +7,8 @@
 
 // https://gist.github.com/mortennobel/0e9e90c9bbc61cc99d5c3e9c038d8115
 
-#include "SDL.h"
-#include <SDL_image.h>
-#include <emscripten.h>
+#include "SDL/SDL.h"
+#include <SDL/SDL_image.h>
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten.h>
@@ -21,7 +20,7 @@
 
 
 static bool quitting = false;
-static SDL_Windows *windows = nullptr;
+static SDL_Window *window = nullptr;
 static SDL_GLContext gl_context;
 
 GLuint vertexBuffer, vertexArrayObject, shaderProgram;
@@ -36,7 +35,7 @@ int invert_image(int width, int height, void* image_pixels)
 		SDL_SetError("Not enough memory for image inversion");
 		return -1;
 	}
-	int heigh_div_2 = heigh / 2;
+	int height_div_2 = height / 2;
 	for (int index=0; index<height_div_2; index++)
 	{
 		memcpy(
@@ -83,7 +82,7 @@ int LoadGLTextures(const char* filename)
 	{
 		Status = true;
 
-		glGentextures(1, &texture);
+		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		std::cout << "Loaded " << TextureImage[0]->w << " " << TextureImage[0]->h << std::endl;
@@ -92,7 +91,7 @@ int LoadGLTextures(const char* filename)
 		SDL_Surface* formatedSurf;
 		if (TextureImage[0]->format->BytesPerPixel==3)
 		{
-			formattedSurf = SDL_ConvertSurfaceFormat(
+			formatedSurf = SDL_ConvertSurfaceFormat(
 				TextureImage[0],
 				SDL_PIXELFORMAT_RGB24,
 				0
@@ -101,22 +100,22 @@ int LoadGLTextures(const char* filename)
 		} 
 		else 
 		{
-			formattedSurf = SDL_ConvertSurfaceFormat(
+			formatedSurf = SDL_ConvertSurfaceFormat(
 				TextureImage[0],
-				SDL_PIXELFORMAT_RGBA32,
+				SDL_PIXELFORMAT_RGB332,
 				0
 			);
 			format = GL_RGB;
 		}
-		invert_image(formattedSurf->w*formattedSurf->format->BytesPerPixel, formattedSurf->sh, (char*) formattedSurf->pixels);
+		invert_image(formatedSurf->w*formatedSurf->format->BytesPerPixel, formatedSurf->h, (char*) formatedSurf->pixels);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, format, formattedSurf->w,
-		formattedSurf->h, 0, format,
-		GL_UNSIGNED_BYTE, formattedSurf->pixels);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, formatedSurf->w,
+		formatedSurf->h, 0, format,
+		GL_UNSIGNED_BYTE, formatedSurf->pixels);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexPARAMETERI(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		SDL_FreeSurface(formattedSurf);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		SDL_FreeSurface(formatedSurf);
 		SDL_FreeSurface(TextureImage[0]);
 	} 
 	else 
@@ -142,7 +141,7 @@ void loadBufferData()
 	#endif
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), vetexData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), vertexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(positionAttribute);
 	glEnableVertexAttribArray(uvAttribute);
@@ -201,7 +200,7 @@ GLuint initShader(const char* vShader, const char* fShader, const char* outputAt
 	{
 		std::cerr << "Shader program failed to link" << std::endl;
 		GLint logSize;
-		glGetProgramv(program, GL_INFO_LOG_LENGTH, &logSize);
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);
 		char* logMsg = new char[logSize];
 		glGetProgramInfoLog(program, logSize, nullptr, logMsg);
 		std::cerr << logMsg << std::endl;
@@ -272,7 +271,7 @@ void loadShader()
 		std::cerr << "Shader did not contain the 'color' attribute." << std::endl;
 	}
 
-	positionAttribute = glGetAttributeLocation(shaderProgram, "position");
+	positionAttribute = glGetAttribLocation(shaderProgram, "position");
 	if (positionAttribute < 0)
 	{
 		std::cerr << "Shader did not contain the 'position' attribute." << std::endl;
@@ -307,7 +306,7 @@ void render()
 	{
 		for(int y=0; y<2; y++)
 		{
-			glBindTexture(GL_TEXTURE_2D, textures[textireId]);
+			glBindTexture(GL_TEXTURE_2D, textures[textureId]);
 			glUniform2f(glGetUniformLocation(shaderProgram, "offset"), -0.5+x, -0.5+y);
 
 			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -335,7 +334,7 @@ int main(int argc, char** argv)
 {
 #ifdef EMSCRIPTEN
 	SDL_Renderer *renderer=nullptr;
-	SDL_CreateWindowAndRenderer(512, 512, SDL_WINDOW_OPENGL, &window, &renderer);
+	// SDL_CreateWindowAndRenderer(512, 512, SDL_WINDOW_OPENGL, &window, &renderer);
 #else
 	if(SDL_INIT(SDL_INIT_VIDEO|SDL_INIT_EVENTS) != 0)
 	{

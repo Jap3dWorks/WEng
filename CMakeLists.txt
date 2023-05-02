@@ -21,8 +21,7 @@ endif ()
 
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   message(STATUS "Platform is Windows.")
-  add_definitions("-fdeclspec")
-  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
+  add_compile_options(-fdeclspec)
 endif ()
 
 if (CMAKE_GENERATOR MATCHES "Visual Studio.*")

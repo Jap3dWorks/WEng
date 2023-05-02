@@ -29,15 +29,15 @@ if "%EMSCRIPTENENV%"=="" (
 )
 
 :choice
-SET /P AREYOUSURE=Build cmake files? (Y/[N])?
-IF /I "%AREYOUSURE%" EQU "Y" GOTO YES
-IF /I "%AREYOUSURE%" NEQ "Y" GOTO NO
+SET /P BUILDFILES=Build cmake files? (Y/[N])?
+IF /I "%BUILDFILES%" EQU "Y" GOTO YES
+IF /I "%BUILDFILES%" NEQ "Y" GOTO NO
 
 :YES
 cmake --build ./build
-GOTO END
+GOTO ENDB
 :NO
-GOTO END
-:END
+GOTO ENDB
+:ENDB
 
 

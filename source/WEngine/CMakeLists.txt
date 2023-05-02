@@ -1,10 +1,16 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-# find_package(glm REQUIRED)
+project(WEng)
 
-# include_directories(include ${GLM_INCLUDE_DIRS})
+if (NOT EMSCRIPTEN)
+find_package(glm REQUIRED)
+include_directories(include ${GLM_INCLUDE_DIRS})
+else()
 include_directories(include)
+endif()
 
 add_executable(WEng src/WEngine.cpp)
-# target_link_libraries(WEng glm)
+if (NOT EMSCRIPTEN)
+target_link_libraries(WEng glm)
+endif()
 
