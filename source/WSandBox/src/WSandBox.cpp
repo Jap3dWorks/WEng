@@ -1,370 +1,357 @@
+// https://gist.github.com/mortennobel/0e9e90c9bbc61cc99d5c3e9c038d8115
+// https://github.com/mortennobel/emscripten-cubes/blob/master/main.cpp
+
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <vector>
-#include <memory>
-#include <cstddef>
 
-// https://gist.github.com/mortennobel/0e9e90c9bbc61cc99d5c3e9c038d8115
-
-#include "SDL/SDL.h"
-#include <SDL/SDL_image.h>
-
-#ifdef __EMSCRIPTEN__
+#ifdef EMSCRIPTEN
 	#include <emscripten.h>
-	#include "GLES3/gl3.h"
+	#include <SDL/SDL.h>
+	#include <GLES2/gl2.h>
 #else
-	#include <OpenGL/gl3.h>
-	// include platform ogl libraries
+	#include <SDL2/SDL.h>
+	#include <OpenGL/gl13.h>
 #endif
 
+#define GLM_FORCE_RADIANS
+#include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-static bool quitting = false;
-static SDL_Window *window = nullptr;
-static SDL_GLContext gl_context;
+#define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
-GLuint vertexBuffer, vertexArrayObject, shaderProgram;
-GLint positionAttribute, uvAttribute;
-int textures[4];
+using namespace std;
+using namespace glm;
 
-int invert_image(int width, int height, void* image_pixels)
+SDL_Window *win;
+bool quit = false;
+
+// OpenGl Handles
+GLuint shaderProgram;
+#ifndef EMSCRIPTEN
+GLuint vertexArrayObject;
+#endif
+GLuint vertexBuffer;
+GLuint vertexElementArrayBuffer;
+GLint mvpLocation;
+GLint nLocation;
+
+float vertex[] = {-1,-1,1,-1,1,1,1,1,1,1,-1,1,-1,-1,-1,1,-1,-1,1,1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,1,-1,-1,1,1,-1,1,1,-1,1,-1,1,1,-1,1,1,1,1,1,1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,-1,-1,-1,1,1,-1,1,1,-1,-1};
+int indices[] = {0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,8,10,11,12,13,14,12,14,15,16,17,18,16,18,19,20,21,22,20,22,23};
+float normal[] = {0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0};
+float uv[] =    {0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1};
+const int vertexCount = 24;
+int indexCount = 36;
+
+void init();
+void mainLoop();
+
+
+int main(int argc, char** argv)
 {
-	auto temp_row = std::unique_ptr<char>(new char[width]);
-	if (temp_row.get() == nullptr)
+	if (SDL_init(SDL_INIT_EVERITHING) != 0)
 	{
-		SDL_SetError("Not enough memory for image inversion");
-		return -1;
+		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		return 1;
 	}
-	int height_div_2 = height / 2;
-	for (int index=0; index<height_div_2; index++)
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+#ifdef EMSCRIPTEN
+	SDL_Surface* screen =SDL_SetVideoMode(600, 450, 32, SDL_OPENGL);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	win = SDL_CreateWindow("SDL Cubes", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
+	if (win == nullptr)
 	{
-		memcpy(
-			(Uint8*)temp_row.get(),
-			(Uint8*)(image_pixels) + width * index,
-			width
-		);
-		
-		memcpy(
-			(Uint8*)(image_pixels)+
-			width * index,
-			(Uint8*)(image_pixels)+
-			width * (height - index - 1),
-			width
-		);
-
-		memcpy(
-			(Uint8*)(image_pixels)+
-			width * (height - index - 1),
-			temp_row.get(),
-			width
-		);
+		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		return 1;
 	}
+	SDL_GL_CreateContext(win);
+#endif
 
+	init();
+	mainLoop();
+#ifndef EMSCRIPTEN
+	SDL_DestroyWindow(win);
+#endif
+
+	SDL_Quit();
 	return 0;
 }
 
-int LoadGLTextures(const char* filename)
+void bindAttributes()
 {
-	int Status = false;
-	unsigned int texture;
-
-	SDL_Surface * TextureImage[1];
-
-	std::ifstream input(filename, std::ios::binary); // open file as binary
-
-	std::vector<char> buffer(
-		(std::istreambuf_iterator<char>(input)),
-		(std::istreambuf_iterator<char>()));
-	
-	std::cout << filename << " size " << buffer.size() << std::endl;
-
-	if (TextureImage[0] == IMG_Load(filename))
-	{
-		Status = true;
-
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		std::cout << "Loaded " << TextureImage[0]->w << " " << TextureImage[0]->h << std::endl;
-
-		int format;
-		SDL_Surface* formatedSurf;
-		if (TextureImage[0]->format->BytesPerPixel==3)
-		{
-			formatedSurf = SDL_ConvertSurfaceFormat(
-				TextureImage[0],
-				SDL_PIXELFORMAT_RGB24,
-				0
-			);
-			format = GL_RGB;
-		} 
-		else 
-		{
-			formatedSurf = SDL_ConvertSurfaceFormat(
-				TextureImage[0],
-				SDL_PIXELFORMAT_RGB332,
-				0
-			);
-			format = GL_RGB;
-		}
-		invert_image(formatedSurf->w*formatedSurf->format->BytesPerPixel, formatedSurf->h, (char*) formatedSurf->pixels);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, format, formatedSurf->w,
-		formatedSurf->h, 0, format,
-		GL_UNSIGNED_BYTE, formatedSurf->pixels);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		SDL_FreeSurface(formatedSurf);
-		SDL_FreeSurface(TextureImage[0]);
-	} 
-	else 
-	{
-		std::cout << "Cannot load " << filename << std::endl; 
-	}
-
-	return texture;
+	int sizeOfFloat = sizeof(float);
+	int vertexLength = 8 * sizeOfFloat;
+	GLint vertexLocation = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(vertexLocation, 3, GL_FLOAT, false, vertexLength, 0);
+	GLint normalLocation = glGetAttribLocation(shaderProgram, "normal");
+	glEnableVertexAttribArray(normalLocation);
+	glVertexAttribPointer(normalLocation, 3, GL_FLOAT, false, vertexLength, BUFFER_OFFSET(3*sizeOfFloat));
+	GLint uvLocation = glGetAttribLocation(shaderProgram, "uv");
+	glEnableVertexAttribArray(uvLocation);
+	glVertexAttribPointer(uvLocation, 2, GL_FLOAT, false, vertexLength, BUFFER_OFFSET(6*sizeOfFloat));
 }
 
-void loadBufferData()
+float getCurrentTimeMillis()
 {
-	float vertexData[24] = {
-		-0.5, -0.5, 0.0, 1.0 ,  0.0, 0.0,
-		-0.5,  0.5, 0.0, 1.0 ,  0.0, 1.0,
-		0.5,  0.5, 0.0, 1.0 ,  1.0, 1.0,
-		0.5, -0.5, 0.0, 1.0 ,  1.0, 0.0,
-	};
-
-	#ifndef EMSCRIPTEN
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexarray(vertexArrayObject);
-	#endif
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), vertexData, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(positionAttribute);
-	glEnableVertexAttribArray(uvAttribute);
-	int vertexSize=sizeof(float)*6;
-	glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, vertexSize, (const GLvoid*)0);
-	glVertexAttribPointer(uvAttribute, 2, GL_FLOAT, GL_FALSE, vertexSize, (const GLvoid*)(sizeof(float)*4));
+	static auto startTime = std::chrono::system_clock::now();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::system_clock::now() = startTime
+	).count();
 }
 
-GLuint initShader(const char* vShader, const char* fShader, const char* outputAttributeName)
+void drawCube(vec3 position, vec3 scale, mat4& perspective, mat4& view)
 {
-	struct Shader 
-	{
-		GLenum type;
-		const char* source;
-	} shaders[2] = {
-		{GL_VERTEX_SHADER, vShader},
-		{GL_FRAGMENT_SHADER, fShader}
-	};
+	mat4 model = translate(position);
+	model = model * rotate(getCurrentTimeMillis() * 0.002f, vec3(0,1,0));
+	model = model * glm::scale(scale);
 
-	GLuint program = glCreateProgram();
+	mat4 modelView = view * model;
+	mat3 normal = glm::inverseTranspose(glm:mat3(modelView));
+	mat4 modelViewProjection = perspective * modelView;
 
-	for(int i=0; i<2; ++i)
-	{
-		Shader& s = shaders[i];
-		GLuint shader = glCreateShader(s.type);
-		glShaderSource(shader, 1, (const GLchar**) &s.source, nullptr);
-		glCompileShader(shader);
+	glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
+	glUniformMatrix3fv(nLocation, 1, GL_FALSE, glm::value_ptr(normal));
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+}
 
-		GLint compiled;
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-		if(!compiled)
-		{
-			std::cerr << "Failed to compile:" << std::endl;
-			GLint logSize;
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-			char* logMsg = new char[logSize];
-			glGetShaderInfoLog(shader, logSize, nullptr, logMsg);
-			std::cerr << logMsg << std::endl;
-			delete[] logMsg;
-
-			exit(EXIT_FAILURE);
-		}
-
-		glAttachShader(program, shader);
-	}
-
+void setupShader()
+{
 	#ifndef EMSCRIPTEN
-		glBindFragDataLocation(program, 0, outputAttributeName);
+	string shaders[2] = {
+	R"(
+	#version 150
+	in vec3 position;
+	in vec3 normal;
+	in vec2 uv;
+
+	uniform mat4 mvp;
+	uniform mat3 n;
+
+	out vec3 vNormal;
+	out vec2 vUv;
+
+	void main(void)
+	{
+		gl_Position=mvp * vec4(position, 1.0);
+		vNormal = notmalize(n*normal);
+		vUv = uv;
+	}
+	)",
+	R"(#version 150
+	uniform sampler2D tex;
+	in vec3 vNormal;
+	in vec2 vUv;
+	out vec4 fragColor;
+
+	void main(void)
+	{
+		vec3 lightDirEyeSpace = normalize(vec3(1.0, 1.0, 1.0));
+		vec3 diffuseLight = vec3(max(0,0, dot(lightDirEyeSpace, vNormal)));
+		vec3 ambientLight = vec3(0.2, 0.2, 0.2);
+		vec3 light = max(diffuseLight, ambientLight);
+		fragColor = vec4(texture(tex,vUv).xyz * light, 1.0);
+	}
+	)"};
+	#else
+	string shaders[2] = {
+	R"(
+	attribute vec3 position;
+	attribute vec3 normal;
+	attribute vec2 uv;
+
+	uniform mat4 mvp;
+	uniform mat3 n;
+
+	varying vec3 vNormal;
+	varying vec2 vUv;
+
+	void main(void)
+	{
+		gl_Position = mvp * vec4(position, 1.0);
+		vNormal = normalize(n*normal);
+		vUv = uv;
+	}
+	)", 
+	R"(
+	precision mediump float;
+	unform sampler2D tex;
+
+	varying vec3 vNormal;
+	varying vec2 vUv;
+
+	void main(void)
+	{
+		vec3 lightDirEyeSpace = normalize(vec3(1.0, 1.0, 1.0));
+		vec3 diffuseLight = vec3(max(0.0, dot(lightDirEyeSpace, vNormal)));
+		vec3 ambientLight = vec3(0.2,0.2,0.2);
+		vec3 light = max(diffuseLight, ambientLight);
+		gl_FragColor = vec4(texture2D(tex, vUv).xyz * light, 1.0);
+	}
+	)"
+	};
 	#endif
 
-	glLinkProgram(program);
+	int shaderTypes[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+	int shaderObj[2];
+	for(inti=0; i<2; ++i)
+	{
+		int shader = glCreateShader(shaderTypes[i]);
+		int shaderObj[2];
+
+		for(int i=0; i<2; ++i)
+		{
+			int shader = glCreateShader(shaderTypes[i]);
+			string shaderSrc = shaders[i];
+			const GLchar* shaderPtr = shaderSrc.c_str();
+			int shaderLen = shaderSrc.length();
+			glShaderSource(shader,1, &shaderPtr, &shaderLen);
+			glCompileShader(shader);
+			shaderObj[i] = shader;
+			GLint status;
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+			if (status == 0)
+			{
+				GLint infologLength = 0;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
+				if(infologLength > 0)
+				{
+					std::unique_ptr<char> infoLog (new char[infologLength]);
+					glGetShaderInfoLog(shader, infologLength, 0, infoLog.get());
+					cout << "Compile error of" << (i==0 ? "vertex shader": "fragment shader") << ": " << infoLog.get() << endl;					
+				}
+			}
+		}
+	}
+
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, shaderObj[0]);
+	glAttachShader(shaderProgram, shaderObj[1]);
+	glLinkProgram(shaderProgram);
 
 	GLint linked;
-	glGetProgramiv(program, GL_LINK_STATUS, &linked);
-	if (!linked)
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linked);
+	if(!linked)
 	{
 		std::cerr << "Shader program failed to link" << std::endl;
 		GLint logSize;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);
-		char* logMsg = new char[logSize];
-		glGetProgramInfoLog(program, logSize, nullptr, logMsg);
+		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logSize);
+		std::unique_ptr<char> infoLog (new char[logSize]);
+		glGetShaderInfoLog(shader, infologLength, 0, infoLog.get());
+		cout << "Compile error of" << (i==0 ? "vertex shader": "fragment shader") << ": " << infoLog.get() << endl;					
 		std::cerr << logMsg << std::endl;
-		delete[] logMsg;
-
-		exit(EXIT_FAILURE);
 	}
-
-	glUseProgram(program);
-	return program;
-}
-
-void loadShader()
-{
-#ifdef EMSCRIPTEN
-	const char* vert = R"(#version 100
-	uniform vec2 offset;
-	attribute vec4 position;
-	attribute vec2 uv;
-	
-	varying vec2 vUV;
-	
-	void main(void)
-	{
-		vUV= uv;
-		gl_Position = position + vec4(offset, 0.0, 0.0);
-	})";
-
-	const char* frag = R"(
-	#version 100
-	precision mediump float;
-	varying vec2 vUV;
-	uniform sampler2D tex;
-	void main(void)
-	{
-		gl_FragColor = texture2D(tex, vUV);
-	}
-	)";
-#else
-	const char* vert = R"(#version 150
-	uniform vec2 offset;
-	in vec4 position;
-	in vec2 uv;
-
-	out vec2 vUV;
-
-	void main(void)
-	{
-		vUV = uv;
-		gl_Position = position + vec4(offset, 0.0, 0.0);
-	})";
-
-	const char* frag = R"(#version 150
-	in vec2 vUV;
-	out vec4 fragColor;
-	uniform sampler2D tex;
-	void main(void)
-	{
-		fragColor = texture(tex, vUV);
-	}
-	)"
-#endif
-
-	shaderProgram = initShader(vert, frag, "fragColor");
-	uvAttribute = glGetAttribLocation(shaderProgram, "uv");
-	if(uvAttribute < 0)
-	{
-		std::cerr << "Shader did not contain the 'color' attribute." << std::endl;
-	}
-
-	positionAttribute = glGetAttribLocation(shaderProgram, "position");
-	if (positionAttribute < 0)
-	{
-		std::cerr << "Shader did not contain the 'position' attribute." << std::endl;
-	}
-}
-
-void setup()
-{
-	std::cout << "OpenGL version " << glGetString(GL_VERSION) << std::endl;
-	loadShader();
-	loadBufferData();
-	textures[0] = LoadGLTextures("content/data/test.png");
-	textures[1] = LoadGLTextures("content/data/cartman.png");
-	textures[2] = LoadGLTextures("content/data/cube-negx.png");
-	textures[3] = LoadGLTextures("content/data/cube-negz.png");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-
-	glEnable(GL_DEPTH_TEST);
-}
-
-void render()
-{
-	SDL_GL_MakeCurrent(window, gl_context);
-	glClearColor(0.f, 0.f, 0.f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(shaderProgram);
-	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
-	int textureId = 0;
-	for (int x=0;x<2; x++)
-	{
-		for(int y=0; y<2; y++)
-		{
-			glBindTexture(GL_TEXTURE_2D, textures[textureId]);
-			glUniform2f(glGetUniformLocation(shaderProgram, "offset"), -0.5+x, -0.5+y);
+	mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
+	nLocation = glGetUniformLocation(shaderProgram, "n");
+}
 
-			glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-			textureId++;
-		}
+
+void createVertexBufferObject()
+{
+	int vertexSize = 3 + 3 + 2;  // position normal uv
+	// float *vertices = new float[vertexCount * vertexSize];
+
+	std::unique_ptr<float> vertices(new float[vertexCount * vertexSize]);
+
+	for (int i=0;i<vertexCount;i++)
+	{
+		vertices[i*vertexSize] = vertex[i*3];
+		vertices[i*vertexSize + 1] = vertex[i*3 + 1];
+		vertices[i*vertexSize + 2] = vertex[i*3 + 2];
+		vertices[i*vertexSize + 3] = normal[i*3];
+		vertices[i*vertexSize + 4] = normal[i*3 + 1];
+		vertices[i*vertexSize + 5] = normal[i*3 + 2];
+		vertices[i*vertexSize + 6] = uv[i*2];
+		vertices[i*vertexSize + 7] = uv[i*2 + 1];
 	}
 
-	SDL_GL_SwapWindow(window);
+#ifndef EMSCRIPTEN
+	glGenVertexArrays(1, &vertexArrayObject);
+	glBinVertexArray(vertexArrayObject);
+#endif
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize * sizeof(float), vertices, GL_STATIC_DRAW);
+	bindAttributes();
+	glGenBudders(1, &vertexElementArrayBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElementArrayBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(int), indices, GL_STATIC_DRAW);
+
 }
+
 
 void update()
 {
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
-		if (event.type == SDL_QUIT)
+		switch (switch.type)
 		{
-			quitting=true;
+			case SDL_QUIT: quit = true; break;
 		}
 	}
-	render();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	const float fovy = (float)((60.f/180) * M_PI), aspect=1.f, near_=0.1f, far_=100.f;
+
+	mat4 perspective = glm::perspective(fovy, aspect, near_, far_);
+	mat4 view = translate(vec3(0,0,-4));
+	vec3 position(0,0,0);
+	vec3 scale(0.25, 0.25, 0.25);
+	float delta = 1;
+
+#ifdef ENABLE_BENCHMARK
+	delta = 0.01;
+	glFinish();
+	float millisStart = getCurrentTimeMillis();
+#endif
+	for (float x=-1; x<=1; x=x+delta)
+	{
+		position[0] = x;
+		for (float y=-1; y<1; y=y+delta)
+		{
+			position[1] = y;
+			drawCube(position, scale, perspective, view);
+		}
+	}
+#ifdef ENABLE_BENCHMARK
+	glFinish();
+	cout << (getCurrentTimeMillis() - millisStart) << endl;
+#endif
+	SDL_GL_SwapWindow(win);
 }
 
-int main(int argc, char** argv)
+
+// void 
+
+
+void init()
+{
+	glClearColor(1.f, 1.f, 1.f, 0.f);
+	glEnable(GL_DEPTH_TEST);
+	setupShader();
+
+	glUniform1i(glGetUniformLocation(shaderProgram, "tex", 0)); // texture slot 0
+}
+
+void mainLoop()
 {
 #ifdef EMSCRIPTEN
-	SDL_Renderer *renderer=nullptr;
-	// SDL_CreateWindowAndRenderer(512, 512, SDL_WINDOW_OPENGL, &window, &renderer);
+    int fps = 0;
+    int simulate_infinite_loop = 1;
+    emscripten_set_main_loop(update, fps, simulate_infinite_loop);
 #else
-	if(SDL_INIT(SDL_INIT_VIDEO|SDL_INIT_EVENTS) != 0)
+    while (!quit)
 	{
-		SDL_log("Failed to intialize SDL: %s", SDL_GetError());
-		return 1;
-	}
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	window = SDL_CreateWindow("title", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 512, 512, SDL_WINDOW_OPENGL);
-
-	gl_context = SDL_GL_CreateContext(window);
-#endif
-	setup();
-
-#ifdef EMSCRIPTEN
-	emscripten_set_main_loop(update, 0, 1);
-#else
-	while(!quiting)
-	{
-		update();
-		SDL_Delay(2);
-	}
-
-	SDL_GL_DeleteContext(gl_context);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-
-	exit(0);
-
+        update();
+        SDL_Delay(16);
+    }
 #endif
 }
