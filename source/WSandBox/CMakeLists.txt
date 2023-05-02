@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.26.2)
 
 add_executable(WSandBox src/WSandBox.cpp)
 
+
 if (EMSCRIPTEN)
     target_compile_definitions(WSandBox PUBLIC MODULE_NAME=WSANDBOX)
     target_compile_definitions(WSandBox PUBLIC WSANDBOX_API)

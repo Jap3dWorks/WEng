@@ -23,9 +23,9 @@ set CXX=clang++
 :: -DCMAKE_GENERATOR_PLATFORM=Win64
 if "%EMSCRIPTENENV%"=="" (
     set glm_DIR=C:/msys64/mingw64/lib/cmake/glm
-    call emcmake cmake -G "MinGW Makefiles" -Dglm_DIR=%glm_DIR% -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B .\build
+    call cmake -G "MinGW Makefiles" -Dglm_DIR=%glm_DIR% -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B .\build
 ) else (
-    call emcmake cmake -G "MinGW Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=Debug -S . -B .\build
+    call emcmake cmake -G "MinGW Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B .\build
 )
 
 :choice

@@ -49,7 +49,7 @@ foreach(subdir ${SUBDIRS})
 endforeach()
 
 message(STATUS "Start collecting plugins.")
-# Collect plugins
+# Collect modules
 if(WENG_PLUGINS_PATHS)
   foreach(plugins_directories ${WENG_PLUGINS_PATHS})
     FIND_CMAKE_LISTS(plugins_dir ${plugins_directories})
