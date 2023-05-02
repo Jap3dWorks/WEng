@@ -11,7 +11,7 @@ Configs, acces rights and versions should be managed by the Server.
 - [ ] Draw a simple cube using wasm
 - [ ] Draw a simple plane and load glsl shaders
 - [ ] Load a simple module in main app
-- [ ] Rething project structure
+- [ ] Rethink project structure
 
 ## Things to think about
 ### Component system and component registration.
@@ -20,3 +20,7 @@ Configs, acces rights and versions should be managed by the Server.
 ### File format, I bet for Usd file format.
 ### Edit and view modes, useful when more than one user wants to edit the same asset or scene.
 Because it have already solutions for scene compositing and dependencies.
+
+
+## References
+https://github.com/mortennobel/SimpleRenderEngine

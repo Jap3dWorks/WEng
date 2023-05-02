@@ -2,11 +2,30 @@ cmake_minimum_required (VERSION 3.26.2)
 
 project(WEng)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
+set(CMAKE_VERBOSE_MAKEFILE on)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_DIR}/build/emscripten)
+
 if (EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lGL -lGLU -lglut -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif ()
+
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  message(STATUS "Platform is Windows.")
+  add_definitions("-fdeclspec")
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
+endif ()
+
+if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
+else()
+endif()
 
 macro(FIND_CMAKE_LISTS result curdir)
   FILE(GLOB_RECURSE children ABSOLUTE ${curdir} ${curdir}/*/CMakeLists.txt)
@@ -40,4 +59,3 @@ if(WENG_PLUGINS_PATHS)
   endforeach()
 endif()
 
-# include_directories(D:/_docs/Weng/emsdk/upstream/emscripten/cache/sysroot/include)
