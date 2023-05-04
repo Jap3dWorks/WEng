@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-add_executable(WSandBox src/WSandBox.cpp)
+add_executable(WSandBox source/WSandBox.cpp)
 
 
 if (EMSCRIPTEN)

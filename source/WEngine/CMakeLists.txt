@@ -9,7 +9,7 @@ else()
 include_directories(include)
 endif()
 
-add_executable(WEng src/WEngine.cpp)
+add_executable(WEng source/WEngine.cpp)
 if (NOT EMSCRIPTEN)
 target_link_libraries(WEng glm)
 endif()
