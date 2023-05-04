@@ -32,3 +32,10 @@ https://github.com/mortennobel/SimpleRenderEngine
 ### DLL_EXPORT
 https://stackoverflow.com/a/2164853
 
+### GUI
+https://github.com/ocornut/imgui
+
+### Kodi CMake multiplataforma
+https://github.com/xbmc/xbmc
+
+
