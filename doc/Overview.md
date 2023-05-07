@@ -38,4 +38,9 @@ https://github.com/ocornut/imgui
 ### Kodi CMake multiplataforma
 https://github.com/xbmc/xbmc
 
+### Emscripten Debug
+https://emscripten.org/docs/porting/Debugging.html
+https://stackoverflow.com/questions/52333308/debug-emscripten-with-visual-studio-code
 
+### Glew Docs
+https://glew.sourceforge.net/install.html

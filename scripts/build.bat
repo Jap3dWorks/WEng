@@ -13,6 +13,7 @@ set BUILDTYPE=Release
 GOTO END
 
 :DEBUG
+set BUILDTYPE=Debug
 GOTO END
 :END
 
@@ -39,7 +40,13 @@ if "%EMSCRIPTENENV%"=="" (
     set glm_DIR=C:/msys64/mingw64/lib/cmake/glm
     call cmake -G "MinGW Makefiles" -Dglm_DIR=%glm_DIR% -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B %BUILD_PATH%
 ) else (
-    call emcmake cmake -G "MinGW Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B %BUILD_PATH%
+    if "BUILDTYPE"=="Debug" (
+        set EMCC_DEBUG=2
+        call emcmake cmake -G "MinGW Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B %BUILD_PATH%
+    ) else (
+        call emcmake cmake -G "MinGW Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_BUILD_TYPE=%BUILDTYPE% -S . -B %BUILD_PATH%
+    )
+
 )
 
 :choice
