@@ -20,7 +20,6 @@ if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif ()
 
-
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   message(STATUS "Platform is Windows.")
   add_compile_options(-fdeclspec)

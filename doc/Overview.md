@@ -42,5 +42,8 @@ https://github.com/xbmc/xbmc
 https://emscripten.org/docs/porting/Debugging.html
 https://stackoverflow.com/questions/52333308/debug-emscripten-with-visual-studio-code
 
+https://developer.chrome.com/blog/wasm-debugging-2020/
+https://goo.gle/wasm-debugging-extension
+
 ### Glew Docs
 https://glew.sourceforge.net/install.html
