@@ -3,31 +3,30 @@ include(FindPackageHandleStandardArgs)
 
 
 if (WIN32)
-    find_path(SDL2_CONFIG
+    find_path(SDL2_DIR
         NAMES
-            SDL2Config.camke SDL2-Config.cmake
+            SDL2Config.cmake SDL2-Config.cmake
         PATHS
             $ENV{SDL2_DIR}
             C:/msys64/mingw64/lib/cmake/SDL2
         DOC "The SDL2 Config File"
+        REQUIRED
     )
 elseif(UNIX)
-    find_path(SDL2_CONFIG
-    NAMES
-        SDL2Config.camke SDL2-Config.cmake
-    PATHS
-        $ENV{SDL2_DIR}
-        /usr/lib/cmake/SDL2
-    DOC "The SDL2 Config File"
+    find_path(SDL2_DIR
+        NAMES
+            SDL2Config.cmake SDL2-Config.cmake
+        PATHS
+            $ENV{SDL2_DIR}
+            /usr/lib/cmake/SDL2
+        DOC "The SDL2 Config File"
+        REQUIRED
 )
 endif()
 
-if(SDL2_CONFIG)
-    cmake_path(GET SDL2_DIR PARENT_PATH SDL2_CONFIG)
-    find_package(SDL2 CONFIG REQUIRED)
-else()
-    message(FATAL_ERROR "SDL2 library not found!")
-endif()
+
+find_package(SDL2 CONFIG REQUIRED)
+
 
 
 # find_package(SDL2 CONFIG )
