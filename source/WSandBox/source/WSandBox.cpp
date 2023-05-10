@@ -12,6 +12,7 @@
 	#include <SDL2/SDL.h>
 	// #include <OpenGL/gl13.h>
 	#include <GL/glew.h>
+	// #include <GL/glut.h>
 	#include <chrono>
 	#include <memory>
 #endif
@@ -53,6 +54,23 @@ void mainLoop();
 
 int main(int argc, char** argv)
 {
+
+#ifndef EMSCRIPTEN
+	GLenum err = glewInit();
+
+	if (err != GLEW_OK)
+	{
+		fprintf(stderr, "Error: '%s'\n", glewGetString(err));
+		exit(1);
+	}
+
+	if (!GLEW_VERSION_2_1)
+	{
+		exit(1);
+	}
+
+#endif
+
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 	{
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;

@@ -12,17 +12,16 @@ if (WIN32)
         REQUIRED
     )
 elseif(UNIX)
-    find_path(glew_DIR
-        NAMES
-            glewConfig.cmake glew-config.cmake
-        PATHS
-            $ENV{glew_DIR}
-            /usr/lib/cmake/glew
-        DOC "The glew Config File"
-        REQUIRED
-)
+#     find_path(glew_DIR
+#         NAMES
+#             glewConfig.cmake glew-config.cmake
+#         PATHS
+#             $ENV{glew_DIR}
+#             /usr/lib/cmake/glew
+#         DOC "The glew Config File"
+#         REQUIRED
+# )
 endif()
-
 
 find_package(glew CONFIG REQUIRED)
 
