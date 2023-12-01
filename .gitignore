@@ -1,13 +1,14 @@
 .ignore
+/.ssh
 /.helix
 /.venv
 /.vscode
-/build
+/[bB]uild
 *.exe
 /.cache
 /.lvenv
 **/compile_commands.json
-web/
+[wW]eb/
 project_structure.txt
 emcc.lua
 ThirdParty/
