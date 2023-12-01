@@ -1,6 +1,6 @@
 @echo off
 
-set BUILD_PATH=.\build
+set BUILD_PATH=.\Build
 
 set BUILDTYPE=Debug
 :choice
