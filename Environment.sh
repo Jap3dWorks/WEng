@@ -11,5 +11,5 @@ export PATH=$PATH:./bin:./Scripts
         #   "'  - Build.sh: Use Build.sh command to build the project \n'"
 
 konsole -e $SHELL -c "echo 'Ussage:
-  - Build.sh: Use Build.sh command to build the project.'; exec bash"
+  - Build: Build the project.';exec bash"
 

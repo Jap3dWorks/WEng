@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_PATH = "./Build"
+BUILD_PATH="./build"
 mkdir -p $BUILD_PATH
 
 export CC=clang
@@ -8,8 +8,8 @@ export CXX=clang++
 
 export BUILD_TYPE="Debug"
 
-OPTIONS = ("Debug", "Release", "Quit")
-select opt in "${OPTIONS[@]"
+OPTIONS=("Debug", "Release", "Quit")
+select opt in "${OPTIONS[@]}"
 do
     case $opt in
         "Debug")
@@ -23,16 +23,17 @@ do
         "Quit")
             exit 0
             ;;
-        *) echo "invalid option $REPLY";;
+        *) 
+            echo "Invalid option $REPLY"        
+        ;;
     esac
 done
 
-exit 0
+# exit 0
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-emcmake cmake  -S . -B ./Build 
-# cmake --build ./build
-
+# emcmake cmake  -S . -B $BUILD_PATH 
+# cmake --build $BUILD_PATH
 
 exit 0

@@ -42,7 +42,7 @@ endmacro()
 
 # Collect project modules
 message(STATUS "Start collecting modules.")
-find_cmake_lists(SUBDIRS "${PROJECT_SOURCE_DIR}/source")
+find_cmake_lists(SUBDIRS "${PROJECT_SOURCE_DIR}/Source")
 
 foreach(subdir ${SUBDIRS})
   message(STATUS "Add subdirectory, ${subdir}.")
