@@ -14,9 +14,10 @@ if (EMSCRIPTEN)
     target_include_directories(WSandBox PUBLIC include thirdParty/glm)
 else()
     find_package(glm REQUIRED)
-    find_package(glew REQUIRED)
+    find_package(GLEW REQUIRED)
     find_package(SDL2 REQUIRED)
+    
     target_include_directories(WSandBox PUBLIC include ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
-    target_link_libraries(WSandBox glm GLEW::glew_s SDL2::SDL2main SDL2::SDL2)
+    target_link_libraries(WSandBox GL GLU glm GLEW::GLEW SDL2::SDL2main SDL2::SDL2)
 endif ()
 

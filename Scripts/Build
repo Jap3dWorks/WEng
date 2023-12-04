@@ -1,23 +1,25 @@
 #!/bin/bash
 
+if [ -z "$EMSCRIPTENENV" ]; 
+then
+    EMSCRIPTENENV=false
+fi
+
 BUILD_PATH="./build"
 mkdir -p $BUILD_PATH
 
-export CC=clang
-export CXX=clang++
+export BUILDTYPE="Debug"
 
-export BUILD_TYPE="Debug"
-
-OPTIONS=("Debug", "Release", "Quit")
+OPTIONS=("Debug" "Release" "Quit")
 select opt in "${OPTIONS[@]}"
 do
     case $opt in
         "Debug")
-            BUILD_TYPE="Debug"
+            BUILDTYPE="Debug"
             break
             ;;
         "Release")
-            BUILD_TYPE="Release"
+            BUILDTYPE="Release"
             break
             ;;
         "Quit")
@@ -29,11 +31,35 @@ do
     esac
 done
 
-# exit 0
+echo "Building $BUILDTYPE"
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SYSTEM=Linux
+ARCH=x86_64
 
-# emcmake cmake  -S . -B $BUILD_PATH 
-# cmake --build $BUILD_PATH
+BUILD_PATH="$BUILD_PATH/${SYSTEM}_${ARCH}_${BUILDTYPE}"
+
+if [ "$EMSCRIPTENENV" = true ] ; then
+    BUILD_PATH="${BUILD_PATH}_Emscripten"
+    # emcmake cmake  -S . -B $BUILD_PATH 
+else
+    BUILD_PATH="${BUILD_PATH}_Standalone"
+    # cmake --build $BUILD_PATH
+fi
+
+mkdir -p $BUILD_PATH
+
+export CC=clang
+export CXX=clang++
+
+echo "Building $BUILDTYPE for $SYSTEM $ARCH"
+
+if [ "$EMSCRIPTENENV" = true ];
+then
+    emcmake cmake  -S . -B $BUILD_PATH -DCMAKE_BUILD_TYPE=$BUILDTYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+else
+    cmake  -S . -B $BUILD_PATH -DCMAKE_BUILD_TYPE=$BUILDTYPE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON # -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+fi
+
+cmake --build $BUILD_PATH
 
 exit 0
