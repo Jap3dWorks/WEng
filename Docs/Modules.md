@@ -6,17 +6,17 @@ Modules structures will be explained next.
 * modules (camelCase)
     * ModulesNames _(PascalCase)_
         * CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
-        * source
-            * ModuleFile.cpp _(PascaoCase)_
-        * include
+        * Source
+            * ModuleFile.cpp _(PascalCase)_
+        * Include
             * ModuleHeader.h _(PascalCase)_
     * ...
-* source (camelCase)
+* Source (camelCase)
     * WSourceModules _(PascalCase)_
         * CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
-        * source
-            * ModuleFile.cpp _(PascaoCase)_
-        * include
+        * Source
+            * ModuleFile.cpp _(PascalCase)_
+        * Include
             * ModuleHeader.h _(PascalCase)_
     * ...
 

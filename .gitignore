@@ -14,5 +14,5 @@ emcc.lua
 ThirdParty/
 *.bak
 sh.exe.stackdump
-
+*.code-workspace
 

@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-add_executable(WSandBox source/WSandBox.cpp)
-
+add_executable(WSandBox Source/WSandBox.cpp)
 
 if (EMSCRIPTEN)
+    message(STATUS "WSandBox EMSCRIPTEN")
     target_compile_definitions(WSandBox PUBLIC MODULE_NAME=WSANDBOX)
     target_compile_definitions(WSandBox PUBLIC WSANDBOX_API)
 
@@ -13,6 +13,7 @@ if (EMSCRIPTEN)
     target_compile_definitions(WSandBox PUBLIC GLM_FORCE_PURE)
     target_include_directories(WSandBox PUBLIC include thirdParty/glm)
 else()
+    message(STATUS "WSandBox Standalone")
     find_package(glm REQUIRED)
     find_package(GLEW REQUIRED)
     find_package(SDL2 REQUIRED)
@@ -20,4 +21,3 @@ else()
     target_include_directories(WSandBox PUBLIC include ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
     target_link_libraries(WSandBox GL GLU glm GLEW::GLEW SDL2::SDL2main SDL2::SDL2)
 endif ()
-

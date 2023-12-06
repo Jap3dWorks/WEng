@@ -10,9 +10,7 @@
 	#include <GLES2/gl2.h>
 #else
 	#include <SDL2/SDL.h>
-	// #include <OpenGL/gl13.h>
 	#include <GL/glew.h>
-	// #include <GL/glut.h>
 	#include <chrono>
 	#include <memory>
 #endif
@@ -41,10 +39,99 @@ GLuint vertexElementArrayBuffer;
 GLint mvpLocation;
 GLint nLocation;
 
-float vertex[] = {-1,-1,1,-1,1,1,1,1,1,1,-1,1,-1,-1,-1,1,-1,-1,1,1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,1,-1,-1,1,1,-1,1,1,-1,1,-1,1,1,-1,1,1,1,1,1,1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,-1,-1,-1,1,1,-1,1,1,-1,-1};
-int indices[] = {0,1,2,0,2,3,4,5,6,4,6,7,8,9,10,8,10,11,12,13,14,12,14,15,16,17,18,16,18,19,20,21,22,20,22,23};
-float normal[] = {0,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0};
-float uv[] =    {0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1};
+float vertex[] = {
+	-1,-1,1,
+	-1,1,1,
+	1,1,1,
+	1,-1,1,
+	-1,-1,-1,
+	1,-1,-1,
+	1,1,-1,
+	-1,1,-1,
+	-1,-1,1,
+	-1,-1,-1,
+	-1,1,-1,
+	-1,1,1,
+	-1,1,1,
+	-1,1,-1,
+	1,1,-1,
+	1,1,1,
+	1,1,1,
+	1,1,-1,
+	1,-1,-1,
+	1,-1,1,
+	-1,-1,-1,
+	-1,-1,1,
+	1,-1,1,
+	1,-1,-1
+};
+int indices[] = {
+	0,1,2,
+	0,2,3,
+	4,5,6,
+	4,6,7,
+	8,9,10,
+	8,10,11,
+	12,13,14,
+	12,14,15,
+	16,17,18,
+	16,18,19,
+	20,21,22,
+	20,22,23
+};
+float normal[] = {
+	0,0,1,
+	0,0,1,
+	0,0,1,
+	0,0,1,
+	0,0,-1,
+	0,0,-1,
+	0,0,-1,
+	0,0,-1,
+	-1,0,0,
+	-1,0,0,
+	-1,0,0,
+	-1,0,0,
+	0,1,0,
+	0,1,0,
+	0,1,0,
+	0,1,0,
+	1,0,0,
+	1,0,0,
+	1,0,0,
+	1,0,0,
+	0,-1,0,
+	0,-1,0,
+	0,-1,0,
+	0,-1,0
+};
+float uv[] = {
+	0,0,
+	1,0,
+	1,1,
+	0,1,
+	0,0,
+	1,0,
+	1,1,
+	0,1,
+	0,0,
+	1,0,
+	1,1,
+	0,1,
+	0,0,
+	1,0,
+	1,1,
+	0,1,
+	0,0,
+	1,0,
+	1,1,
+	0,1,
+	0,0,
+	1,0,
+	1,1,
+	0,1
+};
+
 const int vertexCount = 24;
 int indexCount = 36;
 
@@ -52,22 +139,29 @@ void init();
 void mainLoop();
 
 
+#define EXIT_DEBUG 	\
+	std::cout << "Hello World" << std::endl; \
+	return 1;
+
+
 int main(int argc, char** argv)
 {
 
 #ifndef EMSCRIPTEN
-	GLenum err = glewInit();
 
-	if (err != GLEW_OK)
-	{
-		fprintf(stderr, "Error: '%s'\n", glewGetString(err));
-		exit(1);
-	}
+	GLenum err = glewInit(); // Use glewContextInit
 
-	if (!GLEW_VERSION_2_1)
-	{
-		exit(1);
-	}
+	// if (err != GLEW_OK && err != GLEW_ERROR_NO_GLX_DISPLAY)
+	// {
+	// 	fprintf(stderr, "[ERROR] Error at Initializing GLEW : '%s'\n", glewGetString(err));
+	// 	exit(1);
+	// }
+
+	// if (!GLEW_VERSION_2_1)
+	// {
+	// 	fprintf(stderr, "[ERROR] Not valid Glew Version, Please use GLEW 2.1");
+	// 	exit(1);
+	// }
 
 #endif
 
@@ -78,9 +172,13 @@ int main(int argc, char** argv)
 	}
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
 #ifdef EMSCRIPTEN
+	
 	SDL_Surface* screen =SDL_SetVideoMode(600, 450, 32, SDL_OPENGL);
+
 #else
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -92,12 +190,16 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	SDL_GL_CreateContext(win);
+
 #endif
 
 	init();
 	mainLoop();
+
 #ifndef EMSCRIPTEN
+
 	SDL_DestroyWindow(win);
+
 #endif
 
 	SDL_Quit();
@@ -306,6 +408,7 @@ void createVertexBufferObject()
 
 void update()
 {
+
 	SDL_Event event;
 	while(SDL_PollEvent(&event))
 	{
@@ -315,8 +418,11 @@ void update()
 		}
 	}
 
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	const float fovy = (float)((60.f/180) * M_PI), aspect=1.f, near_=0.1f, far_=100.f;
+
+	return;
 
 	mat4 perspective = glm::perspective(fovy, aspect, near_, far_);
 	mat4 view = translate(vec3(0,0,-4));
