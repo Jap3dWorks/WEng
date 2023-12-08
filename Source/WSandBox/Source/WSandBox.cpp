@@ -4,16 +4,12 @@
 #include <iostream>
 #include <string>
 
-#ifdef EMSCRIPTEN
-	#include <emscripten.h>
-	#include <SDL/SDL.h>
-	#include <GLES2/gl2.h>
-#else
-	#include <SDL2/SDL.h>
-	#include <GL/glew.h>
-	#include <chrono>
-	#include <memory>
-#endif
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <SDL2/SDL.h>
+
+#include <chrono>
+#include <memory>
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
@@ -31,9 +27,7 @@ bool quit = false;
 
 // OpenGl Handles
 GLuint shaderProgram;
-#ifndef EMSCRIPTEN
 GLuint vertexArrayObject;
-#endif
 GLuint vertexBuffer;
 GLuint vertexElementArrayBuffer;
 GLint mvpLocation;
@@ -41,168 +35,75 @@ GLint nLocation;
 
 float vertex[] = {
 	-1,-1,1,
-	-1,1,1,
-	1,1,1,
-	1,-1,1,
-	-1,-1,-1,
-	1,-1,-1,
-	1,1,-1,
-	-1,1,-1,
-	-1,-1,1,
-	-1,-1,-1,
-	-1,1,-1,
-	-1,1,1,
-	-1,1,1,
-	-1,1,-1,
-	1,1,-1,
-	1,1,1,
-	1,1,1,
-	1,1,-1,
-	1,-1,-1,
-	1,-1,1,
-	-1,-1,-1,
-	-1,-1,1,
-	1,-1,1,
-	1,-1,-1
+	0,1,1,
+	1,-1,1
 };
 int indices[] = {
-	0,1,2,
-	0,2,3,
-	4,5,6,
-	4,6,7,
-	8,9,10,
-	8,10,11,
-	12,13,14,
-	12,14,15,
-	16,17,18,
-	16,18,19,
-	20,21,22,
-	20,22,23
+	0,1,2
 };
 float normal[] = {
 	0,0,1,
 	0,0,1,
-	0,0,1,
-	0,0,1,
-	0,0,-1,
-	0,0,-1,
-	0,0,-1,
-	0,0,-1,
-	-1,0,0,
-	-1,0,0,
-	-1,0,0,
-	-1,0,0,
-	0,1,0,
-	0,1,0,
-	0,1,0,
-	0,1,0,
-	1,0,0,
-	1,0,0,
-	1,0,0,
-	1,0,0,
-	0,-1,0,
-	0,-1,0,
-	0,-1,0,
-	0,-1,0
+	0,0,1
 };
 float uv[] = {
 	0,0,
-	1,0,
-	1,1,
-	0,1,
-	0,0,
-	1,0,
-	1,1,
-	0,1,
-	0,0,
-	1,0,
-	1,1,
-	0,1,
-	0,0,
-	1,0,
-	1,1,
-	0,1,
-	0,0,
-	1,0,
-	1,1,
-	0,1,
-	0,0,
-	1,0,
-	1,1,
-	0,1
+	1,0.5,
+	1,0
 };
 
-const int vertexCount = 24;
-int indexCount = 36;
+const int vertexCount = 9;
+int indexCount = 3;
 
 void init();
 void mainLoop();
 
-
-#define EXIT_DEBUG 	\
-	std::cout << "Hello World" << std::endl; \
-	return 1;
-
-
 int main(int argc, char** argv)
 {
+	glewExperimental = GL_TRUE;
 
-#ifndef EMSCRIPTEN
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitWindowSize(800, 600);
+	glutInitWindowPosition(100,100);
+	glutCreateWindow("OGLplus+GLUT+GLEW");
 
-	GLenum err = glewInit(); // Use glewContextInit
+	GLenum err = glewInit();
 
-	// if (err != GLEW_OK && err != GLEW_ERROR_NO_GLX_DISPLAY)
+	if (err != GLEW_OK)
+	{
+		fprintf(stderr, "[ERROR] '%d'\n", err);
+		fprintf(stderr, "[ERROR] Error at Initializing GLEW : '%s'\n", glewGetString(err));
+		exit(1);
+	}
+
+	// if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 	// {
-	// 	fprintf(stderr, "[ERROR] Error at Initializing GLEW : '%s'\n", glewGetString(err));
-	// 	exit(1);
+	// 	std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+	// 	return 1;
 	// }
 
-	// if (!GLEW_VERSION_2_1)
+	// SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	// SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	// win = SDL_CreateWindow("SDL Cubes", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
+	// if (win == nullptr)
 	// {
-	// 	fprintf(stderr, "[ERROR] Not valid Glew Version, Please use GLEW 2.1");
-	// 	exit(1);
+	// 	std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+	// 	return 1;
 	// }
 
-#endif
-
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-	{
-		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-		return 1;
-	}
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-#ifdef EMSCRIPTEN
-	
-	SDL_Surface* screen =SDL_SetVideoMode(600, 450, 32, SDL_OPENGL);
-
-#else
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-	win = SDL_CreateWindow("SDL Cubes", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
-	if (win == nullptr)
-	{
-		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-		return 1;
-	}
-	SDL_GL_CreateContext(win);
-
-#endif
+	// SDL_GL_CreateContext(win);
 
 	init();
 	mainLoop();
 
-#ifndef EMSCRIPTEN
-
-	SDL_DestroyWindow(win);
-
-#endif
-
 	SDL_Quit();
+
 	return 0;
 }
 
@@ -210,6 +111,7 @@ void bindAttributes()
 {
 	int sizeOfFloat = sizeof(float);
 	int vertexLength = 8 * sizeOfFloat;
+
 	GLint vertexLocation = glGetAttribLocation(shaderProgram, "position");
 	glEnableVertexAttribArray(vertexLocation);
 	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, false, vertexLength, 0);
@@ -244,88 +146,46 @@ void drawCube(vec3 position, vec3 scale, mat4& perspective, mat4& view)
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
 
-void setupShader()
+void setupTestShaders()
 {
-	#ifndef EMSCRIPTEN
 	string shaders[2] = {
 	R"(
-	#version 150
+	#version 460
+
 	in vec3 position;
 	in vec3 normal;
 	in vec2 uv;
-
-	uniform mat4 mvp;
-	uniform mat3 n;
 
 	out vec3 vNormal;
 	out vec2 vUv;
 
 	void main(void)
 	{
-		gl_Position=mvp * vec4(position, 1.0);
-		vNormal = notmalize(n*normal);
-		vUv = uv;
+		gl_Position = vec4(position, 1.0);
+		vNormal=normalize(normal);
+		vUv=uv;
 	}
 	)",
-	R"(#version 150
-	uniform sampler2D tex;
+	R"(
+	#version 460
+
 	in vec3 vNormal;
 	in vec2 vUv;
 	out vec4 fragColor;
 
 	void main(void)
 	{
-		vec3 lightDirEyeSpace = normalize(vec3(1.0, 1.0, 1.0));
-		vec3 diffuseLight = vec3(max(0,0, dot(lightDirEyeSpace, vNormal)));
-		vec3 ambientLight = vec3(0.2, 0.2, 0.2);
-		vec3 light = max(diffuseLight, ambientLight);
-		fragColor = vec4(texture(tex,vUv).xyz * light, 1.0);
-	}
-	)"};
-	#else
-	string shaders[2] = {
-	R"(
-	attribute vec3 position;
-	attribute vec3 normal;
-	attribute vec2 uv;
-
-	uniform mat4 mvp;
-	uniform mat3 n;
-
-	varying vec3 vNormal;
-	varying vec2 vUv;
-
-	void main(void)
-	{
-		gl_Position = mvp * vec4(position, 1.0);
-		vNormal = normalize(n*normal);
-		vUv = uv;
-	}
-	)", 
-	R"(
-	precision mediump float;
-	unform sampler2D tex;
-
-	varying vec3 vNormal;
-	varying vec2 vUv;
-
-	void main(void)
-	{
-		vec3 lightDirEyeSpace = normalize(vec3(1.0, 1.0, 1.0));
-		vec3 diffuseLight = vec3(max(0.0, dot(lightDirEyeSpace, vNormal)));
-		vec3 ambientLight = vec3(0.2,0.2,0.2);
-		vec3 light = max(diffuseLight, ambientLight);
-		gl_FragColor = vec4(texture2D(tex, vUv).xyz * light, 1.0);
+		fragColor = vec4(1.0, 1.0, 0.0, 1.0);
 	}
 	)"
 	};
-	#endif
-
+	
 	int shaderTypes[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 	int shaderObj[2];
 	for(int i=0; i<2; ++i)
 	{
 		int shader = glCreateShader(shaderTypes[i]);
+
 		string shaderSrc = shaders[i];
 		const GLchar* shaderPtr = shaderSrc.c_str();
 		int shaderLen = shaderSrc.length();
@@ -345,7 +205,6 @@ void setupShader()
 				cout << "Compile error of" << (i==0 ? "vertex shader": "fragment shader") << ": " << infoLog.get() << endl;					
 			}
 		}
-
 	}
 
 	shaderProgram = glCreateProgram();
@@ -370,7 +229,6 @@ void setupShader()
 	nLocation = glGetUniformLocation(shaderProgram, "n");
 }
 
-
 void createVertexBufferObject()
 {
 	int vertexSize = 3 + 3 + 2;  // position normal uv
@@ -392,7 +250,6 @@ void createVertexBufferObject()
 
 #ifndef EMSCRIPTEN
 	glGenVertexArrays(1, &vertexArrayObject);
-	// __glBinVertexArray(vertexArrayObject);
 	__glewBindVertexArray(vertexArrayObject);
 #endif
 	glGenBuffers(1, &vertexBuffer);
@@ -418,11 +275,9 @@ void update()
 		}
 	}
 
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	const float fovy = (float)((60.f/180) * M_PI), aspect=1.f, near_=0.1f, far_=100.f;
-
-	return;
 
 	mat4 perspective = glm::perspective(fovy, aspect, near_, far_);
 	mat4 view = translate(vec3(0,0,-4));
@@ -430,11 +285,6 @@ void update()
 	vec3 scale(0.25, 0.25, 0.25);
 	float delta = 1;
 
-#ifdef ENABLE_BENCHMARK
-	delta = 0.01;
-	glFinish();
-	float millisStart = getCurrentTimeMillis();
-#endif
 	for (float x=-1; x<=1; x=x+delta)
 	{
 		position[0] = x;
@@ -444,10 +294,7 @@ void update()
 			drawCube(position, scale, perspective, view);
 		}
 	}
-#ifdef ENABLE_BENCHMARK
-	glFinish();
-	cout << (getCurrentTimeMillis() - millisStart) << endl;
-#endif
+
 	SDL_GL_SwapWindow(win);
 }
 
@@ -456,22 +303,23 @@ void init()
 {
 	glClearColor(1.f, 1.f, 1.f, 0.f);
 	glEnable(GL_DEPTH_TEST);
-	setupShader();
+	
+	setupTestShaders();
 
-	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0); // texture slot 0
+	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
 }
 
 void mainLoop()
 {
-#ifdef EMSCRIPTEN
-    int fps = 0;
-    int simulate_infinite_loop = 1;
-    emscripten_set_main_loop(update, fps, simulate_infinite_loop);
-#else
+// #ifdef EMSCRIPTEN
+//     int fps = 0;
+//     int simulate_infinite_loop = 1;
+//     emscripten_set_main_loop(update, fps, simulate_infinite_loop);
+// #else
     while (!quit)
 	{
         update();
         SDL_Delay(16);
     }
-#endif
+// #endif
 }

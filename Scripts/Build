@@ -50,13 +50,17 @@ mkdir -p $BUILD_PATH
 
 export CC=clang
 export CXX=clang++
+# export CC=gcc
+# export CXX=g++
 
 echo "Building $BUILDTYPE for $SYSTEM $ARCH"
 
 if [ "$EMSCRIPTENENV" = true ];
 then
+    echo "Building for Emscripten"
     emcmake cmake  -S . -B $BUILD_PATH -DCMAKE_BUILD_TYPE=$BUILDTYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 else
+    echo "Building for Standalone"
     cmake  -S . -B $BUILD_PATH -DCMAKE_BUILD_TYPE=$BUILDTYPE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON # -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 fi
 

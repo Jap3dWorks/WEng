@@ -14,10 +14,22 @@ if (EMSCRIPTEN)
     target_include_directories(WSandBox PUBLIC include thirdParty/glm)
 else()
     message(STATUS "WSandBox Standalone")
-    find_package(glm REQUIRED)
+    find_package(OpenGL REQUIRED)
+    find_package(GLUT REQUIRED)
     find_package(GLEW REQUIRED)
     find_package(SDL2 REQUIRED)
+    find_package(glm REQUIRED)
     
     target_include_directories(WSandBox PUBLIC include ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
-    target_link_libraries(WSandBox GL GLU glm GLEW::GLEW SDL2::SDL2main SDL2::SDL2)
+    target_link_libraries(
+        WSandBox 
+        OpenGL::GL 
+        OpenGL::GLU 
+        GLUT::GLUT 
+        GLEW::GLEW 
+        SDL2::SDL2main 
+        SDL2::SDL2
+        glm 
+    )
+
 endif ()
