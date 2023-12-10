@@ -19,307 +19,207 @@
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
-using namespace std;
-using namespace glm;
+GLuint program;
+GLuint vbo_triangle;
 
-SDL_Window *win;
-bool quit = false;
-
-// OpenGl Handles
-GLuint shaderProgram;
-GLuint vertexArrayObject;
-GLuint vertexBuffer;
-GLuint vertexElementArrayBuffer;
-GLint mvpLocation;
-GLint nLocation;
-
-float vertex[] = {
-	-1,-1,1,
-	0,1,1,
-	1,-1,1
-};
-int indices[] = {
-	0,1,2
-};
-float normal[] = {
-	0,0,1,
-	0,0,1,
-	0,0,1
-};
-float uv[] = {
-	0,0,
-	1,0.5,
-	1,0
-};
-
-const int vertexCount = 9;
-int indexCount = 3;
-
-void init();
-void mainLoop();
-
-int main(int argc, char** argv)
+bool init_resources(void)
 {
-	glewExperimental = GL_TRUE;
+	GLint compile_ok = GL_FALSE, link_ok = GL_FALSE;
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowSize(800, 600);
-	glutInitWindowPosition(100,100);
-	glutCreateWindow("OGLplus+GLUT+GLEW");
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	const GLchar* vs_source = R"(
+		#version 460
+		in vec2 coord2d;
+		in vec3 VertexColor;
+		out vec3 OutColor;
 
-	GLenum err = glewInit();
+		void main()
+		{
+			// ... 
+			gl_Position = vec4(coord2d, 0.f, 1.f);
+			OutColor = VertexColor;
+		}
+	)";
 
-	if (err != GLEW_OK)
+	glShaderSource(vs, 1, &vs_source, NULL);
+	glCompileShader(vs);
+	glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_ok);
+	if (!compile_ok)
 	{
-		fprintf(stderr, "[ERROR] '%d'\n", err);
-		fprintf(stderr, "[ERROR] Error at Initializing GLEW : '%s'\n", glewGetString(err));
-		exit(1);
+		std::cerr << "Error in vertex shader" << std::endl;
+		return false;
 	}
 
-	// if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-	// {
-	// 	std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-	// 	return 1;
-	// }
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	const char* fs_source = R"(
+		#version 460
+		in vec3 OutColor;
+		in vec4 gl_FragCoord;
+		out vec4 DiffuseColor;
 
-	// SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+		void main()
+		{
+			gl_FragCoord;
+			DiffuseColor = vec4(gl_FragCoord.y * 0.5, gl_FragCoord.y * 0.5, gl_FragCoord.y * 0.5, 1.0);
+		}
+	)";
 
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	glShaderSource(fs, 1, &fs_source, NULL);
+	glCompileShader(fs);
+	glGetShaderiv(fs, GL_COMPILE_STATUS, &compile_ok);
+	if (!compile_ok)
+	{
+		std::cerr << "Error in fragment shader" << std::endl;
+		return false;
+	}
 
-	// win = SDL_CreateWindow("SDL Cubes", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
-	// if (win == nullptr)
-	// {
-	// 	std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-	// 	return 1;
-	// }
+	program = glCreateProgram();
+	glAttachShader(program, vs);
+	glAttachShader(program, fs);
+	glLinkProgram(program);
+	glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
+	if (!link_ok)
+	{
+		std::cerr << "Error in glLinkProgram" << std::endl;
+		return false;
+	}
 
-	// SDL_GL_CreateContext(win);
+	GLint attribute_coord2d;
+	const char* attribute_name = "coord2d";
+	attribute_coord2d = glGetAttribLocation(program, attribute_name);
 
-	init();
-	mainLoop();
+	GLint attribute_color;
+	const char* attribute_color_name = "VertexColor";
+	attribute_color = glGetAttribLocation(program, attribute_color_name);
 
+	if (attribute_coord2d == -1)
+	{
+		std::cerr << "Could not bind attribute " << attribute_name << std::endl;
+		return false;
+	}
+
+	GLfloat triangle_vertices[] = {
+		0.0,   0.8, 1.f, 0.f, 0.f, 
+		-0.8, -0.8, 0.f, 1.f, 0.f,
+		0.8,  -0.8, 1.f, 0.f, 1.f
+	};
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glBufferData(
+		GL_ARRAY_BUFFER, 
+		sizeof(triangle_vertices),
+		triangle_vertices,
+		GL_STATIC_DRAW
+	);
+
+	glUseProgram(program);
+	glEnableVertexAttribArray(
+		attribute_coord2d
+	);
+	glVertexAttribPointer(
+		attribute_coord2d,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		5 * sizeof(GLfloat),
+		0
+	);
+	glEnableVertexAttribArray(
+		attribute_color
+	);
+	glVertexAttribPointer(
+		attribute_color,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		5 * sizeof(GLfloat),
+		(GLvoid*)(2 * sizeof(GLfloat))
+	);
+
+	return true;
+}
+
+void render(SDL_Window* window)
+{
+	// Filled in later
+	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	SDL_GL_SwapWindow(window);
+}
+
+void free_resources()
+{
+	glDeleteProgram(program);
+	// Filled in later
+}
+
+void mainLoop(SDL_Window* window)
+{
+	while (true)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+				return;
+		}
+		render(window);
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	SDL_Init(SDL_INIT_EVERYTHING);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	SDL_Window* window = SDL_CreateWindow(
+		"OpenGL SDL2 Window",
+		SDL_WINDOWPOS_CENTERED, 
+		SDL_WINDOWPOS_CENTERED, 
+		800, 600, 
+		SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL
+	);
+
+	if(!window)
+	{
+		std::cerr << "Error: " << SDL_GetError() << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	SDL_GLContext context = SDL_GL_CreateContext(window);
+
+	GLenum glew_status = glewInit();
+
+	if (glew_status != GLEW_OK)
+	{
+		std::cerr << "Error: " << glewGetErrorString(glew_status) << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	if (!init_resources())
+		return EXIT_FAILURE;
+	
+	mainLoop(window);
+
+	free_resources();
+
+	SDL_GL_DeleteContext(context);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 
-	return 0;
-}
-
-void bindAttributes()
-{
-	int sizeOfFloat = sizeof(float);
-	int vertexLength = 8 * sizeOfFloat;
-
-	GLint vertexLocation = glGetAttribLocation(shaderProgram, "position");
-	glEnableVertexAttribArray(vertexLocation);
-	glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, false, vertexLength, 0);
-	GLint normalLocation = glGetAttribLocation(shaderProgram, "normal");
-	glEnableVertexAttribArray(normalLocation);
-	glVertexAttribPointer(normalLocation, 3, GL_FLOAT, false, vertexLength, BUFFER_OFFSET(3*sizeOfFloat));
-	GLint uvLocation = glGetAttribLocation(shaderProgram, "uv");
-	glEnableVertexAttribArray(uvLocation);
-	glVertexAttribPointer(uvLocation, 2, GL_FLOAT, false, vertexLength, BUFFER_OFFSET(6*sizeOfFloat));
-}
-
-float getCurrentTimeMillis()
-{
-	static auto startTime = std::chrono::system_clock::now();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::system_clock::now() - startTime
-	).count();
-}
-
-void drawCube(vec3 position, vec3 scale, mat4& perspective, mat4& view)
-{
-	mat4 model = translate(position);
-	model = model * rotate(getCurrentTimeMillis() * 0.002f, vec3(0,1,0));
-	model = model * glm::scale(scale);
-
-	mat4 modelView = view * model;
-	mat3 normal = glm::inverseTranspose(glm::mat3(modelView));
-	mat4 modelViewProjection = perspective * modelView;
-
-	glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
-	glUniformMatrix3fv(nLocation, 1, GL_FALSE, glm::value_ptr(normal));
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-}
-
-void setupTestShaders()
-{
-	string shaders[2] = {
-	R"(
-	#version 460
-
-	in vec3 position;
-	in vec3 normal;
-	in vec2 uv;
-
-	out vec3 vNormal;
-	out vec2 vUv;
-
-	void main(void)
-	{
-		gl_Position = vec4(position, 1.0);
-		vNormal=normalize(normal);
-		vUv=uv;
-	}
-	)",
-	R"(
-	#version 460
-
-	in vec3 vNormal;
-	in vec2 vUv;
-	out vec4 fragColor;
-
-	void main(void)
-	{
-		fragColor = vec4(1.0, 1.0, 0.0, 1.0);
-	}
-	)"
-	};
-	
-	int shaderTypes[2] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
-	int shaderObj[2];
-	for(int i=0; i<2; ++i)
-	{
-		int shader = glCreateShader(shaderTypes[i]);
-
-		string shaderSrc = shaders[i];
-		const GLchar* shaderPtr = shaderSrc.c_str();
-		int shaderLen = shaderSrc.length();
-		glShaderSource(shader,1, &shaderPtr, &shaderLen);
-		glCompileShader(shader);
-		shaderObj[i] = shader;
-		GLint status;
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-		if (status == 0)
-		{
-			GLint infologLength = 0;
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLength);
-			if(infologLength > 0)
-			{
-				std::unique_ptr<char> infoLog (new char[infologLength]);
-				glGetShaderInfoLog(shader, infologLength, 0, infoLog.get());
-				cout << "Compile error of" << (i==0 ? "vertex shader": "fragment shader") << ": " << infoLog.get() << endl;					
-			}
-		}
-	}
-
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, shaderObj[0]);
-	glAttachShader(shaderProgram, shaderObj[1]);
-	glLinkProgram(shaderProgram);
-
-	GLint linked;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linked);
-	if(!linked)
-	{
-		std::cerr << "Shader program failed to link" << std::endl;
-		GLint logSize;
-		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &logSize);
-		std::unique_ptr<char> infoLog (new char[logSize]);
-		glGetShaderInfoLog(shaderProgram, logSize, 0, infoLog.get());			
-		std::cerr << infoLog.get() << std::endl;
-	}
-
-	glUseProgram(shaderProgram);
-	mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
-	nLocation = glGetUniformLocation(shaderProgram, "n");
-}
-
-void createVertexBufferObject()
-{
-	int vertexSize = 3 + 3 + 2;  // position normal uv
-	// float *vertices = new float[vertexCount * vertexSize];
-
-	std::unique_ptr<float> vertices(new float[vertexCount * vertexSize]);
-
-	for (int i=0;i<vertexCount;i++)
-	{
-		vertices.get()[i*vertexSize] = vertex[i*3];
-		vertices.get()[i*vertexSize + 1] = vertex[i*3 + 1];
-		vertices.get()[i*vertexSize + 2] = vertex[i*3 + 2];
-		vertices.get()[i*vertexSize + 3] = normal[i*3];
-		vertices.get()[i*vertexSize + 4] = normal[i*3 + 1];
-		vertices.get()[i*vertexSize + 5] = normal[i*3 + 2];
-		vertices.get()[i*vertexSize + 6] = uv[i*2];
-		vertices.get()[i*vertexSize + 7] = uv[i*2 + 1];
-	}
-
-#ifndef EMSCRIPTEN
-	glGenVertexArrays(1, &vertexArrayObject);
-	__glewBindVertexArray(vertexArrayObject);
-#endif
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * vertexSize * sizeof(float), vertices.get(), GL_STATIC_DRAW);
-	bindAttributes();
-	glGenBuffers(1, &vertexElementArrayBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexElementArrayBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(int), indices, GL_STATIC_DRAW);
-
-}
-
-
-void update()
-{
-
-	SDL_Event event;
-	while(SDL_PollEvent(&event))
-	{
-		switch (event.type)
-		{
-			case SDL_QUIT: quit = true; break;
-		}
-	}
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	const float fovy = (float)((60.f/180) * M_PI), aspect=1.f, near_=0.1f, far_=100.f;
-
-	mat4 perspective = glm::perspective(fovy, aspect, near_, far_);
-	mat4 view = translate(vec3(0,0,-4));
-	vec3 position(0,0,0);
-	vec3 scale(0.25, 0.25, 0.25);
-	float delta = 1;
-
-	for (float x=-1; x<=1; x=x+delta)
-	{
-		position[0] = x;
-		for (float y=-1; y<1; y=y+delta)
-		{
-			position[1] = y;
-			drawCube(position, scale, perspective, view);
-		}
-	}
-
-	SDL_GL_SwapWindow(win);
-}
-
-
-void init()
-{
-	glClearColor(1.f, 1.f, 1.f, 0.f);
-	glEnable(GL_DEPTH_TEST);
-	
-	setupTestShaders();
-
-	glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
-}
-
-void mainLoop()
-{
-// #ifdef EMSCRIPTEN
-//     int fps = 0;
-//     int simulate_infinite_loop = 1;
-//     emscripten_set_main_loop(update, fps, simulate_infinite_loop);
-// #else
-    while (!quit)
-	{
-        update();
-        SDL_Delay(16);
-    }
-// #endif
+	return EXIT_SUCCESS;
 }
