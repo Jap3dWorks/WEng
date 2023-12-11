@@ -3,6 +3,21 @@
 ## Dependencies
 
 # Linux
-## glew for wayland
-pacman -Syu glewlwyd
-https://github.com/nigels-com/glew/issues/273
+
+# Build Environment
+## Linux
+Open a terminal into the engine directory.
+Run the following code to load the dev environment
+```
+source Environment.sh
+```
+
+Now you can use the WCli tool to automate some processes.
+WSCEnv will create the vscode environment
+
+```
+WCli VSCEnv
+```
+
+
+

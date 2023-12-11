@@ -3,6 +3,8 @@ import subprocess
 import sys
 import os
 import platform
+from WCli_lib import vscode_utils
+
 
 class CliVars:
     BUILD_PATH = "./build"
@@ -32,15 +34,25 @@ class CliCommand(object):
     def get_help(cls):
         return cls._HELP
 
-    @staticmethod
-    def add_parser(cls, parser):
+    @classmethod
+    def _create_parser(cls, parser):
         command_parser = parser.add_parser(
             cls.get_command_name(), 
             help=cls.get_help()
         )
         command_parser.set_defaults(command=cls)
 
+        cls.add_parser(command_parser)
+
         return command_parser
+
+    @staticmethod
+    def add_parser(command_parser):
+        """
+        Add parser to the command
+        Command classes should override this method.
+        """
+        pass
 
     def __init__(self, cmd_args):
         self.cmd_args = cmd_args
@@ -55,7 +67,6 @@ class CliCommand(object):
         pass
 
     def _run(self):
-        assert self._validate()
         return self.run()
 
 
@@ -65,9 +76,8 @@ class BuildCommand(CliCommand):
     def __init__(self, cmd_args):
         super(BuildCommand, self).__init__(cmd_args)
 
-    @classmethod
-    def add_parser(cls, parser):
-        command_parser = CliCommand.add_parser(cls, parser)
+    @staticmethod
+    def add_parser(command_parser):
 
         command_parser.add_argument(
             "-p", 
@@ -148,11 +158,15 @@ class RunCommand(CliCommand):
     def __init__(self, cmd_args):
         super(RunCommand, self).__init__(cmd_args)
 
-    @classmethod
-    def add_parser(cls, parser):
-        command_parser = CliCommand.add_parser(cls, parser)
-
-        command_parser.add_argument("-t", "--type", type=str, choices=["Debug", "Release"] , help="Build type")
+    @staticmethod
+    def add_parser(command_parser):
+        command_parser.add_argument(
+            "-t", "--type", 
+            type=str, 
+            choices=[CliVars.DEBUG_TYPE, CliVars.RELEASE_TYPE] ,
+            default=CliVars.DEBUG_TYPE, 
+            help="Build type"
+        )
         return command_parser
 
     def validate(self):
@@ -160,6 +174,56 @@ class RunCommand(CliCommand):
 
     def run(self):
         print("Run")
+
+
+class VSCEnvCommand(CliCommand):
+    _COMMAND_NAME = "VSCEnv"
+
+    def __init__(self, cmd_args):
+        super(VSCEnvCommand, self).__init__(cmd_args)
+    
+    @staticmethod
+    def add_parser(command_parser):
+        command_parser.add_argument(
+            "-p",
+            "--project-path",
+            type=str,
+            help="Project directory path"
+        )
+        command_parser.add_argument(
+            "-ep",
+            "--engine-path",
+            type=str,
+            default=os.getcwd(),
+            help="Engine directory path"
+        )
+    
+    def validate(self):
+        return True
+    
+    def run(self):
+        workspace_path = \
+            self.cmd_args.project_path or \ 
+            self.cmd_args.engine_path
+        
+        workspace_manager = vscode_utils.VSCWorkspaceManager(
+            workspace_path
+        )
+
+        workspace_manager.add_folder(self.cmd_args.engine_path)
+        if self.cmd_args.project_path:
+            workspace_manager.add_folder(self.cmd_args.project_path)
+        
+        workspace_manager.save()
+
+        vscode_path = os.path.join(workspace_path, ".vscode")
+        if not os.path.exists(vscode_path):
+            os.makedirs(vscode_path)
+
+        # setup compile commands and others stuff here
+        # ...
+
+        return 0
 
 
 class CommandRegister(object):
@@ -193,6 +257,7 @@ def _init_commands():
     register = CommandRegister.get_register()
     register.register(BuildCommand)
     register.register(RunCommand)
+    register.register(VSCEnvCommand)
 
 
 def main(*args):
@@ -202,11 +267,13 @@ def main(*args):
     subparsers = parser.add_subparsers()
 
     for command in CommandRegister.get_register().get_commands():
-        command.add_parser(subparsers)
+        command._create_parser(subparsers)
 
     args = parser.parse_args(*args)
+    command = args.command(args)
 
-    result = args.command(args).run()
+    assert command._validate()
+    result = command._run()
 
     if isinstance(result, int):
         return result
