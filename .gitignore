@@ -16,3 +16,4 @@ ThirdParty/
 sh.exe.stackdump
 *.code-workspace
 __pycache__
+bin/

@@ -156,7 +156,7 @@ class VSCWorkspaceManager(object):
         }
         self.data["tasks"]["tasks"].insert(0, task)
 
-    def add_launch(self, name, type="cppvsdbg", request="launch", program=None, args=[], stop_at_entry=False, cwd="${workspaceFolder}", environment=None, console="externalTerminal", pre_launch_task=None):
+    def add_launch(self, name, type="cppdbg", request="launch", program=None, args=[], stop_at_entry=True, cwd="${workspaceFolder}", environment=None, externalConsole=False, MIMode="lldb", pre_launch_task=None):
         launch = {
             "name": name,
             "type": type,
@@ -166,7 +166,8 @@ class VSCWorkspaceManager(object):
             "stopAtEntry": stop_at_entry,
             "cwd": cwd,
             "environment": [] if environment is None else environment,
-            "console": console,
+            "externalConsole": externalConsole,
+            "MIMode": MIMode,
             "preLaunchTask": pre_launch_task
         }
 

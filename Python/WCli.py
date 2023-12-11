@@ -4,10 +4,14 @@ import sys
 import os
 import platform
 from WCli_lib import vscode_utils
+from WCli_lib.logger import wlogger
+
 
 
 class CliVars:
     BUILD_PATH = os.path.abspath("./build")
+    BIN_PATH = os.path.abspath("./bin")
+
     DEBUG_TYPE = "Debug"
     RELEASE_TYPE = "Release"
 
@@ -20,6 +24,60 @@ class CliVars:
 
     C_COMPILER = "clang"
     CXX_COMPILER = "clang++"
+
+
+class CliUtils:
+    @staticmethod
+    def check_dir(path):
+        dir_path = os.path.dirname(path)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        
+        return path
+
+    @staticmethod
+    def get_build_folder_name(arch, build_type):
+        return CliVars.BUILD_FOLDER_FORMAT.format(
+            system=platform.system(),
+            arch=arch,
+            build_type=build_type
+        )
+    
+    @staticmethod
+    def get_build_folder(arch, build_type, build_path=CliVars.BUILD_PATH):
+        return os.path.join(
+            build_path,
+            CliUtils.get_build_folder_name(arch, build_type)
+        )
+    
+    @staticmethod
+    def get_build_source_folder(arch, build_type, build_path=CliVars.BUILD_PATH):
+        return os.path.join(
+            CliUtils.get_build_folder(arch, build_type, build_path),
+            "Source"
+        )
+
+    @staticmethod
+    def get_build_target_path(arch, build_type, target, build_path=CliVars.BUILD_PATH):
+        return os.path.join(
+            CliUtils.get_build_source_folder(arch, build_type, build_path),
+            target,
+            target
+        )
+
+    @staticmethod
+    def get_bin_folder(arch, build_type):
+        return os.path.join(
+            CliVars.BIN_PATH,
+            CliUtils.get_build_folder_name(arch, build_type)
+        )
+
+    @staticmethod
+    def get_target_bin_path(arch, build_type, target):
+        return os.path.join(
+            CliUtils.get_bin_folder(arch, build_type),
+            target
+        )
 
 
 class CliCommand(object):
@@ -78,14 +136,6 @@ class BuildCommand(CliCommand):
 
     @staticmethod
     def add_parser(command_parser):
-
-        command_parser.add_argument(
-            "-p", 
-            "--build-path", 
-            type=str, 
-            default=CliVars.BUILD_PATH, 
-            help="Build path"
-        )
         command_parser.add_argument(
             "-t", 
             "--build-type", 
@@ -119,15 +169,10 @@ class BuildCommand(CliCommand):
         return True
 
     def run(self):
-        build_folder = CliVars.BUILD_FOLDER_FORMAT.format(
-            system=platform.system(),
-            arch=self.cmd_args.arch,
-            build_type=self.cmd_args.build_type
-        )
 
-        build_path = os.path.join(
-            self.cmd_args.build_path,
-            build_folder
+        build_path = CliUtils.get_build_folder(
+            self.cmd_args.arch,
+            self.cmd_args.build_type
         )
 
         if not os.path.exists(build_path):
@@ -150,6 +195,21 @@ class BuildCommand(CliCommand):
 
         subprocess.run(cmd)
 
+        for t in os.listdir(CliUtils.get_build_source_folder(self.cmd_args.arch, self.cmd_args.build_type)):
+            build_target_path = CliUtils.get_build_target_path(self.cmd_args.arch, self.cmd_args.build_type, t)
+            bin_target_path = CliUtils.get_target_bin_path(self.cmd_args.arch, self.cmd_args.build_type, t)
+
+            if os.path.exists(build_target_path):
+                if os.path.exists(bin_target_path):
+                    os.remove(bin_target_path)
+
+                os.rename(
+                    build_target_path, 
+                    CliUtils.check_dir(bin_target_path)
+                )
+
+        return 0
+
 
 class RunCommand(CliCommand):
     _COMMAND_NAME = "Run"
@@ -167,6 +227,25 @@ class RunCommand(CliCommand):
             help="Build type"
         )
 
+        if platform.system() == "Windows":
+            command_parser.add_argument(
+                "-a", "--arch",
+                type=str,
+                choices=[CliVars.ARCH_X86, CliVars.ARCH_X64],
+                default=CliVars.ARCH_X64,
+                help="Build architecture"
+
+            )
+        else:
+            command_parser.add_argument(
+                "-a", "--arch",
+                type=str,
+                choices=[CliVars.ARCH_X86_64],
+                default=CliVars.ARCH_X86_64,
+                help="Build architecture"
+
+            )
+
         command_parser.add_argument(
             "-tg", "--target",
             type=str,
@@ -179,8 +258,17 @@ class RunCommand(CliCommand):
         return True
 
     def run(self):
-        print("Run")
+        target_path = CliUtils.get_target_bin_path(
+            self.cmd_args.arch,
+            self.cmd_args.type,
+            self.cmd_args.target
+        )
 
+        wlogger.info("Run %s" % target_path)
+
+        subprocess.run([target_path])
+
+        return 0
 
 class VSCEnvCommand(CliCommand):
     _COMMAND_NAME = "VSCEnv"
@@ -219,20 +307,22 @@ class VSCEnvCommand(CliCommand):
             workspace_manager.add_folder(self.cmd_args.project_path)
         
         workspace_manager.add_task(
-            "Build Debug",
-            "cmake",
+            "Build X86_64 Debug",
+            "WCli",
             [
-                "-S", ".",
-                "-B", "${workspaceFolder}/build",
-                "-DCMAKE_BUILD_TYPE=Debug",
-                "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-                "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+                "Build", "-t", CliVars.DEBUG_TYPE, "-a", CliVars.ARCH_X86_64
             ]
         )
 
         workspace_manager.add_launch(
-            "Debug",
-            pre_launch_task="Build Debug"
+            "WSandBox X86_64 Debug",
+            program=CliUtils.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE, 
+                "WSandBox"),
+            args=[],
+            pre_launch_task="Build X86_64 Debug",
+            MIMode=None
         )
 
         workspace_manager.save()
