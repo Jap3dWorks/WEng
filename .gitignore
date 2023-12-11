@@ -1,12 +1,12 @@
 .ignore
-/.ssh
-/.helix
-/.venv
-/.vscode
+.ssh
+.helix
+.venv
+.vscode
 /[bB]uild
 *.exe
-/.cache
-/.lvenv
+.cache
+.lvenv
 **/compile_commands.json
 [wW]eb/
 project_structure.txt
@@ -15,4 +15,4 @@ ThirdParty/
 *.bak
 sh.exe.stackdump
 *.code-workspace
-
+__pycache__

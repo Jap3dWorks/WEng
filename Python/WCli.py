@@ -7,7 +7,7 @@ from WCli_lib import vscode_utils
 
 
 class CliVars:
-    BUILD_PATH = "./build"
+    BUILD_PATH = os.path.abspath("./build")
     DEBUG_TYPE = "Debug"
     RELEASE_TYPE = "Release"
 
@@ -134,19 +134,18 @@ class BuildCommand(CliCommand):
             os.makedirs(build_path)
 
         cmd = [
-            "cmake", 
-            "-S", ".", 
-            "-B", build_path, 
-            "-DCMAKE_BUILD_TYPE=" + self.cmd_args.build_type, 
-            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON", 
+            "cmake",
+            "-S", ".",
+            "-B", build_path,
+            "-DCMAKE_BUILD_TYPE=" + self.cmd_args.build_type,
+            "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
             "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
         ]
 
         subprocess.run(cmd)
 
         cmd = [
-            "cmake",
-            "--build", build_path
+            "cmake", "--build", build_path
         ]
 
         subprocess.run(cmd)
@@ -167,6 +166,13 @@ class RunCommand(CliCommand):
             default=CliVars.DEBUG_TYPE, 
             help="Build type"
         )
+
+        command_parser.add_argument(
+            "-tg", "--target",
+            type=str,
+            help="Target to run"
+        )
+
         return command_parser
 
     def validate(self):
@@ -181,7 +187,7 @@ class VSCEnvCommand(CliCommand):
 
     def __init__(self, cmd_args):
         super(VSCEnvCommand, self).__init__(cmd_args)
-    
+
     @staticmethod
     def add_parser(command_parser):
         command_parser.add_argument(
@@ -197,14 +203,12 @@ class VSCEnvCommand(CliCommand):
             default=os.getcwd(),
             help="Engine directory path"
         )
-    
+
     def validate(self):
         return True
-    
+
     def run(self):
-        workspace_path = \
-            self.cmd_args.project_path or \ 
-            self.cmd_args.engine_path
+        workspace_path = self.cmd_args.project_path or self.cmd_args.engine_path
         
         workspace_manager = vscode_utils.VSCWorkspaceManager(
             workspace_path
@@ -214,6 +218,23 @@ class VSCEnvCommand(CliCommand):
         if self.cmd_args.project_path:
             workspace_manager.add_folder(self.cmd_args.project_path)
         
+        workspace_manager.add_task(
+            "Build Debug",
+            "cmake",
+            [
+                "-S", ".",
+                "-B", "${workspaceFolder}/build",
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+                "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+            ]
+        )
+
+        workspace_manager.add_launch(
+            "Debug",
+            pre_launch_task="Build Debug"
+        )
+
         workspace_manager.save()
 
         vscode_path = os.path.join(workspace_path, ".vscode")
