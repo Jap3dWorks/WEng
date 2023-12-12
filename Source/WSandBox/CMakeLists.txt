@@ -21,7 +21,7 @@ else()
     find_package(glm REQUIRED)
     find_package(STB REQUIRED)
     
-    target_include_directories(WSandBox PUBLIC include ${STB_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
+    target_include_directories(WSandBox PUBLIC Include ${STB_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
     target_link_libraries(
         WSandBox 
         OpenGL::GL 

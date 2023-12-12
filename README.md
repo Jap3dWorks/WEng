@@ -18,6 +18,3 @@ WSCEnv will create the vscode environment
 ```
 WCli VSCEnv
 ```
-
-
-

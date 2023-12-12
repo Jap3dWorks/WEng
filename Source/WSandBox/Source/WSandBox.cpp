@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "Shader.h"
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -23,7 +24,7 @@
 GLuint program;
 GLuint vbo_triangle;
 
-struct FCamera
+struct CCamera
 {
 	glm::vec3 Position = glm::vec3(0.f, 0.f, 3.f);
 	glm::vec3 CameraFront = glm::vec3(0.f, 0.f, -1.f);
@@ -38,18 +39,35 @@ struct FCamera
 	float CameraSpeed = 0.05f;
 };
 
-struct FVertex
+struct CVertex
 {
 	glm::vec3 Position;
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
 };
 
-struct FMesh
+struct CMesh
 {
-	std::vector<FVertex> Vertices;
+	std::vector<CVertex> Vertices;
 	std::vector<uint32_t> Indices;
 	// std::vector<GLuint> Textures;
+};
+
+struct CRenderObject
+{
+	uint32_t VAO;
+	uint32_t VBO;
+	uint32_t EBO;
+};
+
+struct CActor
+{
+	CMesh Mesh;
+	glm::vec3 Position;
+	glm::vec3 Rotation;
+	glm::vec3 Scale;
+
+	CRenderObject RenderObject;
 };
 
 namespace KeyCallbacks
@@ -57,7 +75,7 @@ namespace KeyCallbacks
 	void MouseCameraCallback(
 		const float& InX, 
 		const float& InY, 
-		FCamera& InCamera
+		CCamera& InCamera
 	)
 	{
 		float xoffset = InX - InCamera.LastX;
@@ -87,7 +105,7 @@ namespace KeyCallbacks
 	void KeyboardCameraCallback(
 		const int& InKey, 
 		const int& InScancode, 
-		FCamera& InCamera
+		CCamera& InCamera
 	)
 	{
 		float cameraSpeed = 0.05f;
@@ -117,16 +135,24 @@ namespace KeyCallbacks
 									)
 								) * InCamera.CameraSpeed;
 		}
+		if(InKey == SDLK_e)
+		{
+			InCamera.Position += InCamera.CameraSpeed * InCamera.CameraUp;
+		}
+		if(InKey == SDLK_q)
+		{
+			InCamera.Position -= InCamera.CameraSpeed * InCamera.CameraUp;
+		}
 	}
 }
 
 namespace Shapes
 {
-	FMesh CreateCube()
+	CActor CreateCube()
 	{
-		FMesh Mesh;
+		CActor Object;
 
-		Mesh.Vertices = {
+		Object.Mesh.Vertices = {
 			// Front
 			{{-0.5f, -0.5f,  0.5f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
 			{{ 0.5f, -0.5f,  0.5f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
@@ -157,10 +183,9 @@ namespace Shapes
 			{{-0.5f, -0.5f, -0.5f}, {0.f, -1.f, 0.f}, {1.f, 0.f}},
 			{{ 0.5f, -0.5f, -0.5f}, {0.f, -1.f, 0.f}, {0.f, 0.f}},
 			{{ 0.5f, -0.5f,  0.5f}, {0.f, -1.f, 0.f}, {0.f, 1.f}}
-
 		};
 
-		Mesh.Indices = {
+		Object.Mesh.Indices = {
 			0, 1, 2, 
 			2, 3, 0,
 			4, 5, 6, 
@@ -175,11 +200,64 @@ namespace Shapes
 			22, 23, 20
 		};
 
-		return Mesh;
+		glGenVertexArrays(1, &Object.RenderObject.VAO);  // Vertex Array Object
+		glGenBuffers(1, &Object.RenderObject.VBO);  // Vertex Buffer Object
+		glGenBuffers(1, &Object.RenderObject.EBO);  // Element Buffer Object
+
+		glBindVertexArray(Object.RenderObject.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, Object.RenderObject.VBO);
+
+		glBufferData(
+			GL_ARRAY_BUFFER, 
+			Object.Mesh.Vertices.size() * sizeof(CVertex), 
+			&Object.Mesh.Vertices[0], 
+			GL_STATIC_DRAW
+		);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Object.RenderObject.EBO);
+		glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER, 
+			Object.Mesh.Indices.size() * sizeof(uint32_t), 
+			&Object.Mesh.Indices[0], 
+			GL_STATIC_DRAW
+		);
+
+		// Position attribute
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(
+			0, 
+			3, 
+			GL_FLOAT, 
+			GL_FALSE, 
+			sizeof(CVertex), 
+			(void*)0
+		);
+		// Normal attribute
+		glVertexAttribPointer(
+			1, 
+			3, 
+			GL_FLOAT, 
+			GL_FALSE, 
+			sizeof(CVertex), 
+			(void*)offsetof(CVertex, Normal)
+		);
+		// Texture Coordinate attribute
+		glVertexAttribPointer(
+			2, 
+			2, 
+			GL_FLOAT, 
+			GL_FALSE, 
+			sizeof(CVertex), 
+			(void*)offsetof(CVertex, TexCoords)
+		);
+		
+		glBindVertexArray(0);
+
+		return Object;
 	}
 }
 
-class FRenderData
+class CRenderData
 {
 public:
 	static inline uint32_t SRC_WIDTH{800};
@@ -194,12 +272,11 @@ public:
 	[[nodiscard]] float GetLastFrame() const { return LastFrame; }
 };
 
-class FInputActions
+class CInputActions
 {
 public:
 
 	std::vector<std::function<void(const float&, const float&)>> MouseCallbacks;
-
 	std::vector<std::function<void(const int&, const int&)>> KeyCallbacks;
 
 	void RunMouseActions(
@@ -223,144 +300,90 @@ public:
 	}
 };
 
-struct FSdlContext
+struct CSdlContext
 {
 	SDL_Window* Window;
 	SDL_GLContext Context;
 };
 
-bool InitResources(void)
+CShader InitShaders()
 {
-	GLint compile_ok = GL_FALSE, link_ok = GL_FALSE;
-	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-	const GLchar* vs_source = R"(
-		#version 460
-		in vec2 coord2d;
-		in vec3 VertexColor;
-		out vec3 OutColor;
-
-		void main()
-		{
-			// ... 
-			gl_Position = vec4(coord2d, 0.f, 1.f);
-			OutColor = VertexColor;
-		}
-	)";
-
-	glShaderSource(vs, 1, &vs_source, NULL);
-	glCompileShader(vs);
-	glGetShaderiv(vs, GL_COMPILE_STATUS, &compile_ok);
-	if (!compile_ok)
-	{
-		std::cerr << "Error in vertex shader" << std::endl;
-		return false;
-	}
-
-	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-	const char* fs_source = R"(
-		#version 460
-		in vec3 OutColor;
-		in vec4 gl_FragCoord;
-		out vec4 DiffuseColor;
-
-		void main()
-		{
-			gl_FragCoord;
-			DiffuseColor = vec4(gl_FragCoord.y * 0.5, gl_FragCoord.y * 0.5, gl_FragCoord.y * 0.5, 1.0);
-		}
-	)";
-
-	glShaderSource(fs, 1, &fs_source, NULL);
-	glCompileShader(fs);
-	glGetShaderiv(fs, GL_COMPILE_STATUS, &compile_ok);
-	if (!compile_ok)
-	{
-		std::cerr << "Error in fragment shader" << std::endl;
-		return false;
-	}
-
-	program = glCreateProgram();
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	glLinkProgram(program);
-	glGetProgramiv(program, GL_LINK_STATUS, &link_ok);
-	if (!link_ok)
-	{
-		std::cerr << "Error in glLinkProgram" << std::endl;
-		return false;
-	}
-
-	GLint attribute_coord2d;
-	const char* attribute_name = "coord2d";
-	attribute_coord2d = glGetAttribLocation(program, attribute_name);
-
-	GLint attribute_color;
-	const char* attribute_color_name = "VertexColor";
-	attribute_color = glGetAttribLocation(program, attribute_color_name);
-
-	if (attribute_coord2d == -1)
-	{
-		std::cerr << "Could not bind attribute " << attribute_name << std::endl;
-		return false;
-	}
-
-	GLfloat triangle_vertices[] = {
-		0.0,  0.8, 1.f, 0.f, 0.f, 
-	   -0.8, -0.8, 0.f, 1.f, 0.f,
-		0.8, -0.8, 1.f, 0.f, 1.f
-	};
-
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(
-		GL_ARRAY_BUFFER, 
-		sizeof(triangle_vertices),
-		triangle_vertices,
-		GL_STATIC_DRAW
+	CShader Shader(
+		"./Source/WSandBox/Shaders/V_Main.glsl",
+		"./Source/WSandBox/Shaders/F_Main.glsl"
 	);
 
-	glUseProgram(program);
-	glEnableVertexAttribArray(
-		attribute_coord2d
-	);
-	glVertexAttribPointer(
-		attribute_coord2d,
-		2,
-		GL_FLOAT,
-		GL_FALSE,
-		5 * sizeof(GLfloat),
-		0
-	);
-	glEnableVertexAttribArray(
-		attribute_color
-	);
-	glVertexAttribPointer(
-		attribute_color,
-		3,
-		GL_FLOAT,
-		GL_FALSE,
-		5 * sizeof(GLfloat),
-		(GLvoid*)(2 * sizeof(GLfloat))
-	);
-
-	return true;
+	return Shader;
 }
 
-void Render(SDL_Window* window)
+void Render(
+	SDL_Window* InWindow, 
+	CCamera& InCamera, 
+	std::vector<CActor>& InActors, 
+	CShader& InShader
+)
 {
 	// Filled in later
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glm::mat4 View = glm::mat4(1.f);
+	View = glm::lookAt(
+		InCamera.Position, 
+		InCamera.Position + InCamera.CameraFront, 
+		InCamera.CameraUp
+	);
 
-	SDL_GL_SwapWindow(window);
+	glm::mat4 Projection = glm::mat4(1.f);
+	Projection = glm::perspective(
+		glm::radians(InCamera.FOV), 
+		(float)CRenderData::SRC_WIDTH / (float)CRenderData::SRC_HEIGHT, 
+		0.1f, 
+		100.f
+	);
+
+	for(auto& Actor : InActors)
+	{
+		glUseProgram(InShader.ID);
+
+		glm::mat4 Model = glm::mat4(1.f);
+		Model = glm::translate(Model, Actor.Position);
+		Model = glm::rotate(Model, glm::radians(Actor.Rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		Model = glm::rotate(Model, glm::radians(Actor.Rotation.y), glm::vec3(0.f, 1.f, 0.f));
+		Model = glm::rotate(Model, glm::radians(Actor.Rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		Model = glm::scale(Model, Actor.Scale);
+
+		glUniformMatrix4fv(
+			glGetUniformLocation(InShader.ID, "Model"), 
+			1, 
+			GL_FALSE, 
+			glm::value_ptr(Model)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(InShader.ID, "View"), 
+			1, 
+			GL_FALSE, 
+			glm::value_ptr(View)
+		);
+		glUniformMatrix4fv(
+			glGetUniformLocation(InShader.ID, "Projection"), 
+			1, 
+			GL_FALSE, 
+			glm::value_ptr(Projection)
+		);
+
+		glBindVertexArray(Actor.RenderObject.VAO);
+		glDrawElements(
+			GL_TRIANGLES, 
+			Actor.Mesh.Indices.size(), 
+			GL_UNSIGNED_INT, 
+			0
+		);
+
+		glBindVertexArray(0);
+	}
+
+	SDL_GL_SwapWindow(InWindow);
 }
 
 void FreeResources()
@@ -369,8 +392,11 @@ void FreeResources()
 }
 
 void MainLoop(
-	SDL_Window* window, 
-	const FInputActions& InInputActions
+	SDL_Window* InWindow, 
+	const CInputActions& InInputActions,
+	CCamera& InCamera,
+	std::vector<CActor>& InActors,
+	CShader& InShader
 )
 {
 	while (true)
@@ -385,26 +411,23 @@ void MainLoop(
 
 				case SDL_KEYDOWN:
 					InInputActions.RunKeyActions(event);
-					// switch(event.key.keysym.sym)
-					// {
-					// 	case SDLK_LEFT: break;
-					// 	case SDLK_RIGHT: break;
-					// 	case SDLK_UP: break;
-					// 	case SDLK_DOWN: break;
-					// }
 					break;
 
 				case SDL_MOUSEMOTION:
 					InInputActions.RunMouseActions(event);
-					// event.motion.x; event.motion.y;
 					break;
 			}
 		}
-		Render(window);
+		Render(
+			InWindow,
+			InCamera,
+			InActors,
+			InShader
+		);
 	}
 }
 
-FSdlContext InitSDL()
+CSdlContext InitSDL()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -441,15 +464,44 @@ FSdlContext InitSDL()
 	return {window, context};
 }
 
+std::vector<CActor> InitLevelActors()
+{
+	std::vector<CActor> Actors;
+
+	for(glm::vec3 Position : {
+			glm::vec3{0.f, 0.f, 0.f}, 
+			glm::vec3{2.f, 5.f, -15.f}, 
+			glm::vec3{-1.5f, -2.2f, -2.5f}, 
+			glm::vec3{-3.8f, -2.0f, -12.3f}, 
+			glm::vec3{2.4f, -0.4f, -3.5f}, 
+			glm::vec3{-1.7f, 3.0f, -7.5f}, 
+			glm::vec3{1.3f, -2.0f, -2.5f}, 
+			glm::vec3{1.5f, 2.0f, -2.5f}, 
+			glm::vec3{1.5f, 0.2f, -1.5f}, 
+			glm::vec3{-1.3f, 1.0f, -1.5f}
+		}
+	)
+	{
+		CActor Actor = Shapes::CreateCube();
+
+		Actor.Position = Position;
+		Actor.Rotation = glm::vec3(0.f, 0.f, 0.f);
+		Actor.Scale = glm::vec3(1.f, 1.f, 1.f);
+
+		Actors.push_back(Actor);
+	}
+
+	return Actors;
+}
+
 int main(int argc, char* argv[])
 {
-	FSdlContext SdlContext = InitSDL();
+	CSdlContext SdlContext = InitSDL();
 
-	if (!InitResources())
-		return EXIT_FAILURE;
-	
-	FCamera Camera;
-	FInputActions InputActions;
+	std::vector<CActor> Actors = InitLevelActors();
+	CShader Shader = InitShaders();
+	CCamera Camera;
+	CInputActions InputActions;
 
 	InputActions.MouseCallbacks.push_back(
 		[&Camera](const float& InX, const float& InY)
@@ -469,7 +521,13 @@ int main(int argc, char* argv[])
 		}
 	);
 
-	MainLoop(SdlContext.Window, InputActions);
+	MainLoop(
+		SdlContext.Window, 
+		InputActions,
+		Camera,
+		Actors,
+		Shader
+	);
 
 	FreeResources();
 

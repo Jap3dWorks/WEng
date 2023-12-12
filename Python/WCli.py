@@ -7,7 +7,6 @@ from WCli_lib import vscode_utils
 from WCli_lib.logger import wlogger
 
 
-
 class CliVars:
     BUILD_PATH = os.path.abspath("./build")
     BIN_PATH = os.path.abspath("./bin")
@@ -269,6 +268,7 @@ class RunCommand(CliCommand):
         subprocess.run([target_path])
 
         return 0
+
 
 class VSCEnvCommand(CliCommand):
     _COMMAND_NAME = "VSCEnv"
