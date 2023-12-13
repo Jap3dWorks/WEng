@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-add_executable(WCore Source/WCore.cpp)
+add_library(WCore SHARED Source/WCore.cpp)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
@@ -21,4 +21,4 @@ target_link_libraries(
     glm 
 )
 
-# install(TARGETS WSandBox DESTINATION bin)
+install(TARGETS WCore DESTINATION bin)

@@ -1,10 +1,7 @@
 #!/bin/bash
 
-export PATH=$PATH:./bin:./Scripts
+export PATH=$PATH:./Scripts
 
-echo "Environment set up for WCli"
+echo "Environment set up for wcli"
 echo $PATH
-
-# konsole -e $SHELL -c "echo 'Ussage:
-#   WCli Build';exec bash"
 

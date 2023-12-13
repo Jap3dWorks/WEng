@@ -1,6 +1,6 @@
 import os
 import platform
-from WCli_lib import cmake_builder
+from wcli_lib import cmake_builder
 import re
 
 

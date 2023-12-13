@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-add_executable({{ module_name }} Source/{{ module_name }}.cpp)
+add_library({{ module_name }} SHARED Source/{{ module_name }}.cpp)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
@@ -9,7 +9,7 @@ find_package(SDL2 REQUIRED)
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)
 
-target_include_directories({{ module_name }} PUBLIC Include ${STB_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
+target_include_directories({{ module_name }} PUBLIC Include Source ${STB_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 target_link_libraries(
     {{ module_name }} 
     OpenGL::GL 
@@ -21,4 +21,4 @@ target_link_libraries(
     glm 
 )
 
-# install(TARGETS WSandBox DESTINATION bin)
+install(TARGETS {{ module_name }} DESTINATION bin)

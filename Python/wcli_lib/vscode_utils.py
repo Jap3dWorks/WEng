@@ -136,15 +136,14 @@ class VSCWorkspaceManager(object):
             "extensions": {
                 "recommendations": [
                     "ms-vscode.cpptools",
-                    "ms-dotnettools.csharp",
+                    # "ms-dotnettools.csharp",
                     "vadimcn.vscode-lldb",
                     "ms-vscode.mono-debug",
-                    "dfarley1.file-picker",
+                    # "dfarley1.file-picker",
                     "twxs.cmake",
                     "ms-vscode.cmake-tools"
                 ]
-        	},
-
+        	}
         }
 
     def add_folder(self, folder_path) -> None:

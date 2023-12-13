@@ -14,14 +14,14 @@ def _check_dir(path) -> str:
     dir_path = os.path.dirname(path)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    
+
     return path
 
 class CMakeBuilder(object):
     TEMPLATES_FOLDER = os.path.abspath(
         os.path.dirname(__file__) + "/templates"
     )
-    
+
     def get_template_path(self, template_name) -> str:
         return os.path.join(
             CMakeBuilder.TEMPLATES_FOLDER,
@@ -51,5 +51,4 @@ class CMakeBuilder(object):
             file.write(
                 template.render(data)
             )
-
 

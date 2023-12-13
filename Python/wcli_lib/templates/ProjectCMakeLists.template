@@ -52,5 +52,4 @@ endforeach()
 {% if project_path != engine_path %}
 # Add Engine Dependencies
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "{{ engine_path }}/cmake")
-
 {% endif %}

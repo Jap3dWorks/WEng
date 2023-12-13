@@ -3,8 +3,8 @@ import subprocess
 import sys
 import os
 import platform
-from WCli_lib import vscode_utils, project_manager
-from WCli_lib.logger import wlogger
+from wcli_lib import vscode_utils, project_manager
+from wcli_lib.logger import wlogger
 import copy
 
 
@@ -21,6 +21,8 @@ class CliVars:
     CXX_COMPILER = "clang++"
 
     WENG = "WEng"
+    WCLI = "wcli"
+
 
 class CommandUtils:
     @staticmethod
@@ -371,17 +373,17 @@ class VSCEnvCommand(CliCommand):
         
         workspace_manager.add_task(
             "Build X86_64 Debug",
-            "WCli",
+            CliVars.WCLI,
             [
-                "Build", "-t", CliVars.DEBUG_TYPE, "-a", CliVars.ARCH_X86_64
+                BuildCommand.get_command_name(), "-t", CliVars.DEBUG_TYPE, "-a", CliVars.ARCH_X86_64
             ]
         )
 
         workspace_manager.add_task(
             "Build X86_64 Release",
-            "WCli",
+            CliVars.WCLI,
             [
-                "Build", "-t", CliVars.RELEASE_TYPE, "-a", CliVars.ARCH_X86_64
+                BuildCommand.get_command_name(), "-t", CliVars.RELEASE_TYPE, "-a", CliVars.ARCH_X86_64
             ]
         )
 
@@ -392,7 +394,8 @@ class VSCEnvCommand(CliCommand):
                 program=project_manager.ProjectPaths.get_target_bin_path(
                     CliVars.ARCH_X86_64, 
                     CliVars.DEBUG_TYPE, 
-                    "WSandBox"),
+                    "WSandBox"
+                ),
                 args=[],
                 pre_launch_task="Build X86_64 Debug",
                 MIMode=None
@@ -403,7 +406,8 @@ class VSCEnvCommand(CliCommand):
                 program=project_manager.ProjectPaths.get_target_bin_path(
                     CliVars.ARCH_X86_64, 
                     CliVars.RELEASE_TYPE, 
-                    "WSandBox"),
+                    "WSandBox"
+                ),
                 args=[],
                 pre_launch_task="Build X86_64 Release",
                 MIMode=None
