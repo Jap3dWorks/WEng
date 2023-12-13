@@ -25,7 +25,6 @@ else()
     target_link_libraries(
         WSandBox 
         OpenGL::GL 
-        OpenGL::GLU 
         GLUT::GLUT 
         GLEW::GLEW 
         SDL2::SDL2main 
