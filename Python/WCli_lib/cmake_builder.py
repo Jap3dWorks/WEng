@@ -5,8 +5,9 @@ import os
 # https://jinja.palletsprojects.com/en/3.0.x/api/
 
 class CMakeTemplates:
-    CMakeLists = "CMakeLists.template"
+    ProjectCMakeLists = "ProjectCMakeLists.template"
     FindModule = "FindModule.template"
+    ModuleCMakeLists = "ModuleCMakeLists.template"
 
 
 def _check_dir(path) -> str:

@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_DIR}/build/emscripten)
 
 if (EMSCRIPTEN)
     message("EMSCRIPTEN build process.")
@@ -51,7 +50,7 @@ endforeach()
 
 {# Add engine dependencies #}
 {% if project_path != engine_path %}
-
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "{{ engine_path }}/cmake")  ## FindModule files should be enough to solve engine dependencies
+# Add Engine Dependencies
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "{{ engine_path }}/cmake")
 
 {% endif %}

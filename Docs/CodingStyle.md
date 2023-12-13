@@ -3,5 +3,5 @@ C -> class
 S -> struct
 T -> templates
 
-W -> WEng Object
+W -> WEng Object | Engine modules
 A -> Actor Object

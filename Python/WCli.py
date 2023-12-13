@@ -5,6 +5,7 @@ import os
 import platform
 from WCli_lib import vscode_utils, project_manager
 from WCli_lib.logger import wlogger
+import copy
 
 
 class CliVars:
@@ -19,6 +20,37 @@ class CliVars:
     C_COMPILER = "clang"
     CXX_COMPILER = "clang++"
 
+    WENG = "WEng"
+
+class CommandUtils:
+    @staticmethod
+    def clean_project_engine_paths(out_cmd_args) -> bool:
+        out_cmd_args.engine_path = os.path.abspath(
+            out_cmd_args.engine_path
+        )
+        
+        if not out_cmd_args.project_path:
+            wlogger.info("Project path not set, Set engine path as project path.")
+            out_cmd_args.project_path = out_cmd_args.engine_path
+        else:
+            out_cmd_args.project_path = os.path.abspath(
+                out_cmd_args.project_path
+            )
+
+        return True
+
+    @staticmethod
+    def is_engine_path(path) -> bool:
+        dirname = os.path.basename(path)
+        return dirname == CliVars.WENG
+
+    @staticmethod
+    def error_message_engine_path(path)->None:
+        wlogger.error(
+            "Not correct engine path, '{path}'.".format(
+                path=path
+            )
+        )
 
 
 class CliCommand(object):
@@ -111,10 +143,10 @@ class BuildCommand(CliCommand):
 
     def run(self) -> int:
 
-        build_path = project_manager.ProjectFiles.get_build_folder(
+        build_path = project_manager.ProjectPaths.get_build_folder(
             self.cmd_args.arch,
             self.cmd_args.build_type,
-            project_manager.ProjectFiles.BUILD_PATH     
+            project_manager.ProjectPaths.BUILD_PATH     
         )
 
         if not os.path.exists(build_path):
@@ -145,7 +177,7 @@ class BuildCommand(CliCommand):
         if completed_process.returncode != 0:
             return completed_process.returncode
 
-        install_path = project_manager.ProjectFiles.get_bin_folder(
+        install_path = project_manager.ProjectPaths.get_bin_folder(
             self.cmd_args.arch,
             self.cmd_args.build_type
         )
@@ -202,7 +234,7 @@ class RunCommand(CliCommand):
         command_parser.add_argument(
             "-tg", "--target",
             type=str,
-            help="Target to run"
+            help="Target to run."
         )
 
         return command_parser
@@ -211,13 +243,13 @@ class RunCommand(CliCommand):
         return True
 
     def run(self) -> int:
-        target_path = project_manager.ProjectFiles.get_target_bin_path(
+        target_path = project_manager.ProjectPaths.get_target_bin_path(
             self.cmd_args.arch,
             self.cmd_args.type,
             self.cmd_args.target
         )
 
-        wlogger.info("Run %s" % target_path)
+        wlogger.info("Run '%s'." % target_path)
 
         subprocess.run([target_path])
 
@@ -226,6 +258,10 @@ class RunCommand(CliCommand):
 
 class ProjectCommand(CliCommand):
     _COMMAND_NAME = "Project"
+
+    def __init__(self, cmd_args) -> None:
+        super().__init__(cmd_args)
+        self.project_manager = None
 
     def add_parser(command_parser) -> argparse.ArgumentParser:
         command_parser.add_argument(
@@ -247,28 +283,48 @@ class ProjectCommand(CliCommand):
             action="store_true",
             help="Create or Update project."
         )
+        command_parser.add_argument(
+            "-m",
+            "--modules",
+            nargs="+",
+            type=str,
+            help="Add modules to project."
+        )
 
     def validate(self) -> bool:
-        if not self.cmd_args.project_path:
-            wlogger.info("Project path not set, Set engine path as project path.")
-            self.cmd_args.project_path = self.cmd_args.engine_path
-        
-        return True
+        CommandUtils.clean_project_engine_paths(self.cmd_args)
+        is_engine = CommandUtils.is_engine_path(self.cmd_args.engine_path)
+        if not is_engine:
+            CommandUtils.error_message_engine_path(self.cmd_args.engine_path)
+            return False
 
-    def update_project(self, project_path, engine_path) -> None:
-        project_manager.ProjectManager(
-            project_path, 
-            engine_path
-        ).update_project()
+        self.project_manager = project_manager.ProjectManager(
+            self.cmd_args.project_path,
+            self.cmd_args.engine_path
+        )
+
+        return True
 
     def run(self) -> int:
         if self.cmd_args.update:
-            self.update_project(
-                self.cmd_args.project_path,
-                self.cmd_args.engine_path
+            self.project_manager.update_project()
+            wlogger.info(
+                "Project updated at '{project_path}'".format(
+                    project_path=self.cmd_args.project_path
+                )
+            )
+        
+        for module in self.cmd_args.modules:
+            self.project_manager.update_module(module)
+            wlogger.info(
+                "Module '{module}' updated at '{project_path}'".format(
+                    module=module,
+                    project_path=self.cmd_args.project_path
+                )
             )
 
         return 0
+
 
 class VSCEnvCommand(CliCommand):
     _COMMAND_NAME = "VSCEnv"
@@ -293,6 +349,13 @@ class VSCEnvCommand(CliCommand):
         )
 
     def validate(self) -> bool:
+        CommandUtils.clean_project_engine_paths(self.cmd_args)
+
+        is_engine = CommandUtils.is_engine_path(self.cmd_args.engine_path)
+        if not is_engine:
+            CommandUtils.error_message_engine_path(self.cmd_args.engine_path)
+            return False
+
         return True
 
     def run(self) -> int:
@@ -303,7 +366,7 @@ class VSCEnvCommand(CliCommand):
         )
 
         workspace_manager.add_folder(self.cmd_args.engine_path)
-        if self.cmd_args.project_path:
+        if self.cmd_args.project_path != self.cmd_args.engine_path:
             workspace_manager.add_folder(self.cmd_args.project_path)
         
         workspace_manager.add_task(
@@ -322,33 +385,40 @@ class VSCEnvCommand(CliCommand):
             ]
         )
 
-        workspace_manager.add_launch(
-            "WSandBox X86_64 Debug",
-            program=project_manager.ProjectFiles.get_target_bin_path(
-                CliVars.ARCH_X86_64, 
-                CliVars.DEBUG_TYPE, 
-                "WSandBox"),
-            args=[],
-            pre_launch_task="Build X86_64 Debug",
-            MIMode=None
-        )
+        # TODO: set the engine and project launch jobs
+        if CommandUtils.is_engine_path(self.cmd_args.project_path):
+            workspace_manager.add_launch(
+                "WSandBox X86_64 Debug",
+                program=project_manager.ProjectPaths.get_target_bin_path(
+                    CliVars.ARCH_X86_64, 
+                    CliVars.DEBUG_TYPE, 
+                    "WSandBox"),
+                args=[],
+                pre_launch_task="Build X86_64 Debug",
+                MIMode=None
+            )
 
-        workspace_manager.add_launch(
-            "WSandBox X86_64 Release",
-            program=project_manager.ProjectFiles.get_target_bin_path(
-                CliVars.ARCH_X86_64, 
-                CliVars.RELEASE_TYPE, 
-                "WSandBox"),
-            args=[],
-            pre_launch_task="Build X86_64 Release",
-            MIMode=None
-        )
+            workspace_manager.add_launch(
+                "WSandBox X86_64 Release",
+                program=project_manager.ProjectPaths.get_target_bin_path(
+                    CliVars.ARCH_X86_64, 
+                    CliVars.RELEASE_TYPE, 
+                    "WSandBox"),
+                args=[],
+                pre_launch_task="Build X86_64 Release",
+                MIMode=None
+            )
 
         workspace_manager.save()
 
         vscode_path = os.path.join(workspace_path, ".vscode")
         if not os.path.exists(vscode_path):
             os.makedirs(vscode_path)
+        
+        wlogger.info("VSC environment created at '{workspace_path}'.".format(
+            workspace_path=workspace_path
+            )
+        )
 
         return 0
 
@@ -385,6 +455,7 @@ def _init_commands() -> None:
     register.register(BuildCommand)
     register.register(RunCommand)
     register.register(VSCEnvCommand)
+    register.register(ProjectCommand)
 
 
 def main(*args) -> int:
@@ -413,4 +484,9 @@ def main(*args) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    if len(sys.argv) <= 1:
+        args = ["-h"]
+    else:
+        args = sys.argv[1:]
+
+    sys.exit(main(args))
