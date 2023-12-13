@@ -34,3 +34,8 @@ else()
     )
 
 endif ()
+
+install(TARGETS WSandBox DESTINATION bin)
+
+# install(FILES my_header.h DESTINATION include)
+# install(DIRECTORY my_directory DESTINATION share)

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.26.2)
 
-project(WEng)
+project( {{ project }} )
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,4 +49,9 @@ foreach(subdir ${SUBDIRS})
   add_subdirectory(${subdir})
 endforeach()
 
+{# Add engine dependencies #}
+{% if project_path != engine_path %}
 
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "{{ engine_path }}/cmake")  ## FindModule files should be enough to solve engine dependencies
+
+{% endif %}

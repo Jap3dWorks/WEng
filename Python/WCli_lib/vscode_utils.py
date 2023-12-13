@@ -6,7 +6,7 @@ import re
 class VSCWorkspaceManager(object):
     WORKSPACE_EXTENSION = ".code-workspace"
 
-    def _normalize_workspace_path(self, workspace_path):
+    def _normalize_workspace_path(self, workspace_path) -> str:
         dir_name = None 
         if os.path.isdir(workspace_path):
             dir_name = os.path.basename(workspace_path)
@@ -27,7 +27,7 @@ class VSCWorkspaceManager(object):
 
         return workspace_path
 
-    def __init__(self, workspace_path):
+    def __init__(self, workspace_path) -> None:
         self.workspace_path = self._normalize_workspace_path(
             workspace_path
         )
@@ -147,7 +147,7 @@ class VSCWorkspaceManager(object):
 
         }
 
-    def add_folder(self, folder_path):
+    def add_folder(self, folder_path) -> None:
         self.data["folders"].insert(
             0, 
             {
@@ -156,7 +156,7 @@ class VSCWorkspaceManager(object):
             }
         )
 
-    def add_task(self, label, command, args, type="shell", problem_matcher="$tsc", presentation={"reveal": "always"}, group="build"):
+    def add_task(self, label, command, args, type="shell", problem_matcher="$tsc", presentation={"reveal": "always"}, group="build") -> None:
         task = {
             "label": label,
             "command": command,
@@ -168,7 +168,7 @@ class VSCWorkspaceManager(object):
         }
         self.data["tasks"]["tasks"].insert(0, task)
 
-    def add_launch(self, name, type="cppdbg", request="launch", program=None, args=[], stop_at_entry=True, cwd="${workspaceFolder}", environment=None, externalConsole=False, MIMode="lldb", pre_launch_task=None):
+    def add_launch(self, name, type="cppdbg", request="launch", program=None, args=[], stop_at_entry=True, cwd="${workspaceFolder}", environment=None, externalConsole=False, MIMode="lldb", pre_launch_task=None) -> None:
         launch = {
             "name": name,
             "type": type,
@@ -185,7 +185,7 @@ class VSCWorkspaceManager(object):
 
         self.data["launch"]["configurations"].insert(0, launch)
 
-    def save(self):
+    def save(self) -> None:
         if not os.path.exists(os.path.dirname(self.workspace_path)):
             os.makedirs(os.path.dirname(self.workspace_path))
 

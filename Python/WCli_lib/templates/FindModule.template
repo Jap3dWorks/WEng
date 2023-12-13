@@ -1,0 +1,6 @@
+
+IF(UNIX)
+
+    set({{ module_name.upper() }}_INCLUDE_DIRS "{{ engine_path }}/Install/{{ build_folder }}/include/{{ module_name }}")
+
+ENDIF()
