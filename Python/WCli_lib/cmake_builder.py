@@ -4,8 +4,9 @@ import os
 # https://jinja.palletsprojects.com/en/3.0.x/templates/
 # https://jinja.palletsprojects.com/en/3.0.x/api/
 
-class Templates:
+class CMakeTemplates:
     CMakeLists = "CMakeLists.template"
+    FindModule = "FindModule.template"
 
 
 def _check_dir(path) -> str:
@@ -42,8 +43,8 @@ class CMakeBuilder(object):
     def __init__(self) -> None:
         pass
 
-    def build(self, template_name, data, output_path) -> None:
-        template = self.get_template(template_name)
+    def build(self, template, data, output_path) -> None:
+        template = self.get_template(template)
 
         with open(_check_dir(output_path), "w") as file:
             file.write(

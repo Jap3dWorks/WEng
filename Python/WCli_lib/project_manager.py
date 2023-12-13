@@ -112,7 +112,7 @@ class ProjectManager(object):
         
         cmake_path = self.paths.get_root_cmakelists_path()
         cmake_builder.CMakeBuilder().build(
-            cmake_builder.Templates.CMakeLists,
+            cmake_builder.CMakeTemplates.CMakeLists,
             {
                 "project": self.project,
                 "project_path": self.paths.project_path,
