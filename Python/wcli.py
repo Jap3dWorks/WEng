@@ -198,66 +198,6 @@ class BuildCommand(CliCommand):
         return completed_process.returncode
 
 
-class RunCommand(CliCommand):
-    _COMMAND_NAME = "Run"
-
-    def __init__(self, cmd_args) -> None:
-        super(RunCommand, self).__init__(cmd_args)
-
-    @staticmethod
-    def add_parser(command_parser) -> argparse.ArgumentParser:
-        command_parser.add_argument(
-            "-t", "--type", 
-            type=str, 
-            choices=[CliVars.DEBUG_TYPE, CliVars.RELEASE_TYPE] ,
-            default=CliVars.DEBUG_TYPE, 
-            help="Build type."
-        )
-
-        if platform.system() == "Windows":
-            command_parser.add_argument(
-                "-a", "--arch",
-                type=str,
-                choices=[CliVars.ARCH_X86, CliVars.ARCH_X64],
-                default=CliVars.ARCH_X64,
-                help="Build architecture."
-
-            )
-        else:
-            command_parser.add_argument(
-                "-a", "--arch",
-                type=str,
-                choices=[CliVars.ARCH_X86_64],
-                default=CliVars.ARCH_X86_64,
-                help="Build architecture."
-
-            )
-
-        command_parser.add_argument(
-            "-tg", "--target",
-            type=str,
-            help="Target to run."
-        )
-
-        return command_parser
-
-    def validate(self) -> bool:
-        return True
-
-    def run(self) -> int:
-        target_path = project_manager.ProjectPaths.get_target_bin_path(
-            self.cmd_args.arch,
-            self.cmd_args.type,
-            self.cmd_args.target
-        )
-
-        wlogger.info("Run '%s'." % target_path)
-
-        subprocess.run([target_path])
-
-        return 0
-
-
 class ProjectCommand(CliCommand):
     _COMMAND_NAME = "Project"
 
@@ -265,6 +205,7 @@ class ProjectCommand(CliCommand):
         super().__init__(cmd_args)
         self.project_manager = None
 
+    @staticmethod
     def add_parser(command_parser) -> argparse.ArgumentParser:
         command_parser.add_argument(
             "-p",
@@ -285,13 +226,8 @@ class ProjectCommand(CliCommand):
             action="store_true",
             help="Create or Update project."
         )
-        command_parser.add_argument(
-            "-m",
-            "--modules",
-            nargs="+",
-            type=str,
-            help="Add modules to project."
-        )
+
+        return command_parser
 
     def validate(self) -> bool:
         CommandUtils.clean_project_engine_paths(self.cmd_args)
@@ -315,7 +251,60 @@ class ProjectCommand(CliCommand):
                     project_path=self.cmd_args.project_path
                 )
             )
-        
+
+        return 0
+
+
+class ModulesCommand(CliCommand):
+    _COMMAND_NAME = "Modules"
+
+    @staticmethod
+    def add_parser(command_parser) -> argparse.ArgumentParser:
+        command_parser.add_argument(
+            "-p",
+            "--project-path",
+            type=str,
+            help="Project directory path, Project name is the last folder name."
+        )
+        command_parser.add_argument(
+            "-ep",
+            "--engine-path",
+            type=str,
+            default=os.getcwd(),
+            help="Engine directory path."
+        )
+        command_parser.add_argument(
+            "-l",
+            "--library",
+            action="store_true",
+            help="Modules are libraries."
+        )
+        command_parser.add_argument(
+            "-e",
+            "--executable",
+            action="store_true",
+            help="Modules are executables."
+        )
+        command_parser.add_argument("modules", metavar='m', type=str, nargs='+',
+            help='Module names')
+
+        return command_parser
+
+    def validate(self) -> bool:
+        CommandUtils.clean_project_engine_paths(self.cmd_args)
+        is_engine = CommandUtils.is_engine_path(self.cmd_args.engine_path)
+        if not is_engine:
+            CommandUtils.error_message_engine_path(self.cmd_args.engine_path)
+            return False
+
+        self.project_manager = project_manager.ProjectManager(
+            self.cmd_args.project_path,
+            self.cmd_args.engine_path
+        )
+
+        return True
+
+    def run(self) -> int:
         for module in self.cmd_args.modules:
             self.project_manager.update_module(module)
             wlogger.info(
@@ -324,8 +313,6 @@ class ProjectCommand(CliCommand):
                     project_path=self.cmd_args.project_path
                 )
             )
-
-        return 0
 
 
 class VSCEnvCommand(CliCommand):
@@ -360,6 +347,83 @@ class VSCEnvCommand(CliCommand):
 
         return True
 
+    def set_engine_launch_jobs(self, out_workspace_manager):
+        # TODO inspect modules CMakeLists.txt for add_executable() commands
+        # WSandBox ejecutable
+        out_workspace_manager.add_launch(
+            "WSandBox X86_64 Debug",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE, 
+                "WSandBox"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Debug",
+            MIMode=None
+        )
+
+        out_workspace_manager.add_launch(
+            "WSandBox X86_64 Release",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE, 
+                "WSandBox"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Release",
+            MIMode=None
+        )
+
+        # WOpenGlTest ejecutable
+        out_workspace_manager.add_launch(
+            "WOpenGLTest X86_64 Debug",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE, 
+                "WOpenGLTest"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Debug",
+            MIMode=None
+        )
+
+        out_workspace_manager.add_launch(
+            "WOpenGLTest X86_64 Release",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE, 
+                "WOpenGLTest"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Release",
+            MIMode=None
+        )
+
+        # WVulkanTest
+        out_workspace_manager.add_launch(
+            "WVulkanTest X86_64 Debug",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE, 
+                "WVulkanTest"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Debug",
+            MIMode=None
+        )
+
+        out_workspace_manager.add_launch(
+            "WVulkanTest X86_64 Release",
+            program=project_manager.ProjectPaths.get_target_bin_path(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE, 
+                "WVulkanTest"
+            ),
+            args=[],
+            pre_launch_task="Build X86_64 Release",
+            MIMode=None
+        )
+
     def run(self) -> int:
         workspace_path = self.cmd_args.project_path or self.cmd_args.engine_path
         
@@ -387,31 +451,10 @@ class VSCEnvCommand(CliCommand):
             ]
         )
 
-        # TODO: set the engine and project launch jobs
         if CommandUtils.is_engine_path(self.cmd_args.project_path):
-            workspace_manager.add_launch(
-                "WSandBox X86_64 Debug",
-                program=project_manager.ProjectPaths.get_target_bin_path(
-                    CliVars.ARCH_X86_64, 
-                    CliVars.DEBUG_TYPE, 
-                    "WSandBox"
-                ),
-                args=[],
-                pre_launch_task="Build X86_64 Debug",
-                MIMode=None
-            )
-
-            workspace_manager.add_launch(
-                "WSandBox X86_64 Release",
-                program=project_manager.ProjectPaths.get_target_bin_path(
-                    CliVars.ARCH_X86_64, 
-                    CliVars.RELEASE_TYPE, 
-                    "WSandBox"
-                ),
-                args=[],
-                pre_launch_task="Build X86_64 Release",
-                MIMode=None
-            )
+            self.set_engine_launch_jobs(workspace_manager)
+        else:
+            pass
 
         workspace_manager.save()
 
@@ -457,9 +500,9 @@ class CommandRegister(object):
 def _init_commands() -> None:
     register = CommandRegister.get_register()
     register.register(BuildCommand)
-    register.register(RunCommand)
     register.register(VSCEnvCommand)
     register.register(ProjectCommand)
+    register.register(ModulesCommand)
 
 
 def main(*args) -> int:
