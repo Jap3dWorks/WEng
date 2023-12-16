@@ -2,5 +2,5 @@
 
 export PATH=$PATH:./Scripts
 
-echo "Environment set up for wcli"
+echo "Set environment for wcli"
 
