@@ -470,6 +470,12 @@ class VSCEnvCommand(CliCommand):
         return 0
 
 
+class CompileShadersCommand(CliCommand):
+    # TODO, compile shaders to SPIR-V
+    # Example: glslc shader.vert -o shader.vert.spv
+    pass
+
+
 class CommandRegister(object):
     _STATIC_REGISTER = None
 
@@ -495,6 +501,7 @@ class CommandRegister(object):
 
     def get_command_names(self) -> list:
         return self.commands.keys()
+
 
 
 def _init_commands() -> None:
