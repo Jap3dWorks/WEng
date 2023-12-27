@@ -510,10 +510,10 @@ private:
     void CreateGraphicsPipeline()
     {
         auto VertShaderCode = VulkanUtils::ReadFile(
-            "Source/WVulkanTest/Shaders/ShaderBase.frag.spv"
+            std::string("Source/WVulkanTest/Shaders/ShaderBase.frag.spv")
         );
         auto FragShaderCode = VulkanUtils::ReadFile(
-            "Source/WVulkanTest/Shaders/ShaderBase.vert.spv"
+            std::string("Source/WVulkanTest/Shaders/ShaderBase.vert.spv")
         );
 
         VkShaderModule VertShaderModule = CreateShaderModule(VertShaderCode);
