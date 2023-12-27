@@ -594,7 +594,7 @@ private:
 
         std::vector<VkDynamicState> DynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_LINE_WIDTH
+            VK_DYNAMIC_STATE_SCISSOR
         };
         VkPipelineDynamicStateCreateInfo DynamicState{};
         DynamicState.sType = 
@@ -630,19 +630,26 @@ private:
         PipelineInfo.subpass = 0;
         PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        if (vkCreateGraphicsPipelines(Device, VK_NULL_HANDLE, 1, &PipelineInfo, nullptr, &GraphicsPipeline) != VK_SUCCESS)
+        if (vkCreateGraphicsPipelines(
+            Device, 
+            VK_NULL_HANDLE, 
+            1, 
+            &PipelineInfo, 
+            nullptr, 
+            &GraphicsPipeline) != VK_SUCCESS
+        )
         {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
 
         vkDestroyShaderModule(Device, FragShaderModule, nullptr);
         vkDestroyShaderModule(Device, VertShaderModule, nullptr);
-
     }
 
     void CreateFramebuffers()
     {
         SwapChainFramebuffers.resize(SwapChainImageViews.size());
+
         for (size_t i=0; i<SwapChainImageViews.size(); i++)
         {
             VkImageView Attachments[] = {
@@ -658,7 +665,12 @@ private:
             FramebufferInfo.height = SwapChainExtent.height;
             FramebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(Device, &FramebufferInfo, nullptr, &SwapChainFramebuffers[i]) != VK_SUCCESS)
+            if (vkCreateFramebuffer(
+                Device, 
+                &FramebufferInfo, 
+                nullptr, 
+                &SwapChainFramebuffers[i]) != VK_SUCCESS
+            )
             {
                 throw std::runtime_error("Failed to create framebuffer!");
             }
@@ -767,7 +779,14 @@ private:
         vkResetFences(Device, 1, &InFlightFence);
 
         uint32_t ImageIndex;
-        vkAcquireNextImageKHR(Device, SwapChain, UINT64_MAX, ImageAvailableSemaphore, VK_NULL_HANDLE, &ImageIndex);
+        vkAcquireNextImageKHR(
+            Device, 
+            SwapChain, 
+            UINT64_MAX, 
+            ImageAvailableSemaphore, 
+            VK_NULL_HANDLE, 
+            &ImageIndex
+        );
 
         vkResetCommandBuffer(CommandBuffer, 0);
         RecordCommandBuffer(CommandBuffer, ImageIndex);
@@ -776,11 +795,13 @@ private:
         SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
         VkSemaphore WaitSemaphores[] = {ImageAvailableSemaphore};
-        VkPipelineStageFlags WaitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        VkPipelineStageFlags WaitStages[] = {
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        };
         SubmitInfo.waitSemaphoreCount = 1;
         SubmitInfo.pWaitSemaphores = WaitSemaphores;
         SubmitInfo.pWaitDstStageMask = WaitStages;
-        
+
         SubmitInfo.commandBufferCount = 1;
         SubmitInfo.pCommandBuffers = &CommandBuffer;
 
@@ -863,18 +884,60 @@ private:
                 static_cast<uint32_t>(Height)
             };
 
-            ActualExtent.width = std::max(InCapabilities.minImageExtent.width, std::min(InCapabilities.maxImageExtent.width, ActualExtent.width));
-            ActualExtent.height = std::max(InCapabilities.minImageExtent.height, std::min(InCapabilities.maxImageExtent.height, ActualExtent.height));
+            ActualExtent.width = std::clamp(
+                ActualExtent.width, 
+                InCapabilities.minImageExtent.width, 
+                InCapabilities.maxImageExtent.width
+            );
+            ActualExtent.height = std::clamp(
+                ActualExtent.height, 
+                InCapabilities.minImageExtent.height, 
+                InCapabilities.maxImageExtent.height
+            ); 
 
             return ActualExtent;
         }
     }
 
-    VulkanUtils::SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device)
+    VulkanUtils::SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice InDevice)
     {
-        VulkanUtils::SwapChainSupportDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, Surface, &details.Capabilities);
+        VulkanUtils::SwapChainSupportDetails Details;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(InDevice, Surface, &Details.Capabilities);
 
+        uint32_t FormatCount;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(InDevice, Surface, &FormatCount, nullptr);
+
+        if (FormatCount != 0)
+        {
+            Details.Formats.resize(FormatCount);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(
+                InDevice, 
+                Surface, 
+                &FormatCount, 
+                Details.Formats.data()
+            );
+        }
+
+        uint32_t PresentModeCount;
+        vkGetPhysicalDeviceSurfacePresentModesKHR(
+            InDevice, 
+            Surface, 
+            &PresentModeCount, 
+            nullptr
+        );
+
+        if (PresentModeCount != 0)
+        {
+            Details.PresentModes.resize(PresentModeCount);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(
+                InDevice, 
+                Surface, 
+                &PresentModeCount, 
+                Details.PresentModes.data()
+            );
+        }
+
+        return Details;
     }
 
     bool IsDeviceSuitable(VkPhysicalDevice InDevice)
@@ -886,8 +949,10 @@ private:
         bool SwapChainAdequate = false;
         if(ExtensionsSupported)
         {
-            VulkanUtils::SwapChainSupportDetails SwapChainSupport = QuerySwapChainSupport(InDevice);
-            SwapChainAdequate = !SwapChainSupport.Formats.empty() && !SwapChainSupport.PresentModes.empty();
+            VulkanUtils::SwapChainSupportDetails SwapChainSupport = 
+                QuerySwapChainSupport(InDevice);
+            SwapChainAdequate = 
+                !SwapChainSupport.Formats.empty() && !SwapChainSupport.PresentModes.empty();
         }
 
         return Indices.IsComplete() && ExtensionsSupported && SwapChainAdequate;
@@ -896,11 +961,25 @@ private:
     bool CheckDeviceExtensionSupport(VkPhysicalDevice InDevice)
     {
         uint32_t ExtensionCount;
-        vkEnumerateDeviceExtensionProperties(InDevice, nullptr, &ExtensionCount, nullptr);
-        std::vector<VkExtensionProperties> AvailableExtensions(ExtensionCount);
-        vkEnumerateDeviceExtensionProperties(InDevice, nullptr, &ExtensionCount, AvailableExtensions.data());
+        vkEnumerateDeviceExtensionProperties(
+            InDevice, 
+            nullptr, 
+            &ExtensionCount, 
+            nullptr
+        );
 
-        std::set<std::string> RequiredExtensions(DeviceExtensions.begin(), DeviceExtensions.end());
+        std::vector<VkExtensionProperties> AvailableExtensions(ExtensionCount);
+        vkEnumerateDeviceExtensionProperties(
+            InDevice, 
+            nullptr, 
+            &ExtensionCount, 
+            AvailableExtensions.data()
+        );
+
+        std::set<std::string> RequiredExtensions(
+            DeviceExtensions.begin(), 
+            DeviceExtensions.end()
+        );
 
         for(const auto& Extension : AvailableExtensions)
         {
@@ -914,10 +993,14 @@ private:
         VulkanUtils::QueueFamilyIndices Indices;
 
         uint32_t QueueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(InDevice, &QueueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(
+            InDevice, &QueueFamilyCount, nullptr
+        );
 
         std::vector<VkQueueFamilyProperties> QueueFamilies(QueueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(InDevice, &QueueFamilyCount, QueueFamilies.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(
+            InDevice, &QueueFamilyCount, QueueFamilies.data()
+        );
 
         int i=0;
         for(const auto& QueueFamily : QueueFamilies)
@@ -943,16 +1026,6 @@ private:
         }
 
         return Indices;
-    }
-
-    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT InMessageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
-        void* InUserData)
-    {
-        std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
-        return VK_FALSE;
     }
 
     std::vector<const char*> GetRequiredExtensions()
@@ -995,6 +1068,16 @@ private:
             }
         }
         return true;
+    }
+
+    static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT InMessageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
+        void* InUserData)
+    {
+        std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
+        return VK_FALSE;
     }
 };
 
