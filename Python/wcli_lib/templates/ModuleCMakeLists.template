@@ -22,6 +22,12 @@ target_link_libraries(
 )
 
 install(TARGETS {{ module_name }} DESTINATION bin)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Shaders DESTINATION bin/{{ module_name }}_Content/Shaders)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Assets DESTINATION bin/{{ module_name }}_Content/Assets)
+install(
+    DIRECTORY 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Shaders 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+    DESTINATION 
+    bin/{{ module_name }}_Content
+)
+install(DIRECTORY  DESTINATION bin/{{ module_name }}_Content)
 

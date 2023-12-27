@@ -348,7 +348,8 @@ class VSCEnvCommand(CliCommand):
         return True
 
     def set_engine_launch_jobs(self, out_workspace_manager):
-        # TODO inspect modules CMakeLists.txt for add_executable() commands
+        # TODO inspect modules CMakeLists.txt for add_executable() commands     
+           
         # WSandBox ejecutable
         out_workspace_manager.add_launch(
             "WSandBox X86_64 Debug",
@@ -356,6 +357,10 @@ class VSCEnvCommand(CliCommand):
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE, 
                 "WSandBox"
+            ),
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE
             ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
@@ -370,6 +375,10 @@ class VSCEnvCommand(CliCommand):
                 "WSandBox"
             ),
             args=[],
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE
+            ),
             pre_launch_task="Build X86_64 Release",
             MIMode=None
         )
@@ -382,6 +391,10 @@ class VSCEnvCommand(CliCommand):
                 CliVars.DEBUG_TYPE, 
                 "WOpenGLTest"
             ),
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE
+            ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
             MIMode=None
@@ -393,6 +406,10 @@ class VSCEnvCommand(CliCommand):
                 CliVars.ARCH_X86_64, 
                 CliVars.RELEASE_TYPE, 
                 "WOpenGLTest"
+            ),
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE
             ),
             args=[],
             pre_launch_task="Build X86_64 Release",
@@ -407,6 +424,10 @@ class VSCEnvCommand(CliCommand):
                 CliVars.DEBUG_TYPE, 
                 "WVulkanTest"
             ),
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.DEBUG_TYPE
+            ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
             MIMode=None
@@ -418,6 +439,10 @@ class VSCEnvCommand(CliCommand):
                 CliVars.ARCH_X86_64, 
                 CliVars.RELEASE_TYPE, 
                 "WVulkanTest"
+            ),
+            cwd=project_manager.ProjectPaths.get_bin_folder(
+                CliVars.ARCH_X86_64, 
+                CliVars.RELEASE_TYPE
             ),
             args=[],
             pre_launch_task="Build X86_64 Release",

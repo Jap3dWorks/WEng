@@ -510,10 +510,10 @@ private:
     void CreateGraphicsPipeline()
     {
         auto VertShaderCode = VulkanUtils::ReadFile(
-            std::string("Source/WVulkanTest/Shaders/ShaderBase.vert.spv")
+            std::string("WVulkanTest_Content/Shaders/ShaderBase.vert.spv")
         );
         auto FragShaderCode = VulkanUtils::ReadFile(
-            std::string("Source/WVulkanTest/Shaders/ShaderBase.frag.spv")
+            std::string("WVulkanTest_Content/Shaders/ShaderBase.frag.spv")
         );
 
         VkShaderModule VertShaderModule = CreateShaderModule(VertShaderCode);
@@ -1074,7 +1074,8 @@ private:
         VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT InMessageType,
         const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
-        void* InUserData)
+        void* InUserData
+    )
     {
         std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
         return VK_FALSE;
@@ -1091,6 +1092,6 @@ int main()
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+
     return EXIT_SUCCESS;
 }
-
