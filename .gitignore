@@ -18,4 +18,4 @@ sh.exe.stackdump
 __pycache__
 bin/
 Install/
-
+*.spv

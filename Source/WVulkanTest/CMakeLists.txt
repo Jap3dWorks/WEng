@@ -2,10 +2,6 @@ cmake_minimum_required (VERSION 3.26.2)
 
 add_executable(WVulkanTest Source/WVulkanTest.cpp)
 
-# find_package(OpenGL REQUIRED)
-# find_package(GLUT REQUIRED)
-# find_package(GLEW REQUIRED)
-# find_package(SDL2 REQUIRED)
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)
 find_package(GLFW REQUIRED)
@@ -29,3 +25,6 @@ target_link_libraries(
 )
 
 install(TARGETS WVulkanTest DESTINATION bin)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Shaders DESTINATION bin/WVulkanTest_Content/Shaders)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Assets DESTINATION bin/WVulkanTest_Content/Assets)
+
