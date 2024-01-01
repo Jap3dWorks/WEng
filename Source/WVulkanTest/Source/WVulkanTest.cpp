@@ -85,6 +85,12 @@ namespace VulkanUtils
     }
 }
 
+namespace VulkanConfig
+{
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+    
+}
+
 class CHelloTriangleApplication
 {
 public:
@@ -118,16 +124,18 @@ private:
     VkPipeline GraphicsPipeline;
 
     VkCommandPool CommandPool;
-    VkCommandBuffer CommandBuffer;
+    std::vector<VkCommandBuffer> CommandBuffers;
 
-    VkSemaphore ImageAvailableSemaphore;
-    VkSemaphore RenderFinishedSemaphore;
-    VkFence InFlightFence;
+    std::vector<VkSemaphore> ImageAvailableSemaphores;
+    std::vector<VkSemaphore> RenderFinishedSemaphores;
+    std::vector<VkFence> InFlightFences;
 
     const uint32_t Width{800};
     const uint32_t Height{600};
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
+
+    uint32_t CurrentFrame = 0;
 
     VkInstance Instance;
 
@@ -168,7 +176,7 @@ private:
         CreateGraphicsPipeline();
         CreateFramebuffers();
         CreateCommandPool();
-        CreateCommandBuffer();
+        CreateCommandBuffers();
         CreateSyncObjects();
     }
 
@@ -184,9 +192,12 @@ private:
 
     void Cleanup()
     {
-        vkDestroySemaphore(Device, RenderFinishedSemaphore, nullptr);
-        vkDestroySemaphore(Device, ImageAvailableSemaphore, nullptr);
-        vkDestroyFence(Device, InFlightFence, nullptr);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            vkDestroySemaphore(Device, RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(Device, ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(Device, InFlightFences[i], nullptr);
+        }
 
         vkDestroyCommandPool(Device, CommandPool, nullptr);
 
@@ -364,7 +375,9 @@ private:
         {
             CreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
             CreateInfo.ppEnabledLayerNames = ValidationLayers.data();
-        } else {
+        } 
+        else 
+        {
             CreateInfo.enabledLayerCount = 0;
         }
 
@@ -692,15 +705,17 @@ private:
         }
     }
 
-    void CreateCommandBuffer()
+    void CreateCommandBuffers()
     {
+        CommandBuffers.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+
         VkCommandBufferAllocateInfo AllocInfo{};
         AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         AllocInfo.commandPool = CommandPool;
         AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        AllocInfo.commandBufferCount = 1;
+        AllocInfo.commandBufferCount = (uint32_t)CommandBuffers.size();
 
-        if (vkAllocateCommandBuffers(Device, &AllocInfo, &CommandBuffer) != VK_SUCCESS)
+        if (vkAllocateCommandBuffers(Device, &AllocInfo, CommandBuffers.data()) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
@@ -756,6 +771,10 @@ private:
 
     void CreateSyncObjects()
     {
+        ImageAvailableSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+        RenderFinishedSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+        InFlightFences.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+
         VkSemaphoreCreateInfo SemaphoreInfo{};
         SemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -763,38 +782,41 @@ private:
         FenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         FenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        if (
-            vkCreateSemaphore(Device, &SemaphoreInfo, nullptr, &ImageAvailableSemaphore) != VK_SUCCESS ||
-            vkCreateSemaphore(Device, &SemaphoreInfo, nullptr, &RenderFinishedSemaphore) != VK_SUCCESS ||
-            vkCreateFence(Device, &FenceInfo, nullptr, &InFlightFence) != VK_SUCCESS
-        )
+        for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
         {
-            throw std::runtime_error("Failed to create synchronization objects for a frame!");
+            if (
+                vkCreateSemaphore(Device, &SemaphoreInfo, nullptr, &ImageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(Device, &SemaphoreInfo, nullptr, &RenderFinishedSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(Device, &FenceInfo, nullptr, &InFlightFences[i]) != VK_SUCCESS
+            )
+            {
+                throw std::runtime_error("Failed to create synchronization objects for a frame!");
+            }
         }
     }
 
     void DrawFrame()
     {
-        vkWaitForFences(Device, 1, &InFlightFence, VK_TRUE, UINT64_MAX);
-        vkResetFences(Device, 1, &InFlightFence);
+        vkWaitForFences(Device, 1, &InFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
+        vkResetFences(Device, 1, &InFlightFences[CurrentFrame]);
 
         uint32_t ImageIndex;
         vkAcquireNextImageKHR(
             Device, 
             SwapChain, 
             UINT64_MAX, 
-            ImageAvailableSemaphore, 
+            ImageAvailableSemaphores[CurrentFrame], 
             VK_NULL_HANDLE, 
             &ImageIndex
         );
 
-        vkResetCommandBuffer(CommandBuffer, 0);
-        RecordCommandBuffer(CommandBuffer, ImageIndex);
+        vkResetCommandBuffer(CommandBuffers[CurrentFrame], 0);
+        RecordCommandBuffer(CommandBuffers[CurrentFrame], ImageIndex);
 
         VkSubmitInfo SubmitInfo{};
         SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore WaitSemaphores[] = {ImageAvailableSemaphore};
+        VkSemaphore WaitSemaphores[] = {ImageAvailableSemaphores[CurrentFrame]};
         VkPipelineStageFlags WaitStages[] = {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         };
@@ -803,13 +825,13 @@ private:
         SubmitInfo.pWaitDstStageMask = WaitStages;
 
         SubmitInfo.commandBufferCount = 1;
-        SubmitInfo.pCommandBuffers = &CommandBuffer;
+        SubmitInfo.pCommandBuffers = &CommandBuffers[CurrentFrame];
 
-        VkSemaphore SignalSemaphores[] = {RenderFinishedSemaphore};
+        VkSemaphore SignalSemaphores[] = {RenderFinishedSemaphores[CurrentFrame]};
         SubmitInfo.signalSemaphoreCount = 1;
         SubmitInfo.pSignalSemaphores = SignalSemaphores;
 
-        if (vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, InFlightFence) != VK_SUCCESS)
+        if (vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, InFlightFences[CurrentFrame]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to submit draw command buffer!");
         }
@@ -827,6 +849,8 @@ private:
         PresentInfo.pImageIndices = &ImageIndex;
 
         vkQueuePresentKHR(PresentQueue, &PresentInfo);
+
+        CurrentFrame = (CurrentFrame + 1) % VulkanConfig::MAX_FRAMES_IN_FLIGHT;
     }
 
     VkShaderModule CreateShaderModule(const std::vector<char>& InCode)
