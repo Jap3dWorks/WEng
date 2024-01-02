@@ -130,6 +130,8 @@ private:
     std::vector<VkSemaphore> RenderFinishedSemaphores;
     std::vector<VkFence> InFlightFences;
 
+    bool FramebufferResized = false;
+
     const uint32_t Width{800};
     const uint32_t Height{600};
 
@@ -158,9 +160,18 @@ private:
         glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // it is not OpenGL
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);   // Not resizable
 
         Window = glfwCreateWindow(Width, Height, "Vulkan", nullptr, nullptr);
+
+        glfwSetWindowUserPointer(Window, this);
+        glfwSetFramebufferSizeCallback(Window, FramebufferResizeCallback);
+
+    }
+
+    static void FramebufferResizeCallback(GLFWwindow* InWindow, int InWidth, int InHeight)
+    {
+        auto App = reinterpret_cast<CHelloTriangleApplication*>(glfwGetWindowUserPointer(InWindow));
+        App->FramebufferResized = true;
     }
 
     void InitVulkan()
@@ -190,8 +201,25 @@ private:
         vkDeviceWaitIdle(Device);
     }
 
+    void CleanupSwapChain()
+    {
+        for (auto Framebuffer : SwapChainFramebuffers)
+        {
+            vkDestroyFramebuffer(Device, Framebuffer, nullptr);
+        }
+
+        for (auto ImageView : SwapChainImageViews)
+        {
+            vkDestroyImageView(Device, ImageView, nullptr);
+        }
+
+        vkDestroySwapchainKHR(Device, SwapChain, nullptr);
+    }
+
     void Cleanup()
     {
+        CleanupSwapChain();
+
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
             vkDestroySemaphore(Device, RenderFinishedSemaphores[i], nullptr);
@@ -233,6 +261,25 @@ private:
         glfwDestroyWindow(Window);
 
         glfwTerminate();
+    }
+
+    void RecreateSwapChain()
+    {
+        int TempWidth = 0, TempHeight = 0;
+        glfwGetFramebufferSize(Window, &TempWidth, &TempHeight);
+        while(TempWidth == 0 || TempHeight == 0)
+        {
+            glfwGetFramebufferSize(Window, &TempWidth, &TempHeight);
+            glfwWaitEvents();
+        }
+        
+        vkDeviceWaitIdle(Device);
+
+        CleanupSwapChain();
+
+        CreateSwapChain();
+        CreateImageViews();
+        CreateFramebuffers();
     }
 
     void CreateInstance()
@@ -288,7 +335,7 @@ private:
                                    VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                                    VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         InCreateInfo.pfnUserCallback = DebugCallback;
-        InCreateInfo.pUserData = nullptr;
+        // InCreateInfo.pUserData = nullptr;
     }
 
     void SetupDebugMessenger()
@@ -798,10 +845,9 @@ private:
     void DrawFrame()
     {
         vkWaitForFences(Device, 1, &InFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
-        vkResetFences(Device, 1, &InFlightFences[CurrentFrame]);
 
         uint32_t ImageIndex;
-        vkAcquireNextImageKHR(
+        VkResult Result = vkAcquireNextImageKHR(
             Device, 
             SwapChain, 
             UINT64_MAX, 
@@ -809,6 +855,18 @@ private:
             VK_NULL_HANDLE, 
             &ImageIndex
         );
+
+        if (Result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            RecreateSwapChain();
+            return;
+        }
+        else if (Result != VK_SUCCESS && Result != VK_SUBOPTIMAL_KHR)
+        {
+            throw std::runtime_error("Failed to acquire swap chain image!");
+        }
+
+        vkResetFences(Device, 1, &InFlightFences[CurrentFrame]);
 
         vkResetCommandBuffer(CommandBuffers[CurrentFrame], 0);
         RecordCommandBuffer(CommandBuffers[CurrentFrame], ImageIndex);
@@ -848,7 +906,17 @@ private:
 
         PresentInfo.pImageIndices = &ImageIndex;
 
-        vkQueuePresentKHR(PresentQueue, &PresentInfo);
+        Result = vkQueuePresentKHR(PresentQueue, &PresentInfo);
+
+        if (Result == VK_ERROR_OUT_OF_DATE_KHR || Result == VK_SUBOPTIMAL_KHR || FramebufferResized)
+        {
+            FramebufferResized = false;
+            RecreateSwapChain();
+        }
+        else if (Result != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to present swap chain image!");
+        }
 
         CurrentFrame = (CurrentFrame + 1) % VulkanConfig::MAX_FRAMES_IN_FLIGHT;
     }
