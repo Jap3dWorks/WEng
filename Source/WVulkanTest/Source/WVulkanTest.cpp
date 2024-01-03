@@ -800,39 +800,99 @@ private:
 
     void CreateVertexBuffer()
     {
+        VkDeviceSize BufferSize = sizeof(Vertices[0]) * Vertices.size();
+        
+        VkBuffer StagingBuffer;
+        VkDeviceMemory StagingBufferMemory;
+        CreateBuffer(
+            BufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            StagingBuffer,
+            StagingBufferMemory
+        );
+
+        void* Data;
+        vkMapMemory(Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
+            memcpy(Data, Vertices.data(), (size_t) BufferSize);
+        vkUnmapMemory(Device, StagingBufferMemory);
+
+        CopyBuffer(StagingBuffer, VertexBuffer, BufferSize);
+
+        vkDestroyBuffer(Device, StagingBuffer, nullptr);
+        vkFreeMemory(Device, StagingBufferMemory, nullptr);
+    }
+
+    void CreateBuffer(
+        VkDeviceSize InSize, 
+        VkBufferUsageFlags InUsage, 
+        VkMemoryPropertyFlags InProperties,
+        VkBuffer& InBuffer,
+        VkDeviceMemory& InBufferMemory
+    )
+    {
         VkBufferCreateInfo BufferInfo{};
         BufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        BufferInfo.size = sizeof(Vertices[0]) * Vertices.size();
-        BufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        BufferInfo.size = InSize;
+        BufferInfo.usage = InUsage;
         BufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(Device, &BufferInfo, nullptr, &VertexBuffer) != VK_SUCCESS)
+        if (vkCreateBuffer(Device, &BufferInfo, nullptr, &InBuffer) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create vertex buffer!");
         }
 
         VkMemoryRequirements MemRequirements;
-        vkGetBufferMemoryRequirements(Device, VertexBuffer, &MemRequirements);
+        vkGetBufferMemoryRequirements(Device, InBuffer, &MemRequirements);
 
         VkMemoryAllocateInfo AllocInfo{};
         AllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         AllocInfo.allocationSize = MemRequirements.size;
         AllocInfo.memoryTypeIndex = FindMemoryType(
             MemRequirements.memoryTypeBits, 
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+            InProperties
         );
-        
-        if (vkAllocateMemory(Device, &AllocInfo, nullptr, &VertexBufferMemory) != VK_SUCCESS)
+
+        if (vkAllocateMemory(Device, &AllocInfo, nullptr, &InBufferMemory) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to allocate vertex buffer memory!");
         }
 
-        vkBindBufferMemory(Device, VertexBuffer, VertexBufferMemory, 0);
+        vkBindBufferMemory(Device, InBuffer, InBufferMemory, 0);
+    }
 
-        void* Data;
-        vkMapMemory(Device, VertexBufferMemory, 0, BufferInfo.size, 0, &Data);
-            memcpy(Data, Vertices.data(), (size_t)BufferInfo.size);
-        vkUnmapMemory(Device, VertexBufferMemory);
+    void CopyBuffer(VkBuffer InSrcBuffer, VkBuffer DstBuffer, VkDeviceSize InSize)
+    {
+        VkCommandBufferAllocateInfo AllocInfo;
+        AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        AllocInfo.commandPool = CommandPool;
+        AllocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer CommandBuffer;
+        vkAllocateCommandBuffers(Device, &AllocInfo, &CommandBuffer);
+
+        VkCommandBufferBeginInfo BeginInfo{};
+        BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(CommandBuffer, &BeginInfo);
+
+            VkBufferCopy CopyRegion{};
+            CopyRegion.size = InSize;
+            vkCmdCopyBuffer(CommandBuffer, InSrcBuffer, DstBuffer, 1, &CopyRegion);
+        
+        vkEndCommandBuffer(CommandBuffer);
+
+        VkSubmitInfo SubmitInfo{};
+        SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        SubmitInfo.commandBufferCount = 1;
+        SubmitInfo.pCommandBuffers = &CommandBuffer;
+
+        vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(GraphicsQueue);
+
+        vkFreeCommandBuffers(Device, CommandPool, 1, &CommandBuffer);
     }
 
     uint32_t FindMemoryType(uint32_t InTypeFilter, VkMemoryPropertyFlags InProperties)
