@@ -50,9 +50,15 @@ struct Vertex{
 };
 
 const std::vector<Vertex> Vertices = {
-    {{0.0f, -0.5f}, {1.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 1.0f}},
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}},
+    {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+};
+
+// less than 65535 unique vertices
+const std::vector<uint16_t> Indices = {
+    0, 1, 2, 2, 3, 0
 };
 
 namespace VulkanUtils
@@ -168,6 +174,8 @@ private:
 
     VkBuffer VertexBuffer;
     VkDeviceMemory VertexBufferMemory;
+    VkBuffer IndexBuffer;
+    VkDeviceMemory IndexBufferMemory;
 
     std::vector<VkCommandBuffer> CommandBuffers;
 
@@ -233,6 +241,7 @@ private:
         CreateFramebuffers();
         CreateCommandPool();
         CreateVertexBuffer();
+        CreateIndexBuffer();
         CreateCommandBuffers();
         CreateSyncObjects();
     }
@@ -269,6 +278,9 @@ private:
         vkDestroyPipeline(Device, GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
         vkDestroyRenderPass(Device, RenderPass, nullptr);
+
+        vkDestroyBuffer(Device, IndexBuffer, nullptr);
+        vkFreeMemory(Device, IndexBufferMemory, nullptr);
 
         vkDestroyBuffer(Device, VertexBuffer, nullptr);
         vkFreeMemory(Device, VertexBufferMemory, nullptr);
@@ -817,10 +829,52 @@ private:
             memcpy(Data, Vertices.data(), (size_t) BufferSize);
         vkUnmapMemory(Device, StagingBufferMemory);
 
+        CreateBuffer(
+            BufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            VertexBuffer,
+            VertexBufferMemory
+        );
+
         CopyBuffer(StagingBuffer, VertexBuffer, BufferSize);
 
         vkDestroyBuffer(Device, StagingBuffer, nullptr);
         vkFreeMemory(Device, StagingBufferMemory, nullptr);
+    }
+
+    void CreateIndexBuffer()
+    {
+        VkDeviceSize BufferSize = sizeof(Indices[0]) * Indices.size();
+
+        VkBuffer StagingBuffer;
+        VkDeviceMemory StagingBufferMemory;
+        CreateBuffer(
+            BufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            StagingBuffer,
+            StagingBufferMemory
+        );
+
+        void* Data;
+
+        vkMapMemory(Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
+            memcpy(Data, Indices.data(), (size_t) BufferSize);
+        vkUnmapMemory(Device, StagingBufferMemory);
+
+        CreateBuffer(
+            BufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            IndexBuffer,
+            IndexBufferMemory
+        );
+
+        CopyBuffer(StagingBuffer, IndexBuffer, BufferSize);
+
+        vkDestroyBuffer(Device, StagingBuffer, nullptr);
+        vkFreeMemory(Device, StagingBufferMemory, nullptr);        
     }
 
     void CreateBuffer(
@@ -868,6 +922,7 @@ private:
         AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         AllocInfo.commandPool = CommandPool;
         AllocInfo.commandBufferCount = 1;
+        AllocInfo.pNext = nullptr;
 
         VkCommandBuffer CommandBuffer;
         vkAllocateCommandBuffers(Device, &AllocInfo, &CommandBuffer);
@@ -971,9 +1026,18 @@ private:
 
             VkBuffer VertexBufer[] = {VertexBuffer};
             VkDeviceSize offsets[] = {0};
+
             vkCmdBindVertexBuffers(InCommandBuffer, 0, 1, VertexBufer, offsets);
-            
-            vkCmdDraw(InCommandBuffer, static_cast<uint32_t>(Vertices.size()), 1, 0, 0);
+            vkCmdBindIndexBuffer(InCommandBuffer, IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+            vkCmdDrawIndexed(
+                InCommandBuffer, 
+                static_cast<uint32_t>(Indices.size()), 
+                1, 
+                0, 
+                0, 
+                0
+            );
 
         vkCmdEndRenderPass(InCommandBuffer);
 

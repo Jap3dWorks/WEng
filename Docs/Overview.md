@@ -23,8 +23,6 @@ Configs, acces rights and versions should be managed by the Server.
 Because it have already solutions for scene compositing and dependencies.
 
 ## To Investigate
-Gotod + Usd
-js binding
 
 ## References
 https://github.com/mortennobel/SimpleRenderEngine
@@ -47,3 +45,9 @@ https://goo.gle/wasm-debugging-extension
 
 ### Glew Docs
 https://glew.sourceforge.net/install.html
+
+### Vulkan Memory Library
+https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+
+### Vulkan Memory Allocation
+https://developer.nvidia.com/vulkan-memory-management
