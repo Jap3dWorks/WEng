@@ -61,6 +61,13 @@ const std::vector<uint16_t> Indices = {
     0, 1, 2, 2, 3, 0
 };
 
+struct SUniformBufferObject
+{
+    glm::mat4 Model;
+    glm::mat4 View;
+    glm::mat4 Proj;
+};
+
 namespace VulkanUtils
 {
     VkResult CreateDebugUtilsMessengerEXT(
@@ -167,6 +174,7 @@ private:
     std::vector<VkFramebuffer> SwapChainFramebuffers;
 
     VkRenderPass RenderPass;
+    VkDescriptorSetLayout DescriptorSetLayout;
     VkPipelineLayout PipelineLayout;
     VkPipeline GraphicsPipeline;
 
@@ -237,6 +245,7 @@ private:
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
+        CreateDescriptiorSetLayout();
         CreateGraphicsPipeline();
         CreateFramebuffers();
         CreateCommandPool();
@@ -617,6 +626,29 @@ private:
         }
 
     }
+
+    void CreateDescriptiorSetLayout()
+   {
+        VkDescriptorSetLayoutBinding UboLayoutBinding{};
+        UboLayoutBinding.binding = 0;
+        UboLayoutBinding.descriptorCount = 1;
+        UboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        UboLayoutBinding.pImmutableSamplers = nullptr;
+        UboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        VkDescriptorSetLayoutCreateInfo LayoutInfo{};
+        LayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        LayoutInfo.bindingCount = 1;
+        LayoutInfo.pBindings = &UboLayoutBinding;
+
+        if (vkCreateDescriptorSetLayout(
+            Device, &LayoutInfo, nullptr, &DescriptorSetLayout
+            ) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create descriptor set layout!");
+        }
+
+   } 
 
     void CreateGraphicsPipeline()
     {
