@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.26.2)
+# cmake_minimum_required (VERSION 3.20)
 
 add_executable(WVulkanTest Source/WVulkanTest.cpp)
 
@@ -17,8 +17,7 @@ target_include_directories(
     ${VULKAN_INCLUDE_DIRS}
 )
 target_link_libraries(
-    WVulkanTest 
-    glm 
+    WVulkanTest
     vulkan
     glfw
     dl pthread X11 Xxf86vm Xrandr Xi
@@ -28,7 +27,7 @@ install(TARGETS WVulkanTest DESTINATION bin)
 install(
     DIRECTORY 
     ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
-    ${CMAKE_CURRENT_SOURCE_DIR}/Assets 
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Assets 
     DESTINATION bin/WVulkanTest_Content
 )
 
