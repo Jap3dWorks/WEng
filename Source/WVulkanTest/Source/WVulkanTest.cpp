@@ -1,9 +1,14 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <chrono>
 #include <vector>
 #include <cstring>
 #include <cstdlib>
@@ -14,7 +19,6 @@
 #include <array>
 #include <set>
 
-#include <glm/glm.hpp>
 
 struct Vertex{
     glm::vec2 Position;
@@ -185,6 +189,10 @@ private:
     VkBuffer IndexBuffer;
     VkDeviceMemory IndexBufferMemory;
 
+    std::vector<VkBuffer> UniformBuffers;
+    std::vector<VkDeviceMemory> UniformBuffersMemory;
+    std::vector<void*> UniformBuffersMapped;
+
     std::vector<VkCommandBuffer> CommandBuffers;
 
     std::vector<VkSemaphore> ImageAvailableSemaphores;
@@ -245,12 +253,13 @@ private:
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
-        CreateDescriptiorSetLayout();
+        CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
         CreateFramebuffers();
         CreateCommandPool();
         CreateVertexBuffer();
         CreateIndexBuffer();
+        CreateUniformBuffers();
         CreateCommandBuffers();
         CreateSyncObjects();
     }
@@ -287,6 +296,18 @@ private:
         vkDestroyPipeline(Device, GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
         vkDestroyRenderPass(Device, RenderPass, nullptr);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            vkDestroyBuffer(Device, UniformBuffers[i], nullptr);
+            vkFreeMemory(Device, UniformBuffersMemory[i], nullptr);
+        }
+
+        vkDestroyDescriptorSetLayout(
+            Device,
+            DescriptorSetLayout,
+            nullptr
+        );
 
         vkDestroyBuffer(Device, IndexBuffer, nullptr);
         vkFreeMemory(Device, IndexBufferMemory, nullptr);
@@ -627,7 +648,7 @@ private:
 
     }
 
-    void CreateDescriptiorSetLayout()
+    void CreateDescriptorSetLayout()
    {
         VkDescriptorSetLayoutBinding UboLayoutBinding{};
         UboLayoutBinding.binding = 0;
@@ -909,6 +930,34 @@ private:
         vkFreeMemory(Device, StagingBufferMemory, nullptr);        
     }
 
+    void CreateUniformBuffers()
+    {
+        VkDeviceSize BufferSize = sizeof(SUniformBufferObject);
+        
+        UniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+        UniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+        UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            CreateBuffer(
+                BufferSize,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                UniformBuffers[i],
+                UniformBuffersMemory[i]
+            );
+            vkMapMemory(
+                Device, 
+                UniformBuffersMemory[i],
+                0,
+                BufferSize,
+                0, 
+                &UniformBuffersMapped[i]
+            );
+        }
+    }
+
     void CreateBuffer(
         VkDeviceSize InSize, 
         VkBufferUsageFlags InUsage, 
@@ -1105,6 +1154,38 @@ private:
         }
     }
 
+    void UpdateUniformBuffer(uint32_t CurrentImage)
+    {
+        static auto StartTime = std::chrono::high_resolution_clock::now();
+        
+        auto CurrentTime = std::chrono::high_resolution_clock::now();
+        float Time = std::chrono::duration<float, std::chrono::seconds::period>(
+            CurrentTime - StartTime
+        ).count();
+
+        SUniformBufferObject Ubo{};
+        Ubo.Model = glm::rotate(
+            glm::mat4(1.f), 
+            Time * glm::radians(90.f), 
+            glm::vec3(0.f, 0.f, 1.f)
+        );
+        Ubo.View = glm::lookAt(
+            glm::vec3(2.f, 2.f, 2.f), 
+            glm::vec3(0.f, 0.f, 0.f),
+            glm::vec3(0.f, 0.f, 1.f)
+        );
+        Ubo.Proj = glm::perspective(
+            glm::radians(45.f),
+            SwapChainExtent.width / (float) SwapChainExtent.height,
+            1.f,
+            10.f
+        );
+
+        Ubo.Proj[1][1] *= -1;  // Fix OpenGL Y inversion
+
+        memcpy(UniformBuffersMapped[CurrentImage], &Ubo, sizeof(Ubo));
+    }
+
     void DrawFrame()
     {
         vkWaitForFences(Device, 1, &InFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
@@ -1128,6 +1209,8 @@ private:
         {
             throw std::runtime_error("Failed to acquire swap chain image!");
         }
+
+        UpdateUniformBuffer(CurrentFrame);
 
         vkResetFences(Device, 1, &InFlightFences[CurrentFrame]);
 
