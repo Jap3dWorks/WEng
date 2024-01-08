@@ -193,6 +193,9 @@ private:
     std::vector<VkDeviceMemory> UniformBuffersMemory;
     std::vector<void*> UniformBuffersMapped;
 
+    VkDescriptorPool DescriptorPool;
+    std::vector<VkDescriptorSet> DescriptorSets;
+
     std::vector<VkCommandBuffer> CommandBuffers;
 
     std::vector<VkSemaphore> ImageAvailableSemaphores;
@@ -260,6 +263,8 @@ private:
         CreateVertexBuffer();
         CreateIndexBuffer();
         CreateUniformBuffers();
+        CreateDescriptorPool();
+        CreateDescriptorSets();
         CreateCommandBuffers();
         CreateSyncObjects();
     }
@@ -302,6 +307,8 @@ private:
             vkDestroyBuffer(Device, UniformBuffers[i], nullptr);
             vkFreeMemory(Device, UniformBuffersMemory[i], nullptr);
         }
+
+        vkDestroyDescriptorPool(Device, DescriptorPool, nullptr);
 
         vkDestroyDescriptorSetLayout(
             Device,
@@ -734,7 +741,7 @@ private:
         Rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         Rasterizer.lineWidth = 1.0f;
         Rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        Rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        Rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of y-flip in the projection matrix
         Rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo Multisampling{};
@@ -958,6 +965,83 @@ private:
         }
     }
 
+    void CreateDescriptorPool()
+    {
+        VkDescriptorPoolSize PoolSize{};
+        PoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        PoolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+        VkDescriptorPoolCreateInfo PoolInfo{};
+        PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        PoolInfo.poolSizeCount = 1;
+        PoolInfo.pPoolSizes = &PoolSize;
+        PoolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+        if(vkCreateDescriptorPool(
+                Device,
+                &PoolInfo,
+                nullptr,
+                &DescriptorPool
+            ) != VK_SUCCESS
+        )
+        {
+            throw std::runtime_error(
+                "Failed to create descriptor pool!"
+            );
+        }
+    }
+
+    void CreateDescriptorSets()
+    {
+        std::vector<VkDescriptorSetLayout> Layouts(
+            MAX_FRAMES_IN_FLIGHT, 
+            DescriptorSetLayout
+        );
+        VkDescriptorSetAllocateInfo AllocInfo{};
+        AllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        AllocInfo.descriptorPool = DescriptorPool;
+        AllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        AllocInfo.pSetLayouts = Layouts.data();
+
+        DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+        if (vkAllocateDescriptorSets(
+                Device,
+                &AllocInfo,
+                DescriptorSets.data()
+            ) != VK_SUCCESS
+        )
+        {
+            throw std::runtime_error(
+                "Failed to allocate descriptor sets!"
+            );
+        }
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            VkDescriptorBufferInfo BufferInfo{};
+            BufferInfo.buffer = UniformBuffers[i];
+            BufferInfo.offset = 0;
+            BufferInfo.range = sizeof(SUniformBufferObject);
+
+            VkWriteDescriptorSet DescriptorWrite{};
+            DescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            DescriptorWrite.dstSet = DescriptorSets[i];
+            DescriptorWrite.dstBinding = 0;
+            DescriptorWrite.dstArrayElement = 0;
+            DescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            DescriptorWrite.descriptorCount = 1;
+            DescriptorWrite.pBufferInfo = &BufferInfo;
+
+            vkUpdateDescriptorSets(
+                Device,
+                1,
+                &DescriptorWrite,
+                0,
+                nullptr
+            );
+        }
+    }
+
     void CreateBuffer(
         VkDeviceSize InSize, 
         VkBufferUsageFlags InUsage, 
@@ -1110,6 +1194,17 @@ private:
 
             vkCmdBindVertexBuffers(InCommandBuffer, 0, 1, VertexBufer, offsets);
             vkCmdBindIndexBuffer(InCommandBuffer, IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+            vkCmdBindDescriptorSets(
+                InCommandBuffer, 
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                PipelineLayout,
+                0,
+                1,
+                &DescriptorSets[CurrentFrame],
+                0,
+                nullptr
+            );
 
             vkCmdDrawIndexed(
                 InCommandBuffer, 
