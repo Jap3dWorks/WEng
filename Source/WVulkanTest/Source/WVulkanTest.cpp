@@ -788,8 +788,8 @@ private:
         VkPipelineLayoutCreateInfo PipelineLayoutInfo{};
         PipelineLayoutInfo.sType = 
             VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        PipelineLayoutInfo.setLayoutCount = 0;
-        PipelineLayoutInfo.pushConstantRangeCount = 0;
+        PipelineLayoutInfo.setLayoutCount = 1;
+        PipelineLayoutInfo.pSetLayouts = &DescriptorSetLayout;
 
         if (vkCreatePipelineLayout(Device, &PipelineLayoutInfo, nullptr, &PipelineLayout) != VK_SUCCESS)
         {
