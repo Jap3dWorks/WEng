@@ -162,8 +162,11 @@ public:
 
 private:
     GLFWwindow* Window=nullptr;
+
+    VkInstance Instance;
     VkDebugUtilsMessengerEXT DebugMessenger;
     VkSurfaceKHR Surface;
+    
     VkPhysicalDevice PhysicalDevice = VK_NULL_HANDLE;
     VkDevice Device;
 
@@ -210,8 +213,6 @@ private:
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
     uint32_t CurrentFrame = 0;
-
-    VkInstance Instance;
 
     const std::vector<const char*> ValidationLayers = {
         "VK_LAYER_KHRONOS_validation"
