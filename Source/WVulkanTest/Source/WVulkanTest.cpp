@@ -67,9 +67,9 @@ const std::vector<uint16_t> Indices = {
 
 struct SUniformBufferObject
 {
-    glm::mat4 Model;
-    glm::mat4 View;
-    glm::mat4 Proj;
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
 };
 
 namespace VulkanUtils
@@ -568,7 +568,7 @@ private:
         CreateInfo.presentMode = PresentMode;
         CreateInfo.clipped = VK_TRUE;
 
-        CreateInfo.oldSwapchain = VK_NULL_HANDLE;
+        // CreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
         if (vkCreateSwapchainKHR(Device, &CreateInfo, nullptr, &SwapChain) != VK_SUCCESS)
         {
@@ -604,7 +604,12 @@ private:
             CreateInfo.subresourceRange.baseArrayLayer = 0;
             CreateInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(Device, &CreateInfo, nullptr, &SwapChainImageViews[i]) != VK_SUCCESS)
+            if (vkCreateImageView(
+                    Device, 
+                    &CreateInfo, 
+                    nullptr, 
+                    &SwapChainImageViews[i]
+                ) != VK_SUCCESS)
             {
                 throw std::runtime_error("Failed to create image views!");
             }
@@ -671,12 +676,11 @@ private:
         LayoutInfo.pBindings = &UboLayoutBinding;
 
         if (vkCreateDescriptorSetLayout(
-            Device, &LayoutInfo, nullptr, &DescriptorSetLayout
+                Device, &LayoutInfo, nullptr, &DescriptorSetLayout
             ) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
-
    } 
 
     void CreateGraphicsPipeline()
@@ -1032,6 +1036,8 @@ private:
             DescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             DescriptorWrite.descriptorCount = 1;
             DescriptorWrite.pBufferInfo = &BufferInfo;
+            DescriptorWrite.pImageInfo = nullptr;
+            DescriptorWrite.pTexelBufferView = nullptr;
 
             vkUpdateDescriptorSets(
                 Device,
@@ -1168,7 +1174,7 @@ private:
         RenderPassInfo.renderArea.offset = {0, 0};
         RenderPassInfo.renderArea.extent = SwapChainExtent;
 
-        VkClearValue ClearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+        VkClearValue ClearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
         RenderPassInfo.clearValueCount = 1;
         RenderPassInfo.pClearValues = &ClearColor;
 
@@ -1190,10 +1196,10 @@ private:
             Scissor.extent = SwapChainExtent;
             vkCmdSetScissor(InCommandBuffer, 0, 1, &Scissor);
 
-            VkBuffer VertexBufer[] = {VertexBuffer};
+            VkBuffer VertexBufers[] = {VertexBuffer};
             VkDeviceSize offsets[] = {0};
 
-            vkCmdBindVertexBuffers(InCommandBuffer, 0, 1, VertexBufer, offsets);
+            vkCmdBindVertexBuffers(InCommandBuffer, 0, 1, VertexBufers, offsets);
             vkCmdBindIndexBuffer(InCommandBuffer, IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
             vkCmdBindDescriptorSets(
@@ -1260,24 +1266,24 @@ private:
         ).count();
 
         SUniformBufferObject Ubo{};
-        Ubo.Model = glm::rotate(
+        Ubo.model = glm::rotate(
             glm::mat4(1.f), 
             Time * glm::radians(90.f), 
             glm::vec3(0.f, 0.f, 1.f)
         );
-        Ubo.View = glm::lookAt(
+        Ubo.view = glm::lookAt(
             glm::vec3(2.f, 2.f, 2.f), 
             glm::vec3(0.f, 0.f, 0.f),
             glm::vec3(0.f, 0.f, 1.f)
         );
-        Ubo.Proj = glm::perspective(
+        Ubo.proj = glm::perspective(
             glm::radians(45.f),
             SwapChainExtent.width / (float) SwapChainExtent.height,
             1.f,
             10.f
         );
 
-        Ubo.Proj[1][1] *= -1;  // Fix OpenGL Y inversion
+        Ubo.proj[1][1] *= -1;  // Fix OpenGL Y inversion
 
         memcpy(UniformBuffersMapped[CurrentImage], &Ubo, sizeof(Ubo));
     }

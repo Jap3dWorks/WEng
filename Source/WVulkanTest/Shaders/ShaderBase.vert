@@ -1,6 +1,6 @@
 #version 450
 
-layout(binding = 0) uniform UniformBufferObject
+layout(binding = 0) uniform SUniformBufferObject
 {
     mat4 model;
     mat4 view;
