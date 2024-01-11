@@ -25,9 +25,9 @@ target_link_libraries(
 
 install(TARGETS WVulkanTest DESTINATION bin)
 install(
-    DIRECTORY 
+    DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Assets 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
     DESTINATION bin/WVulkanTest_Content
 )
 
