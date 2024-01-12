@@ -26,6 +26,7 @@
 struct Vertex{
     glm::vec2 Position;
     glm::vec3 Color;
+    glm::vec2 TexCoord;
 
     static VkVertexInputBindingDescription GetBindingDescription()
     {
@@ -38,9 +39,9 @@ struct Vertex{
         return BindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+    static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 2> AttributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 3> AttributeDescriptions{};
 
         AttributeDescriptions[0].binding = 0;
         AttributeDescriptions[0].location = 0;
@@ -51,16 +52,21 @@ struct Vertex{
         AttributeDescriptions[1].location = 1;
         AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
         AttributeDescriptions[1].offset = offsetof(Vertex, Color);
+
+        AttributeDescriptions[2].binding = 0;
+        AttributeDescriptions[2].location = 2;
+        AttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        AttributeDescriptions[2].offset = offsetof(Vertex, TexCoord);
     
         return AttributeDescriptions;
     }
 };
 
 const std::vector<Vertex> Vertices = {
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}},
-    {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.f, 0.f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}, {0.f, 0.f}},
+    {{0.5f, 0.5f}, {1.0f, 1.0f, 0.0f}, {0.f, 1.f}},
+    {{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}, {1.f, 1.f}}
 };
 
 // less than 65535 unique vertices
@@ -687,14 +693,26 @@ private:
         UboLayoutBinding.pImmutableSamplers = nullptr;
         UboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+        VkDescriptorSetLayoutBinding SamplerLayoutBinding{};
+        SamplerLayoutBinding.binding = 1;
+        SamplerLayoutBinding.descriptorCount = 1;
+        SamplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        SamplerLayoutBinding.pImmutableSamplers = nullptr;
+        SamplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        std::array<VkDescriptorSetLayoutBinding, 2> Binding = {
+            UboLayoutBinding, SamplerLayoutBinding
+        };
+
         VkDescriptorSetLayoutCreateInfo LayoutInfo{};
         LayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        LayoutInfo.bindingCount = 1;
-        LayoutInfo.pBindings = &UboLayoutBinding;
+        LayoutInfo.bindingCount = static_cast<uint32_t>(Binding.size());
+        LayoutInfo.pBindings = Binding.data();
 
         if (vkCreateDescriptorSetLayout(
                 Device, &LayoutInfo, nullptr, &DescriptorSetLayout
-            ) != VK_SUCCESS)
+            ) != VK_SUCCESS
+        )
         {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
@@ -1264,14 +1282,16 @@ private:
 
     void CreateDescriptorPool()
     {
-        VkDescriptorPoolSize PoolSize{};
-        PoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        PoolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        std::array<VkDescriptorPoolSize, 2> PoolSizes{};
+        PoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        PoolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        PoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        PoolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
         VkDescriptorPoolCreateInfo PoolInfo{};
         PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        PoolInfo.poolSizeCount = 1;
-        PoolInfo.pPoolSizes = &PoolSize;
+        PoolInfo.poolSizeCount = static_cast<uint32_t>(PoolSizes.size());
+        PoolInfo.pPoolSizes = PoolSizes.data();
         PoolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
         if(vkCreateDescriptorPool(
@@ -1320,21 +1340,33 @@ private:
             BufferInfo.offset = 0;
             BufferInfo.range = sizeof(SUniformBufferObject);
 
-            VkWriteDescriptorSet DescriptorWrite{};
-            DescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            DescriptorWrite.dstSet = DescriptorSets[i];
-            DescriptorWrite.dstBinding = 0;
-            DescriptorWrite.dstArrayElement = 0;
-            DescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            DescriptorWrite.descriptorCount = 1;
-            DescriptorWrite.pBufferInfo = &BufferInfo;
-            DescriptorWrite.pImageInfo = nullptr;
-            DescriptorWrite.pTexelBufferView = nullptr;
+            VkDescriptorImageInfo ImageInfo{};
+            ImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            ImageInfo.imageView = TextureImageView;
+            ImageInfo.sampler = TextureSampler;
+
+            std::array<VkWriteDescriptorSet, 2> DescriptorWrites{};
+
+            DescriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            DescriptorWrites[0].dstSet = DescriptorSets[i];
+            DescriptorWrites[0].dstBinding = 0;
+            DescriptorWrites[0].dstArrayElement = 0;
+            DescriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            DescriptorWrites[0].descriptorCount = 1;
+            DescriptorWrites[0].pBufferInfo = &BufferInfo;
+
+            DescriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            DescriptorWrites[1].dstSet = DescriptorSets[i];
+            DescriptorWrites[1].dstBinding = 1;
+            DescriptorWrites[1].dstArrayElement = 0;
+            DescriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            DescriptorWrites[1].descriptorCount = 1;
+            DescriptorWrites[1].pImageInfo = &ImageInfo;
 
             vkUpdateDescriptorSets(
                 Device,
-                1,
-                &DescriptorWrite,
+                static_cast<uint32_t>(DescriptorWrites.size()),
+                DescriptorWrites.data(),
                 0,
                 nullptr
             );
