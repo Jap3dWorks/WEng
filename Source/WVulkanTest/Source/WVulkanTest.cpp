@@ -9,6 +9,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+#include <tiny_obj_loader.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -165,6 +167,12 @@ namespace VulkanConfig
     
 }
 
+namespace AssetConfig
+{
+    const std::string MODEL_PATH = "WVulkanTest_Content/Assets/Models/viking_room.obj";
+    const std::string TEXTURE_PATH = "WVulkanTest_Content/Assets/Textures/viking_room.png";
+}
+
 class CHelloTriangleApplication
 {
 public:
@@ -311,6 +319,10 @@ private:
 
     void CleanupSwapChain()
     {
+        vkDestroyImageView(Device, DepthImageView, nullptr);
+        vkDestroyImage(Device, DepthImage, nullptr);
+        vkFreeMemory(Device, DepthImageMemory, nullptr);
+        
         for (auto Framebuffer : SwapChainFramebuffers)
         {
             vkDestroyFramebuffer(Device, Framebuffer, nullptr);
@@ -401,6 +413,7 @@ private:
 
         CreateSwapChain();
         CreateImageViews();
+        CreateDepthResources();
         CreateFramebuffers();
     }
 
@@ -1004,7 +1017,7 @@ private:
     {
         int TexWidth, TexHeight, TexChannels;
         stbi_uc* Pixels = stbi_load(
-            "WVulkanTest_Content/Assets/Textures/Texture.jpg", 
+            AssetConfig::TEXTURE_PATH.c_str(),
             &TexWidth, 
             &TexHeight, 
             &TexChannels, 

@@ -6,6 +6,7 @@ find_package(glm REQUIRED)
 find_package(STB REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(tinyobjloader REQUIRED)
 
 target_include_directories(
     WVulkanTest PUBLIC 
@@ -15,6 +16,7 @@ target_include_directories(
     ${GLM_INCLUDE_DIRS} 
     ${GLFW_INCLUDE_DIRS}
     ${VULKAN_INCLUDE_DIRS}
+    ${TINYOBJLOADER_INCLUDE_DIRS}
 )
 target_link_libraries(
     WVulkanTest
