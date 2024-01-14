@@ -665,7 +665,8 @@ private:
             SwapChainImageViews[i] = CreateImageView(
                 SwapChainImages[i], 
                 SwapChainImageFormat,
-                VK_IMAGE_ASPECT_COLOR_BIT
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1
             );
         }
     }
@@ -947,7 +948,7 @@ private:
         for (size_t i=0; i<SwapChainImageViews.size(); i++)
         {
             std::array<VkImageView, 3> Attachments = {
-                SwapChainImageViews[i],
+                ColorImageView,
                 DepthImageView,
                 SwapChainImageViews[i]
             };
@@ -1008,7 +1009,8 @@ private:
         ColorImageView = CreateImageView(
             ColorImage,
             ColorFormat,
-            VK_IMAGE_ASPECT_COLOR_BIT
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            1
         );
     }
 
@@ -1032,7 +1034,8 @@ private:
         DepthImageView = CreateImageView(
             DepthImage, 
             DepthFormat,
-            VK_IMAGE_ASPECT_DEPTH_BIT
+            VK_IMAGE_ASPECT_DEPTH_BIT,
+            1
         );
     }
 
@@ -1297,7 +1300,8 @@ private:
         TextureImageView = CreateImageView(
             TextureImage, 
             VK_FORMAT_R8G8B8A8_SRGB,
-            VK_IMAGE_ASPECT_COLOR_BIT
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            MipLevels
         );
     }
 
@@ -1333,7 +1337,8 @@ private:
     VkImageView CreateImageView(
         VkImage InImage, 
         VkFormat InFormat, 
-        VkImageAspectFlags InAspectFlags
+        VkImageAspectFlags InAspectFlags,
+        uint32_t InMipLevels
     )
     {
         VkImageViewCreateInfo ViewInfo{};
@@ -1343,7 +1348,7 @@ private:
         ViewInfo.format = InFormat;
         ViewInfo.subresourceRange.aspectMask = InAspectFlags;
         ViewInfo.subresourceRange.baseMipLevel = 0;
-        ViewInfo.subresourceRange.levelCount = 1;
+        ViewInfo.subresourceRange.levelCount = InMipLevels;
         ViewInfo.subresourceRange.baseArrayLayer = 0;
         ViewInfo.subresourceRange.layerCount = 1;
 
