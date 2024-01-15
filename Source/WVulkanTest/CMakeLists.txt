@@ -33,3 +33,28 @@ install(
     DESTINATION bin/WVulkanTest_Content
 )
 
+add_executable(WVulkanComputeTest Source/WVulkanComputeTest.cpp)
+
+target_include_directories(
+    WVulkanComputeTest PUBLIC 
+    Include 
+    Source 
+    ${STB_INCLUDE_DIRS} 
+    ${GLM_INCLUDE_DIRS} 
+    ${GLFW_INCLUDE_DIRS}
+    ${VULKAN_INCLUDE_DIRS}
+    ${TINYOBJLOADER_INCLUDE_DIRS}
+)
+target_link_libraries(
+    WVulkanComputeTest
+    vulkan
+    glfw
+    dl pthread X11 Xxf86vm Xrandr Xi
+)
+install(TARGETS WVulkanComputeTest DESTINATION bin)
+install(
+    DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+    DESTINATION bin/WVulkanComputeTest_Content
+)
