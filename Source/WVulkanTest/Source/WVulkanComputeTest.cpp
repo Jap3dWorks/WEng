@@ -236,6 +236,8 @@ private:
         CreateSurface();
         PickPhysicalDevice();
         CreateLogicalDevice();
+        CreateSwapChain();
+
 
     }
 
@@ -266,6 +268,125 @@ private:
         }
 
         vkDestroySwapchainKHR(Device, SwapChain, nullptr);
+    }
+
+    void CreateSwapChain()
+    {
+        SwapChainSupportDetails SwapChainSupport = QuerySwapChainSupport(PhysicalDevice);
+
+        VkSurfaceFormatKHR SurfaceFormat = ChooseSwapSurfaceFormat(SwapChainSupport.Formats);
+        VkPresentModeKHR PresentMode = ChooseSwapPresentMode(SwapChainSupport.PresentModes);
+        VkExtent2D Extent = ChooseSwapExtent(SwapChainSupport.Capabilities);
+
+        uint32_t ImageCount = SwapChainSupport.Capabilities.minImageCount + 1;
+        if (
+            SwapChainSupport.Capabilities.maxImageCount > 0 && 
+            ImageCount > SwapChainSupport.Capabilities.maxImageCount
+        )
+        {
+            ImageCount = SwapChainSupport.Capabilities.maxImageCount;
+        }
+
+        VkSwapchainCreateInfoKHR CreateInfo{};
+        CreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        CreateInfo.surface = Surface;
+
+        CreateInfo.minImageCount = ImageCount;
+        CreateInfo.imageFormat = SurfaceFormat.format;
+        CreateInfo.imageColorSpace = SurfaceFormat.colorSpace;
+        CreateInfo.imageExtent = Extent;
+        CreateInfo.imageArrayLayers = 1;
+        CreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+        QueueFamilyIndices Indices = FindQueueFamilies(PhysicalDevice);
+        uint32_t QueueFamilyIndices[] = {
+            Indices.GraphicsAndComputeFamily.value(),
+            Indices.PresentFamily.value()
+        };
+
+        if (Indices.GraphicsAndComputeFamily != Indices.PresentFamily)
+        {
+            CreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            CreateInfo.queueFamilyIndexCount = 2;
+            CreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
+        }
+        else
+        {
+            CreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        }
+
+        
+
+    }
+
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& AvailableFormats)
+    {
+        for (const auto& AvailableFormat : AvailableFormats)
+        {
+            if (
+                AvailableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
+                AvailableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+            )
+            {
+                return AvailableFormat;
+            }
+        }
+        return AvailableFormats[0];
+    }
+
+    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& AvailablePresentModes)
+    {
+        for (const auto& AvailablePresentMode : AvailablePresentModes)
+        {
+            if (AvailablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+            {
+                return AvailablePresentMode;
+            }
+        }
+        return VK_PRESENT_MODE_FIFO_KHR;
+    }
+
+    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& Capabilities)
+    {
+        if (Capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+        {
+            return Capabilities.currentExtent;
+        }
+        else
+        {
+            int Width, Height;
+            glfwGetFramebufferSize(Window, &Width, &Height);
+
+            VkExtent2D ActualExtent = {
+                static_cast<uint32_t>(Width),
+                static_cast<uint32_t>(Height)
+            };
+
+            ActualExtent.width = std::clamp(
+                ActualExtent.width,
+                Capabilities.minImageExtent.width,
+                Capabilities.maxImageExtent.width
+            );
+            ActualExtent.height = std::clamp(
+                ActualExtent.height,
+                Capabilities.minImageExtent.height,
+                Capabilities.maxImageExtent.height
+            );
+
+            return ActualExtent;
+        }
+    }
+
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& AvailableFormats)
+    {
+        for (const auto& AvailableFormat : AvailableFormats)
+        {
+            if (AvailableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && AvailableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                return AvailableFormat;
+            }
+        }
+        return AvailableFormats[0];
     }
 
     void Cleanup()
