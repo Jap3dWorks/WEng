@@ -897,6 +897,8 @@ private:
         {
             throw std::runtime_error("Failed to create shader module!");
         }
+        
+        return ShaderModule;
     }
 
     void CreateBuffer(
