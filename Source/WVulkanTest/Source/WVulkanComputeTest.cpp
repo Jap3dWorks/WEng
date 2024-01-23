@@ -747,7 +747,7 @@ private:
             // Create a shader storage buffer for each frame in flight
             CreateBuffer(
                 BufferSize,
-                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                 ShaderStorageBuffers[i],
                 ShaderStorageBuffersMemory[i]
@@ -897,7 +897,7 @@ private:
         {
             throw std::runtime_error("Failed to create shader module!");
         }
-        
+
         return ShaderModule;
     }
 
@@ -1049,13 +1049,13 @@ private:
             Scissor.extent = SwapChainExtent;
             vkCmdSetScissor(CommandBuffer, 0, 1, &Scissor);
 
-            VkDeviceSize Offset[] = {0};
+            VkDeviceSize Offsets[] = {0};
             vkCmdBindVertexBuffers(
                 CommandBuffer, 
                 0, 
                 1, 
                 &ShaderStorageBuffers[CurrentFrame], 
-                Offset
+                Offsets
             );
 
             vkCmdDraw(CommandBuffer, PARTICLE_COUNT, 1, 0, 0);
