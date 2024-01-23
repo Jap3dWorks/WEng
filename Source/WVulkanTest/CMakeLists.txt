@@ -33,6 +33,8 @@ install(
     DESTINATION bin/WVulkanTest_Content
 )
 
+# Vulkan Compute Test
+
 add_executable(WVulkanComputeTest Source/WVulkanComputeTest.cpp)
 
 target_include_directories(

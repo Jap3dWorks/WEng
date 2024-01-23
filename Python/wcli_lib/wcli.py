@@ -352,7 +352,7 @@ class VSCEnvCommand(CliCommand):
            
         # WSandBox ejecutable
         out_workspace_manager.add_launch(
-            "WSandBox X86_64 Debug",
+            name="WSandBox X86_64 Debug",
             program=project_manager.ProjectPaths.get_target_bin_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE, 
@@ -364,28 +364,13 @@ class VSCEnvCommand(CliCommand):
             ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
-            MIMode=None
-        )
-
-        out_workspace_manager.add_launch(
-            "WSandBox X86_64 Release",
-            program=project_manager.ProjectPaths.get_target_bin_path(
-                CliVars.ARCH_X86_64, 
-                CliVars.RELEASE_TYPE, 
-                "WSandBox"
-            ),
-            args=[],
-            cwd=project_manager.ProjectPaths.get_bin_folder(
-                CliVars.ARCH_X86_64, 
-                CliVars.RELEASE_TYPE
-            ),
-            pre_launch_task="Build X86_64 Release",
-            MIMode=None
+            MIMode="lldb",
+            miDebuggerPath="/usr/local/bin/lldb-mi"
         )
 
         # WOpenGlTest ejecutable
         out_workspace_manager.add_launch(
-            "WOpenGLTest X86_64 Debug",
+            name="WOpenGLTest X86_64 Debug",
             program=project_manager.ProjectPaths.get_target_bin_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE, 
@@ -397,28 +382,13 @@ class VSCEnvCommand(CliCommand):
             ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
-            MIMode=None
-        )
-
-        out_workspace_manager.add_launch(
-            "WOpenGLTest X86_64 Release",
-            program=project_manager.ProjectPaths.get_target_bin_path(
-                CliVars.ARCH_X86_64, 
-                CliVars.RELEASE_TYPE, 
-                "WOpenGLTest"
-            ),
-            cwd=project_manager.ProjectPaths.get_bin_folder(
-                CliVars.ARCH_X86_64, 
-                CliVars.RELEASE_TYPE
-            ),
-            args=[],
-            pre_launch_task="Build X86_64 Release",
-            MIMode=None
+            MIMode="lldb",
+            miDebuggerPath="/usr/local/bin/lldb-mi"
         )
 
         # WVulkanTest
         out_workspace_manager.add_launch(
-            "WVulkanTest X86_64 Debug",
+            name="WVulkanTest X86_64 Debug",
             program=project_manager.ProjectPaths.get_target_bin_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE, 
@@ -430,11 +400,12 @@ class VSCEnvCommand(CliCommand):
             ),
             args=[],
             pre_launch_task="Build X86_64 Debug",
-            MIMode=None
+            MIMode="lldb",
+            miDebuggerPath="/usr/local/bin/lldb-mi"
         )
 
         out_workspace_manager.add_launch(
-            "WVulkanTest X86_64 Release",
+            name="WVulkanTest X86_64 Release",
             program=project_manager.ProjectPaths.get_target_bin_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.RELEASE_TYPE, 
@@ -446,7 +417,8 @@ class VSCEnvCommand(CliCommand):
             ),
             args=[],
             pre_launch_task="Build X86_64 Release",
-            MIMode=None
+            MIMode="lldb",
+            miDebuggerPath="/usr/local/bin/lldb-mi"
         )
 
     def run(self) -> int:
