@@ -1,6 +1,13 @@
 add_library(WEngine SHARED Source/WEngine.cpp)
 
-target_include_directories(WEngine PUBLIC Include)
+target_include_directories(
+    WEngine 
+    PUBLIC 
+        Include
+    PRIVATE
+        Source
+        Intermediate
+)
 
 add_library(WEngine::WEngine ALIAS WEngine)
 

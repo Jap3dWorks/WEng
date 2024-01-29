@@ -8,18 +8,26 @@ target_include_directories(
         Include
         WCore::WCore
         WEngine::WEngine
-        WRender::WRender    
+        WRender::WRender
+    PRIVATE 
+        Intermediate
 )
 
 target_link_libraries(
     WSpacers 
     PUBLIC 
-    WCore::WCore
-    WEngine::WEngine
-    WRender::WRender
+        WCore::WCore
+        WEngine::WEngine
+        WRender::WRender
 )
 
 install(
     TARGETS WSpacers
     RUNTIME DESTINATION bin
+)
+install(
+    DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+    DESTINATION bin/WVulkanTest_Content
 )

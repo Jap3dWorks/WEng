@@ -4,20 +4,23 @@ add_executable(WVulkanTest Source/WVulkanTest.cpp)
 
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)
-find_package(GLFW REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(tinyobjloader REQUIRED)
 
 target_include_directories(
-    WVulkanTest PUBLIC 
-    Include 
-    Source 
-    ${STB_INCLUDE_DIRS} 
-    ${GLM_INCLUDE_DIRS} 
-    ${GLFW_INCLUDE_DIRS}
-    ${VULKAN_INCLUDE_DIRS}
-    ${TINYOBJLOADER_INCLUDE_DIRS}
+    WVulkanTest 
+    PUBLIC 
+        Include  
+        ${STB_INCLUDE_DIRS} 
+        ${GLM_INCLUDE_DIRS} 
+        ${GLFW_INCLUDE_DIRS}
+        ${VULKAN_INCLUDE_DIRS}
+        ${TINYOBJLOADER_INCLUDE_DIRS}
+    PRIVATE
+        Source
 )
+
 target_link_libraries(
     WVulkanTest
     vulkan
