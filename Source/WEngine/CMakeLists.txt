@@ -1,7 +1,13 @@
+add_library(WEngine SHARED Source/WEngine.cpp)
 
-project(WEng)
+target_include_directories(WEngine PUBLIC Include)
 
-include_directories(include)
+add_library(WEngine::WEngine ALIAS WEngine)
 
-add_executable(WEng Source/WEngine.cpp)
-
+install (
+    TARGETS WEngine 
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)

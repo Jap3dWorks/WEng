@@ -83,6 +83,14 @@ class ProjectPaths(object):
         )
 
     @staticmethod
+    def get_lib_folder(arch, build_type):
+        return os.path.join(
+            ProjectPaths.INSTALL_PATH,
+            ProjectPaths.get_build_folder_name(arch, build_type),
+            "lib"
+        )
+
+    @staticmethod
     def get_target_bin_path(arch, build_type, target):
         return os.path.join(
             ProjectPaths.get_bin_folder(arch, build_type),

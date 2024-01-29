@@ -181,7 +181,8 @@ class VSCWorkspaceManager(object):
             "preLaunchTask": pre_launch_task
         }
 
-        self.data["launch"]["configurations"].insert(0, launch)
+        # self.data["launch"]["configurations"].insert(0, launch)
+        self.data["launch"]["configurations"].append(launch)
 
     def save(self) -> None:
         if not os.path.exists(os.path.dirname(self.workspace_path)):

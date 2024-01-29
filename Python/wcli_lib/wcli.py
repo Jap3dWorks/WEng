@@ -349,42 +349,69 @@ class VSCEnvCommand(CliCommand):
 
     def set_engine_launch_jobs(self, out_workspace_manager):
         # TODO inspect modules CMakeLists.txt for add_executable() commands     
-           
-        # WSandBox ejecutable
+        
+        # WSpacers executable, default test project
         out_workspace_manager.add_launch(
-            name="WSandBox X86_64 Debug",
+            name="WSpacers X86_64 Debug",
             program=project_manager.ProjectPaths.get_target_bin_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE, 
-                "WSandBox"
+                "WSpacers"
             ),
             cwd=project_manager.ProjectPaths.get_bin_folder(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE
             ),
             args=[],
+            environment = [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": project_manager.ProjectPaths.get_lib_folder(
+                        CliVars.ARCH_X86_64, 
+                        CliVars.DEBUG_TYPE
+                    )
+                }
+            ],
             pre_launch_task="Build X86_64 Debug",
             MIMode="lldb",
             miDebuggerPath="/usr/local/bin/lldb-mi"
         )
 
-        # WOpenGlTest ejecutable
-        out_workspace_manager.add_launch(
-            name="WOpenGLTest X86_64 Debug",
-            program=project_manager.ProjectPaths.get_target_bin_path(
-                CliVars.ARCH_X86_64, 
-                CliVars.DEBUG_TYPE, 
-                "WOpenGLTest"
-            ),
-            cwd=project_manager.ProjectPaths.get_bin_folder(
-                CliVars.ARCH_X86_64, 
-                CliVars.DEBUG_TYPE
-            ),
-            args=[],
-            pre_launch_task="Build X86_64 Debug",
-            MIMode="lldb",
-            miDebuggerPath="/usr/local/bin/lldb-mi"
-        )
+        # # WSandBox executable
+        # out_workspace_manager.add_launch(
+        #     name="WSandBox X86_64 Debug",
+        #     program=project_manager.ProjectPaths.get_target_bin_path(
+        #         CliVars.ARCH_X86_64, 
+        #         CliVars.DEBUG_TYPE, 
+        #         "WSandBox"
+        #     ),
+        #     cwd=project_manager.ProjectPaths.get_bin_folder(
+        #         CliVars.ARCH_X86_64, 
+        #         CliVars.DEBUG_TYPE
+        #     ),
+        #     args=[],
+        #     pre_launch_task="Build X86_64 Debug",
+        #     MIMode="lldb",
+        #     miDebuggerPath="/usr/local/bin/lldb-mi"
+        # )
+
+        # # WOpenGlTest executable
+        # out_workspace_manager.add_launch(
+        #     name="WOpenGLTest X86_64 Debug",
+        #     program=project_manager.ProjectPaths.get_target_bin_path(
+        #         CliVars.ARCH_X86_64, 
+        #         CliVars.DEBUG_TYPE, 
+        #         "WOpenGLTest"
+        #     ),
+        #     cwd=project_manager.ProjectPaths.get_bin_folder(
+        #         CliVars.ARCH_X86_64, 
+        #         CliVars.DEBUG_TYPE
+        #     ),
+        #     args=[],
+        #     pre_launch_task="Build X86_64 Debug",
+        #     MIMode="lldb",
+        #     miDebuggerPath="/usr/local/bin/lldb-mi"
+        # )
 
         # WVulkanTest
         out_workspace_manager.add_launch(
