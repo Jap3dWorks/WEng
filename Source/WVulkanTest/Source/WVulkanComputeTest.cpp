@@ -745,7 +745,7 @@ private:
 
         VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
         InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;  // points will be rendered as individuak points
         InputAssembly.primitiveRestartEnable = VK_FALSE;
 
         VkPipelineViewportStateCreateInfo ViewportState{};
