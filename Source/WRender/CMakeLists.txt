@@ -1,4 +1,12 @@
-add_library(WRender SHARED Source/WRender.cpp)
+add_library(
+    WRender 
+    SHARED 
+        Source/WRender.cpp
+        Source/WRenderCommand.cpp
+        Source/WRenderPipeline.cpp
+        Source/WRenderPool.cpp
+        Source/WWindow.cpp
+        )
 
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)

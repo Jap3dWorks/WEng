@@ -783,7 +783,7 @@ private:
         {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
-   } 
+   }
 
     void CreateGraphicsPipeline()
     {

@@ -12,10 +12,9 @@ public:
 };
 
 
+
 class WRENDER_API WRender
 {
 public:
     WRender() {}
-
-
 };
