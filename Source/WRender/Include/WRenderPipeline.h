@@ -19,33 +19,37 @@ enum class WRENDER_API WPipelineType
     RayTracing      // Ray Tracing
 };
 
+struct WDescriptorSetLayoutInfo
+{
+    WId wid;
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+    VkDescriptorSetLayout descriptor_set_layout = nullptr;
+};
 
 struct WRENDER_API WRenderPipelineInfo
 {
-
     WId wid;
     WPipelineType type;
     std::vector<WShaderStage> shaders{};
+    WDescriptorSetLayoutInfo *descriptor_set_layout = nullptr;
+
     VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
-
-    VkPipeline pipeline=nullptr;
-    VkPipelineLayout pipeline_layout=nullptr;
-    
+    VkPipeline pipeline = nullptr;
+    VkPipelineLayout pipeline_layout = nullptr;
 };
-
 
 class WRENDER_API WRenderPipelines
 {
 private:
     WDevice& device_;
-
-    std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> pipelines_;
+    std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
+    std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> render_pipelines_;
 
 public:
     ~WRenderPipelines();
     
-    WRenderPipelineInfo* Create(WRenderPipelineInfo info);
-
+    WRenderPipelineInfo& CreateRenderPipeline(WRenderPipelineInfo info);
+    WDescriptorSetLayoutInfo& CreateDescriptorSetLayout(WDescriptorSetLayoutInfo info);
 
 private:
 
@@ -54,7 +58,9 @@ private:
 
 class WRENDER_API WVulkanPipeline
 {
-    static void Create(WRenderPipelineInfo& out_pipeline_info);
+public:
+    static void CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info);
+    static void CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
 
 };
 

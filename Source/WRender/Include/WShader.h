@@ -19,29 +19,15 @@ enum class WShaderType
 };
 
 
-class WShaderStage
+struct WShaderStage
 {
-public:
     WId id;
     std::vector<char> code;
     WShaderType type;
     std::string entry_point;
-
+    
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
-
-    ~WShaderStage()
-    {
-        // if (vk_shader_module)
-        // {
-        //     // destroy shader module
-        //     vkDestroyShaderModule(
-        //         device->vk_device,
-        //         vk_shader_module,
-        //         nullptr
-        //     );
-        // }
-    }
 
 };
 

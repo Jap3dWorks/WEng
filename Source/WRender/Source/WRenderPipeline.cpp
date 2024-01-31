@@ -12,24 +12,44 @@ WRenderPipelineInfo::~WRenderPipelineInfo()
 // WRenderPipelines
 // -------------------
 
-WRenderPipelineInfo* WRenderPipelines::Create(WRenderPipelineInfo info)
+WRenderPipelineInfo& WRenderPipelines::CreateRenderPipeline(WRenderPipelineInfo info)
 {
     if (info.pipeline != nullptr) {
         throw std::logic_error("info.pipeline must be nullptr");
     }
+    if (info.pipeline_layout != nullptr) {
+        throw std::logic_error("info.pipeline_layout must be nullptr");
+    }
+    if (info.descriptor_set_layout == nullptr) {
+        throw std::logic_error("info.descriptor_set_layout must be not nullptr");
+    }
 
     // Create Vulkan Pipeline into info object
-    // info->device = &Device_;
-    WVulkanPipeline::Create(device_, info);
+    WVulkanPipeline::CreateVkRenderPipeline(device_, info);
 
-    pipelines_[info.type].push_back(std::move(info));
+    render_pipelines_[info.type].push_back(std::move(info));
 
-    return &pipelines_[info.type].back();
+    return render_pipelines_[info.type].back();
 }
+
+WDescriptorSetLayoutInfo& WRenderPipelines::CreateDescriptorSetLayout(WDescriptorSetLayoutInfo info)
+{
+    if (info.descriptor_set_layout != nullptr) {
+        throw std::logic_error("info.descriptor_set_layout must be nullptr");
+    }
+
+    // Create Vulkan Descriptor Set Layout into info object
+    WVulkanPipeline::CreateVkDescriptorSetLayout(device_, info);
+
+    descriptor_set_layouts_.push_back(std::move(info));
+
+    return descriptor_set_layouts_.back();
+}
+
 
 WRenderPipelines::~WRenderPipelines()
 {
-    for (auto& pipeline_type : pipelines_)
+    for (auto& pipeline_type : render_pipelines_)
     {
         for (auto& pipeline : pipeline_type.second)
         {
@@ -54,12 +74,21 @@ WRenderPipelines::~WRenderPipelines()
             }
         }
     }
+    for(auto& descriptor_set_layout : descriptor_set_layouts_)
+    {
+        // destroy descriptor set layout
+        vkDestroyDescriptorSetLayout(
+            device_.vk_device,
+            descriptor_set_layout,
+            nullptr
+        );
+    }
 }
 
 // WVulkanPipeline 
 // ---------------
 
-void WVulkanPipeline::Create(WDevice Device, WRenderPipelineInfo& out_pipeline_info)
+void WVulkanPipeline::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
@@ -80,7 +109,9 @@ void WVulkanPipeline::Create(WDevice Device, WRenderPipelineInfo& out_pipeline_i
             vertex_shader_stage = &out_pipeline_info.shaders[i];
         }
 
-        ShaderStages[i].module = out_pipeline_info.shaders[i].vk_shader_module;
+        // TODO: Create Shader Module
+        
+        // ShaderStages[i].module = out_pipeline_info.shaders[i].vk_shader_module;
         ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();
     }
 
@@ -126,6 +157,109 @@ void WVulkanPipeline::Create(WDevice Device, WRenderPipelineInfo& out_pipeline_i
     VkPipelineMultisampleStateCreateInfo Multisampling{};
     Multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     Multisampling.sampleShadingEnable = VK_FALSE;
-    Multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    Multisampling.rasterizationSamples = out_pipeline_info.sample_count;
 
+    VkPipelineDepthStencilStateCreateInfo DepthStencil{};
+    DepthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    DepthStencil.depthTestEnable = VK_TRUE;
+    DepthStencil.depthWriteEnable = VK_TRUE;
+    DepthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    DepthStencil.depthBoundsTestEnable = VK_FALSE;
+    DepthStencil.stencilTestEnable = VK_FALSE;
+
+    VkPipelineColorBlendAttachmentState ColorBlendAttachment{};
+    ColorBlendAttachment.colorWriteMask = 
+        VK_COLOR_COMPONENT_R_BIT | 
+        VK_COLOR_COMPONENT_G_BIT | 
+        VK_COLOR_COMPONENT_B_BIT | 
+        VK_COLOR_COMPONENT_A_BIT;
+    ColorBlendAttachment.blendEnable = VK_FALSE;
+
+    VkPipelineColorBlendStateCreateInfo ColorBlending{};
+    ColorBlending.sType = 
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    ColorBlending.logicOpEnable = VK_FALSE;
+    ColorBlending.logicOp = VK_LOGIC_OP_COPY;
+    ColorBlending.attachmentCount = 1;
+    ColorBlending.pAttachments = &ColorBlendAttachment;
+    ColorBlending.blendConstants[0] = 0.f;
+    ColorBlending.blendConstants[1] = 0.f;
+    ColorBlending.blendConstants[2] = 0.f;
+    ColorBlending.blendConstants[3] = 0.f;
+
+    std::vector<VkDynamicState> DynamicStates = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+    VkPipelineDynamicStateCreateInfo DynamicState{};
+    DynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
+    DynamicState.pDynamicStates = DynamicStates.data();
+
+    VkPipelineLayoutCreateInfo PipelineLayoutInfo{};
+    PipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    PipelineLayoutInfo.setLayoutCount = 0;
+    PipelineLayoutInfo.pSetLayouts = &out_pipeline_info.descriptor_set_layout; // DescriptorSetLayout
+
+    if (vkCreatePipelineLayout(
+        device.vk_device,
+        &PipelineLayoutInfo,
+        nullptr,
+        &out_pipeline_info.pipeline_layout
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create pipeline layout!");
+    }
+
+    VkGraphicsPipelineCreateInfo PipelineInfo{};
+    PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    PipelineInfo.stageCount = static_cast<uint32_t>(ShaderStages.size());
+    PipelineInfo.pStages = ShaderStages.data();
+    PipelineInfo.pVertexInputState = &VertexInputInfo;
+    PipelineInfo.pInputAssemblyState = &InputAssembly;
+    PipelineInfo.pViewportState = &ViewportState;
+    PipelineInfo.pRasterizationState = &Rasterizer;
+    PipelineInfo.pMultisampleState = &Multisampling;
+    PipelineInfo.pDepthStencilState = &DepthStencil;
+    PipelineInfo.pColorBlendState = &ColorBlending;
+    PipelineInfo.pDynamicState = &DynamicState;
+    PipelineInfo.layout = out_pipeline_info.pipeline_layout;
+    PipelineInfo.renderPass = out_pipeline_info.render_pass;
+    PipelineInfo.subpass = 0;
+    PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+    if (vkCreateGraphicsPipelines(
+        device.vk_device,
+        VK_NULL_HANDLE,
+        1,
+        &PipelineInfo,
+        nullptr,
+        &out_pipeline_info.pipeline
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create graphics pipeline!");
+    }
+
+    // TODO: Destroy Shader Modules
+
+}
+
+void WVulkanPipeline::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
+{
+    VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
+    DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    DescriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(
+        out_descriptor_set_layout_info.bindings.size()
+    );
+    DescriptorSetLayoutInfo.pBindings = out_descriptor_set_layout_info.bindings.data();
+
+    if (vkCreateDescriptorSetLayout(
+        device.vk_device,
+        &DescriptorSetLayoutInfo,
+        nullptr,
+        &out_descriptor_set_layout_info.descriptor_set_layout
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create descriptor set layout!");
+    }
 }
