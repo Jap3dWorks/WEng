@@ -18,17 +18,31 @@ enum class WShaderType
     // TessellationEvaluation
 };
 
-struct WShaderStage
+
+class WShaderStage
 {
+public:
     WId id;
     std::vector<char> code;
     WShaderType type;
     std::string entry_point;
-    VkShaderModule vk_shader_module=nullptr;
 
-    VkVertexInputBindingDescription vk_vertex_input_binding_description{};
-    std::vector<VkVertexInputAttributeDescription> vk_vertex_input_attribute_descriptions{};
-    // inputs and descriptors
+    std::vector<VkVertexInputBindingDescription> binding_descriptors;
+    std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
+
+    ~WShaderStage()
+    {
+        // if (vk_shader_module)
+        // {
+        //     // destroy shader module
+        //     vkDestroyShaderModule(
+        //         device->vk_device,
+        //         vk_shader_module,
+        //         nullptr
+        //     );
+        // }
+    }
+
 };
 
 namespace WVulkan

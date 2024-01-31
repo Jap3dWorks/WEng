@@ -11,41 +11,41 @@
 #include <unordered_map>
 
 
-enum class WPipelineType
+enum class WRENDER_API WPipelineType
 {
-    Graphics,  // Default
-    Transparency,  // Alpha Blending
-    Compute,  // GPGPU
-    RayTracing  // Ray Tracing
+    Graphics,       // Default
+    Transparency,   // Alpha Blending
+    Compute,        // GPGPU
+    RayTracing      // Ray Tracing
 };
 
 
-struct WRenderPipelineInfo
+struct WRENDER_API WRenderPipelineInfo
 {
+
     WId wid;
     WPipelineType type;
-    VkPipeline pipeline=nullptr;
     std::vector<WShaderStage> shaders{};
+    VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
+
+    VkPipeline pipeline=nullptr;
+    VkPipelineLayout pipeline_layout=nullptr;
+    
 };
 
 
-class WRENDER_API WRenderPipeline
+class WRENDER_API WRenderPipelines
 {
 private:
-    WRenderPipelineInfo info_;
-    WRenderPipeline() {}
+    WDevice& device_;
 
-    static std::unordered_map<WPipelineType, std::vector<WRenderPipeline>> pipelines_;
+    std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> pipelines_;
 
 public:
+    ~WRenderPipelines();
+    
+    WRenderPipelineInfo* Create(WRenderPipelineInfo info);
 
-    static WRenderPipeline Create(WRenderPipelineInfo& out_info)
-    {
-        WRenderPipeline pipeline;
-        pipeline.info_ = out_info;
-
-        return pipeline;
-    }
 
 private:
 
@@ -54,26 +54,7 @@ private:
 
 class WRENDER_API WVulkanPipeline
 {
-    static void Create(const WDevice& device, WRenderPipelineInfo& out_pipeline_info)
-    {
-        // Create Shader Stages
-        std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
-            out_pipeline_info.shaders.size()
-        );
-
-        for (uint32_t i = 0; i < out_pipeline_info.shaders.size(); i++)
-        {
-            ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
-                out_pipeline_info.shaders[i].type
-            );
-
-            ShaderStages[i].module = out_pipeline_info.shaders[i].vk_shader_module;
-            ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();
-        }
-
-    }
-
+    static void Create(WRenderPipelineInfo& out_pipeline_info);
 
 };
 
