@@ -15,7 +15,7 @@ target_include_directories(
         ${GLM_INCLUDE_DIRS} 
         ${GLFW_INCLUDE_DIRS}
         ${VULKAN_INCLUDE_DIRS}
-        ${TINYOBJLOADER_INCLUDE_DIRS}
+        ${tinyobjloader_INCLUDE_DIRS}
     PRIVATE
         Source
 )
@@ -47,7 +47,7 @@ target_include_directories(
     ${GLM_INCLUDE_DIRS} 
     ${GLFW_INCLUDE_DIRS}
     ${VULKAN_INCLUDE_DIRS}
-    ${TINYOBJLOADER_INCLUDE_DIRS}
+    ${tinyobjloader_INCLUDE_DIRS}
 )
 target_link_libraries(
     WVulkanComputeTest

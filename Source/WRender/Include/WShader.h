@@ -7,7 +7,6 @@
 #include "vulkan/vulkan.h"
 #include <stdexcept>
 
-
 enum class WShaderType
 {
     Vertex,
@@ -18,7 +17,6 @@ enum class WShaderType
     // TessellationEvaluation
 };
 
-
 struct WShaderStage
 {
     WId id;
@@ -28,12 +26,11 @@ struct WShaderStage
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
-
 };
 
 namespace WVulkan
 {
-    void CreateShaderModule(const WDeviceInfo& device, const WShaderStage& out_shader_info)
+    VkShaderModule CreateShaderModule(const WDeviceInfo& device, WShaderStage& out_shader_info)
     {
         VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
         ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -53,7 +50,6 @@ namespace WVulkan
         {
             throw std::runtime_error("Failed to create shader module!");
         }
-
         return ShaderModule;
     }
 
