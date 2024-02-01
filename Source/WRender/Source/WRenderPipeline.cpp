@@ -64,7 +64,7 @@ WRenderPipelines::~WRenderPipelines()
 // WVulkan 
 // ---------------
 
-void WVulkan::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
+void WVulkan::CreateVkRenderPipeline(WDeviceInfo device, WRenderPipelineInfo& out_pipeline_info)
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
@@ -233,7 +233,7 @@ void WVulkan::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pi
     }
 }
 
-void WVulkan::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
+void WVulkan::CreateVkDescriptorSetLayout(WDeviceInfo device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
 {
     VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
     DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -253,7 +253,7 @@ void WVulkan::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutIn
     }
 }
 
-void WVulkan::DestroyVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
+void WVulkan::DestroyVkRenderPipeline(WDeviceInfo device, WRenderPipelineInfo& out_pipeline_info)
 {
     if (pipeline.pipeline_layout)
     {
@@ -276,7 +276,7 @@ void WVulkan::DestroyVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_p
     }
 }
 
-void WVulkan::DestroyDescriptorSetLayout(WDevice device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info)
+void WVulkan::DestroyDescriptorSetLayout(WDeviceInfo device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info)
 {
     // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(

@@ -12,33 +12,43 @@
 // WRender
 // -------
 
+WRender::WRender()
+{
+    instance_info_ = {};
+    instance_info_.wid = 0; // WId::GenerateId();
+
+    window_info_ = {};
+    window_info_.wid = 0; // WId::GenerateId();
+
+    surface_info_ = {};
+    surface_info_.wid = 0; // WId::GenerateId();
+
+    device_ = {};
+    device_.wid = 0; // WId::GenerateId();
+
+    render_pipelines_ = {};
+    render_pipelines_.wid = 0; // WId::GenerateId();
+
+    initialize();
+}
+
 void WRender::initialize()
 {
-    instance_info_.wid = 0; // WId::GenerateId();
     // Create Vulkan Instance
-    instance_info_.instance = WVulkan::CreateInstance(
+    WVulkan::CreateInstance(
+        instance_info_,
         _CREATE_VALIDATON_LAYERS
     );
 
-    // Create Window
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    instance_info_.window = glfwCreateWindow(800, 600, "WEngine", nullptr, nullptr);
+    WVulkan::CreateWindow(
+        window_info_
+    );
 
-    glfwSetWindowUserPointer(Window, this);
-    glfwSetFramebufferSizeCallback(Window, FramebufferResizeCallback);
-
-    // Create Vulkan Surface
-    if (glfwCreateWindowSurface(
-        instance_info_.instance, 
-        instance_info_.window, 
-        nullptr, 
-        &instance_info_.surface
-        ) != VK_SUCCESS
-    )
-    {
-        throw std::runtime_error("Failed to create window surface!");
-    }
+    surface_info_.surface = WVulkan::CreateSurface(
+        surface_info_,
+        instance_info_, 
+        window_info_
+    );
 
     // Create Vulkan Device
     device_.vk_device = WVulkan::CreateDevice(instance_info_.instance, surface);
@@ -50,13 +60,17 @@ WRender::~WRender()
     vkDestroyDevice(device_.vk_device, nullptr);
 
     // Destroy Vulkan Surface
-    // vkDestroySurfaceKHR(instance_info_.instance, surface, nullptr);
+    vkDestroySurfaceKHR(
+        instance_info_.instance, 
+        instance_info_.surface, 
+        nullptr
+    );
 
     // Destroy Vulkan Instance
     vkDestroyInstance(instance_info_.instance, nullptr);
 
     // Destroy Window
-    glfwDestroyWindow(instance_info_.window);
+    glfwDestroyWindow(window_info_.window);
 
     // Terminate GLFW
     glfwTerminate();
@@ -93,7 +107,7 @@ bool WVulkan::CheckValidationLayerSupport()
     return true;
 }
 
-VkInstance WVulkan::CreateInstance(bool enable_validation_layers)
+void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  enable_validation_layers)
 {
     if (enable_validation_layers && !CheckValidationLayerSupport())
     {
@@ -108,37 +122,62 @@ VkInstance WVulkan::CreateInstance(bool enable_validation_layers)
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.apiVersion = VK_API_VERSION_1_2;
 
-    VkInstanceCreateInfo instance_info{};
-    instance_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instance_info.pApplicationInfo = &app_info;
+    VkInstanceCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    create_info.pApplicationInfo = &app_info;
 
     auto extensions = GetRequiredExtensions(enable_validation_layers);
-    instance_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-    instance_info.ppEnabledExtensionNames = extensions.data();
+    create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    create_info.ppEnabledExtensionNames = extensions.data();
 
     VkDebugUtilsMessengerCreateInfoEXT debug_create_info;
     if (enable_validation_layers)
     {
-        instance_info.enabledLayerCount = static_cast<uint32_t>(validation_layers.size());
-        instance_info.ppEnabledLayerNames = validation_layers.data();
+        create_info.enabledLayerCount = static_cast<uint32_t>(validation_layers.size());
+        create_info.ppEnabledLayerNames = validation_layers.data();
 
         PopulateDebugMessengerCreateInfo(debug_create_info);
-        instance_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debug_create_info;
+        create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debug_create_info;
     }
     else
     {
-        instance_info.enabledLayerCount = 0;
-        instance_info.pNext = nullptr;
+        create_info.enabledLayerCount = 0;
+        create_info.pNext = nullptr;
     }
 
-    VkInstance instance;
-    if (vkCreateInstance(&instance_info, nullptr, &instance) != VK_SUCCESS)
+    if (vkCreateInstance(&create_info, nullptr, &out_instance_info.instance) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create instance!");
     }
-
-    return instance;
 }   
+
+VkSurfaceKHR WVulkan::CreateSurface(VkInstance instance, GLFWwindow* window)
+{
+    VkSurfaceKHR surface;
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create window surface!");
+    }
+    return surface;
+}
+
+void WVulkan::InitWindow(WWindowInfo &out_window_info)
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    out_window_info.window = glfwCreateWindow(
+        out_window_info.width, out_window_info.height, out_window_info.title.c_str(), nullptr, nullptr
+    );
+
+    glfwSetWindowUserPointer(out_window_info.window, this);
+    if (out_window_info.framebuffer_size_callback)
+    {
+        glfwSetFramebufferSizeCallback(
+            out_window_info.window, 
+            out_window_info.framebuffer_size_callback
+        );
+    }
+}
 
 std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
 {

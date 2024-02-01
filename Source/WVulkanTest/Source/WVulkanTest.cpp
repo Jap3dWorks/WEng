@@ -292,7 +292,9 @@ private:
 
     static void FramebufferResizeCallback(GLFWwindow* InWindow, int InWidth, int InHeight)
     {
-        auto App = reinterpret_cast<CHelloTriangleApplication*>(glfwGetWindowUserPointer(InWindow));
+        auto App = reinterpret_cast<CHelloTriangleApplication*>(
+            glfwGetWindowUserPointer(InWindow)
+        );
         App->FramebufferResized = true;
     }
 

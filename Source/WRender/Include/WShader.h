@@ -33,7 +33,7 @@ struct WShaderStage
 
 namespace WVulkan
 {
-    void CreateShaderModule(const WDevice& device, const WShaderStage& out_shader_info)
+    void CreateShaderModule(const WDeviceInfo& device, const WShaderStage& out_shader_info)
     {
         VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
         ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

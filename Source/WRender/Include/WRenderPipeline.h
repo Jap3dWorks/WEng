@@ -41,7 +41,7 @@ struct WRENDER_API WRenderPipelineInfo
 class WRENDER_API WRenderPipelines
 {
 private:
-    WDevice& device_;
+    WDeviceInfo& device_;
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
     std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> render_pipelines_;
 
@@ -60,13 +60,13 @@ private:
 namespace WVulkan
 {
 
-    void CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info);
+    void CreateVkRenderPipeline(WDeviceInfo device, WRenderPipelineInfo& out_pipeline_info);
 
-    void CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
+    void CreateVkDescriptorSetLayout(WDeviceInfo device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
     
-    void DestroyVkRenderPipeline(WDevice device, const WRenderPipelineInfo& pipeline_info);
+    void DestroyVkRenderPipeline(WDeviceInfo device, const WRenderPipelineInfo& pipeline_info);
     
-    void DestroyDescriptorSetLayout(WDevice device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
+    void DestroyDescriptorSetLayout(WDeviceInfo device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
 
 };
 
