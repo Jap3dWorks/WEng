@@ -49,6 +49,7 @@ public:
     ~WRenderPipelines();
     
     WRenderPipelineInfo& CreateRenderPipeline(WRenderPipelineInfo info);
+    
     WDescriptorSetLayoutInfo& CreateDescriptorSetLayout(WDescriptorSetLayoutInfo info);
 
 private:
@@ -56,11 +57,16 @@ private:
 };
 
 
-class WRENDER_API WVulkanPipeline
+namespace WVulkan
 {
-public:
-    static void CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info);
-    static void CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
+
+    void CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info);
+
+    void CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
+    
+    void DestroyVkRenderPipeline(WDevice device, const WRenderPipelineInfo& pipeline_info);
+    
+    void DestroyDescriptorSetLayout(WDevice device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
 
 };
 

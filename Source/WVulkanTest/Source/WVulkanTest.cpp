@@ -288,7 +288,6 @@ private:
 
         glfwSetWindowUserPointer(Window, this);
         glfwSetFramebufferSizeCallback(Window, FramebufferResizeCallback);
-
     }
 
     static void FramebufferResizeCallback(GLFWwindow* InWindow, int InWidth, int InHeight)

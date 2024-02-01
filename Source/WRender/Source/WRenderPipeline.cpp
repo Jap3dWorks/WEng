@@ -25,7 +25,7 @@ WRenderPipelineInfo& WRenderPipelines::CreateRenderPipeline(WRenderPipelineInfo 
     }
 
     // Create Vulkan Pipeline into info object
-    WVulkanPipeline::CreateVkRenderPipeline(device_, info);
+    WVulkan::CreateVkRenderPipeline(device_, info);
 
     render_pipelines_[info.type].push_back(std::move(info));
 
@@ -39,13 +39,12 @@ WDescriptorSetLayoutInfo& WRenderPipelines::CreateDescriptorSetLayout(WDescripto
     }
 
     // Create Vulkan Descriptor Set Layout into info object
-    WVulkanPipeline::CreateVkDescriptorSetLayout(device_, info);
+    WVulkan::CreateVkDescriptorSetLayout(device_, info);
 
     descriptor_set_layouts_.push_back(std::move(info));
 
     return descriptor_set_layouts_.back();
 }
-
 
 WRenderPipelines::~WRenderPipelines()
 {
@@ -53,45 +52,25 @@ WRenderPipelines::~WRenderPipelines()
     {
         for (auto& pipeline : pipeline_type.second)
         {
-            if (pipeline.pipeline_layout)
-            {
-                // destroy pipeline layout
-                vkDestroyPipelineLayout(
-                    device_.vk_device,
-                    pipeline.pipeline_layout,
-                    nullptr
-                );
-            }
-
-            if (pipeline.pipeline)
-            {   
-                // destroy pipeline
-                vkDestroyPipeline(
-                    device_.vk_device,
-                    pipeline.pipeline_layout,
-                    nullptr
-                );
-            }
+            WVulkan::DestroyVkRenderPipeline(device_, pipeline);
         }
     }
     for(auto& descriptor_set_layout : descriptor_set_layouts_)
     {
-        // destroy descriptor set layout
-        vkDestroyDescriptorSetLayout(
-            device_.vk_device,
-            descriptor_set_layout,
-            nullptr
-        );
+        WVulkan::DestroyDescriptorSetLayout(device_, descriptor_set_layout);
     }
 }
 
-// WVulkanPipeline 
+// WVulkan 
 // ---------------
 
-void WVulkanPipeline::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
+void WVulkan::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
+        out_pipeline_info.shaders.size()
+    );
+    std::vector<VkShaderModule> ShaderModules(
         out_pipeline_info.shaders.size()
     );
 
@@ -109,9 +88,12 @@ void WVulkanPipeline::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo
             vertex_shader_stage = &out_pipeline_info.shaders[i];
         }
 
-        // TODO: Create Shader Module
-        
-        // ShaderStages[i].module = out_pipeline_info.shaders[i].vk_shader_module;
+        ShaderModules[i] = WVulkan::CreateShaderModule(
+            device,
+            out_pipeline_info.shaders[i]
+        );
+
+        ShaderStages[i].module = ShaderModules[i];
         ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();
     }
 
@@ -240,11 +222,18 @@ void WVulkanPipeline::CreateVkRenderPipeline(WDevice device, WRenderPipelineInfo
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
 
-    // TODO: Destroy Shader Modules
-
+    // Destroy Shader Modules
+    for (auto& shader_module : ShaderModules)
+    {
+        vkDestroyShaderModule(
+            device.vk_device,
+            shader_module,
+            nullptr
+        );
+    }
 }
 
-void WVulkanPipeline::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
+void WVulkan::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
 {
     VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
     DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -263,3 +252,37 @@ void WVulkanPipeline::CreateVkDescriptorSetLayout(WDevice device, WDescriptorSet
         throw std::runtime_error("Failed to create descriptor set layout!");
     }
 }
+
+void WVulkan::DestroyVkRenderPipeline(WDevice device, WRenderPipelineInfo& out_pipeline_info)
+{
+    if (pipeline.pipeline_layout)
+    {
+        // destroy pipeline layout
+        vkDestroyPipelineLayout(
+            device_.vk_device,
+            pipeline.pipeline_layout,
+            nullptr
+        );
+    }
+
+    if (pipeline.pipeline)
+    {   
+        // destroy pipeline
+        vkDestroyPipeline(
+            device_.vk_device,
+            pipeline.pipeline_layout,
+            nullptr
+        );
+    }
+}
+
+void WVulkan::DestroyDescriptorSetLayout(WDevice device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info)
+{
+    // destroy descriptor set layout
+    vkDestroyDescriptorSetLayout(
+        device_.vk_device,
+        descriptor_set_layout.descriptor_set_layout,
+        nullptr
+    );
+}
+

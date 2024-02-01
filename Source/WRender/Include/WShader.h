@@ -33,7 +33,7 @@ struct WShaderStage
 
 namespace WVulkan
 {
-    void CreateShaderModule(const WDevice& device, WShaderStage& out_shader_info)
+    void CreateShaderModule(const WDevice& device, const WShaderStage& out_shader_info)
     {
         VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
         ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -42,15 +42,19 @@ namespace WVulkan
             out_shader_info.code.data()
         );
 
+        VkShaderModule ShaderModule;
+
         if (vkCreateShaderModule(
             device.vk_device, 
             &ShaderModuleCreateInfo, 
             nullptr, 
-            &out_shader_info.vk_shader_module
+            &ShaderModule
         ) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create shader module!");
         }
+
+        return ShaderModule;
     }
 
     VkShaderStageFlagBits ToShaderStageFlagBits(const WShaderType& type)
