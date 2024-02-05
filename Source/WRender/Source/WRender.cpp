@@ -202,6 +202,141 @@ void WVulkan::InitWindow(WWindowInfo &out_window_info)
     }
 }
 
+void WVulkan::CreateSwapChain(
+    WSwapChainInfo& out_swap_chain_info, 
+    const WDeviceInfo& device_info, 
+    const WSurfaceInfo &surface_info,
+    const WWindowInfo &window_info,
+    const WRenderPassInfo &render_pass_info,
+    const WRenderDebugInfo &debug_info
+)
+{
+    SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
+        device_info.vk_physical_device,
+        surface_info.surface
+    );
+
+    VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
+    VkPresentModeKHR present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes);
+    VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities, window_info.window);
+
+    uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
+    if(swap_chain_support.capabilities.maxImageCount > 0 && image_count > swap_chain_support.capabilities.maxImageCount)
+    {
+        image_count = swap_chain_support.capabilities.maxImageCount;
+    }
+
+    VkSwapchainCreateInfoKHR create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    create_info.surface = surface_info.surface;
+    
+    create_info.minImageCount = image_count;
+    create_info.imageFormat = surface_format.format;
+    create_info.imageColorSpace = surface_format.colorSpace;
+    create_info.imageExtent = extent;  // Swap chain image resolution
+    create_info.imageArrayLayers = 1;
+    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;  // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
+
+    QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+    uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
+
+    if (indices.graphics_family != indices.present_family)
+    {
+        create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        create_info.queueFamilyIndexCount = 2;
+        create_info.pQueueFamilyIndices = queue_family_indices;
+    }
+    else
+    {
+        create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    }
+
+    create_info.preTransform = swap_chain_support.capabilities.currentTransform;
+    create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    create_info.presentMode = present_mode;
+    create_info.clipped = VK_TRUE;
+
+    if (vkCreateSwapchainKHR(device_info.vk_device, &create_info, nullptr, &out_swap_chain_info.swap_chain) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create swap chain!");
+    }
+
+    // Retrieve Swap Chain Images
+    vkGetSwapchainImagesKHR(device_info.vk_device, out_swap_chain_info.swap_chain, &image_count, nullptr);
+    out_swap_chain_info.swap_chain_images.resize(image_count);
+    vkGetSwapchainImagesKHR(device_info.vk_device, out_swap_chain_info.swap_chain, &image_count, out_swap_chain_info.swap_chain_images.data());
+
+    // Save Swap Chain Image Format
+    out_swap_chain_info.swap_chain_image_format = surface_format.format;
+    out_swap_chain_info.swap_chain_extent = extent;
+}
+
+void WVulkan::CreateImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+{
+    swap_chain_info.swap_chain_image_views.resize(swap_chain_info.swap_chain_images.size());
+
+    for (size_t i = 0; i < swap_chain_info.swap_chain_images.size(); i++)
+    {
+        swap_chain_info.swap_chain_image_views[i] = CreateImageView(
+            device_info.vk_device,
+            swap_chain_info.swap_chain_images[i],
+            swap_chain_info.swap_chain_image_format,
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            1
+        );
+    }
+}
+
+void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo& device_info)
+{
+    VkAttachmentDescription color_attachment{};
+    color_attachment.format = swap_chain_info.swap_chain_image_format;
+    color_attachment.samples = device_info.msaa_samples;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentDescription depth_attachment{};
+    depth_attachment.format = FindDepthFormat(device_info.vk_physical_device);
+    depth_attachment.samples = device_info.msaa_samples;
+    depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentDescription color_attachment_resolve{};
+    color_attachment_resolve.format = swap_chain_info.swap_chain_image_format;
+    color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
+    color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference color_attachment_ref{};
+    color_attachment_ref.attachment = 0;
+    color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_attachment_ref{};
+    depth_attachment_ref.attachment = 1;
+    depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference color_attachment_resolve_ref{};
+    color_attachment_resolve_ref.attachment = 2;
+    color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    // subpass.colorAttachmentCount
+
+}
+
 std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
 {
     uint32_t glfw_extension_count = 0;
@@ -388,3 +523,108 @@ WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysical
 
     return details;
 }
+
+VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
+{
+    for(const auto& available_format : available_formats)
+    {
+        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB && available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        {
+            return available_format;
+        }
+    }
+    return available_formats[0];
+}
+
+VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes)
+{
+    for (const auto& available_present_mode : available_present_modes)
+    {
+        if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR)
+        {
+            return available_present_mode;
+        }
+    }
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow* window)
+{
+    if (capabilities.currentExtent.width != UINT32_MAX)
+    {
+        return capabilities.currentExtent;
+    }
+    else
+    {
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        VkExtent2D actual_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+
+        actual_extent.width = std::max(
+            capabilities.minImageExtent.width, 
+            std::min(capabilities.maxImageExtent.width, actual_extent.width)
+        );
+        actual_extent.height = std::max(
+            capabilities.minImageExtent.height, 
+            std::min(capabilities.maxImageExtent.height, actual_extent.height)
+        );
+
+        return actual_extent;
+    }
+}
+
+VkImageView  WVulkan::CreateImageView(const VkDevice& device, const VkImage& image, const VkFormat& format, const VkImageAspectFlags& aspect_flags, const uint32_t& mip_levels)
+{
+    VkImageViewCreateInfo view_info{};
+    view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    view_info.image = image;
+    view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    view_info.format = format;
+    view_info.subresourceRange.aspectMask = aspect_flags;
+    view_info.subresourceRange.baseMipLevel = 0;
+    view_info.subresourceRange.levelCount = mip_levels;
+    view_info.subresourceRange.baseArrayLayer = 0;
+    view_info.subresourceRange.layerCount = 1;
+
+    VkImageView image_view;
+    if (vkCreateImageView(device, &view_info, nullptr, &image_view) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create texture image view!");
+    }
+
+    return image_view;
+}
+
+VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice& device, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+{
+    for (VkFormat format : candidates)
+    {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(device, format, &props);
+
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+        {
+            return format;
+        }
+        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+        {
+            return format;
+        }
+    }
+    throw std::runtime_error("Failed to find supported format!");
+}
+
+VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice& device)
+{
+    return FindSupportedFormat(
+        device,
+        {
+            VK_FORMAT_D32_SFLOAT,
+            VK_FORMAT_D32_SFLOAT_S8_UINT,  // Stencil
+            VK_FORMAT_D24_UNORM_S8_UINT   // Stencil
+        },
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+}
+

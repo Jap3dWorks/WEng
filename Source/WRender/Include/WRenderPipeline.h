@@ -47,7 +47,6 @@ struct WRENDER_API WRenderPipelineInfo
     WId wid;
     WPipelineType type;
     std::vector<WShaderStage> shaders{};
-    // WDescriptorSetLayoutInfo *descriptor_set_layout = nullptr;
 
     VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
     VkPipeline pipeline = nullptr;

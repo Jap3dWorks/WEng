@@ -7,14 +7,7 @@
 #include "WRenderPipeline.h"
 #include <optional>
 
-
 class GLFWwindow;
-
-class WRENDER_API WRenderPipeline
-{
-public:
-    WRenderPipeline() {}
-};
 
 struct WInstanceInfo
 {
@@ -53,6 +46,22 @@ struct WRenderDebugInfo
     VkDebugUtilsMessengerEXT debug_messenger = nullptr;
 };
 
+struct WSwapChainInfo
+{
+    WId wid;
+    VkSwapchainKHR swap_chain = nullptr;
+    VkFormat swap_chain_image_format;
+    VkExtent2D swap_chain_extent;
+    std::vector<VkImage> swap_chain_images;
+    std::vector<VkImageView> swap_chain_image_views;
+};
+
+struct WRenderPassInfo
+{
+    WId wid;
+
+    VkRenderPass render_pass = nullptr;
+};
 
 class WRENDER_API WRender
 {
@@ -68,12 +77,12 @@ private:
     WDeviceInfo device_info_;
     WRenderPipelines render_pipelines_;
     WRenderDebugInfo debug_info_;
+    WRenderPassInfo render_pass_info_;
 
     std::string name_;
 
     void initialize();
 };
-
 
 namespace WVulkan
 {
@@ -94,14 +103,36 @@ namespace WVulkan
     void CreateSurface(WSurfaceInfo &surface_info, const WInstanceInfo &instance, const WWindowInfo &window);
 
     /**
-     * Creates a GLFW Window.
-    */
-    void InitWindow(WWindowInfo &info);
-
-    /**
      * Creates a Vulkan Device.
     */
     void CreateDevice(WDeviceInfo &Device, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info);
+
+    /**
+     * Creates a Vulkan Swap Chain.
+    */
+    void CreateSwapChain(
+        WSwapChainInfo &out_swap_chain, 
+        const WDeviceInfo &device_info, 
+        const WSurfaceInfo &surface_info, 
+        const WWindowInfo &window_info, 
+        const WRenderPassInfo &render_pass_info, 
+        const WRenderDebugInfo &debug_info
+    );
+
+    /**
+     * Creates Vulkan Image Views.
+    */
+    void CreateImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+
+    /**
+     * Creates a Vulkan Render Pass.
+    */
+    void CreateRenderPass(WRenderPassInfo& render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
+
+    /**
+     * Creates a GLFW Window.
+    */
+    void InitWindow(WWindowInfo &info);
 
     // ----------------- Helper Functions -----------------
 
@@ -123,6 +154,16 @@ namespace WVulkan
         std::vector<VkPresentModeKHR> present_modes;
     };
 
+    QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+
+    SwapChainSupportDetails QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats);
+
+    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes);
+
+    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow* window);
+
     /**
      * Return a list of required vulkan instance extensions.
     */
@@ -139,7 +180,10 @@ namespace WVulkan
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const std::vector<const char*>& device_extensions);
 
-    QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+    VkImageView CreateImageView(const VkDevice& device, const VkImage& image, const VkFormat& format, const VkImageAspectFlags& aspect_flags, const uint32_t& mip_levels);
 
-    SwapChainSupportDetails QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
+    VkFormat FindSupportedFormat(const VkPhysicalDevice& device, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+    VkFormat FindDepthFormat(const VkPhysicalDevice& device);
+
 }
