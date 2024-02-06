@@ -55,13 +55,22 @@ struct WSwapChainInfo
     std::vector<VkImage> swap_chain_images;
     std::vector<VkImageView> swap_chain_image_views;
     
+    VkImage color_image;
+    VkDeviceMemory color_image_memory;
+    VkImageView color_image_view;    
+
+    VkImage depth_image;
+    VkDeviceMemory depth_image_memory;
+    VkImageView depth_image_view;
+
+    std::vector<VkFramebuffer> swap_chain_framebuffers;
+
     VkSwapchainKHR swap_chain = nullptr;
 };
 
 struct WRenderPassInfo
 {
     WId wid;
-
     VkRenderPass render_pass = nullptr;
 };
 
@@ -91,7 +100,9 @@ private:
     WSwapChainInfo swap_chain_info_;
     WRenderPassInfo render_pass_info_;
 
-    std::string name_;
+    WCommandPoolInfo command_pool_info_;
+
+    // std::string name_;
 
     void initialize();
 };
@@ -141,7 +152,7 @@ namespace WVulkan
     /**
      * Creates a Vulkan Command Pool.
     */
-    void CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info);
+    void CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info, const WSurfaceInfo& surface_info);
 
     /**
      * Creates a GLFW Window.
@@ -217,10 +228,32 @@ namespace WVulkan
 
     bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const std::vector<const char*>& device_extensions);
 
-    VkImageView CreateImageView(const VkDevice& device, const VkImage& image, const VkFormat& format, const VkImageAspectFlags& aspect_flags, const uint32_t& mip_levels);
-
     VkFormat FindSupportedFormat(const VkPhysicalDevice& device, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkFormat FindDepthFormat(const VkPhysicalDevice& device);
+
+    uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
+
+    void CreateImage(
+        const VkDevice& device, 
+        const VkPhysicalDevice& physical_device,
+        const uint32_t& width, const uint32_t& height, 
+        const uint32_t& mip_levels, 
+        const VkSampleCountFlagBits& samples,
+        const VkFormat& format, 
+        const VkImageTiling& tiling, 
+        const VkImageUsageFlags& usage, 
+        const VkMemoryPropertyFlags& properties,
+        VkImage& out_image,
+        VkDeviceMemory& out_image_memory
+    );
+
+    VkImageView CreateImageView(
+        const VkDevice& device, 
+        const VkImage& image, 
+        const VkFormat& format, 
+        const VkImageAspectFlags& aspect_flags, 
+        const uint32_t& mip_levels
+    );
 
 }

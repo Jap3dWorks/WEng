@@ -273,6 +273,80 @@ void WVulkan::CreateSwapChain(
     // Save Swap Chain Image Format
     out_swap_chain_info.swap_chain_image_format = surface_format.format;
     out_swap_chain_info.swap_chain_extent = extent;
+
+    // Color Resources, renders are drawn to this image, later to be presented to the swap chain
+    CreateImage(
+        device_info.vk_device,
+        device_info.vk_physical_device,
+        out_swap_chain_info.swap_chain_extent.width,
+        out_swap_chain_info.swap_chain_extent.height,
+        1,
+        device_info.msaa_samples,
+        out_swap_chain_info.swap_chain_image_format,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        out_swap_chain_info.color_image,
+        out_swap_chain_info.color_image_memory
+    );
+
+    out_swap_chain_info.color_image_view = CreateImageView(
+        device_info.vk_device,
+        out_swap_chain_info.color_image,
+        out_swap_chain_info.swap_chain_image_format,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1
+    );
+
+    // Depth Resources
+    VkFormat depth_format = FindDepthFormat(device_info.vk_physical_device);
+    CreateImage(
+        device_info.vk_device,
+        device_info.vk_physical_device,
+        out_swap_chain_info.swap_chain_extent.width,
+        out_swap_chain_info.swap_chain_extent.height,
+        1,
+        device_info.msaa_samples,
+        depth_format,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        out_swap_chain_info.depth_image,
+        out_swap_chain_info.depth_image_memory
+    );
+
+    out_swap_chain_info.depth_image_view = CreateImageView(
+        device_info.vk_device,
+        out_swap_chain_info.depth_image,
+        depth_format,
+        VK_IMAGE_ASPECT_DEPTH_BIT,
+        1
+    );
+
+    //  Framebuffer is needed to render to the image
+    out_swap_chain_info.swap_chain_framebuffers.resize(out_swap_chain_info.swap_chain_images.size());
+    for(size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
+    {
+        std::array<VkImageView, 3> attachments = {
+            out_swap_chain_info.color_image_view,
+            out_swap_chain_info.depth_image_view,
+            out_swap_chain_info.swap_chain_image_views[i]
+        };
+
+        VkFramebufferCreateInfo framebuffer_info{};
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.renderPass = render_pass_info.render_pass;
+        framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebuffer_info.pAttachments = attachments.data();
+        framebuffer_info.width = out_swap_chain_info.swap_chain_extent.width;
+        framebuffer_info.height = out_swap_chain_info.swap_chain_extent.height;
+        framebuffer_info.layers = 1;
+
+        if (vkCreateFramebuffer(device_info.vk_device, &framebuffer_info, nullptr, &out_swap_chain_info.swap_chain_framebuffers[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create framebuffer!");
+        }
+    }
 }
 
 void WVulkan::CreateImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
@@ -368,6 +442,20 @@ void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwa
     }
 }
 
+void WVulkan::CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info, const WSurfaceInfo &surface_info)
+{
+    QueueFamilyIndices queue_family_indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+    VkCommandPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+
+    if (vkCreateCommandPool(device_info.vk_device, &pool_info, nullptr, &command_pool_info.command_pool) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create command pool!");
+    }
+}
+
 void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info)
 {
     // Pick Physical Device
@@ -451,6 +539,20 @@ void WVulkan::DestroyDevice(WDeviceInfo &device_info)
 
 void WVulkan::DestroySwapChain(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
+
+    vkDestroyImageView(device_info.vk_device, swap_chain_info.color_image_view, nullptr);
+    vkDestroyImage(device_info.vk_device, swap_chain_info.color_image, nullptr);
+    vkFreeMemory(device_info.vk_device, swap_chain_info.color_image_memory, nullptr);
+
+    vkDestroyImageView(device_info.vk_device, swap_chain_info.depth_image_view, nullptr);
+    vkDestroyImage(device_info.vk_device, swap_chain_info.depth_image, nullptr);
+    vkFreeMemory(device_info.vk_device, swap_chain_info.depth_image_memory, nullptr);
+
+    for(auto framebuffer : swap_chain_info.swap_chain_framebuffers)
+    {
+        vkDestroyFramebuffer(device_info.vk_device, framebuffer, nullptr);
+    }
+
     for (auto image_view : swap_chain_info.swap_chain_image_views)
     {
         vkDestroyImageView(device_info.vk_device, image_view, nullptr);
@@ -735,3 +837,72 @@ VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice& device)
     );
 }
 
+uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties mem_properties;
+    vkGetPhysicalDeviceMemoryProperties(device, &mem_properties);
+
+    for (uint32_t i = 0; i < mem_properties.memoryTypeCount; i++)
+    {
+        if ((type_filter & (1 << i)) && (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+    throw std::runtime_error("Failed to find suitable memory type!");
+}
+
+void WVulkan::CreateImage(
+    const VkDevice& device,
+    const VkPhysicalDevice& physical_device,
+    const uint32_t& width, const uint32_t& height, 
+    const uint32_t& mip_levels, 
+    const VkSampleCountFlagBits& samples,
+    const VkFormat& format, 
+    const VkImageTiling& tiling, 
+    const VkImageUsageFlags& usage, 
+    const VkMemoryPropertyFlags& properties,
+    VkImage& out_image,
+    VkDeviceMemory& out_image_memory
+)
+{
+    VkImageCreateInfo image_info{};
+    image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    image_info.imageType = VK_IMAGE_TYPE_2D;
+    image_info.extent.width = width;
+    image_info.extent.height = height;
+    image_info.extent.depth = 1;
+    image_info.mipLevels = mip_levels;
+    image_info.arrayLayers = 1;
+    image_info.format = format;
+    image_info.tiling = tiling;
+    image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    image_info.usage = usage;
+    image_info.samples = samples;
+    image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateImage(device, &image_info, nullptr, &out_image) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create image!");
+    }
+
+    VkMemoryRequirements mem_requirements;
+
+    vkGetImageMemoryRequirements(device, out_image, &mem_requirements);
+
+    VkMemoryAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    alloc_info.allocationSize = mem_requirements.size;
+    alloc_info.memoryTypeIndex = FindMemoryType(
+        physical_device, 
+        mem_requirements.memoryTypeBits, 
+        properties
+    );
+
+    if (vkAllocateMemory(device, &alloc_info, nullptr, &out_image_memory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate image memory!");
+    }
+
+    vkBindImageMemory(device, out_image, out_image_memory, 0);
+}
