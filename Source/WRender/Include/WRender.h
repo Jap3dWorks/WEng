@@ -49,11 +49,13 @@ struct WRenderDebugInfo
 struct WSwapChainInfo
 {
     WId wid;
-    VkSwapchainKHR swap_chain = nullptr;
     VkFormat swap_chain_image_format;
     VkExtent2D swap_chain_extent;
+    
     std::vector<VkImage> swap_chain_images;
     std::vector<VkImageView> swap_chain_image_views;
+    
+    VkSwapchainKHR swap_chain = nullptr;
 };
 
 struct WRenderPassInfo
@@ -63,12 +65,20 @@ struct WRenderPassInfo
     VkRenderPass render_pass = nullptr;
 };
 
+struct WCommandPoolInfo
+{
+    WId wid;
+    VkCommandPool command_pool = nullptr;
+};
+
 class WRENDER_API WRender
 {
 public:
     WId wid;
     WRender();
     ~WRender();
+
+    void DrawFrame();
 
 private:
     WInstanceInfo instance_info_;
@@ -77,6 +87,8 @@ private:
     WDeviceInfo device_info_;
     WRenderPipelines render_pipelines_;
     WRenderDebugInfo debug_info_;
+
+    WSwapChainInfo swap_chain_info_;
     WRenderPassInfo render_pass_info_;
 
     std::string name_;
@@ -86,11 +98,8 @@ private:
 
 namespace WVulkan
 {
-
-    /**
-     * Checks if the requested validation layers are available.
-    */
-    bool CheckValidationLayerSupport(const WRenderDebugInfo &debug_info);
+    // Create functions
+    // ----------------
 
     /**
      * Creates a Vulkan Instance.
@@ -130,11 +139,39 @@ namespace WVulkan
     void CreateRenderPass(WRenderPassInfo& render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
 
     /**
+     * Creates a Vulkan Command Pool.
+    */
+    void CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info);
+
+    /**
      * Creates a GLFW Window.
     */
-    void InitWindow(WWindowInfo &info);
+    void CreateWindow(WWindowInfo &info);
 
-    // ----------------- Helper Functions -----------------
+    // Destroy functions
+    // -----------------
+
+    void DestroyInstance(WInstanceInfo &instance_info);
+
+    void DestroySurface(WSurfaceInfo &surface_info, const WInstanceInfo &instance_info);
+
+    void DestroyDevice(WDeviceInfo &device_info);
+
+    void DestroySwapChain(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+
+    void DestroyImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+
+    void DestroyRenderPass(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info);
+
+    void DestroyWindow(WWindowInfo &window_info);
+
+    // Helper Functions
+    // ----------------
+
+    /**
+     * Checks if the requested validation layers are available.
+    */
+    bool CheckValidationLayerSupport(const WRenderDebugInfo &debug_info);
 
     struct QueueFamilyIndices
     {

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <set>
 #include <string>
+#include <array>
 
 #ifdef NDEBUG
     #define _ENABLE_VALIDATON_LAYERS false
@@ -44,7 +45,7 @@ void WRender::initialize()
         debug_info_
     );
 
-    WVulkan::InitWindow(
+    WVulkan::CreateWindow(
         window_info_
     );
 
@@ -61,61 +62,64 @@ void WRender::initialize()
         surface_info_,
         debug_info_
     );
+
+    // Create Vulkan Swap Chain
+    WVulkan::CreateSwapChain(
+        swap_chain_info_,
+        device_info_,
+        surface_info_,
+        window_info_,
+        render_pass_info_,
+        debug_info_
+    );
+
+    // Create Vulkan Image Views
+    WVulkan::CreateImageViews(
+        swap_chain_info_,
+        device_info_
+    );
+
+    // Create Vulkan Render Pass
+    WVulkan::CreateRenderPass(
+        render_pass_info_,
+        swap_chain_info_,
+        device_info_
+    );
 }
 
 WRender::~WRender()
 {
+    // Destroy Vulkan Render Pass
+    WVulkan::DestroyRenderPass(render_pass_info_, device_info_);
+
+    // Destroy Vulkan Image Views
+    WVulkan::DestroyImageViews(swap_chain_info_, device_info_);
+
+    // Destroy Vulkan Swap Chain
+    WVulkan::DestroySwapChain(swap_chain_info_, device_info_);
+    
     // Destroy Vulkan Device
-    vkDestroyDevice(device_info_.vk_device, nullptr);
+    WVulkan::DestroyDevice(device_info_);
 
     // Destroy Vulkan Surface
-    vkDestroySurfaceKHR(
-        instance_info_.instance, 
-        surface_info_.surface, 
-        nullptr
-    );
+    WVulkan::DestroySurface(surface_info_, instance_info_);
 
     // Destroy Vulkan Instance
-    vkDestroyInstance(instance_info_.instance, nullptr);
+    WVulkan::DestroyInstance(instance_info_);
 
     // Destroy Window
-    glfwDestroyWindow(window_info_.window);
+    WVulkan::DestroyWindow(window_info_);
+}
 
-    // Terminate GLFW
-    glfwTerminate();
+void WRender::DrawFrame()
+{
+    
 }
 
 // WVulkan
 // -------
 
-bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
-{
-    uint32_t layer_count;
-    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-    std::vector<VkLayerProperties> available_layers(layer_count);
-    vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
-
-    for (const char* layer_name : debug_info.validation_layers)
-    {
-        bool layer_found = false;
-
-        for (const auto& layer_properties : available_layers)
-        {
-            if (std::strcmp(layer_name, layer_properties.layerName) == 0)
-            {
-                layer_found = true;
-                break;
-            }
-        }
-
-        if (!layer_found)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
+// Create functions
 
 void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDebugInfo &debug_info)
 {
@@ -184,7 +188,7 @@ void WVulkan::CreateSurface(WSurfaceInfo &surface, const WInstanceInfo &instance
     }
 }
 
-void WVulkan::InitWindow(WWindowInfo &out_window_info)
+void WVulkan::CreateWindow(WWindowInfo &out_window_info)
 {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -333,35 +337,35 @@ void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwa
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    // subpass.colorAttachmentCount
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_ref;
+    subpass.pDepthStencilAttachment = &depth_attachment_ref;
+    subpass.pResolveAttachments = &color_attachment_resolve_ref;
 
-}
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
-{
-    uint32_t glfw_extension_count = 0;
-    const char** glfw_extensions;
-    glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+    std::array<VkAttachmentDescription, 3> Attachments = {
+        color_attachment, depth_attachment, color_attachment_resolve
+    };
+    VkRenderPassCreateInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount = static_cast<uint32_t>(Attachments.size());
+    render_pass_info.pAttachments = Attachments.data();
+    render_pass_info.subpassCount = 1;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &dependency;
 
-    std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
-
-    if (enable_validation_layers)
+    if(vkCreateRenderPass(device_info.vk_device, &render_pass_info, nullptr, &out_render_pass_info.render_pass) != VK_SUCCESS)
     {
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        throw std::runtime_error("Failed to create render pass!");
     }
-
-    return extensions;
-}
-
-VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT InMessageType,
-    const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
-    void* InUserData
-)
-{
-    std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
-    return VK_FALSE;
 }
 
 void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info)
@@ -426,6 +430,109 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
         create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
         create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
     }
+}
+
+// Destroy functions
+
+void WVulkan::DestroyInstance(WInstanceInfo &instance_info)
+{
+    vkDestroyInstance(instance_info.instance, nullptr);
+}
+
+void WVulkan::DestroySurface(WSurfaceInfo &surface_info, const WInstanceInfo &instance_info)
+{
+    vkDestroySurfaceKHR(instance_info.instance, surface_info.surface, nullptr);
+}
+
+void WVulkan::DestroyDevice(WDeviceInfo &device_info)
+{
+    vkDestroyDevice(device_info.vk_device, nullptr);
+}
+
+void WVulkan::DestroySwapChain(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+{
+    for (auto image_view : swap_chain_info.swap_chain_image_views)
+    {
+        vkDestroyImageView(device_info.vk_device, image_view, nullptr);
+    }
+    vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
+}
+
+void WVulkan::DestroyImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+{
+    for (auto image_view : swap_chain_info.swap_chain_image_views)
+    {
+        vkDestroyImageView(device_info.vk_device, image_view, nullptr);
+    }
+}
+
+void WVulkan::DestroyRenderPass(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info)
+{
+    vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
+}
+
+void WVulkan::DestroyWindow(WWindowInfo &window_info)
+{
+    glfwDestroyWindow(window_info.window);
+    glfwTerminate();
+}
+
+// Helper functions
+
+bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
+{
+    uint32_t layer_count;
+    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+    std::vector<VkLayerProperties> available_layers(layer_count);
+    vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
+
+    for (const char* layer_name : debug_info.validation_layers)
+    {
+        bool layer_found = false;
+
+        for (const auto& layer_properties : available_layers)
+        {
+            if (std::strcmp(layer_name, layer_properties.layerName) == 0)
+            {
+                layer_found = true;
+                break;
+            }
+        }
+
+        if (!layer_found)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
+{
+    uint32_t glfw_extension_count = 0;
+    const char** glfw_extensions;
+    glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
+    std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
+
+    if (enable_validation_layers)
+    {
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    }
+
+    return extensions;
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT InMessageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
+    void* InUserData
+)
+{
+    std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
+    return VK_FALSE;
 }
 
 bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, const std::vector<const char*>& device_extensions)
