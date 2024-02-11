@@ -6,7 +6,9 @@ add_library(
         Source/WRenderPipeline.cpp
         Source/WRenderPool.cpp
         Source/WWindow.cpp
-        )
+        Source/WShader.cpp
+        Source/WVulkan.cpp
+    )
 
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)

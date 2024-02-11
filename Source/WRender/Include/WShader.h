@@ -6,6 +6,7 @@
 #include <vector>
 #include "vulkan/vulkan.h"
 #include <stdexcept>
+#include <cassert>
 
 enum class WShaderType
 {
@@ -17,7 +18,18 @@ enum class WShaderType
     // TessellationEvaluation
 };
 
-struct WShaderStage
+struct WTextureInfo
+{
+    WId id;
+    std::string path;
+    VkImage image;
+    VkDeviceMemory image_memory;
+    VkImageView image_view;
+    VkSampler sampler;
+    uint32_t mip_levels;
+};
+
+struct WShaderStageInfo
 {
     WId id;
     std::vector<char> code;
@@ -26,45 +38,54 @@ struct WShaderStage
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
+
 };
 
-namespace WVulkan
+class WShaderModule
 {
-    VkShaderModule CreateShaderModule(const WDeviceInfo& device, WShaderStage& out_shader_info)
+public:
+    WShaderModule() = delete;
+    WShaderModule(const WShaderModule&) = delete;
+    WShaderModule& operator=(const WShaderModule&) = delete;
+
+    WShaderModule(WShaderModule&& other)
     {
-        VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
-        ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        ShaderModuleCreateInfo.codeSize = out_shader_info.code.size();
-        ShaderModuleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(
-            out_shader_info.code.data()
+        assert(this != &other);
+        
+        shader_module = other.shader_module;
+        device = other.device;
+
+        other.shader_module = VK_NULL_HANDLE;
+    };
+    
+    WShaderModule& operator=(WShaderModule&& other)
+    {
+        assert(this != &other);
+        
+        shader_module = other.shader_module;
+        device = other.device;
+
+        other.shader_module = nullptr;
+    };
+
+    ~WShaderModule()
+    {
+        vkDestroyShaderModule(
+            device, 
+            shader_module,
+            nullptr
         );
-
-        VkShaderModule ShaderModule;
-
-        if (vkCreateShaderModule(
-            device.vk_device, 
-            &ShaderModuleCreateInfo, 
-            nullptr, 
-            &ShaderModule
-        ) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create shader module!");
-        }
-        return ShaderModule;
     }
 
-    VkShaderStageFlagBits ToShaderStageFlagBits(const WShaderType& type)
+    WShaderModule(const WShaderStageInfo&, const WDeviceInfo&);
+
+    const VkShaderModule GetShaderModule() const
     {
-        switch (type)
-        {
-        case WShaderType::Vertex:
-            return VK_SHADER_STAGE_VERTEX_BIT;
-        case WShaderType::Fragment:
-            return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case WShaderType::Compute:
-            return VK_SHADER_STAGE_COMPUTE_BIT;
-        default:
-            throw std::runtime_error("Invalid shader type!");
-        }
+        return shader_module;
     }
-}
+
+private:
+    VkShaderModule shader_module{VK_NULL_HANDLE};
+    VkDevice device{VK_NULL_HANDLE};
+
+};

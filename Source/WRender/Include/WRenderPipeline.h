@@ -46,7 +46,7 @@ struct WRENDER_API WRenderPipelineInfo
 {
     WId wid;
     WPipelineType type;
-    std::vector<WShaderStage> shaders{};
+    std::vector<WShaderStageInfo> shaders{};
 
     VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
     VkPipeline pipeline = nullptr;
@@ -68,19 +68,3 @@ private:
     std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> render_pipelines_;
 
 };
-
-
-namespace WVulkan
-{
-
-    void CreateVkRenderPipeline(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info, WRenderPipelineInfo& out_pipeline_info);
-
-    void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
-    
-    void DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info);
-    
-    void DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
-
-};
-
-
