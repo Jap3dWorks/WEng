@@ -12,5 +12,8 @@ struct WDeviceInfo{
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
+    VkQueue vk_graphics_queue = nullptr;
+    VkQueue vk_present_queue = nullptr;
+
     VkDevice vk_device = nullptr;
 };

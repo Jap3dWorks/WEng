@@ -77,7 +77,7 @@ struct WRenderPassInfo
 struct WCommandPoolInfo
 {
     WId wid;
-    VkCommandPool command_pool = nullptr;
+    VkCommandPool vk_command_pool = nullptr;
 };
 
 class WRENDER_API WRender

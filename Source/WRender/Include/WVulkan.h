@@ -4,11 +4,12 @@
 #include "WRender.h"
 #include "WShader.h"
 #include "WRenderPipeline.h"
+// #include ""
 
 
 namespace WVulkan
 {
-       // Create functions
+    // Create functions
     // ----------------
 
     /**
@@ -58,15 +59,18 @@ namespace WVulkan
     */
     void CreateWindow(WWindowInfo &info);
 
-
     WShaderModule CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
 
-    void CreateTextureInfo(WTextureInfo& out_texture_info, const WDeviceInfo& device_info);
+    void CreateTexture(
+        WTextureInfo& out_texture_info, 
+        const WDeviceInfo& device_info,
+        const WCommandPoolInfo& command_pool_info
+    );
 
     void CreateVkRenderPipeline(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info, WRenderPipelineInfo& out_pipeline_info);
 
     void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
-   
+
 
     // Destroy functions
     // -----------------
@@ -148,7 +152,7 @@ namespace WVulkan
 
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
 
-    void CreateImage(
+    void CreateVkImage(
         const VkDevice& device, 
         const VkPhysicalDevice& physical_device,
         const uint32_t& width, const uint32_t& height, 
@@ -162,7 +166,7 @@ namespace WVulkan
         VkDeviceMemory& out_image_memory
     );
 
-    VkImageView CreateImageView(
+    VkImageView CreateVkImageView(
         const VkDevice& device, 
         const VkImage& image, 
         const VkFormat& format, 
@@ -170,9 +174,42 @@ namespace WVulkan
         const uint32_t& mip_levels
     );
 
+    void CreateVkBuffer(
+        const VkDevice& device,
+        const VkPhysicalDevice& physical_device,
+        VkDeviceSize size, 
+        VkBufferUsageFlags usage, 
+        VkMemoryPropertyFlags properties, 
+        VkBuffer& out_buffer, 
+        VkDeviceMemory& out_buffer_memory
+    );
+
+    void TransitionImageLayout(
+        const VkDevice& device, 
+        const VkCommandPool& command_pool, 
+        const VkQueue& graphics_queue, 
+        const VkImage& image, 
+        const VkFormat& format, 
+        const VkImageLayout& old_layout, 
+        const VkImageLayout& new_layout, 
+        const uint32_t& mip_levels
+    );
+
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */
     VkShaderStageFlagBits ToShaderStageFlagBits(const WShaderType& type);
+
+    VkCommandBuffer BeginSingleTimeCommands(
+        const VkDevice& device, 
+        const VkCommandPool& command_pool
+    );
+
+    void EndSingleTimeCommands(
+        const VkDevice& device, 
+        const VkCommandPool& command_pool, 
+        const VkQueue& graphics_queue, 
+        const VkCommandBuffer& command_buffer
+    );
 
 }
