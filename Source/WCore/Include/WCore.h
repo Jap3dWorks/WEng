@@ -6,3 +6,8 @@
 
 typedef uint32_t WId;
 
+
+class WObject
+{
+
+};
