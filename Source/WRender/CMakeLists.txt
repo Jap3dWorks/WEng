@@ -2,9 +2,7 @@ add_library(
     WRender 
     SHARED 
         Source/WRender.cpp
-        Source/WRenderCommand.cpp
         Source/WRenderPipeline.cpp
-        Source/WRenderPool.cpp
         Source/WWindow.cpp
         Source/WShader.cpp
         Source/WVulkan.cpp

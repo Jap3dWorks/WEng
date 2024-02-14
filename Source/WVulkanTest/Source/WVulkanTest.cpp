@@ -320,9 +320,10 @@ private:
         CreateTextureSampler();
 
         LoadModel();
-        
+
         CreateVertexBuffer();
         CreateIndexBuffer();
+        
         CreateUniformBuffers();
         CreateDescriptorPool();
         CreateDescriptorSets();

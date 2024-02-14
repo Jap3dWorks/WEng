@@ -8,38 +8,6 @@
 #include <stdexcept>
 #include <cassert>
 
-enum class WShaderType
-{
-    Vertex,
-    Fragment,
-    // Geometry,
-    Compute,
-    // TessellationControl,
-    // TessellationEvaluation
-};
-
-struct WTextureInfo
-{
-    WId id;
-    std::string path;
-    VkImage image;
-    VkDeviceMemory image_memory;
-    VkImageView image_view;
-    VkSampler sampler;
-    uint32_t mip_levels;
-};
-
-struct WShaderStageInfo
-{
-    WId id;
-    std::vector<char> code;
-    WShaderType type;
-    std::string entry_point;
-    
-    std::vector<VkVertexInputBindingDescription> binding_descriptors;
-    std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
-
-};
 
 class WShaderModuleManager
 {
