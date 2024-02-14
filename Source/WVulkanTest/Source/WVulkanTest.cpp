@@ -314,10 +314,13 @@ private:
         CreateColorResources();
         CreateDepthResources();
         CreateFramebuffers();
+        
         CreateTextureImage();
         CreateTextureImageView();
         CreateTextureSampler();
+
         LoadModel();
+        
         CreateVertexBuffer();
         CreateIndexBuffer();
         CreateUniformBuffers();

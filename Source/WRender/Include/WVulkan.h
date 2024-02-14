@@ -59,15 +59,20 @@ namespace WVulkan
     */
     void CreateWindow(WWindowInfo &info);
 
-    WShaderModule CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
+    WShaderModuleManager CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
 
-    void CreateTexture(
+    void CreateVkTexture(
         WTextureInfo& out_texture_info, 
         const WDeviceInfo& device_info,
         const WCommandPoolInfo& command_pool_info
     );
 
-    void CreateVkRenderPipeline(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info, WRenderPipelineInfo& out_pipeline_info);
+    void CreateVkRenderPipeline(
+        const WDeviceInfo &device, 
+        const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
+        const WRenderPassInfo& render_pass_info, 
+        WRenderPipelineInfo& out_pipeline_info
+    );
 
     void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
 
@@ -171,6 +176,12 @@ namespace WVulkan
         const VkImage& image, 
         const VkFormat& format, 
         const VkImageAspectFlags& aspect_flags, 
+        const uint32_t& mip_levels
+    );
+
+    VkSampler CreateVkTextureSampler(
+        const VkDevice& device, 
+        const VkPhysicalDevice& physical_device,
         const uint32_t& mip_levels
     );
 

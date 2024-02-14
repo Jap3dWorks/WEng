@@ -41,14 +41,14 @@ struct WShaderStageInfo
 
 };
 
-class WShaderModule
+class WShaderModuleManager
 {
 public:
-    WShaderModule() = delete;
-    WShaderModule(const WShaderModule&) = delete;
-    WShaderModule& operator=(const WShaderModule&) = delete;
+    WShaderModuleManager() = delete;
+    WShaderModuleManager(const WShaderModuleManager&) = delete;
+    WShaderModuleManager& operator=(const WShaderModuleManager&) = delete;
 
-    WShaderModule(WShaderModule&& other)
+    WShaderModuleManager(WShaderModuleManager&& other)
     {
         assert(this != &other);
         
@@ -58,7 +58,7 @@ public:
         other.shader_module = VK_NULL_HANDLE;
     };
     
-    WShaderModule& operator=(WShaderModule&& other)
+    WShaderModuleManager& operator=(WShaderModuleManager&& other)
     {
         assert(this != &other);
         
@@ -68,7 +68,7 @@ public:
         other.shader_module = nullptr;
     };
 
-    ~WShaderModule()
+    ~WShaderModuleManager()
     {
         vkDestroyShaderModule(
             device, 
@@ -77,7 +77,7 @@ public:
         );
     }
 
-    WShaderModule(const WShaderStageInfo&, const WDeviceInfo&);
+    WShaderModuleManager(const WShaderStageInfo&, const WDeviceInfo&);
 
     const VkShaderModule GetShaderModule() const
     {

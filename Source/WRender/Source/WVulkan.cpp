@@ -412,7 +412,6 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
         create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
         create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
     }
-    // TODO Here:
     else
     {
         create_info.enabledLayerCount = 0;
@@ -427,12 +426,12 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
 
 }
 
-WShaderModule WVulkan::CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info)
+WShaderModuleManager WVulkan::CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info)
 {
-    return WShaderModule(out_shader_info, device);
+    return WShaderModuleManager(out_shader_info, device);
 }
 
-void WVulkan::CreateTexture(
+void WVulkan::CreateVkTexture(
     WTextureInfo& out_texture_info, 
     const WDeviceInfo& device_info,
     const WCommandPoolInfo& command_pool_info
@@ -505,12 +504,30 @@ void WVulkan::CreateTexture(
         out_texture_info.mip_levels
     );
 
+    // Image view
+    out_texture_info.image_view = CreateVkImageView(
+        device_info.vk_device,
+        out_texture_info.image,
+        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        out_texture_info.mip_levels
+    );
+
+    // TODO Sampler
+    out_texture_info.sampler = CreateVkTextureSampler(
+        device_info.vk_device,
+        device_info.vk_physical_device,
+        out_texture_info.mip_levels
+    );
+
 }
 
 void WVulkan::CreateVkRenderPipeline(
     const WDeviceInfo &device,
     const WDescriptorSetLayoutInfo& descriptor_set_layout_info, 
-    WRenderPipelineInfo& out_pipeline_info)
+    const WRenderPassInfo& render_pass_info,
+    WRenderPipelineInfo& out_pipeline_info
+)
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
@@ -531,7 +548,7 @@ void WVulkan::CreateVkRenderPipeline(
             vertex_shader_stage = &out_pipeline_info.shaders[i];
         }
 
-        WShaderModule shader_module(out_pipeline_info.shaders[i], device);
+        WShaderModuleManager shader_module(out_pipeline_info.shaders[i], device);
 
         ShaderStages[i].module = shader_module.GetShaderModule();
         ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();
@@ -646,8 +663,8 @@ void WVulkan::CreateVkRenderPipeline(
     PipelineInfo.pColorBlendState = &ColorBlending;
     PipelineInfo.pDynamicState = &DynamicState;
     PipelineInfo.layout = out_pipeline_info.pipeline_layout;
-    // PipelineInfo.renderPass = out_pipeline_info.render_pass;  TODO rener_pass
-    PipelineInfo.subpass = 0;
+    PipelineInfo.renderPass = render_pass_info.render_pass;
+    PipelineInfo.subpass = out_pipeline_info.subpass;
     PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(
@@ -1276,4 +1293,40 @@ void WVulkan::EndSingleTimeCommands(
      vkQueueWaitIdle(graphics_queue);
 
      vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+}
+
+VkSampler WVulkan::CreateVkTextureSampler(
+    const VkDevice& device,
+    const VkPhysicalDevice& physical_device,
+    const uint32_t& mip_levels
+)
+{
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(physical_device, &properties);
+
+    VkSamplerCreateInfo sampler_info{};
+    sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sampler_info.magFilter = VK_FILTER_LINEAR;
+    sampler_info.minFilter = VK_FILTER_LINEAR;
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.anisotropyEnable = VK_TRUE;
+    sampler_info.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_info.unnormalizedCoordinates = VK_FALSE;
+    sampler_info.compareEnable = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler_info.minLod = 0;
+    sampler_info.maxLod = static_cast<float>(mip_levels);
+    sampler_info.mipLodBias = 0;
+    
+    VkSampler texture_sampler;
+    if (vkCreateSampler(device, &sampler_info, nullptr, &texture_sampler) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create texture sampler!");
+    }
+
+    return texture_sampler;
 }

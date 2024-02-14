@@ -94,7 +94,7 @@ private:
     WWindowInfo window_info_;
     WSurfaceInfo surface_info_;
     WDeviceInfo device_info_;
-    WRenderPipelines render_pipelines_;
+    WRenderPipelinesManager render_pipelines_;
     WRenderDebugInfo debug_info_;
 
     WSwapChainInfo swap_chain_info_;

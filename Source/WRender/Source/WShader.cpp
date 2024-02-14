@@ -3,7 +3,7 @@
 #include "stb/stb_image.h"
 
 
-WShaderModule::WShaderModule(const WShaderStageInfo& shader_stage_info, const WDeviceInfo& device_info) :
+WShaderModuleManager::WShaderModuleManager(const WShaderStageInfo& shader_stage_info, const WDeviceInfo& device_info) :
     device(device_info.vk_device)
 {
     VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
