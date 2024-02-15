@@ -1,9 +1,9 @@
 add_library(
     WRender 
     SHARED 
+        Compile/Compile.cpp
         Source/WRender.cpp
         Source/WRenderPipeline.cpp
-        Source/WWindow.cpp
         Source/WShader.cpp
         Source/WVulkan.cpp
     )
@@ -24,6 +24,7 @@ target_include_directories(
         ${GLM_INCLUDE_DIRS} 
         ${GLFW_INCLUDE_DIRS}
         ${VULKAN_INCLUDE_DIRS}
+        Source
 )
 
 target_link_libraries(

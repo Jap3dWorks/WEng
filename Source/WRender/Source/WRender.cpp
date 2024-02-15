@@ -20,7 +20,7 @@
 // WRender
 // -------
 
-WRender::WRender() : render_pipelines_(device_info_)
+WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
 {
     instance_info_ = {};
     instance_info_.wid = 0; // WId::GenerateId();

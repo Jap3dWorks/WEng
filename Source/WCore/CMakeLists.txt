@@ -1,10 +1,18 @@
 
-add_library(WCore SHARED Source/WCore.cpp)
+add_library(
+    WCore 
+    SHARED 
+        Compile/Compile.cpp
+        Source/WCore.cpp
+)
 
 target_include_directories(
     WCore 
     PUBLIC 
         Include
+    PRIVATE
+        Source
+        Intermediate
 )
 
 add_library(WCore::WCore ALIAS WCore)

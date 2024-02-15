@@ -2284,8 +2284,7 @@ private:
     {
         VulkanUtils::QueueFamilyIndices Indices;
 
-        uint32_t QueueFam    QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
-ilyCount = 0;
+        uint32_t QueueFamilyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(
             InDevice, &QueueFamilyCount, nullptr
         );

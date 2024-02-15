@@ -1,32 +1,49 @@
 
-add_library({{ module_name }} SHARED Source/{{ module_name }}.cpp)
+add_library(
+    {{ module_name }} 
+    SHARED 
+        Compile/Compile.cpp
+        # .cpp files here
+)
 
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(glm REQUIRED)
-find_package(STB REQUIRED)
+target_include_directories(
+    {{ module_name }} 
+    PUBLIC 
+        Include
+        # Private Includes Here, use format WLibrary::WLibrary
+    PRIVATE
+        Intermediate
+        Source 
+        WCore::WCore
+        # Private Includes Here, use format WLibrary::WLibrary
+)
 
-target_include_directories({{ module_name }} PUBLIC Include Source ${STB_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 target_link_libraries(
     {{ module_name }} 
-    OpenGL::GL 
-    OpenGL::GLU 
-    GLUT::GLUT 
-    GLEW::GLEW 
-    SDL2::SDL2main 
-    SDL2::SDL2
-    glm 
+    PRIVATE
+        WCore::WCore
+        # link libraries here, use format WLibrary::WLibrary
 )
 
-install(TARGETS {{ module_name }} DESTINATION bin)
+# Create library ALIAS
+add_library({{ module_name }}::{{ module_name }} ALIAS {{ module_name }})
+
+# setup install directories
 install(
-    DIRECTORY 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Shaders 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-    DESTINATION 
-    bin/{{ module_name }}_Content
+    TARGETS {{ module_name }} 
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
 )
-install(DIRECTORY  DESTINATION bin/{{ module_name }}_Content)
+
+# install(TARGETS {{ module_name }} DESTINATION bin)
+# install(
+#     DIRECTORY 
+#     ${CMAKE_CURRENT_SOURCE_DIR}/Shaders 
+#     ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+#     DESTINATION 
+#     bin/{{ module_name }}_Content
+# )
+# install(DIRECTORY  DESTINATION bin/{{ module_name }}_Content)
 

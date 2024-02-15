@@ -1,6 +1,4 @@
 #include "WShader.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
 
 
 WShaderModuleManager::WShaderModuleManager(const WShaderStageInfo& shader_stage_info, const WDeviceInfo& device_info) :

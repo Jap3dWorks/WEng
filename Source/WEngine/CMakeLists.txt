@@ -1,4 +1,9 @@
-add_library(WEngine SHARED Source/WEngine.cpp)
+add_library(
+    WEngine 
+    SHARED
+        Compile/Compile.cpp
+        Source/WEngine.cpp
+)
 
 target_include_directories(
     WEngine 
