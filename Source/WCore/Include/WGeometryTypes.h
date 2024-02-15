@@ -18,7 +18,6 @@ struct WMesh{
     std::vector<uint32_t> indices;
 };
 
-
 struct WModel{
     std::vector<WMesh> meshes;
     // materials by index

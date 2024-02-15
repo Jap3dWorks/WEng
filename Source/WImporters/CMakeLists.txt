@@ -1,31 +1,31 @@
 
 add_library(
-    WFiles 
+    WImporters 
     SHARED 
         Compile/Compile.cpp
-        Source/WFiles.cpp
+        Source/WImporters.cpp
 )
 
 target_include_directories(
-    WFiles 
+    WImporters 
     PUBLIC 
         Include
     PRIVATE
+        WCore::WCore
         Intermediate
         Source
-        WCore::WCore
 )
 
 target_link_libraries(
-    WFiles 
+    WImporters 
     PRIVATE
         WCore::WCore
 )
 
-add_library(WFiles::WFiles ALIAS WFiles)
+add_library(WImporters::WImporters ALIAS WImporters)
 
 install(
-    TARGETS WFiles 
+    TARGETS WImporters 
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin

@@ -10,8 +10,5 @@ public:
     virtual ~WActor() = default;
     
 private:
-    WId id_;
     std::string name_;
-    
-
 };

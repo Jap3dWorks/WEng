@@ -1,7 +1,6 @@
 add_executable(WSpacers Source/WSpacers.cpp)
 
 
-
 target_include_directories(
     WSpacers 
     PRIVATE 

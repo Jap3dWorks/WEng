@@ -4,6 +4,8 @@ add_library(
     SHARED 
         Compile/Compile.cpp
         Source/WCore.cpp
+        Source/WAsset.cpp
+        Source/WObjectManager.cpp
 )
 
 target_include_directories(

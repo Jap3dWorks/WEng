@@ -1,0 +1,2 @@
+#include "WObjectManager.h"
+

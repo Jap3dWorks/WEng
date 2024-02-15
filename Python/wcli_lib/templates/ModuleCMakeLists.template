@@ -3,6 +3,7 @@ add_library(
     {{ module_name }} 
     SHARED 
         Compile/Compile.cpp
+        Source/{{ module_name }}.cpp
         # .cpp files here
 )
 
@@ -22,6 +23,9 @@ target_link_libraries(
     {{ module_name }} 
     PRIVATE
         WCore::WCore
+        {% for link_name in link_modules %}
+        {{ link_name }}::{{ link_name }}
+        {% endfor %}
         # link libraries here, use format WLibrary::WLibrary
 )
 
