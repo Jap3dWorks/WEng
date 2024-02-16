@@ -5,6 +5,7 @@ add_library(
         Compile/Compile.cpp
         Source/WCore.cpp
         Source/WAsset.cpp
+        Source/WActor.cpp
         Source/WObjectManager.cpp
 )
 

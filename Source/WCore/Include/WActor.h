@@ -3,7 +3,7 @@
 #include "WCore.h"
 
 
-class WActor : public WObject
+class WCORE_API WActor : public WObject
 {
 public:
     WActor() = default;
