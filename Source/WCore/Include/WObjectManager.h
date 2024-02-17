@@ -40,10 +40,9 @@ private:
     std::vector<std::unique_ptr<WObjectTypeContainer>> objects_{};
 
     template <typename T>
-    WObject& CreateObject(const char* object_name, T* null=nullptr)
+    WObject* CreateObject(const char* object_name, T* null=nullptr)
     {
-        T::
-        
+        // T::
     }
 
     // virtual void AddObject(WObject* object) = 0;

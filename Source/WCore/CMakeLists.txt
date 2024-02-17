@@ -2,7 +2,7 @@
 add_library(
     WCore 
     SHARED 
-        Compile/Compile.cpp
+        CompileGenerated/CompileGenerated.cpp
         Source/WCore.cpp
         Source/WAsset.cpp
         Source/WActor.cpp
@@ -14,9 +14,10 @@ target_include_directories(
     WCore 
     PUBLIC 
         Include
+        PublicGenerated
     PRIVATE
         Source
-        Intermediate
+        PrivateGenerated
 )
 
 add_library(WCore::WCore ALIAS WCore)

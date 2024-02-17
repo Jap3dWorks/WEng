@@ -2,7 +2,7 @@
 add_library(
     WImporters 
     SHARED 
-        Compile/Compile.cpp
+        CompileGenerated/CompileGenerated.cpp
         Source/WImporters.cpp
 )
 
@@ -10,9 +10,10 @@ target_include_directories(
     WImporters 
     PUBLIC 
         Include
+        PublicGenerated
     PRIVATE
         WCore::WCore
-        Intermediate
+        PrivateGenerated
         Source
 )
 

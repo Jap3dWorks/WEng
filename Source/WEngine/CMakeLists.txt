@@ -1,7 +1,7 @@
 add_library(
     WEngine 
     SHARED
-        Compile/Compile.cpp
+        CompileGenerated/CompileGenerated.cpp
         Source/WEngine.cpp
 )
 
@@ -9,9 +9,10 @@ target_include_directories(
     WEngine 
     PUBLIC 
         Include
+        PublicGenerated
     PRIVATE
         Source
-        Intermediate
+        PrivateGenerated
 )
 
 add_library(WEngine::WEngine ALIAS WEngine)

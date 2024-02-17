@@ -10,8 +10,8 @@ class WCORE_API WAsset : public WObject
 
 public:
 
-    virtual void Load(const char* file_path) = 0;
-    virtual void Save(const char* file_path) = 0;
+    virtual void Load(const char* file_path){}
+    virtual void Save(const char* file_path){}
 
     virtual void SetName(const char* name);
     virtual void SetPath(const char* path);

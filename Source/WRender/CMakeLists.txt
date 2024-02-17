@@ -1,7 +1,7 @@
 add_library(
     WRender 
     SHARED 
-        Compile/Compile.cpp
+        CompileGenerated/CompileGenerated.cpp
         Source/WRender.cpp
         Source/WRenderPipeline.cpp
         Source/WShader.cpp
@@ -17,8 +17,9 @@ target_include_directories(
     WRender 
     PUBLIC 
         Include
+        PublicGenerated
     PRIVATE 
-        Intermediate
+        PrivateGenerated
         WCore::WCore
         ${STB_INCLUDE_DIRS} 
         ${GLM_INCLUDE_DIRS} 

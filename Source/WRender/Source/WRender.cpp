@@ -23,20 +23,20 @@
 WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
 {
     instance_info_ = {};
-    instance_info_.wid = 0; // WId::GenerateId();
+    instance_info_.wid = {}; // WId::GenerateId();
 
     window_info_ = {};
-    window_info_.wid = 0; // WId::GenerateId();
+    window_info_.wid = {}; // WId::GenerateId();
     window_info_.user_pointer = this;
 
     surface_info_ = {};
-    surface_info_.wid = 0; // WId::GenerateId();
+    surface_info_.wid = {}; // WId::GenerateId();
 
     device_info_ = {};
-    device_info_.wid = 0; // WId::GenerateId();
+    device_info_.wid = {}; // WId::GenerateId();
 
     debug_info_ = {};
-    debug_info_.wid = 0; // WId::GenerateId();
+    debug_info_.wid = {}; // WId::GenerateId();
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 }
 
