@@ -7,6 +7,7 @@ add_library(
         Source/WAsset.cpp
         Source/WActor.cpp
         Source/WObjectManager.cpp
+        Source/WComponent.cpp
 )
 
 target_include_directories(

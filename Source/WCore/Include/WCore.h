@@ -4,8 +4,10 @@
 #include "WLog.h"
 #include <string>
 #include <functional>
+#include "Core/CoreMacros.h"
 
-// typedef size_t WId;
+#include "WCore.intermediate.h"
+
 
 class WCORE_API WId
 {
@@ -17,6 +19,7 @@ private:
 class WCORE_API WClass
 {
 public:
+
     WClass() = delete;
     WClass(const char *name);
 
@@ -41,12 +44,17 @@ namespace std
     };
 }
 
+WCLASS()
 class WCORE_API WObject
 {
-protected:
-    WId id_{};
+    WOBJECT_BODY(WObject)
 
 public:
-    virtual WClass GetClass() const = 0;
+
+private:
+    // static const WObject default_object_{}; 
+
+protected:
+    WId id_{};
 };
 

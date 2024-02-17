@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 
-
 /*
  * This class is a container for all WObjects of a specific type.
  * Each WObject that is created will be added to the appropriate WObjectTypeContainer.
@@ -12,7 +11,11 @@
 */
 class WCORE_API WObjectTypeContainer
 {
+public:
+    WObjectTypeContainer() = default;
+    virtual ~WObjectTypeContainer() = default;
 
+    virtual WClass GetObjectType() const = 0;
 };
 
 /*
@@ -24,7 +27,12 @@ class WCORE_API WObjectManager
 {
 public:
     WObjectManager() = default;
-    virtual ~WObjectManager() = default;
+    virtual ~WObjectManager()
+    {
+        // Remove all objects
+        // objects_.clear();
+
+    }
 
 private:
 
@@ -32,15 +40,15 @@ private:
     std::vector<std::unique_ptr<WObjectTypeContainer>> objects_{};
 
     template <typename T>
-    WObject* CreateObject(const char* object_name, T* null)
+    WObject& CreateObject(const char* object_name, T* null=nullptr)
     {
-
+        T::
+        
     }
 
     // virtual void AddObject(WObject* object) = 0;
     // virtual void RemoveObject(WObject* object) = 0;
     // virtual void RemoveObject(const char* object_name) = 0;
     // virtual void RemoveAllObjects() = 0;
-
 
 };

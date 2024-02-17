@@ -7,7 +7,6 @@ In this initial state our data files will be USD both for models as for levels.
 There are intention to try to migrate to Vulkan.
 
 ## Dependencies
-OpenGL
 Vulkan
 SDL
 GLM

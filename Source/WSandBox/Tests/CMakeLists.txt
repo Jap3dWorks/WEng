@@ -8,10 +8,10 @@ add_executable(
   WSandBox_test
   WSandBox_test.cc
 )
-target_link_libraries(
-  WSandBox_test
-  GTest::gtest_main
-)
+# target_link_libraries(
+  # WSandBox_test
+  # GTest::gtest_main
+# )
 
 
 include(GoogleTest)
