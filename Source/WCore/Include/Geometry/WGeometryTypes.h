@@ -13,13 +13,15 @@ struct WVertex{
     glm::vec4 Color;
 };
 
-struct WMesh{
+struct WStaticModelComponent{
     std::vector<WVertex> vertices;
     std::vector<uint32_t> indices;
 };
 
 struct WModel{
-    std::vector<WMesh> meshes;
+    std::vector<WStaticModelComponent> meshes;
     // materials by index
     // std::vector<WTexture> textures;
 };
+
+

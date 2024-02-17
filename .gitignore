@@ -19,3 +19,8 @@ __pycache__
 bin/
 Install/
 *.spv
+*.png
+*.jpg
+*.gif
+*.bmp
+*.tga

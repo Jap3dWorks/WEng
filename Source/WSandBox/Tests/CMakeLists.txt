@@ -1,4 +1,4 @@
-find_package(googletest)
+# find_package(googletest)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

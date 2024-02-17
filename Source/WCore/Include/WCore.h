@@ -5,7 +5,14 @@
 #include <string>
 #include <functional>
 
-typedef uint32_t WId;
+// typedef size_t WId;
+
+class WCORE_API WId
+{
+private:
+    size_t id_; 
+};
+
 
 class WCORE_API WClass
 {

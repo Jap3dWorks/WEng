@@ -1,0 +1,24 @@
+@startuml
+
+class WId{
+    -_id: size_t
+}
+
+class WCore{
+    -_id: WId
+}
+
+WId -o WCore::_id
+
+class WActor{}
+class WAsset{}
+class WComponent{}
+
+WCore <|-- WActor
+WCore <|-- WAsset
+WCore <|-- WComponent
+
+
+WComponent -o WActor
+
+@enduml
