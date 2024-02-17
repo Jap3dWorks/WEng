@@ -1,4 +1,4 @@
-#include "WAsset.h"
+#include "WAssets/WAsset.h"
 
 
 // WAsset
@@ -23,3 +23,14 @@ std::string WAsset::GetPath() const
 {
     return path_;
 }
+
+void WAsset::Serialize()
+{
+
+}
+
+void WAsset::Deserialize()
+{
+
+}
+

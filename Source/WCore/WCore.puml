@@ -1,6 +1,6 @@
 @startuml
 
-class WId{
+class WId {
     -_id: size_t
 }
 

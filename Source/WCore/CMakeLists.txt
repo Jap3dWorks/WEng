@@ -8,6 +8,8 @@ add_library(
         Source/WActor.cpp
         Source/WObjectManager.cpp
         Source/WComponent.cpp
+        Source/WStaticModel.cpp
+        Source/WSerialize.cpp
 )
 
 target_include_directories(

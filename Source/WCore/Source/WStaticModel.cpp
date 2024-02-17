@@ -1,0 +1,1 @@
+#include "WAssets/WStaticModel.h"

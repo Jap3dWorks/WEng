@@ -4,7 +4,7 @@
 #include "WLog.h"
 #include <string>
 #include <functional>
-#include "Core/CoreMacros.h"
+#include "WCore/CoreMacros.h"
 
 #include "WCore.intermediate.h"
 
