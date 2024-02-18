@@ -19,8 +19,8 @@ public:
     virtual void Serialize() = 0;
     virtual void Deserialize() = 0;
 
-    void set_file_path(const std::string& file_path);
-    std::string get_file_path() const;
+    void SetFilePath(const std::string& file_path);
+    std::string GetFilePath() const;
 
 protected:
     std::vector<char> data_{};

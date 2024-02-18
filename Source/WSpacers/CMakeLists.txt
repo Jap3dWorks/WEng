@@ -8,6 +8,7 @@ target_include_directories(
         WCore::WCore
         WEngine::WEngine
         WRender::WRender
+        WImporters::WImporters
     PRIVATE 
         PrivateGenerated
 )
@@ -18,6 +19,7 @@ target_link_libraries(
         WCore::WCore
         WEngine::WEngine
         WRender::WRender
+        WImporters::WImporters
 )
 
 install(

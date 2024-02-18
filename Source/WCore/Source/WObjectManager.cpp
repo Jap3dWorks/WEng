@@ -1,7 +1,8 @@
-#include "WObjectManager.h"
+#include "WObjectManager/WObjectManager.h"
 
 // Iterator
 // --------
+
 detail::WObjectContainerBase::Iterator::Iterator(WObject* object) : object_(object) {}
 
 
@@ -51,3 +52,11 @@ void detail::WObjectContainerBase::AssignNewId(WObject* object)
     object->id_ = WId(size_++);
 }
 
+// WObjectManager
+// --------------
+
+WObjectManager& WObjectManager::GetInstance()
+{
+    static WObjectManager instance;
+    return instance;
+}

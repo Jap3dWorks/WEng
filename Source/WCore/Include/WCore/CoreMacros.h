@@ -21,5 +21,5 @@ public:                                                                 \
 
 
 
-#define WOBJECT_BODY(_WCLASS_) \ 
+#define WOBJECT_BODY(_WCLASS_)  \
 _WOBJECT_BODY_(_WCLASS_)

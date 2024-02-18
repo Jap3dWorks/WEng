@@ -58,7 +58,6 @@ namespace detail
 
         virtual Iterator begin() = 0;
         virtual Iterator end() = 0;
-
     };
 
     template <typename T, size_t max_size=WCONTAINER_MAX_OBJECTS>
@@ -91,7 +90,6 @@ namespace detail
         // we use fixes to avoid dynamic memory allocation.
         std::array<T, max_size> objects_{};
     };
-
 }
 
 
@@ -105,6 +103,12 @@ class WCORE_API WObjectManager
 public:
     WObjectManager() = default;
     virtual ~WObjectManager() = default;
+
+    // You can create a global instance of WObjectManager
+    static WObjectManager& GetInstance();
+
+    WObjectManager(const WObjectManager&) = delete;
+    WObjectManager& operator=(const WObjectManager&) = delete;
 
 private:
 

@@ -1,6 +1,8 @@
 #include "WImporters.h"
 #include "WAssets/WStaticModel.h"
-#include "WObjectManager.h"
+#include "WObjectManager/WObjectManager.h"
+#include "WAssets/WStaticModel.h"
+
 #include <vector>
 #include <unordered_map>
 
@@ -8,7 +10,7 @@
 #include <tiny_obj_loader.h>
 
 
-void WImportObj::Import(const char* file_path, const char* dst_path)
+std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* dst_path)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -29,11 +31,15 @@ void WImportObj::Import(const char* file_path, const char* dst_path)
         throw std::runtime_error(warning + error);
     }
 
-    WMesh mesh = {};
+    WModel model = {};
+    model.meshes.resize(shapes.size());
+    uint32_t index_offset = 0;
 
-    std::unordered_map<WVertex, uint32_t> unique_vertices = {};
     for (const auto& shape : shapes)
     {
+        WMesh& mesh = model.meshes[index_offset++];
+        std::unordered_map<WVertex, uint32_t> unique_vertices = {};
+
         for (const auto& index : shape.mesh.indices)
         {
             WVertex vertex = {};
@@ -57,8 +63,15 @@ void WImportObj::Import(const char* file_path, const char* dst_path)
     }
 
     // create an static asset
-    
+    WObjectManager& object_manager = WObjectManager::GetInstance();
+    WStaticModel* static_model = object_manager.CreateObject<WStaticModel>(
+        "StaticModel"
+    );
+    static_model->SetModel(std::move(model));
+    static_model->SetFilePath(file_path);
 
+    std::vector<WAsset*> imported_assets = {static_model};
+    return imported_assets;
 };
 
 std::vector<std::string> WImportObj::Extensions()
