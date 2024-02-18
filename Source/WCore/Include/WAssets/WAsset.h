@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "WCore.h"
+#include "WCore/WCore.h"
 #include <string>
 #include "WSerialize/WSerialize.h"
 

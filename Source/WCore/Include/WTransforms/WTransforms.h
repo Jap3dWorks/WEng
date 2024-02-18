@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore.h"
+#include "WCore/WCore.h"
 #include <glm/glm.hpp>
 
 

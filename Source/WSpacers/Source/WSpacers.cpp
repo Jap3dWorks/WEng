@@ -1,7 +1,7 @@
 #include "WSpacers.h"
 #include "WEngine.h"
 #include "WRender.h"
-#include "WCore.h"
+#include "WCore/WCore.h"
 
 #include <iostream>
 

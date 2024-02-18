@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "WCore.h"
+#include "WCore/WCore.h"
 
 /*
  * Base class for all actors in the engine. 
@@ -15,3 +15,4 @@ class WCORE_API WActor : public WObject
 private:
     std::string name_{};
 };
+

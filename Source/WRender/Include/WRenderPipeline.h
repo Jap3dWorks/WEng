@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "WCore.h"
+#include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "vulkan/vulkan.h"
 #include "WShader.h"

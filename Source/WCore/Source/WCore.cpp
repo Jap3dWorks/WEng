@@ -1,4 +1,4 @@
-#include "WCore.h"
+#include "WCore/WCore.h"
 #include "WLog.h"
 
 

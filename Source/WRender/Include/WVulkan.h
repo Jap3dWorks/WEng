@@ -1,5 +1,5 @@
 #pragma once
-#include "WCore.h"
+#include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WRender.h"
 #include "WShader.h"

@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "WCore.h"
+#include "WCore/WCore.h"
 
 /**
  * @brief Base class for all serializable objects.
