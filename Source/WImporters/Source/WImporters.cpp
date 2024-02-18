@@ -9,7 +9,6 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-
 std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* dst_path)
 {
     tinyobj::attrib_t attrib;
