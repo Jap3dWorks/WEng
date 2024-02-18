@@ -17,7 +17,6 @@ protected:
     virtual std::vector<std::string> Extensions() = 0;
     virtual std::vector<std::string> Formats() = 0;
     
-    // virtual std::vector<WObject*> Objects() = 0;
 };
 
 class WIMPORTERS_API WImportObj : public WImporter

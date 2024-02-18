@@ -8,11 +8,46 @@
 
 #include "WCore.intermediate.h"
 
+namespace detail
+{
+    class WObjectContainerBase;
+}
+
 
 class WCORE_API WId
 {
+public:
+    WId() = default;
+    size_t GetId() const;
+
+    bool operator==(const WId &other) const;
+    bool operator!=(const WId &other) const;
+
+    bool operator<(const WId &other) const;
+    bool operator>(const WId &other) const;
+
+    bool operator<=(const WId &other) const;
+    bool operator>=(const WId &other) const;
+
+    WId operator+(const WId &other) const;
+    WId operator-(const WId &other) const;
+
+    operator size_t() const;
+
 private:
-    size_t id_; 
+    WId(size_t id);
+    WId& operator++();
+    WId operator++(int);
+
+    WId& operator--();
+    WId operator--(int);
+
+    WId& operator+=(const WId &other);
+    WId& operator-=(const WId &other);
+
+    size_t id_=0; 
+
+    friend detail::WObjectContainerBase;
 };
 
 
@@ -51,10 +86,13 @@ class WCORE_API WObject
 
 public:
 
+protected:
+    WId id_{};
+
 private:
     // static const WObject default_object_{}; 
 
-protected:
-    WId id_{};
+friend detail::WObjectContainerBase;
+
 };
 

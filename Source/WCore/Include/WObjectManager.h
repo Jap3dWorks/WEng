@@ -3,23 +3,100 @@
 #include "WCore/WCore.h"
 #include <vector>
 #include <memory>
+#include <unordered_map>
+#include <array>
+#include <memory>
+#include <type_traits>
+#include <concepts>
+
+
+#define WCONTAINER_MAX_OBJECTS 1024
 
 /*
  * This class is a container for all WObjects of a specific type.
- * Each WObject that is created will be added to the appropriate WObjectTypeContainer.
- * We should create a WObjectTypeContainer for each type of WObject using reflection system.
+ * Each WObject that is created will be added to the appropriate WObjectContainer<T>.
 */
-class WCORE_API WObjectTypeContainer
+namespace detail
 {
-public:
-    WObjectTypeContainer() = default;
-    virtual ~WObjectTypeContainer() = default;
+    class WCORE_API WObjectContainerBase
+    {
+    public:
+        WObjectContainerBase() = default;
+        virtual ~WObjectContainerBase() = default;
 
-    virtual WClass GetObjectType() const = 0;
-};
+        virtual WClass GetObjectType() const = 0;
+        virtual WObject* CreateObject() = 0;
+        virtual WObject* GetObject(WId id) = 0;
+
+        size_t GetSize() const;
+
+    protected:
+        size_t size_{0};
+        void AssignNewId(WObject* object);
+
+    public:
+        // iterator
+        class Iterator
+        {
+        public:
+            Iterator() = delete;
+            Iterator(WObject* object);
+
+            virtual ~Iterator() = default;
+
+            WObject& operator*();
+            WObject* operator->();
+            Iterator& operator++();
+            Iterator operator++(int);
+            bool operator==(const Iterator& other);
+            bool operator!=(const Iterator& other);
+
+        private:
+            WObject* object_{};
+
+        };
+
+        virtual Iterator begin() = 0;
+        virtual Iterator end() = 0;
+
+    };
+
+    template <typename T, size_t max_size=WCONTAINER_MAX_OBJECTS>
+    class WObjectContainer : public detail::WObjectContainerBase
+    {
+    public:
+        WObjectContainer() = default;
+        virtual ~WObjectContainer() = default;
+
+        WClass GetObjectType() const override
+        {
+            return T::GetDefaultObject()->GetClass();
+        }
+
+        WObject* CreateObject() override
+        {
+            T& object = objects_[size_];
+            AssignNewId(&object);
+
+            return &object;
+        }
+
+        WObject* GetObject(WId id) override
+        {
+            return &objects_[id];
+        }
+
+    private:
+        // by now use a fixed size array, in the future we should use a dynamic array
+        // we use fixes to avoid dynamic memory allocation.
+        std::array<T, max_size> objects_{};
+    };
+
+}
+
 
 /*
- * This class is a container for all WObjectTypeContainer.
+ * This class is a container for all WObjectContainer.
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
 */
@@ -27,27 +104,38 @@ class WCORE_API WObjectManager
 {
 public:
     WObjectManager() = default;
-    virtual ~WObjectManager()
-    {
-        // Remove all objects
-        // objects_.clear();
-
-    }
+    virtual ~WObjectManager() = default;
 
 private:
 
     // 1st dimension is the container of an specific type of WObject
-    std::vector<std::unique_ptr<WObjectTypeContainer>> objects_{};
+    // std::vector<std::unique_ptr<WObjectTypeContainer>> objects_{};
+    std::unordered_map<WClass, std::unique_ptr<detail::WObjectContainerBase>> containers_{};
 
-    template <typename T>
-    WObject* CreateObject(const char* object_name, T* null=nullptr)
+public:
+    /**
+     * @brief Create a new WObject of type T
+    */
+    template <std::derived_from<WObject> T>
+    T* CreateObject(const char* object_name)
     {
-        // T::
+        WClass object_class = T::GetDefaultObject()->GetClass();
+
+        if (containers_.count(object_class) == 0)
+        {
+            containers_[object_class] = std::unique_ptr<
+                detail::WObjectContainer<T>
+            >{};
+        }
+
+        return reinterpret_cast<T*>(containers_[object_class]->CreateObject());
     }
 
-    // virtual void AddObject(WObject* object) = 0;
-    // virtual void RemoveObject(WObject* object) = 0;
-    // virtual void RemoveObject(const char* object_name) = 0;
-    // virtual void RemoveAllObjects() = 0;
-
+    template <std::derived_from<WObject> T>
+    T* GetObject(WId id)
+    {
+        WClass object_class = T::GetDefaultObject()->GetClass();
+        return reinterpret_cast<T*>(containers_[object_class]->GetObject(id));
+    }
 };
+
