@@ -30,8 +30,9 @@ int main(int argc, char** argv)
         std::cout << "Actor is not a static model!" << std::endl;
         return 1;
     }
-    // WSpacers::WEngine engine;
-    // engine.run();
+    
+    WStaticModel* static_model = static_cast<WStaticModel*>(actor[0]);
+    static_model->GetModel().meshes[0];
 
     std::cout << "Test WSpacers!" << std::endl;
     return 0;

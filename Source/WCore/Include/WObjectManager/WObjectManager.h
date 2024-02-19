@@ -143,18 +143,7 @@ public:
 
         if (!containers_.contains(object_class))
         {
-            containers_[object_class] = std::unique_ptr<detail::WObjectContainerBase>{
-                new detail::WObjectContainer<T>()
-            };
-            // containers_.insert(
-            //     {
-            //         object_class, 
-            //         std::unique_ptr<detail::WObjectContainerBase>{
-            //             new detail::WObjectContainer<T>()
-            //         }
-            //         // std::make_unique<detail::WObjectContainer<T>>()
-            //     }
-            // );
+            containers_[object_class] = std::make_unique<detail::WObjectContainer<T>>();
         }
 
         return reinterpret_cast<T*>(containers_[object_class]->CreateObject());

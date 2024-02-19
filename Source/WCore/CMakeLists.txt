@@ -10,6 +10,7 @@ add_library(
         Source/WComponent.cpp
         Source/WStaticModel.cpp
         Source/WSerialize.cpp
+        Source/WTexture.cpp
 )
 
 target_include_directories(
