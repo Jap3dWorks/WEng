@@ -69,7 +69,7 @@ namespace detail
 
         WClass GetObjectType() const override
         {
-            return T::GetDefaultObject()->GetClass();
+            return T::GetDefaultObject().GetClass();
         }
 
         WObject* CreateObject() override
@@ -123,7 +123,7 @@ public:
     template <std::derived_from<WObject> T>
     T* CreateObject(const char* object_name)
     {
-        WClass object_class = T::GetDefaultObject()->GetClass();
+        const WClass& object_class = T::GetStaticClass();
 
         if (containers_.count(object_class) == 0)
         {

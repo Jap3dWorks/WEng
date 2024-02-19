@@ -104,3 +104,33 @@ const char* WClass::GetName() const
 {
     return name_;
 }
+
+bool WClass::operator==(const WClass &other) const
+{
+    return name_ == other.name_;
+}
+
+bool WClass::operator!=(const WClass &other) const
+{
+    return name_ != other.name_;
+}
+
+bool WClass::operator<(const WClass &other) const
+{
+    return name_ < other.name_;
+}
+
+bool WClass::operator>(const WClass &other) const
+{
+    return name_ > other.name_;
+}
+
+bool WClass::operator<=(const WClass &other) const
+{
+    return name_ <= other.name_;
+}
+
+bool WClass::operator>=(const WClass &other) const
+{
+    return name_ >= other.name_;
+}

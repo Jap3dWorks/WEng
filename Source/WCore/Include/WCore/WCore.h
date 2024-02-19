@@ -62,6 +62,16 @@ public:
 
     const char *GetName() const;
 
+public:
+    bool operator==(const WClass &other) const;
+    bool operator!=(const WClass &other) const;
+
+    bool operator<(const WClass &other) const;
+    bool operator>(const WClass &other) const;
+
+    bool operator<=(const WClass &other) const;
+    bool operator>=(const WClass &other) const;
+
 private:
     const char *name_;
 };

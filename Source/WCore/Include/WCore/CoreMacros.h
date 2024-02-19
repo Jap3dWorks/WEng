@@ -5,19 +5,21 @@
 #define WCLASS(...)
 
 
-#define _WOBJECT_BODY_(_WCLASS_)                                        \
-private:                                                                \
-    static inline std::unique_ptr<_WCLASS_> default_object_{};          \
-public:                                                                 \
-    _WCLASS_() = default;                                               \
-    ~_WCLASS_() = default;                                              \
-    static const _WCLASS_* GetDefaultObject() {                         \
-        if (!default_object_.get()) {                                   \
-                default_object_ = std::make_unique<_WCLASS_>();         \
-        }                                                               \
-        return default_object_.get();                                   \
-    }                                                                   \
-    virtual WClass GetClass() const { return WClass( #_WCLASS_ ); }     \
+#define _WOBJECT_BODY_(_WCLASS_)                                                  \
+private:                                                                          \
+    static inline std::unique_ptr<_WCLASS_> default_object_{};                    \
+public:                                                                           \
+    _WCLASS_() = default;                                                         \
+    ~_WCLASS_() = default;                                                        \
+    static const _WCLASS_& GetDefaultObject() {                                   \
+        static _WCLASS_ default_object{};                                         \
+        return default_object;                                                    \
+    }                                                                             \
+        static const WClass& GetStaticClass() {                                   \
+        static WClass static_class( #_WCLASS_ );                                  \
+        return static_class;                                                      \
+    }                                                                             \
+    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); } \     
 
 
 
