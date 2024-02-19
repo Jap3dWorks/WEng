@@ -160,8 +160,14 @@ class BuildCommand(CliCommand):
             "-B", build_path,
             "-DCMAKE_BUILD_TYPE=" + self.cmd_args.build_type,
             "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-            "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+            "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+            "-DCMAKE_C_COMPILER=" + CliVars.C_COMPILER,
+            "-DCMAKE_CXX_COMPILER=" + CliVars.CXX_COMPILER
         ]
+
+        if self.cmd_args.build_type == CliVars.DEBUG_TYPE:
+            cmd.append('-DCMAKE_CXX_FLAGS=-g -O0')
+            cmd.append('-DCMAKE_C_FLAGS=-g -O0')
 
         completed_process = subprocess.run(cmd, stderr=subprocess.STDOUT)
 
@@ -179,13 +185,10 @@ class BuildCommand(CliCommand):
         if completed_process.returncode != 0:
             return completed_process.returncode
 
-        install_path = project_manager.ProjectPaths.get_bin_folder(
+        install_path = project_manager.ProjectPaths.get_install_path(
             self.cmd_args.arch,
             self.cmd_args.build_type
         )
-
-        if install_path.endswith("/bin"):
-            install_path = install_path[:-4]
 
         wlogger.info("Install %s" % install_path)
         
@@ -347,9 +350,7 @@ class VSCEnvCommand(CliCommand):
 
         return True
 
-    def set_engine_launch_jobs(self, out_workspace_manager):
-        # TODO inspect modules CMakeLists.txt for add_executable() commands     
-        
+    def set_engine_launch_jobs(self, out_workspace_manager):        
         # WSpacers executable, default test project
         out_workspace_manager.add_launch(
             name="WSpacers X86_64 Debug",
@@ -358,12 +359,19 @@ class VSCEnvCommand(CliCommand):
                 CliVars.DEBUG_TYPE, 
                 "WSpacers"
             ),
-            cwd=project_manager.ProjectPaths.get_bin_folder(
+            cwd=project_manager.ProjectPaths.get_install_path(
                 CliVars.ARCH_X86_64, 
                 CliVars.DEBUG_TYPE
             ),
             args=[],
             environment = [
+                {
+                    "name": "PATH",
+                    "value": project_manager.ProjectPaths.get_bin_folder(
+                        CliVars.ARCH_X86_64, 
+                        CliVars.DEBUG_TYPE
+                    )
+                },
                 {
                     "name": "LD_LIBRARY_PATH",
                     "value": project_manager.ProjectPaths.get_lib_folder(
@@ -374,44 +382,8 @@ class VSCEnvCommand(CliCommand):
             ],
             pre_launch_task="Build X86_64 Debug",
             MIMode="lldb",
-            miDebuggerPath="/usr/local/bin/lldb-mi"
+            miDebuggerPath=out_workspace_manager.get_lldb_mi_path()
         )
-
-        # # WSandBox executable
-        # out_workspace_manager.add_launch(
-        #     name="WSandBox X86_64 Debug",
-        #     program=project_manager.ProjectPaths.get_target_bin_path(
-        #         CliVars.ARCH_X86_64, 
-        #         CliVars.DEBUG_TYPE, 
-        #         "WSandBox"
-        #     ),
-        #     cwd=project_manager.ProjectPaths.get_bin_folder(
-        #         CliVars.ARCH_X86_64, 
-        #         CliVars.DEBUG_TYPE
-        #     ),
-        #     args=[],
-        #     pre_launch_task="Build X86_64 Debug",
-        #     MIMode="lldb",
-        #     miDebuggerPath="/usr/local/bin/lldb-mi"
-        # )
-
-        # # WOpenGlTest executable
-        # out_workspace_manager.add_launch(
-        #     name="WOpenGLTest X86_64 Debug",
-        #     program=project_manager.ProjectPaths.get_target_bin_path(
-        #         CliVars.ARCH_X86_64, 
-        #         CliVars.DEBUG_TYPE, 
-        #         "WOpenGLTest"
-        #     ),
-        #     cwd=project_manager.ProjectPaths.get_bin_folder(
-        #         CliVars.ARCH_X86_64, 
-        #         CliVars.DEBUG_TYPE
-        #     ),
-        #     args=[],
-        #     pre_launch_task="Build X86_64 Debug",
-        #     MIMode="lldb",
-        #     miDebuggerPath="/usr/local/bin/lldb-mi"
-        # )
 
         # WVulkanTest
         out_workspace_manager.add_launch(
@@ -428,7 +400,7 @@ class VSCEnvCommand(CliCommand):
             args=[],
             pre_launch_task="Build X86_64 Debug",
             MIMode="lldb",
-            miDebuggerPath="/usr/local/bin/lldb-mi"
+            miDebuggerPath=out_workspace_manager.get_lldb_mi_path()
         )
 
         out_workspace_manager.add_launch(
@@ -445,7 +417,7 @@ class VSCEnvCommand(CliCommand):
             args=[],
             pre_launch_task="Build X86_64 Release",
             MIMode="lldb",
-            miDebuggerPath="/usr/local/bin/lldb-mi"
+            miDebuggerPath=out_workspace_manager.get_lldb_mi_path()
         )
 
     def run(self) -> int:

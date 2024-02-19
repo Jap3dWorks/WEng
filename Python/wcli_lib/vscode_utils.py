@@ -1,7 +1,7 @@
 import json
 import os
 import re
-
+from wcli_lib.logger import wlogger
 
 class VSCWorkspaceManager(object):
     WORKSPACE_EXTENSION = ".code-workspace"
@@ -165,7 +165,7 @@ class VSCWorkspaceManager(object):
         }
         self.data["tasks"]["tasks"].insert(0, task)
 
-    def add_launch(self, name, type="cppdbg", request="launch", program=None, args=[], stop_at_entry=True, cwd="${workspaceFolder}", environment=None, externalConsole=False, MIMode="lldb", miDebuggerPath="/usr/local/bin/lldb-mi", pre_launch_task=None) -> None:
+    def add_launch(self, name, type="cppdbg", request="launch", program=None, args=[], stop_at_entry=True, cwd="${workspaceFolder}", environment=None, externalConsole=False, MIMode="lldb", miDebuggerPath=None, pre_launch_task=None) -> None:
         launch = {
             "name": name,
             "type": type,
@@ -176,13 +176,24 @@ class VSCWorkspaceManager(object):
             "cwd": cwd,
             "environment": [] if environment is None else environment,
             "externalConsole": externalConsole,
-            "MIMode": MIMode,
-            "miDebuggerPath": miDebuggerPath,
             "preLaunchTask": pre_launch_task
         }
 
-        # self.data["launch"]["configurations"].insert(0, launch)
+        if MIMode and miDebuggerPath:
+            launch["MIMode"] = MIMode
+            launch["miDebuggerPath"] = miDebuggerPath
+
+        
         self.data["launch"]["configurations"].append(launch)
+
+    def get_lldb_mi_path(self):
+        for candidate in ("/usr/local/bin/lldb-mi", "/usr/bin/lldb-mi"):
+            if os.path.exists(candidate):
+                return candidate
+
+        wlogger.warning("lldb-mi not found!")
+
+        return None
 
     def save(self) -> None:
         if not os.path.exists(os.path.dirname(self.workspace_path)):

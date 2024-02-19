@@ -15,8 +15,8 @@ int main(int argc, char** argv)
     WImportObj importer;
 
     std::vector<WAsset*> actor = importer.Import(
-        "/Game/Assets/Models/viking_room.obj", 
-        "/Game/Assets/modelobj.modelobj"
+        "../Content/Assets/Models/viking_room.obj", 
+        "/Content/Assets/modelobj.modelobj"
     );
     
     if (actor.size() < 1)

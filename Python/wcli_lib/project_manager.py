@@ -44,6 +44,7 @@ class ProjectPaths(object):
         
         return path
 
+    # build paths
     @staticmethod
     def get_build_folder_name(arch, build_type):
         return ProjectPaths.BUILD_FOLDER_FORMAT.format(
@@ -74,6 +75,14 @@ class ProjectPaths(object):
             target
         )
 
+    # install paths
+    @staticmethod
+    def get_install_path(arch, build_type):
+        return os.path.join(
+            ProjectPaths.INSTALL_PATH,
+            ProjectPaths.get_build_folder_name(arch, build_type)
+        )
+    
     @staticmethod
     def get_bin_folder(arch, build_type):
         return os.path.join(

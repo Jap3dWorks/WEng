@@ -6,6 +6,8 @@ add_library(
         Source/WImporters.cpp
 )
 
+find_package(tinyobjloader REQUIRED)
+
 target_include_directories(
     WImporters 
     PUBLIC 
@@ -15,6 +17,7 @@ target_include_directories(
         WCore::WCore
         PrivateGenerated
         Source
+        ${tinyobjloader_INCLUDE_DIRS}
 )
 
 target_link_libraries(

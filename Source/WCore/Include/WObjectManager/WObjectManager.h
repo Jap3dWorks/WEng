@@ -30,11 +30,6 @@ namespace detail
 
         size_t GetSize() const;
 
-    protected:
-        size_t size_{0};
-        void AssignNewId(WObject* object);
-
-    public:
         // iterator
         class Iterator
         {
@@ -58,6 +53,11 @@ namespace detail
 
         virtual Iterator begin() = 0;
         virtual Iterator end() = 0;
+
+    protected:
+        size_t size_{0};
+        void AssignNewId(WObject* object);
+        
     };
 
     template <typename T, size_t max_size=WCONTAINER_MAX_OBJECTS>
@@ -83,6 +83,22 @@ namespace detail
         WObject* GetObject(WId id) override
         {
             return &objects_[id];
+        }
+
+        virtual Iterator begin()
+        {
+            return Iterator{&objects_[0]};
+        }
+        virtual Iterator end()
+        {
+            if (size_ == objects_.size())
+            {
+                return Iterator{(&objects_[size_-1]) + 1};
+            }
+            else
+            {
+                return Iterator{&objects_[size_]};
+            }
         }
 
     private:
@@ -125,11 +141,20 @@ public:
     {
         const WClass& object_class = T::GetStaticClass();
 
-        if (containers_.count(object_class) == 0)
+        if (!containers_.contains(object_class))
         {
-            containers_[object_class] = std::unique_ptr<
-                detail::WObjectContainer<T>
-            >{};
+            containers_[object_class] = std::unique_ptr<detail::WObjectContainerBase>{
+                new detail::WObjectContainer<T>()
+            };
+            // containers_.insert(
+            //     {
+            //         object_class, 
+            //         std::unique_ptr<detail::WObjectContainerBase>{
+            //             new detail::WObjectContainer<T>()
+            //         }
+            //         // std::make_unique<detail::WObjectContainer<T>>()
+            //     }
+            // );
         }
 
         return reinterpret_cast<T*>(containers_[object_class]->CreateObject());
