@@ -77,7 +77,6 @@ struct WCommandPoolInfo
 struct WTextureInfo
 {
     WId id;
-    std::string path;
     VkImage image;
     VkDeviceMemory image_memory;
     VkImageView image_view;

@@ -5,9 +5,9 @@
 #include <set>
 #include <string>
 #include <cstring>
+#include <cmath>
+#include "WStructs/WTextureStructs.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
 
 // WVulkan
 // -------
@@ -432,33 +432,23 @@ WShaderModuleManager WVulkan::CreateShaderModule(const WDeviceInfo& device, cons
 }
 
 void WVulkan::CreateVkTexture(
-    WTextureInfo& out_texture_info, 
+    WTextureInfo& out_texture_info,
+    const WTextureStruct& texture_struct,
     const WDeviceInfo& device_info,
     const WCommandPoolInfo& command_pool_info
 )
 {
-    int width, height, channels;
-    stbi_uc* pixels = stbi_load(
-        "Textures/texture.jpg",
-        &width,
-        &height,
-        &channels,
-        STBI_rgb_alpha
-    );
-
-    VkDeviceSize image_size = width * height * 4;
     out_texture_info.mip_levels = static_cast<uint32_t>(
         std::floor(
             std::log2(
-                std::max(width, height)
+                std::max(texture_struct.width, texture_struct.height)
             )
         )
     ) + 1;
 
-    if (!pixels)
-    {
-        throw std::runtime_error("Failed to load texture image!");
-    }
+    uint8_t channels_num = NumOfChannels(texture_struct.channels);
+
+    VkDeviceSize image_size = texture_struct.width * texture_struct.height * channels_num;
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -474,15 +464,14 @@ void WVulkan::CreateVkTexture(
 
     void* data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-        memcpy(data, pixels, static_cast<size_t>(image_size));
+        memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
-    stbi_image_free(pixels);
     CreateVkImage(
         device_info.vk_device,
         device_info.vk_physical_device,
-        width,
-        height,
+        texture_struct.width,
+        texture_struct.height,
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
         VK_FORMAT_R8G8B8A8_SRGB,
@@ -513,7 +502,7 @@ void WVulkan::CreateVkTexture(
         out_texture_info.mip_levels
     );
 
-    // TODO Sampler
+    // Sampler
     out_texture_info.sampler = CreateVkTextureSampler(
         device_info.vk_device,
         device_info.vk_physical_device,

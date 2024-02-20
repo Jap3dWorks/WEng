@@ -7,6 +7,9 @@
 // #include ""
 
 
+class WTextureStruct;
+
+
 namespace WVulkan
 {
     // Create functions
@@ -63,6 +66,7 @@ namespace WVulkan
 
     void CreateVkTexture(
         WTextureInfo& out_texture_info, 
+        const WTextureStruct& texture_struct,
         const WDeviceInfo& device_info,
         const WCommandPoolInfo& command_pool_info
     );

@@ -39,6 +39,29 @@ ETextureChannels operator&(ETextureChannels a, ETextureChannels b)
     );
 }
 
+uint8_t NumOfChannels(ETextureChannels channels)
+{
+    uint8_t num = 0;
+    if ((channels & ETextureChannels::kR) == ETextureChannels::kR)
+    {
+        num = 1;
+    }
+    else if ((channels & ETextureChannels::kRG) == ETextureChannels::kRG)
+    {
+        num = 2;
+    }
+    else if ((channels & ETextureChannels::kRGB) == ETextureChannels::kRGB)
+    {
+        num = 3;
+    }
+    else if ((channels & ETextureChannels::kRGBA) == ETextureChannels::kRGBA)
+    {
+        num = 4;
+    }
+
+    return num;
+}
+
 struct WTextureStruct{
     std::vector<uint8_t> data;
     ETextureChannels channels;
