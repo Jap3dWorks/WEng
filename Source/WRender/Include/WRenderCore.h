@@ -152,3 +152,35 @@ struct WRenderPipelineInfo
     VkPipeline pipeline = nullptr;
     VkPipelineLayout pipeline_layout = nullptr;
 };
+
+struct WMeshInfo
+{
+    WId wid;
+    VkBuffer vertex_buffer;
+    VkDeviceMemory vertex_buffer_memory;
+    VkBuffer index_buffer;
+    VkDeviceMemory index_buffer_memory;
+    uint32_t index_count;
+};
+
+/**
+ * Uniform buffer data structure
+*/
+struct WUniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
+/**
+ * single vulkan uniform buffer object, 
+ * Create a vector of these for multiple frames in flight
+*/
+struct WUniformBufferObjectInfo
+{
+    WId wid;
+    VkBuffer uniform_buffer;
+    VkDeviceMemory uniform_buffer_memory;
+    void* mapped_data;
+};

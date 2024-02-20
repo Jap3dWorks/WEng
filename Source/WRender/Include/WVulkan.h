@@ -4,10 +4,10 @@
 #include "WRender.h"
 #include "WShader.h"
 #include "WRenderPipeline.h"
-// #include ""
 
 
-class WTextureStruct;
+struct WTextureStruct;
+struct WMeshStruct;
 
 
 namespace WVulkan
@@ -80,6 +80,17 @@ namespace WVulkan
 
     void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
 
+    void CreateVkMesh(
+        WMeshInfo& out_mesh_info,
+        const WMeshStruct& mesh_struct,
+        const WDeviceInfo &device,
+        const WCommandPoolInfo &command_pool_info
+    );
+
+    void CreateVkUniformBuffer(
+        WUniformBufferObjectInfo& out_uniform_buffer_info,
+        const WDeviceInfo &device
+    );
 
     // Destroy functions
     // -----------------
@@ -210,6 +221,15 @@ namespace WVulkan
         const uint32_t& mip_levels
     );
 
+    void CopyVkBuffer(
+        const VkDevice& device, 
+        const VkCommandPool& command_pool, 
+        const VkQueue& graphics_queue, 
+        const VkBuffer& src_buffer, 
+        const VkBuffer& dst_buffer, 
+        const VkDeviceSize& size
+    );
+    
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */

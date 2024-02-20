@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cmath>
 #include "WStructs/WTextureStructs.h"
+#include "WStructs/WGeometryStructs.h"
 
 
 // WVulkan
@@ -745,6 +746,125 @@ void WVulkan::CreateVkImage(
     vkBindImageMemory(device, out_image, out_image_memory, 0);
 }
 
+void WVulkan::CreateVkMesh(
+    WMeshInfo &out_mesh_ingo,
+    const WMeshStruct &mesh_struct,
+    const WDeviceInfo &device, 
+    const WCommandPoolInfo &command_pool_info
+)
+{
+    VkBuffer staging_buffer;
+    VkDeviceMemory staging_buffer_memory;
+    
+    // vertex buffer
+
+     VkDeviceSize buffer_size = 
+        sizeof(mesh_struct.vertices[0]) * mesh_struct.vertices.size();
+    
+    CreateVkBuffer(
+        device.vk_device,
+        device.vk_physical_device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        staging_buffer,
+        staging_buffer_memory
+    );
+
+    void* data;
+    vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
+        memcpy(data, mesh_struct.vertices.data(), static_cast<size_t>(buffer_size));
+    vkUnmapMemory(device.vk_device, staging_buffer_memory);
+
+    CreateVkBuffer(
+        device.vk_device,
+        device.vk_physical_device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        out_mesh_ingo.vertex_buffer,
+        out_mesh_ingo.vertex_buffer_memory
+    );
+    
+    CopyVkBuffer(
+        device.vk_device,
+        command_pool_info.vk_command_pool,
+        device.vk_graphics_queue,
+        staging_buffer,
+        out_mesh_ingo.vertex_buffer,
+        buffer_size
+    );
+
+    vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
+    vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
+
+    // index buffer
+
+    buffer_size = sizeof(mesh_struct.indices[0]) * mesh_struct.indices.size();
+
+    CreateVkBuffer(
+        device.vk_device,
+        device.vk_physical_device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        staging_buffer,
+        staging_buffer_memory
+    );
+    
+    vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
+        memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
+    vkUnmapMemory(device.vk_device, staging_buffer_memory);
+
+    CreateVkBuffer(
+        device.vk_device,
+        device.vk_physical_device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        out_mesh_ingo.index_buffer,
+        out_mesh_ingo.index_buffer_memory
+    );
+
+    CopyVkBuffer(
+        device.vk_device,
+        command_pool_info.vk_command_pool,
+        device.vk_graphics_queue,
+        staging_buffer,
+        out_mesh_ingo.index_buffer,
+        buffer_size
+    );
+
+    vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
+    vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
+}
+
+void WVulkan::CreateVkUniformBuffer(
+    WUniformBufferObjectInfo& out_uniform_buffer_object_info,
+    const WDeviceInfo& device
+)
+{
+    VkDeviceSize buffer_size = sizeof(WUniformBufferObject);
+    CreateVkBuffer(
+        device.vk_device,
+        device.vk_physical_device,
+        buffer_size,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        out_uniform_buffer_object_info.uniform_buffer,
+        out_uniform_buffer_object_info.uniform_buffer_memory
+    );
+
+    vkMapMemory(
+        device.vk_device,
+        out_uniform_buffer_object_info.uniform_buffer_memory,
+        0,
+        buffer_size,
+        0,
+        &out_uniform_buffer_object_info.mapped_data
+    );
+}
+
 // Destroy functions
 // -----------------
 
@@ -1319,3 +1439,47 @@ VkSampler WVulkan::CreateVkTextureSampler(
 
     return texture_sampler;
 }
+
+void WVulkan::CopyVkBuffer(
+    const VkDevice& device,
+    const VkCommandPool& command_pool,
+    const VkQueue& graphics_queue,
+    const VkBuffer& src_buffer,
+    const VkBuffer& dst_buffer,
+    const VkDeviceSize& size
+)
+{
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandPool = command_pool;
+    alloc_info.commandBufferCount = 1;
+    alloc_info.pNext = nullptr;
+
+    VkCommandBuffer command_buffer;
+    vkAllocateCommandBuffers(device, &alloc_info, &command_buffer);
+
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(command_buffer, &begin_info);
+
+        VkBufferCopy copy_region{};
+        copy_region.size = size;
+        vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
+
+    vkEndCommandBuffer(command_buffer);
+
+    VkSubmitInfo submit_info{};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &command_buffer;
+
+    vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphics_queue);
+
+    vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+}
+
+
