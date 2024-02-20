@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.h"
 #include "WAssets/WAsset.h"
-#include "WGeometry/WGeometryTypes.h"
+#include "WStructs/WGeometryStructs.h"
 
 
 WCLASS()
@@ -11,9 +11,9 @@ class WCORE_API WStaticModel : public WAsset
     WOBJECT_BODY(WStaticModel)
 
 public:
-    void SetModel(const WModel& model);
-    const WModel& GetModel() const;
+    void SetModel(const WModelStruct& model);
+    const WModelStruct& GetModel() const;
 
 private:
-    WModel model_{};
+    WModelStruct model_{};
 };

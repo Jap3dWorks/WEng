@@ -4,14 +4,13 @@
 #include <glm/glm.hpp>
 
 
-class WCORE_API WTransform
+ struct WTransformStruct
 {
 public:
-    WTransform() = default;
-    virtual ~WTransform() = default;
+    WTransformStruct() = default;
+    virtual ~WTransformStruct() = default;
 
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
-
 };

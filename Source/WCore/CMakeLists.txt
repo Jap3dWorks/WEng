@@ -8,9 +8,9 @@ add_library(
         Source/WActor.cpp
         Source/WObjectManager.cpp
         Source/WComponent.cpp
-        Source/WStaticModel.cpp
         Source/WSerialize.cpp
-        Source/WTexture.cpp
+        Source/WStaticModel.cpp
+        Source/WTextureAsset.cpp
 )
 
 target_include_directories(

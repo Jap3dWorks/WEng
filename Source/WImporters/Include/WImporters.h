@@ -11,7 +11,12 @@ public:
     WImporter() = default;
     virtual ~WImporter() = default;
 
-    virtual std::vector<WAsset*> Import(const char* file_path, const char* dst_path) = 0;
+    /**
+     * @brief Import an asset from a file
+     * @param file_path The file path to import
+     * @param asset_path The asset path to import to, relative to the Content|Game directory
+    */
+    virtual std::vector<WAsset*> Import(const char* file_path, const char* asset_path) = 0;
 
 protected:
     virtual std::vector<std::string> Extensions() = 0;
@@ -24,10 +29,23 @@ public:
     WImportObj() = default;
     virtual ~WImportObj() = default;
 
-    std::vector<WAsset*> Import(const char* file_path, const char* dst_path) override;
+    std::vector<WAsset*> Import(const char* file_path, const char* asset_path) override;
 
 protected:
-    std::vector<std::string> Extensions();
-    std::vector<std::string> Formats();    
+    virtual std::vector<std::string> Extensions() override;
+    virtual std::vector<std::string> Formats() override;
 };
 
+
+class WIMPORTERS_API WImportTexture : public WImporter
+{
+public:
+    WImportTexture() = default;
+    virtual ~WImportTexture() = default;
+
+    std::vector<WAsset*> Import(const char* file_path, const char* asset_path) override;
+
+protected:
+    virtual std::vector<std::string> Extensions() override;
+    virtual std::vector<std::string> Formats() override;
+};

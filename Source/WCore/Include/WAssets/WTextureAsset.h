@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.h"
 #include "WAssets/WAsset.h"
-#include "WGeometry/WGeometryTypes.h"
+#include "WStructs/WTextureStructs.h"
 #include <memory>
 
 
@@ -12,10 +12,12 @@ class WCORE_API WTextureAsset : public WAsset
     WOBJECT_BODY(WTextureAsset)
 
     public:
-        void SetTexture(const WTexture& texture);
-        const WTexture& GetTexture() const;
+        void SetTexture(const WTextureStruct& texture);
+        void SetTexture(WTextureStruct&& texture);
+
+        const WTextureStruct& GetTexture() const;
 
     private:
-        WTexture texture_{};
-
+        WTextureStruct texture_{};
 };
+

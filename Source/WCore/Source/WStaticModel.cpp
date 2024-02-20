@@ -1,12 +1,12 @@
 #include "WAssets/WStaticModel.h"
 
 
-void WStaticModel::SetModel(const WModel& model)
+void WStaticModel::SetModel(const WModelStruct& model)
 {
     model_ = model;
 }
 
-const WModel& WStaticModel::GetModel() const
+const WModelStruct& WStaticModel::GetModel() const
 {
     return model_;
 }

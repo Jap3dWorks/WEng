@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.h"
-#include "WGeometry/WGeometryTypes.h"
-#include "WTransforms/WTransforms.h"
+#include "WStructs/WGeometryStructs.h"
+#include "WStructs/WTransformStructs.h"
 
 WCLASS()
 class WCORE_API WComponent : public WObject
@@ -15,7 +15,7 @@ class WCORE_API WTransformComponent : public WComponent
 {
     WOBJECT_BODY(WTransformComponent)
 public:
-    WTransform transform{};
+    WTransformStruct transform{};
 };
 
 WCLASS()
@@ -23,5 +23,5 @@ class WCORE_API WStaticModelComponent : public WComponent
 {
     WOBJECT_BODY(WStaticModelComponent)
 public:
-    WModel* model=nullptr;
+    WModelStruct* model=nullptr;
 };

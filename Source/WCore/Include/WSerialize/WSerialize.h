@@ -18,13 +18,12 @@ public:
 
     virtual void Serialize() = 0;
     virtual void Deserialize() = 0;
+    
+    void SetPath(const std::string& file_path);
+    std::string GetPath() const;
 
-    void SetFilePath(const std::string& file_path);
-    std::string GetFilePath() const;
-
-protected:
-    std::vector<char> data_{};
+private:
+    // Game based path
     std::string file_path_{};
-    std::vector<WObject*> objects_{};
 };
 

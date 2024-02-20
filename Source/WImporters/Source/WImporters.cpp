@@ -2,6 +2,7 @@
 #include "WAssets/WStaticModel.h"
 #include "WObjectManager/WObjectManager.h"
 #include "WAssets/WStaticModel.h"
+#include "WAssets/WTextureAsset.h"
 
 #include <vector>
 #include <unordered_map>
@@ -9,7 +10,11 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* dst_path)
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+
+std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset_path)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -30,18 +35,18 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* dst_p
         throw std::runtime_error(warning + error);
     }
 
-    WModel model = {};
+    WModelStruct model = {};
     model.meshes.resize(shapes.size());
     uint32_t index_offset = 0;
 
     for (const auto& shape : shapes)
     {
-        WMesh& mesh = model.meshes[index_offset++];
-        std::unordered_map<WVertex, uint32_t> unique_vertices = {};
+        WMeshStruct& mesh = model.meshes[index_offset++];
+        std::unordered_map<WVertexStruct, uint32_t> unique_vertices = {};
 
         for (const auto& index : shape.mesh.indices)
         {
-            WVertex vertex = {};
+            WVertexStruct vertex = {};
 
             vertex.Position = {
                 attrib.vertices[3 * index.vertex_index + 0],
@@ -67,7 +72,7 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* dst_p
         "StaticModel"
     );
     static_model->SetModel(std::move(model));
-    static_model->SetFilePath(file_path);
+    static_model->SetPath(asset_path);
 
     std::vector<WAsset*> imported_assets = {static_model};
     return imported_assets;
@@ -83,3 +88,55 @@ std::vector<std::string> WImportObj::Formats()
     return {"obj"};
 }
 
+// WImportTexture
+// --------------
+std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* asset_path)
+{
+    int width, height, channels;
+    stbi_uc* Pixels = stbi_load(
+        file_path,
+        &width,
+        &height,
+        &channels,
+        STBI_rgb_alpha
+    );
+
+    if (!Pixels)
+    {
+        throw std::runtime_error("Failed to load texture image!");
+    }
+
+    WTextureStruct texture_struct = {};
+    texture_struct.width = width;
+    texture_struct.height = height;
+    texture_struct.channels = ETextureChannels::kRGBA;
+    texture_struct.data.resize(width * height * 4);
+    std::memcpy(
+        texture_struct.data.data(), 
+        Pixels, 
+        texture_struct.data.size()
+    );
+
+    stbi_image_free(Pixels);
+    WObjectManager& object_manager = WObjectManager::GetInstance();
+    WTextureAsset* texture_asset = object_manager.CreateObject<WTextureAsset>(
+        "TextureAsset"
+    );
+
+    texture_asset->SetTexture(
+        std::move(texture_struct)
+    );
+    texture_asset->SetPath(asset_path);
+
+    return {std::move(texture_asset)};
+}
+
+std::vector<std::string> WImportTexture::Extensions()
+{
+    return {".png", ".jpg", ".jpeg", ".tga", ".bmp"};
+}
+
+std::vector<std::string> WImportTexture::Formats()
+{
+    return {"png", "jpg", "jpeg", "tga", "bmp"};
+}

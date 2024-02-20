@@ -6,33 +6,53 @@
 #include "WImporters.h"
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
+#include "WAssets/WTextureAsset.h"
 #include <vector>
 
 #include <iostream>
 
 int main(int argc, char** argv)
 {
-    WImportObj importer;
 
-    std::vector<WAsset*> actor = importer.Import(
+    std::vector<WAsset*> geo_asset = WImportObj().Import(
         "../Content/Assets/Models/viking_room.obj", 
         "/Content/Assets/modelobj.modelobj"
     );
     
-    if (actor.size() < 1)
+    if (geo_asset.size() < 1)
     {
-        std::cout << "Failed to import actor!" << std::endl;
+        std::cout << "Failed to import geo_asset!" << std::endl;
         return 1;
     }
 
-    if (actor[0]->GetClass() != WStaticModel::GetStaticClass())
+    if (geo_asset[0]->GetClass() != WStaticModel::GetStaticClass())
     {
-        std::cout << "Actor is not a static model!" << std::endl;
+        std::cout << "geo_asset is not a static model!" << std::endl;
+        return 1;
+    }
+
+    std::vector<WAsset*> tex_asset = WImportTexture().Import(
+        "../Content/Assets/Textures/viking_room.png", 
+        "/Content/Assets/texture.texture"
+    );
+
+    if (tex_asset.size() < 1)
+    {
+        std::cout << "Failed to import tex_asset!" << std::endl;
+        return 1;
+    }
+
+    if (tex_asset[0]->GetClass() != WTextureAsset::GetStaticClass())
+    {
+        std::cout << "tex_asset is not a texture!" << std::endl;
         return 1;
     }
     
-    WStaticModel* static_model = static_cast<WStaticModel*>(actor[0]);
+    WStaticModel* static_model = static_cast<WStaticModel*>(geo_asset[0]);
     static_model->GetModel().meshes[0];
+
+    WTextureAsset* texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
+    texture_asset->GetTexture();
 
     std::cout << "Test WSpacers!" << std::endl;
     return 0;

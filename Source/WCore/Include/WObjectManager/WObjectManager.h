@@ -128,8 +128,6 @@ public:
 
 private:
 
-    // 1st dimension is the container of an specific type of WObject
-    // std::vector<std::unique_ptr<WObjectTypeContainer>> objects_{};
     std::unordered_map<WClass, std::unique_ptr<detail::WObjectContainerBase>> containers_{};
 
 public:
@@ -137,7 +135,7 @@ public:
      * @brief Create a new WObject of type T
     */
     template <std::derived_from<WObject> T>
-    T* CreateObject(const char* object_name)
+    T* CreateObject(const char* object_path)
     {
         const WClass& object_class = T::GetStaticClass();
 
