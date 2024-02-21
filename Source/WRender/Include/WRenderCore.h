@@ -2,7 +2,9 @@
 
 #include "WCore/WCore.h"
 #include <vulkan/vulkan.h>
+#include "WRenderConfig.h"
 #include <vector>
+#include <array>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -135,8 +137,33 @@ struct WSwapChainInfo
 struct WDescriptorSetLayoutInfo
 {
     WId wid;
-    VkDescriptorSetLayout descriptor_set_layout = nullptr;
     std::vector<VkDescriptorSetLayoutBinding> bindings;
+    VkDescriptorSetLayout descriptor_set_layout = nullptr;
+};
+
+/**
+ * Descriptor pool is used to allocate descriptors memory., 
+ * Represents the maximum number of descriptors that can be allocated.
+*/
+struct WDescriptorPoolInfo
+{
+    WId wid;
+    std::vector<VkDescriptorPoolSize> pool_sizes;
+    VkDescriptorPool descriptor_pool = nullptr;
+};
+
+/**
+ * Descriptor set is the relation between the descriptor set layout 
+ * and the descriptor pool
+ * you can have multiple descriptor sets with the same layout, 
+ * this is used for multiple frames in flight
+*/
+struct WDescriptorSetInfo
+{
+    WId wid;
+    // The len of this vector is the number of frames in flight
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets = {};
+
 };
 
 struct WRenderPipelineInfo

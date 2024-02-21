@@ -92,6 +92,51 @@ namespace WVulkan
         const WDeviceInfo &device
     );
 
+    void CreateVkDescriptorPool(
+        WDescriptorPoolInfo& out_descriptor_pool_info,
+        const WDeviceInfo &device
+    );
+
+    /**
+     * Add a descriptor pool item to the descriptor pool.
+     * @param out_descriptor_pool_info: The descriptor pool to add the item to.
+     * @param descriptor_type: The type of descriptor to add.
+    */
+    void AddVkDescriptorPoolItem(
+        WDescriptorPoolInfo& out_descriptor_pool_info,
+        const VkDescriptorType& descriptor_type
+    );
+
+    void CreateVkDescriptorSets(
+        WDescriptorSetInfo& out_descriptor_set_info,
+        const WDeviceInfo &device,
+        const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
+        const WDescriptorPoolInfo& descriptor_pool_info,
+        const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
+    );
+
+    // void UpdateVkDescriptorSets(
+    //     const WDescriptorSetInfo& descriptor_set_info,
+    //     const WDeviceInfo &device,
+    //     const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
+    // );
+
+    void UpdateVkWriteDescriptorSet(
+        VkWriteDescriptorSet& out_write_descriptor_set,
+        VkDescriptorBufferInfo& buffer_info,
+        const WUniformBufferObjectInfo& uniform_buffer_info,
+        const VkDescriptorSet& descriptor_set,
+        const uint32_t& binding
+    );
+
+    void UpdateVkWriteDescriptorSet(
+        VkWriteDescriptorSet& out_write_descriptor_set,
+        VkDescriptorImageInfo& image_info,
+        const WTextureInfo& texture_info,
+        const VkDescriptorSet& descriptor_set,
+        const uint32_t& binding
+    );
+
     // Destroy functions
     // -----------------
 

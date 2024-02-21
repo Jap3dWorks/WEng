@@ -1720,17 +1720,12 @@ private:
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
+            std::array<VkWriteDescriptorSet, 2> DescriptorWrites{};
+
             VkDescriptorBufferInfo BufferInfo{};
             BufferInfo.buffer = UniformBuffers[i];
             BufferInfo.offset = 0;
             BufferInfo.range = sizeof(SUniformBufferObject);
-
-            VkDescriptorImageInfo ImageInfo{};
-            ImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            ImageInfo.imageView = TextureImageView;
-            ImageInfo.sampler = TextureSampler;
-
-            std::array<VkWriteDescriptorSet, 2> DescriptorWrites{};
 
             DescriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             DescriptorWrites[0].dstSet = DescriptorSets[i];
@@ -1739,6 +1734,11 @@ private:
             DescriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             DescriptorWrites[0].descriptorCount = 1;
             DescriptorWrites[0].pBufferInfo = &BufferInfo;
+
+            VkDescriptorImageInfo ImageInfo{};
+            ImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            ImageInfo.imageView = TextureImageView;
+            ImageInfo.sampler = TextureSampler;
 
             DescriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             DescriptorWrites[1].dstSet = DescriptorSets[i];

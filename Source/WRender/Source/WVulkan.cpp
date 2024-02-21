@@ -8,6 +8,7 @@
 #include <cmath>
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
+#include "WRenderConfig.h"
 
 
 // WVulkan
@@ -863,6 +864,128 @@ void WVulkan::CreateVkUniformBuffer(
         0,
         &out_uniform_buffer_object_info.mapped_data
     );
+}
+
+void WVulkan::CreateVkDescriptorPool(
+    WDescriptorPoolInfo& out_descriptor_pool_info,
+    const WDeviceInfo& device
+)
+{
+    if (out_descriptor_pool_info.pool_sizes.empty())
+    {
+        throw std::runtime_error("Descriptor pool sizes are empty!");
+    }
+
+    // AddVkDescriptorPoolItem(
+    //     out_descriptor_pool_info,
+    //     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+    //     FRAMES_IN_FLIGHT
+    // );
+
+    // AddVkDescriptorPoolItem(
+    //     out_descriptor_pool_info,
+    //     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    //     FRAMES_IN_FLIGHT
+    // );
+
+    VkDescriptorPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.poolSizeCount = static_cast<uint32_t>(
+        out_descriptor_pool_info.pool_sizes.size()
+    );
+    pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
+    pool_info.maxSets = 1;
+
+    if (vkCreateDescriptorPool(
+        device.vk_device,
+        &pool_info,
+        nullptr,
+        &out_descriptor_pool_info.descriptor_pool
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create descriptor pool!");
+    }
+}
+
+void WVulkan::AddVkDescriptorPoolItem(
+    WDescriptorPoolInfo& out_descriptor_pool_info,
+    const VkDescriptorType& descriptor_type
+)
+{
+    VkDescriptorPoolSize pool_size{};
+    pool_size.type = descriptor_type;
+    pool_size.descriptorCount = MAX_FRAMES_IN_FLIGHT;
+    out_descriptor_pool_info.pool_sizes.push_back(pool_size);
+}
+
+void WVulkan::CreateVkDescriptorSets(
+    WDescriptorSetInfo& out_descriptor_set_info,
+    const WDeviceInfo &device,
+    const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
+    const WDescriptorPoolInfo& descriptor_pool_info,
+    const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
+)
+{
+    std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts(
+        descriptor_set_layout_info.descriptor_set_layout
+    );
+
+    VkDescriptorSetAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
+    alloc_info.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+    alloc_info.pSetLayouts = layouts.data();
+
+    if (vkAllocateDescriptorSets(
+        device.vk_device,
+        &alloc_info,
+        out_descriptor_set_info.descriptor_sets.data()
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate descriptor sets!");
+    }
+}
+
+void WVulkan::UpdateVkWriteDescriptorSet(
+    VkWriteDescriptorSet& out_write_descriptor_set,
+    VkDescriptorBufferInfo& buffer_info,
+    const WUniformBufferObjectInfo& uniform_buffer_info,
+    const VkDescriptorSet& descriptor_set,
+    const uint32_t& binding
+)
+{
+    buffer_info.buffer = uniform_buffer_info.uniform_buffer;
+    buffer_info.offset = 0;
+    buffer_info.range = sizeof(WUniformBufferObject);
+    
+    out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    out_write_descriptor_set.dstSet = descriptor_set;
+    out_write_descriptor_set.dstBinding = binding;
+    out_write_descriptor_set.dstArrayElement = 0;
+    out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    out_write_descriptor_set.descriptorCount = 1;
+    out_write_descriptor_set.pBufferInfo = &buffer_info;
+}
+
+void WVulkan::UpdateVkWriteDescriptorSet(
+    VkWriteDescriptorSet& out_write_descriptor_set,
+    VkDescriptorImageInfo& image_info,
+    const WTextureInfo& texture_info,
+    const VkDescriptorSet& descriptor_set,
+    const uint32_t& binding
+)
+{
+    image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    image_info.imageView = texture_info.image_view;
+    image_info.sampler = texture_info.sampler;
+
+    out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    out_write_descriptor_set.dstSet = descriptor_set;
+    out_write_descriptor_set.dstBinding = binding;
+    out_write_descriptor_set.dstArrayElement = 0;
+    out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    out_write_descriptor_set.descriptorCount = 1;
+    out_write_descriptor_set.pImageInfo = &image_info;
 }
 
 // Destroy functions
