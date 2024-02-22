@@ -11,7 +11,7 @@
 #include <tiny_obj_loader.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 
 std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset_path)

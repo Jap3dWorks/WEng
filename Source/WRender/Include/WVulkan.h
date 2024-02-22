@@ -1,6 +1,6 @@
 #pragma once
 #include "WCore/WCore.h"
-#include "WRenderVulkanCore.h"
+#include "WRenderCore.h"
 #include "WRender.h"
 #include "WShader.h"
 #include "WRenderPipeline.h"
@@ -133,21 +133,23 @@ namespace WVulkan
         const VkDescriptorSet& descriptor_set;
     };
 
-
+    /**
+     * Update a VkWriteDescriptorSet with a UBO struct.
+    */
     template<typename ...Args>
     void UpdateVkWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set,
-        const WVkWriteDescriptorSetUBOStruct& ubo_struct,
+        WVkWriteDescriptorSetUBOStruct& ubo_struct,
         Args&&... args
     )
     {
-        ubo_struct.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
-        ubo_struct.offset = 0;
-        ubo_struct.range = sizeof(WUniformBufferObject);
+        ubo_struct.buffer_info.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
+        ubo_struct.buffer_info.offset = 0;
+        ubo_struct.buffer_info.range = sizeof(WUniformBufferObject);
         
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstSet = descriptor_set;
-        out_write_descriptor_set.dstBinding = binding;
+        out_write_descriptor_set.dstSet = ubo_struct.descriptor_set;
+        out_write_descriptor_set.dstBinding = ubo_struct.binding;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         out_write_descriptor_set.descriptorCount = 1;
@@ -159,20 +161,23 @@ namespace WVulkan
         );
     }
 
+    /**
+     * Update a VkWriteDescriptorSet with a texture struct.
+    */
     template<typename ...Args>
     void UpdateVkWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set,
-        const WVkWriteDescriptorSetTextureStruct& texture_struct,
+        WVkWriteDescriptorSetTextureStruct& texture_struct,
         Args&&... args
     )
     {
         texture_struct.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        texture_struct.image_info.imageView = texture_struct.texture_info.texture_image_view;
-        texture_struct.image_info.sampler = texture_struct.texture_info.texture_sampler;
+        texture_struct.image_info.imageView = texture_struct.texture_info.image_view;
+        texture_struct.image_info.sampler = texture_struct.texture_info.sampler;
 
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstSet = descriptor_set;
-        out_write_descriptor_set.dstBinding = binding;
+        out_write_descriptor_set.dstSet = texture_struct.descriptor_set;
+        out_write_descriptor_set.dstBinding = texture_struct.binding;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         out_write_descriptor_set.descriptorCount = 1;
@@ -184,6 +189,9 @@ namespace WVulkan
         );
     }
 
+    /**
+     * No arguments fallback functioin.
+    */
     void UpdateVkWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set
     );
