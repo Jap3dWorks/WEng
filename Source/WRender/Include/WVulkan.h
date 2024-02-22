@@ -1,6 +1,6 @@
 #pragma once
 #include "WCore/WCore.h"
-#include "WRenderCore.h"
+#include "WRenderVulkanCore.h"
 #include "WRender.h"
 #include "WShader.h"
 #include "WRenderPipeline.h"
@@ -114,28 +114,95 @@ namespace WVulkan
         const WDescriptorPoolInfo& descriptor_pool_info,
         const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
     );
+ 
+    // ----------------
+ 
+    struct WVkWriteDescriptorSetUBOStruct
+    {
+        VkDescriptorBufferInfo& buffer_info;
+        uint32_t binding;
+        const WUniformBufferObjectInfo& uniform_buffer_info;
+        const VkDescriptorSet& descriptor_set;
+    };
 
-    // void UpdateVkDescriptorSets(
-    //     const WDescriptorSetInfo& descriptor_set_info,
-    //     const WDeviceInfo &device,
-    //     const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
+    struct WVkWriteDescriptorSetTextureStruct
+    {
+        VkDescriptorImageInfo& image_info;
+        uint32_t binding;
+        const WTextureInfo& texture_info;
+        const VkDescriptorSet& descriptor_set;
+    };
+
+
+    template<typename ...Args>
+    void UpdateVkWriteDescriptorSet(
+        VkWriteDescriptorSet& out_write_descriptor_set,
+        const WVkWriteDescriptorSetUBOStruct& ubo_struct,
+        Args&&... args
+    )
+    {
+        ubo_struct.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
+        ubo_struct.offset = 0;
+        ubo_struct.range = sizeof(WUniformBufferObject);
+        
+        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        out_write_descriptor_set.dstSet = descriptor_set;
+        out_write_descriptor_set.dstBinding = binding;
+        out_write_descriptor_set.dstArrayElement = 0;
+        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        out_write_descriptor_set.descriptorCount = 1;
+        out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
+
+        UpdateVkWriteDescriptorSet(
+            out_write_descriptor_set, 
+            std::forward<Args>(args)...
+        );
+    }
+
+    template<typename ...Args>
+    void UpdateVkWriteDescriptorSet(
+        VkWriteDescriptorSet& out_write_descriptor_set,
+        const WVkWriteDescriptorSetTextureStruct& texture_struct,
+        Args&&... args
+    )
+    {
+        texture_struct.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        texture_struct.image_info.imageView = texture_struct.texture_info.texture_image_view;
+        texture_struct.image_info.sampler = texture_struct.texture_info.texture_sampler;
+
+        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        out_write_descriptor_set.dstSet = descriptor_set;
+        out_write_descriptor_set.dstBinding = binding;
+        out_write_descriptor_set.dstArrayElement = 0;
+        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        out_write_descriptor_set.descriptorCount = 1;
+        out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
+
+        UpdateVkWriteDescriptorSet(
+            out_write_descriptor_set, 
+            std::forward<Args>(args)...
+        );
+    }
+
+    void UpdateVkWriteDescriptorSet(
+        VkWriteDescriptorSet& out_write_descriptor_set
+    );
+
+    // void UpdateVkWriteDescriptorSet(
+    //     VkWriteDescriptorSet& out_write_descriptor_set,
+    //     VkDescriptorBufferInfo& buffer_info,
+    //     const uint32_t& binding,
+    //     const WUniformBufferObjectInfo& uniform_buffer_info,
+    //     const VkDescriptorSet& descriptor_set
     // );
 
-    void UpdateVkWriteDescriptorSet(
-        VkWriteDescriptorSet& out_write_descriptor_set,
-        VkDescriptorBufferInfo& buffer_info,
-        const WUniformBufferObjectInfo& uniform_buffer_info,
-        const VkDescriptorSet& descriptor_set,
-        const uint32_t& binding
-    );
-
-    void UpdateVkWriteDescriptorSet(
-        VkWriteDescriptorSet& out_write_descriptor_set,
-        VkDescriptorImageInfo& image_info,
-        const WTextureInfo& texture_info,
-        const VkDescriptorSet& descriptor_set,
-        const uint32_t& binding
-    );
+    // void UpdateVkWriteDescriptorSet(
+    //     VkWriteDescriptorSet& out_write_descriptor_set,
+    //     VkDescriptorImageInfo& image_info,
+    //     const uint32_t& binding,
+    //     const WTextureInfo& texture_info,
+    //     const VkDescriptorSet& descriptor_set
+    // );
 
     // Destroy functions
     // -----------------

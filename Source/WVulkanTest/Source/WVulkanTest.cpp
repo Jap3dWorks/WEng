@@ -108,7 +108,10 @@ namespace VulkanUtils
         const VkAllocationCallbacks* InAllocator,
         VkDebugUtilsMessengerEXT* OutDebugMessenger)
     {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(InInstance, "vkCreateDebugUtilsMessengerEXT");
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+            InInstance, 
+            "vkCreateDebugUtilsMessengerEXT"
+        );
         if(func != nullptr)
         {
             return func(InInstance, InCreateInfo, InAllocator, OutDebugMessenger);

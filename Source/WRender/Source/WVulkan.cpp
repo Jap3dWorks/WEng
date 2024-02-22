@@ -10,14 +10,13 @@
 #include "WStructs/WGeometryStructs.h"
 #include "WRenderConfig.h"
 
-
 // WVulkan
 // -------
 
 // Create functions
 // ----------------
 
-void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDebugInfo &debug_info)
+void WVulkan::CreateInstance(WInstanceInfo &out_instance_info, const WRenderDebugInfo &debug_info)
 {
     if (debug_info.enable_validation_layers && !CheckValidationLayerSupport(debug_info))
     {
@@ -26,7 +25,7 @@ void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDeb
 
     VkApplicationInfo app_info{};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pApplicationName = "WEngine"; // 
+    app_info.pApplicationName = "WEngine"; //
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.pEngineName = "WEngine";
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -47,12 +46,12 @@ void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDeb
         create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
 
         debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
-                                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                                   VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                                   VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+                                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         if (debug_info.debug_callback)
         {
             debug_create_info.pfnUserCallback = debug_info.debug_callback;
@@ -62,7 +61,7 @@ void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDeb
             debug_create_info.pfnUserCallback = DebugCallback;
         }
 
-        create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debug_create_info;
+        create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debug_create_info;
     }
     else
     {
@@ -74,7 +73,7 @@ void WVulkan::CreateInstance(WInstanceInfo &out_instance_info,  const WRenderDeb
     {
         throw std::runtime_error("Failed to create instance!");
     }
-}   
+}
 
 void WVulkan::CreateSurface(WSurfaceInfo &surface, const WInstanceInfo &instance_info, const WWindowInfo &window)
 {
@@ -89,39 +88,35 @@ void WVulkan::CreateWindow(WWindowInfo &out_window_info)
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     out_window_info.window = glfwCreateWindow(
-        out_window_info.width, out_window_info.height, out_window_info.title.c_str(), nullptr, nullptr
-    );
+        out_window_info.width, out_window_info.height, out_window_info.title.c_str(), nullptr, nullptr);
 
     glfwSetWindowUserPointer(out_window_info.window, out_window_info.user_pointer);
     if (out_window_info.framebuffer_size_callback)
     {
         glfwSetFramebufferSizeCallback(
-            out_window_info.window, 
-            out_window_info.framebuffer_size_callback
-        );
+            out_window_info.window,
+            out_window_info.framebuffer_size_callback);
     }
 }
 
 void WVulkan::CreateSwapChain(
-    WSwapChainInfo& out_swap_chain_info, 
-    const WDeviceInfo& device_info, 
+    WSwapChainInfo &out_swap_chain_info,
+    const WDeviceInfo &device_info,
     const WSurfaceInfo &surface_info,
     const WWindowInfo &window_info,
     const WRenderPassInfo &render_pass_info,
-    const WRenderDebugInfo &debug_info
-)
+    const WRenderDebugInfo &debug_info)
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
         device_info.vk_physical_device,
-        surface_info.surface
-    );
+        surface_info.surface);
 
     VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
     VkPresentModeKHR present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes);
     VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities, window_info.window);
 
     uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
-    if(swap_chain_support.capabilities.maxImageCount > 0 && image_count > swap_chain_support.capabilities.maxImageCount)
+    if (swap_chain_support.capabilities.maxImageCount > 0 && image_count > swap_chain_support.capabilities.maxImageCount)
     {
         image_count = swap_chain_support.capabilities.maxImageCount;
     }
@@ -129,13 +124,13 @@ void WVulkan::CreateSwapChain(
     VkSwapchainCreateInfoKHR create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     create_info.surface = surface_info.surface;
-    
+
     create_info.minImageCount = image_count;
     create_info.imageFormat = surface_format.format;
     create_info.imageColorSpace = surface_format.colorSpace;
-    create_info.imageExtent = extent;  // Swap chain image resolution
+    create_info.imageExtent = extent; // Swap chain image resolution
     create_info.imageArrayLayers = 1;
-    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;  // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
+    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
 
     QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
     uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
@@ -183,16 +178,14 @@ void WVulkan::CreateSwapChain(
         VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         out_swap_chain_info.color_image,
-        out_swap_chain_info.color_image_memory
-    );
+        out_swap_chain_info.color_image_memory);
 
     out_swap_chain_info.color_image_view = CreateVkImageView(
         device_info.vk_device,
         out_swap_chain_info.color_image,
         out_swap_chain_info.swap_chain_image_format,
         VK_IMAGE_ASPECT_COLOR_BIT,
-        1
-    );
+        1);
 
     // Depth Resources
     VkFormat depth_format = FindDepthFormat(device_info.vk_physical_device);
@@ -208,26 +201,23 @@ void WVulkan::CreateSwapChain(
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         out_swap_chain_info.depth_image,
-        out_swap_chain_info.depth_image_memory
-    );
+        out_swap_chain_info.depth_image_memory);
 
     out_swap_chain_info.depth_image_view = CreateVkImageView(
         device_info.vk_device,
         out_swap_chain_info.depth_image,
         depth_format,
         VK_IMAGE_ASPECT_DEPTH_BIT,
-        1
-    );
+        1);
 
     //  Framebuffer is needed to render to the image
     out_swap_chain_info.swap_chain_framebuffers.resize(out_swap_chain_info.swap_chain_images.size());
-    for(size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
+    for (size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
     {
         std::array<VkImageView, 3> attachments = {
             out_swap_chain_info.color_image_view,
             out_swap_chain_info.depth_image_view,
-            out_swap_chain_info.swap_chain_image_views[i]
-        };
+            out_swap_chain_info.swap_chain_image_views[i]};
 
         VkFramebufferCreateInfo framebuffer_info{};
         framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -256,12 +246,11 @@ void WVulkan::CreateImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInf
             swap_chain_info.swap_chain_images[i],
             swap_chain_info.swap_chain_image_format,
             VK_IMAGE_ASPECT_COLOR_BIT,
-            1
-        );
+            1);
     }
 }
 
-void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo& device_info)
+void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = swap_chain_info.swap_chain_image_format;
@@ -321,8 +310,7 @@ void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwa
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     std::array<VkAttachmentDescription, 3> Attachments = {
-        color_attachment, depth_attachment, color_attachment_resolve
-    };
+        color_attachment, depth_attachment, color_attachment_resolve};
     VkRenderPassCreateInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     render_pass_info.attachmentCount = static_cast<uint32_t>(Attachments.size());
@@ -332,13 +320,13 @@ void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwa
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
-    if(vkCreateRenderPass(device_info.vk_device, &render_pass_info, nullptr, &out_render_pass_info.render_pass) != VK_SUCCESS)
+    if (vkCreateRenderPass(device_info.vk_device, &render_pass_info, nullptr, &out_render_pass_info.render_pass) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create render pass!");
     }
 }
 
-void WVulkan::CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info, const WSurfaceInfo &surface_info)
+void WVulkan::CreateCommandPool(WCommandPoolInfo &command_pool_info, const WDeviceInfo &device_info, const WSurfaceInfo &surface_info)
 {
     QueueFamilyIndices queue_family_indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
     VkCommandPoolCreateInfo pool_info{};
@@ -364,7 +352,7 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
     std::vector<VkPhysicalDevice> devices(device_count);
     vkEnumeratePhysicalDevices(instance_info.instance, &device_count, devices.data());
 
-    for (const auto& device : devices)
+    for (const auto &device : devices)
     {
         if (IsDeviceSuitable(device, surface_info.surface, device_info.device_extensions))
         {
@@ -419,34 +407,30 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
         create_info.enabledLayerCount = 0;
     }
 
-    if(vkCreateDevice(device_info.vk_physical_device, &create_info, nullptr, &device_info.vk_device) != VK_SUCCESS)
+    if (vkCreateDevice(device_info.vk_physical_device, &create_info, nullptr, &device_info.vk_device) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create logical device!");
     }
     vkGetDeviceQueue(device_info.vk_device, indices.graphics_family.value(), 0, &device_info.vk_graphics_queue);
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
-
 }
 
-WShaderModuleManager WVulkan::CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info)
+WShaderModuleManager WVulkan::CreateShaderModule(const WDeviceInfo &device, const WShaderStageInfo &out_shader_info)
 {
     return WShaderModuleManager(out_shader_info, device);
 }
 
 void WVulkan::CreateVkTexture(
-    WTextureInfo& out_texture_info,
-    const WTextureStruct& texture_struct,
-    const WDeviceInfo& device_info,
-    const WCommandPoolInfo& command_pool_info
-)
+    WTextureInfo &out_texture_info,
+    const WTextureStruct &texture_struct,
+    const WDeviceInfo &device_info,
+    const WCommandPoolInfo &command_pool_info)
 {
     out_texture_info.mip_levels = static_cast<uint32_t>(
-        std::floor(
-            std::log2(
-                std::max(texture_struct.width, texture_struct.height)
-            )
-        )
-    ) + 1;
+                                      std::floor(
+                                          std::log2(
+                                              std::max(texture_struct.width, texture_struct.height)))) +
+                                  1;
 
     uint8_t channels_num = NumOfChannels(texture_struct.channels);
 
@@ -461,12 +445,11 @@ void WVulkan::CreateVkTexture(
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         staging_buffer,
-        staging_buffer_memory
-    );
+        staging_buffer_memory);
 
-    void* data;
+    void *data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-        memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
+    memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
     CreateVkImage(
@@ -481,8 +464,7 @@ void WVulkan::CreateVkTexture(
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         out_texture_info.image,
-        out_texture_info.image_memory
-    );
+        out_texture_info.image_memory);
 
     TransitionImageLayout(
         device_info.vk_device,
@@ -492,8 +474,7 @@ void WVulkan::CreateVkTexture(
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        out_texture_info.mip_levels
-    );
+        out_texture_info.mip_levels);
 
     // Image view
     out_texture_info.image_view = CreateVkImageView(
@@ -501,29 +482,24 @@ void WVulkan::CreateVkTexture(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
-        out_texture_info.mip_levels
-    );
+        out_texture_info.mip_levels);
 
     // Sampler
     out_texture_info.sampler = CreateVkTextureSampler(
         device_info.vk_device,
         device_info.vk_physical_device,
-        out_texture_info.mip_levels
-    );
-
+        out_texture_info.mip_levels);
 }
 
 void WVulkan::CreateVkRenderPipeline(
     const WDeviceInfo &device,
-    const WDescriptorSetLayoutInfo& descriptor_set_layout_info, 
-    const WRenderPassInfo& render_pass_info,
-    WRenderPipelineInfo& out_pipeline_info
-)
+    const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
+    const WRenderPassInfo &render_pass_info,
+    WRenderPipelineInfo &out_pipeline_info)
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
-        out_pipeline_info.shaders.size()
-    );
+        out_pipeline_info.shaders.size());
 
     WShaderStageInfo *vertex_shader_stage = nullptr;
 
@@ -531,10 +507,9 @@ void WVulkan::CreateVkRenderPipeline(
     {
         ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
-            out_pipeline_info.shaders[i].type
-        );
-        
-        if(out_pipeline_info.shaders[i].type == WShaderType::Vertex)
+            out_pipeline_info.shaders[i].type);
+
+        if (out_pipeline_info.shaders[i].type == WShaderType::Vertex)
         {
             vertex_shader_stage = &out_pipeline_info.shaders[i];
         }
@@ -554,14 +529,12 @@ void WVulkan::CreateVkRenderPipeline(
     VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
     VertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(
-        vertex_shader_stage->binding_descriptors.size()
-    );
-    VertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>( 
-        vertex_shader_stage->attribute_descriptors.size()
-    );
-    VertexInputInfo.pVertexBindingDescriptions = 
+        vertex_shader_stage->binding_descriptors.size());
+    VertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(
+        vertex_shader_stage->attribute_descriptors.size());
+    VertexInputInfo.pVertexBindingDescriptions =
         vertex_shader_stage->binding_descriptors.data();
-    VertexInputInfo.pVertexAttributeDescriptions = 
+    VertexInputInfo.pVertexAttributeDescriptions =
         vertex_shader_stage->attribute_descriptors.data();
 
     VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
@@ -598,15 +571,15 @@ void WVulkan::CreateVkRenderPipeline(
     DepthStencil.stencilTestEnable = VK_FALSE;
 
     VkPipelineColorBlendAttachmentState ColorBlendAttachment{};
-    ColorBlendAttachment.colorWriteMask = 
-        VK_COLOR_COMPONENT_R_BIT | 
-        VK_COLOR_COMPONENT_G_BIT | 
-        VK_COLOR_COMPONENT_B_BIT | 
+    ColorBlendAttachment.colorWriteMask =
+        VK_COLOR_COMPONENT_R_BIT |
+        VK_COLOR_COMPONENT_G_BIT |
+        VK_COLOR_COMPONENT_B_BIT |
         VK_COLOR_COMPONENT_A_BIT;
     ColorBlendAttachment.blendEnable = VK_FALSE;
 
     VkPipelineColorBlendStateCreateInfo ColorBlending{};
-    ColorBlending.sType = 
+    ColorBlending.sType =
         VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     ColorBlending.logicOpEnable = VK_FALSE;
     ColorBlending.logicOp = VK_LOGIC_OP_COPY;
@@ -619,8 +592,7 @@ void WVulkan::CreateVkRenderPipeline(
 
     std::vector<VkDynamicState> DynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
+        VK_DYNAMIC_STATE_SCISSOR};
     VkPipelineDynamicStateCreateInfo DynamicState{};
     DynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
@@ -632,11 +604,10 @@ void WVulkan::CreateVkRenderPipeline(
     PipelineLayoutInfo.pSetLayouts = &descriptor_set_layout_info.descriptor_set_layout;
 
     if (vkCreatePipelineLayout(
-        device.vk_device,
-        &PipelineLayoutInfo,
-        nullptr,
-        &out_pipeline_info.pipeline_layout
-    ) != VK_SUCCESS)
+            device.vk_device,
+            &PipelineLayoutInfo,
+            nullptr,
+            &out_pipeline_info.pipeline_layout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create pipeline layout!");
     }
@@ -659,52 +630,48 @@ void WVulkan::CreateVkRenderPipeline(
     PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(
-        device.vk_device,
-        VK_NULL_HANDLE,
-        1,
-        &PipelineInfo,
-        nullptr,
-        &out_pipeline_info.pipeline
-    ) != VK_SUCCESS)
+            device.vk_device,
+            VK_NULL_HANDLE,
+            1,
+            &PipelineInfo,
+            nullptr,
+            &out_pipeline_info.pipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
 }
 
 void WVulkan::CreateVkDescriptorSetLayout(
-    const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info)
+    const WDeviceInfo &device, WDescriptorSetLayoutInfo &out_descriptor_set_layout_info)
 {
     VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
     DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     DescriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(
-        out_descriptor_set_layout_info.bindings.size()
-    );
+        out_descriptor_set_layout_info.bindings.size());
     DescriptorSetLayoutInfo.pBindings = out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
-        device.vk_device,
-        &DescriptorSetLayoutInfo,
-        nullptr,
-        &out_descriptor_set_layout_info.descriptor_set_layout
-    ) != VK_SUCCESS)
+            device.vk_device,
+            &DescriptorSetLayoutInfo,
+            nullptr,
+            &out_descriptor_set_layout_info.descriptor_set_layout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create descriptor set layout!");
     }
 }
 
 void WVulkan::CreateVkImage(
-    const VkDevice& device,
-    const VkPhysicalDevice& physical_device,
-    const uint32_t& width, const uint32_t& height, 
-    const uint32_t& mip_levels, 
-    const VkSampleCountFlagBits& samples,
-    const VkFormat& format, 
-    const VkImageTiling& tiling, 
-    const VkImageUsageFlags& usage, 
-    const VkMemoryPropertyFlags& properties,
-    VkImage& out_image,
-    VkDeviceMemory& out_image_memory
-)
+    const VkDevice &device,
+    const VkPhysicalDevice &physical_device,
+    const uint32_t &width, const uint32_t &height,
+    const uint32_t &mip_levels,
+    const VkSampleCountFlagBits &samples,
+    const VkFormat &format,
+    const VkImageTiling &tiling,
+    const VkImageUsageFlags &usage,
+    const VkMemoryPropertyFlags &properties,
+    VkImage &out_image,
+    VkDeviceMemory &out_image_memory)
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -734,10 +701,9 @@ void WVulkan::CreateVkImage(
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = mem_requirements.size;
     alloc_info.memoryTypeIndex = FindMemoryType(
-        physical_device, 
-        mem_requirements.memoryTypeBits, 
-        properties
-    );
+        physical_device,
+        mem_requirements.memoryTypeBits,
+        properties);
 
     if (vkAllocateMemory(device, &alloc_info, nullptr, &out_image_memory) != VK_SUCCESS)
     {
@@ -750,18 +716,17 @@ void WVulkan::CreateVkImage(
 void WVulkan::CreateVkMesh(
     WMeshInfo &out_mesh_ingo,
     const WMeshStruct &mesh_struct,
-    const WDeviceInfo &device, 
-    const WCommandPoolInfo &command_pool_info
-)
+    const WDeviceInfo &device,
+    const WCommandPoolInfo &command_pool_info)
 {
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
-    
+
     // vertex buffer
 
-     VkDeviceSize buffer_size = 
+    VkDeviceSize buffer_size =
         sizeof(mesh_struct.vertices[0]) * mesh_struct.vertices.size();
-    
+
     CreateVkBuffer(
         device.vk_device,
         device.vk_physical_device,
@@ -769,12 +734,11 @@ void WVulkan::CreateVkMesh(
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         staging_buffer,
-        staging_buffer_memory
-    );
+        staging_buffer_memory);
 
-    void* data;
+    void *data;
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-        memcpy(data, mesh_struct.vertices.data(), static_cast<size_t>(buffer_size));
+    memcpy(data, mesh_struct.vertices.data(), static_cast<size_t>(buffer_size));
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
@@ -784,17 +748,15 @@ void WVulkan::CreateVkMesh(
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         out_mesh_ingo.vertex_buffer,
-        out_mesh_ingo.vertex_buffer_memory
-    );
-    
+        out_mesh_ingo.vertex_buffer_memory);
+
     CopyVkBuffer(
         device.vk_device,
         command_pool_info.vk_command_pool,
         device.vk_graphics_queue,
         staging_buffer,
         out_mesh_ingo.vertex_buffer,
-        buffer_size
-    );
+        buffer_size);
 
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
     vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
@@ -810,11 +772,10 @@ void WVulkan::CreateVkMesh(
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         staging_buffer,
-        staging_buffer_memory
-    );
-    
+        staging_buffer_memory);
+
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-        memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
+    memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
@@ -824,8 +785,7 @@ void WVulkan::CreateVkMesh(
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         out_mesh_ingo.index_buffer,
-        out_mesh_ingo.index_buffer_memory
-    );
+        out_mesh_ingo.index_buffer_memory);
 
     CopyVkBuffer(
         device.vk_device,
@@ -833,17 +793,15 @@ void WVulkan::CreateVkMesh(
         device.vk_graphics_queue,
         staging_buffer,
         out_mesh_ingo.index_buffer,
-        buffer_size
-    );
+        buffer_size);
 
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
     vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
 }
 
 void WVulkan::CreateVkUniformBuffer(
-    WUniformBufferObjectInfo& out_uniform_buffer_object_info,
-    const WDeviceInfo& device
-)
+    WUniformBufferObjectInfo &out_uniform_buffer_object_info,
+    const WDeviceInfo &device)
 {
     VkDeviceSize buffer_size = sizeof(WUniformBufferObject);
     CreateVkBuffer(
@@ -853,8 +811,7 @@ void WVulkan::CreateVkUniformBuffer(
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         out_uniform_buffer_object_info.uniform_buffer,
-        out_uniform_buffer_object_info.uniform_buffer_memory
-    );
+        out_uniform_buffer_object_info.uniform_buffer_memory);
 
     vkMapMemory(
         device.vk_device,
@@ -862,14 +819,12 @@ void WVulkan::CreateVkUniformBuffer(
         0,
         buffer_size,
         0,
-        &out_uniform_buffer_object_info.mapped_data
-    );
+        &out_uniform_buffer_object_info.mapped_data);
 }
 
 void WVulkan::CreateVkDescriptorPool(
-    WDescriptorPoolInfo& out_descriptor_pool_info,
-    const WDeviceInfo& device
-)
+    WDescriptorPoolInfo &out_descriptor_pool_info,
+    const WDeviceInfo &device)
 {
     if (out_descriptor_pool_info.pool_sizes.empty())
     {
@@ -891,26 +846,23 @@ void WVulkan::CreateVkDescriptorPool(
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info.poolSizeCount = static_cast<uint32_t>(
-        out_descriptor_pool_info.pool_sizes.size()
-    );
+        out_descriptor_pool_info.pool_sizes.size());
     pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
     pool_info.maxSets = 1;
 
     if (vkCreateDescriptorPool(
-        device.vk_device,
-        &pool_info,
-        nullptr,
-        &out_descriptor_pool_info.descriptor_pool
-    ) != VK_SUCCESS)
+            device.vk_device,
+            &pool_info,
+            nullptr,
+            &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create descriptor pool!");
     }
 }
 
 void WVulkan::AddVkDescriptorPoolItem(
-    WDescriptorPoolInfo& out_descriptor_pool_info,
-    const VkDescriptorType& descriptor_type
-)
+    WDescriptorPoolInfo &out_descriptor_pool_info,
+    const VkDescriptorType &descriptor_type)
 {
     VkDescriptorPoolSize pool_size{};
     pool_size.type = descriptor_type;
@@ -919,16 +871,17 @@ void WVulkan::AddVkDescriptorPoolItem(
 }
 
 void WVulkan::CreateVkDescriptorSets(
-    WDescriptorSetInfo& out_descriptor_set_info,
+    WDescriptorSetInfo &out_descriptor_set_info,
     const WDeviceInfo &device,
-    const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
-    const WDescriptorPoolInfo& descriptor_pool_info,
-    const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
-)
+    const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
+    const WDescriptorPoolInfo &descriptor_pool_info,
+    const std::vector<VkWriteDescriptorSet> &write_descriptor_sets)
 {
-    std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts(
-        descriptor_set_layout_info.descriptor_set_layout
-    );
+    std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts();
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
+    }
 
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -937,55 +890,59 @@ void WVulkan::CreateVkDescriptorSets(
     alloc_info.pSetLayouts = layouts.data();
 
     if (vkAllocateDescriptorSets(
-        device.vk_device,
-        &alloc_info,
-        out_descriptor_set_info.descriptor_sets.data()
-    ) != VK_SUCCESS)
+            device.vk_device,
+            &alloc_info,
+            out_descriptor_set_info.descriptor_sets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
 }
 
-void WVulkan::UpdateVkWriteDescriptorSet(
-    VkWriteDescriptorSet& out_write_descriptor_set,
-    VkDescriptorBufferInfo& buffer_info,
-    const WUniformBufferObjectInfo& uniform_buffer_info,
-    const VkDescriptorSet& descriptor_set,
-    const uint32_t& binding
-)
-{
-    buffer_info.buffer = uniform_buffer_info.uniform_buffer;
-    buffer_info.offset = 0;
-    buffer_info.range = sizeof(WUniformBufferObject);
-    
-    out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    out_write_descriptor_set.dstSet = descriptor_set;
-    out_write_descriptor_set.dstBinding = binding;
-    out_write_descriptor_set.dstArrayElement = 0;
-    out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    out_write_descriptor_set.descriptorCount = 1;
-    out_write_descriptor_set.pBufferInfo = &buffer_info;
-}
+// void WVulkan::UpdateVkWriteDescriptorSet(
+//     VkWriteDescriptorSet& out_write_descriptor_set,
+//     VkDescriptorBufferInfo& buffer_info,
+//     const uint32_t& binding,
+//     const WUniformBufferObjectInfo& uniform_buffer_info,
+//     const VkDescriptorSet& descriptor_set
+// )
+// {
+//     buffer_info.buffer = uniform_buffer_info.uniform_buffer;
+//     buffer_info.offset = 0;
+//     buffer_info.range = sizeof(WUniformBufferObject);
+
+//     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+//     out_write_descriptor_set.dstSet = descriptor_set;
+//     out_write_descriptor_set.dstBinding = binding;
+//     out_write_descriptor_set.dstArrayElement = 0;
+//     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+//     out_write_descriptor_set.descriptorCount = 1;
+//     out_write_descriptor_set.pBufferInfo = &buffer_info;
+// }
+
+// void WVulkan::UpdateVkWriteDescriptorSet(
+//     VkWriteDescriptorSet& out_write_descriptor_set,
+//     VkDescriptorImageInfo& image_info,
+//     const uint32_t& binding,
+//     const WTextureInfo& texture_info,
+//     const VkDescriptorSet& descriptor_set
+// )
+// {
+//     image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+//     image_info.imageView = texture_info.image_view;
+//     image_info.sampler = texture_info.sampler;
+
+//     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+//     out_write_descriptor_set.dstSet = descriptor_set;
+//     out_write_descriptor_set.dstBinding = binding;
+//     out_write_descriptor_set.dstArrayElement = 0;
+//     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+//     out_write_descriptor_set.descriptorCount = 1;
+//     out_write_descriptor_set.pImageInfo = &image_info;
+// }
 
 void WVulkan::UpdateVkWriteDescriptorSet(
-    VkWriteDescriptorSet& out_write_descriptor_set,
-    VkDescriptorImageInfo& image_info,
-    const WTextureInfo& texture_info,
-    const VkDescriptorSet& descriptor_set,
-    const uint32_t& binding
-)
+    VkWriteDescriptorSet &out_write_descriptor_set)
 {
-    image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    image_info.imageView = texture_info.image_view;
-    image_info.sampler = texture_info.sampler;
-
-    out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    out_write_descriptor_set.dstSet = descriptor_set;
-    out_write_descriptor_set.dstBinding = binding;
-    out_write_descriptor_set.dstArrayElement = 0;
-    out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    out_write_descriptor_set.descriptorCount = 1;
-    out_write_descriptor_set.pImageInfo = &image_info;
 }
 
 // Destroy functions
@@ -1017,7 +974,7 @@ void WVulkan::DestroySwapChain(WSwapChainInfo &swap_chain_info, const WDeviceInf
     vkDestroyImage(device_info.vk_device, swap_chain_info.depth_image, nullptr);
     vkFreeMemory(device_info.vk_device, swap_chain_info.depth_image_memory, nullptr);
 
-    for(auto framebuffer : swap_chain_info.swap_chain_framebuffers)
+    for (auto framebuffer : swap_chain_info.swap_chain_framebuffers)
     {
         vkDestroyFramebuffer(device_info.vk_device, framebuffer, nullptr);
     }
@@ -1048,7 +1005,7 @@ void WVulkan::DestroyWindow(WWindowInfo &window_info)
     glfwTerminate();
 }
 
-void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info)
+void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo &pipeline_info)
 {
     if (pipeline_info.pipeline_layout)
     {
@@ -1056,29 +1013,26 @@ void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPi
         vkDestroyPipelineLayout(
             device.vk_device,
             pipeline_info.pipeline_layout,
-            nullptr
-        );
+            nullptr);
     }
 
     if (pipeline_info.pipeline)
-    {   
+    {
         // destroy pipeline
         vkDestroyPipeline(
             device.vk_device,
             pipeline_info.pipeline,
-            nullptr
-        );
+            nullptr);
     }
 }
 
-void WVulkan::DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info)
+void WVulkan::DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo &descriptor_set_layout_info)
 {
     // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(
         device.vk_device,
         descriptor_set_layout_info.descriptor_set_layout,
-        nullptr
-    );
+        nullptr);
 }
 
 // Helper functions
@@ -1091,11 +1045,11 @@ bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
     std::vector<VkLayerProperties> available_layers(layer_count);
     vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
 
-    for (const char* layer_name : debug_info.validation_layers)
+    for (const char *layer_name : debug_info.validation_layers)
     {
         bool layer_found = false;
 
-        for (const auto& layer_properties : available_layers)
+        for (const auto &layer_properties : available_layers)
         {
             if (std::strcmp(layer_name, layer_properties.layerName) == 0)
             {
@@ -1113,13 +1067,13 @@ bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
     return true;
 }
 
-std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
+std::vector<const char *> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
 {
     uint32_t glfw_extension_count = 0;
-    const char** glfw_extensions;
+    const char **glfw_extensions;
     glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
-    std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
+    std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
 
     if (enable_validation_layers)
     {
@@ -1132,15 +1086,14 @@ std::vector<const char*> WVulkan::GetRequiredExtensions(bool enable_validation_l
 VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT InMessageType,
-    const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
-    void* InUserData
-)
+    const VkDebugUtilsMessengerCallbackDataEXT *InCallbackData,
+    void *InUserData)
 {
     std::cerr << "Validation layer: " << InCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }
 
-bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, const std::vector<const char*>& device_extensions)
+bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice &device, const VkSurfaceKHR &surface, const std::vector<const char *> &device_extensions)
 {
     QueueFamilyIndices indices = FindQueueFamilies(device, surface);
 
@@ -1159,7 +1112,7 @@ bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKH
     return indices.IsComplete() && extensions_supported && swap_chain_adequate && supported_features.samplerAnisotropy;
 }
 
-bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const std::vector<const char*>& device_extensions)
+bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice &device, const std::vector<const char *> &device_extensions)
 {
     uint32_t extension_count;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
@@ -1168,7 +1121,7 @@ bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const 
 
     std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
 
-    for (const auto& extension : available_extensions)
+    for (const auto &extension : available_extensions)
     {
         required_extensions.erase(extension.extensionName);
     }
@@ -1176,7 +1129,7 @@ bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const 
     return required_extensions.empty();
 }
 
-WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface)
+WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     QueueFamilyIndices indices;
 
@@ -1186,7 +1139,7 @@ WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice& d
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
 
     int i = 0;
-    for (const auto& queue_family : queue_families)
+    for (const auto &queue_family : queue_families)
     {
         if (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
@@ -1211,7 +1164,7 @@ WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice& d
     return indices;
 }
 
-WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface)
+WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     SwapChainSupportDetails details;
 
@@ -1238,7 +1191,7 @@ WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysical
 
 VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
 {
-    for(const auto& available_format : available_formats)
+    for (const auto &available_format : available_formats)
     {
         if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB && available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
         {
@@ -1250,7 +1203,7 @@ VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceF
 
 VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes)
 {
-    for (const auto& available_present_mode : available_present_modes)
+    for (const auto &available_present_mode : available_present_modes)
     {
         if (available_present_mode == VK_PRESENT_MODE_MAILBOX_KHR)
         {
@@ -1260,7 +1213,7 @@ VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeK
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow* window)
+VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow *window)
 {
     if (capabilities.currentExtent.width != UINT32_MAX)
     {
@@ -1273,19 +1226,17 @@ VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilitie
         VkExtent2D actual_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
         actual_extent.width = std::max(
-            capabilities.minImageExtent.width, 
-            std::min(capabilities.maxImageExtent.width, actual_extent.width)
-        );
+            capabilities.minImageExtent.width,
+            std::min(capabilities.maxImageExtent.width, actual_extent.width));
         actual_extent.height = std::max(
-            capabilities.minImageExtent.height, 
-            std::min(capabilities.maxImageExtent.height, actual_extent.height)
-        );
+            capabilities.minImageExtent.height,
+            std::min(capabilities.maxImageExtent.height, actual_extent.height));
 
         return actual_extent;
     }
 }
 
-VkImageView  WVulkan::CreateVkImageView(const VkDevice& device, const VkImage& image, const VkFormat& format, const VkImageAspectFlags& aspect_flags, const uint32_t& mip_levels)
+VkImageView WVulkan::CreateVkImageView(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &aspect_flags, const uint32_t &mip_levels)
 {
     VkImageViewCreateInfo view_info{};
     view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1308,14 +1259,13 @@ VkImageView  WVulkan::CreateVkImageView(const VkDevice& device, const VkImage& i
 }
 
 void WVulkan::CreateVkBuffer(
-    const VkDevice& device,
-    const VkPhysicalDevice& physical_device,
+    const VkDevice &device,
+    const VkPhysicalDevice &physical_device,
     VkDeviceSize size,
     VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
-    VkBuffer& out_buffer,
-    VkDeviceMemory& out_buffer_memory
-)
+    VkBuffer &out_buffer,
+    VkDeviceMemory &out_buffer_memory)
 {
     VkBufferCreateInfo buffer_info{};
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1335,10 +1285,9 @@ void WVulkan::CreateVkBuffer(
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = mem_requirements.size;
     alloc_info.memoryTypeIndex = FindMemoryType(
-        physical_device, 
-        mem_requirements.memoryTypeBits, 
-        properties
-    );
+        physical_device,
+        mem_requirements.memoryTypeBits,
+        properties);
 
     if (vkAllocateMemory(device, &alloc_info, nullptr, &out_buffer_memory) != VK_SUCCESS)
     {
@@ -1348,7 +1297,7 @@ void WVulkan::CreateVkBuffer(
     vkBindBufferMemory(device, out_buffer, out_buffer_memory, 0);
 }
 
-VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice& device, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice &device, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates)
     {
@@ -1367,21 +1316,20 @@ VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice& device, const std:
     throw std::runtime_error("Failed to find supported format!");
 }
 
-VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice& device)
+VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice &device)
 {
     return FindSupportedFormat(
         device,
         {
             VK_FORMAT_D32_SFLOAT,
-            VK_FORMAT_D32_SFLOAT_S8_UINT,  // Stencil
+            VK_FORMAT_D32_SFLOAT_S8_UINT, // Stencil
             VK_FORMAT_D24_UNORM_S8_UINT   // Stencil
         },
         VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    );
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties)
+uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_filter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties mem_properties;
     vkGetPhysicalDeviceMemoryProperties(device, &mem_properties);
@@ -1396,7 +1344,7 @@ uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice& device, uint32_t type_f
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
-VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const WShaderType& type)
+VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const WShaderType &type)
 {
     switch (type)
     {
@@ -1412,15 +1360,14 @@ VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const WShaderType& type)
 }
 
 void WVulkan::TransitionImageLayout(
-    const VkDevice& device,
-    const VkCommandPool& command_pool, 
-    const VkQueue& graphics_queue, 
-    const VkImage& image, 
-    const VkFormat& format, 
-    const VkImageLayout& old_layout, 
-    const VkImageLayout& new_layout, 
-    const uint32_t& mip_levels
-)
+    const VkDevice &device,
+    const VkCommandPool &command_pool,
+    const VkQueue &graphics_queue,
+    const VkImage &image,
+    const VkFormat &format,
+    const VkImageLayout &old_layout,
+    const VkImageLayout &new_layout,
+    const uint32_t &mip_levels)
 {
     VkCommandBuffer command_buffer = BeginSingleTimeCommands(device, command_pool);
 
@@ -1442,8 +1389,7 @@ void WVulkan::TransitionImageLayout(
 
     if (
         old_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
-        new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-    )
+        new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
     {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -1453,8 +1399,7 @@ void WVulkan::TransitionImageLayout(
     }
     else if (
         old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-        new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-    )
+        new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
     {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -1477,18 +1422,16 @@ void WVulkan::TransitionImageLayout(
         0,
         nullptr,
         1,
-        &barrier
-    );
+        &barrier);
 
     EndSingleTimeCommands(
-        device, 
-        command_pool, 
-        graphics_queue, 
-        command_buffer
-    );
+        device,
+        command_pool,
+        graphics_queue,
+        command_buffer);
 }
 
-VkCommandBuffer WVulkan::BeginSingleTimeCommands(const VkDevice& device, const VkCommandPool& command_pool)
+VkCommandBuffer WVulkan::BeginSingleTimeCommands(const VkDevice &device, const VkCommandPool &command_pool)
 {
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1508,30 +1451,28 @@ VkCommandBuffer WVulkan::BeginSingleTimeCommands(const VkDevice& device, const V
 }
 
 void WVulkan::EndSingleTimeCommands(
-    const VkDevice& device,
-    const VkCommandPool& command_pool,
-    const VkQueue& graphics_queue,
-    const VkCommandBuffer& command_buffer
-)
+    const VkDevice &device,
+    const VkCommandPool &command_pool,
+    const VkQueue &graphics_queue,
+    const VkCommandBuffer &command_buffer)
 {
     vkEndCommandBuffer(command_buffer);
 
     VkSubmitInfo submit_info{};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;   
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers = &command_buffer;
 
-     vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
-     vkQueueWaitIdle(graphics_queue);
+    vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphics_queue);
 
-     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+    vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
 VkSampler WVulkan::CreateVkTextureSampler(
-    const VkDevice& device,
-    const VkPhysicalDevice& physical_device,
-    const uint32_t& mip_levels
-)
+    const VkDevice &device,
+    const VkPhysicalDevice &physical_device,
+    const uint32_t &mip_levels)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physical_device, &properties);
@@ -1553,7 +1494,7 @@ VkSampler WVulkan::CreateVkTextureSampler(
     sampler_info.minLod = 0;
     sampler_info.maxLod = static_cast<float>(mip_levels);
     sampler_info.mipLodBias = 0;
-    
+
     VkSampler texture_sampler;
     if (vkCreateSampler(device, &sampler_info, nullptr, &texture_sampler) != VK_SUCCESS)
     {
@@ -1564,13 +1505,12 @@ VkSampler WVulkan::CreateVkTextureSampler(
 }
 
 void WVulkan::CopyVkBuffer(
-    const VkDevice& device,
-    const VkCommandPool& command_pool,
-    const VkQueue& graphics_queue,
-    const VkBuffer& src_buffer,
-    const VkBuffer& dst_buffer,
-    const VkDeviceSize& size
-)
+    const VkDevice &device,
+    const VkCommandPool &command_pool,
+    const VkQueue &graphics_queue,
+    const VkBuffer &src_buffer,
+    const VkBuffer &dst_buffer,
+    const VkDeviceSize &size)
 {
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1588,9 +1528,9 @@ void WVulkan::CopyVkBuffer(
 
     vkBeginCommandBuffer(command_buffer, &begin_info);
 
-        VkBufferCopy copy_region{};
-        copy_region.size = size;
-        vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
+    VkBufferCopy copy_region{};
+    copy_region.size = size;
+    vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
 
     vkEndCommandBuffer(command_buffer);
 
@@ -1604,5 +1544,3 @@ void WVulkan::CopyVkBuffer(
 
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
-
-

@@ -36,7 +36,6 @@ protected:
     virtual std::vector<std::string> Formats() override;
 };
 
-
 class WIMPORTERS_API WImportTexture : public WImporter
 {
 public:
