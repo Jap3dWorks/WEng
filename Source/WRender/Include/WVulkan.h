@@ -196,6 +196,9 @@ namespace WVulkan
         VkWriteDescriptorSet& out_write_descriptor_set
     );
 
+    /**
+     * Create a WCommandBufferInfo with a VkCommandBuffer.
+    */
     void CreateVkCommandBuffers(
         WCommandBufferInfo& out_command_buffer_info,
         const WDeviceInfo &device,
