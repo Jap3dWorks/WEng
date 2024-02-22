@@ -190,27 +190,17 @@ namespace WVulkan
     }
 
     /**
-     * No arguments fallback functioin.
+     * Update VkWriteDescriptorSet No arguments fallback functioin.
     */
     void UpdateVkWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set
     );
 
-    // void UpdateVkWriteDescriptorSet(
-    //     VkWriteDescriptorSet& out_write_descriptor_set,
-    //     VkDescriptorBufferInfo& buffer_info,
-    //     const uint32_t& binding,
-    //     const WUniformBufferObjectInfo& uniform_buffer_info,
-    //     const VkDescriptorSet& descriptor_set
-    // );
-
-    // void UpdateVkWriteDescriptorSet(
-    //     VkWriteDescriptorSet& out_write_descriptor_set,
-    //     VkDescriptorImageInfo& image_info,
-    //     const uint32_t& binding,
-    //     const WTextureInfo& texture_info,
-    //     const VkDescriptorSet& descriptor_set
-    // );
+    void CreateVkCommandBuffers(
+        WCommandBufferInfo& out_command_buffer_info,
+        const WDeviceInfo &device,
+        const WCommandPoolInfo &command_pool_info
+    );
 
     // Destroy functions
     // -----------------

@@ -898,51 +898,32 @@ void WVulkan::CreateVkDescriptorSets(
     }
 }
 
-// void WVulkan::UpdateVkWriteDescriptorSet(
-//     VkWriteDescriptorSet& out_write_descriptor_set,
-//     VkDescriptorBufferInfo& buffer_info,
-//     const uint32_t& binding,
-//     const WUniformBufferObjectInfo& uniform_buffer_info,
-//     const VkDescriptorSet& descriptor_set
-// )
-// {
-//     buffer_info.buffer = uniform_buffer_info.uniform_buffer;
-//     buffer_info.offset = 0;
-//     buffer_info.range = sizeof(WUniformBufferObject);
-
-//     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-//     out_write_descriptor_set.dstSet = descriptor_set;
-//     out_write_descriptor_set.dstBinding = binding;
-//     out_write_descriptor_set.dstArrayElement = 0;
-//     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-//     out_write_descriptor_set.descriptorCount = 1;
-//     out_write_descriptor_set.pBufferInfo = &buffer_info;
-// }
-
-// void WVulkan::UpdateVkWriteDescriptorSet(
-//     VkWriteDescriptorSet& out_write_descriptor_set,
-//     VkDescriptorImageInfo& image_info,
-//     const uint32_t& binding,
-//     const WTextureInfo& texture_info,
-//     const VkDescriptorSet& descriptor_set
-// )
-// {
-//     image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-//     image_info.imageView = texture_info.image_view;
-//     image_info.sampler = texture_info.sampler;
-
-//     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-//     out_write_descriptor_set.dstSet = descriptor_set;
-//     out_write_descriptor_set.dstBinding = binding;
-//     out_write_descriptor_set.dstArrayElement = 0;
-//     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-//     out_write_descriptor_set.descriptorCount = 1;
-//     out_write_descriptor_set.pImageInfo = &image_info;
-// }
-
 void WVulkan::UpdateVkWriteDescriptorSet(
     VkWriteDescriptorSet &out_write_descriptor_set)
 {
+}
+
+void WVulkan::CreateVkCommandBuffers(
+    WCommandBufferInfo& out_command_buffer_info,
+    const WDeviceInfo &device,
+    const WCommandPoolInfo &command_pool_info
+)
+{
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.commandPool = command_pool_info.vk_command_pool;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandBufferCount = static_cast<uint32_t>(
+        out_command_buffer_info.command_buffers.size()
+    );
+
+    if (vkAllocateCommandBuffers(
+            device.vk_device,
+            &alloc_info,
+            out_command_buffer_info.command_buffers.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate command buffers!");
+    }
 }
 
 // Destroy functions

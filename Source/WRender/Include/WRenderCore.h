@@ -213,3 +213,8 @@ struct WUniformBufferObjectInfo
     VkDeviceMemory uniform_buffer_memory;
     void* mapped_data;
 };
+
+struct WCommandBufferInfo
+{
+    std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers;
+};

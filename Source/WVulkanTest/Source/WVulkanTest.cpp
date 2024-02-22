@@ -331,6 +331,7 @@ private:
         CreateUniformBuffers();
         CreateDescriptorPool();
         CreateDescriptorSets();
+        
         CreateCommandBuffers();
         CreateSyncObjects();
     }
