@@ -1,2 +1,5 @@
+python-lsp-server
 PyYAML
 Jinja2
+cmake-language-server
+

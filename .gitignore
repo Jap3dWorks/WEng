@@ -24,3 +24,5 @@ Install/
 *.gif
 *.bmp
 *.tga
+.clangd
+hx.sh
