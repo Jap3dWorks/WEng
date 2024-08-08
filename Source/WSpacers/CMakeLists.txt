@@ -14,12 +14,12 @@ target_include_directories(
 )
 
 target_link_libraries(
-    WSpacers 
-    PUBLIC 
+    WSpacers
+    PUBLIC
         WCore::WCore
-        WEngine::WEngine
         WRender::WRender
         WImporters::WImporters
+        WEngine::WEngine
 )
 
 install(

@@ -159,6 +159,7 @@ namespace VulkanUtils
 
         if(!File.is_open())
         {
+            std::cout << "Open File: " << InFileName << std::endl;
             throw std::runtime_error("Failed to open file!");
         }
 

@@ -1,10 +1,13 @@
 #pragma once
+
 #include "DllDef.h"
-#include <cstdint>
+#include "WLibraryLink.h"
 #include "WLog.h"
+#include "WCore/CoreMacros.h"
+
 #include <string>
 #include <functional>
-#include "WCore/CoreMacros.h"
+#include <cstdint>
 
 #include "WCore.intermediate.h"
 

@@ -2,6 +2,9 @@
 
 // TODO auto generate this code
 
+// Importers
+// ---------
+
 #if defined(_WIN32)
     #ifdef WIMPORTERS_EXPORTS
         #define WIMPORTERS_API __declspec(dllexport)
@@ -17,6 +20,9 @@
 #else
     #define WIMPORTERS_API
 #endif
+
+// Render
+// ------
 
 #if defined(_WIN32)
     #ifdef WRENDER_EXPORTS
@@ -34,6 +40,9 @@
     #define WRENDER_API
 #endif
 
+// Core
+// ----
+
 #if defined(_WIN32)
     #ifdef WCORE_EXPORTS
         #define WCORE_API __declspec(dllexport)
@@ -50,3 +59,22 @@
     #define WCORE_API
 #endif
 
+// Engine
+// ------
+
+#if defined(_WIN32)
+    #ifdef WENGINE_EXPORTS
+        #define WENGINE_API __declspec(dllexport)
+    #else
+        #define WENGINE_API __declspec(dllimport)
+    #endif
+
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WENGINE_EXPORTS
+        #define WENGINE_API __attribute__((visibility("default")))
+    #else
+        #define WENGINE_API
+    #endif
+#else
+    #define WENGINE_API
+#endif

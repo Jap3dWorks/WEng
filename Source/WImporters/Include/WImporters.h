@@ -14,11 +14,12 @@ public:
     /**
      * @brief Import an asset from a file
      * @param file_path The file path to import
-     * @param asset_path The asset path to import to, relative to the Content|Game directory
+     * @param asset_path The asset path to import to, relative to the Content directory
     */
     virtual std::vector<WAsset*> Import(const char* file_path, const char* asset_path) = 0;
 
 protected:
+
     virtual std::vector<std::string> Extensions() = 0;
     virtual std::vector<std::string> Formats() = 0;
 };
