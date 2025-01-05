@@ -34,7 +34,7 @@ public:
         device = other.device;
 
         other.shader_module = nullptr;
-    };
+    }
 
     ~WShaderModuleManager()
     {

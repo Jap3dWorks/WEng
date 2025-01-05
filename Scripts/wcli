@@ -1,3 +1,4 @@
 #!/bin/bash
 
-python ./Python/wcli_lib/wcli.py $@
+SRC_DIR=$(dirname "$0")
+python $SRC_DIR/../Python/wcli_lib/wcli.py $@
