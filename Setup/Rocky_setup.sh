@@ -3,7 +3,7 @@
 SCRIPT_DIR=$(dirname "$0")
 
 dnf install glm-devel glfw-devel -y
-dnf install vulkan-tools libXxf86vm -y
+dnf install vulkan-devel vulkan-tools libXxf86vm -y
 
 if [ -e $SCRIPT_DIR/../../tinyobjloader ]
 then

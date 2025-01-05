@@ -11,8 +11,15 @@ target_include_directories(
         Include
         PublicGenerated
     PRIVATE
-        Source
+        WCore::WCore
         PrivateGenerated
+        Source
+)
+
+target_link_libraries(
+    WEngine
+    PRIVATE
+        WCore::WCore
 )
 
 add_library(WEngine::WEngine ALIAS WEngine)
