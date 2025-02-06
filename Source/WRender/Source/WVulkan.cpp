@@ -415,9 +415,9 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
 }
 
-WShaderModuleManager WVulkan::CreateShaderModule(const WDeviceInfo &device, const WShaderStageInfo &out_shader_info)
+WShaderModule WVulkan::CreateShaderModule(const WDeviceInfo &device, const WShaderStageInfo &out_shader_info)
 {
-    return WShaderModuleManager(out_shader_info, device);
+    return WShaderModule(out_shader_info, device);
 }
 
 void WVulkan::CreateVkTexture(
@@ -514,7 +514,7 @@ void WVulkan::CreateVkRenderPipeline(
             vertex_shader_stage = &out_pipeline_info.shaders[i];
         }
 
-        WShaderModuleManager shader_module(out_pipeline_info.shaders[i], device);
+        WShaderModule shader_module(out_pipeline_info.shaders[i], device);
 
         ShaderStages[i].module = shader_module.GetShaderModule();
         ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();

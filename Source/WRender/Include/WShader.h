@@ -9,14 +9,15 @@
 #include <cassert>
 
 
-class WShaderModuleManager
+class WShaderModule
 {
 public:
-    WShaderModuleManager() = delete;
-    WShaderModuleManager(const WShaderModuleManager&) = delete;
-    WShaderModuleManager& operator=(const WShaderModuleManager&) = delete;
 
-    WShaderModuleManager(WShaderModuleManager&& other)
+    WShaderModule() = delete;
+    WShaderModule(const WShaderModule&) = delete;
+    WShaderModule& operator=(const WShaderModule&) = delete;
+
+    WShaderModule(WShaderModule&& other)
     {
         assert(this != &other);
         
@@ -26,7 +27,7 @@ public:
         other.shader_module = VK_NULL_HANDLE;
     };
     
-    WShaderModuleManager& operator=(WShaderModuleManager&& other)
+    WShaderModule& operator=(WShaderModule&& other)
     {
         assert(this != &other);
         
@@ -34,18 +35,13 @@ public:
         device = other.device;
 
         other.shader_module = nullptr;
+
+	return *this;
     }
 
-    ~WShaderModuleManager()
-    {
-        vkDestroyShaderModule(
-            device, 
-            shader_module,
-            nullptr
-        );
-    }
+    ~WShaderModule();
 
-    WShaderModuleManager(const WShaderStageInfo&, const WDeviceInfo&);
+    WShaderModule(const WShaderStageInfo&, const WDeviceInfo&);
 
     const VkShaderModule GetShaderModule() const
     {
@@ -53,7 +49,9 @@ public:
     }
 
 private:
+
     VkShaderModule shader_module{VK_NULL_HANDLE};
     VkDevice device{VK_NULL_HANDLE};
 
 };
+

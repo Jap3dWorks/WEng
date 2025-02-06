@@ -1,7 +1,7 @@
 #include "WShader.h"
 
 
-WShaderModuleManager::WShaderModuleManager(const WShaderStageInfo& shader_stage_info, const WDeviceInfo& device_info) :
+WShaderModule::WShaderModule(const WShaderStageInfo& shader_stage_info, const WDeviceInfo& device_info) :
     device(device_info.vk_device)
 {
     VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
@@ -22,3 +22,12 @@ WShaderModuleManager::WShaderModuleManager(const WShaderStageInfo& shader_stage_
     }
 }
 
+
+WShaderModule::~WShaderModule()
+{
+    vkDestroyShaderModule(
+	device, 
+	shader_module,
+	nullptr
+    );
+}

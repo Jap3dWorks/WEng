@@ -16,7 +16,9 @@ namespace detail
     class WObjectContainerBase;
 }
 
-
+/**
+ * @brief Basic identifier token
+*/
 class WCORE_API WId
 {
 public:

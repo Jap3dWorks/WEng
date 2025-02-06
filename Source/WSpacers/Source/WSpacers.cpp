@@ -7,10 +7,21 @@
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
+#include "WRenderPipeline.h"
+#include "WShader.h"
 #include <exception>
 #include <vector>
 
 #include <iostream>
+
+void SetupRender()
+{
+    // Shader pipeline
+    WRender Render;
+
+    WShaderModule ShaderManager;
+    
+}
 
 int main(int argc, char** argv)
 {
@@ -55,6 +66,10 @@ int main(int argc, char** argv)
 
         WTextureAsset* texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
         texture_asset->GetTexture();
+
+	// assign shader to models
+
+	// start while loop
 
         std::cout << "Test WSpacers!" << std::endl;
     }

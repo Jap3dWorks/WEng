@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "DllDef.h"
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "vulkan/vulkan.h"
@@ -10,15 +11,36 @@
 #include <vector>
 #include <unordered_map>
 
+class WRENDER_API WRenderPipeline
+{
+public:
 
-/*
- * A render pipeline is a collection of shaders and render states.
- * This class
+    WRenderPipeline()=delete;
+
+    WRenderPipeline(
+	const WDeviceInfo& in_device_info,
+	const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
+	const WRenderPassInfo& in_render_pass_info,
+	const WRenderPipelineInfo& in_pipeline_info
+	);
+
+    ~WRenderPipeline();
+
+private:
+
+    WRenderPipelineInfo render_pipeline_;
+    WDeviceInfo device_info_;
+    
+};
+
+/**
+ * @brief A render pipeline is a collection of shaders and render states.
 */
 class WRENDER_API WRenderPipelinesManager
 {
 
 public:
+
     ~WRenderPipelinesManager();
     WRenderPipelinesManager(
         WDeviceInfo& device, 
@@ -28,15 +50,17 @@ public:
     WDescriptorSetLayoutInfo& CreateDescriptorSetLayout(
         WDescriptorSetLayoutInfo descriptor_set_layout_info
     );
-    WRenderPipelineInfo& CreateRenderPipeline(
+
+    WRenderPipeline& CreateRenderPipeline(
         WRenderPipelineInfo render_pipeline_info, 
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info
     );
 
 private:
+
     WDeviceInfo& device_info_;
     WRenderPassInfo& render_pass_info_;
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
-    std::unordered_map<WPipelineType, std::vector<WRenderPipelineInfo>> render_pipelines_;
+    std::unordered_map<WPipelineType, std::vector<WRenderPipeline>> render_pipelines_;
 
 };

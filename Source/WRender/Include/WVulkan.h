@@ -62,7 +62,7 @@ namespace WVulkan
     */
     void CreateWindow(WWindowInfo &info);
 
-    WShaderModuleManager CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
+    WShaderModule CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
 
     void CreateVkTexture(
         WTextureInfo& out_texture_info, 

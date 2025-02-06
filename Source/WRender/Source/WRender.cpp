@@ -116,6 +116,6 @@ WRender::~WRender()
 
 void WRender::DrawFrame()
 {
-    
+    // TODO
 }
 

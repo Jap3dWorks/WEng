@@ -1,9 +1,7 @@
 #pragma once
 #include <memory>
 
-
 #define WCLASS(...)
-
 
 #define _WOBJECT_BODY_(_WCLASS_)                                                  \
 private:                                                                          \

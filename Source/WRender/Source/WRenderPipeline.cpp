@@ -1,13 +1,38 @@
 #include "WRenderPipeline.h"
 #include <cassert>
 #include <stdexcept>
+#include "WRenderCore.h"
 #include "WVulkan.h"
 
+// WRenderPipeline
+// ---------------
+
+WRenderPipeline::WRenderPipeline(
+    const WDeviceInfo& in_device_info,
+    const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
+    const WRenderPassInfo& in_render_pass_info,
+    const WRenderPipelineInfo& in_pipeline_info
+    ) :
+    device_info_(in_device_info),
+    render_pipeline_(in_pipeline_info)
+{
+    WVulkan::CreateVkRenderPipeline(
+        device_info_,
+        in_descriptor_set_layout_info,
+        in_render_pass_info,
+        render_pipeline_
+    );
+}
+
+WRenderPipeline::~WRenderPipeline()
+{
+    WVulkan::DestroyVkRenderPipeline(device_info_, render_pipeline_);
+}
 
 // WRenderPipelinesManager
 // -------------------
 
-WRenderPipelineInfo& WRenderPipelinesManager::CreateRenderPipeline(
+WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
     WRenderPipelineInfo render_pipeline_info,
     const WDescriptorSetLayoutInfo& descriptor_set_layout_info
 )
@@ -19,15 +44,12 @@ WRenderPipelineInfo& WRenderPipelinesManager::CreateRenderPipeline(
         throw std::logic_error("render_pipeline_info.pipeline_layout must be nullptr");
     }
 
-    // Create Vulkan Pipeline into info object
-    WVulkan::CreateVkRenderPipeline(
-        device_info_,
-        descriptor_set_layout_info,
-        render_pass_info_,
-        render_pipeline_info
-    );
-
-    render_pipelines_[render_pipeline_info.type].push_back(std::move(render_pipeline_info));
+    render_pipelines_[render_pipeline_info.type].emplace_back(
+	device_info_,
+	descriptor_set_layout_info,
+	render_pass_info_,
+	render_pipeline_info
+	);
 
     return render_pipelines_[render_pipeline_info.type].back();
 }
@@ -54,13 +76,6 @@ WRenderPipelinesManager::WRenderPipelinesManager(
 
 WRenderPipelinesManager::~WRenderPipelinesManager()
 {
-    for (auto& pipeline_type : render_pipelines_)
-    {
-        for (auto& pipeline : pipeline_type.second)
-        {
-            WVulkan::DestroyVkRenderPipeline(device_info_, pipeline);
-        }
-    }
     for(auto& descriptor_set_layout : descriptor_set_layouts_)
     {
         WVulkan::DestroyDescriptorSetLayout(device_info_, descriptor_set_layout);
