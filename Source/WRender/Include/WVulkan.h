@@ -55,14 +55,21 @@ namespace WVulkan
     /**
      * Creates a Vulkan Command Pool.
     */
-    void CreateCommandPool(WCommandPoolInfo& command_pool_info, const WDeviceInfo& device_info, const WSurfaceInfo& surface_info);
+    void CreateCommandPool(
+	WCommandPoolInfo& command_pool_info,
+	const WDeviceInfo& device_info,
+	const WSurfaceInfo& surface_info
+	);
 
     /**
      * Creates a GLFW Window.
     */
     void CreateWindow(WWindowInfo &info);
 
-    WShaderModule CreateShaderModule(const WDeviceInfo& device, const WShaderStageInfo& out_shader_info);
+    void CreateShaderModule(
+	const WDeviceInfo& device,
+	WShaderStageInfo & out_shader_info
+	);
 
     void CreateVkTexture(
         WTextureInfo& out_texture_info, 
@@ -75,7 +82,8 @@ namespace WVulkan
         const WDeviceInfo &device, 
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WRenderPassInfo& render_pass_info, 
-        WRenderPipelineInfo& out_pipeline_info
+        WRenderPipelineInfo& out_pipeline_info,
+	std::vector<WShaderStageInfo> & out_shaders
     );
 
     void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
@@ -222,6 +230,8 @@ namespace WVulkan
 
     void DestroyWindow(WWindowInfo &window_info);
 
+    void DestroyVkShaderModule(const WDeviceInfo & in_device_info, WShaderStageInfo & out_shader_stage_info);
+
     void DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info);
     
     void DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
@@ -359,5 +369,14 @@ namespace WVulkan
         const VkQueue& graphics_queue, 
         const VkCommandBuffer& command_buffer
     );
+
+    /**
+     * @brief Creates a shader stage from a spir-v shader file in disk.
+     */
+    WShaderStageInfo CreateShaderStageInfo(
+	const char* in_shader_file_path,
+	const char* int_entry_point,
+	WShaderType in_shader_type
+	);
 
 }

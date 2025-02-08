@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export PATH=$PATH:./Scripts
+export PYTHONPATH=$PYTHONPATH:./Python
+

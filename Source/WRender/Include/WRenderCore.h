@@ -7,6 +7,7 @@
 #include <array>
 
 #include <glm/glm.hpp>
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -88,9 +89,13 @@ struct WTextureInfo
     uint32_t mip_levels;
 };
 
+/**
+ * @brief: Shader related data.
+ */
 struct WShaderStageInfo
 {
     WId id;
+
     std::vector<char> code;
     WShaderType type;
     std::string entry_point;
@@ -98,6 +103,7 @@ struct WShaderStageInfo
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
 
+    VkShaderModule vk_shader_module {VK_NULL_HANDLE};
 };
 
 enum class WPipelineType
@@ -172,7 +178,8 @@ struct WRenderPipelineInfo
 {
     WId wid;
     WPipelineType type;
-    std::vector<WShaderStageInfo> shaders{};
+
+    // std::vector<WShaderStageInfo> shaders{};  // We need the shaders at creation time
 
     VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
 

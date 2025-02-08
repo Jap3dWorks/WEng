@@ -2,13 +2,18 @@
 
 #include <GLFW/glfw3.h>
 #include <array>
+#include <cstddef>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <cstring>
 #include <cmath>
+#include "WCore/WExceptions.h"
+#include "WRenderCore.h"
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
 #include "WRenderConfig.h"
+#include <fstream>
 
 // WVulkan
 // -------
@@ -415,9 +420,24 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
 }
 
-WShaderModule WVulkan::CreateShaderModule(const WDeviceInfo &device, const WShaderStageInfo &out_shader_info)
+void WVulkan::CreateShaderModule(const WDeviceInfo & device, WShaderStageInfo & out_shader_info)
 {
-    return WShaderModule(out_shader_info, device);
+    VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
+    ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    ShaderModuleCreateInfo.codeSize = out_shader_info.code.size();
+    ShaderModuleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(
+        out_shader_info.code.data()
+    );
+
+    if (vkCreateShaderModule(
+        device.vk_device, 
+        &ShaderModuleCreateInfo, 
+        nullptr, 
+        &out_shader_info.vk_shader_module
+    ) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create shader module!");
+    }
 }
 
 void WVulkan::CreateVkTexture(
@@ -495,29 +515,29 @@ void WVulkan::CreateVkRenderPipeline(
     const WDeviceInfo &device,
     const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
     const WRenderPassInfo &render_pass_info,
-    WRenderPipelineInfo &out_pipeline_info)
+    WRenderPipelineInfo &out_pipeline_info,
+    std::vector<WShaderStageInfo> & out_shader_stage_info
+    )
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
-        out_pipeline_info.shaders.size());
+        out_shader_stage_info.size());
 
     WShaderStageInfo *vertex_shader_stage = nullptr;
 
-    for (uint32_t i = 0; i < out_pipeline_info.shaders.size(); i++)
+    for (uint32_t i = 0; i < out_shader_stage_info.size(); i++)
     {
         ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
-            out_pipeline_info.shaders[i].type);
+            out_shader_stage_info[i].type);
 
-        if (out_pipeline_info.shaders[i].type == WShaderType::Vertex)
+        if (out_shader_stage_info[i].type == WShaderType::Vertex)
         {
-            vertex_shader_stage = &out_pipeline_info.shaders[i];
+            vertex_shader_stage = &out_shader_stage_info[i];
         }
 
-        WShaderModule shader_module(out_pipeline_info.shaders[i], device);
-
-        ShaderStages[i].module = shader_module.GetShaderModule();
-        ShaderStages[i].pName = out_pipeline_info.shaders[i].entry_point.c_str();
+        ShaderStages[i].module = out_shader_stage_info[i].vk_shader_module;
+        ShaderStages[i].pName = out_shader_stage_info[i].entry_point.c_str();
     }
 
     if (vertex_shader_stage == nullptr)
@@ -984,6 +1004,17 @@ void WVulkan::DestroyWindow(WWindowInfo &window_info)
 {
     glfwDestroyWindow(window_info.window);
     glfwTerminate();
+}
+
+void WVulkan::DestroyVkShaderModule(const WDeviceInfo & device, WShaderStageInfo & out_shader_stage)
+{
+    vkDestroyShaderModule(
+	device.vk_device, 
+	out_shader_stage.vk_shader_module,
+	nullptr
+    );
+
+    out_shader_stage.vk_shader_module = VK_NULL_HANDLE;
 }
 
 void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo &pipeline_info)
@@ -1524,4 +1555,37 @@ void WVulkan::CopyVkBuffer(
     vkQueueWaitIdle(graphics_queue);
 
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+}
+
+WShaderStageInfo CreateShaderStageInfo(
+    const char* in_shader_file_path,
+    const char* in_entry_point,
+    WShaderType in_shader_type
+    )
+{
+    WShaderStageInfo result;
+
+    // std::ios::ate -> at the end of the file
+    // std::ios::binary -> as binary avoid text transformations
+    std::ifstream file(in_shader_file_path, std::ios::ate | std::ios::binary);
+
+    if (!file.is_open())
+    {
+	throw std::runtime_error("FAIL while reading shader file!");
+    }
+
+    size_t file_size = (size_t) file.tellg();
+
+    result.code.resize(file_size);
+
+    file.seekg(0);
+
+    file.read(result.code.data(), file_size);
+
+    file.close();
+    
+    result.entry_point = in_entry_point;
+    result.type = in_shader_type;
+
+    return result;
 }

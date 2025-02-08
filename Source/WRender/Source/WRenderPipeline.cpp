@@ -11,22 +11,39 @@ WRenderPipeline::WRenderPipeline(
     const WDeviceInfo& in_device_info,
     const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
     const WRenderPassInfo& in_render_pass_info,
-    const WRenderPipelineInfo& in_pipeline_info
+    const WRenderPipelineInfo& in_pipeline_info,
+    std::vector<WShaderStageInfo> in_shader_stages
     ) :
     device_info_(in_device_info),
-    render_pipeline_(in_pipeline_info)
+    render_pipeline_info_(in_pipeline_info)
 {
+    
+    shader_stage_infos_ = in_shader_stages;
+
+    for(auto& shader_stage_info: shader_stage_infos_)
+    {
+	shader_stage_info.vk_shader_module = VK_NULL_HANDLE;
+	WVulkan::CreateShaderModule(device_info_, shader_stage_info);
+    }
+    
     WVulkan::CreateVkRenderPipeline(
         device_info_,
         in_descriptor_set_layout_info,
         in_render_pass_info,
-        render_pipeline_
+        render_pipeline_info_,
+	shader_stage_infos_
     );
 }
 
 WRenderPipeline::~WRenderPipeline()
 {
-    WVulkan::DestroyVkRenderPipeline(device_info_, render_pipeline_);
+
+    for (auto& shader_stage_info : shader_stage_infos_)
+    {
+	WVulkan::DestroyVkShaderModule(device_info_, shader_stage_info);
+    }
+
+    WVulkan::DestroyVkRenderPipeline(device_info_, render_pipeline_info_);
 }
 
 // WRenderPipelinesManager

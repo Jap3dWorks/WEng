@@ -1,0 +1,7 @@
+#!/bin/sh
+
+BASEDIR=$(dirname "$0")
+source ${BASEDIR}/source-environment.sh
+
+wcli Build -t Release -a x86_64
+

@@ -26,3 +26,6 @@ Install/
 *.tga
 .clangd
 hx.sh
+*~
+*#
+

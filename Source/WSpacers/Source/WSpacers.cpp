@@ -19,7 +19,10 @@ void SetupRender()
     // Shader pipeline
     WRender Render;
 
-    WShaderModule ShaderManager;
+    // Shader Stages
+    
+
+    // Render Pipeline
     
 }
 

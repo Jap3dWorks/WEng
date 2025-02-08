@@ -21,15 +21,18 @@ public:
 	const WDeviceInfo& in_device_info,
 	const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
 	const WRenderPassInfo& in_render_pass_info,
-	const WRenderPipelineInfo& in_pipeline_info
+	const WRenderPipelineInfo& in_pipeline_info,
+	std::vector<WShaderStageInfo> in_shader_stages
 	);
 
     ~WRenderPipeline();
 
 private:
 
-    WRenderPipelineInfo render_pipeline_;
+    WRenderPipelineInfo render_pipeline_info_;
     WDeviceInfo device_info_;
+
+    std::vector<WShaderStageInfo> shader_stage_infos_;
     
 };
 
