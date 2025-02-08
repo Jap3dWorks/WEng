@@ -15,7 +15,7 @@ class WRENDER_API WRenderPipeline
 {
 public:
 
-    WRenderPipeline()=delete;
+    WRenderPipeline() = delete;
 
     WRenderPipeline(
 	const WDeviceInfo& in_device_info,
@@ -55,7 +55,8 @@ public:
     );
 
     WRenderPipeline& CreateRenderPipeline(
-        WRenderPipelineInfo render_pipeline_info, 
+        WRenderPipelineInfo render_pipeline_info,
+	std::vector<WShaderStageInfo> in_shader_stages,
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info
     );
 

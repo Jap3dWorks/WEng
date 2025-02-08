@@ -14,6 +14,7 @@
 #include "WStructs/WGeometryStructs.h"
 #include "WRenderConfig.h"
 #include <fstream>
+#include <vulkan/vulkan_core.h>
 
 // WVulkan
 // -------
@@ -420,8 +421,10 @@ void WVulkan::CreateDevice(WDeviceInfo &device_info, const WInstanceInfo &instan
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
 }
 
-void WVulkan::CreateShaderModule(const WDeviceInfo & device, WShaderStageInfo & out_shader_info)
+WShaderModule WVulkan::CreateShaderModule(const WDeviceInfo & device, WShaderStageInfo & out_shader_info)
 {
+    WShaderModule result;
+
     VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
     ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     ShaderModuleCreateInfo.codeSize = out_shader_info.code.size();
@@ -433,11 +436,13 @@ void WVulkan::CreateShaderModule(const WDeviceInfo & device, WShaderStageInfo & 
         device.vk_device, 
         &ShaderModuleCreateInfo, 
         nullptr, 
-        &out_shader_info.vk_shader_module
+        &result.vk_shader_module
     ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create shader module!");
     }
+
+    return result;
 }
 
 void WVulkan::CreateVkTexture(
@@ -516,28 +521,29 @@ void WVulkan::CreateVkRenderPipeline(
     const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
     const WRenderPassInfo &render_pass_info,
     WRenderPipelineInfo &out_pipeline_info,
-    std::vector<WShaderStageInfo> & out_shader_stage_info
+    const std::vector<WShaderStageInfo> & in_shader_stage_infos,
+    const std::vector<WShaderModule> & in_shader_modules
     )
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
-        out_shader_stage_info.size());
+        in_shader_stage_infos.size());
 
-    WShaderStageInfo *vertex_shader_stage = nullptr;
+    const WShaderStageInfo * vertex_shader_stage = nullptr;
 
-    for (uint32_t i = 0; i < out_shader_stage_info.size(); i++)
+    for (uint32_t i = 0; i < in_shader_stage_infos.size(); i++)
     {
         ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
-            out_shader_stage_info[i].type);
+            in_shader_stage_infos[i].type);
 
-        if (out_shader_stage_info[i].type == WShaderType::Vertex)
+        if (in_shader_stage_infos[i].type == WShaderType::Vertex)
         {
-            vertex_shader_stage = &out_shader_stage_info[i];
+            vertex_shader_stage = &in_shader_stage_infos[i];
         }
 
-        ShaderStages[i].module = out_shader_stage_info[i].vk_shader_module;
-        ShaderStages[i].pName = out_shader_stage_info[i].entry_point.c_str();
+        ShaderStages[i].module = in_shader_modules[i].vk_shader_module;
+        ShaderStages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
     }
 
     if (vertex_shader_stage == nullptr)
@@ -1006,15 +1012,15 @@ void WVulkan::DestroyWindow(WWindowInfo &window_info)
     glfwTerminate();
 }
 
-void WVulkan::DestroyVkShaderModule(const WDeviceInfo & device, WShaderStageInfo & out_shader_stage)
+void WVulkan::DestroyVkShaderModule(const WDeviceInfo & device, WShaderModule & out_shader_module)
 {
     vkDestroyShaderModule(
 	device.vk_device, 
-	out_shader_stage.vk_shader_module,
+	out_shader_module.vk_shader_module,
 	nullptr
     );
 
-    out_shader_stage.vk_shader_module = VK_NULL_HANDLE;
+    out_shader_module.vk_shader_module = VK_NULL_HANDLE;
 }
 
 void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo &pipeline_info)
@@ -1564,6 +1570,8 @@ WShaderStageInfo CreateShaderStageInfo(
     )
 {
     WShaderStageInfo result;
+
+    // TODO: check file path extension, and compile if it is not .spv
 
     // std::ios::ate -> at the end of the file
     // std::ios::binary -> as binary avoid text transformations

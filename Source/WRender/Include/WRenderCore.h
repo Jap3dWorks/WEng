@@ -89,6 +89,11 @@ struct WTextureInfo
     uint32_t mip_levels;
 };
 
+struct WShaderModule
+{
+    VkShaderModule vk_shader_module{VK_NULL_HANDLE};
+};
+
 /**
  * @brief: Shader related data.
  */
@@ -102,8 +107,6 @@ struct WShaderStageInfo
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
-
-    VkShaderModule vk_shader_module {VK_NULL_HANDLE};
 };
 
 enum class WPipelineType

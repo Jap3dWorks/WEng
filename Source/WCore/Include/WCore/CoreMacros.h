@@ -17,9 +17,18 @@ public:                                                                         
         static WClass static_class( #_WCLASS_ );                                  \
         return static_class;                                                      \
     }                                                                             \
-    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); } \     
-
+    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); }     
 
 
 #define WOBJECT_BODY(_WCLASS_)  \
 _WOBJECT_BODY_(_WCLASS_)
+
+#define WNODISCARD [[nodiscard]]
+
+#define WINLINE inline
+
+#ifndef NDEBUG
+#define WDEBUGBUILD 1
+#else
+#define WDEBUGBUILD 0
+#endif

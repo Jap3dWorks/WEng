@@ -1,6 +1,7 @@
 #include "WRenderPipeline.h"
 #include <cassert>
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 #include "WRenderCore.h"
 #include "WVulkan.h"
 
@@ -17,13 +18,15 @@ WRenderPipeline::WRenderPipeline(
     device_info_(in_device_info),
     render_pipeline_info_(in_pipeline_info)
 {
-    
+    std::vector<WShaderModule> shader_modules(in_shader_stages.size());
+
     shader_stage_infos_ = in_shader_stages;
 
-    for(auto& shader_stage_info: shader_stage_infos_)
+    for(int i=0; i< shader_stage_infos_.size(); i++)
     {
-	shader_stage_info.vk_shader_module = VK_NULL_HANDLE;
-	WVulkan::CreateShaderModule(device_info_, shader_stage_info);
+	shader_modules[i] = WVulkan::CreateShaderModule(
+	    device_info_, shader_stage_infos_[i]
+	    );
     }
     
     WVulkan::CreateVkRenderPipeline(
@@ -31,18 +34,18 @@ WRenderPipeline::WRenderPipeline(
         in_descriptor_set_layout_info,
         in_render_pass_info,
         render_pipeline_info_,
-	shader_stage_infos_
+	shader_stage_infos_,
+	shader_modules
     );
+
+    for (auto& shader_module : shader_modules)
+    {
+	WVulkan::DestroyVkShaderModule(device_info_, shader_module);
+    }
 }
 
 WRenderPipeline::~WRenderPipeline()
 {
-
-    for (auto& shader_stage_info : shader_stage_infos_)
-    {
-	WVulkan::DestroyVkShaderModule(device_info_, shader_stage_info);
-    }
-
     WVulkan::DestroyVkRenderPipeline(device_info_, render_pipeline_info_);
 }
 
@@ -50,25 +53,28 @@ WRenderPipeline::~WRenderPipeline()
 // -------------------
 
 WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
-    WRenderPipelineInfo render_pipeline_info,
+    WRenderPipelineInfo in_render_pipeline_info,
+    std::vector<WShaderStageInfo> in_shader_stage_info,
     const WDescriptorSetLayoutInfo& descriptor_set_layout_info
 )
 {
-    if (render_pipeline_info.pipeline != nullptr) {
-        throw std::logic_error("render_pipeline_info.pipeline must be nullptr");
-    }
-    if (render_pipeline_info.pipeline_layout != nullptr) {
-        throw std::logic_error("render_pipeline_info.pipeline_layout must be nullptr");
-    }
+    assert(
+	in_render_pipeline_info.pipeline != VK_NULL_HANDLE &&
+	"render_pipeline_info.pipeline must be nullptr"
+	);
+    assert(in_render_pipeline_info.pipeline_layout != VK_NULL_HANDLE &&
+        "render_pipeline_info.pipeline_layout must be nullptr"
+	);
 
-    render_pipelines_[render_pipeline_info.type].emplace_back(
+    render_pipelines_[in_render_pipeline_info.type].emplace_back(
 	device_info_,
 	descriptor_set_layout_info,
 	render_pass_info_,
-	render_pipeline_info
+	in_render_pipeline_info,
+	in_shader_stage_info
 	);
 
-    return render_pipelines_[render_pipeline_info.type].back();
+    return render_pipelines_[in_render_pipeline_info.type].back();
 }
 
 WDescriptorSetLayoutInfo& WRenderPipelinesManager::CreateDescriptorSetLayout(

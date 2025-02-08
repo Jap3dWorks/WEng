@@ -2,11 +2,11 @@
 
 #pragma once
 
+#include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include <optional>
-
 
 /**
  * @brief Render related top class. Highest level abstraction.
@@ -15,18 +15,21 @@ class WRENDER_API WRender
 {
 public:
 
-    WId wid;
     WRender();
     ~WRender();
 
+    WNODISCARD WINLINE WId Wid() { return wid_; }
+
     void DrawFrame();
 
-    inline WRenderPipelinesManager& RenderPipelinesManager()
+    WNODISCARD WINLINE WRenderPipelinesManager& RenderPipelinesManager()
     {
 	return render_pipelines_manager_;
     }
 
 private:
+
+    WId wid_;
 
     WInstanceInfo instance_info_;
     WWindowInfo window_info_;

@@ -7,29 +7,61 @@
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
+#include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include "WShader.h"
+#include "WVulkan.h"
 #include <exception>
 #include <vector>
 
 #include <iostream>
 
-void SetupRender()
+void SetupRender(WRender & render)
 {
-    // Shader pipeline
-    WRender Render;
-
     // Shader Stages
-    
+
+    std::vector<WShaderStageInfo> shaders;
+    shaders.push_back(
+	WVulkan::CreateShaderStageInfo(
+	    "../Shaders/ShaderBase.vert",
+	    "main",
+	    WShaderType::Vertex
+	    )
+	);
+
+    shaders.push_back(
+	WVulkan::CreateShaderStageInfo(
+	    "../Shaders/ShaderBase.frag",
+	    "main",
+	    WShaderType::Fragment
+	    )
+	);
 
     // Render Pipeline
-    
+
+    WRenderPipelineInfo render_pipeline_info;
+
+    WDescriptorSetLayoutInfo descriptor_set_layout;
+
+    descriptor_set_layout = render.RenderPipelinesManager().CreateDescriptorSetLayout(
+	descriptor_set_layout
+	);
+
+    render.RenderPipelinesManager().CreateRenderPipeline(
+	render_pipeline_info,
+	shaders,
+	descriptor_set_layout
+	);
 }
 
 int main(int argc, char** argv)
 {
     try
     {
+	WRender render;
+
+	SetupRender(render);
+	
         std::vector<WAsset*> geo_asset = WImportObj().Import(
             "../Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/modelobj.modelobj"

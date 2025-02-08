@@ -4,6 +4,7 @@
 #include "WRender.h"
 #include "WShader.h"
 #include "WRenderPipeline.h"
+#include <vulkan/vulkan_core.h>
 
 
 struct WTextureStruct;
@@ -66,7 +67,7 @@ namespace WVulkan
     */
     void CreateWindow(WWindowInfo &info);
 
-    void CreateShaderModule(
+    WShaderModule CreateShaderModule(
 	const WDeviceInfo& device,
 	WShaderStageInfo & out_shader_info
 	);
@@ -83,7 +84,9 @@ namespace WVulkan
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WRenderPassInfo& render_pass_info, 
         WRenderPipelineInfo& out_pipeline_info,
-	std::vector<WShaderStageInfo> & out_shaders
+	const std::vector<WShaderStageInfo> & in_shader_stage_infos,
+	const std::vector<WShaderModule> & in_shader_modules
+	
     );
 
     void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
@@ -230,7 +233,7 @@ namespace WVulkan
 
     void DestroyWindow(WWindowInfo &window_info);
 
-    void DestroyVkShaderModule(const WDeviceInfo & in_device_info, WShaderStageInfo & out_shader_stage_info);
+    void DestroyVkShaderModule(const WDeviceInfo & in_device_info, WShaderModule & out_shader_stage_info);
 
     void DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info);
     
