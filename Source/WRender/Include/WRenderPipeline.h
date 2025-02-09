@@ -7,7 +7,6 @@
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "vulkan/vulkan.h"
-#include "WShader.h"
 #include <vector>
 #include <unordered_map>
 

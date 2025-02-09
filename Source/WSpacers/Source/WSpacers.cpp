@@ -54,6 +54,16 @@ void SetupRender(WRender & render)
 	);
 }
 
+bool run(WRender & in_render)
+{
+    while(true)
+    {
+	in_render.DrawFrame();
+    }
+
+    return true;
+}
+
 int main(int argc, char** argv)
 {
     try
@@ -105,6 +115,7 @@ int main(int argc, char** argv)
 	// assign shader to models
 
 	// start while loop
+	run(render);
 
         std::cout << "Test WSpacers!" << std::endl;
     }
@@ -114,6 +125,8 @@ int main(int argc, char** argv)
         std::cout << e.what() << std::endl;
         return 1;
     }
+
     return 0;
+
 }
 

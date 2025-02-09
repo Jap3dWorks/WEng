@@ -334,13 +334,20 @@ void WVulkan::CreateRenderPass(WRenderPassInfo &out_render_pass_info, const WSwa
 
 void WVulkan::CreateCommandPool(WCommandPoolInfo &command_pool_info, const WDeviceInfo &device_info, const WSurfaceInfo &surface_info)
 {
-    QueueFamilyIndices queue_family_indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+    QueueFamilyIndices queue_family_indices =
+	FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
     VkCommandPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 
-    if (vkCreateCommandPool(device_info.vk_device, &pool_info, nullptr, &command_pool_info.vk_command_pool) != VK_SUCCESS)
+    if (
+	vkCreateCommandPool(
+	    device_info.vk_device,
+	    &pool_info,
+	    nullptr,
+	    &command_pool_info.vk_command_pool) != VK_SUCCESS
+	)
     {
         throw std::runtime_error("Failed to create command pool!");
     }

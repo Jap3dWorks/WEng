@@ -1,11 +1,9 @@
 #pragma once
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
-#include "WRender.h"
-#include "WShader.h"
 #include "WRenderPipeline.h"
 #include <vulkan/vulkan_core.h>
-
+#include <optional>
 
 struct WTextureStruct;
 struct WMeshStruct;

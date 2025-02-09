@@ -32,3 +32,4 @@ _WOBJECT_BODY_(_WCLASS_)
 #else
 #define WDEBUGBUILD 0
 #endif
+
