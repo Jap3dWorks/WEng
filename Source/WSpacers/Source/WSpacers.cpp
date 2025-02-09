@@ -9,7 +9,6 @@
 #include "WAssets/WTextureAsset.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
-#include "WShader.h"
 #include "WVulkan.h"
 #include <exception>
 #include <vector>

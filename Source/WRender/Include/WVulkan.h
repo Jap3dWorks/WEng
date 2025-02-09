@@ -17,22 +17,22 @@ namespace WVulkan
     /**
      * Creates a Vulkan Instance.
     */
-    void CreateInstance(WInstanceInfo &out_instance_info, const WRenderDebugInfo &debug_info);
+    void Create(WInstanceInfo &out_instance_info, const WRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Surface.
     */
-    void CreateSurface(WSurfaceInfo &surface_info, const WInstanceInfo &instance, const WWindowInfo &window);
+    void Create(WSurfaceInfo &surface_info, const WInstanceInfo &instance, const WWindowInfo &window);
 
     /**
      * Creates a Vulkan Device.
     */
-    void CreateDevice(WDeviceInfo &Device, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info);
+    void Create(WDeviceInfo &Device, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Swap Chain.
     */
-    void CreateSwapChain(
+    void Create(
         WSwapChainInfo &out_swap_chain, 
         const WDeviceInfo &device_info, 
         const WSurfaceInfo &surface_info, 
@@ -44,79 +44,85 @@ namespace WVulkan
     /**
      * Creates Vulkan Image Views.
     */
-    void CreateImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+    void Create(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
 
     /**
      * Creates a Vulkan Render Pass.
     */
-    void CreateRenderPass(WRenderPassInfo& render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
+    void Create(WRenderPassInfo & render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
 
     /**
      * Creates a Vulkan Command Pool.
     */
-    void CreateCommandPool(
-	WCommandPoolInfo& command_pool_info,
-	const WDeviceInfo& device_info,
-	const WSurfaceInfo& surface_info
+    void Create(
+	WCommandPoolInfo & command_pool_info,
+	const WDeviceInfo & device_info,
+	const WSurfaceInfo & surface_info
 	);
 
     /**
-     * Creates a GLFW Window.
+     * @brief: Creates a GLFW Window.
     */
-    void CreateWindow(WWindowInfo &info);
+    void Create(WWindowInfo &info);
 
     WShaderModule CreateShaderModule(
-	const WDeviceInfo& device,
-	WShaderStageInfo & out_shader_info
+	WShaderStageInfo & out_shader_info,
+	const WDeviceInfo & device
 	);
 
-    void CreateVkTexture(
+    void Create(
         WTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
         const WDeviceInfo& device_info,
         const WCommandPoolInfo& command_pool_info
     );
 
-    void CreateVkRenderPipeline(
+    void Create(
+        WRenderPipelineInfo& out_pipeline_info,
         const WDeviceInfo &device, 
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WRenderPassInfo& render_pass_info, 
-        WRenderPipelineInfo& out_pipeline_info,
 	const std::vector<WShaderStageInfo> & in_shader_stage_infos,
 	const std::vector<WShaderModule> & in_shader_modules
 	
     );
 
-    void CreateVkDescriptorSetLayout(const WDeviceInfo &device, WDescriptorSetLayoutInfo& out_descriptor_set_layout_info);
+    void Create(
+	WDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
+	const WDeviceInfo &device
+	);
 
-    void CreateVkMesh(
+    /**
+     * @brief Create a vulkan  mesh
+     */
+    void Create(
         WMeshInfo& out_mesh_info,
         const WMeshStruct& mesh_struct,
         const WDeviceInfo &device,
         const WCommandPoolInfo &command_pool_info
     );
 
-    void CreateVkUniformBuffer(
+    void Create(
         WUniformBufferObjectInfo& out_uniform_buffer_info,
         const WDeviceInfo &device
     );
 
-    void CreateVkDescriptorPool(
+    void Create(
         WDescriptorPoolInfo& out_descriptor_pool_info,
         const WDeviceInfo &device
     );
 
     /**
-     * Add a descriptor pool item to the descriptor pool.
+     * @brief Add a descriptor pool item to the descriptor pool.
      * @param out_descriptor_pool_info: The descriptor pool to add the item to.
      * @param descriptor_type: The type of descriptor to add.
     */
-    void AddVkDescriptorPoolItem(
+    void AddDescriptorPoolItem(
         WDescriptorPoolInfo& out_descriptor_pool_info,
         const VkDescriptorType& descriptor_type
     );
 
-    void CreateVkDescriptorSets(
+    void Create(
         WDescriptorSetInfo& out_descriptor_set_info,
         const WDeviceInfo &device,
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
@@ -146,7 +152,7 @@ namespace WVulkan
      * Update a VkWriteDescriptorSet with a UBO struct.
     */
     template<typename ...Args>
-    void UpdateVkWriteDescriptorSet(
+    void UpdateWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set,
         WVkWriteDescriptorSetUBOStruct& ubo_struct,
         Args&&... args
@@ -164,7 +170,7 @@ namespace WVulkan
         out_write_descriptor_set.descriptorCount = 1;
         out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
 
-        UpdateVkWriteDescriptorSet(
+        UpdateWriteDescriptorSet(
             out_write_descriptor_set, 
             std::forward<Args>(args)...
         );
@@ -174,7 +180,7 @@ namespace WVulkan
      * Update a VkWriteDescriptorSet with a texture struct.
     */
     template<typename ...Args>
-    void UpdateVkWriteDescriptorSet(
+    void UpdateWriteDescriptorSet(
         VkWriteDescriptorSet& out_write_descriptor_set,
         WVkWriteDescriptorSetTextureStruct& texture_struct,
         Args&&... args
@@ -192,7 +198,7 @@ namespace WVulkan
         out_write_descriptor_set.descriptorCount = 1;
         out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
 
-        UpdateVkWriteDescriptorSet(
+        UpdateWriteDescriptorSet(
             out_write_descriptor_set, 
             std::forward<Args>(args)...
         );
@@ -201,37 +207,40 @@ namespace WVulkan
     /**
      * Update VkWriteDescriptorSet No arguments fallback functioin.
     */
-    void UpdateVkWriteDescriptorSet(
-        VkWriteDescriptorSet& out_write_descriptor_set
+    void Update(
+        VkWriteDescriptorSet & out_write_descriptor_set
     );
 
     /**
      * Create a WCommandBufferInfo with a VkCommandBuffer.
     */
-    void CreateVkCommandBuffers(
-        WCommandBufferInfo& out_command_buffer_info,
-        const WDeviceInfo &device,
-        const WCommandPoolInfo &command_pool_info
+    void Create(
+        WCommandBufferInfo & out_command_buffer_info,
+        const WDeviceInfo & device,
+        const WCommandPoolInfo & command_pool_info
     );
 
     // Destroy functions
     // -----------------
 
-    void DestroyInstance(WInstanceInfo &instance_info);
+    void Destroy(WInstanceInfo & instance_info);
 
-    void DestroySurface(WSurfaceInfo &surface_info, const WInstanceInfo &instance_info);
+    void Destroy(WSurfaceInfo & surface_info, const WInstanceInfo & instance_info);
 
-    void DestroyDevice(WDeviceInfo &device_info);
+    void Destroy(WDeviceInfo & device_info);
 
-    void DestroySwapChain(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+    void Destroy(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
 
-    void DestroyImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+    void Destroy(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
 
-    void DestroyRenderPass(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info);
+    void Dertroy(WRenderPassInfo & render_pass_info, const WDeviceInfo & device_info);
 
-    void DestroyWindow(WWindowInfo &window_info);
+    void Destroy(WWindowInfo &window_info);
 
-    void DestroyVkShaderModule(const WDeviceInfo & in_device_info, WShaderModule & out_shader_stage_info);
+    void DestroyVkShaderModule(
+	WShaderModule & out_shader_stage_info,
+	const WDeviceInfo & in_device_info
+	);
 
     void DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info);
     

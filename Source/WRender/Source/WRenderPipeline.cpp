@@ -25,22 +25,26 @@ WRenderPipeline::WRenderPipeline(
     for(int i=0; i< shader_stage_infos_.size(); i++)
     {
 	shader_modules[i] = WVulkan::CreateShaderModule(
-	    device_info_, shader_stage_infos_[i]
+	    shader_stage_infos_[i],
+	    device_info_
 	    );
     }
     
-    WVulkan::CreateVkRenderPipeline(
+    WVulkan::Create(
+        render_pipeline_info_,
         device_info_,
         in_descriptor_set_layout_info,
         in_render_pass_info,
-        render_pipeline_info_,
 	shader_stage_infos_,
 	shader_modules
     );
 
     for (auto& shader_module : shader_modules)
     {
-	WVulkan::DestroyVkShaderModule(device_info_, shader_module);
+	WVulkan::DestroyVkShaderModule(
+	    shader_module,
+	    device_info_
+	    );
     }
 }
 
@@ -86,7 +90,10 @@ WDescriptorSetLayoutInfo& WRenderPipelinesManager::CreateDescriptorSetLayout(
     }
 
     // Create Vulkan Descriptor Set Layout into info object
-    WVulkan::CreateVkDescriptorSetLayout(device_info_, descriptor_set_layout_info);
+    WVulkan::Create(
+	descriptor_set_layout_info,
+	device_info_
+	);
 
     descriptor_set_layouts_.push_back(std::move(descriptor_set_layout_info));
 

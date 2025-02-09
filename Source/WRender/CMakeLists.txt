@@ -4,8 +4,8 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
         Source/WRender.cpp
         Source/WRenderPipeline.cpp
-        Source/WShader.cpp
         Source/WVulkan.cpp
+	Source/WRenderCommandPool.cpp
     )
 
 find_package(glm REQUIRED)

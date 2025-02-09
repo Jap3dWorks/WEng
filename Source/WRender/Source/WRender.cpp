@@ -43,23 +43,23 @@ WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
 void WRender::initialize()
 {
     // Create Vulkan Instance
-    WVulkan::CreateInstance(
+    WVulkan::Create(
         instance_info_,
         debug_info_
     );
 
-    WVulkan::CreateWindow(
+    WVulkan::Create(
         window_info_
     );
 
-    WVulkan::CreateSurface(
+    WVulkan::Create(
         surface_info_,
         instance_info_, 
         window_info_
     );
 
     // Create Vulkan Device
-    WVulkan::CreateDevice(
+    WVulkan::Create(
         device_info_, 
         instance_info_, 
         surface_info_,
@@ -67,7 +67,7 @@ void WRender::initialize()
     );
 
     // Create Vulkan Swap Chain
-    WVulkan::CreateSwapChain(
+    WVulkan::Create(
         swap_chain_info_,
         device_info_,
         surface_info_,
@@ -77,13 +77,13 @@ void WRender::initialize()
     );
 
     // Create Vulkan Image Views
-    WVulkan::CreateImageViews(
+    WVulkan::Create(
         swap_chain_info_,
         device_info_
     );
 
     // Create Vulkan Render Pass
-    WVulkan::CreateRenderPass(
+    WVulkan::Create(
         render_pass_info_,
         swap_chain_info_,
         device_info_
@@ -96,22 +96,22 @@ WRender::~WRender()
     WVulkan::DestroyRenderPass(render_pass_info_, device_info_);
 
     // Destroy Vulkan Image Views
-    WVulkan::DestroyImageViews(swap_chain_info_, device_info_);
+    WVulkan::Destroy(swap_chain_info_, device_info_);
 
     // Destroy Vulkan Swap Chain
-    WVulkan::DestroySwapChain(swap_chain_info_, device_info_);
+    WVulkan::Destroy(swap_chain_info_, device_info_);
     
     // Destroy Vulkan Device
-    WVulkan::DestroyDevice(device_info_);
+    WVulkan::Destroy(device_info_);
 
     // Destroy Vulkan Surface
-    WVulkan::DestroySurface(surface_info_, instance_info_);
+    WVulkan::Destroy(surface_info_, instance_info_);
 
     // Destroy Vulkan Instance
-    WVulkan::DestroyInstance(instance_info_);
+    WVulkan::Destroy(instance_info_);
 
     // Destroy Window
-    WVulkan::DestroyWindow(window_info_);
+    WVulkan::Destroy(window_info_);
 }
 
 void WRender::DrawFrame()
