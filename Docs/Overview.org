@@ -1,53 +1,57 @@
-# Overview
-WEngine is a kind of game  engine conceived to act with a client server logic.
-We want ti use Wasm to create a web application.
-The movitaion of the project is to create an easy deployable system in an intranet.
-The server will contain assets, data and users and the client will be the editor (web or desktop).
-Each new functionality could be a new client. 
-e.g a game compiler client.
-Configs, acces rights and versions should be managed by the Server.
+* Overview
 
-## Milestones
-- [ ] Draw a simple cube using wasm
-- [ ] Draw a simple plane and load glsl shaders
-- [ ] Load a simple module in main app
-- [ ] Load an Usd Model
-- [ ] Rethink project structure
+Project to learn vulkan
 
-## Things to think about
-### Component system and component registration.
-### Command system, command queue and command registation (Threaded).
-### Editor Mode and Play Mode.
-### File format, I bet for Usd file format.
-### Edit and view modes, useful when more than one user wants to edit the same asset or scene.
-Because it have already solutions for scene compositing and dependencies.
+** Setup
 
-## To Investigate
+1. Run *Setup/<Distro>_setup.sh* file.
+   #+BEGIN_SRC sh
+   sudo Setup/<Distro>_setup.sh
+   #+END_SRC
+2. Create a python virtual env.
+   #+BEGIN_SRC python
+   python -m venv .venv                         &&
+   chmod +x .venv/bin/activate                  &&
+   source .venv/bin/activate                    &&
+   python -m pip install -r Python/requirements.txt
+   #+END_SRC
+3. *compile_commands.json* are genereated inside *build/Linux_x86_64_Release_Standalone* folder.
 
-## References
+** Things to think about
+
+- Component system and component registration.
+- Command system, command queue and command registation (Threaded).
+- Editor Mode and Play Mode.
+- File format, I bet for Usd file format.
+- Edit and view modes, useful when more than one user wants to edit the same asset or scene.
+
+** To Investigate
+
+** References
+
 https://github.com/mortennobel/SimpleRenderEngine
 
-### DLL_EXPORT
+*** DLL_EXPORT
 https://stackoverflow.com/a/2164853
 
-### GUI
+*** GUI
 https://github.com/ocornut/imgui
 
-### Kodi CMake multiplataforma
+*** Kodi CMake multiplataforma
 https://github.com/xbmc/xbmc
 
-### Emscripten Debug
+*** Emscripten Debug
 https://emscripten.org/docs/porting/Debugging.html
 https://stackoverflow.com/questions/52333308/debug-emscripten-with-visual-studio-code
 
 https://developer.chrome.com/blog/wasm-debugging-2020/
 https://goo.gle/wasm-debugging-extension
 
-### Glew Docs
+*** Glew Docs
 https://glew.sourceforge.net/install.html
 
-### Vulkan Memory Library
+*** Vulkan Memory Library
 https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
 
-### Vulkan Memory Allocation
+*** Vulkan Memory Allocation
 https://developer.nvidia.com/vulkan-memory-management
