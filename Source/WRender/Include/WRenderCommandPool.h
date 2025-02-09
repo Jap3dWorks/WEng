@@ -16,7 +16,12 @@ public:
 
     ~WRenderCommandPool();
 
+    WRenderCommandPool(WRenderCommandPool&& other) noexcept;
+    WRenderCommandPool& operator=(WRenderCommandPool&& other) noexcept;
+
 private:
+
+    void Move(WRenderCommandPool&& out_other) noexcept;
 
     WCommandPoolInfo command_pool_info_;
     WDeviceInfo device_info_;

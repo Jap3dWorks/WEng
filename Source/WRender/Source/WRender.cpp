@@ -77,7 +77,7 @@ void WRender::initialize()
     );
 
     // Create Vulkan Image Views
-    WVulkan::Create(
+    WVulkan::CreateImageView(
         swap_chain_info_,
         device_info_
     );
@@ -93,7 +93,7 @@ void WRender::initialize()
 WRender::~WRender()
 {
     // Destroy Vulkan Render Pass
-    WVulkan::DestroyRenderPass(render_pass_info_, device_info_);
+    WVulkan::Destroy(render_pass_info_, device_info_);
 
     // Destroy Vulkan Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);

@@ -172,7 +172,9 @@ void WVulkan::Create(
     out_swap_chain_info.swap_chain_extent = extent;
 
     // Color Resources, renders are drawn to this image, later to be presented to the swap chain
-    CreateVkImage(
+    Create(
+        out_swap_chain_info.color_image,
+        out_swap_chain_info.color_image_memory,
         device_info.vk_device,
         device_info.vk_physical_device,
         out_swap_chain_info.swap_chain_extent.width,
@@ -182,11 +184,10 @@ void WVulkan::Create(
         out_swap_chain_info.swap_chain_image_format,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        out_swap_chain_info.color_image,
-        out_swap_chain_info.color_image_memory);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
 
-    out_swap_chain_info.color_image_view = CreateVkImageView(
+    out_swap_chain_info.color_image_view = CreateImageView(
         device_info.vk_device,
         out_swap_chain_info.color_image,
         out_swap_chain_info.swap_chain_image_format,
@@ -195,7 +196,9 @@ void WVulkan::Create(
 
     // Depth Resources
     VkFormat depth_format = FindDepthFormat(device_info.vk_physical_device);
-    CreateVkImage(
+    Create(
+        out_swap_chain_info.depth_image,
+        out_swap_chain_info.depth_image_memory,
         device_info.vk_device,
         device_info.vk_physical_device,
         out_swap_chain_info.swap_chain_extent.width,
@@ -205,11 +208,10 @@ void WVulkan::Create(
         depth_format,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        out_swap_chain_info.depth_image,
-        out_swap_chain_info.depth_image_memory);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
 
-    out_swap_chain_info.depth_image_view = CreateVkImageView(
+    out_swap_chain_info.depth_image_view = CreateImageView(
         device_info.vk_device,
         out_swap_chain_info.depth_image,
         depth_format,
@@ -241,13 +243,13 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::CreateImageView(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
     swap_chain_info.swap_chain_image_views.resize(swap_chain_info.swap_chain_images.size());
 
     for (size_t i = 0; i < swap_chain_info.swap_chain_images.size(); i++)
     {
-        swap_chain_info.swap_chain_image_views[i] = CreateVkImageView(
+        swap_chain_info.swap_chain_image_views[i] = CreateImageView(
             device_info.vk_device,
             swap_chain_info.swap_chain_images[i],
             swap_chain_info.swap_chain_image_format,
@@ -256,7 +258,7 @@ void WVulkan::Create(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_
     }
 }
 
-void WVulkan::Create(WRenderPassInfo &out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = swap_chain_info.swap_chain_image_format;
@@ -480,20 +482,23 @@ void WVulkan::Create(
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateVkBuffer(
+        staging_buffer,
+        staging_buffer_memory,
         device_info.vk_device,
         device_info.vk_physical_device,
         image_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        staging_buffer,
-        staging_buffer_memory);
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
     void *data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
-    CreateVkImage(
+    Create(
+        out_texture_info.image,
+        out_texture_info.image_memory,
         device_info.vk_device,
         device_info.vk_physical_device,
         texture_struct.width,
@@ -503,9 +508,8 @@ void WVulkan::Create(
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        out_texture_info.image,
-        out_texture_info.image_memory);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
 
     TransitionImageLayout(
         device_info.vk_device,
@@ -518,7 +522,7 @@ void WVulkan::Create(
         out_texture_info.mip_levels);
 
     // Image view
-    out_texture_info.image_view = CreateVkImageView(
+    out_texture_info.image_view = CreateImageView(
         device_info.vk_device,
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
@@ -526,7 +530,7 @@ void WVulkan::Create(
         out_texture_info.mip_levels);
 
     // Sampler
-    out_texture_info.sampler = CreateVkTextureSampler(
+    out_texture_info.sampler = CreateTextureSampler(
         device_info.vk_device,
         device_info.vk_physical_device,
         out_texture_info.mip_levels);
@@ -704,7 +708,9 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::CreateVkImage(
+void WVulkan::Create(
+    VkImage &out_image,
+    VkDeviceMemory &out_image_memory,
     const VkDevice &device,
     const VkPhysicalDevice &physical_device,
     const uint32_t &width, const uint32_t &height,
@@ -713,9 +719,8 @@ void WVulkan::CreateVkImage(
     const VkFormat &format,
     const VkImageTiling &tiling,
     const VkImageUsageFlags &usage,
-    const VkMemoryPropertyFlags &properties,
-    VkImage &out_image,
-    VkDeviceMemory &out_image_memory)
+    const VkMemoryPropertyFlags &properties
+    )
 {
     VkImageCreateInfo image_info{};
     image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -772,13 +777,14 @@ void WVulkan::Create(
         sizeof(mesh_struct.vertices[0]) * mesh_struct.vertices.size();
 
     CreateVkBuffer(
+        staging_buffer,
+        staging_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        staging_buffer,
-        staging_buffer_memory);
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
     void *data;
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
@@ -786,13 +792,14 @@ void WVulkan::Create(
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
+        out_mesh_ingo.vertex_buffer,
+        out_mesh_ingo.vertex_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        out_mesh_ingo.vertex_buffer,
-        out_mesh_ingo.vertex_buffer_memory);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
 
     CopyVkBuffer(
         device.vk_device,
@@ -810,26 +817,28 @@ void WVulkan::Create(
     buffer_size = sizeof(mesh_struct.indices[0]) * mesh_struct.indices.size();
 
     CreateVkBuffer(
+        staging_buffer,
+        staging_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        staging_buffer,
-        staging_buffer_memory);
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
     memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
+        out_mesh_ingo.index_buffer,
+        out_mesh_ingo.index_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        out_mesh_ingo.index_buffer,
-        out_mesh_ingo.index_buffer_memory);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	);
 
     CopyVkBuffer(
         device.vk_device,
@@ -849,13 +858,14 @@ void WVulkan::Create(
 {
     VkDeviceSize buffer_size = sizeof(WUniformBufferObject);
     CreateVkBuffer(
+        out_uniform_buffer_object_info.uniform_buffer,
+        out_uniform_buffer_object_info.uniform_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        out_uniform_buffer_object_info.uniform_buffer,
-        out_uniform_buffer_object_info.uniform_buffer_memory);
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
 
     vkMapMemory(
         device.vk_device,
@@ -1011,7 +1021,7 @@ void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device
     vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
 }
 
-void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::DestroyImageView(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
     for (auto image_view : swap_chain_info.swap_chain_image_views)
     {
@@ -1019,7 +1029,7 @@ void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device
     }
 }
 
-void WVulkan::DestroyRenderPass(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info)
+void WVulkan::Destroy(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info)
 {
     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
 }
@@ -1030,7 +1040,7 @@ void WVulkan::Destroy(WWindowInfo &window_info)
     glfwTerminate();
 }
 
-void WVulkan::DestroyVkShaderModule(
+void WVulkan::Destroy(
     WShaderModule & out_shader_module,
     const WDeviceInfo & device
     )
@@ -1044,7 +1054,10 @@ void WVulkan::DestroyVkShaderModule(
     out_shader_module.vk_shader_module = VK_NULL_HANDLE;
 }
 
-void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo &pipeline_info)
+void WVulkan::Destroy(
+    WRenderPipelineInfo & pipeline_info,
+    const WDeviceInfo & device
+    )
 {
     if (pipeline_info.pipeline_layout)
     {
@@ -1053,6 +1066,8 @@ void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPi
             device.vk_device,
             pipeline_info.pipeline_layout,
             nullptr);
+
+	pipeline_info.pipeline_layout = VK_NULL_HANDLE;
     }
 
     if (pipeline_info.pipeline)
@@ -1061,17 +1076,38 @@ void WVulkan::DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPi
         vkDestroyPipeline(
             device.vk_device,
             pipeline_info.pipeline,
-            nullptr);
+            nullptr
+	    );
+
+	pipeline_info.pipeline = VK_NULL_HANDLE;
     }
 }
 
-void WVulkan::DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo &descriptor_set_layout_info)
+void WVulkan::Destroy(
+    WDescriptorSetLayoutInfo & descriptor_set_layout_info,
+    const WDeviceInfo & device
+    )
 {
     // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(
         device.vk_device,
         descriptor_set_layout_info.descriptor_set_layout,
-        nullptr);
+        nullptr
+	);
+}
+
+void WVulkan::Destroy(
+    WCommandPoolInfo & out_command_pool,
+    const WDeviceInfo & in_device_info
+    )
+{
+    vkDestroyCommandPool(
+	in_device_info.vk_device,
+	out_command_pool.vk_command_pool,
+	nullptr
+	);
+
+    out_command_pool.vk_command_pool = nullptr;
 }
 
 // Helper functions
@@ -1275,7 +1311,7 @@ VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilitie
     }
 }
 
-VkImageView WVulkan::CreateVkImageView(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &aspect_flags, const uint32_t &mip_levels)
+VkImageView WVulkan::CreateImageView(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &aspect_flags, const uint32_t &mip_levels)
 {
     VkImageViewCreateInfo view_info{};
     view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -1298,13 +1334,14 @@ VkImageView WVulkan::CreateVkImageView(const VkDevice &device, const VkImage &im
 }
 
 void WVulkan::CreateVkBuffer(
+    VkBuffer &out_buffer,
+    VkDeviceMemory &out_buffer_memory,
     const VkDevice &device,
     const VkPhysicalDevice &physical_device,
     VkDeviceSize size,
     VkBufferUsageFlags usage,
-    VkMemoryPropertyFlags properties,
-    VkBuffer &out_buffer,
-    VkDeviceMemory &out_buffer_memory)
+    VkMemoryPropertyFlags properties
+    )
 {
     VkBufferCreateInfo buffer_info{};
     buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1508,7 +1545,7 @@ void WVulkan::EndSingleTimeCommands(
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-VkSampler WVulkan::CreateVkTextureSampler(
+VkSampler WVulkan::CreateTextureSampler(
     const VkDevice &device,
     const VkPhysicalDevice &physical_device,
     const uint32_t &mip_levels)

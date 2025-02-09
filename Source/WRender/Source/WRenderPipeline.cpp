@@ -41,7 +41,7 @@ WRenderPipeline::WRenderPipeline(
 
     for (auto& shader_module : shader_modules)
     {
-	WVulkan::DestroyVkShaderModule(
+	WVulkan::Destroy(
 	    shader_module,
 	    device_info_
 	    );
@@ -50,7 +50,10 @@ WRenderPipeline::WRenderPipeline(
 
 WRenderPipeline::~WRenderPipeline()
 {
-    WVulkan::DestroyVkRenderPipeline(device_info_, render_pipeline_info_);
+    WVulkan::Destroy(
+	render_pipeline_info_,
+	device_info_
+	);
 }
 
 // WRenderPipelinesManager
@@ -108,7 +111,10 @@ WRenderPipelinesManager::~WRenderPipelinesManager()
 {
     for(auto& descriptor_set_layout : descriptor_set_layouts_)
     {
-        WVulkan::DestroyDescriptorSetLayout(device_info_, descriptor_set_layout);
+        WVulkan::Destroy(
+	    descriptor_set_layout,
+	    device_info_
+	    );
     }
 }
 

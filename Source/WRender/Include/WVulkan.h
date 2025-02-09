@@ -33,7 +33,7 @@ namespace WVulkan
      * Creates a Vulkan Swap Chain.
     */
     void Create(
-        WSwapChainInfo &out_swap_chain, 
+        WSwapChainInfo & out_swap_chain, 
         const WDeviceInfo &device_info, 
         const WSurfaceInfo &surface_info, 
         const WWindowInfo &window_info, 
@@ -42,17 +42,17 @@ namespace WVulkan
     );
 
     /**
-     * Creates Vulkan Image Views.
+     * @brief Creates Vulkan Image Views.
     */
-    void Create(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info);
+    void CreateImageView(WSwapChainInfo & swap_chain_info, const WDeviceInfo &device_info);
 
     /**
-     * Creates a Vulkan Render Pass.
+     * @brief Creates a Vulkan Render Pass.
     */
     void Create(WRenderPassInfo & render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
 
     /**
-     * Creates a Vulkan Command Pool.
+     * @brief Creates a Vulkan Command Pool.
     */
     void Create(
 	WCommandPoolInfo & command_pool_info,
@@ -149,7 +149,7 @@ namespace WVulkan
     };
 
     /**
-     * Update a VkWriteDescriptorSet with a UBO struct.
+     * @brief Update a VkWriteDescriptorSet with a UBO struct.
     */
     template<typename ...Args>
     void UpdateWriteDescriptorSet(
@@ -177,7 +177,7 @@ namespace WVulkan
     }
 
     /**
-     * Update a VkWriteDescriptorSet with a texture struct.
+     * @brief Update a VkWriteDescriptorSet with a texture struct.
     */
     template<typename ...Args>
     void UpdateWriteDescriptorSet(
@@ -220,6 +220,44 @@ namespace WVulkan
         const WCommandPoolInfo & command_pool_info
     );
 
+    void Create(
+        VkImage& out_image,
+        VkDeviceMemory& out_image_memory,
+        const VkDevice& device, 
+        const VkPhysicalDevice& physical_device,
+        const uint32_t& width, const uint32_t& height, 
+        const uint32_t& mip_levels, 
+        const VkSampleCountFlagBits& samples,
+        const VkFormat& format, 
+        const VkImageTiling& tiling, 
+        const VkImageUsageFlags& usage, 
+        const VkMemoryPropertyFlags& properties
+    );
+
+    VkImageView CreateImageView(
+        const VkDevice& device, 
+        const VkImage& image, 
+        const VkFormat& format, 
+        const VkImageAspectFlags& aspect_flags, 
+        const uint32_t& mip_levels
+    );
+
+    VkSampler CreateTextureSampler(
+        const VkDevice& device, 
+        const VkPhysicalDevice& physical_device,
+        const uint32_t& mip_levels
+    );
+
+    void CreateVkBuffer(
+        VkBuffer & out_buffer, 
+        VkDeviceMemory & out_buffer_memory,
+        const VkDevice& device,
+        const VkPhysicalDevice& physical_device,
+        VkDeviceSize size, 
+        VkBufferUsageFlags usage, 
+        VkMemoryPropertyFlags properties
+    );
+
     // Destroy functions
     // -----------------
 
@@ -231,21 +269,31 @@ namespace WVulkan
 
     void Destroy(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
 
-    void Destroy(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
+    void DestroyImageView(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
 
-    void Dertroy(WRenderPassInfo & render_pass_info, const WDeviceInfo & device_info);
+    void Destroy(WRenderPassInfo & render_pass_info, const WDeviceInfo & device_info);
 
     void Destroy(WWindowInfo &window_info);
 
-    void DestroyVkShaderModule(
+    void Destroy(
 	WShaderModule & out_shader_stage_info,
 	const WDeviceInfo & in_device_info
 	);
 
-    void DestroyVkRenderPipeline(const WDeviceInfo &device, const WRenderPipelineInfo& pipeline_info);
+    void Destroy(
+	WRenderPipelineInfo & pipeline_info,
+	const WDeviceInfo & device
+	);
     
-    void DestroyDescriptorSetLayout(const WDeviceInfo &device, const WDescriptorSetLayoutInfo& descriptor_set_layout_info); 
+    void Destroy(
+	WDescriptorSetLayoutInfo & descriptor_set_layout_info,
+	const WDeviceInfo & device
+	); 
 
+    void Destroy(
+	WCommandPoolInfo & out_command_pool,
+	const WDeviceInfo & in_device_info
+	);
 
     // Helper Functions
     // ----------------
@@ -304,44 +352,6 @@ namespace WVulkan
     VkFormat FindDepthFormat(const VkPhysicalDevice& device);
 
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
-
-    void CreateVkImage(
-        const VkDevice& device, 
-        const VkPhysicalDevice& physical_device,
-        const uint32_t& width, const uint32_t& height, 
-        const uint32_t& mip_levels, 
-        const VkSampleCountFlagBits& samples,
-        const VkFormat& format, 
-        const VkImageTiling& tiling, 
-        const VkImageUsageFlags& usage, 
-        const VkMemoryPropertyFlags& properties,
-        VkImage& out_image,
-        VkDeviceMemory& out_image_memory
-    );
-
-    VkImageView CreateVkImageView(
-        const VkDevice& device, 
-        const VkImage& image, 
-        const VkFormat& format, 
-        const VkImageAspectFlags& aspect_flags, 
-        const uint32_t& mip_levels
-    );
-
-    VkSampler CreateVkTextureSampler(
-        const VkDevice& device, 
-        const VkPhysicalDevice& physical_device,
-        const uint32_t& mip_levels
-    );
-
-    void CreateVkBuffer(
-        const VkDevice& device,
-        const VkPhysicalDevice& physical_device,
-        VkDeviceSize size, 
-        VkBufferUsageFlags usage, 
-        VkMemoryPropertyFlags properties, 
-        VkBuffer& out_buffer, 
-        VkDeviceMemory& out_buffer_memory
-    );
 
     void TransitionImageLayout(
         const VkDevice& device, 
