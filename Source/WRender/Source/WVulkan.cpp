@@ -980,6 +980,26 @@ void WVulkan::Create(
     }
 }
 
+void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in_device_info)
+{
+    VkSemaphoreCreateInfo semaphore_create_info; 
+    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    
+    if(vkCreateSemaphore(
+	   in_device_info.vk_device,
+	   &semaphore_create_info,
+	   nullptr,
+	   &out_semaphore_info.semaphore) != VK_SUCCESS) 
+    {
+	throw std::runtime_error("Failed to create semaphore!");
+    }
+}
+
+void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_info)
+{
+    
+}
+
 // Destroy functions
 // -----------------
 
@@ -1108,6 +1128,72 @@ void WVulkan::Destroy(
 	);
 
     out_command_pool.vk_command_pool = nullptr;
+}
+
+// Record Commands
+// ---------------
+
+void RecordRenderPassCommandBuffer(
+    WCommandBufferInfo & out_command_buffer_info,
+    const WRenderPassInfo & in_render_pass,
+    const WSwapChainInfo & in_swap_chain,
+    const WRenderPipelineInfo & in_render_pipeline_info,
+    int in_framebuffer_index
+    )
+{
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = 0;
+    begin_info.pInheritanceInfo = nullptr;
+
+    if (vkBeginCommandBuffer(out_command_buffer_info.command_buffers[0], &begin_info) != VK_SUCCESS) {
+	throw std::runtime_error("Failed to begin recording command buffer!");
+    }
+
+    VkRenderPassBeginInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_info.renderPass =  in_render_pass.render_pass;
+    render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_framebuffer_index];
+    render_pass_info.renderArea.offset = {0,0};
+    render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
+    VkClearValue clear_color = {{{0.f, 0.f, 0.f, 1.f}}};
+    render_pass_info.clearValueCount = 1;
+    render_pass_info.pClearValues = &clear_color;
+
+    vkCmdBeginRenderPass(
+	out_command_buffer_info.command_buffers[0],
+	&render_pass_info,
+	VK_SUBPASS_CONTENTS_INLINE
+	);
+
+    vkCmdBindPipeline(
+	out_command_buffer_info.command_buffers[0],
+	VK_PIPELINE_BIND_POINT_GRAPHICS,
+	in_render_pipeline_info.pipeline
+	);
+
+    VkViewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = static_cast<float>(in_swap_chain.swap_chain_extent.width);
+    viewport.height = static_cast<float>(in_swap_chain.swap_chain_extent.height);
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+    vkCmdSetViewport(out_command_buffer_info.command_buffers[0], 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = in_swap_chain.swap_chain_extent;
+    vkCmdSetScissor(out_command_buffer_info.command_buffers[0], 0, 1, &scissor);
+
+    // Rendering vertices Here
+    vkCmdDraw(out_command_buffer_info.command_buffers[0], 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(out_command_buffer_info.command_buffers[0]);
+
+    if(vkEndCommandBuffer(out_command_buffer_info.command_buffers[0]) != VK_SUCCESS) {
+	throw std::runtime_error("Failed to record command buffer!");
+    }
 }
 
 // Helper functions

@@ -224,7 +224,27 @@ struct WUniformBufferObjectInfo
     void* mapped_data;
 };
 
+/**
+ * @brief Helper struxt to store command buffer data
+ */
 struct WCommandBufferInfo
 {
+    WId wid;
     std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers;
 };
+
+struct WSemaphoreInfo
+{
+    WId wid;
+
+    
+    VkSemaphore semaphore=VK_NULL_HANDLE;
+};
+
+struct WFenceInfo
+{
+    WId wid;
+
+    VkFence fence=VK_NULL_HANDLE;
+};
+
