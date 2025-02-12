@@ -43,16 +43,23 @@ class WRENDER_API WRenderPipelinesManager
 public:
 
     ~WRenderPipelinesManager();
+
     WRenderPipelinesManager(
         WDeviceInfo& device, 
         WRenderPassInfo& render_pass_info
     );
 
-    WDescriptorSetLayoutInfo& CreateDescriptorSetLayout(
+    WRenderPipelinesManager(
+	WRenderPipelinesManager && other
+	);
+
+    WRenderPipelinesManager & operator=(WRenderPipelinesManager && other);
+
+    WDescriptorSetLayoutInfo & CreateDescriptorSetLayout(
         WDescriptorSetLayoutInfo descriptor_set_layout_info
     );
 
-    WRenderPipeline& CreateRenderPipeline(
+    WRenderPipeline & CreateRenderPipeline(
         WRenderPipelineInfo render_pipeline_info,
 	std::vector<WShaderStageInfo> in_shader_stages,
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info
@@ -60,8 +67,8 @@ public:
 
 private:
 
-    WDeviceInfo& device_info_;
-    WRenderPassInfo& render_pass_info_;
+    WDeviceInfo device_info_;
+    WRenderPassInfo render_pass_info_;
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
     std::unordered_map<WPipelineType, std::vector<WRenderPipeline>> render_pipelines_;
 

@@ -6,6 +6,7 @@
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
+#include "WRenderCommandPool.h"
 #include <optional>
 
 /**
@@ -35,13 +36,15 @@ private:
     WWindowInfo window_info_;
     WSurfaceInfo surface_info_;
     WDeviceInfo device_info_;
-    WRenderPipelinesManager render_pipelines_manager_;
     WRenderDebugInfo debug_info_;
 
     WSwapChainInfo swap_chain_info_;
     WRenderPassInfo render_pass_info_;
 
-    WCommandPoolInfo command_pool_info_;
+    WCommandPoolInfo render_command_pool_info_;
+
+    WRenderCommandPool render_command_pool_;
+    WRenderPipelinesManager render_pipelines_manager_;
 
     void initialize();
 };

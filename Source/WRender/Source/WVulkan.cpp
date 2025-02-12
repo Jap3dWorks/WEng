@@ -991,13 +991,24 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
 	   nullptr,
 	   &out_semaphore_info.semaphore) != VK_SUCCESS) 
     {
-	throw std::runtime_error("Failed to create semaphore!");
+	throw std::runtime_error("Failed creating a semaphore!");
     }
 }
 
 void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_info)
 {
-    
+    VkFenceCreateInfo fence_create_info;
+    fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    if(vkCreateFence(
+	   in_device_info.vk_device,
+	   &fence_create_info,
+	   nullptr,
+	   &out_fence_info.fence
+	   ) != VK_SUCCESS)
+    {
+	throw std::runtime_error("Failed creating a fence!");
+    }
 }
 
 // Destroy functions

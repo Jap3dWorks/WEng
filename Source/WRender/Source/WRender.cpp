@@ -1,4 +1,7 @@
 #include "WRender.h"
+#include "WRenderCommandPool.h"
+#include "WRenderCore.h"
+#include "WRenderPipeline.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -38,6 +41,11 @@ WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
     debug_info_ = {};
     debug_info_.wid = {}; // WId::GenerateId();
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
+
+    render_command_pool_info_ = {};
+    render_command_pool_info_.wid = {};
+
+    initialize();
 }
 
 void WRender::initialize()
@@ -88,6 +96,17 @@ void WRender::initialize()
         swap_chain_info_,
         device_info_
     );
+
+    render_pipelines_manager_ = WRenderPipelinesManager(
+	device_info_,
+	render_pass_info_
+	);
+
+    render_command_pool_ = WRenderCommandPool(
+	WCommandPoolInfo(),
+	device_info_,
+	surface_info_
+	);
 }
 
 WRender::~WRender()

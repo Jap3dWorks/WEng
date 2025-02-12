@@ -84,6 +84,7 @@ WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
     return render_pipelines_[in_render_pipeline_info.type].back();
 }
 
+
 WDescriptorSetLayoutInfo& WRenderPipelinesManager::CreateDescriptorSetLayout(
     WDescriptorSetLayoutInfo descriptor_set_layout_info
 )
@@ -116,5 +117,23 @@ WRenderPipelinesManager::~WRenderPipelinesManager()
 	    device_info_
 	    );
     }
+}
+
+WRenderPipelinesManager::WRenderPipelinesManager(
+    WRenderPipelinesManager && other
+    ) : device_info_(std::move(other.device_info_)),
+	render_pass_info_(std::move(other.render_pass_info_)),
+	render_pipelines_(std::move(other.render_pipelines_))
+{
+}
+
+
+WRenderPipelinesManager & WRenderPipelinesManager::operator=(WRenderPipelinesManager && other)
+{
+    device_info_ = std::move(other.device_info_);
+    render_pass_info_ = std::move(other.render_pass_info_);
+    render_pipelines_ = std::move(other.render_pipelines_);
+
+    return *this;
 }
 
