@@ -1,6 +1,7 @@
 #include "WRenderPipeline.h"
 #include <cassert>
 #include <stdexcept>
+#include <utility>
 #include <vulkan/vulkan_core.h>
 #include "WRenderCore.h"
 #include "WVulkan.h"
@@ -26,9 +27,9 @@ WRenderPipeline::WRenderPipeline(
 
     for(int i=0; i< shader_stage_infos_.size(); i++)
     {
-	shader_modules[i] = WVulkan::CreateShaderModule(
-	    shader_stage_infos_[i],
-	    device_info_
+        shader_modules[i] = WVulkan::CreateShaderModule(
+            shader_stage_infos_[i],
+            device_info_
 	    );
     }
     
@@ -37,29 +38,57 @@ WRenderPipeline::WRenderPipeline(
         device_info_,
         in_descriptor_set_layout_info,
         in_render_pass_info,
-	shader_stage_infos_,
-	shader_modules
+        shader_stage_infos_,
+        shader_modules
     );
 
     for (auto& shader_module : shader_modules)
     {
-	WVulkan::Destroy(
-	    shader_module,
-	    device_info_
+        WVulkan::Destroy(
+            shader_module,
+            device_info_
 	    );
     }
 }
 
 WRenderPipeline::~WRenderPipeline()
 {
-    WVulkan::Destroy(
-	render_pipeline_info_,
-	device_info_
-	);
+    if(render_pipeline_info_.pipeline != VK_NULL_HANDLE)
+    {
+        WVulkan::Destroy(
+            render_pipeline_info_,
+            device_info_
+        );
+    }
+}
+
+WRenderPipeline::WRenderPipeline(WRenderPipeline && out_other)
+{
+    Move(std::move(out_other));
+}
+
+WRenderPipeline & WRenderPipeline::operator=(WRenderPipeline && out_other)
+{
+    Move(std::move(out_other));
+    return *this;
+}
+
+void WRenderPipeline::Move(WRenderPipeline && out_other)
+{
+    render_pipeline_info_ = std::move(out_other.render_pipeline_info_);
+    device_info_ = std::move(out_other.device_info_);
+    shader_stage_infos_ = std::move(shader_stage_infos_);
+
+    out_other.render_pipeline_info_ = {};
+    out_other.device_info_ = {};
+    out_other.shader_stage_infos_ = {};
 }
 
 // WRenderPipelinesManager
 // -------------------
+
+WRenderPipelinesManager::WRenderPipelinesManager()
+{}
 
 WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
     WRenderPipelineInfo in_render_pipeline_info,
@@ -122,20 +151,28 @@ WRenderPipelinesManager::~WRenderPipelinesManager()
 }
 
 WRenderPipelinesManager::WRenderPipelinesManager(
-    WRenderPipelinesManager && other
-    ) : device_info_(std::move(other.device_info_)),
-	render_pass_info_(std::move(other.render_pass_info_)),
-	render_pipelines_(std::move(other.render_pipelines_))
+        WRenderPipelinesManager && other
+    )
 {
+    Move(std::move(other));
 }
 
 
 WRenderPipelinesManager & WRenderPipelinesManager::operator=(WRenderPipelinesManager && other)
 {
-    device_info_ = std::move(other.device_info_);
-    render_pass_info_ = std::move(other.render_pass_info_);
-    render_pipelines_ = std::move(other.render_pipelines_);
+    Move(std::move(other));
 
     return *this;
+}
+
+void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)
+{
+    device_info_ = std::move(out_other.device_info_);
+    render_pass_info_ = std::move(out_other.render_pass_info_);
+    render_pipelines_ = std::move(out_other.render_pipelines_);
+
+    out_other.device_info_ = {};
+    out_other.render_pass_info_ = {};
+    out_other.render_pipelines_ = {};
 }
 

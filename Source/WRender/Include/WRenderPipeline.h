@@ -16,10 +16,10 @@ public:
     WRenderPipeline();
 
     WRenderPipeline(
-        const WDeviceInfo& in_device_info,
-        const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
-        const WRenderPassInfo& in_render_pass_info,
-        const WRenderPipelineInfo& in_pipeline_info,
+        const WDeviceInfo & in_device_info,
+        const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info,
+        const WRenderPassInfo & in_render_pass_info,
+        const WRenderPipelineInfo & in_pipeline_info,
         std::vector<WShaderStageInfo> in_shader_stages
 	);
 
@@ -27,7 +27,7 @@ public:
 
     WRenderPipeline(WRenderPipeline && out_other);
 
-    WRenderPipeline & operator=(WRenderPipeline && out_render);
+    WRenderPipeline & operator=(WRenderPipeline && out_other);
 
     WRenderPipeline & operator=(const WRenderPipeline & in_render) = delete;
     WRenderPipeline(const WRenderPipeline & in_render) = delete;
@@ -38,6 +38,8 @@ private:
     WDeviceInfo device_info_;
 
     std::vector<WShaderStageInfo> shader_stage_infos_;
+
+    void Move(WRenderPipeline && out_other);
     
 };
 
@@ -49,6 +51,8 @@ class WRENDER_API WRenderPipelinesManager
 
 public:
 
+    WRenderPipelinesManager();
+
     ~WRenderPipelinesManager();
 
     WRenderPipelinesManager(
@@ -57,7 +61,7 @@ public:
     );
 
     WRenderPipelinesManager(
-	WRenderPipelinesManager && other
+        WRenderPipelinesManager && other
 	);
 
     WRenderPipelinesManager & operator=(WRenderPipelinesManager && other);
@@ -73,6 +77,8 @@ public:
     );
 
 private:
+
+    void Move(WRenderPipelinesManager && out_other);
 
     WDeviceInfo device_info_;
     WRenderPassInfo render_pass_info_;

@@ -19,13 +19,16 @@ public:
     WRender();
     ~WRender();
 
-    WNODISCARD WINLINE WId Wid() { return wid_; }
+    WNODISCARD WINLINE WId Wid()
+    {
+        return wid_;
+    }
 
     void DrawFrame();
 
-    WNODISCARD WINLINE WRenderPipelinesManager& RenderPipelinesManager()
+    WNODISCARD WINLINE WRenderPipelinesManager & RenderPipelinesManager()
     {
-	return render_pipelines_manager_;
+        return render_pipelines_manager_;
     }
 
 private:
