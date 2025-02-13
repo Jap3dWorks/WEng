@@ -8,6 +8,8 @@
 // WRenderPipeline
 // ---------------
 
+WRenderPipeline::WRenderPipeline() {}
+
 WRenderPipeline::WRenderPipeline(
     const WDeviceInfo& in_device_info,
     const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,

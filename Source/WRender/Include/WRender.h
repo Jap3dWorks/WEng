@@ -46,5 +46,4 @@ private:
     WRenderCommandPool render_command_pool_;
     WRenderPipelinesManager render_pipelines_manager_;
 
-    void initialize();
 };

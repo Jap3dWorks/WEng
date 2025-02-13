@@ -8,16 +8,22 @@ class WRENDER_API WRenderCommandPool
 
 public:
 
+    WRenderCommandPool();
+
     WRenderCommandPool(
-	WCommandPoolInfo in_command_pool_info,
-	const WDeviceInfo & in_device_info,
-	const WSurfaceInfo & in_surface_info
+        WCommandPoolInfo in_command_pool_info,
+        const WDeviceInfo & in_device_info,
+        const WSurfaceInfo & in_surface_info
 	);
 
     ~WRenderCommandPool();
 
     WRenderCommandPool(WRenderCommandPool&& other) noexcept;
-    WRenderCommandPool& operator=(WRenderCommandPool&& other) noexcept;
+    WRenderCommandPool & operator=(WRenderCommandPool&& other) noexcept;
+
+    WRenderCommandPool(const WRenderCommandPool & in_other) = delete;
+
+    WRenderCommandPool & operator=(const WRenderCommandPool & in_other) = delete;
 
 private:
 

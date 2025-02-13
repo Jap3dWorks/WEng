@@ -3,6 +3,13 @@
 #include "WVulkan.h"
 #include <vulkan/vulkan_core.h>
 
+
+WRenderCommandPool::WRenderCommandPool() :
+    device_info_(), command_pool_info_()
+{
+    
+}
+
 WRenderCommandPool::WRenderCommandPool(
     WCommandPoolInfo in_command_pool_info,
     const WDeviceInfo & in_device_info,

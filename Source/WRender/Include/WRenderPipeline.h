@@ -13,17 +13,24 @@ class WRENDER_API WRenderPipeline
 {
 public:
 
-    WRenderPipeline() = delete;
+    WRenderPipeline();
 
     WRenderPipeline(
-	const WDeviceInfo& in_device_info,
-	const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
-	const WRenderPassInfo& in_render_pass_info,
-	const WRenderPipelineInfo& in_pipeline_info,
-	std::vector<WShaderStageInfo> in_shader_stages
+        const WDeviceInfo& in_device_info,
+        const WDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
+        const WRenderPassInfo& in_render_pass_info,
+        const WRenderPipelineInfo& in_pipeline_info,
+        std::vector<WShaderStageInfo> in_shader_stages
 	);
 
     ~WRenderPipeline();
+
+    WRenderPipeline(WRenderPipeline && out_other);
+
+    WRenderPipeline & operator=(WRenderPipeline && out_render);
+
+    WRenderPipeline & operator=(const WRenderPipeline & in_render) = delete;
+    WRenderPipeline(const WRenderPipeline & in_render) = delete;
 
 private:
 

@@ -23,7 +23,7 @@
 // WRender
 // -------
 
-WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
+WRender::WRender() 
 {
     instance_info_ = {};
     instance_info_.wid = {}; // WId::GenerateId();
@@ -45,11 +45,6 @@ WRender::WRender() : render_pipelines_manager_(device_info_, render_pass_info_)
     render_command_pool_info_ = {};
     render_command_pool_info_.wid = {};
 
-    initialize();
-}
-
-void WRender::initialize()
-{
     // Create Vulkan Instance
     WVulkan::Create(
         instance_info_,
