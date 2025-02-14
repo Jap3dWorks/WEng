@@ -991,7 +991,7 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
 	   nullptr,
 	   &out_semaphore_info.semaphore) != VK_SUCCESS) 
     {
-	throw std::runtime_error("Failed creating a semaphore!");
+        throw std::runtime_error("Failed creating a semaphore!");
     }
 }
 
@@ -999,6 +999,7 @@ void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_
 {
     VkFenceCreateInfo fence_create_info;
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_create_info.flags = out_fence_info.creation_flags;
 
     if(vkCreateFence(
 	   in_device_info.vk_device,
@@ -1007,7 +1008,7 @@ void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_
 	   &out_fence_info.fence
 	   ) != VK_SUCCESS)
     {
-	throw std::runtime_error("Failed creating a fence!");
+        throw std::runtime_error("Failed creating a fence!");
     }
 }
 
@@ -1124,7 +1125,7 @@ void WVulkan::Destroy(
         device.vk_device,
         descriptor_set_layout_info.descriptor_set_layout,
         nullptr
-	);
+        );
 }
 
 void WVulkan::Destroy(
@@ -1133,12 +1134,40 @@ void WVulkan::Destroy(
     )
 {
     vkDestroyCommandPool(
-	in_device_info.vk_device,
-	out_command_pool.vk_command_pool,
-	nullptr
-	);
+        in_device_info.vk_device,
+        out_command_pool.vk_command_pool,
+        nullptr
+        );
 
     out_command_pool.vk_command_pool = nullptr;
+}
+
+void WVulkan::Destroy(
+    WSemaphoreInfo & out_semaphore_info,
+    const WDeviceInfo & in_device_info
+    )
+{
+    vkDestroySemaphore(
+        in_device_info.vk_device,
+        out_semaphore_info.semaphore,
+        nullptr
+        );
+
+    out_semaphore_info.semaphore = VK_NULL_HANDLE;
+}
+
+void WVulkan::Destroy(
+    WFenceInfo & out_fence_info,
+    const WDeviceInfo & in_device_info
+    )
+{
+    vkDestroyFence(
+        in_device_info.vk_device,
+        out_fence_info.fence,
+        nullptr
+        );
+
+    out_fence_info.fence = VK_NULL_HANDLE;
 }
 
 // Record Commands

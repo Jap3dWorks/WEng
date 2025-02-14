@@ -236,7 +236,6 @@ struct WCommandBufferInfo
 struct WSemaphoreInfo
 {
     WId wid;
-
     
     VkSemaphore semaphore=VK_NULL_HANDLE;
 };
@@ -245,6 +244,8 @@ struct WFenceInfo
 {
     WId wid;
 
-    VkFence fence=VK_NULL_HANDLE;
+    VkFence fence = VK_NULL_HANDLE;
+
+    VkFenceCreateFlagBits creation_flags = VK_FENCE_CREATE_SIGNALED_BIT;
 };
 

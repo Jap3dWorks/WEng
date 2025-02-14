@@ -260,7 +260,10 @@ namespace WVulkan
 
     void Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in_device_info);
 
-    void Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_info);
+    void Create(
+        WFenceInfo & out_fence_info,
+        const WDeviceInfo & in_device_info
+        );
 
     // Destroy functions
     // -----------------
@@ -279,35 +282,36 @@ namespace WVulkan
 
     void Destroy(WWindowInfo &window_info);
 
-    void Destroy(
-	WShaderModule & out_shader_stage_info,
-	const WDeviceInfo & in_device_info
-	);
+    void Destroy(WShaderModule &out_shader_stage_info,
+                 const WDeviceInfo &in_device_info);
+
+    void Destroy(WRenderPipelineInfo &pipeline_info, const WDeviceInfo &device);
+
+    void Destroy(WDescriptorSetLayoutInfo &descriptor_set_layout_info,
+                 const WDeviceInfo &device);
+
+    void Destroy(WCommandPoolInfo &out_command_pool,
+                 const WDeviceInfo &in_device_info);
 
     void Destroy(
-	WRenderPipelineInfo & pipeline_info,
-	const WDeviceInfo & device
-	);
-    
-    void Destroy(
-	WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-	const WDeviceInfo & device
-	); 
+        WSemaphoreInfo & out_semaphore_info,
+        const WDeviceInfo & in_device_info
+        );
 
     void Destroy(
-	WCommandPoolInfo & out_command_pool,
-	const WDeviceInfo & in_device_info
-	);
+        WFenceInfo & out_fence_info,
+        const WDeviceInfo & in_device_info
+        );
 
     // Record Commands
     // ---------------
 
     void RecordRenderCommandBuffer(
-	WCommandBufferInfo & out_command_buffer_info,
-	const WRenderPassInfo & in_render_pass_info,
-	const WSwapChainInfo & in_swap_chain_info,
-	const WRenderPipelineInfo & in_render_pipeline_info,
-	int in_framebuffer_index = 0
+        WCommandBufferInfo & out_command_buffer_info,
+        const WRenderPassInfo & in_render_pass_info,
+        const WSwapChainInfo & in_swap_chain_info,
+        const WRenderPipelineInfo & in_render_pipeline_info,
+        int in_framebuffer_index = 0
 	);
 
     // Draw

@@ -2,6 +2,8 @@
 #include "WRenderCommandPool.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
+#include <cstdint>
+#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -18,7 +20,6 @@
 #endif
 
 #include "WVulkan.h"
-
 
 // WRender
 // -------
@@ -93,15 +94,32 @@ WRender::WRender()
     );
 
     render_pipelines_manager_ = WRenderPipelinesManager(
-	device_info_,
-	render_pass_info_
+        device_info_,
+        render_pass_info_
 	);
 
     render_command_pool_ = WRenderCommandPool(
-	WCommandPoolInfo(),
-	device_info_,
-	surface_info_
+        WCommandPoolInfo(),
+        device_info_,
+        surface_info_
 	);
+
+    render_command_buffer_ = render_command_pool_.CreateCommandBuffer();
+
+    WVulkan::Create(
+        image_available_semaphore_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        render_available_semaphore_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        in_flight_fence_,
+        device_info_
+        );
 }
 
 WRender::~WRender()
@@ -131,5 +149,39 @@ WRender::~WRender()
 void WRender::DrawFrame()
 {
     // TODO
+    // glfwPollEvents();
+
+    vkWaitForFences(
+        device_info_.vk_device,
+        1,
+        &in_flight_fence_.fence,
+        VK_TRUE,
+        UINT64_MAX
+        );
+    
+    vkResetFences(
+        device_info_.vk_device,
+        1,
+        &in_flight_fence_.fence
+        );
+
+    uint32_t image_index;
+
+    vkAcquireNextImageKHR(
+        device_info_.vk_device,
+        swap_chain_info_.swap_chain,
+        UINT64_MAX,
+        image_available_semaphore_.semaphore,
+        VK_NULL_HANDLE,
+        &image_index
+        );
+
+    vkResetCommandBuffer(render_command_buffer_.command_buffers[0], 0);
+
+//     WVulkan::RecordRenderCommandBuffer(
+//         render_command_buffer_,
+//         render_pass_info_,
+//         swap_chain_info_, );
+
 }
 

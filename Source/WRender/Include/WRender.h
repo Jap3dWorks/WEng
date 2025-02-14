@@ -47,6 +47,12 @@ private:
     WCommandPoolInfo render_command_pool_info_;
 
     WRenderCommandPool render_command_pool_;
+    WCommandBufferInfo render_command_buffer_;
+    
     WRenderPipelinesManager render_pipelines_manager_;
+
+    WSemaphoreInfo image_available_semaphore_;
+    WSemaphoreInfo render_available_semaphore_;
+    WFenceInfo in_flight_fence_;
 
 };

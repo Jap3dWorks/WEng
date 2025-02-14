@@ -22,8 +22,11 @@ public:
     WRenderCommandPool & operator=(WRenderCommandPool&& other) noexcept;
 
     WRenderCommandPool(const WRenderCommandPool & in_other) = delete;
-
     WRenderCommandPool & operator=(const WRenderCommandPool & in_other) = delete;
+
+    WCommandBufferInfo CreateCommandBuffer();
+
+
 
 private:
 
@@ -31,6 +34,8 @@ private:
 
     WCommandPoolInfo command_pool_info_;
     WDeviceInfo device_info_;
+
+    std::vector<WCommandBufferInfo> command_buffers_;
     
 };
 

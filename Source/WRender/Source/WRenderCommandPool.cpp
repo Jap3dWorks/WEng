@@ -19,9 +19,9 @@ WRenderCommandPool::WRenderCommandPool(
     device_info_(in_device_info)
 {
     WVulkan::Create(
-	command_pool_info_,
-	device_info_,
-	in_surface_info
+        command_pool_info_,
+        device_info_,
+        in_surface_info
 	);
 }
 
@@ -46,9 +46,17 @@ void WRenderCommandPool::Move(WRenderCommandPool && out_other) noexcept
 {
     if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE)
     {
-	WVulkan::Destroy(command_pool_info_, device_info_);
+        WVulkan::Destroy(command_pool_info_, device_info_);
     }
 
     device_info_ = std::move(out_other.device_info_);
     command_pool_info_ = std::move(out_other.command_pool_info_);
+}
+
+WCommandBufferInfo WRenderCommandPool::CreateCommandBuffer()
+{
+    command_buffers_.push_back({});
+    WVulkan::Create(command_buffers_.back(), device_info_, command_pool_info_);
+
+    return command_buffers_.back();
 }
