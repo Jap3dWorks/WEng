@@ -27,6 +27,12 @@
 // WRender
 // -------
 
+void WRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
+{
+    auto app = reinterpret_cast<WRender*>(glfwGetWindowUserPointer(in_window));
+    app->frame_buffer_resized = true;
+}
+
 WRender::WRender() 
 {
     instance_info_ = {};
@@ -35,6 +41,7 @@ WRender::WRender()
     window_info_ = {};
     window_info_.wid = {}; // WId::GenerateId();
     window_info_.user_pointer = this;
+    window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
 
     surface_info_ = {};
     surface_info_.wid = {}; // WId::GenerateId();
@@ -171,21 +178,29 @@ void WRender::DrawFrame()
         UINT64_MAX
         );
     
-    vkResetFences(
-        device_info_.vk_device,
-        1,
-        &in_flight_fence_.fences[current_frame]
-        );
-
     uint32_t image_index;
 
-    vkAcquireNextImageKHR(
+    VkResult result = vkAcquireNextImageKHR(
         device_info_.vk_device,
         swap_chain_info_.swap_chain,
         UINT64_MAX,
         image_available_semaphore_.semaphores[current_frame],
         VK_NULL_HANDLE,
         &image_index
+        );
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        RecreateSwapChain();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("Failed to acquiera swap chain image!");
+    }
+
+    vkResetFences(
+        device_info_.vk_device,
+        1,
+        &in_flight_fence_.fences[current_frame]
         );
 
     VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphores[current_frame]};
@@ -240,7 +255,38 @@ void WRender::DrawFrame()
 
     vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
 
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
+        frame_buffer_resized = false;
+        RecreateSwapChain();
+    } else if (result != VK_SUCCESS) {
+        throw std::runtime_error("Failed to present swap chain image!");
+    }
+
     current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 
 }
 
+void WRender::RecreateSwapChain()
+{
+    int width=0, height=0;
+    glfwGetFramebufferSize(window_info_.window, &width, &height);
+
+    while(width ==0 || height == 0) {
+        glfwGetFramebufferSize(window_info_.window, &width, &height);
+        glfwWaitEvents();
+    }
+
+    DeviceWaitIdle();
+
+    WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    WVulkan::Create(
+        swap_chain_info_,
+        device_info_,
+        surface_info_,
+        window_info_,
+        render_pass_info_,
+        debug_info_
+        );
+
+}

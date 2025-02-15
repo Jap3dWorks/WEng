@@ -1056,6 +1056,7 @@ void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device
     {
         vkDestroyImageView(device_info.vk_device, image_view, nullptr);
     }
+
     vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
 }
 

@@ -33,6 +33,10 @@ public:
 
     void DeviceWaitIdle() const;
 
+    void RecreateSwapChain();
+
+    static void FrameBufferSizeCallback(GLFWwindow*, int, int);
+
 private:
 
     WId wid_;
@@ -58,5 +62,7 @@ private:
     WFenceInfo in_flight_fence_;
 
     uint32_t current_frame{0};
+
+    bool frame_buffer_resized{false};
 
 };
