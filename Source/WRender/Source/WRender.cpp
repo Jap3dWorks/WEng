@@ -1,8 +1,10 @@
 #include "WRender.h"
+#include "WCore/WCore.h"
 #include "WRenderCommandPool.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include <cstdint>
+#include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
@@ -112,7 +114,7 @@ WRender::WRender()
         );
 
     WVulkan::Create(
-        render_available_semaphore_,
+        render_finished_semaphore_,
         device_info_
         );
 
@@ -124,6 +126,13 @@ WRender::WRender()
 
 WRender::~WRender()
 {
+
+    WVulkan::Destroy(image_available_semaphore_, device_info_);
+
+    WVulkan::Destroy(render_finished_semaphore_, device_info_);
+
+    WVulkan::Destroy(in_flight_fence_, device_info_);
+    
     // Destroy Vulkan Render Pass
     WVulkan::Destroy(render_pass_info_, device_info_);
 
@@ -144,6 +153,11 @@ WRender::~WRender()
 
     // Destroy Window
     WVulkan::Destroy(window_info_);
+}
+
+void WRender::DeviceWaitIdle() const
+{
+    vkDeviceWaitIdle(device_info_.vk_device);
 }
 
 void WRender::DrawFrame()
@@ -176,12 +190,57 @@ void WRender::DrawFrame()
         &image_index
         );
 
-    vkResetCommandBuffer(render_command_buffer_.command_buffers[0], 0);
+    VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphore};
+    for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[WPipelineType::Graphics])
+    {
+        vkResetCommandBuffer(render_command_buffer_.command_buffers[0], 0);
 
-//     WVulkan::RecordRenderCommandBuffer(
-//         render_command_buffer_,
-//         render_pass_info_,
-//         swap_chain_info_, );
+        WVulkan::RecordRenderCommandBuffer(
+            render_command_buffer_,
+          render_pass_info_,
+            swap_chain_info_,
+            render_pipeline.RenderPipelineInfo(),
+            0
+            );
+
+        VkSubmitInfo submit_info;
+        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphore};
+        VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submit_info.waitSemaphoreCount = 1;
+        submit_info.pWaitSemaphores = wait_semaphores;
+        submit_info.pWaitDstStageMask = wait_stages;
+
+        submit_info.commandBufferCount = 1;
+        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[0];
+
+        submit_info.signalSemaphoreCount = 1;
+        submit_info.pSignalSemaphores = signal_semaphores;
+        
+        if (vkQueueSubmit(
+                device_info_.vk_graphics_queue,
+                1,
+                &submit_info,
+                in_flight_fence_.fence) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to submit draw command buffer");
+        }
+
+    }
+
+    VkPresentInfoKHR present_info{};
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = signal_semaphores;
+
+    VkSwapchainKHR swap_chains[] = {swap_chain_info_.swap_chain};
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = swap_chains;
+    present_info.pImageIndices = &image_index;
+    present_info.pResults = nullptr;
+
+    vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
 
 }
 

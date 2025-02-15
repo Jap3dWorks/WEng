@@ -31,6 +31,8 @@ public:
         return render_pipelines_manager_;
     }
 
+    void DeviceWaitIdle() const;
+
 private:
 
     WId wid_;
@@ -52,7 +54,7 @@ private:
     WRenderPipelinesManager render_pipelines_manager_;
 
     WSemaphoreInfo image_available_semaphore_;
-    WSemaphoreInfo render_available_semaphore_;
+    WSemaphoreInfo render_finished_semaphore_;
     WFenceInfo in_flight_fence_;
 
 };

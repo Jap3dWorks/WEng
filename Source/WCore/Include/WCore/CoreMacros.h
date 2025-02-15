@@ -27,6 +27,10 @@ _WOBJECT_BODY_(_WCLASS_)
 
 #define WINLINE inline
 
+#define WCNOEXCEPT const noexcept
+
+#define WNOEXCEPT noexcept
+
 #ifndef NDEBUG
 #define WDEBUGBUILD 1
 #else

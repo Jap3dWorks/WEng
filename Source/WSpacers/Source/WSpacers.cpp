@@ -20,20 +20,21 @@ void SetupRender(WRender & render)
     // Shader Stages
 
     std::vector<WShaderStageInfo> shaders;
+
     shaders.push_back(
-	WVulkan::CreateShaderStageInfo(
-	    "../Shaders/ShaderBase.vert",
-	    "main",
-	    WShaderType::Vertex
-	    )
+        WVulkan::CreateShaderStageInfo(
+            "../Shaders/ShaderBase.vert",
+            "main",
+            WShaderType::Vertex
+            )
 	);
 
     shaders.push_back(
-	WVulkan::CreateShaderStageInfo(
-	    "../Shaders/ShaderBase.frag",
-	    "main",
-	    WShaderType::Fragment
-	    )
+        WVulkan::CreateShaderStageInfo(
+            "../Shaders/ShaderBase.frag",
+            "main",
+            WShaderType::Fragment
+            )
 	);
 
     // Render Pipeline
@@ -43,13 +44,13 @@ void SetupRender(WRender & render)
     WDescriptorSetLayoutInfo descriptor_set_layout;
 
     descriptor_set_layout = render.RenderPipelinesManager().CreateDescriptorSetLayout(
-	descriptor_set_layout
+        descriptor_set_layout
 	);
 
     render.RenderPipelinesManager().CreateRenderPipeline(
-	render_pipeline_info,
-	shaders,
-	descriptor_set_layout
+        render_pipeline_info,
+        shaders,
+        descriptor_set_layout
 	);
 }
 
@@ -57,7 +58,7 @@ bool run(WRender & in_render)
 {
     while(true)
     {
-	in_render.DrawFrame();
+        in_render.DrawFrame();
     }
 
     return true;
@@ -67,9 +68,9 @@ int main(int argc, char** argv)
 {
     try
     {
-	WRender render;
+        WRender render;
 
-	SetupRender(render);
+        SetupRender(render);
 	
         std::vector<WAsset*> geo_asset = WImportObj().Import(
             "../Content/Assets/Models/viking_room.obj", 
@@ -111,12 +112,12 @@ int main(int argc, char** argv)
         WTextureAsset* texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
         texture_asset->GetTexture();
 
-	// assign shader to models
+        // assign shader to models
 
-	// start while loop
-	run(render);
+        // start while loop
+        run(render);
 
-        std::cout << "Test WSpacers!" << std::endl;
+        render.DeviceWaitIdle();
     }
     catch(const std::exception& e)
     {

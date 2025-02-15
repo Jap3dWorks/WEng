@@ -1173,7 +1173,7 @@ void WVulkan::Destroy(
 // Record Commands
 // ---------------
 
-void RecordRenderPassCommandBuffer(
+void WVulkan::RecordRenderCommandBuffer(
     WCommandBufferInfo & out_command_buffer_info,
     const WRenderPassInfo & in_render_pass,
     const WSwapChainInfo & in_swap_chain,
@@ -1186,7 +1186,9 @@ void RecordRenderPassCommandBuffer(
     begin_info.flags = 0;
     begin_info.pInheritanceInfo = nullptr;
 
-    if (vkBeginCommandBuffer(out_command_buffer_info.command_buffers[0], &begin_info) != VK_SUCCESS) {
+    if (vkBeginCommandBuffer(
+            out_command_buffer_info.command_buffers[in_framebuffer_index], &begin_info
+            ) != VK_SUCCESS) {
 	throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
@@ -1201,15 +1203,15 @@ void RecordRenderPassCommandBuffer(
     render_pass_info.pClearValues = &clear_color;
 
     vkCmdBeginRenderPass(
-	out_command_buffer_info.command_buffers[0],
-	&render_pass_info,
-	VK_SUBPASS_CONTENTS_INLINE
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        &render_pass_info,
+        VK_SUBPASS_CONTENTS_INLINE
 	);
 
     vkCmdBindPipeline(
-	out_command_buffer_info.command_buffers[0],
-	VK_PIPELINE_BIND_POINT_GRAPHICS,
-	in_render_pipeline_info.pipeline
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        in_render_pipeline_info.pipeline
 	);
 
     VkViewport viewport{};
@@ -1219,20 +1221,20 @@ void RecordRenderPassCommandBuffer(
     viewport.height = static_cast<float>(in_swap_chain.swap_chain_extent.height);
     viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f;
-    vkCmdSetViewport(out_command_buffer_info.command_buffers[0], 0, 1, &viewport);
+    vkCmdSetViewport(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
     scissor.extent = in_swap_chain.swap_chain_extent;
-    vkCmdSetScissor(out_command_buffer_info.command_buffers[0], 0, 1, &scissor);
+    vkCmdSetScissor(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &scissor);
 
     // Rendering vertices Here
-    vkCmdDraw(out_command_buffer_info.command_buffers[0], 3, 1, 0, 0);
+    vkCmdDraw(out_command_buffer_info.command_buffers[in_framebuffer_index], 3, 1, 0, 0);
 
-    vkCmdEndRenderPass(out_command_buffer_info.command_buffers[0]);
+    vkCmdEndRenderPass(out_command_buffer_info.command_buffers[in_framebuffer_index]);
 
-    if(vkEndCommandBuffer(out_command_buffer_info.command_buffers[0]) != VK_SUCCESS) {
-	throw std::runtime_error("Failed to record command buffer!");
+    if(vkEndCommandBuffer(out_command_buffer_info.command_buffers[in_framebuffer_index]) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to record command buffer!");
     }
 }
 

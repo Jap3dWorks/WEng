@@ -32,6 +32,8 @@ public:
     WRenderPipeline & operator=(const WRenderPipeline & in_render) = delete;
     WRenderPipeline(const WRenderPipeline & in_render) = delete;
 
+    WNODISCARD WRenderPipelineInfo RenderPipelineInfo() WCNOEXCEPT;
+
 private:
 
     WRenderPipelineInfo render_pipeline_info_;
@@ -49,6 +51,8 @@ private:
 class WRENDER_API WRenderPipelinesManager
 {
 
+    using WPipelineData = std::unordered_map<WPipelineType, std::vector<WRenderPipeline>>;
+
 public:
 
     WRenderPipelinesManager();
@@ -56,25 +60,29 @@ public:
     ~WRenderPipelinesManager();
 
     WRenderPipelinesManager(
-        WDeviceInfo& device, 
-        WRenderPassInfo& render_pass_info
-    );
+        WDeviceInfo & device, 
+        WRenderPassInfo & render_pass_info
+        );
 
     WRenderPipelinesManager(
         WRenderPipelinesManager && other
-	);
+        );
 
-    WRenderPipelinesManager & operator=(WRenderPipelinesManager && other);
+    WRenderPipelinesManager & operator=(
+        WRenderPipelinesManager && other
+        );
 
     WDescriptorSetLayoutInfo & CreateDescriptorSetLayout(
         WDescriptorSetLayoutInfo descriptor_set_layout_info
-    );
+        );
 
     WRenderPipeline & CreateRenderPipeline(
         WRenderPipelineInfo render_pipeline_info,
-	std::vector<WShaderStageInfo> in_shader_stages,
+        std::vector<WShaderStageInfo> in_shader_stages,
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info
-    );
+        );
+
+    WPipelineData & RenderPipelines() WNOEXCEPT;
 
 private:
 
@@ -83,6 +91,7 @@ private:
     WDeviceInfo device_info_;
     WRenderPassInfo render_pass_info_;
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
-    std::unordered_map<WPipelineType, std::vector<WRenderPipeline>> render_pipelines_;
+    WPipelineData render_pipelines_;
 
 };
+

@@ -84,6 +84,11 @@ void WRenderPipeline::Move(WRenderPipeline && out_other)
     out_other.shader_stage_infos_ = {};
 }
 
+WRenderPipelineInfo WRenderPipeline::RenderPipelineInfo() WCNOEXCEPT
+{
+    return render_pipeline_info_;
+}
+
 // WRenderPipelinesManager
 // -------------------
 
@@ -174,5 +179,10 @@ void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)
     out_other.device_info_ = {};
     out_other.render_pass_info_ = {};
     out_other.render_pipelines_ = {};
+}
+
+WRenderPipelinesManager::WPipelineData & WRenderPipelinesManager::RenderPipelines()noexcept
+{
+    return render_pipelines_;
 }
 

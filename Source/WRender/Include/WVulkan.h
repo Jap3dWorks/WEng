@@ -8,7 +8,6 @@
 struct WTextureStruct;
 struct WMeshStruct;
 
-
 namespace WVulkan
 {
     // Create functions
@@ -312,7 +311,7 @@ namespace WVulkan
         const WSwapChainInfo & in_swap_chain_info,
         const WRenderPipelineInfo & in_render_pipeline_info,
         int in_framebuffer_index = 0
-	);
+        );
 
     // Draw
     // ----
