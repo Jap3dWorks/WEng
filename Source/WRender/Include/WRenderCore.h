@@ -237,14 +237,14 @@ struct WSemaphoreInfo
 {
     WId wid;
     
-    VkSemaphore semaphore=VK_NULL_HANDLE;
+    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> semaphores;
 };
 
 struct WFenceInfo
 {
     WId wid;
 
-    VkFence fence = VK_NULL_HANDLE;
+    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> fences;
 
     VkFenceCreateFlagBits creation_flags = VK_FENCE_CREATE_SIGNALED_BIT;
 };

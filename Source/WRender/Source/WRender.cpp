@@ -1,6 +1,7 @@
 #include "WRender.h"
 #include "WCore/WCore.h"
 #include "WRenderCommandPool.h"
+#include "WRenderConfig.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include <cstdint>
@@ -162,13 +163,10 @@ void WRender::DeviceWaitIdle() const
 
 void WRender::DrawFrame()
 {
-    // TODO
-    // glfwPollEvents();
-
     vkWaitForFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fence,
+        &in_flight_fence_.fences[current_frame],
         VK_TRUE,
         UINT64_MAX
         );
@@ -176,7 +174,7 @@ void WRender::DrawFrame()
     vkResetFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fence
+        &in_flight_fence_.fences[current_frame]
         );
 
     uint32_t image_index;
@@ -185,35 +183,36 @@ void WRender::DrawFrame()
         device_info_.vk_device,
         swap_chain_info_.swap_chain,
         UINT64_MAX,
-        image_available_semaphore_.semaphore,
+        image_available_semaphore_.semaphores[current_frame],
         VK_NULL_HANDLE,
         &image_index
         );
 
-    VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphore};
+    VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphores[current_frame]};
+
     for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[WPipelineType::Graphics])
     {
-        vkResetCommandBuffer(render_command_buffer_.command_buffers[0], 0);
+        vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
 
         WVulkan::RecordRenderCommandBuffer(
             render_command_buffer_,
-          render_pass_info_,
+            render_pass_info_,
             swap_chain_info_,
             render_pipeline.RenderPipelineInfo(),
-            0
+            current_frame
             );
 
         VkSubmitInfo submit_info;
         submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphore};
+        VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphores[current_frame]};
         VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submit_info.waitSemaphoreCount = 1;
         submit_info.pWaitSemaphores = wait_semaphores;
         submit_info.pWaitDstStageMask = wait_stages;
 
         submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[0];
+        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[current_frame];
 
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores = signal_semaphores;
@@ -222,11 +221,10 @@ void WRender::DrawFrame()
                 device_info_.vk_graphics_queue,
                 1,
                 &submit_info,
-                in_flight_fence_.fence) != VK_SUCCESS)
+                in_flight_fence_.fences[current_frame]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to submit draw command buffer");
         }
-
     }
 
     VkPresentInfoKHR present_info{};
@@ -241,6 +239,8 @@ void WRender::DrawFrame()
     present_info.pResults = nullptr;
 
     vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
+
+    current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 
 }
 

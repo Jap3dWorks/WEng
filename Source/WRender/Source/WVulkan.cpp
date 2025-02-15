@@ -985,13 +985,16 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
     VkSemaphoreCreateInfo semaphore_create_info; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     
-    if(vkCreateSemaphore(
-	   in_device_info.vk_device,
-	   &semaphore_create_info,
-	   nullptr,
-	   &out_semaphore_info.semaphore) != VK_SUCCESS) 
+    for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
     {
-        throw std::runtime_error("Failed creating a semaphore!");
+        if(vkCreateSemaphore(
+        in_device_info.vk_device,
+        &semaphore_create_info,
+        nullptr,
+        &out_semaphore_info.semaphores[i]) != VK_SUCCESS) 
+        {
+            throw std::runtime_error("Failed creating a semaphore!");
+        }
     }
 }
 
@@ -1001,14 +1004,17 @@ void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info.flags = out_fence_info.creation_flags;
 
-    if(vkCreateFence(
-	   in_device_info.vk_device,
-	   &fence_create_info,
-	   nullptr,
-	   &out_fence_info.fence
-	   ) != VK_SUCCESS)
+    for (size_t i=0; i < out_fence_info.fences.size(); i++)
     {
-        throw std::runtime_error("Failed creating a fence!");
+        if(vkCreateFence(
+        in_device_info.vk_device,
+        &fence_create_info,
+        nullptr,
+        &out_fence_info.fences[i]
+        ) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed creating a fence!");
+        }
     }
 }
 
@@ -1147,13 +1153,16 @@ void WVulkan::Destroy(
     const WDeviceInfo & in_device_info
     )
 {
-    vkDestroySemaphore(
-        in_device_info.vk_device,
-        out_semaphore_info.semaphore,
-        nullptr
-        );
+    for(size_t i = 0; i<out_semaphore_info.semaphores.size(); i++)
+    {
+        vkDestroySemaphore(
+            in_device_info.vk_device,
+            out_semaphore_info.semaphores[i],
+            nullptr
+            );
 
-    out_semaphore_info.semaphore = VK_NULL_HANDLE;
+        out_semaphore_info.semaphores[i] = VK_NULL_HANDLE;
+    }
 }
 
 void WVulkan::Destroy(
@@ -1161,13 +1170,16 @@ void WVulkan::Destroy(
     const WDeviceInfo & in_device_info
     )
 {
-    vkDestroyFence(
-        in_device_info.vk_device,
-        out_fence_info.fence,
-        nullptr
-        );
+    for(size_t i=0; i<out_fence_info.fences.size(); i++)
+    {
+        vkDestroyFence(
+            in_device_info.vk_device,
+            out_fence_info.fences[i],
+            nullptr
+            );
 
-    out_fence_info.fence = VK_NULL_HANDLE;
+        out_fence_info.fences[i] = VK_NULL_HANDLE;
+    }
 }
 
 // Record Commands

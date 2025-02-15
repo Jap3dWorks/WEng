@@ -57,4 +57,6 @@ private:
     WSemaphoreInfo render_finished_semaphore_;
     WFenceInfo in_flight_fence_;
 
+    uint32_t current_frame{0};
+
 };
