@@ -16,10 +16,12 @@
                 (dap-register-debug-template
                 "WSpacers LLDB::Run"
                 (list :type "lldb-vscode"
-                        :cwd (project-root (project-current))
+                        :cwd "/mnt/data/Devs/WEng/WEng"
                         :request "launch"
-                        :program (concat (project-root (project-current)) "Install/Linux_x86_64_Debug_Standalone/bin/WSpacers" )
-                        :name "LLDB::Run"))
+                        :program "/mnt/data/Devs/WEng/WEng/Install/Linux_x86_64_Debug_Standalone/bin/WSpacers" 
+                        :name "LLDB::Run"
+                        :env '(("LD_LIBRARY_PATH" . "/mnt/data/Devs/WEng/WEng/Install/Linux_x86_64_Debug_Standalone/lib")
+                               )))
 
 		   )))))
 
