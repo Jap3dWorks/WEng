@@ -8,13 +8,14 @@
 #include <string>
 #include <cstring>
 #include <cmath>
-#include "WCore/WExceptions.h"
+#include <cstdlib>
 #include "WRenderCore.h"
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
 #include "WRenderConfig.h"
 #include <fstream>
 #include <vulkan/vulkan_core.h>
+#include <regex>
 
 // WVulkan
 // -------
@@ -1770,15 +1771,29 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
 {
     WShaderStageInfo result;
 
-    // TODO: check file path extension, and compile if it is not .spv
+    std::string file_path = in_shader_file_path;
+
+    std::regex extension_pattern("\\.spv$");
+    std::smatch extension_match;
+    if (!std::regex_search(
+            file_path, 
+            extension_match, 
+            extension_pattern))
+    {
+        file_path += ".spv";
+
+        std::string cmd = std::string("glslc ") + in_shader_file_path + " -o " + file_path;
+
+        system(cmd.c_str());
+    }
 
     // std::ios::ate -> at the end of the file
     // std::ios::binary -> as binary avoid text transformations
-    std::ifstream file(in_shader_file_path, std::ios::ate | std::ios::binary);
+    std::ifstream file(file_path, std::ios::ate | std::ios::binary);
 
     if (!file.is_open())
     {
-	throw std::runtime_error("FAIL while reading shader file!");
+        throw std::runtime_error("FAIL while reading shader file!");
     }
 
     size_t file_size = (size_t) file.tellg();

@@ -27,7 +27,7 @@ void SetupRender(WRender & render)
             "main",
             WShaderType::Vertex
             )
-	);
+        );
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
@@ -35,7 +35,7 @@ void SetupRender(WRender & render)
             "main",
             WShaderType::Fragment
             )
-	);
+        );
 
     // Render Pipeline
 

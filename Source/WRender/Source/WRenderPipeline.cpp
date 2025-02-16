@@ -25,7 +25,7 @@ WRenderPipeline::WRenderPipeline(
 
     shader_stage_infos_ = in_shader_stages;
 
-    for(int i=0; i< shader_stage_infos_.size(); i++)
+    for(int i=0; i < shader_stage_infos_.size(); i++)
     {
         shader_modules[i] = WVulkan::CreateShaderModule(
             shader_stage_infos_[i],
@@ -178,7 +178,6 @@ void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)
 
     out_other.device_info_ = {};
     out_other.render_pass_info_ = {};
-    out_other.render_pipelines_ = {};
 }
 
 WRenderPipelinesManager::WPipelineData & WRenderPipelinesManager::RenderPipelines()noexcept
