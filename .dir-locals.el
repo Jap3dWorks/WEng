@@ -16,7 +16,7 @@
                 (dap-register-debug-template
                 "WSpacers LLDB::Run"
                 (list :type "lldb-vscode"
-                        :cwd nil
+                        :cwd (project-root (project-current))
                         :request "launch"
                         :program (concat (project-root (project-current)) "Install/Linux_x86_64_Debug_Standalone/bin/WSpacers" )
                         :name "LLDB::Run"))
