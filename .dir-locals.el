@@ -12,16 +12,16 @@
                        (interactive)
                        (ja-execute-shell-script (concat (project-root (project-current)) ".scripts/cmd-compile-debug.sh" ))))
 
+                   (setenv "LD_LIBRARY_PATH" "Install/Linux_x86_64_Debug_Standalone/lib")
 
                 (dap-register-debug-template
-                "WSpacers LLDB::Run"
+                "[LLDB][WSpacers] Run"
                 (list :type "lldb-vscode"
-                        :cwd "/mnt/data/Devs/WEng/WEng"
+                        :cwd "${workspaceFolder}"
                         :request "launch"
-                        :program "/mnt/data/Devs/WEng/WEng/Install/Linux_x86_64_Debug_Standalone/bin/WSpacers" 
+                        :program "Install/Linux_x86_64_Debug_Standalone/bin/WSpacers" 
                         :name "LLDB::Run"
-                        :env '(("LD_LIBRARY_PATH" . "/mnt/data/Devs/WEng/WEng/Install/Linux_x86_64_Debug_Standalone/lib")
-                               )))
+                        :env '()))
 
 		   )))))
 
