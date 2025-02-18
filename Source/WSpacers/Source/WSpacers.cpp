@@ -115,14 +115,15 @@ int main(int argc, char** argv)
         // assign shader to models
 
         // start while loop
+
         run(render);
 
         render.DeviceWaitIdle();
     }
     catch(const std::exception& e)
     {
-        std::cout << "Something goes really bad!" << std::endl;
-        std::cout << e.what() << std::endl;
+        std::cout << std::string("[ERROR] ") + e.what() << std::endl;
+
         return 1;
     }
 

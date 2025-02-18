@@ -27,7 +27,9 @@ WRenderCommandPool::WRenderCommandPool(
 
 WRenderCommandPool::~WRenderCommandPool()
 {
-    WVulkan::Destroy(command_pool_info_, device_info_);
+    if(command_pool_info_.vk_command_pool) {
+        WVulkan::Destroy(command_pool_info_, device_info_);
+    }
 }
 
 WRenderCommandPool::WRenderCommandPool(WRenderCommandPool&& other) noexcept
@@ -51,6 +53,8 @@ void WRenderCommandPool::Move(WRenderCommandPool && out_other) noexcept
 
     device_info_ = std::move(out_other.device_info_);
     command_pool_info_ = std::move(out_other.command_pool_info_);
+
+    out_other = {};
 }
 
 WCommandBufferInfo WRenderCommandPool::CreateCommandBuffer()

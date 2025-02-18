@@ -21,7 +21,7 @@ namespace WVulkan
     /**
      * Creates a Vulkan Surface.
     */
-    void Create(WSurfaceInfo &surface_info, const WInstanceInfo &instance, const WWindowInfo &window);
+    void Create(WSurfaceInfo & surface_info, WInstanceInfo & instance, WWindowInfo & window);
 
     /**
      * Creates a Vulkan Device.

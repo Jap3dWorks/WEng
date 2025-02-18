@@ -56,14 +56,14 @@ WRender::WRender()
     render_command_pool_info_ = {};
     render_command_pool_info_.wid = {};
 
+    WVulkan::Create(
+        window_info_
+    );
+
     // Create Vulkan Instance
     WVulkan::Create(
         instance_info_,
         debug_info_
-    );
-
-    WVulkan::Create(
-        window_info_
     );
 
     WVulkan::Create(

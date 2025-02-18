@@ -23,7 +23,7 @@
 // Create functions
 // ----------------
 
-void WVulkan::Create(WInstanceInfo &out_instance_info, const WRenderDebugInfo &debug_info)
+void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo & debug_info)
 {
     if (debug_info.enable_validation_layers && !CheckValidationLayerSupport(debug_info))
     {
@@ -82,9 +82,10 @@ void WVulkan::Create(WInstanceInfo &out_instance_info, const WRenderDebugInfo &d
     }
 }
 
-void WVulkan::Create(WSurfaceInfo &surface, const WInstanceInfo &instance_info, const WWindowInfo &window)
+void WVulkan::Create(WSurfaceInfo & surface, WInstanceInfo & instance_info, WWindowInfo & window)
 {
-    if (glfwCreateWindowSurface(instance_info.instance, window.window, nullptr, &surface.surface) != VK_SUCCESS)
+    VkResult result = glfwCreateWindowSurface(instance_info.instance, window.window, nullptr, & surface.surface);
+    if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create window surface!");
     }
@@ -93,11 +94,19 @@ void WVulkan::Create(WSurfaceInfo &surface, const WInstanceInfo &instance_info, 
 void WVulkan::Create(WWindowInfo &out_window_info)
 {
     glfwInit();
+
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
     out_window_info.window = glfwCreateWindow(
-        out_window_info.width, out_window_info.height, out_window_info.title.c_str(), nullptr, nullptr);
+        out_window_info.width,
+        out_window_info.height,
+        out_window_info.title.c_str(),
+        nullptr,
+        nullptr
+        );
 
     glfwSetWindowUserPointer(out_window_info.window, out_window_info.user_pointer);
+
     if (out_window_info.framebuffer_size_callback)
     {
         glfwSetFramebufferSizeCallback(
@@ -112,7 +121,8 @@ void WVulkan::Create(
     const WSurfaceInfo &surface_info,
     const WWindowInfo &window_info,
     const WRenderPassInfo &render_pass_info,
-    const WRenderDebugInfo &debug_info)
+    const WRenderDebugInfo &debug_info
+    )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
         device_info.vk_physical_device,
@@ -1255,10 +1265,11 @@ void WVulkan::RecordRenderCommandBuffer(
 // Helper functions
 // ----------------
 
-bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
+bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo & debug_info)
 {
     uint32_t layer_count;
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+
     std::vector<VkLayerProperties> available_layers(layer_count);
     vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
 
@@ -1287,7 +1298,7 @@ bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo &debug_info)
 std::vector<const char *> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
 {
     uint32_t glfw_extension_count = 0;
-    const char **glfw_extensions;
+    const char ** glfw_extensions;
     glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
     std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
