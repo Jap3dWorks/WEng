@@ -288,5 +288,4 @@ void WRender::RecreateSwapChain()
         render_pass_info_,
         debug_info_
         );
-
 }
