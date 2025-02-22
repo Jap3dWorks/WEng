@@ -14,16 +14,18 @@
 
 struct WDeviceInfo{
     WId wid;
-    VkPhysicalDevice vk_physical_device= VK_NULL_HANDLE;
-    VkSampleCountFlagBits msaa_samples = VK_SAMPLE_COUNT_1_BIT;
-    std::vector<const char*> device_extensions = {
+    VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
+    VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
+
+    // TODO, can we use std::array for device_xtensions?
+    std::vector<const char*> device_extensions {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
-    VkQueue vk_graphics_queue = nullptr;
-    VkQueue vk_present_queue = nullptr;
+    VkQueue vk_graphics_queue {VK_NULL_HANDLE};
+    VkQueue vk_present_queue {VK_NULL_HANDLE};
 
-    VkDevice vk_device = nullptr;
+    VkDevice vk_device {VK_NULL_HANDLE};
 };
 
 struct WWindowInfo
@@ -33,9 +35,9 @@ struct WWindowInfo
     uint32_t width = 800;
     uint32_t height = 600;
 
-    GLFWframebuffersizefun framebuffer_size_callback = nullptr;
-    void* user_pointer = nullptr;
-    GLFWwindow* window = nullptr;
+    GLFWframebuffersizefun framebuffer_size_callback {nullptr};
+    void* user_pointer {nullptr};
+    GLFWwindow* window {nullptr};
 
 };
 
@@ -52,31 +54,31 @@ enum class WShaderType
 struct WInstanceInfo
 {
     WId wid;
-    VkInstance instance = nullptr;
+    VkInstance instance {nullptr};
 };
 
 struct WSurfaceInfo
 {
     WId wid;
-    VkSurfaceKHR surface = nullptr;
+    VkSurfaceKHR surface{nullptr};
 };
 
 struct WRenderDebugInfo
 {
     WId wid;
-    bool enable_validation_layers = false;
+    bool enable_validation_layers{false};
     std::vector<const char*> validation_layers = {
         "VK_LAYER_KHRONOS_validation"
     };
 
-    PFN_vkDebugUtilsMessengerCallbackEXT debug_callback = nullptr;
-    VkDebugUtilsMessengerEXT debug_messenger = nullptr;
+    PFN_vkDebugUtilsMessengerCallbackEXT debug_callback{VK_NULL_HANDLE};
+    VkDebugUtilsMessengerEXT debug_messenger{VK_NULL_HANDLE};
 };
 
 struct WCommandPoolInfo
 {
     WId wid;
-    VkCommandPool vk_command_pool = nullptr;
+    VkCommandPool vk_command_pool{VK_NULL_HANDLE};
 };
 
 struct WTextureInfo
@@ -120,7 +122,7 @@ enum class WPipelineType
 struct WRenderPassInfo
 {
     WId wid;
-    VkRenderPass render_pass = nullptr;
+    VkRenderPass render_pass{nullptr};
 };
 
 struct WSwapChainInfo
@@ -142,14 +144,14 @@ struct WSwapChainInfo
 
     std::vector<VkFramebuffer> swap_chain_framebuffers;
 
-    VkSwapchainKHR swap_chain = nullptr;
+    VkSwapchainKHR swap_chain{nullptr};
 };
 
 struct WDescriptorSetLayoutInfo
 {
     WId wid;
     std::vector<VkDescriptorSetLayoutBinding> bindings;
-    VkDescriptorSetLayout descriptor_set_layout = nullptr;
+    VkDescriptorSetLayout descriptor_set_layout{nullptr};
 };
 
 /**
@@ -160,7 +162,7 @@ struct WDescriptorPoolInfo
 {
     WId wid;
     std::vector<VkDescriptorPoolSize> pool_sizes;
-    VkDescriptorPool descriptor_pool = nullptr;
+    VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
 };
 
 /**
@@ -173,7 +175,7 @@ struct WDescriptorSetInfo
 {
     WId wid;
     // The len of this vector is the number of frames in flight
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets = {};
+    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 
 };
 
@@ -184,12 +186,12 @@ struct WRenderPipelineInfo
 
     // std::vector<WShaderStageInfo> shaders{};  // We need the shaders at creation time
 
-    VkSampleCountFlagBits sample_count = VK_SAMPLE_COUNT_1_BIT;  // No Multisampling
+    VkSampleCountFlagBits sample_count{VK_SAMPLE_COUNT_1_BIT};  // No Multisampling
 
-    uint32_t subpass = 0; // Index of the subpass where this pipeline will be used
+    uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
 
-    VkPipeline pipeline = nullptr;
-    VkPipelineLayout pipeline_layout = nullptr;
+    VkPipeline pipeline{nullptr};
+    VkPipelineLayout pipeline_layout{nullptr};
 };
 
 struct WMeshInfo
@@ -219,9 +221,9 @@ struct WUniformBufferObject
 struct WUniformBufferObjectInfo
 {
     WId wid;
-    VkBuffer uniform_buffer;
-    VkDeviceMemory uniform_buffer_memory;
-    void* mapped_data;
+    VkBuffer uniform_buffer{VK_NULL_HANDLE};
+    VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
+    void* mapped_data{nullptr};
 };
 
 /**
@@ -230,22 +232,22 @@ struct WUniformBufferObjectInfo
 struct WCommandBufferInfo
 {
     WId wid;
-    std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers;
+    std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
 struct WSemaphoreInfo
 {
     WId wid;
     
-    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> semaphores;
+    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
 };
 
 struct WFenceInfo
 {
     WId wid;
 
-    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> fences;
+    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
 
-    VkFenceCreateFlagBits creation_flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
 };
 

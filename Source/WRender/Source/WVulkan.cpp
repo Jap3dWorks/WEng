@@ -1030,15 +1030,16 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
 {
     VkSemaphoreCreateInfo semaphore_create_info; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    
+    semaphore_create_info.pNext = VK_NULL_HANDLE;
+
     for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
     {
-        if(vkCreateSemaphore(
-        in_device_info.vk_device,
-        &semaphore_create_info,
-        nullptr,
-        &out_semaphore_info.semaphores[i]) != VK_SUCCESS) 
-        {
+        if (vkCreateSemaphore(
+                in_device_info.vk_device,
+                &semaphore_create_info,
+                nullptr,
+                &out_semaphore_info.semaphores[i]
+                ) != VK_SUCCESS) {
             throw std::runtime_error("Failed creating a semaphore!");
         }
     }
@@ -1049,18 +1050,17 @@ void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_
     VkFenceCreateInfo fence_create_info;
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info.flags = out_fence_info.creation_flags;
+    fence_create_info.pNext = VK_NULL_HANDLE;
 
     for (size_t i=0; i < out_fence_info.fences.size(); i++)
     {
-        if(vkCreateFence(
-        in_device_info.vk_device,
-        &fence_create_info,
-        nullptr,
-        &out_fence_info.fences[i]
-        ) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed creating a fence!");
-        }
+        if (vkCreateFence(
+              in_device_info.vk_device,
+              &fence_create_info,
+              nullptr,
+              &out_fence_info.fences[i]) != VK_SUCCESS) {
+        throw std::runtime_error("Failed creating a fence!");
+      }
     }
 }
 

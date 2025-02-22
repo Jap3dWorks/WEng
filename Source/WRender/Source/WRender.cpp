@@ -108,7 +108,7 @@ WRender::WRender()
         render_pass_info_
 	);
 
-    render_command_pool_ = WRenderCommandPool(  // TODO fix Memory error Here!
+    render_command_pool_ = WRenderCommandPool( 
         WCommandPoolInfo(),
         device_info_,
         surface_info_
