@@ -108,21 +108,30 @@ WRender::WRender()
         render_pass_info_
 	);
 
-    render_command_pool_ = WRenderCommandPool(
+    render_command_pool_ = WRenderCommandPool(  // TODO fix Memory error Here!
         WCommandPoolInfo(),
         device_info_,
         surface_info_
 	);
 
-    render_command_buffer_ = render_command_pool_.CreateCommandBuffer();
-
     // TODO CHECK Create Depth and color Resources
+    WVulkan::CreateSCColorResources(
+        swap_chain_info_,
+        device_info_
+        );
+
+    WVulkan::CreateSCDepthResources(
+        swap_chain_info_,
+        device_info_
+        );
 
     WVulkan::CreateSCFramebuffers(
         swap_chain_info_,
         render_pass_info_,
         device_info_
         );
+
+    render_command_buffer_ = render_command_pool_.CreateCommandBuffer();
 
     WVulkan::Create(
         image_available_semaphore_,

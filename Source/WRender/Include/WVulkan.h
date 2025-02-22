@@ -38,16 +38,29 @@ namespace WVulkan
         const WWindowInfo &window_info, 
         const WRenderPassInfo &render_pass_info, 
         const WRenderDebugInfo &debug_info
-    );
+        );
 
     /**
      * @brief Creates Vulkan Image Views.
     */
-    void CreateSCImageViews(WSwapChainInfo & swap_chain_info, const WDeviceInfo &device_info);
+    void CreateSCImageViews(
+        WSwapChainInfo & out_swap_chain_info,
+        const WDeviceInfo &in_device_info
+        );
 
     void CreateSCFramebuffers(
         WSwapChainInfo & out_swap_chain_info,
         const WRenderPassInfo & out_render_pass_info,
+        const WDeviceInfo & in_device_info
+        );
+
+    void CreateSCColorResources(
+        WSwapChainInfo & out_swap_chain_info,
+        const WDeviceInfo & in_device_info
+        );
+
+    void CreateSCDepthResources(
+        WSwapChainInfo & out_swap_chain_info,
         const WDeviceInfo & in_device_info
         );
 
@@ -230,7 +243,8 @@ namespace WVulkan
         VkDeviceMemory& out_image_memory,
         const VkDevice& device, 
         const VkPhysicalDevice& physical_device,
-        const uint32_t& width, const uint32_t& height, 
+        const uint32_t& width,
+        const uint32_t& height, 
         const uint32_t& mip_levels, 
         const VkSampleCountFlagBits& samples,
         const VkFormat& format, 
@@ -240,11 +254,11 @@ namespace WVulkan
     );
 
     VkImageView CreateImageView(
-        const VkDevice& device, 
         const VkImage& image, 
         const VkFormat& format, 
         const VkImageAspectFlags& aspect_flags, 
-        const uint32_t& mip_levels
+        const uint32_t& mip_levels,
+        const VkDevice& device 
     );
 
     VkSampler CreateTextureSampler(
