@@ -43,7 +43,13 @@ namespace WVulkan
     /**
      * @brief Creates Vulkan Image Views.
     */
-    void CreateImageView(WSwapChainInfo & swap_chain_info, const WDeviceInfo &device_info);
+    void CreateSCImageViews(WSwapChainInfo & swap_chain_info, const WDeviceInfo &device_info);
+
+    void CreateSCFramebuffers(
+        WSwapChainInfo & out_swap_chain_info,
+        const WRenderPassInfo & out_render_pass_info,
+        const WDeviceInfo & in_device_info
+        );
 
     /**
      * @brief Creates a Vulkan Render Pass.

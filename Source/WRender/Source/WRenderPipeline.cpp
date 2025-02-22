@@ -131,9 +131,9 @@ WDescriptorSetLayoutInfo& WRenderPipelinesManager::CreateDescriptorSetLayout(
 
     // Create Vulkan Descriptor Set Layout into info object
     WVulkan::Create(
-	descriptor_set_layout_info,
-	device_info_
-	);
+        descriptor_set_layout_info,
+        device_info_
+        );
 
     descriptor_set_layouts_.push_back(std::move(descriptor_set_layout_info));
 

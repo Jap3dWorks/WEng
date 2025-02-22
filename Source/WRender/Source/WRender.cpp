@@ -91,7 +91,7 @@ WRender::WRender()
     );
 
     // Create Vulkan Image Views
-    WVulkan::CreateImageView(
+    WVulkan::CreateSCImageViews(
         swap_chain_info_,
         device_info_
     );
@@ -115,6 +115,14 @@ WRender::WRender()
 	);
 
     render_command_buffer_ = render_command_pool_.CreateCommandBuffer();
+
+    // TODO CHECK Create Depth and color Resources
+
+    WVulkan::CreateSCFramebuffers(
+        swap_chain_info_,
+        render_pass_info_,
+        device_info_
+        );
 
     WVulkan::Create(
         image_available_semaphore_,

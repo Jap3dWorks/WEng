@@ -116,12 +116,12 @@ void WVulkan::Create(WWindowInfo &out_window_info)
 }
 
 void WVulkan::Create(
-    WSwapChainInfo &out_swap_chain_info,
-    const WDeviceInfo &device_info,
-    const WSurfaceInfo &surface_info,
-    const WWindowInfo &window_info,
-    const WRenderPassInfo &render_pass_info,
-    const WRenderDebugInfo &debug_info
+    WSwapChainInfo & out_swap_chain_info,
+    const WDeviceInfo & device_info,
+    const WSurfaceInfo & surface_info,
+    const WWindowInfo & window_info,
+    const WRenderPassInfo & render_pass_info,
+    const WRenderDebugInfo & debug_info
     )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
@@ -182,79 +182,83 @@ void WVulkan::Create(
     out_swap_chain_info.swap_chain_image_format = surface_format.format;
     out_swap_chain_info.swap_chain_extent = extent;
 
-    // Color Resources, renders are drawn to this image, later to be presented to the swap chain
-    Create(
-        out_swap_chain_info.color_image,
-        out_swap_chain_info.color_image_memory,
-        device_info.vk_device,
-        device_info.vk_physical_device,
-        out_swap_chain_info.swap_chain_extent.width,
-        out_swap_chain_info.swap_chain_extent.height,
-        1,
-        device_info.msaa_samples,
-        out_swap_chain_info.swap_chain_image_format,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+    // From Here Move
 
-    out_swap_chain_info.color_image_view = CreateImageView(
-        device_info.vk_device,
-        out_swap_chain_info.color_image,
-        out_swap_chain_info.swap_chain_image_format,
-        VK_IMAGE_ASPECT_COLOR_BIT,
-        1);
+    // // Color Resources, renders are drawn to this image, later to be presented to the swap chain
+    // Create(
+    //     out_swap_chain_info.color_image,
+    //     out_swap_chain_info.color_image_memory,
+    //     device_info.vk_device,
+    //     device_info.vk_physical_device,
+    //     out_swap_chain_info.swap_chain_extent.width,
+    //     out_swap_chain_info.swap_chain_extent.height,
+    //     1,
+    //     device_info.msaa_samples,
+    //     out_swap_chain_info.swap_chain_image_format,
+    //     VK_IMAGE_TILING_OPTIMAL,
+    //     VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	// );
 
-    // Depth Resources
-    VkFormat depth_format = FindDepthFormat(device_info.vk_physical_device);
-    Create(
-        out_swap_chain_info.depth_image,
-        out_swap_chain_info.depth_image_memory,
-        device_info.vk_device,
-        device_info.vk_physical_device,
-        out_swap_chain_info.swap_chain_extent.width,
-        out_swap_chain_info.swap_chain_extent.height,
-        1,
-        device_info.msaa_samples,
-        depth_format,
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+    // out_swap_chain_info.color_image_view = CreateImageView(
+    //     device_info.vk_device,
+    //     out_swap_chain_info.color_image,
+    //     out_swap_chain_info.swap_chain_image_format,
+    //     VK_IMAGE_ASPECT_COLOR_BIT,
+    //     1);
 
-    out_swap_chain_info.depth_image_view = CreateImageView(
-        device_info.vk_device,
-        out_swap_chain_info.depth_image,
-        depth_format,
-        VK_IMAGE_ASPECT_DEPTH_BIT,
-        1);
+    // // Depth Resources
+    // VkFormat depth_format = FindDepthFormat(device_info.vk_physical_device);
+    // Create(
+    //     out_swap_chain_info.depth_image,
+    //     out_swap_chain_info.depth_image_memory,
+    //     device_info.vk_device,
+    //     device_info.vk_physical_device,
+    //     out_swap_chain_info.swap_chain_extent.width,
+    //     out_swap_chain_info.swap_chain_extent.height,
+    //     1,
+    //     device_info.msaa_samples,
+    //     depth_format,
+    //     VK_IMAGE_TILING_OPTIMAL,
+    //     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+	// );
 
-    //  Framebuffer is needed to render to the image
-    out_swap_chain_info.swap_chain_framebuffers.resize(out_swap_chain_info.swap_chain_images.size());
-    for (size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
-    {
-        std::array<VkImageView, 3> attachments = {
-            out_swap_chain_info.color_image_view,
-            out_swap_chain_info.depth_image_view,
-            out_swap_chain_info.swap_chain_image_views[i]};
+    // out_swap_chain_info.depth_image_view = CreateImageView(
+    //     device_info.vk_device,
+    //     out_swap_chain_info.depth_image,
+    //     depth_format,
+    //     VK_IMAGE_ASPECT_DEPTH_BIT,
+    //     1
+    //     );
 
-        VkFramebufferCreateInfo framebuffer_info{};
-        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebuffer_info.renderPass = render_pass_info.render_pass;
-        framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
-        framebuffer_info.pAttachments = attachments.data();
-        framebuffer_info.width = out_swap_chain_info.swap_chain_extent.width;
-        framebuffer_info.height = out_swap_chain_info.swap_chain_extent.height;
-        framebuffer_info.layers = 1;
+    // //  Framebuffer is needed to render to the image
+    // out_swap_chain_info.swap_chain_framebuffers.resize(out_swap_chain_info.swap_chain_images.size());
+    // for (size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
+    // {
+    //     std::array<VkImageView, 3> attachments = {
+    //         out_swap_chain_info.color_image_view,
+    //         out_swap_chain_info.depth_image_view,
+    //         out_swap_chain_info.swap_chain_image_views[i]
+    //     };
 
-        if (vkCreateFramebuffer(device_info.vk_device, &framebuffer_info, nullptr, &out_swap_chain_info.swap_chain_framebuffers[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create framebuffer!");
-        }
-    }
+    //     VkFramebufferCreateInfo framebuffer_info{};
+    //     framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    //     framebuffer_info.renderPass = render_pass_info.render_pass;
+    //     framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
+    //     framebuffer_info.pAttachments = attachments.data();
+    //     framebuffer_info.width = out_swap_chain_info.swap_chain_extent.width;
+    //     framebuffer_info.height = out_swap_chain_info.swap_chain_extent.height;
+    //     framebuffer_info.layers = 1;
+
+    //     if (vkCreateFramebuffer(device_info.vk_device, &framebuffer_info, nullptr, &out_swap_chain_info.swap_chain_framebuffers[i]) != VK_SUCCESS)
+    //     {
+    //         throw std::runtime_error("Failed to create framebuffer!");
+    //     }
+    // }
 }
 
-void WVulkan::CreateImageView(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::CreateSCImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
 {
     swap_chain_info.swap_chain_image_views.resize(swap_chain_info.swap_chain_images.size());
 
@@ -267,6 +271,45 @@ void WVulkan::CreateImageView(WSwapChainInfo &swap_chain_info, const WDeviceInfo
             VK_IMAGE_ASPECT_COLOR_BIT,
             1);
     }
+}
+
+void WVulkan::CreateSCFramebuffers(
+    WSwapChainInfo & out_swap_chain_info,
+    const WRenderPassInfo & out_render_pass_info,
+    const WDeviceInfo & in_device_info)
+{
+    out_swap_chain_info.swap_chain_framebuffers.resize(
+        out_swap_chain_info.swap_chain_image_views.size()
+        );
+
+    for (size_t i=0; i < out_swap_chain_info.swap_chain_image_views.size(); i++)
+    {
+        std::array<VkImageView, 3> Attachments = {
+            out_swap_chain_info.color_image_view,
+            out_swap_chain_info.depth_image_view,
+            out_swap_chain_info.swap_chain_image_views[i]
+        };
+
+        VkFramebufferCreateInfo FramebufferInfo{};
+        FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        FramebufferInfo.renderPass = out_render_pass_info.render_pass;
+        FramebufferInfo.attachmentCount = static_cast<uint32_t>(Attachments.size());
+        FramebufferInfo.pAttachments = Attachments.data();
+        FramebufferInfo.width = out_swap_chain_info.swap_chain_extent.width;
+        FramebufferInfo.height = out_swap_chain_info.swap_chain_extent.height;
+        FramebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(
+            in_device_info.vk_device, 
+            &FramebufferInfo, 
+            nullptr, 
+            &out_swap_chain_info.swap_chain_framebuffers[i]) != VK_SUCCESS
+        )
+        {
+            throw std::runtime_error("Failed to create framebuffer!");
+        }
+    }
+
 }
 
 void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
