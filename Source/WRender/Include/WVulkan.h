@@ -41,30 +41,6 @@ namespace WVulkan
         );
 
     /**
-     * @brief Creates Vulkan Image Views.
-    */
-    void CreateSCImageViews(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo &in_device_info
-        );
-
-    void CreateSCFramebuffers(
-        WSwapChainInfo & out_swap_chain_info,
-        const WRenderPassInfo & out_render_pass_info,
-        const WDeviceInfo & in_device_info
-        );
-
-    void CreateSCColorResources(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo & in_device_info
-        );
-
-    void CreateSCDepthResources(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo & in_device_info
-        );
-
-    /**
      * @brief Creates a Vulkan Render Pass.
     */
     void Create(WRenderPassInfo & render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
@@ -98,7 +74,7 @@ namespace WVulkan
     void Create(
         WRenderPipelineInfo& out_pipeline_info,
         const WDeviceInfo &device, 
-        const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
+        const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
         const WRenderPassInfo& render_pass_info, 
 	const std::vector<WShaderStageInfo> & in_shader_stage_infos,
 	const std::vector<WShaderModule> & in_shader_modules
@@ -166,68 +142,6 @@ namespace WVulkan
         const VkDescriptorSet& descriptor_set;
     };
 
-    /**
-     * @brief Update a VkWriteDescriptorSet with a UBO struct.
-    */
-    template<typename ...Args>
-    void UpdateWriteDescriptorSet(
-        VkWriteDescriptorSet& out_write_descriptor_set,
-        WVkWriteDescriptorSetUBOStruct& ubo_struct,
-        Args&&... args
-    )
-    {
-        ubo_struct.buffer_info.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
-        ubo_struct.buffer_info.offset = 0;
-        ubo_struct.buffer_info.range = sizeof(WUniformBufferObject);
-        
-        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstSet = ubo_struct.descriptor_set;
-        out_write_descriptor_set.dstBinding = ubo_struct.binding;
-        out_write_descriptor_set.dstArrayElement = 0;
-        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
-
-        UpdateWriteDescriptorSet(
-            out_write_descriptor_set, 
-            std::forward<Args>(args)...
-        );
-    }
-
-    /**
-     * @brief Update a VkWriteDescriptorSet with a texture struct.
-    */
-    template<typename ...Args>
-    void UpdateWriteDescriptorSet(
-        VkWriteDescriptorSet& out_write_descriptor_set,
-        WVkWriteDescriptorSetTextureStruct& texture_struct,
-        Args&&... args
-    )
-    {
-        texture_struct.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        texture_struct.image_info.imageView = texture_struct.texture_info.image_view;
-        texture_struct.image_info.sampler = texture_struct.texture_info.sampler;
-
-        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstSet = texture_struct.descriptor_set;
-        out_write_descriptor_set.dstBinding = texture_struct.binding;
-        out_write_descriptor_set.dstArrayElement = 0;
-        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
-
-        UpdateWriteDescriptorSet(
-            out_write_descriptor_set, 
-            std::forward<Args>(args)...
-        );
-    }
-
-    /**
-     * Update VkWriteDescriptorSet No arguments fallback functioin.
-    */
-    void Update(
-        VkWriteDescriptorSet & out_write_descriptor_set
-    );
 
     /**
      * @brief Create a WCommandBufferInfo.
@@ -277,7 +191,10 @@ namespace WVulkan
         VkMemoryPropertyFlags properties
     );
 
-    void Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in_device_info);
+    void Create(
+        WSemaphoreInfo & out_semaphore_info,
+        const WDeviceInfo & in_device_info
+        );
 
     void Create(
         WFenceInfo & out_fence_info,
@@ -335,6 +252,101 @@ namespace WVulkan
 
     // Draw
     // ----
+
+    // Swap Chain
+    // ----------
+
+    /**
+     * @brief Creates Vulkan Image Views.
+    */
+    void CreateSCImageViews(
+        WSwapChainInfo & out_swap_chain_info,
+        const WDeviceInfo &in_device_info
+        );
+
+    void CreateSCFramebuffers(
+        WSwapChainInfo & out_swap_chain_info,
+        const WRenderPassInfo & out_render_pass_info,
+        const WDeviceInfo & in_device_info
+        );
+
+    void CreateSCColorResources(
+        WSwapChainInfo & out_swap_chain_info,
+        const WDeviceInfo & in_device_info
+        );
+
+    void CreateSCDepthResources(
+        WSwapChainInfo & out_swap_chain_info,
+        const WDeviceInfo & in_device_info
+        );
+
+    // Descriptor Set Layout
+    // ---------------------
+
+    void AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout);
+
+    /**
+     * @brief Update a VkWriteDescriptorSet with a UBO struct.
+    */
+    template<typename ...Args>
+    void UpdateWriteDescriptorSet(
+        VkWriteDescriptorSet & out_write_descriptor_set,
+        WVkWriteDescriptorSetUBOStruct & ubo_struct,
+        Args && ... args
+    )
+    {
+        ubo_struct.buffer_info.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
+        ubo_struct.buffer_info.offset = 0;
+        ubo_struct.buffer_info.range = sizeof(WUniformBufferObject);
+        
+        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        out_write_descriptor_set.dstSet = ubo_struct.descriptor_set;
+        out_write_descriptor_set.dstBinding = ubo_struct.binding;
+        out_write_descriptor_set.dstArrayElement = 0;
+        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        out_write_descriptor_set.descriptorCount = 1;
+        out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
+
+        UpdateWriteDescriptorSet(
+            out_write_descriptor_set, 
+            std::forward<Args>(args) ...
+        );
+    }
+
+    /**
+     * @brief Update a VkWriteDescriptorSet with a texture struct.
+    */
+    template<typename ...Args>
+    void UpdateWriteDescriptorSet(
+        VkWriteDescriptorSet & out_write_descriptor_set,
+        WVkWriteDescriptorSetTextureStruct& texture_struct,
+        Args&&... args
+    )
+    {
+        texture_struct.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        texture_struct.image_info.imageView = texture_struct.texture_info.image_view;
+        texture_struct.image_info.sampler = texture_struct.texture_info.sampler;
+
+        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        out_write_descriptor_set.dstSet = texture_struct.descriptor_set;
+        out_write_descriptor_set.dstBinding = texture_struct.binding;
+        out_write_descriptor_set.dstArrayElement = 0;
+        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        out_write_descriptor_set.descriptorCount = 1;
+        out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
+
+        UpdateWriteDescriptorSet(
+            out_write_descriptor_set, 
+            std::forward<Args>(args)...
+        );
+    }
+
+    /**
+     * @brief Update VkWriteDescriptorSet Stop condition
+    */
+    void UpdateWriteDescriptorSet(
+        VkWriteDescriptorSet & out_write_descriptor_set
+        );
 
     // void DrawFrame()
 

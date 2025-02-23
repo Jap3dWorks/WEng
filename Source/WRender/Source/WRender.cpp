@@ -114,7 +114,6 @@ WRender::WRender()
         surface_info_
 	);
 
-    // TODO CHECK Create Depth and color Resources
     WVulkan::CreateSCColorResources(
         swap_chain_info_,
         device_info_

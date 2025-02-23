@@ -29,7 +29,6 @@
 #include <set>
 #include <unordered_map>
 
-
 struct Vertex{
     glm::vec3 Position;
     glm::vec3 Color;

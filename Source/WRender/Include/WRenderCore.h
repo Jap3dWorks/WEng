@@ -108,8 +108,8 @@ struct WShaderStageInfo
     EShaderType type;
     std::string entry_point{"main"};
     
-    std::vector<VkVertexInputBindingDescription> binding_descriptors;
-    std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
+    std::vector<VkVertexInputBindingDescription> binding_descriptors{};
+    std::vector<VkVertexInputAttributeDescription> attribute_descriptors{};
 };
 
 enum class EPipelineType : uint8_t

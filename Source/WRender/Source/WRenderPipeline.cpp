@@ -131,6 +131,8 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout(
         "info.descriptor_set_layout must be nullptr"
         );
 
+    WVulkan::AddDSLDefaultBindings(descriptor_set_layout_info);
+
     // Create Vulkan Descriptor Set Layout into info object
     WVulkan::Create(
         descriptor_set_layout_info,

@@ -593,24 +593,25 @@ void WVulkan::Create(
     )
 {
     // Create Shader Stages
-    std::vector<VkPipelineShaderStageCreateInfo> ShaderStages(
+    std::vector<VkPipelineShaderStageCreateInfo> shader_stages(
         in_shader_stage_infos.size());
 
     const WShaderStageInfo * vertex_shader_stage = nullptr;
 
     for (uint32_t i = 0; i < in_shader_stage_infos.size(); i++)
     {
-        ShaderStages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
-            in_shader_stage_infos[i].type);
+        shader_stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shader_stages[i].stage = WVulkan::ToShaderStageFlagBits(
+            in_shader_stage_infos[i].type
+            );
 
         if (in_shader_stage_infos[i].type == EShaderType::Vertex)
         {
             vertex_shader_stage = &in_shader_stage_infos[i];
         }
 
-        ShaderStages[i].module = in_shader_modules[i].vk_shader_module;
-        ShaderStages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
+        shader_stages[i].module = in_shader_modules[i].vk_shader_module;
+        shader_stages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
     }
 
     if (vertex_shader_stage == nullptr)
@@ -707,8 +708,8 @@ void WVulkan::Create(
 
     VkGraphicsPipelineCreateInfo PipelineInfo{};
     PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    PipelineInfo.stageCount = static_cast<uint32_t>(ShaderStages.size());
-    PipelineInfo.pStages = ShaderStages.data();
+    PipelineInfo.stageCount = static_cast<uint32_t>(shader_stages.size());
+    PipelineInfo.pStages = shader_stages.data();
     PipelineInfo.pVertexInputState = &VertexInputInfo;
     PipelineInfo.pInputAssemblyState = &InputAssembly;
     PipelineInfo.pViewportState = &ViewportState;
@@ -717,7 +718,7 @@ void WVulkan::Create(
     PipelineInfo.pDepthStencilState = &DepthStencil;
     PipelineInfo.pColorBlendState = &ColorBlending;
     PipelineInfo.pDynamicState = &DynamicState;
-    PipelineInfo.layout = out_pipeline_info.pipeline_layout;
+    PipelineInfo.layout = out_pipeline_info.pipeline_layout; // CHECK
     PipelineInfo.renderPass = render_pass_info.render_pass;
     PipelineInfo.subpass = out_pipeline_info.subpass;
     PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -744,6 +745,7 @@ void WVulkan::Create(
     DescriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(
         out_descriptor_set_layout_info.bindings.size()
         );
+
     DescriptorSetLayoutInfo.pBindings = out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
@@ -1000,10 +1002,9 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Update(
-    VkWriteDescriptorSet &out_write_descriptor_set)
-{
-}
+void WVulkan::UpdateWriteDescriptorSet(
+    VkWriteDescriptorSet &out_write_descriptor_set
+    ) {}
 
 void WVulkan::Create(
     WCommandBufferInfo& out_command_buffer_info,
@@ -1297,6 +1298,29 @@ void WVulkan::RecordRenderCommandBuffer(
     if(vkEndCommandBuffer(out_command_buffer_info.command_buffers[in_framebuffer_index]) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!");
     }
+}
+
+// Descriptor Set Layout
+// ---------------------
+
+
+void WVulkan::AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout)
+{
+    VkDescriptorSetLayoutBinding ubo_layout_binding{};
+    ubo_layout_binding.binding = 0;
+    ubo_layout_binding.descriptorCount = 1;
+    ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    ubo_layout_binding.pImmutableSamplers = nullptr;
+    ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkDescriptorSetLayoutBinding sampler_layout_biding{};
+    sampler_layout_biding.binding = 1;
+    sampler_layout_biding.descriptorCount = 1;
+    sampler_layout_biding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    sampler_layout_biding.pImmutableSamplers = nullptr;
+    sampler_layout_biding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    out_descriptor_set_layout.bindings = {ubo_layout_binding, sampler_layout_biding};
 }
 
 // Helper functions
@@ -1864,6 +1888,33 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
     
     result.entry_point = in_entry_point;
     result.type = in_shader_type;
+
+    if (in_shader_type == EShaderType::Vertex)
+    {
+        result.attribute_descriptors.resize(3);
+        result.attribute_descriptors[0].binding = 0;
+        result.attribute_descriptors[0].location = 0;
+        result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        result.attribute_descriptors[0].offset = offsetof(WVertexStruct, Position);
+
+        result.attribute_descriptors[1].binding = 0;
+        result.attribute_descriptors[1].location = 1;
+        result.attribute_descriptors[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        result.attribute_descriptors[1].offset = offsetof(WVertexStruct, Color);
+
+        result.attribute_descriptors[2].binding = 0;
+        result.attribute_descriptors[2].location = 2;
+        result.attribute_descriptors[2].format = VK_FORMAT_R32G32_SFLOAT;
+        result.attribute_descriptors[2].offset = offsetof(WVertexStruct, TexCoords);
+
+        // more vertex data bindings here
+
+        result.binding_descriptors.resize(1);
+        result.binding_descriptors[0].binding = 0;
+        result.binding_descriptors[0].stride = sizeof(WVertexStruct);
+        result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    }
 
     return result;
 }

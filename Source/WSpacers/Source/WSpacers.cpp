@@ -20,7 +20,7 @@ void SetupRender(WRender & render)
 {
     // Shader Stages
 
-    std::vector<WShaderStageInfo> shaders;
+    std::vector<WShaderStageInfo> shaders{2};
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
