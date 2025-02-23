@@ -222,7 +222,7 @@ void WRender::DrawFrame()
 
     VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphores[current_frame]};
 
-    for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[WPipelineType::Graphics])
+    for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
 

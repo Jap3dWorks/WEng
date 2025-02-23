@@ -419,7 +419,7 @@ namespace WVulkan
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */
-    VkShaderStageFlagBits ToShaderStageFlagBits(const WShaderType& type);
+    VkShaderStageFlagBits ToShaderStageFlagBits(const EShaderType& type);
 
     VkCommandBuffer BeginSingleTimeCommands(
         const VkDevice& device, 
@@ -439,7 +439,7 @@ namespace WVulkan
     WShaderStageInfo CreateShaderStageInfo(
 	const char* in_shader_file_path,
 	const char* int_entry_point,
-	WShaderType in_shader_type
+	EShaderType in_shader_type
 	);
 
 }

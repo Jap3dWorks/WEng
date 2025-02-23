@@ -11,6 +11,7 @@
 #include "WRenderPipeline.h"
 #include "WVulkan.h"
 #include <exception>
+#include <filesystem>
 #include <vector>
 
 #include <iostream>
@@ -23,23 +24,24 @@ void SetupRender(WRender & render)
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
-            "../Shaders/ShaderBase.vert",
+            std::filesystem::absolute("Content/Shaders/ShaderBase.vert").c_str(),
             "main",
-            WShaderType::Vertex
+            EShaderType::Vertex
             )
         );
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
-            "../Shaders/ShaderBase.frag",
+            std::filesystem::absolute("Content/Shaders/ShaderBase.frag").c_str(),
             "main",
-            WShaderType::Fragment
+            EShaderType::Fragment
             )
         );
 
     // Render Pipeline
 
     WRenderPipelineInfo render_pipeline_info;
+    render_pipeline_info.type = EPipelineType::Graphics;
 
     WDescriptorSetLayoutInfo descriptor_set_layout;
 
@@ -73,7 +75,7 @@ int main(int argc, char** argv)
         SetupRender(render);
 	
         std::vector<WAsset*> geo_asset = WImportObj().Import(
-            "../Content/Assets/Models/viking_room.obj", 
+            "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/modelobj.modelobj"
         );
     
@@ -90,7 +92,7 @@ int main(int argc, char** argv)
         }
 
         std::vector<WAsset*> tex_asset = WImportTexture().Import(
-            "../Content/Assets/Textures/viking_room.png", 
+            "Content/Assets/Textures/viking_room.png", 
             "/Content/Assets/texture.texture"
         );
 

@@ -51,7 +51,7 @@ private:
 class WRENDER_API WRenderPipelinesManager
 {
 
-    using WPipelineData = std::unordered_map<WPipelineType, std::vector<WRenderPipeline>>;
+    using WPipelineData = std::unordered_map<EPipelineType, std::vector<WRenderPipeline>>;
 
 public:
 

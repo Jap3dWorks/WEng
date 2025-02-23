@@ -343,7 +343,7 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
     depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference color_attachment_resolve_ref{};
-    color_attachment_resolve_ref.attachment = 2;
+    color_attachment_resolve_ref.attachment = VK_ATTACHMENT_UNUSED; // 2;
     color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass{};
@@ -363,6 +363,7 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
 
     std::array<VkAttachmentDescription, 3> Attachments = {
         color_attachment, depth_attachment, color_attachment_resolve};
+
     VkRenderPassCreateInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     render_pass_info.attachmentCount = static_cast<uint32_t>(Attachments.size());
@@ -603,7 +604,7 @@ void WVulkan::Create(
         ShaderStages[i].stage = WVulkan::ToShaderStageFlagBits(
             in_shader_stage_infos[i].type);
 
-        if (in_shader_stage_infos[i].type == WShaderType::Vertex)
+        if (in_shader_stage_infos[i].type == EShaderType::Vertex)
         {
             vertex_shader_stage = &in_shader_stage_infos[i];
         }
@@ -734,14 +735,15 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WDescriptorSetLayoutInfo &out_descriptor_set_layout_info,
+    WDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
     const WDeviceInfo &device
     )
 {
     VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
     DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     DescriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(
-        out_descriptor_set_layout_info.bindings.size());
+        out_descriptor_set_layout_info.bindings.size()
+        );
     DescriptorSetLayoutInfo.pBindings = out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
@@ -1614,15 +1616,15 @@ uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_f
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
-VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const WShaderType &type)
+VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const EShaderType &type)
 {
     switch (type)
     {
-    case WShaderType::Vertex:
+    case EShaderType::Vertex:
         return VK_SHADER_STAGE_VERTEX_BIT;
-    case WShaderType::Fragment:
+    case EShaderType::Fragment:
         return VK_SHADER_STAGE_FRAGMENT_BIT;
-    case WShaderType::Compute:
+    case EShaderType::Compute:
         return VK_SHADER_STAGE_COMPUTE_BIT;
     default:
         throw std::runtime_error("Invalid shader type!");
@@ -1818,7 +1820,7 @@ void WVulkan::CopyVkBuffer(
 WShaderStageInfo WVulkan::CreateShaderStageInfo(
     const char* in_shader_file_path,
     const char* in_entry_point,
-    WShaderType in_shader_type
+    EShaderType in_shader_type
     )
 {
     WShaderStageInfo result;
@@ -1836,7 +1838,9 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
 
         std::string cmd = std::string("glslc ") + in_shader_file_path + " -o " + file_path;
 
-        system(cmd.c_str());
+        if(system(cmd.c_str()) != 0) {
+            throw std::runtime_error("FAIL while using glslc command!");
+        }
     }
 
     // std::ios::ate -> at the end of the file

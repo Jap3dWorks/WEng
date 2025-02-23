@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.h"
+#include <cstdint>
 #include <vulkan/vulkan.h>
 #include "WRenderConfig.h"
 #include <vector>
@@ -41,7 +42,7 @@ struct WWindowInfo
 
 };
 
-enum class WShaderType
+enum class EShaderType : uint8_t
 {
     Vertex,
     Fragment,
@@ -67,7 +68,7 @@ struct WRenderDebugInfo
 {
     WId wid;
     bool enable_validation_layers{false};
-    std::vector<const char*> validation_layers = {
+    std::vector<const char*> validation_layers{
         "VK_LAYER_KHRONOS_validation"
     };
 
@@ -84,11 +85,11 @@ struct WCommandPoolInfo
 struct WTextureInfo
 {
     WId id;
-    VkImage image;
-    VkDeviceMemory image_memory;
-    VkImageView image_view;
-    VkSampler sampler;
-    uint32_t mip_levels;
+    VkImage image{VK_NULL_HANDLE};
+    VkDeviceMemory image_memory{VK_NULL_HANDLE};
+    VkImageView image_view{VK_NULL_HANDLE};
+    VkSampler sampler{VK_NULL_HANDLE};
+    uint32_t mip_levels{1};
 };
 
 struct WShaderModule
@@ -104,14 +105,14 @@ struct WShaderStageInfo
     WId id;
 
     std::vector<char> code;
-    WShaderType type;
-    std::string entry_point;
+    EShaderType type;
+    std::string entry_point{"main"};
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors;
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors;
 };
 
-enum class WPipelineType
+enum class EPipelineType : uint8_t
 {
     Graphics,       // Default
     Transparency,   // Alpha Blending
@@ -134,24 +135,24 @@ struct WSwapChainInfo
     std::vector<VkImage> swap_chain_images;
     std::vector<VkImageView> swap_chain_image_views;
     
-    VkImage color_image;
-    VkDeviceMemory color_image_memory;
-    VkImageView color_image_view;    
+    VkImage color_image{VK_NULL_HANDLE};
+    VkDeviceMemory color_image_memory{VK_NULL_HANDLE};
+    VkImageView color_image_view{VK_NULL_HANDLE};    
 
-    VkImage depth_image;
-    VkDeviceMemory depth_image_memory;
-    VkImageView depth_image_view;
+    VkImage depth_image{VK_NULL_HANDLE};
+    VkDeviceMemory depth_image_memory{VK_NULL_HANDLE};
+    VkImageView depth_image_view{VK_NULL_HANDLE};
 
-    std::vector<VkFramebuffer> swap_chain_framebuffers;
+    std::vector<VkFramebuffer> swap_chain_framebuffers{};
 
-    VkSwapchainKHR swap_chain{nullptr};
+    VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
 };
 
 struct WDescriptorSetLayoutInfo
 {
     WId wid;
-    std::vector<VkDescriptorSetLayoutBinding> bindings;
-    VkDescriptorSetLayout descriptor_set_layout{nullptr};
+    std::vector<VkDescriptorSetLayoutBinding> bindings{};
+    VkDescriptorSetLayout descriptor_set_layout{VK_NULL_HANDLE};
 };
 
 /**
@@ -182,7 +183,7 @@ struct WDescriptorSetInfo
 struct WRenderPipelineInfo
 {
     WId wid;
-    WPipelineType type;
+    EPipelineType type{EPipelineType::Graphics};
 
     // std::vector<WShaderStageInfo> shaders{};  // We need the shaders at creation time
 
@@ -190,8 +191,8 @@ struct WRenderPipelineInfo
 
     uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
 
-    VkPipeline pipeline{nullptr};
-    VkPipelineLayout pipeline_layout{nullptr};
+    VkPipeline pipeline{VK_NULL_HANDLE};
+    VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};
 };
 
 struct WMeshInfo

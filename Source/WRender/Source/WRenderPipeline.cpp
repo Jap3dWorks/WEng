@@ -102,32 +102,34 @@ WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
 )
 {
     assert(
-	in_render_pipeline_info.pipeline != VK_NULL_HANDLE &&
-	"render_pipeline_info.pipeline must be nullptr"
-	);
-    assert(in_render_pipeline_info.pipeline_layout != VK_NULL_HANDLE &&
+        in_render_pipeline_info.pipeline == VK_NULL_HANDLE &&
+        "render_pipeline_info.pipeline must be nullptr"
+    );
+    assert(
+        in_render_pipeline_info.pipeline_layout == VK_NULL_HANDLE &&
         "render_pipeline_info.pipeline_layout must be nullptr"
-	);
+    );
 
     render_pipelines_[in_render_pipeline_info.type].emplace_back(
-	device_info_,
-	descriptor_set_layout_info,
-	render_pass_info_,
-	in_render_pipeline_info,
-	in_shader_stage_info
-	);
+        device_info_,
+        descriptor_set_layout_info,
+        render_pass_info_,
+        in_render_pipeline_info,
+        in_shader_stage_info
+    );
 
     return render_pipelines_[in_render_pipeline_info.type].back();
 }
 
 
-WDescriptorSetLayoutInfo& WRenderPipelinesManager::CreateDescriptorSetLayout(
+WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout(
     WDescriptorSetLayoutInfo descriptor_set_layout_info
 )
 {
-    if (descriptor_set_layout_info.descriptor_set_layout != nullptr) {
-        throw std::logic_error("info.descriptor_set_layout must be nullptr");
-    }
+    assert(
+        descriptor_set_layout_info.descriptor_set_layout == VK_NULL_HANDLE &&
+        "info.descriptor_set_layout must be nullptr"
+        );
 
     // Create Vulkan Descriptor Set Layout into info object
     WVulkan::Create(

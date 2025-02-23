@@ -1,21 +1,31 @@
 * Overview
 
-Project to learn vulkan
+Project to learn vulkan and cpp development.
 
 ** Setup
 
 1. Run *Setup/<Distro>_setup.sh* file.
-   #+BEGIN_SRC sh
-   sudo Setup/<Distro>_setup.sh
-   #+END_SRC
+    #+BEGIN_SRC sh
+    sudo Setup/<Distro>_setup.sh
+    #+END_SRC
 2. Create a python virtual env.
-   #+BEGIN_SRC python
-   python -m venv .venv                         &&
-   chmod +x .venv/bin/activate                  &&
-   source .venv/bin/activate                    &&
-   python -m pip install -r Python/requirements.txt
-   #+END_SRC
+    #+BEGIN_SRC sh
+    python -m venv .venv                         &&
+    chmod +x .venv/bin/activate                  &&
+    source .venv/bin/activate                    &&
+    python -m pip install -r Python/requirements.txt
+    #+END_SRC
 3. *compile_commands.json* are genereated inside *build/Linux_x86_64_Release_Standalone* folder.
+4. If you use clangd lsp creat a .clangd file pointing to the compile_commands.json folder.
+    #+NAME: .clangd
+    #+BEGIN_SRC
+    CompileFlags:
+      CompilationDatabase: build/Linux_x86_64_Release_Standalone
+    #+END_SRC
+
+** Requirements
+
+ - *glslc* installed in your system. If you use a setup script it will install it for you.
 
 ** Things to think about
 
