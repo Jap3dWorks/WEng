@@ -20,7 +20,8 @@ void SetupRender(WRender & render)
 {
     // Shader Stages
 
-    std::vector<WShaderStageInfo> shaders{2};
+    std::vector<WShaderStageInfo> shaders;
+    shaders.reserve(2);
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
@@ -43,11 +44,9 @@ void SetupRender(WRender & render)
     WRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = EPipelineType::Graphics;
 
-    WDescriptorSetLayoutInfo descriptor_set_layout;
 
-    descriptor_set_layout = render.RenderPipelinesManager().CreateDescriptorSetLayout(
-        descriptor_set_layout
-	);
+    WDescriptorSetLayoutInfo descriptor_set_layout =
+        render.RenderPipelinesManager().CreateDescriptorSetLayout();
 
     render.RenderPipelinesManager().CreateRenderPipeline(
         render_pipeline_info,

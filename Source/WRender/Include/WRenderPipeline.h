@@ -72,9 +72,7 @@ public:
         WRenderPipelinesManager && other
         );
 
-    WDescriptorSetLayoutInfo & CreateDescriptorSetLayout(
-        WDescriptorSetLayoutInfo descriptor_set_layout_info
-        );
+    WDescriptorSetLayoutInfo & CreateDescriptorSetLayout();
 
     WRenderPipeline & CreateRenderPipeline(
         WRenderPipelineInfo render_pipeline_info,

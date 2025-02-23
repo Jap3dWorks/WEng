@@ -49,9 +49,9 @@ namespace WVulkan
      * @brief Creates a Vulkan Command Pool.
     */
     void Create(
-	WCommandPoolInfo & command_pool_info,
-	const WDeviceInfo & device_info,
-	const WSurfaceInfo & surface_info
+        WCommandPoolInfo & command_pool_info,
+        const WDeviceInfo & device_info,
+        const WSurfaceInfo & surface_info
 	);
 
     /**
@@ -60,9 +60,9 @@ namespace WVulkan
     void Create(WWindowInfo &info);
 
     WShaderModule CreateShaderModule(
-	WShaderStageInfo & out_shader_info,
-	const WDeviceInfo & device
-	);
+        const WShaderStageInfo & in_shader_info,
+        const WDeviceInfo & in_device
+    );
 
     void Create(
         WTextureInfo& out_texture_info, 
@@ -72,14 +72,13 @@ namespace WVulkan
     );
 
     void Create(
-        WRenderPipelineInfo& out_pipeline_info,
-        const WDeviceInfo &device, 
-        const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-        const WRenderPassInfo& render_pass_info, 
-	const std::vector<WShaderStageInfo> & in_shader_stage_infos,
-	const std::vector<WShaderModule> & in_shader_modules
-	
-    );
+        WRenderPipelineInfo &out_pipeline_info,
+        const WDeviceInfo &device,
+        const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
+        const WRenderPassInfo &render_pass_info,
+        const std::vector<WShaderStageInfo> &in_shader_stage_infos // ,
+        // const std::vector<WShaderModule> &in_shader_modules
+        );
 
     void Create(
 	WDescriptorSetLayoutInfo& out_descriptor_set_layout_info,

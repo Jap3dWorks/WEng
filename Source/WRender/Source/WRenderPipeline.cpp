@@ -25,30 +25,14 @@ WRenderPipeline::WRenderPipeline(
 
     shader_stage_infos_ = in_shader_stages;
 
-    for(int i=0; i < shader_stage_infos_.size(); i++)
-    {
-        shader_modules[i] = WVulkan::CreateShaderModule(
-            shader_stage_infos_[i],
-            device_info_
-	    );
-    }
-    
     WVulkan::Create(
         render_pipeline_info_,
         device_info_,
         in_descriptor_set_layout_info,
         in_render_pass_info,
-        shader_stage_infos_,
-        shader_modules
+        shader_stage_infos_
     );
 
-    for (auto& shader_module : shader_modules)
-    {
-        WVulkan::Destroy(
-            shader_module,
-            device_info_
-	    );
-    }
 }
 
 WRenderPipeline::~WRenderPipeline()
@@ -122,14 +106,10 @@ WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
 }
 
 
-WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout(
-    WDescriptorSetLayoutInfo descriptor_set_layout_info
-)
+WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
 {
-    assert(
-        descriptor_set_layout_info.descriptor_set_layout == VK_NULL_HANDLE &&
-        "info.descriptor_set_layout must be nullptr"
-        );
+
+    WDescriptorSetLayoutInfo descriptor_set_layout_info;
 
     WVulkan::AddDSLDefaultBindings(descriptor_set_layout_info);
 
@@ -139,7 +119,7 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout(
         device_info_
         );
 
-    descriptor_set_layouts_.push_back(std::move(descriptor_set_layout_info));
+    descriptor_set_layouts_.push_back(descriptor_set_layout_info);
 
     return descriptor_set_layouts_.back();
 }

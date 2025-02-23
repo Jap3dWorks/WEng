@@ -482,22 +482,22 @@ void WVulkan::Create(WDeviceInfo &device_info, const WInstanceInfo &instance_inf
 }
 
 WShaderModule WVulkan::CreateShaderModule(
-    WShaderStageInfo & out_shader_info,
-    const WDeviceInfo & device
+    const WShaderStageInfo & in_shader_info,
+    const WDeviceInfo & in_device
     )
 {
     WShaderModule result;
 
-    VkShaderModuleCreateInfo ShaderModuleCreateInfo{};
-    ShaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    ShaderModuleCreateInfo.codeSize = out_shader_info.code.size();
-    ShaderModuleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(
-        out_shader_info.code.data()
+    VkShaderModuleCreateInfo shader_module_create_info{};
+    shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    shader_module_create_info.codeSize = in_shader_info.code.size();
+    shader_module_create_info.pCode = reinterpret_cast<const uint32_t*>(
+        in_shader_info.code.data()
     );
 
     if (vkCreateShaderModule(
-        device.vk_device, 
-        &ShaderModuleCreateInfo, 
+        in_device.vk_device, 
+        &shader_module_create_info, 
         nullptr, 
         &result.vk_shader_module
     ) != VK_SUCCESS)
@@ -512,13 +512,14 @@ void WVulkan::Create(
     WTextureInfo &out_texture_info,
     const WTextureStruct &texture_struct,
     const WDeviceInfo &device_info,
-    const WCommandPoolInfo &command_pool_info)
+    const WCommandPoolInfo &command_pool_info
+    )
 {
-    out_texture_info.mip_levels = static_cast<uint32_t>(
-                                      std::floor(
-                                          std::log2(
-                                              std::max(texture_struct.width, texture_struct.height)))) +
-                                  1;
+    out_texture_info.mip_levels =
+        static_cast<uint32_t>(
+            std::floor(
+                std::log2(
+                    std::max(texture_struct.width, texture_struct.height)))) + 1;
 
     uint8_t channels_num = NumOfChannels(texture_struct.channels);
 
@@ -585,21 +586,24 @@ void WVulkan::Create(
 
 void WVulkan::Create(
     WRenderPipelineInfo & out_pipeline_info,
-    const WDeviceInfo & device,
-    const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const WRenderPassInfo & render_pass_info,
-    const std::vector<WShaderStageInfo> & in_shader_stage_infos,
-    const std::vector<WShaderModule> & in_shader_modules
+    const WDeviceInfo & in_device,
+    const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info,
+    const WRenderPassInfo & in_render_pass_info,
+    const std::vector<WShaderStageInfo> & in_shader_stage_infos
     )
 {
     // Create Shader Stages
     std::vector<VkPipelineShaderStageCreateInfo> shader_stages(
-        in_shader_stage_infos.size());
+        in_shader_stage_infos.size()
+        );
+
+    std::vector<WShaderModule> shader_modules(in_shader_stage_infos.size());
 
     const WShaderStageInfo * vertex_shader_stage = nullptr;
 
     for (uint32_t i = 0; i < in_shader_stage_infos.size(); i++)
     {
+        shader_stages[i].pNext = VK_NULL_HANDLE;
         shader_stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shader_stages[i].stage = WVulkan::ToShaderStageFlagBits(
             in_shader_stage_infos[i].type
@@ -610,7 +614,9 @@ void WVulkan::Create(
             vertex_shader_stage = &in_shader_stage_infos[i];
         }
 
-        shader_stages[i].module = in_shader_modules[i].vk_shader_module;
+        shader_modules[i] = CreateShaderModule(in_shader_stage_infos[i], in_device);
+
+        shader_stages[i].module = shader_modules[i].vk_shader_module;
         shader_stages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
     }
 
@@ -619,16 +625,16 @@ void WVulkan::Create(
         throw std::runtime_error("Vertex shader stage not found!");
     }
 
-    VkPipelineVertexInputStateCreateInfo VertexInputInfo{};
-    VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    VkPipelineVertexInputStateCreateInfo vertex_input_info{};
+    vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-    VertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(
+    vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
         vertex_shader_stage->binding_descriptors.size());
-    VertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(
+    vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
         vertex_shader_stage->attribute_descriptors.size());
-    VertexInputInfo.pVertexBindingDescriptions =
+    vertex_input_info.pVertexBindingDescriptions =
         vertex_shader_stage->binding_descriptors.data();
-    VertexInputInfo.pVertexAttributeDescriptions =
+    vertex_input_info.pVertexAttributeDescriptions =
         vertex_shader_stage->attribute_descriptors.data();
 
     VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
@@ -695,10 +701,10 @@ void WVulkan::Create(
     VkPipelineLayoutCreateInfo PipelineLayoutInfo{};
     PipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     PipelineLayoutInfo.setLayoutCount = 0;
-    PipelineLayoutInfo.pSetLayouts = &descriptor_set_layout_info.descriptor_set_layout;
+    PipelineLayoutInfo.pSetLayouts = &in_descriptor_set_layout_info.descriptor_set_layout;
 
     if (vkCreatePipelineLayout(
-            device.vk_device,
+            in_device.vk_device,
             &PipelineLayoutInfo,
             nullptr,
             &out_pipeline_info.pipeline_layout) != VK_SUCCESS)
@@ -710,7 +716,7 @@ void WVulkan::Create(
     PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     PipelineInfo.stageCount = static_cast<uint32_t>(shader_stages.size());
     PipelineInfo.pStages = shader_stages.data();
-    PipelineInfo.pVertexInputState = &VertexInputInfo;
+    PipelineInfo.pVertexInputState = &vertex_input_info;
     PipelineInfo.pInputAssemblyState = &InputAssembly;
     PipelineInfo.pViewportState = &ViewportState;
     PipelineInfo.pRasterizationState = &Rasterizer;
@@ -719,12 +725,12 @@ void WVulkan::Create(
     PipelineInfo.pColorBlendState = &ColorBlending;
     PipelineInfo.pDynamicState = &DynamicState;
     PipelineInfo.layout = out_pipeline_info.pipeline_layout; // CHECK
-    PipelineInfo.renderPass = render_pass_info.render_pass;
+    PipelineInfo.renderPass = in_render_pass_info.render_pass;
     PipelineInfo.subpass = out_pipeline_info.subpass;
     PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(
-            device.vk_device,
+            in_device.vk_device,
             VK_NULL_HANDLE,
             1,
             &PipelineInfo,
@@ -733,6 +739,14 @@ void WVulkan::Create(
     {
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
+
+    for (auto& shader_module : shader_modules)
+    {
+        WVulkan::Destroy(
+            shader_module,
+            in_device
+	    );
+    }
 }
 
 void WVulkan::Create(
@@ -740,17 +754,21 @@ void WVulkan::Create(
     const WDeviceInfo &device
     )
 {
-    VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutInfo{};
-    DescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    DescriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(
+    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info{};
+
+    descriptor_set_layout_create_info.sType =
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+
+    descriptor_set_layout_create_info.bindingCount = static_cast<uint32_t>(
         out_descriptor_set_layout_info.bindings.size()
         );
 
-    DescriptorSetLayoutInfo.pBindings = out_descriptor_set_layout_info.bindings.data();
+    descriptor_set_layout_create_info.pBindings =
+        out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
             device.vk_device,
-            &DescriptorSetLayoutInfo,
+            &descriptor_set_layout_create_info,
             nullptr,
             &out_descriptor_set_layout_info.descriptor_set_layout) != VK_SUCCESS)
     {
@@ -1303,7 +1321,6 @@ void WVulkan::RecordRenderCommandBuffer(
 // Descriptor Set Layout
 // ---------------------
 
-
 void WVulkan::AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout)
 {
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
@@ -1853,6 +1870,7 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
 
     std::regex extension_pattern("\\.spv$");
     std::smatch extension_match;
+
     if (!std::regex_search(
             file_path, 
             extension_match, 
