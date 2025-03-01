@@ -25,7 +25,7 @@ void SetupRender(WRender & render)
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
-            std::filesystem::absolute("Content/Shaders/ShaderBase.vert").c_str(),
+            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.vert").c_str(),
             "main",
             EShaderType::Vertex
             )
@@ -33,7 +33,7 @@ void SetupRender(WRender & render)
 
     shaders.push_back(
         WVulkan::CreateShaderStageInfo(
-            std::filesystem::absolute("Content/Shaders/ShaderBase.frag").c_str(),
+            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.frag").c_str(),
             "main",
             EShaderType::Fragment
             )
@@ -41,12 +41,11 @@ void SetupRender(WRender & render)
 
     // Render Pipeline
 
-    WRenderPipelineInfo render_pipeline_info;
-    render_pipeline_info.type = EPipelineType::Graphics;
-
-
     WDescriptorSetLayoutInfo descriptor_set_layout =
         render.RenderPipelinesManager().CreateDescriptorSetLayout();
+
+    WRenderPipelineInfo render_pipeline_info;
+    render_pipeline_info.type = EPipelineType::Graphics;
 
     render.RenderPipelinesManager().CreateRenderPipeline(
         render_pipeline_info,

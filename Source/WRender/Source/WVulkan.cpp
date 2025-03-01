@@ -693,19 +693,20 @@ void WVulkan::Create(
     std::vector<VkDynamicState> DynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR};
+
     VkPipelineDynamicStateCreateInfo DynamicState{};
     DynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
     DynamicState.pDynamicStates = DynamicStates.data();
 
-    VkPipelineLayoutCreateInfo PipelineLayoutInfo{};
-    PipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    PipelineLayoutInfo.setLayoutCount = 0;
-    PipelineLayoutInfo.pSetLayouts = &in_descriptor_set_layout_info.descriptor_set_layout;
+    VkPipelineLayoutCreateInfo pipeline_layout_info{};
+    pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipeline_layout_info.setLayoutCount = 1;
+    pipeline_layout_info.pSetLayouts = &in_descriptor_set_layout_info.descriptor_set_layout;
 
     if (vkCreatePipelineLayout(
             in_device.vk_device,
-            &PipelineLayoutInfo,
+            &pipeline_layout_info,
             nullptr,
             &out_pipeline_info.pipeline_layout) != VK_SUCCESS)
     {
