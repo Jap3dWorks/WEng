@@ -96,13 +96,13 @@ namespace WVulkan
     );
 
     void Create(
-        WUniformBufferObjectInfo& out_uniform_buffer_info,
-        const WDeviceInfo &device
+        WUniformBufferObjectInfo & out_uniform_buffer_info,
+        const WDeviceInfo & device
     );
 
     void Create(
-        WDescriptorPoolInfo& out_descriptor_pool_info,
-        const WDeviceInfo &device
+        WDescriptorPoolInfo & out_descriptor_pool_info,
+        const WDeviceInfo & device
     );
 
     /**

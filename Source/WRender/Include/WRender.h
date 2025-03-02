@@ -4,9 +4,11 @@
 
 #include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
+#include "WRenderConfig.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include "WRenderCommandPool.h"
+#include <cstddef>
 #include <optional>
 
 /**
@@ -24,7 +26,7 @@ public:
         return wid_;
     }
 
-    void DrawFrame();
+    void Draw();
 
     WNODISCARD WINLINE WRenderPipelinesManager & RenderPipelinesManager()
     {
@@ -36,6 +38,18 @@ public:
     void RecreateSwapChain();
 
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
+
+    WNODISCARD inline const WWindowInfo & WindowInfo() const noexcept
+    { return window_info_; }
+
+    WNODISCARD inline const WDeviceInfo & DeviceInfo() const noexcept
+    { return device_info_; }
+
+    WNODISCARD inline const WSwapChainInfo & SwapChainInfo() const noexcept
+    { return swap_chain_info_; }
+
+    WNODISCARD inline const size_t FramesInFlight() const noexcept
+    { return MAX_FRAMES_IN_FLIGHT; }
 
 private:
 
@@ -61,8 +75,9 @@ private:
     WSemaphoreInfo render_finished_semaphore_;
     WFenceInfo in_flight_fence_;
 
-    uint32_t current_frame{0};
+    uint32_t current_frame {0};
 
-    bool frame_buffer_resized{false};
+    bool frame_buffer_resized {false};
 
 };
+

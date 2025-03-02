@@ -10,9 +10,13 @@
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include "WVulkan.h"
+#include <GLFW/glfw3.h>
+#include <cstddef>
 #include <exception>
 #include <filesystem>
+#include <glm/ext/matrix_transform.hpp>
 #include <vector>
+#include <cstring>
 
 #include <iostream>
 
@@ -54,12 +58,52 @@ void SetupRender(WRender & render)
 	);
 }
 
+bool UpdateUniformBuffers(
+    const WSwapChainInfo & swap_chain_info_,
+    WUniformBufferObjectInfo & uniform_buffer_object_info_
+    )
+{
+    WUniformBufferObject ubo{};
+
+    ubo.model = glm::rotate(
+        glm::mat4(1.f),
+        glm::radians(90.f),
+        glm::vec3(0.f, 0.f, 1.f)
+        );
+    ubo.view = glm::lookAt(
+        glm::vec3(2.f, 2.f, 2.f),
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f, 0.f, 1.f)
+        );
+    ubo.proj = glm::perspective(
+        glm::radians(45.f),
+        swap_chain_info_.swap_chain_extent.width / (float) swap_chain_info_.swap_chain_extent.height,
+        1.f, 10.f
+        );
+
+    ubo.proj[1][1] *= -1;  // Fix OpenGL Y inversion
+
+    std::memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(ubo));
+}
+
 bool run(WRender & in_render)
 {
-    while(true)
+
+    std::vector<WUniformBufferObjectInfo> uniform_buffer_info {in_render.FramesInFlight()};
+
+    for(auto& uniform_buffer : uniform_buffer_info)
     {
-        in_render.DrawFrame();
+        WVulkan::Create(uniform_buffer, in_render.DeviceInfo());
+        UpdateUniformBuffers(in_render.SwapChainInfo(), uniform_buffer);
     }
+
+    while(!glfwWindowShouldClose(in_render.WindowInfo().window))
+    {
+        glfwPollEvents();
+        in_render.Draw();
+    }
+
+    in_render.DeviceWaitIdle();
 
     return true;
 }
@@ -112,13 +156,13 @@ int main(int argc, char** argv)
         WTextureAsset* texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
         texture_asset->GetTexture();
 
+
         // assign shader to models
 
         // start while loop
 
         run(render);
 
-        render.DeviceWaitIdle();
     }
     catch(const std::exception& e)
     {

@@ -934,7 +934,7 @@ void WVulkan::Create(
         buffer_size,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
+        );
 
     vkMapMemory(
         device.vk_device,
@@ -942,7 +942,8 @@ void WVulkan::Create(
         0,
         buffer_size,
         0,
-        &out_uniform_buffer_object_info.mapped_data);
+        &out_uniform_buffer_object_info.mapped_data
+        );
 }
 
 void WVulkan::Create(

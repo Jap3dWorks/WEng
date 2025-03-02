@@ -45,6 +45,9 @@ private:
     
 };
 
+/** temp class */
+struct WPipelineBinding{};
+
 /**
  * @brief A render pipeline is a collection of shaders and render states.
 */
@@ -77,7 +80,7 @@ public:
     WRenderPipeline & CreateRenderPipeline(
         WRenderPipelineInfo render_pipeline_info,
         std::vector<WShaderStageInfo> in_shader_stages,
-        const WDescriptorSetLayoutInfo& descriptor_set_layout_info
+        const WDescriptorSetLayoutInfo & descriptor_set_layout_info
         );
 
     WPipelineData & RenderPipelines() WNOEXCEPT;
@@ -86,10 +89,12 @@ private:
 
     void Move(WRenderPipelinesManager && out_other);
 
-    WDeviceInfo device_info_;
-    WRenderPassInfo render_pass_info_;
-    std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_;
-    WPipelineData render_pipelines_;
+    WDeviceInfo device_info_ {};
+    WRenderPassInfo render_pass_info_ {};
+    std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
+    WPipelineData render_pipelines_ {};
 
+    // 
+    std::unordered_map<WRenderPipeline*, std::vector<WPipelineBinding>> pipeline_bindings_ {};
 };
 

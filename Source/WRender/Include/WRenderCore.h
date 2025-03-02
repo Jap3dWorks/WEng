@@ -32,13 +32,13 @@ struct WDeviceInfo{
 struct WWindowInfo
 {
     WId wid;
-    std::string title = "WEngine";
-    uint32_t width = 800;
-    uint32_t height = 600;
+    std::string title {"WEngine"};
+    uint32_t width {800};
+    uint32_t height {600};
 
     GLFWframebuffersizefun framebuffer_size_callback {nullptr};
-    void* user_pointer {nullptr};
-    GLFWwindow* window {nullptr};
+    void * user_pointer {nullptr};
+    GLFWwindow * window {nullptr};
 
 };
 

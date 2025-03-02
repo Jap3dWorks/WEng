@@ -58,19 +58,19 @@ WRender::WRender()
 
     WVulkan::Create(
         window_info_
-    );
+        );
 
     // Create Vulkan Instance
     WVulkan::Create(
         instance_info_,
         debug_info_
-    );
+        );
 
     WVulkan::Create(
         surface_info_,
         instance_info_, 
         window_info_
-    );
+        );
 
     // Create Vulkan Device
     WVulkan::Create(
@@ -78,7 +78,7 @@ WRender::WRender()
         instance_info_, 
         surface_info_,
         debug_info_
-    );
+        );
 
     // Create Vulkan Swap Chain
     WVulkan::Create(
@@ -88,31 +88,31 @@ WRender::WRender()
         window_info_,
         render_pass_info_,
         debug_info_
-    );
+        );
 
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(
         swap_chain_info_,
         device_info_
-    );
+        );
 
     // Create Vulkan Render Pass
     WVulkan::Create(
         render_pass_info_,
         swap_chain_info_,
         device_info_
-    );
+        );
 
     render_pipelines_manager_ = WRenderPipelinesManager(
         device_info_,
         render_pass_info_
-	);
+        );
 
     render_command_pool_ = WRenderCommandPool( 
         WCommandPoolInfo(),
         device_info_,
         surface_info_
-	);
+        );
 
     WVulkan::CreateSCColorResources(
         swap_chain_info_,
@@ -184,7 +184,7 @@ void WRender::DeviceWaitIdle() const
     vkDeviceWaitIdle(device_info_.vk_device);
 }
 
-void WRender::DrawFrame()
+void WRender::Draw()
 {
     vkWaitForFences(
         device_info_.vk_device,
@@ -212,6 +212,8 @@ void WRender::DrawFrame()
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("Failed to acquiera swap chain image!");
     }
+
+    // Update Uniform Buffers Here
 
     vkResetFences(
         device_info_.vk_device,
