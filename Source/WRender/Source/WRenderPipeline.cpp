@@ -79,6 +79,13 @@ WRenderPipelineInfo WRenderPipeline::RenderPipelineInfo() WCNOEXCEPT
 WRenderPipelinesManager::WRenderPipelinesManager()
 {}
 
+WRenderPipelinesManager::WRenderPipelinesManager(
+    WDeviceInfo& device, WRenderPassInfo& render_pass_info
+) : device_info_(device), render_pass_info_(render_pass_info)
+{
+    WVulkan::Create(descriptor_pool_info_, device_info_);
+}
+
 WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
     WRenderPipelineInfo in_render_pipeline_info,
     std::vector<WShaderStageInfo> in_shader_stage_info,
@@ -102,9 +109,18 @@ WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
         in_shader_stage_info
     );
 
+    //
+
+    WDescriptorSetInfo descriptor_set{};
+    WVulkan::Create(
+        descriptor_set,
+        device_info_,
+        descriptor_set_layout_info,
+        descriptor_pool_info_
+        );
+
     return render_pipelines_[in_render_pipeline_info.type].back();
 }
-
 
 WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
 {
@@ -113,7 +129,6 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
 
     WVulkan::AddDSLDefaultBindings(descriptor_set_layout_info);
 
-    // Create Vulkan Descriptor Set Layout into info object
     WVulkan::Create(
         descriptor_set_layout_info,
         device_info_
@@ -124,9 +139,6 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
     return descriptor_set_layouts_.back();
 }
 
-WRenderPipelinesManager::WRenderPipelinesManager(
-    WDeviceInfo& device, WRenderPassInfo& render_pass_info
-) : device_info_(device), render_pass_info_(render_pass_info) {}
 
 WRenderPipelinesManager::~WRenderPipelinesManager()
 {
@@ -164,7 +176,7 @@ void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)
     out_other.render_pass_info_ = {};
 }
 
-WRenderPipelinesManager::WPipelineData & WRenderPipelinesManager::RenderPipelines()noexcept
+WRenderPipelinesManager::WPipelineDataMaps & WRenderPipelinesManager::RenderPipelines()noexcept
 {
     return render_pipelines_;
 }

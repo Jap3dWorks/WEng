@@ -53,9 +53,6 @@ WRender::WRender()
     debug_info_.wid = {}; // WId::GenerateId();
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
-    render_command_pool_info_ = {};
-    render_command_pool_info_.wid = {};
-
     WVulkan::Create(
         window_info_
         );

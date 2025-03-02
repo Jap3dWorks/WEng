@@ -2,6 +2,7 @@
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <optional>
 
@@ -81,18 +82,18 @@ namespace WVulkan
         );
 
     void Create(
-	WDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-	const WDeviceInfo &device
-	);
+        WDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
+        const WDeviceInfo &device
+        );
 
     /**
      * @brief Create a vulkan  mesh
      */
     void Create(
-        WMeshInfo& out_mesh_info,
-        const WMeshStruct& mesh_struct,
-        const WDeviceInfo &device,
-        const WCommandPoolInfo &command_pool_info
+        WMeshInfo & out_mesh_info,
+        const WMeshStruct & mesh_struct,
+        const WDeviceInfo & device,
+        const WCommandPoolInfo & command_pool_info
     );
 
     void Create(
@@ -105,22 +106,12 @@ namespace WVulkan
         const WDeviceInfo & device
     );
 
-    /**
-     * @brief Add a descriptor pool item to the descriptor pool.
-     * @param out_descriptor_pool_info: The descriptor pool to add the item to.
-     * @param descriptor_type: The type of descriptor to add.
-    */
-    void AddDescriptorPoolItem(
-        WDescriptorPoolInfo& out_descriptor_pool_info,
-        const VkDescriptorType& descriptor_type
-    );
-
     void Create(
         WDescriptorSetInfo& out_descriptor_set_info,
         const WDeviceInfo &device,
         const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const WDescriptorPoolInfo& descriptor_pool_info,
-        const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
+        const WDescriptorPoolInfo& descriptor_pool_info // ,
+        // const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
     );
  
     // ----------------
@@ -246,7 +237,9 @@ namespace WVulkan
         const WRenderPassInfo & in_render_pass_info,
         const WSwapChainInfo & in_swap_chain_info,
         const WRenderPipelineInfo & in_render_pipeline_info,
-        int in_framebuffer_index = 0
+        const WDescriptorSetInfo & in_descriptor_set,
+        const WMeshInfo & in_mesh_info,
+        uint32_t in_framebuffer_index = 0
         );
 
     // Draw

@@ -1,6 +1,5 @@
 add_executable(WSpacers Source/WSpacers.cpp)
 
-
 target_include_directories(
     WSpacers 
     PRIVATE 
@@ -20,10 +19,13 @@ target_link_libraries(
         WRender::WRender
         WImporters::WImporters
         WEngine::WEngine
+    PRIVATE
+        glfw
 )
 
 install(
-    TARGETS WSpacers
+    TARGETS
+        WSpacers
     RUNTIME DESTINATION bin
 )
 install(

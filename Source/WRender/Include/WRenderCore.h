@@ -18,7 +18,6 @@ struct WDeviceInfo{
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
 
-    // TODO, can we use std::array for device_xtensions?
     std::vector<const char*> device_extensions {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
@@ -79,7 +78,7 @@ struct WRenderDebugInfo
 struct WCommandPoolInfo
 {
     WId wid;
-    VkCommandPool vk_command_pool{VK_NULL_HANDLE};
+    VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
 struct WTextureInfo
@@ -162,7 +161,7 @@ struct WDescriptorSetLayoutInfo
 struct WDescriptorPoolInfo
 {
     WId wid;
-    std::vector<VkDescriptorPoolSize> pool_sizes;
+    std::vector<VkDescriptorPoolSize> pool_sizes {};
     VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
 };
 

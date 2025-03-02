@@ -22,9 +22,9 @@ target_include_directories(
 
 target_link_libraries(
     WVulkanTest
-    vulkan
-    glfw
-    dl pthread X11 Xxf86vm Xrandr Xi
+        vulkan
+        glfw
+        dl pthread X11 Xxf86vm Xrandr Xi
 )
 
 install(TARGETS WVulkanTest DESTINATION bin)

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "vulkan/vulkan.h"
@@ -54,7 +55,7 @@ struct WPipelineBinding{};
 class WRENDER_API WRenderPipelinesManager
 {
 
-    using WPipelineData = std::unordered_map<EPipelineType, std::vector<WRenderPipeline>>;
+    using WPipelineDataMaps = std::unordered_map<EPipelineType, std::vector<WRenderPipeline>>;
 
 public:
 
@@ -83,7 +84,7 @@ public:
         const WDescriptorSetLayoutInfo & descriptor_set_layout_info
         );
 
-    WPipelineData & RenderPipelines() WNOEXCEPT;
+    WNODISCARD WPipelineDataMaps & RenderPipelines() WNOEXCEPT;
 
 private:
 
@@ -91,10 +92,15 @@ private:
 
     WDeviceInfo device_info_ {};
     WRenderPassInfo render_pass_info_ {};
-    std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
-    WPipelineData render_pipelines_ {};
+    WDescriptorPoolInfo descriptor_pool_info_ {};
 
-    // 
+    std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
+    WPipelineDataMaps render_pipelines_ {};
+
+
+
+    //  TODO
+
     std::unordered_map<WRenderPipeline*, std::vector<WPipelineBinding>> pipeline_bindings_ {};
 };
 

@@ -10,7 +10,13 @@
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
 #include "WVulkan.h"
+
+#ifndef GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
+
 #include <GLFW/glfw3.h>
+
 #include <cstddef>
 #include <exception>
 #include <filesystem>
@@ -84,6 +90,8 @@ bool UpdateUniformBuffers(
     ubo.proj[1][1] *= -1;  // Fix OpenGL Y inversion
 
     std::memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(ubo));
+
+    return true;
 }
 
 bool run(WRender & in_render)
@@ -108,6 +116,49 @@ bool run(WRender & in_render)
     return true;
 }
 
+bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_asset)
+{
+    std::vector<WAsset*> geo_asset = WImportObj().Import(
+        "Content/Assets/Models/viking_room.obj", 
+        "/Content/Assets/modelobj.modelobj"
+    );
+
+    if (geo_asset.size() < 1)
+    {
+        std::cout << "Failed to import geo_asset!" << std::endl;
+        return false;
+    }
+
+    if (geo_asset[0]->GetClass() != WStaticModel::GetStaticClass())
+    {
+        std::cout << "geo_asset is not a static model!" << std::endl;
+        return false;
+    }
+
+    std::vector<WAsset*> tex_asset = WImportTexture().Import(
+        "Content/Assets/Textures/viking_room.png", 
+        "/Content/Assets/texture.texture"
+    );
+
+    if (tex_asset.size() < 1)
+    {
+        std::cout << "Failed to import tex_asset!" << std::endl;
+        return false;
+    }
+
+    if (tex_asset[0]->GetClass() != WTextureAsset::GetStaticClass())
+    {
+        std::cout << "tex_asset is not a texture!" << std::endl;
+        return false;
+    }
+
+    out_static_model = static_cast<WStaticModel*>(geo_asset[0]);
+    out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
+
+    return true;
+
+}
+
 int main(int argc, char** argv)
 {
     try
@@ -115,49 +166,26 @@ int main(int argc, char** argv)
         WRender render;
 
         SetupRender(render);
+
+        WStaticModel * static_model;
+        WTextureAsset * texture_asset;
+
+        if (!LoadAssets(static_model, texture_asset))
+        {
+            return 1;
+        }
 	
-        std::vector<WAsset*> geo_asset = WImportObj().Import(
-            "Content/Assets/Models/viking_room.obj", 
-            "/Content/Assets/modelobj.modelobj"
-        );
-    
-        if (geo_asset.size() < 1)
-        {
-            std::cout << "Failed to import geo_asset!" << std::endl;
-            return 1;
-        }
+        const WModelStruct & model_data = static_model->GetModel();
+        const WTextureStruct & texture_data = texture_asset->GetTexture();
 
-        if (geo_asset[0]->GetClass() != WStaticModel::GetStaticClass())
-        {
-            std::cout << "geo_asset is not a static model!" << std::endl;
-            return 1;
-        }
+        WMeshInfo mesh_info;
 
-        std::vector<WAsset*> tex_asset = WImportTexture().Import(
-            "Content/Assets/Textures/viking_room.png", 
-            "/Content/Assets/texture.texture"
-        );
-
-        if (tex_asset.size() < 1)
-        {
-            std::cout << "Failed to import tex_asset!" << std::endl;
-            return 1;
-        }
-
-        if (tex_asset[0]->GetClass() != WTextureAsset::GetStaticClass())
-        {
-            std::cout << "tex_asset is not a texture!" << std::endl;
-            return 1;
-        }
-    
-        WStaticModel* static_model = static_cast<WStaticModel*>(geo_asset[0]);
-        const WModelStruct& ModelData = static_model->GetModel();
-
-        WTextureAsset* texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
-        texture_asset->GetTexture();
-
-
-        // assign shader to models
+        WVulkan::Create(
+            mesh_info,
+            model_data.meshes[0],
+            render.DeviceInfo(),
+            render.RenderCommandPool().CommandPoolInfo()
+            );
 
         // start while loop
 

@@ -51,6 +51,9 @@ public:
     WNODISCARD inline const size_t FramesInFlight() const noexcept
     { return MAX_FRAMES_IN_FLIGHT; }
 
+    WNODISCARD inline const WRenderCommandPool & RenderCommandPool() const noexcept
+    { return render_command_pool_; }
+
 private:
 
     WId wid_;
@@ -63,8 +66,6 @@ private:
 
     WSwapChainInfo swap_chain_info_;
     WRenderPassInfo render_pass_info_;
-
-    WCommandPoolInfo render_command_pool_info_;
 
     WRenderCommandPool render_command_pool_;
     WCommandBufferInfo render_command_buffer_;

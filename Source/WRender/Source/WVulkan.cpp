@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -752,7 +753,7 @@ void WVulkan::Create(
 
 void WVulkan::Create(
     WDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
-    const WDeviceInfo &device
+    const WDeviceInfo & device
     )
 {
     VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info{};
@@ -832,10 +833,11 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WMeshInfo &out_mesh_ingo,
-    const WMeshStruct &mesh_struct,
-    const WDeviceInfo &device,
-    const WCommandPoolInfo &command_pool_info)
+    WMeshInfo & out_mesh_info,
+    const WMeshStruct & mesh_struct,
+    const WDeviceInfo & device,
+    const WCommandPoolInfo & command_pool_info
+    )
 {
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -861,8 +863,8 @@ void WVulkan::Create(
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
-        out_mesh_ingo.vertex_buffer,
-        out_mesh_ingo.vertex_buffer_memory,
+        out_mesh_info.vertex_buffer,
+        out_mesh_info.vertex_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
@@ -875,7 +877,7 @@ void WVulkan::Create(
         command_pool_info.vk_command_pool,
         device.vk_graphics_queue,
         staging_buffer,
-        out_mesh_ingo.vertex_buffer,
+        out_mesh_info.vertex_buffer,
         buffer_size);
 
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
@@ -900,8 +902,8 @@ void WVulkan::Create(
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
-        out_mesh_ingo.index_buffer,
-        out_mesh_ingo.index_buffer_memory,
+        out_mesh_info.index_buffer,
+        out_mesh_info.index_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
@@ -914,7 +916,7 @@ void WVulkan::Create(
         command_pool_info.vk_command_pool,
         device.vk_graphics_queue,
         staging_buffer,
-        out_mesh_ingo.index_buffer,
+        out_mesh_info.index_buffer,
         buffer_size);
 
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
@@ -955,17 +957,11 @@ void WVulkan::Create(
         throw std::runtime_error("Descriptor pool sizes are empty!");
     }
 
-    // AddVkDescriptorPoolItem(
-    //     out_descriptor_pool_info,
-    //     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    //     FRAMES_IN_FLIGHT
-    // );
-
-    // AddVkDescriptorPoolItem(
-    //     out_descriptor_pool_info,
-    //     VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-    //     FRAMES_IN_FLIGHT
-    // );
+    out_descriptor_pool_info.pool_sizes.resize(2);
+    out_descriptor_pool_info.pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    out_descriptor_pool_info.pool_sizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    out_descriptor_pool_info.pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    out_descriptor_pool_info.pool_sizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -984,22 +980,13 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::AddDescriptorPoolItem(
-    WDescriptorPoolInfo &out_descriptor_pool_info,
-    const VkDescriptorType &descriptor_type)
-{
-    VkDescriptorPoolSize pool_size{};
-    pool_size.type = descriptor_type;
-    pool_size.descriptorCount = MAX_FRAMES_IN_FLIGHT;
-    out_descriptor_pool_info.pool_sizes.push_back(pool_size);
-}
-
 void WVulkan::Create(
     WDescriptorSetInfo &out_descriptor_set_info,
     const WDeviceInfo &device,
     const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
-    const WDescriptorPoolInfo &descriptor_pool_info,
-    const std::vector<VkWriteDescriptorSet> &write_descriptor_sets)
+    const WDescriptorPoolInfo &descriptor_pool_info
+    // const std::vector<VkWriteDescriptorSet> &write_descriptor_sets
+    )
 {
     std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts;
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -1260,7 +1247,9 @@ void WVulkan::RecordRenderCommandBuffer(
     const WRenderPassInfo & in_render_pass,
     const WSwapChainInfo & in_swap_chain,
     const WRenderPipelineInfo & in_render_pipeline_info,
-    int in_framebuffer_index
+    const WDescriptorSetInfo & in_descriptor_set,
+    const WMeshInfo & in_mesh_info,
+    uint32_t in_framebuffer_index
     )
 {
     VkCommandBufferBeginInfo begin_info{};
@@ -1271,7 +1260,7 @@ void WVulkan::RecordRenderCommandBuffer(
     if (vkBeginCommandBuffer(
             out_command_buffer_info.command_buffers[in_framebuffer_index], &begin_info
             ) != VK_SUCCESS) {
-	throw std::runtime_error("Failed to begin recording command buffer!");
+        throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
     VkRenderPassBeginInfo render_pass_info{};
@@ -1280,9 +1269,13 @@ void WVulkan::RecordRenderCommandBuffer(
     render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_framebuffer_index];
     render_pass_info.renderArea.offset = {0,0};
     render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
-    VkClearValue clear_color = {{{0.f, 0.f, 0.f, 1.f}}};
-    render_pass_info.clearValueCount = 1;
-    render_pass_info.pClearValues = &clear_color;
+
+    std::array<VkClearValue, 2> clear_colors;
+    clear_colors[0].color = {{0.f, 0.f, 0.f, 1.f}};
+    clear_colors[1].depthStencil = {1.f, 0};
+
+    render_pass_info.clearValueCount = clear_colors.size();
+    render_pass_info.pClearValues = clear_colors.data();
 
     vkCmdBeginRenderPass(
         out_command_buffer_info.command_buffers[in_framebuffer_index],
@@ -1294,7 +1287,7 @@ void WVulkan::RecordRenderCommandBuffer(
         out_command_buffer_info.command_buffers[in_framebuffer_index],
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         in_render_pipeline_info.pipeline
-	);
+    );
 
     VkViewport viewport{};
     viewport.x = 0.f;
@@ -1310,8 +1303,44 @@ void WVulkan::RecordRenderCommandBuffer(
     scissor.extent = in_swap_chain.swap_chain_extent;
     vkCmdSetScissor(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &scissor);
 
+    VkBuffer vertex_buffers[] = {in_mesh_info.vertex_buffer};
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        0,
+        1,
+        vertex_buffers,
+        offsets
+        );
+
+    vkCmdBindIndexBuffer(
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        in_mesh_info.index_buffer,
+        0,
+        VK_INDEX_TYPE_UINT32
+        );
+
+    vkCmdBindDescriptorSets(
+        out_command_buffer_info.command_buffers[in_framebuffer_index], 
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        in_render_pipeline_info.pipeline_layout,
+        0,
+        1,
+        &in_descriptor_set.descriptor_sets[in_framebuffer_index],
+        0,
+        nullptr
+    );
+
     // Rendering vertices Here
-    vkCmdDraw(out_command_buffer_info.command_buffers[in_framebuffer_index], 3, 1, 0, 0);
+    vkCmdDrawIndexed(
+        out_command_buffer_info.command_buffers[in_framebuffer_index], 
+        in_mesh_info.index_count, 
+        1, 
+        0, 
+        0, 
+        0
+        );
 
     vkCmdEndRenderPass(out_command_buffer_info.command_buffers[in_framebuffer_index]);
 

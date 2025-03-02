@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 
@@ -26,7 +27,8 @@ public:
 
     WCommandBufferInfo CreateCommandBuffer();
 
-
+    WNODISCARD const WCommandPoolInfo & CommandPoolInfo() const noexcept
+    { return command_pool_info_; }
 
 private:
 
