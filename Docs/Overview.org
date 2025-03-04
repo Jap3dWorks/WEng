@@ -1,3 +1,6 @@
+#+NAME: Overview
+#+STARTUP: overview
+
 * Overview
 
 Project to learn vulkan and cpp development.

@@ -178,6 +178,26 @@ struct WDescriptorSetInfo
     std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };
 
+struct WMeshInfo
+{
+    WId wid;
+    VkBuffer vertex_buffer;
+    VkDeviceMemory vertex_buffer_memory;
+    VkBuffer index_buffer;
+    VkDeviceMemory index_buffer_memory;
+    uint32_t index_count;
+};
+
+/**
+ * @brief Render Pipeline Bindings data
+ */
+struct WPipelineBinding
+{
+    WDescriptorSetInfo descriptor {};
+    WMeshInfo mesh{};
+};
+
+
 struct WRenderPipelineInfo
 {
     WId wid;
@@ -191,16 +211,6 @@ struct WRenderPipelineInfo
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};
-};
-
-struct WMeshInfo
-{
-    WId wid;
-    VkBuffer vertex_buffer;
-    VkDeviceMemory vertex_buffer_memory;
-    VkBuffer index_buffer;
-    VkDeviceMemory index_buffer_memory;
-    uint32_t index_count;
 };
 
 /**

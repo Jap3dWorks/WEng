@@ -213,11 +213,15 @@ namespace WVulkan
 
     void Destroy(WRenderPipelineInfo &pipeline_info, const WDeviceInfo &device);
 
-    void Destroy(WDescriptorSetLayoutInfo &descriptor_set_layout_info,
-                 const WDeviceInfo &device);
+    void Destroy(
+        WDescriptorSetLayoutInfo & descriptor_set_layout_info,
+        const WDeviceInfo & device
+        );
 
-    void Destroy(WCommandPoolInfo &out_command_pool,
-                 const WDeviceInfo &in_device_info);
+    void Destroy(
+        WCommandPoolInfo & out_command_pool,
+        const WDeviceInfo & in_device_info
+        );
 
     void Destroy(
         WSemaphoreInfo & out_semaphore_info,
@@ -237,8 +241,7 @@ namespace WVulkan
         const WRenderPassInfo & in_render_pass_info,
         const WSwapChainInfo & in_swap_chain_info,
         const WRenderPipelineInfo & in_render_pipeline_info,
-        const WDescriptorSetInfo & in_descriptor_set,
-        const WMeshInfo & in_mesh_info,
+        const std::vector<WPipelineBinding> & in_bindings,
         uint32_t in_framebuffer_index = 0
         );
 

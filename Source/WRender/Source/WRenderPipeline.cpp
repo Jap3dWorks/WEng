@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vulkan/vulkan_core.h>
+#include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WVulkan.h"
 
@@ -32,7 +33,6 @@ WRenderPipeline::WRenderPipeline(
         in_render_pass_info,
         shader_stage_infos_
     );
-
 }
 
 WRenderPipeline::~WRenderPipeline()
@@ -79,6 +79,11 @@ WId WRenderPipeline::WID() const
     return wid_;
 }
 
+void WRenderPipeline::WID(WId in_wid)
+{
+    wid_ = in_wid;
+}
+
 // WRenderPipelinesManager
 // -------------------
 
@@ -92,7 +97,7 @@ WRenderPipelinesManager::WRenderPipelinesManager(
     WVulkan::Create(descriptor_pool_info_, device_info_);
 }
 
-WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
+WRenderPipeline & WRenderPipelinesManager::CreateRenderPipeline(
     WRenderPipelineInfo in_render_pipeline_info,
     std::vector<WShaderStageInfo> in_shader_stage_info,
     const WDescriptorSetLayoutInfo& descriptor_set_layout_info
@@ -115,20 +120,13 @@ WRenderPipeline& WRenderPipelinesManager::CreateRenderPipeline(
         in_shader_stage_info
     );
 
-    //
-
-    WDescriptorSetInfo descriptor_set{};
-    WVulkan::Create(
-        descriptor_set,
-        device_info_,
-        descriptor_set_layout_info,
-        descriptor_pool_info_
-        );
+    WId wid{1}; // TODO: make this ok
+    render_pipelines_[in_render_pipeline_info.type].back().WID(wid);
 
     return render_pipelines_[in_render_pipeline_info.type].back();
 }
 
-WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
+WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSet()
 {
 
     WDescriptorSetLayoutInfo descriptor_set_layout_info;
@@ -142,13 +140,24 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
 
     descriptor_set_layouts_.push_back(descriptor_set_layout_info);
 
+    WDescriptorSetInfo descriptor_set_info;
+
+    WVulkan::Create(
+        descriptor_set_info,
+        device_info_,
+        descriptor_set_layout_info,
+        descriptor_pool_info_
+        );
+
+    descriptor_sets_.push_back(descriptor_set_info);
+
     return descriptor_set_layouts_.back();
 }
 
 
 WRenderPipelinesManager::~WRenderPipelinesManager()
 {
-    for(auto& descriptor_set_layout : descriptor_set_layouts_)
+    for(auto & descriptor_set_layout : descriptor_set_layouts_)
     {
         WVulkan::Destroy(
 	    descriptor_set_layout,
@@ -170,6 +179,15 @@ WRenderPipelinesManager & WRenderPipelinesManager::operator=(WRenderPipelinesMan
     Move(std::move(other));
 
     return *this;
+}
+
+void WRenderPipelinesManager::AddBinding(WId in_pipeline_id, WPipelineBinding in_pipeline_binding)
+{
+    assert(pipeline_bindings_.contains(in_pipeline_id) && "Not contains pipeline id.");
+
+    pipeline_bindings_[in_pipeline_id].push_back(
+        in_pipeline_binding
+        );
 }
 
 void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)

@@ -223,6 +223,9 @@ void WRender::Draw()
     for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
 
+        const std::vector<WPipelineBinding> & bindings =
+            render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
+
         for(const auto & binding : render_pipelines_manager_.PipelineBindings(render_pipeline.WID()))
         {
             

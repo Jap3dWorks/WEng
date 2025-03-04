@@ -52,7 +52,7 @@ void SetupRender(WRender & render)
     // Render Pipeline
 
     WDescriptorSetLayoutInfo descriptor_set_layout =
-        render.RenderPipelinesManager().CreateDescriptorSetLayout();
+        render.RenderPipelinesManager().CreateDescriptorSet();
 
     WRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = EPipelineType::Graphics;

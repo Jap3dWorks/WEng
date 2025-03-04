@@ -24,6 +24,8 @@ class WCORE_API WId
 public:
 
     WId() = default;
+    WId(size_t id);
+
     size_t GetId() const;
 
     bool operator==(const WId &other) const;
@@ -42,7 +44,6 @@ public:
 
 private:
 
-    WId(size_t id);
     WId& operator++();
     WId operator++(int);
 

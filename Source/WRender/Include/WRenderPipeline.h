@@ -38,6 +38,8 @@ public:
 
     WNODISCARD WId WID() const;
 
+    void WID(WId in_wid);
+
 private:
 
     WId wid_;
@@ -57,12 +59,6 @@ private:
         return wid_.GetId() == in_other.wid_.GetId();
     }
     
-};
-
-/** temp class */
-struct WPipelineBinding{
-    WDescriptorSetInfo descriptor{};
-    WMeshInfo mesh{};
 };
 
 /**
@@ -92,17 +88,19 @@ public:
         WRenderPipelinesManager && other
         );
 
-    WDescriptorSetLayoutInfo & CreateDescriptorSetLayout();
+    WDescriptorSetLayoutInfo & CreateDescriptorSet();
 
     WRenderPipeline & CreateRenderPipeline(
-        WRenderPipelineInfo render_pipeline_info,
+        WRenderPipelineInfo in_render_pipeline_info,
         std::vector<WShaderStageInfo> in_shader_stages,
-        const WDescriptorSetLayoutInfo & descriptor_set_layout_info
+        const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info
         );
+
+    void AddBinding(WId in_pipeline_id, WPipelineBinding in_pipeline_binding);
 
     WNODISCARD WPipelineDataMaps & RenderPipelines() WNOEXCEPT;
 
-    WNODISCARD const std::vector<WPipelineBinding> & PipelineBindings (WId pipeline_id) const;
+    WNODISCARD const std::vector<WPipelineBinding> & PipelineBindings(WId in_pipeline_id) const;
 
 private:
 
@@ -113,11 +111,10 @@ private:
     WDescriptorPoolInfo descriptor_pool_info_ {};
 
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
+    std::vector<WDescriptorSetInfo> descriptor_sets_ {};
     WPipelineDataMaps render_pipelines_ {};
 
     std::unordered_map<WId, std::vector<WPipelineBinding>> pipeline_bindings_ {};
-
-    //  TODO
 
 };
 

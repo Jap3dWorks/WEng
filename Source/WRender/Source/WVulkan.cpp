@@ -1247,8 +1247,7 @@ void WVulkan::RecordRenderCommandBuffer(
     const WRenderPassInfo & in_render_pass,
     const WSwapChainInfo & in_swap_chain,
     const WRenderPipelineInfo & in_render_pipeline_info,
-    const WDescriptorSetInfo & in_descriptor_set,
-    const WMeshInfo & in_mesh_info,
+    const std::vector<WPipelineBinding> & in_bindings,
     uint32_t in_framebuffer_index
     )
 {
@@ -1303,46 +1302,46 @@ void WVulkan::RecordRenderCommandBuffer(
     scissor.extent = in_swap_chain.swap_chain_extent;
     vkCmdSetScissor(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &scissor);
 
-    VkBuffer vertex_buffers[] = {in_mesh_info.vertex_buffer};
-    VkDeviceSize offsets[] = {0};
+    for (const auto & binding : in_bindings)
+    {
+        VkBuffer vertex_buffers[] = {binding.mesh.vertex_buffer};
+        VkDeviceSize offsets[] = {0};
+        
+        vkCmdBindVertexBuffers(
+            out_command_buffer_info.command_buffers[in_framebuffer_index],
+            0,
+            1,
+            vertex_buffers,
+            offsets
+            );
 
-    vkCmdBindVertexBuffers(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
-        0,
-        1,
-        vertex_buffers,
-        offsets
+        vkCmdBindIndexBuffer(
+            out_command_buffer_info.command_buffers[in_framebuffer_index],
+            binding.mesh.index_buffer,
+            0,
+            VK_INDEX_TYPE_UINT32
+            );
+
+        vkCmdBindDescriptorSets(
+            out_command_buffer_info.command_buffers[in_framebuffer_index], 
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            in_render_pipeline_info.pipeline_layout,
+            0,
+            1,
+            &binding.descriptor.descriptor_sets[in_framebuffer_index],
+            0,
+            nullptr
         );
 
-    vkCmdBindIndexBuffer(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
-        in_mesh_info.index_buffer,
-        0,
-        VK_INDEX_TYPE_UINT32
-        );
-
-    vkCmdBindDescriptorSets(
-        out_command_buffer_info.command_buffers[in_framebuffer_index], 
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        in_render_pipeline_info.pipeline_layout,
-        0,
-        1,
-        &in_descriptor_set.descriptor_sets[in_framebuffer_index],
-        0,
-        nullptr
-    );
-
-    // Rendering vertices Here,
-    //TODO: pass complete binding data here to render multiple objects at once.
-
-    vkCmdDrawIndexed(
-        out_command_buffer_info.command_buffers[in_framebuffer_index], 
-        in_mesh_info.index_count, 
-        1, 
-        0, 
-        0, 
-        0
-        );
+        vkCmdDrawIndexed(
+            out_command_buffer_info.command_buffers[in_framebuffer_index], 
+            binding.mesh.index_count, 
+            1, 
+            0, 
+            0, 
+            0
+            );
+    }
 
     vkCmdEndRenderPass(out_command_buffer_info.command_buffers[in_framebuffer_index]);
 
