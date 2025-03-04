@@ -55,6 +55,7 @@ namespace detail
         virtual Iterator end() = 0;
 
     protected:
+
         size_t size_{0};
         void AssignNewId(WObject* object);
         
