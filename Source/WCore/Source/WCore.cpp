@@ -1,5 +1,6 @@
 #include "WCore/WCore.h"
 #include "WLog.h"
+#include <cassert>
 
 // WId
 // ---
@@ -8,6 +9,11 @@ WId::WId(size_t id) : id_(id) {}
 size_t WId::GetId() const
 {
     return id_;
+}
+
+bool WId::IsValid() const
+{
+    return id_ > 0;
 }
 
 bool WId::operator==(const WId &other) const
@@ -133,4 +139,14 @@ bool WClass::operator<=(const WClass &other) const
 bool WClass::operator>=(const WClass &other) const
 {
     return name_ >= other.name_;
+}
+
+// WObject
+// -------
+
+void WObject::WID(WId in_wid)
+{
+    assert(!wid_.IsValid() && "Object already has a valid ID!");
+    
+    wid_ = in_wid;
 }

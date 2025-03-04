@@ -42,6 +42,8 @@ public:
 
     operator size_t() const;
 
+    bool IsValid() const;
+
 private:
 
     WId& operator++();
@@ -93,7 +95,7 @@ public:
     bool operator>=(const WClass &other) const;
 
 private:
-    const char *name_;
+    const char * name_;
 };
 
 namespace std
@@ -116,11 +118,16 @@ class WCORE_API WObject
 
 public:
 
+    WNODISCARD WId WID() const { return wid_; }
+
+    void WID(WId in_wid);
+
 protected:
 
-    WId id_{};
+    WId wid_{};
 
 private:
+
     // static const WObject default_object_{}; 
 
 friend detail::WObjectContainerBase;

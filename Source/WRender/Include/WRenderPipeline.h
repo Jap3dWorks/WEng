@@ -7,6 +7,7 @@
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "vulkan/vulkan.h"
+#include <cstdint>
 #include <vector>
 #include <unordered_map>
 #include <set>
@@ -88,7 +89,11 @@ public:
         WRenderPipelinesManager && other
         );
 
-    WDescriptorSetLayoutInfo & CreateDescriptorSet();
+    WDescriptorSetLayoutInfo & CreateDescriptorSetLayout();
+
+    const WDescriptorSetInfo & CreateDescriptorSet(
+        const WDescriptorSetLayoutInfo & in_descriptor_set_layout
+        );
 
     WRenderPipeline & CreateRenderPipeline(
         WRenderPipelineInfo in_render_pipeline_info,
@@ -96,7 +101,11 @@ public:
         const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info
         );
 
-    void AddBinding(WId in_pipeline_id, WPipelineBinding in_pipeline_binding);
+    void AddBinding(
+        WId in_pipeline_id,
+        const WDescriptorSetInfo & in_descriptor_set_info,
+        const WMeshInfo & in_mesh_info
+        );
 
     WNODISCARD WPipelineDataMaps & RenderPipelines() WNOEXCEPT;
 
@@ -116,5 +125,6 @@ private:
 
     std::unordered_map<WId, std::vector<WPipelineBinding>> pipeline_bindings_ {};
 
+    uint32_t pipelines_count_{0};
 };
 

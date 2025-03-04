@@ -6,6 +6,7 @@
 #include "WCore/WCore.h"
 #include "WRenderCore.h"
 #include "WVulkan.h"
+#include <cassert>
 
 // WRenderPipeline
 // ---------------
@@ -81,6 +82,8 @@ WId WRenderPipeline::WID() const
 
 void WRenderPipeline::WID(WId in_wid)
 {
+    assert(!wid_.IsValid());
+
     wid_ = in_wid;
 }
 
@@ -120,13 +123,15 @@ WRenderPipeline & WRenderPipelinesManager::CreateRenderPipeline(
         in_shader_stage_info
     );
 
-    WId wid{1}; // TODO: make this ok
+    WId wid{++pipelines_count_};
     render_pipelines_[in_render_pipeline_info.type].back().WID(wid);
+
+    pipeline_bindings_[wid] = {};
 
     return render_pipelines_[in_render_pipeline_info.type].back();
 }
 
-WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSet()
+WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSetLayout()
 {
 
     WDescriptorSetLayoutInfo descriptor_set_layout_info;
@@ -140,20 +145,27 @@ WDescriptorSetLayoutInfo & WRenderPipelinesManager::CreateDescriptorSet()
 
     descriptor_set_layouts_.push_back(descriptor_set_layout_info);
 
+
+    return descriptor_set_layouts_.back();
+}
+
+const WDescriptorSetInfo & WRenderPipelinesManager::CreateDescriptorSet(
+    const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info
+    )
+{
     WDescriptorSetInfo descriptor_set_info;
 
     WVulkan::Create(
         descriptor_set_info,
         device_info_,
-        descriptor_set_layout_info,
+        in_descriptor_set_layout_info,
         descriptor_pool_info_
         );
 
     descriptor_sets_.push_back(descriptor_set_info);
 
-    return descriptor_set_layouts_.back();
+    return descriptor_sets_.back();
 }
-
 
 WRenderPipelinesManager::~WRenderPipelinesManager()
 {
@@ -181,12 +193,16 @@ WRenderPipelinesManager & WRenderPipelinesManager::operator=(WRenderPipelinesMan
     return *this;
 }
 
-void WRenderPipelinesManager::AddBinding(WId in_pipeline_id, WPipelineBinding in_pipeline_binding)
+void WRenderPipelinesManager::AddBinding(
+    WId in_pipeline_id,
+    const WDescriptorSetInfo & in_descriptor_set_info,
+    const WMeshInfo & in_mesh_info
+    )
 {
     assert(pipeline_bindings_.contains(in_pipeline_id) && "Not contains pipeline id.");
 
     pipeline_bindings_[in_pipeline_id].push_back(
-        in_pipeline_binding
+        {in_descriptor_set_info, in_mesh_info}
         );
 }
 

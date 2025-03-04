@@ -52,7 +52,7 @@ void SetupRender(WRender & render)
     // Render Pipeline
 
     WDescriptorSetLayoutInfo descriptor_set_layout =
-        render.RenderPipelinesManager().CreateDescriptorSet();
+        render.RenderPipelinesManager().CreateDescriptorSetLayout();
 
     WRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = EPipelineType::Graphics;
@@ -165,7 +165,38 @@ int main(int argc, char** argv)
     {
         WRender render;
 
-        SetupRender(render);
+        std::vector<WShaderStageInfo> shaders;
+        shaders.reserve(2);
+
+        shaders.push_back(
+            WVulkan::CreateShaderStageInfo(
+                std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.vert").c_str(),
+                "main",
+                EShaderType::Vertex
+                )
+            );
+
+        shaders.push_back(
+            WVulkan::CreateShaderStageInfo(
+                std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.frag").c_str(),
+                "main",
+                EShaderType::Fragment
+                )
+            );
+
+        // Render Pipeline
+
+        WDescriptorSetLayoutInfo descriptor_set_layout =
+            render.RenderPipelinesManager().CreateDescriptorSetLayout();
+
+        WRenderPipelineInfo render_pipeline_info;
+        render_pipeline_info.type = EPipelineType::Graphics;
+
+        WId pipeline_wid = render.RenderPipelinesManager().CreateRenderPipeline(
+            render_pipeline_info,
+            shaders,
+            descriptor_set_layout
+            ).WID();
 
         WStaticModel * static_model;
         WTextureAsset * texture_asset;
@@ -185,6 +216,15 @@ int main(int argc, char** argv)
             model_data.meshes[0],
             render.DeviceInfo(),
             render.RenderCommandPool().CommandPoolInfo()
+            );
+
+        WDescriptorSetInfo descriptor_set =
+            render.RenderPipelinesManager().CreateDescriptorSet(
+                descriptor_set_layout
+                );
+
+        render.RenderPipelinesManager().AddBinding(
+            pipeline_wid, descriptor_set, mesh_info
             );
 
         // start while loop

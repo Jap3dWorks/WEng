@@ -49,7 +49,7 @@ size_t detail::WObjectContainerBase::GetSize() const
 
 void detail::WObjectContainerBase::AssignNewId(WObject* object)
 {
-    object->id_ = WId(size_++);
+    object->wid_ = WId(size_++);
 }
 
 // WObjectManager
