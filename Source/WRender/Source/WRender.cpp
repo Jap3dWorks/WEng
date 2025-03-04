@@ -222,39 +222,47 @@ void WRender::Draw()
 
     for(WRenderPipeline& render_pipeline : render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
-        vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
 
-        WVulkan::RecordRenderCommandBuffer(
-            render_command_buffer_,
-            render_pass_info_,
-            swap_chain_info_,
-            render_pipeline.RenderPipelineInfo(),
-            current_frame
-            );
-
-        VkSubmitInfo submit_info;
-        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphores[current_frame]};
-        VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-        submit_info.waitSemaphoreCount = 1;
-        submit_info.pWaitSemaphores = wait_semaphores;
-        submit_info.pWaitDstStageMask = wait_stages;
-
-        submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[current_frame];
-
-        submit_info.signalSemaphoreCount = 1;
-        submit_info.pSignalSemaphores = signal_semaphores;
-        
-        if (vkQueueSubmit(
-                device_info_.vk_graphics_queue,
-                1,
-                &submit_info,
-                in_flight_fence_.fences[current_frame]) != VK_SUCCESS)
+        for(const auto & binding : render_pipelines_manager_.PipelineBindings(render_pipeline.WID()))
         {
-            throw std::runtime_error("Failed to submit draw command buffer");
+            
+            vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
+
+            WVulkan::RecordRenderCommandBuffer(
+                render_command_buffer_,
+                render_pass_info_,
+                swap_chain_info_,
+                render_pipeline.RenderPipelineInfo(),
+                binding.descriptor,
+                binding.mesh,
+                current_frame
+                );
+
+            VkSubmitInfo submit_info;
+            submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+            VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphores[current_frame]};
+            VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+            submit_info.waitSemaphoreCount = 1;
+            submit_info.pWaitSemaphores = wait_semaphores;
+            submit_info.pWaitDstStageMask = wait_stages;
+
+            submit_info.commandBufferCount = 1;
+            submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[current_frame];
+
+            submit_info.signalSemaphoreCount = 1;
+            submit_info.pSignalSemaphores = signal_semaphores;
+
+            if (vkQueueSubmit(
+                    device_info_.vk_graphics_queue,
+                    1,
+                    &submit_info,
+                    in_flight_fence_.fences[current_frame]) != VK_SUCCESS)
+            {
+                throw std::runtime_error("Failed to submit draw command buffer");
+            }
         }
+        
     }
 
     VkPresentInfoKHR present_info{};

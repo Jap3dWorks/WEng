@@ -22,6 +22,7 @@ namespace detail
 class WCORE_API WId
 {
 public:
+
     WId() = default;
     size_t GetId() const;
 
@@ -40,6 +41,7 @@ public:
     operator size_t() const;
 
 private:
+
     WId(size_t id);
     WId& operator++();
     WId operator++(int);
@@ -54,6 +56,18 @@ private:
 
     friend detail::WObjectContainerBase;
 };
+
+namespace std
+{
+    template <>
+    struct hash<WId>
+    {
+        std::size_t operator()(const WId & in_wid) const
+        {
+            return std::hash<std::size_t>{}(in_wid.GetId());
+        }
+    };
+}
 
 
 class WCORE_API WClass
@@ -102,6 +116,7 @@ class WCORE_API WObject
 public:
 
 protected:
+
     WId id_{};
 
 private:

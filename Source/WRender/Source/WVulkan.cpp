@@ -1332,7 +1332,9 @@ void WVulkan::RecordRenderCommandBuffer(
         nullptr
     );
 
-    // Rendering vertices Here
+    // Rendering vertices Here,
+    //TODO: pass complete binding data here to render multiple objects at once.
+
     vkCmdDrawIndexed(
         out_command_buffer_info.command_buffers[in_framebuffer_index], 
         in_mesh_info.index_count, 

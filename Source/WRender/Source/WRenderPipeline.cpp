@@ -73,6 +73,12 @@ WRenderPipelineInfo WRenderPipeline::RenderPipelineInfo() WCNOEXCEPT
     return render_pipeline_info_;
 }
 
+
+WId WRenderPipeline::WID() const
+{
+    return wid_;
+}
+
 // WRenderPipelinesManager
 // -------------------
 
@@ -181,3 +187,9 @@ WRenderPipelinesManager::WPipelineDataMaps & WRenderPipelinesManager::RenderPipe
     return render_pipelines_;
 }
 
+const std::vector<WPipelineBinding> & WRenderPipelinesManager::PipelineBindings(WId pipeline_id) const
+{
+    assert(pipeline_bindings_.contains(pipeline_id));
+
+    return pipeline_bindings_.find(pipeline_id)->second;
+}

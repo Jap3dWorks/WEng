@@ -9,6 +9,7 @@
 #include "vulkan/vulkan.h"
 #include <vector>
 #include <unordered_map>
+#include <set>
 
 class WRENDER_API WRenderPipeline
 {
@@ -35,7 +36,11 @@ public:
 
     WNODISCARD WRenderPipelineInfo RenderPipelineInfo() WCNOEXCEPT;
 
+    WNODISCARD WId WID() const;
+
 private:
+
+    WId wid_;
 
     WRenderPipelineInfo render_pipeline_info_;
     WDeviceInfo device_info_;
@@ -43,11 +48,22 @@ private:
     std::vector<WShaderStageInfo> shader_stage_infos_;
 
     void Move(WRenderPipeline && out_other);
+
+    bool operator<(const WRenderPipeline & in_other) {
+        return wid_.GetId() < in_other.wid_.GetId();
+    }
+
+    bool operator==(const WRenderPipeline & in_other) {
+        return wid_.GetId() == in_other.wid_.GetId();
+    }
     
 };
 
 /** temp class */
-struct WPipelineBinding{};
+struct WPipelineBinding{
+    WDescriptorSetInfo descriptor{};
+    WMeshInfo mesh{};
+};
 
 /**
  * @brief A render pipeline is a collection of shaders and render states.
@@ -86,6 +102,8 @@ public:
 
     WNODISCARD WPipelineDataMaps & RenderPipelines() WNOEXCEPT;
 
+    WNODISCARD const std::vector<WPipelineBinding> & PipelineBindings (WId pipeline_id) const;
+
 private:
 
     void Move(WRenderPipelinesManager && out_other);
@@ -97,10 +115,9 @@ private:
     std::vector<WDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
     WPipelineDataMaps render_pipelines_ {};
 
-
+    std::unordered_map<WId, std::vector<WPipelineBinding>> pipeline_bindings_ {};
 
     //  TODO
 
-    std::unordered_map<WRenderPipeline*, std::vector<WPipelineBinding>> pipeline_bindings_ {};
 };
 

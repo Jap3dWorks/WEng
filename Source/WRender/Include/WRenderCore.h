@@ -176,7 +176,6 @@ struct WDescriptorSetInfo
     WId wid;
     // The len of this vector is the number of frames in flight
     std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
-
 };
 
 struct WRenderPipelineInfo
