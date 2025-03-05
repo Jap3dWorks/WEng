@@ -169,12 +169,17 @@ const WDescriptorSetInfo & WRenderPipelinesManager::CreateDescriptorSet(
 
 WRenderPipelinesManager::~WRenderPipelinesManager()
 {
+    if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
+    {
+        WVulkan::Destroy(descriptor_pool_info_, device_info_);
+    }
+
     for(auto & descriptor_set_layout : descriptor_set_layouts_)
     {
         WVulkan::Destroy(
-	    descriptor_set_layout,
-	    device_info_
-	    );
+            descriptor_set_layout,
+            device_info_
+            );
     }
 }
 
@@ -211,9 +216,11 @@ void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)
     device_info_ = std::move(out_other.device_info_);
     render_pass_info_ = std::move(out_other.render_pass_info_);
     render_pipelines_ = std::move(out_other.render_pipelines_);
+    descriptor_pool_info_ = std::move(out_other.descriptor_pool_info_);
 
     out_other.device_info_ = {};
     out_other.render_pass_info_ = {};
+    out_other.descriptor_pool_info_ = {};
 }
 
 WRenderPipelinesManager::WPipelineDataMaps & WRenderPipelinesManager::RenderPipelines()noexcept

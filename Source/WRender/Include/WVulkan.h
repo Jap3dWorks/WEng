@@ -219,6 +219,11 @@ namespace WVulkan
         );
 
     void Destroy(
+        WDescriptorPoolInfo & out_descriptor_pool_info,
+        const WDeviceInfo & in_device
+        );
+
+    void Destroy(
         WCommandPoolInfo & out_command_pool,
         const WDeviceInfo & in_device_info
         );

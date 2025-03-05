@@ -952,10 +952,10 @@ void WVulkan::Create(
     WDescriptorPoolInfo &out_descriptor_pool_info,
     const WDeviceInfo &device)
 {
-    if (out_descriptor_pool_info.pool_sizes.empty())
-    {
-        throw std::runtime_error("Descriptor pool sizes are empty!");
-    }
+    // if (out_descriptor_pool_info.pool_sizes.empty())
+    // {
+    //     throw std::runtime_error("Descriptor pool sizes are empty!");
+    // }
 
     out_descriptor_pool_info.pool_sizes.resize(2);
     out_descriptor_pool_info.pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -966,9 +966,10 @@ void WVulkan::Create(
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info.poolSizeCount = static_cast<uint32_t>(
-        out_descriptor_pool_info.pool_sizes.size());
+        out_descriptor_pool_info.pool_sizes.size()
+        );
     pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
-    pool_info.maxSets = 1;
+    pool_info.maxSets = MAX_FRAMES_IN_FLIGHT;
 
     if (vkCreateDescriptorPool(
             device.vk_device,
@@ -981,14 +982,15 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WDescriptorSetInfo &out_descriptor_set_info,
-    const WDeviceInfo &device,
-    const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
-    const WDescriptorPoolInfo &descriptor_pool_info
+    WDescriptorSetInfo & out_descriptor_set_info,
+    const WDeviceInfo & device,
+    const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
+    const WDescriptorPoolInfo & descriptor_pool_info
     // const std::vector<VkWriteDescriptorSet> &write_descriptor_sets
     )
 {
     std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts;
+
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
@@ -1190,6 +1192,22 @@ void WVulkan::Destroy(
         nullptr
         );
 }
+
+void WVulkan::Destroy(
+    WDescriptorPoolInfo & out_descriptor_pool_info,
+    const WDeviceInfo & in_device
+    )
+{
+    vkDestroyDescriptorPool(
+        in_device.vk_device,
+        out_descriptor_pool_info.descriptor_pool,
+        nullptr
+        );
+
+    out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
+    out_descriptor_pool_info.pool_sizes.clear();
+}
+
 
 void WVulkan::Destroy(
     WCommandPoolInfo & out_command_pool,
