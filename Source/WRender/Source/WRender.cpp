@@ -210,8 +210,6 @@ void WRender::Draw()
         throw std::runtime_error("Failed to acquiera swap chain image!");
     }
 
-    // Update Uniform Buffers Here
-
     vkResetFences(
         device_info_.vk_device,
         1,
@@ -239,9 +237,10 @@ void WRender::Draw()
 
         VkSubmitInfo submit_info;
         submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit_info.pNext = nullptr;
 
-        VkSemaphore wait_semaphores[] = {image_available_semaphore_.semaphores[current_frame]};
-        VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        VkSemaphore wait_semaphores[] = { image_available_semaphore_.semaphores[current_frame] };
+        VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
         submit_info.waitSemaphoreCount = 1;
         submit_info.pWaitSemaphores = wait_semaphores;
         submit_info.pWaitDstStageMask = wait_stages;

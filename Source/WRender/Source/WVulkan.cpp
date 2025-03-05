@@ -1043,6 +1043,7 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
     VkSemaphoreCreateInfo semaphore_create_info; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     semaphore_create_info.pNext = VK_NULL_HANDLE;
+    semaphore_create_info.flags = 0;
 
     for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
     {

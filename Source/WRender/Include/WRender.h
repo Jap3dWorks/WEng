@@ -19,12 +19,8 @@ class WRENDER_API WRender
 public:
 
     WRender();
-    ~WRender();
 
-    WNODISCARD WINLINE WId Wid()
-    {
-        return wid_;
-    }
+    ~WRender();
 
     void Draw();
 
@@ -55,8 +51,6 @@ public:
     { return render_command_pool_; }
 
 private:
-
-    WId wid_;
 
     WInstanceInfo instance_info_;
     WWindowInfo window_info_;
