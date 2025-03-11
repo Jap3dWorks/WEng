@@ -180,12 +180,12 @@ struct WDescriptorSetInfo
 
 struct WMeshInfo
 {
-    WId wid;
-    VkBuffer vertex_buffer;
-    VkDeviceMemory vertex_buffer_memory;
-    VkBuffer index_buffer;
-    VkDeviceMemory index_buffer_memory;
-    uint32_t index_count;
+    WId wid {0};
+    VkBuffer vertex_buffer {VK_NULL_HANDLE};
+    VkDeviceMemory vertex_buffer_memory {VK_NULL_HANDLE};
+    VkBuffer index_buffer {VK_NULL_HANDLE};
+    VkDeviceMemory index_buffer_memory {VK_NULL_HANDLE};
+    uint32_t index_count {0};
 };
 
 /**

@@ -67,7 +67,7 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
     }
 
     // create an static asset
-    WObjectManager& object_manager = WObjectManager::GetInstance();
+    WObjectManager & object_manager = WObjectManager::GetInstance();
     WStaticModel* static_model = object_manager.CreateObject<WStaticModel>(
         "StaticModel"
     );

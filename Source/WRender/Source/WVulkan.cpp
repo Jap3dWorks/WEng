@@ -845,7 +845,7 @@ void WVulkan::Create(
     // vertex buffer
 
     VkDeviceSize buffer_size =
-        sizeof(mesh_struct.vertices[0]) * mesh_struct.vertices.size();
+        sizeof(decltype(mesh_struct.vertices)::value_type) * mesh_struct.vertices.size();
 
     CreateVkBuffer(
         staging_buffer,
@@ -885,7 +885,7 @@ void WVulkan::Create(
 
     // index buffer
 
-    buffer_size = sizeof(mesh_struct.indices[0]) * mesh_struct.indices.size();
+    buffer_size = sizeof(decltype(mesh_struct.indices)::value_type) * mesh_struct.indices.size();
 
     CreateVkBuffer(
         staging_buffer,
@@ -1329,12 +1329,20 @@ void WVulkan::RecordRenderCommandBuffer(
     viewport.height = static_cast<float>(in_swap_chain.swap_chain_extent.height);
     viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f;
-    vkCmdSetViewport(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &viewport);
+    vkCmdSetViewport(
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        0, 1,
+        &viewport
+        );
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
     scissor.extent = in_swap_chain.swap_chain_extent;
-    vkCmdSetScissor(out_command_buffer_info.command_buffers[in_framebuffer_index], 0, 1, &scissor);
+    vkCmdSetScissor(
+        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        0, 1,
+        &scissor
+        );
 
     for (const auto & binding : in_bindings)
     {
