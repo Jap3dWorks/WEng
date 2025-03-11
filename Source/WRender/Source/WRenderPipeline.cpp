@@ -209,6 +209,7 @@ void WRenderPipelinesManager::AddBinding(
     pipeline_bindings_[in_pipeline_id].push_back(
         {in_descriptor_set_info, in_mesh_info}
         );
+
 }
 
 void WRenderPipelinesManager::Move(WRenderPipelinesManager && out_other)

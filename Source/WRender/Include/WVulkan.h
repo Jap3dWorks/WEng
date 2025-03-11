@@ -118,18 +118,20 @@ namespace WVulkan
  
     struct WVkWriteDescriptorSetUBOStruct
     {
-        VkDescriptorBufferInfo& buffer_info;
         uint32_t binding;
-        const WUniformBufferObjectInfo& uniform_buffer_info;
-        const VkDescriptorSet& descriptor_set;
+        WUniformBufferObjectInfo uniform_buffer_info;
+        VkDescriptorSet descriptor_set;
+
+        VkDescriptorBufferInfo buffer_info{};
     };
 
     struct WVkWriteDescriptorSetTextureStruct
     {
-        VkDescriptorImageInfo& image_info;
         uint32_t binding;
-        const WTextureInfo& texture_info;
-        const VkDescriptorSet& descriptor_set;
+        WTextureInfo texture_info;
+        VkDescriptorSet descriptor_set;
+
+        VkDescriptorImageInfo image_info{};
     };
 
 
@@ -286,6 +288,11 @@ namespace WVulkan
     void AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     /**
+     * @brief Update VkWriteDescriptorSet Stop condition
+    */
+    void UpdateWriteDescriptorSet();
+
+    /**
      * @brief Update a VkWriteDescriptorSet with a UBO struct.
     */
     template<typename ...Args>
@@ -308,7 +315,6 @@ namespace WVulkan
         out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
 
         UpdateWriteDescriptorSet(
-            out_write_descriptor_set, 
             std::forward<Args>(args) ...
         );
     }
@@ -336,16 +342,13 @@ namespace WVulkan
         out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
 
         UpdateWriteDescriptorSet(
-            out_write_descriptor_set, 
             std::forward<Args>(args)...
         );
     }
 
-    /**
-     * @brief Update VkWriteDescriptorSet Stop condition
-    */
-    void UpdateWriteDescriptorSet(
-        VkWriteDescriptorSet & out_write_descriptor_set
+    void UpdateDescriptorSets(
+        std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
+        const WDeviceInfo & in_device_info
         );
 
     // void DrawFrame()

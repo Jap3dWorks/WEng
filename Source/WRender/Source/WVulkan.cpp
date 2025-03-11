@@ -1011,9 +1011,24 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::UpdateWriteDescriptorSet(
-    VkWriteDescriptorSet &out_write_descriptor_set
-    ) {}
+void WVulkan::UpdateWriteDescriptorSet()
+{
+}
+
+void WVulkan::UpdateDescriptorSets(
+    std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
+    const WDeviceInfo & in_device_info
+    )
+{
+    vkUpdateDescriptorSets(
+        in_device_info.vk_device,
+        static_cast<uint32_t>(in_write_descriptor_sets.size()),
+        in_write_descriptor_sets.data(),
+        0,
+        nullptr
+    );
+
+}
 
 void WVulkan::Create(
     WCommandBufferInfo& out_command_buffer_info,

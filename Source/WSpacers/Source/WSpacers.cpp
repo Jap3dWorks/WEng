@@ -96,15 +96,6 @@ bool UpdateUniformBuffers(
 
 bool run(WRender & in_render)
 {
-
-    std::vector<WUniformBufferObjectInfo> uniform_buffer_info {in_render.FramesInFlight()};
-
-    for(auto& uniform_buffer : uniform_buffer_info)
-    {
-        WVulkan::Create(uniform_buffer, in_render.DeviceInfo());
-        UpdateUniformBuffers(in_render.SwapChainInfo(), uniform_buffer);
-    }
-
     while(!glfwWindowShouldClose(in_render.WindowInfo().window))
     {
         glfwPollEvents();
@@ -226,6 +217,38 @@ int main(int argc, char** argv)
         render.RenderPipelinesManager().AddBinding(
             pipeline_wid, descriptor_set, mesh_info
             );
+
+        // Update Descriptor Sets
+
+        std::vector<WUniformBufferObjectInfo> uniform_buffer_info {
+            descriptor_set.descriptor_sets.size()
+        };
+
+        for(auto & uniform_buffer : uniform_buffer_info)
+        {
+            WVulkan::Create(uniform_buffer, render.DeviceInfo());
+            UpdateUniformBuffers(render.SwapChainInfo(), uniform_buffer);
+        }
+
+        for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
+        {
+            WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
+            std::vector<VkWriteDescriptorSet> write_descriptor_sets{1};
+
+            ubo_struct.binding = 0; // Should increment or something
+            ubo_struct.uniform_buffer_info = uniform_buffer_info[i];
+            ubo_struct.descriptor_set = descriptor_set.descriptor_sets[i];
+
+            WVulkan::UpdateWriteDescriptorSet(
+                write_descriptor_sets[0],
+                ubo_struct
+                );
+
+            WVulkan::UpdateDescriptorSets(
+                write_descriptor_sets,
+                render.DeviceInfo()
+                );
+        }
 
         // start while loop
 

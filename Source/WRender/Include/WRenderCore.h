@@ -229,7 +229,8 @@ struct WUniformBufferObject
 */
 struct WUniformBufferObjectInfo
 {
-    WId wid;
+    WId wid{};
+
     VkBuffer uniform_buffer{VK_NULL_HANDLE};
     VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
     void* mapped_data{nullptr};
