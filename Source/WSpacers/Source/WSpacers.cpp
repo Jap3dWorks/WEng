@@ -9,6 +9,7 @@
 #include "WAssets/WTextureAsset.h"
 #include "WRenderCore.h"
 #include "WRenderPipeline.h"
+#include "WStructs/WGeometryStructs.h"
 #include "WVulkan.h"
 
 #ifndef GLFW_INCLUDE_VULKAN
@@ -87,11 +88,54 @@ bool UpdateUniformBuffers(
         1.f, 10.f
         );
 
-    ubo.proj[1][1] *= -1;  // Fix OpenGL Y inversion
+    ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
 
     std::memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(ubo));
 
     return true;
+}
+
+void GetPlane()
+{
+    std::array<WVertexStruct, 4> vertex{};
+
+    vertex[0] = WVertexStruct{
+        {-1.0, 1.0, 0.0},
+        {},
+        {},
+        {},
+        {},
+        {}
+    };
+
+    vertex[1] = WVertexStruct{
+        {1.0, 1.0, 0.0},
+        {},
+        {},
+        {},
+        {},
+        {}
+    };
+
+
+    vertex[2] = WVertexStruct{
+        {-1.0, -1.0, 0.0},
+        {},
+        {},
+        {},
+        {},
+        {}
+    };
+
+    vertex[3] = WVertexStruct{
+        {1.0, -1.0, 0.0},
+        {},
+        {},
+        {},
+        {},
+        {}
+    };
+    
 }
 
 bool run(WRender & in_render)
