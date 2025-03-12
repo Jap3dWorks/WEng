@@ -182,8 +182,8 @@ namespace VulkanConfig
 
 namespace AssetConfig
 {
-    const std::string MODEL_PATH = "WVulkanTest_Content/Assets/Models/viking_room.obj";
-    const std::string TEXTURE_PATH = "WVulkanTest_Content/Assets/Textures/viking_room.png";
+    const std::string MODEL_PATH = "Content/Assets/Models/viking_room.obj";
+    const std::string TEXTURE_PATH = "Content/Assets/Textures/viking_room.png";
 }
 
 class CHelloTriangleApplication
@@ -798,10 +798,10 @@ private:
     void CreateGraphicsPipeline()
     {
         auto VertShaderCode = VulkanUtils::ReadFile(
-            std::string("WVulkanTest_Content/Shaders/ShaderBase.vert.spv")
+            std::string("Content/Shaders/ShaderBase.vert.spv")
         );
         auto FragShaderCode = VulkanUtils::ReadFile(
-            std::string("WVulkanTest_Content/Shaders/ShaderBase.frag.spv")
+            std::string("Content/Shaders/ShaderBase.frag.spv")
         );
 
         VkShaderModule VertShaderModule = CreateShaderModule(VertShaderCode);

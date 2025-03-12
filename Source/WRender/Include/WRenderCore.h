@@ -205,7 +205,7 @@ struct WRenderPipelineInfo
 
     // std::vector<WShaderStageInfo> shaders{};  // We need the shaders at creation time
 
-    VkSampleCountFlagBits sample_count{VK_SAMPLE_COUNT_1_BIT};  // No Multisampling
+    // VkSampleCountFlagBits sample_count{VK_SAMPLE_COUNT_1_BIT};  // No Multisampling
 
     uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
 

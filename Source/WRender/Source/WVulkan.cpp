@@ -42,6 +42,7 @@ void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo &
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     create_info.pApplicationInfo = &app_info;
+    create_info.pNext = VK_NULL_HANDLE;
 
     auto extensions = GetRequiredExtensions(debug_info.enable_validation_layers);
     create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -69,12 +70,12 @@ void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo &
             debug_create_info.pfnUserCallback = DebugCallback;
         }
 
+        debug_create_info.flags = 0;
         create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debug_create_info;
     }
     else
     {
         create_info.enabledLayerCount = 0;
-        create_info.pNext = nullptr;
     }
 
     if (vkCreateInstance(&create_info, nullptr, &out_instance_info.instance) != VK_SUCCESS)
@@ -127,7 +128,8 @@ void WVulkan::Create(
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
         device_info.vk_physical_device,
-        surface_info.surface);
+        surface_info.surface
+        );
 
     VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
     VkPresentModeKHR present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes);
@@ -151,7 +153,10 @@ void WVulkan::Create(
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
 
     QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
-    uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
+    uint32_t queue_family_indices[] = {
+        indices.graphics_family.value(),
+        indices.present_family.value()
+    };
 
     if (indices.graphics_family != indices.present_family)
     {
@@ -303,10 +308,10 @@ void WVulkan::CreateSCDepthResources(
 
 }
 
-void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInfo &in_swap_chain_info, const WDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
-    color_attachment.format = swap_chain_info.swap_chain_image_format;
+    color_attachment.format = in_swap_chain_info.swap_chain_image_format;
     color_attachment.samples = device_info.msaa_samples;
     color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -326,7 +331,7 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
     depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentDescription color_attachment_resolve{};
-    color_attachment_resolve.format = swap_chain_info.swap_chain_image_format;
+    color_attachment_resolve.format = in_swap_chain_info.swap_chain_image_format;
     color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
     color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -344,7 +349,7 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
     depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference color_attachment_resolve_ref{};
-    color_attachment_resolve_ref.attachment = VK_ATTACHMENT_UNUSED; // 2;
+    color_attachment_resolve_ref.attachment = 2;
     color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass{};
@@ -363,7 +368,8 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     std::array<VkAttachmentDescription, 3> Attachments = {
-        color_attachment, depth_attachment, color_attachment_resolve};
+        color_attachment, depth_attachment, color_attachment_resolve
+    };
 
     VkRenderPassCreateInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -424,6 +430,7 @@ void WVulkan::Create(WDeviceInfo &device_info, const WInstanceInfo &instance_inf
         if (IsDeviceSuitable(device, surface_info.surface, device_info.device_extensions))
         {
             device_info.vk_physical_device = device;
+            device_info.msaa_samples = GetMaxUsableSampleCount(device);
             break;
         }
     }
@@ -661,7 +668,7 @@ void WVulkan::Create(
     VkPipelineMultisampleStateCreateInfo Multisampling{};
     Multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     Multisampling.sampleShadingEnable = VK_FALSE;
-    Multisampling.rasterizationSamples = out_pipeline_info.sample_count;
+    Multisampling.rasterizationSamples = in_device.msaa_samples;
 
     VkPipelineDepthStencilStateCreateInfo DepthStencil{};
     DepthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -1282,6 +1289,7 @@ void WVulkan::RecordRenderCommandBuffer(
     const WSwapChainInfo & in_swap_chain,
     const WRenderPipelineInfo & in_render_pipeline_info,
     const std::vector<WPipelineBinding> & in_bindings,
+    uint32_t in_image_index,
     uint32_t in_framebuffer_index
     )
 {
@@ -1299,7 +1307,7 @@ void WVulkan::RecordRenderCommandBuffer(
     VkRenderPassBeginInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     render_pass_info.renderPass =  in_render_pass.render_pass;
-    render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_framebuffer_index];
+    render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_image_index];
     render_pass_info.renderArea.offset = {0,0};
     render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
 
@@ -1573,7 +1581,8 @@ VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceF
 {
     for (const auto &available_format : available_formats)
     {
-        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB && available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+        if (available_format.format == VK_FORMAT_B8G8R8A8_SRGB &&
+            available_format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
         {
             return available_format;
         }
@@ -2009,4 +2018,28 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
     }
 
     return result;
+}
+
+VkSampleCountFlagBits WVulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device)
+{
+    VkPhysicalDeviceProperties PhysicalDeviceProperties;
+    vkGetPhysicalDeviceProperties(
+        in_physical_device, 
+        &PhysicalDeviceProperties
+    );
+
+    VkSampleCountFlags Counts = 
+        PhysicalDeviceProperties.limits.framebufferColorSampleCounts &
+        PhysicalDeviceProperties.limits.framebufferDepthSampleCounts;
+
+    if (Counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+    if (Counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+    if (Counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+
+    if (Counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+    if (Counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+    if (Counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+    return VK_SAMPLE_COUNT_1_BIT;
+
 }

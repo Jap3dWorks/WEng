@@ -225,13 +225,13 @@ void WRender::Draw()
             render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
-
         WVulkan::RecordRenderCommandBuffer(
             render_command_buffer_,
             render_pass_info_,
             swap_chain_info_,
             render_pipeline.RenderPipelineInfo(),
             bindings,
+            image_index,
             current_frame
             );
 
@@ -273,7 +273,7 @@ void WRender::Draw()
     present_info.pImageIndices = &image_index;
     present_info.pResults = nullptr;
 
-    vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
+    result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
         frame_buffer_resized = false;

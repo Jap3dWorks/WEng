@@ -249,6 +249,7 @@ namespace WVulkan
         const WSwapChainInfo & in_swap_chain_info,
         const WRenderPipelineInfo & in_render_pipeline_info,
         const std::vector<WPipelineBinding> & in_bindings,
+        uint32_t in_image_index = 0,
         uint32_t in_framebuffer_index = 0
         );
 
@@ -456,5 +457,7 @@ namespace WVulkan
 	const char* int_entry_point,
 	EShaderType in_shader_type
 	);
+
+    VkSampleCountFlagBits GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device);
 
 }
