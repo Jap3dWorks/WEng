@@ -15,20 +15,20 @@
                 (setenv "LD_LIBRARY_PATH" "lib")
 
                 (dap-register-debug-template
-                "[LLDB][WSpacers] Run"
-                (list :type "lldb-vscode"
-                        :cwd "${workspaceFolder}/Install/Linux_x86_64_Debug_Standalone"
-                        :request "launch"
-                        :program "bin/WSpacers" 
-                        :name "LLDB::Run"
-                        :env '()))
-
-                (dap-register-debug-template
                 "[LLDB][WVulkanTest] Run"
                 (list :type "lldb-vscode"
                         :cwd "${workspaceFolder}/Install/Linux_x86_64_Debug_Standalone"
                         :request "launch"
                         :program "bin/WVulkanTest" 
+                        :name "LLDB::Run"
+                        :env '()))
+
+                (dap-register-debug-template
+                "[LLDB][WSpacers] Run"
+                (list :type "lldb-vscode"
+                        :cwd "${workspaceFolder}/Install/Linux_x86_64_Debug_Standalone"
+                        :request "launch"
+                        :program "bin/WSpacers" 
                         :name "LLDB::Run"
                         :env '()))
 
