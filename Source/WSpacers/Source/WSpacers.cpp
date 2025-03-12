@@ -117,7 +117,6 @@ void GetPlane()
         {}
     };
 
-
     vertex[2] = WVertexStruct{
         {-1.0, -1.0, 0.0},
         {},
