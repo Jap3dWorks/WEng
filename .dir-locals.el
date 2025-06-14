@@ -1,13 +1,13 @@
 ((nil . (
 	 (eval . (progn
 
-                (define-key evil-normal-state-map (kbd "C-c = c")
+                (define-key global-map (kbd "C-c = c")
                     (lambda ()
                     (interactive)
                     (ja-execute-shell-script (concat (project-root (project-current)) ".scripts/cmd-compile.sh" ))))
 
 
-                (define-key evil-normal-state-map (kbd "C-c = d")
+                (define-key global-map (kbd "C-c = d")
                     (lambda ()
                     (interactive)
                     (ja-execute-shell-script (concat (project-root (project-current)) ".scripts/cmd-compile-debug.sh" ))))
