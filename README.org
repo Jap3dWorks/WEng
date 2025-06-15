@@ -1,0 +1,42 @@
+#+TITLE: Readme
+
+* Introduction 
+WEng is a for fun project based in c++, cmake and OpenGL.
+The intention is to create a simply modular Game Engine for learning porpuses.
+
+In this initial state our data files will be USD both for models as for levels.
+
+There are intention to try to migrate to Vulkan.
+
+** Dependencies
+You can use setup scripts to install basic dependencies.
+
+#+BEGIN_SRC sh
+./Setup/Fedora_setup.sh
+#+END_SRC
+
+** Project Structure
+
+** wcli
+Add ./Scripts to your PATH variable to use wcli
+
+#+BEGIN_SRC sh
+PATH=$PATH:./Scripts wcli -h
+#+END_SRC
+
+You can create a new project using the following code.
+
+#+BEGIN_SRC sh
+PATH=$PATH:./Scripts wcli Project -p /path/to/project_folder
+#+END_SRC
+
+Also you can create any number of modules using the follogind code.
+
+#+BEGIN_SRC sh
+PATH=$PATH:./Scripts wcli Project -p /path/to/project_folder -m Module1 Module2
+#+END_SRC
+
+** LSP
+
+*** Clangd
+

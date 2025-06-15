@@ -1,4 +1,10 @@
 #!/bin/bash
 
 SRC_DIR=$(dirname "$0")
-python $SRC_DIR/../Python/wcli_lib/wcli.py $@
+
+cd ../$SRC_DIR
+
+source ./.venv/bin/activate
+
+python ./Python/wcli_lib/wcli.py $@
+
