@@ -8,9 +8,9 @@ if [ -e .venv ]; then
 fi
 
 python -m venv .venv
-source ./.venv/bin/activate
+source ./Scripts/source-environment.sh
 
-pip install -r ./Python/requirements.txt
-
+python -m pip install --upgrade pip
+python -m pip install -r ./Python/requirements.txt
 
 

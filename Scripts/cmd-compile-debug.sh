@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/usr/bin/sh
 
-BASEDIR=$(dirname "$0")
-cd ${BASEDIR}/..
+SRC_DIR=$(dirname "$0")
+cd ${SRC_DIR}/..
 
-source ./Scripts/source-environment.sh
+source $SRC_DIR/source-environment.sh
 
 wcli Build -t Debug -a x86_64
