@@ -1,6 +1,7 @@
 #include "WSpacers.h"
 
 #include "WEngine.h"
+#include "WLog.h"
 #include "WRender.h"
 #include "WCore/WCore.h"
 #include "WImporters.h"
@@ -27,43 +28,6 @@
 
 #include <iostream>
 
-void SetupRender(WRender & render)
-{
-    // Shader Stages
-
-    std::vector<WShaderStageInfo> shaders;
-    shaders.reserve(2);
-
-    shaders.push_back(
-        WVulkan::CreateShaderStageInfo(
-            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.vert").c_str(),
-            "main",
-            EShaderType::Vertex
-            )
-        );
-
-    shaders.push_back(
-        WVulkan::CreateShaderStageInfo(
-            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.frag").c_str(),
-            "main",
-            EShaderType::Fragment
-            )
-        );
-
-    // Render Pipeline
-
-    WDescriptorSetLayoutInfo descriptor_set_layout =
-        render.RenderPipelinesManager().CreateDescriptorSetLayout();
-
-    WRenderPipelineInfo render_pipeline_info;
-    render_pipeline_info.type = EPipelineType::Graphics;
-
-    render.RenderPipelinesManager().CreateRenderPipeline(
-        render_pipeline_info,
-        shaders,
-        descriptor_set_layout
-	);
-}
 
 bool UpdateUniformBuffers(
     const WSwapChainInfo & swap_chain_info_,
@@ -78,7 +42,7 @@ bool UpdateUniformBuffers(
         glm::vec3(0.f, 0.f, 1.f)
         );
     ubo.view = glm::lookAt(
-        glm::vec3(2.f, 2.f, 2.f),
+        glm::vec3(0.f, 0.f, 2.f),
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f, 0.f, 1.f)
         );
@@ -154,7 +118,7 @@ bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_a
 {
     std::vector<WAsset*> geo_asset = WImportObj().Import(
         "Content/Assets/Models/viking_room.obj", 
-        "/Content/Assets/modelobj.modelobj"
+        "/Content/Assets/viking_room.viking_room"
     );
 
     if (geo_asset.size() < 1)
@@ -171,7 +135,7 @@ bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_a
 
     std::vector<WAsset*> tex_asset = WImportTexture().Import(
         "Content/Assets/Textures/viking_room.png", 
-        "/Content/Assets/texture.texture"
+        "/Content/Assets/viking_texture.viking_texture"
     );
 
     if (tex_asset.size() < 1)
@@ -189,8 +153,37 @@ bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_a
     out_static_model = static_cast<WStaticModel*>(geo_asset[0]);
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
 
+    for (auto& mesh : out_static_model->GetModel().meshes) {
+        WLOG("- A Mesh with: " << mesh.indices.size() << " Indices");
+        WLOG("- A Mesh with: " << mesh.vertices.size() << " Vertices");
+    }
+
     return true;
 
+}
+
+bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
+{
+    out_shaders.clear();
+    out_shaders.reserve(2);
+
+    out_shaders.push_back(
+        WVulkan::CreateShaderStageInfo(
+            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.vert").c_str(),
+            "main",
+            EShaderType::Vertex
+            )
+        );
+
+    out_shaders.push_back(
+        WVulkan::CreateShaderStageInfo(
+            std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.frag").c_str(),
+            "main",
+            EShaderType::Fragment
+            )
+        );
+
+    return true;
 }
 
 int main(int argc, char** argv)
@@ -200,23 +193,7 @@ int main(int argc, char** argv)
         WRender render;
 
         std::vector<WShaderStageInfo> shaders;
-        shaders.reserve(2);
-
-        shaders.push_back(
-            WVulkan::CreateShaderStageInfo(
-                std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.vert").c_str(),
-                "main",
-                EShaderType::Vertex
-                )
-            );
-
-        shaders.push_back(
-            WVulkan::CreateShaderStageInfo(
-                std::filesystem::absolute("Content/Shaders/Spacers_ShaderBase.frag").c_str(),
-                "main",
-                EShaderType::Fragment
-                )
-            );
+        LoadShaders(shaders);
 
         // Render Pipeline
 

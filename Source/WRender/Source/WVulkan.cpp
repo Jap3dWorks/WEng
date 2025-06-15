@@ -136,7 +136,8 @@ void WVulkan::Create(
     VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities, window_info.window);
 
     uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
-    if (swap_chain_support.capabilities.maxImageCount > 0 && image_count > swap_chain_support.capabilities.maxImageCount)
+    if (swap_chain_support.capabilities.maxImageCount > 0 &&
+        image_count > swap_chain_support.capabilities.maxImageCount)
     {
         image_count = swap_chain_support.capabilities.maxImageCount;
     }
@@ -1065,7 +1066,7 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
     VkSemaphoreCreateInfo semaphore_create_info; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     semaphore_create_info.pNext = VK_NULL_HANDLE;
-    semaphore_create_info.flags = 0;
+    // semaphore_create_info.flags = 0;
 
     for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
     {

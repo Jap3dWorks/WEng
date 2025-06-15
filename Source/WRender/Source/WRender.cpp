@@ -218,7 +218,8 @@ void WRender::Draw()
 
     VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphores[current_frame]};
 
-    for(WRenderPipeline & render_pipeline : render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
+    for(WRenderPipeline & render_pipeline :
+            render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
 
         const std::vector<WPipelineBinding> & bindings =
@@ -241,6 +242,7 @@ void WRender::Draw()
 
         VkSemaphore wait_semaphores[] = { image_available_semaphore_.semaphores[current_frame] };
         VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
         submit_info.waitSemaphoreCount = 1;
         submit_info.pWaitSemaphores = wait_semaphores;
         submit_info.pWaitDstStageMask = wait_stages;

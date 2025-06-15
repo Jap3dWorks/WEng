@@ -1,9 +1,9 @@
 #!/bin/sh
 
 SRC_DIR=$(dirname "$0")
-cd $SRC_DIR/..
+cd $SRC_DIR/../Install/Linux_x86_64_Release_Standalone
 
-source ${SRC_DIR}/source-environment.sh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./lib
 
-./Install/Linux-x86_64_Release_Standalone/bin/WVulkanTest
+./bin/WVulkanTest
 
