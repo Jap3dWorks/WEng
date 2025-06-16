@@ -153,11 +153,6 @@ bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_a
     out_static_model = static_cast<WStaticModel*>(geo_asset[0]);
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
 
-    for (auto& mesh : out_static_model->GetModel().meshes) {
-        WLOG("- A Mesh with: " << mesh.indices.size() << " Indices");
-        WLOG("- A Mesh with: " << mesh.vertices.size() << " Vertices");
-    }
-
     return true;
 
 }
@@ -217,6 +212,11 @@ int main(int argc, char** argv)
             return 1;
         }
 	
+        for (auto& mesh : static_model->GetModel().meshes) {
+            WLOG("- A Mesh with: " << mesh.indices.size() << " Indices");
+            WLOG("- A Mesh with: " << mesh.vertices.size() << " Vertices");
+        }
+
         const WModelStruct & model_data = static_model->GetModel();
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 

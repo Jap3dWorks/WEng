@@ -300,7 +300,10 @@ void WRender::RecreateSwapChain()
 
     DeviceWaitIdle();
 
-    WVulkan::Destroy(swap_chain_info_, device_info_);
+    WVulkan::Destroy(
+        swap_chain_info_,
+        device_info_
+        );
 
     WVulkan::Create(
         swap_chain_info_,

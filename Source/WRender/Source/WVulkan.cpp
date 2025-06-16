@@ -153,7 +153,9 @@ void WVulkan::Create(
     create_info.imageArrayLayers = 1;
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
 
-    QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+    QueueFamilyIndices indices =
+        FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+
     uint32_t queue_family_indices[] = {
         indices.graphics_family.value(),
         indices.present_family.value()
@@ -191,9 +193,11 @@ void WVulkan::Create(
 
 }
 
-void WVulkan::CreateSCImageViews(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::CreateSCImageViews(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info)
 {
-    swap_chain_info.swap_chain_image_views.resize(swap_chain_info.swap_chain_images.size());
+    swap_chain_info.swap_chain_image_views.resize(
+        swap_chain_info.swap_chain_images.size()
+        );
 
     for (size_t i = 0; i < swap_chain_info.swap_chain_images.size(); i++)
     {
@@ -1591,7 +1595,7 @@ VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceF
     return available_formats[0];
 }
 
-VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes)
+VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & available_present_modes)
 {
     for (const auto &available_present_mode : available_present_modes)
     {
@@ -1603,24 +1607,32 @@ VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeK
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow *window)
+VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities, GLFWwindow * in_window)
 {
-    if (capabilities.currentExtent.width != UINT32_MAX)
+    if (in_capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
-        return capabilities.currentExtent;
+        return in_capabilities.currentExtent;
     }
     else
     {
         int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        VkExtent2D actual_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+        glfwGetFramebufferSize(in_window, &width, &height);
+        
+        VkExtent2D actual_extent = {
+            static_cast<uint32_t>(width),
+            static_cast<uint32_t>(height)
+        };
 
-        actual_extent.width = std::max(
-            capabilities.minImageExtent.width,
-            std::min(capabilities.maxImageExtent.width, actual_extent.width));
-        actual_extent.height = std::max(
-            capabilities.minImageExtent.height,
-            std::min(capabilities.maxImageExtent.height, actual_extent.height));
+        actual_extent.width = std::clamp(
+            actual_extent.width,
+            in_capabilities.minImageExtent.width,
+            in_capabilities.maxImageExtent.width
+            );
+        actual_extent.height = std::clamp(
+            actual_extent.height,
+            in_capabilities.minImageExtent.height,
+            in_capabilities.maxImageExtent.height
+            );
 
         return actual_extent;
     }

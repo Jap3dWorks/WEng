@@ -2159,7 +2159,7 @@ private:
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& InCapabilities)
+    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & InCapabilities)
     {
         if(InCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
         {
