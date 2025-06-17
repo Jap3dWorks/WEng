@@ -87,6 +87,9 @@ WRender::WRender()
         debug_info_
         );
 
+    WLOG("- Swap Chain: " << swap_chain_info_.swap_chain);
+    WLOG("- Swap Chain Image Format: " << swap_chain_info_.swap_chain_image_format);
+
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(
         swap_chain_info_,
@@ -183,6 +186,21 @@ void WRender::DeviceWaitIdle() const
 
 void WRender::Draw()
 {
+
+    WLOG(" ");
+
+    for (auto& f : in_flight_fence_.fences) {
+        WLOG("- Fence: " << f);
+    }
+
+    for (auto& s : image_available_semaphore_.semaphores) {
+        WLOG("- Image Semaphore: " << s);
+    }
+
+    for (auto& s : render_finished_semaphore_.semaphores) {
+        WLOG("- Render Semaphore: " << s);
+    }
+
     vkWaitForFences(
         device_info_.vk_device,
         1,
@@ -222,12 +240,15 @@ void WRender::Draw()
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
 
+        WLOG("- Render Pipeline: " << render_pipeline.WID());
+
         const std::vector<WPipelineBinding> & bindings =
             render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
+
         WVulkan::RecordRenderCommandBuffer(
-            render_command_buffer_,
+            render_command_buffer_.command_buffers[current_frame],
             render_pass_info_,
             swap_chain_info_,
             render_pipeline.RenderPipelineInfo(),
@@ -264,6 +285,8 @@ void WRender::Draw()
         
     }
 
+    WLOG("- Signal Semaphores: " << signal_semaphores[0]);
+
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
@@ -276,6 +299,7 @@ void WRender::Draw()
     present_info.pResults = nullptr;
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
+    WLOG("- QueuePresentKHR Result: " << result);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
         frame_buffer_resized = false;
@@ -290,6 +314,8 @@ void WRender::Draw()
 
 void WRender::RecreateSwapChain()
 {
+    WLOG("- RECREATE SWAP CHAIN!");
+    
     int width=0, height=0;
     glfwGetFramebufferSize(window_info_.window, &width, &height);
 
@@ -313,4 +339,17 @@ void WRender::RecreateSwapChain()
         render_pass_info_,
         debug_info_
         );
+
+    WVulkan::CreateSCImageViews(
+        swap_chain_info_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        render_pass_info_,
+        swap_chain_info_,
+        device_info_
+        );
+
+
 }

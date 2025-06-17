@@ -244,7 +244,7 @@ namespace WVulkan
     // ---------------
 
     void RecordRenderCommandBuffer(
-        WCommandBufferInfo & out_command_buffer_info,
+        VkCommandBuffer in_commandbuffer,
         const WRenderPassInfo & in_render_pass_info,
         const WSwapChainInfo & in_swap_chain_info,
         const WRenderPipelineInfo & in_render_pipeline_info,

@@ -68,7 +68,7 @@ struct WRenderDebugInfo
     WId wid;
     bool enable_validation_layers{false};
     std::vector<const char*> validation_layers{
-        "VK_LAYER_KHRONOS_validation"
+        "VK_LAYER_KHRONOS_validation",
     };
 
     PFN_vkDebugUtilsMessengerCallbackEXT debug_callback{VK_NULL_HANDLE};

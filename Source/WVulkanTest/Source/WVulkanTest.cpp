@@ -1950,8 +1950,20 @@ private:
             VkBuffer VertexBufers[] = {VertexBuffer};
             VkDeviceSize offsets[] = {0};
 
-            vkCmdBindVertexBuffers(InCommandBuffer, 0, 1, VertexBufers, offsets);
-            vkCmdBindIndexBuffer(InCommandBuffer, IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindVertexBuffers(
+                InCommandBuffer,
+                0,
+                1,
+                VertexBufers,
+                offsets
+                );
+
+            vkCmdBindIndexBuffer(
+                InCommandBuffer,
+                IndexBuffer,
+                0,
+                VK_INDEX_TYPE_UINT32
+                );
 
             vkCmdBindDescriptorSets(
                 InCommandBuffer, 

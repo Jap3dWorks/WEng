@@ -42,7 +42,7 @@ bool UpdateUniformBuffers(
         glm::vec3(0.f, 0.f, 1.f)
         );
     ubo.view = glm::lookAt(
-        glm::vec3(0.f, 0.f, 2.f),
+        glm::vec3(2.f, 2.f, 2.f),
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f, 0.f, 1.f)
         );
@@ -57,48 +57,6 @@ bool UpdateUniformBuffers(
     std::memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(ubo));
 
     return true;
-}
-
-void GetPlane()
-{
-    std::array<WVertexStruct, 4> vertex{};
-
-    vertex[0] = WVertexStruct{
-        {-1.0, 1.0, 0.0},
-        {},
-        {},
-        {},
-        {},
-        {}
-    };
-
-    vertex[1] = WVertexStruct{
-        {1.0, 1.0, 0.0},
-        {},
-        {},
-        {},
-        {},
-        {}
-    };
-
-    vertex[2] = WVertexStruct{
-        {-1.0, -1.0, 0.0},
-        {},
-        {},
-        {},
-        {},
-        {}
-    };
-
-    vertex[3] = WVertexStruct{
-        {1.0, -1.0, 0.0},
-        {},
-        {},
-        {},
-        {},
-        {}
-    };
-    
 }
 
 bool run(WRender & in_render)
@@ -229,6 +187,16 @@ int main(int argc, char** argv)
             render.RenderCommandPool().CommandPoolInfo()
             );
 
+        // TODO Create Texture Info
+
+        WTextureInfo texture_info;
+        WVulkan::Create(
+            texture_info,
+            texture_data,
+            render.DeviceInfo(),
+            render.RenderCommandPool().CommandPoolInfo()
+            );
+
         WDescriptorSetInfo descriptor_set =
             render.RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
@@ -237,6 +205,8 @@ int main(int argc, char** argv)
         render.RenderPipelinesManager().AddBinding(
             pipeline_wid, descriptor_set, mesh_info
             );
+
+        WLOG("- Bind Pipeline: " << pipeline_wid);
 
         // Update Descriptor Sets
 
@@ -270,6 +240,7 @@ int main(int argc, char** argv)
                 );
         }
 
+        
         // start while loop
 
         run(render);

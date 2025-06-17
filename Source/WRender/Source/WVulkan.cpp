@@ -86,7 +86,14 @@ void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo &
 
 void WVulkan::Create(WSurfaceInfo & surface, WInstanceInfo & instance_info, WWindowInfo & window)
 {
-    VkResult result = glfwCreateWindowSurface(instance_info.instance, window.window, nullptr, & surface.surface);
+    VkResult result =
+        glfwCreateWindowSurface(
+            instance_info.instance,
+            window.window,
+            nullptr,
+            & surface.surface
+            );
+    
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create window surface!");
@@ -867,7 +874,7 @@ void WVulkan::Create(
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
+        );
 
     void *data;
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
@@ -882,7 +889,7 @@ void WVulkan::Create(
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+        );
 
     CopyVkBuffer(
         device.vk_device,
@@ -907,7 +914,7 @@ void WVulkan::Create(
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
+        );
 
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
     memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
@@ -921,7 +928,7 @@ void WVulkan::Create(
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+        );
 
     CopyVkBuffer(
         device.vk_device,
@@ -933,6 +940,8 @@ void WVulkan::Create(
 
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
     vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
+
+    out_mesh_info.index_count = mesh_struct.indices.size();
 }
 
 void WVulkan::Create(
@@ -1289,7 +1298,7 @@ void WVulkan::Destroy(
 // ---------------
 
 void WVulkan::RecordRenderCommandBuffer(
-    WCommandBufferInfo & out_command_buffer_info,
+    VkCommandBuffer in_commandbuffer,
     const WRenderPassInfo & in_render_pass,
     const WSwapChainInfo & in_swap_chain,
     const WRenderPipelineInfo & in_render_pipeline_info,
@@ -1299,12 +1308,13 @@ void WVulkan::RecordRenderCommandBuffer(
     )
 {
     VkCommandBufferBeginInfo begin_info{};
+    
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags = 0;
     begin_info.pInheritanceInfo = nullptr;
 
     if (vkBeginCommandBuffer(
-            out_command_buffer_info.command_buffers[in_framebuffer_index], &begin_info
+            in_commandbuffer, &begin_info
             ) != VK_SUCCESS) {
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
@@ -1317,20 +1327,32 @@ void WVulkan::RecordRenderCommandBuffer(
     render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
 
     std::array<VkClearValue, 2> clear_colors;
-    clear_colors[0].color = {{0.f, 0.f, 0.f, 1.f}};
+    
+    float r = (std::rand() % 100) / 99.f;
+    float g = (std::rand() % 100) / 99.f;
+    float b = (std::rand() % 100) / 99.f;
+
+    WLOG("- bg color R: " << r << ", G: " << g << ", B: " << b);
+
+    clear_colors[0].color = {{
+            r,
+            g,
+            b,
+            1.f}};
+
     clear_colors[1].depthStencil = {1.f, 0};
 
     render_pass_info.clearValueCount = clear_colors.size();
     render_pass_info.pClearValues = clear_colors.data();
 
     vkCmdBeginRenderPass(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        in_commandbuffer,
         &render_pass_info,
         VK_SUBPASS_CONTENTS_INLINE
 	);
 
     vkCmdBindPipeline(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        in_commandbuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         in_render_pipeline_info.pipeline
     );
@@ -1343,7 +1365,7 @@ void WVulkan::RecordRenderCommandBuffer(
     viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f;
     vkCmdSetViewport(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        in_commandbuffer,
         0, 1,
         &viewport
         );
@@ -1352,18 +1374,23 @@ void WVulkan::RecordRenderCommandBuffer(
     scissor.offset = {0, 0};
     scissor.extent = in_swap_chain.swap_chain_extent;
     vkCmdSetScissor(
-        out_command_buffer_info.command_buffers[in_framebuffer_index],
+        in_commandbuffer,
         0, 1,
         &scissor
         );
 
     for (const auto & binding : in_bindings)
     {
+
+        WLOG("- RenderCommand Index Buffer: " << binding.mesh.index_buffer);
+        WLOG("- RenderCommand Vertex Buffer: " << binding.mesh.vertex_buffer);
+        WLOG("- RenderCommend Index Count: " << binding.mesh.index_count);
+        
         VkBuffer vertex_buffers[] = {binding.mesh.vertex_buffer};
         VkDeviceSize offsets[] = {0};
         
         vkCmdBindVertexBuffers(
-            out_command_buffer_info.command_buffers[in_framebuffer_index],
+            in_commandbuffer,
             0,
             1,
             vertex_buffers,
@@ -1371,14 +1398,14 @@ void WVulkan::RecordRenderCommandBuffer(
             );
 
         vkCmdBindIndexBuffer(
-            out_command_buffer_info.command_buffers[in_framebuffer_index],
+            in_commandbuffer,
             binding.mesh.index_buffer,
             0,
             VK_INDEX_TYPE_UINT32
             );
 
         vkCmdBindDescriptorSets(
-            out_command_buffer_info.command_buffers[in_framebuffer_index], 
+            in_commandbuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             in_render_pipeline_info.pipeline_layout,
             0,
@@ -1386,21 +1413,21 @@ void WVulkan::RecordRenderCommandBuffer(
             &binding.descriptor.descriptor_sets[in_framebuffer_index],
             0,
             nullptr
-        );
+            );
 
         vkCmdDrawIndexed(
-            out_command_buffer_info.command_buffers[in_framebuffer_index], 
-            binding.mesh.index_count, 
-            1, 
-            0, 
-            0, 
+            in_commandbuffer,
+            binding.mesh.index_count,
+            1,
+            0,
+            0,
             0
             );
     }
 
-    vkCmdEndRenderPass(out_command_buffer_info.command_buffers[in_framebuffer_index]);
+    vkCmdEndRenderPass(in_commandbuffer);
 
-    if(vkEndCommandBuffer(out_command_buffer_info.command_buffers[in_framebuffer_index]) != VK_SUCCESS) {
+    if(vkEndCommandBuffer(in_commandbuffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!");
     }
 }

@@ -10,14 +10,15 @@ struct WVertexStruct{
     glm::vec3 Position;
     glm::vec4 Color;
     glm::vec2 TexCoords;
-    glm::vec3 Normal;
-    glm::vec3 Tangent;
-    glm::vec3 Bitangent;
+    // glm::vec3 Normal;
+    // glm::vec3 Tangent;
+    // glm::vec3 Bitangent;
 
     bool operator==(const WVertexStruct& other) const{
         return Position == other.Position && 
-               Normal == other.Normal && 
-               TexCoords == other.TexCoords;
+            // Normal == other.Normal && 
+            TexCoords == other.TexCoords &&
+            Color == other.Color;
     }
 };
 
@@ -26,7 +27,7 @@ struct std::hash<WVertexStruct>{
     size_t operator()(WVertexStruct const& vertex) const
     {
         return (
-            (hash<glm::vec3>()(vertex.Position) ^ (hash<glm::vec3>()(vertex.Normal) << 1)) >> 1
+            (hash<glm::vec3>()(vertex.Position) ^ (hash<glm::vec3>()(vertex.Color) << 1)) >> 1
             ) ^ (hash<glm::vec2>()(vertex.TexCoords) << 1);
     }
 };
