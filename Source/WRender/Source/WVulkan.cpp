@@ -1,5 +1,6 @@
 #include "WVulkan.h"
 
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include <array>
 #include <cstddef>
@@ -575,7 +576,7 @@ void WVulkan::Create(
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
+        );
 
     TransitionImageLayout(
         device_info.vk_device,
@@ -585,7 +586,8 @@ void WVulkan::Create(
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        out_texture_info.mip_levels);
+        out_texture_info.mip_levels
+        );
 
     // Image view
     out_texture_info.image_view = CreateImageView(
@@ -1007,7 +1009,6 @@ void WVulkan::Create(
     const WDeviceInfo & device,
     const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
     const WDescriptorPoolInfo & descriptor_pool_info
-    // const std::vector<VkWriteDescriptorSet> &write_descriptor_sets
     )
 {
     std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts;
@@ -1041,13 +1042,14 @@ void WVulkan::UpdateDescriptorSets(
     const WDeviceInfo & in_device_info
     )
 {
+    WLOGFNAME("Update Descriptor Sets");
     vkUpdateDescriptorSets(
         in_device_info.vk_device,
         static_cast<uint32_t>(in_write_descriptor_sets.size()),
         in_write_descriptor_sets.data(),
         0,
         nullptr
-    );
+        );
 
 }
 
@@ -1063,7 +1065,7 @@ void WVulkan::Create(
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     alloc_info.commandBufferCount = static_cast<uint32_t>(
         out_command_buffer_info.command_buffers.size()
-    );
+        );
 
     if (vkAllocateCommandBuffers(
             device.vk_device,
@@ -1382,9 +1384,9 @@ void WVulkan::RecordRenderCommandBuffer(
     for (const auto & binding : in_bindings)
     {
 
-        WLOG("- RenderCommand Index Buffer: " << binding.mesh.index_buffer);
-        WLOG("- RenderCommand Vertex Buffer: " << binding.mesh.vertex_buffer);
-        WLOG("- RenderCommend Index Count: " << binding.mesh.index_count);
+        WLOGFNAME("Index Buffer: " << binding.mesh.index_buffer);
+        WLOGFNAME("Vertex Buffer: " << binding.mesh.vertex_buffer);
+        WLOGFNAME("Index Count: " << binding.mesh.index_count);
         
         VkBuffer vertex_buffers[] = {binding.mesh.vertex_buffer};
         VkDeviceSize offsets[] = {0};
@@ -1451,7 +1453,10 @@ void WVulkan::AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_se
     sampler_layout_biding.pImmutableSamplers = nullptr;
     sampler_layout_biding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    out_descriptor_set_layout.bindings = {ubo_layout_binding, sampler_layout_biding};
+    out_descriptor_set_layout.bindings = {
+        ubo_layout_binding,
+        sampler_layout_biding
+    };
 }
 
 // Helper functions
@@ -1733,7 +1738,12 @@ void WVulkan::CreateVkBuffer(
     vkBindBufferMemory(device, out_buffer, out_buffer_memory, 0);
 }
 
-VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice &device, const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+VkFormat WVulkan::FindSupportedFormat(
+    const VkPhysicalDevice & device,
+    const std::vector<VkFormat> & candidates,
+    VkImageTiling tiling,
+    VkFormatFeatureFlags features
+    )
 {
     for (VkFormat format : candidates)
     {
@@ -1752,7 +1762,7 @@ VkFormat WVulkan::FindSupportedFormat(const VkPhysicalDevice &device, const std:
     throw std::runtime_error("Failed to find supported format!");
 }
 
-VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice &device)
+VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice & device)
 {
     return FindSupportedFormat(
         device,
@@ -1827,6 +1837,8 @@ void WVulkan::TransitionImageLayout(
         old_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
         new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
     {
+        WLOGFNAME("From VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTINAL");
+        
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
@@ -1892,6 +1904,8 @@ void WVulkan::EndSingleTimeCommands(
     const VkQueue &graphics_queue,
     const VkCommandBuffer &command_buffer)
 {
+    WLOGFNAME("End Single Time Commands from " << command_buffer);
+    
     vkEndCommandBuffer(command_buffer);
 
     VkSubmitInfo submit_info{};
@@ -1941,13 +1955,16 @@ VkSampler WVulkan::CreateTextureSampler(
 }
 
 void WVulkan::CopyVkBuffer(
-    const VkDevice &device,
-    const VkCommandPool &command_pool,
-    const VkQueue &graphics_queue,
-    const VkBuffer &src_buffer,
-    const VkBuffer &dst_buffer,
-    const VkDeviceSize &size)
+    const VkDevice & device,
+    const VkCommandPool & command_pool,
+    const VkQueue & graphics_queue,
+    const VkBuffer & src_buffer,
+    const VkBuffer & dst_buffer,
+    const VkDeviceSize & size
+    )
 {
+    WLOGFNAME("Copy Vk Buffer - src:" << src_buffer << "dst:" << dst_buffer);
+    
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;

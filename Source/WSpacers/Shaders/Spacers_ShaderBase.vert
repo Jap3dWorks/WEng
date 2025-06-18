@@ -19,10 +19,7 @@ void main()
 {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(InPosition, 1.0);
 
-    // FragColor = InColor;
-
-    // gl_Position = vec4((noise3f(InPosition) - 0.5) * 2.0, (noise3f(InPosition) - 0.5) * 2.0, 0.0, 1.0);
-
     FragColor = vec3(1.f, 1.f, 1.f);
     FragTexCoord = InTexCoord;
 }
+

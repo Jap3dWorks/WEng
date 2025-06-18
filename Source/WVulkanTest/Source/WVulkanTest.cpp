@@ -1431,7 +1431,7 @@ private:
         VkImageLayout InOldLayout,
         VkImageLayout InNewLayout,
         uint32_t InMipLevels
-    )
+        )
     {
         VkCommandBuffer CommandBuffer = BeginSingleTimeCommands();
 

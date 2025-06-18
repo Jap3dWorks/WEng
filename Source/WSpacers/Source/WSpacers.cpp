@@ -171,23 +171,24 @@ int main(int argc, char** argv)
         }
 	
         for (auto& mesh : static_model->GetModel().meshes) {
-            WLOG("- A Mesh with: " << mesh.indices.size() << " Indices");
-            WLOG("- A Mesh with: " << mesh.vertices.size() << " Vertices");
+            WLOG("A Mesh with: " << mesh.indices.size() << " Indices");
+            WLOG("A Mesh with: " << mesh.vertices.size() << " Vertices");
         }
+
+        WLOG("Texture Data Size: " << texture_asset->GetTexture().data.size());
+        WLOG("Texture Width: " << texture_asset->GetTexture().width);
+        WLOG("Texture Height: " << texture_asset->GetTexture().height);
 
         const WModelStruct & model_data = static_model->GetModel();
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 
         WMeshInfo mesh_info;
-
         WVulkan::Create(
             mesh_info,
             model_data.meshes[0],
             render.DeviceInfo(),
             render.RenderCommandPool().CommandPoolInfo()
             );
-
-        // TODO Create Texture Info
 
         WTextureInfo texture_info;
         WVulkan::Create(
@@ -196,6 +197,10 @@ int main(int argc, char** argv)
             render.DeviceInfo(),
             render.RenderCommandPool().CommandPoolInfo()
             );
+
+        WLOG("Texture Sampler: " << texture_info.sampler);
+        WLOG("Image Memory: " << texture_info.image_memory);
+        WLOG("Image View: " << texture_info.image_view);
 
         WDescriptorSetInfo descriptor_set =
             render.RenderPipelinesManager().CreateDescriptorSet(
@@ -206,9 +211,9 @@ int main(int argc, char** argv)
             pipeline_wid, descriptor_set, mesh_info
             );
 
-        WLOG("- Bind Pipeline: " << pipeline_wid);
+        WLOG("Bind Pipeline: " << pipeline_wid);
 
-        // Update Descriptor Sets
+        // Update Descriptor Sets //
 
         std::vector<WUniformBufferObjectInfo> uniform_buffer_info {
             descriptor_set.descriptor_sets.size()
@@ -222,10 +227,11 @@ int main(int argc, char** argv)
 
         for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
         {
-            WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
-            std::vector<VkWriteDescriptorSet> write_descriptor_sets{1};
+            std::vector<VkWriteDescriptorSet> write_descriptor_sets{2};
 
-            ubo_struct.binding = 0; // Should increment or something
+            WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
+
+            ubo_struct.binding = 0;
             ubo_struct.uniform_buffer_info = uniform_buffer_info[i];
             ubo_struct.descriptor_set = descriptor_set.descriptor_sets[i];
 
@@ -234,14 +240,26 @@ int main(int argc, char** argv)
                 ubo_struct
                 );
 
+            WVulkan::WVkWriteDescriptorSetTextureStruct texture_struct{};
+
+            texture_struct.binding = 1;
+            texture_struct.texture_info = texture_info;
+            texture_struct.descriptor_set = descriptor_set.descriptor_sets[i];
+
+            WVulkan::UpdateWriteDescriptorSet(
+                write_descriptor_sets[1],
+                texture_struct
+                );
+
+            // Update // 
+            
             WVulkan::UpdateDescriptorSets(
                 write_descriptor_sets,
                 render.DeviceInfo()
                 );
         }
 
-        
-        // start while loop
+        // Start while loop
 
         run(render);
 

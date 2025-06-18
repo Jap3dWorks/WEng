@@ -87,8 +87,8 @@ WRender::WRender()
         debug_info_
         );
 
-    WLOG("- Swap Chain: " << swap_chain_info_.swap_chain);
-    WLOG("- Swap Chain Image Format: " << swap_chain_info_.swap_chain_image_format);
+    WLOG("Swap Chain: " << swap_chain_info_.swap_chain);
+    WLOG("Swap Chain Image Format: " << swap_chain_info_.swap_chain_image_format);
 
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(

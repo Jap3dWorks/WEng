@@ -1,8 +1,10 @@
 #pragma once
-#include <iostream>
 
 #ifndef NDEBUG
-    #define WLOG(msg) std::cout << msg << std::endl;
+    #include <iostream>
+    #define WLOG(msg) std::cout << msg << std::endl
+    #define WLOGFNAME(msg) std::cout << "[" << __func__ << "] " << msg << std::endl
 #else
     #define WLOG(...)
+    #define WLOGFNAME(...)
 #endif
