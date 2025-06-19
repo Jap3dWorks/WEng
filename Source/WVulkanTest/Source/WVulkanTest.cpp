@@ -1588,7 +1588,7 @@ private:
             StagingBufferMemory
         );
 
-        void* Data;
+        void * Data;
         vkMapMemory(Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
             memcpy(Data, Mesh.Vertices.data(), (size_t) BufferSize);
         vkUnmapMemory(Device, StagingBufferMemory);
@@ -1621,7 +1621,7 @@ private:
             StagingBufferMemory
         );
 
-        void* Data;
+        void * Data;
 
         vkMapMemory(Device, StagingBufferMemory, 0, BufferSize, 0, &Data);
             memcpy(Data, Mesh.Indices.data(), (size_t) BufferSize);

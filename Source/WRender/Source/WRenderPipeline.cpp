@@ -23,6 +23,9 @@ WRenderPipeline::WRenderPipeline(
     device_info_(in_device_info),
     render_pipeline_info_(in_pipeline_info)
 {
+
+    WLOGFNAME("Create a Render Pipeline, ID: " << in_pipeline_info.wid);
+
     std::vector<WShaderModule> shader_modules(in_shader_stages.size());
 
     shader_stage_infos_ = in_shader_stages;
@@ -103,7 +106,7 @@ WRenderPipelinesManager::WRenderPipelinesManager(
 WRenderPipeline & WRenderPipelinesManager::CreateRenderPipeline(
     WRenderPipelineInfo in_render_pipeline_info,
     std::vector<WShaderStageInfo> in_shader_stage_info,
-    const WDescriptorSetLayoutInfo& descriptor_set_layout_info
+    const WDescriptorSetLayoutInfo & descriptor_set_layout_info
 )
 {
     assert(
@@ -126,7 +129,7 @@ WRenderPipeline & WRenderPipelinesManager::CreateRenderPipeline(
     WId wid{++pipelines_count_};
     render_pipelines_[in_render_pipeline_info.type].back().WID(wid);
 
-    pipeline_bindings_[wid] = {};
+    pipeline_bindings_[wid] = {};  // future bindings here
 
     return render_pipelines_[in_render_pipeline_info.type].back();
 }

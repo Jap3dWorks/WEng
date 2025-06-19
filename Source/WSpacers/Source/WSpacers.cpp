@@ -201,6 +201,7 @@ int main(int argc, char** argv)
         WLOG("Texture Sampler: " << texture_info.sampler);
         WLOG("Image Memory: " << texture_info.image_memory);
         WLOG("Image View: " << texture_info.image_view);
+        WLOG("Image: " << texture_info.image);
 
         WDescriptorSetInfo descriptor_set =
             render.RenderPipelinesManager().CreateDescriptorSet(

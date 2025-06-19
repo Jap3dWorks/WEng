@@ -187,18 +187,18 @@ void WRender::DeviceWaitIdle() const
 void WRender::Draw()
 {
 
-    WLOG(" ");
+    WLOGFNAME(" ");
 
     for (auto& f : in_flight_fence_.fences) {
-        WLOG("- Fence: " << f);
+        WLOGFNAME("Fence: " << f);
     }
 
     for (auto& s : image_available_semaphore_.semaphores) {
-        WLOG("- Image Semaphore: " << s);
+        WLOGFNAME("Image Semaphore: " << s);
     }
 
     for (auto& s : render_finished_semaphore_.semaphores) {
-        WLOG("- Render Semaphore: " << s);
+        WLOGFNAME("Render Semaphore: " << s);
     }
 
     vkWaitForFences(
@@ -240,7 +240,7 @@ void WRender::Draw()
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
 
-        WLOG("- Render Pipeline: " << render_pipeline.WID());
+        WLOGFNAME("Render Pipeline: " << render_pipeline.WID());
 
         const std::vector<WPipelineBinding> & bindings =
             render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
@@ -285,7 +285,7 @@ void WRender::Draw()
         
     }
 
-    WLOG("- Signal Semaphores: " << signal_semaphores[0]);
+    WLOGFNAME("Signal Semaphores: " << signal_semaphores[0]);
 
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -299,7 +299,7 @@ void WRender::Draw()
     present_info.pResults = nullptr;
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
-    WLOG("- QueuePresentKHR Result: " << result);
+    WLOGFNAME("QueuePresentKHR Result: " << result);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
         frame_buffer_resized = false;

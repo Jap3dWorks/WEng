@@ -556,9 +556,9 @@ void WVulkan::Create(
         image_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
+        );
 
-    void *data;
+    void * data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
@@ -589,6 +589,28 @@ void WVulkan::Create(
         out_texture_info.mip_levels
         );
 
+    CopyBufferToImage(
+        staging_buffer,
+        out_texture_info.image,
+        texture_struct.width,
+        texture_struct.height,
+        device_info.vk_device,
+        command_pool_info.vk_command_pool,
+        device_info.vk_graphics_queue
+        );
+
+    GenerateMipmaps(
+        out_texture_info.image,
+        VK_FORMAT_R8G8B8A8_SRGB,
+        texture_struct.width,
+        texture_struct.height,
+        out_texture_info.mip_levels,
+        device_info.vk_device,
+        device_info.vk_physical_device,
+        command_pool_info.vk_command_pool,
+        device_info.vk_graphics_queue
+        );
+
     // Image view
     out_texture_info.image_view = CreateImageView(
         out_texture_info.image,
@@ -604,6 +626,7 @@ void WVulkan::Create(
         device_info.vk_physical_device,
         out_texture_info.mip_levels
         );
+
 }
 
 void WVulkan::Create(
@@ -777,21 +800,21 @@ void WVulkan::Create(
     const WDeviceInfo & device
     )
 {
-    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info{};
+    VkDescriptorSetLayoutCreateInfo create_info{};
 
-    descriptor_set_layout_create_info.sType =
+    create_info.sType =
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-    descriptor_set_layout_create_info.bindingCount = static_cast<uint32_t>(
+    create_info.bindingCount = static_cast<uint32_t>(
         out_descriptor_set_layout_info.bindings.size()
         );
 
-    descriptor_set_layout_create_info.pBindings =
+    create_info.pBindings =
         out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
             device.vk_device,
-            &descriptor_set_layout_create_info,
+            &create_info,
             nullptr,
             &out_descriptor_set_layout_info.descriptor_set_layout) != VK_SUCCESS)
     {
@@ -1813,7 +1836,8 @@ void WVulkan::TransitionImageLayout(
     const VkFormat &format,
     const VkImageLayout &old_layout,
     const VkImageLayout &new_layout,
-    const uint32_t &mip_levels)
+    const uint32_t &mip_levels
+    )
 {
     VkCommandBuffer command_buffer = BeginSingleTimeCommands(device, command_pool);
 
@@ -1835,7 +1859,8 @@ void WVulkan::TransitionImageLayout(
 
     if (
         old_layout == VK_IMAGE_LAYOUT_UNDEFINED &&
-        new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+        )
     {
         WLOGFNAME("From VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTINAL");
         
@@ -1847,7 +1872,8 @@ void WVulkan::TransitionImageLayout(
     }
     else if (
         old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-        new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+        new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        )
     {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -1954,6 +1980,55 @@ VkSampler WVulkan::CreateTextureSampler(
     return texture_sampler;
 }
 
+void WVulkan::CopyBufferToImage(
+    VkBuffer in_buffer,
+    VkImage in_image,
+    uint32_t in_width,
+    uint32_t in_height,
+    const VkDevice & in_device,
+    const VkCommandPool & in_command_pool,
+    const VkQueue & in_graphics_queue
+    )
+{
+    VkCommandBuffer command_buffer = BeginSingleTimeCommands(
+        in_device,
+        in_command_pool
+        );
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset = {0,0,0};
+    region.imageExtent = {
+        in_width,
+        in_height,
+        1
+    };
+
+    vkCmdCopyBufferToImage(
+        command_buffer, 
+        in_buffer, 
+        in_image, 
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+        1, 
+        &region
+        );
+
+    EndSingleTimeCommands(
+        in_device,
+        in_command_pool,
+        in_graphics_queue,
+        command_buffer
+        );
+}
+
 void WVulkan::CopyVkBuffer(
     const VkDevice & device,
     const VkCommandPool & command_pool,
@@ -1963,7 +2038,7 @@ void WVulkan::CopyVkBuffer(
     const VkDeviceSize & size
     )
 {
-    WLOGFNAME("Copy Vk Buffer - src:" << src_buffer << "dst:" << dst_buffer);
+    WLOGFNAME("Copy Vk Buffer - src: " << src_buffer << " dst: " << dst_buffer);
     
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -2073,6 +2148,10 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
         result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     }
+    else if (in_shader_type == EShaderType::Fragment)
+    {
+        
+    }
 
     return result;
 }
@@ -2098,5 +2177,126 @@ VkSampleCountFlagBits WVulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physi
     if (Counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
 
     return VK_SAMPLE_COUNT_1_BIT;
+
+}
+
+void WVulkan::GenerateMipmaps(
+    VkImage in_image,
+    VkFormat in_image_format,
+    int32_t in_tex_width,
+    int32_t in_tex_height,
+    int32_t in_mip_levels,
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkCommandPool & in_command_pool,
+    const VkQueue & in_graphic_queue
+    )
+{
+    // Mip pregeneration should be pregenerated
+    VkFormatProperties format_properties;
+    
+    vkGetPhysicalDeviceFormatProperties(
+        in_physical_device,
+        in_image_format,
+        &format_properties
+        );
+
+    if (!(format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+        throw std::runtime_error("Texture image format does not support linear blitting!");
+    }
+
+    VkCommandBuffer command_buffer = BeginSingleTimeCommands(in_device, in_command_pool);
+
+    VkImageMemoryBarrier barrier={};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.image = in_image;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.subresourceRange.levelCount = 1;
+
+    int32_t mip_width = in_tex_width;
+    int32_t mip_height = in_tex_height;
+
+    for (uint32_t i=1; i < in_mip_levels; i++)
+    {
+        barrier.subresourceRange.baseMipLevel = i - 1;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        vkCmdPipelineBarrier(
+            command_buffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+            );
+
+        VkImageBlit blit{};
+        blit.srcOffsets[0] = {0, 0, 0};
+        blit.srcOffsets[1] = {mip_width, mip_height, 1};
+        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.mipLevel = i - 1;
+        blit.srcSubresource.baseArrayLayer = 0;
+        blit.srcSubresource.layerCount = 1;
+        blit.dstOffsets[0] = {0,0,0};
+        blit.dstOffsets[1] = {
+            mip_width > 1 ? mip_width / 2 : 1,
+            mip_height > 1 ? mip_height / 2 : 1,
+            1
+        };
+        blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.dstSubresource.mipLevel = i;
+        blit.dstSubresource.baseArrayLayer = 0;
+        blit.dstSubresource.layerCount = 1;
+
+        vkCmdBlitImage(
+            command_buffer,
+            in_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            in_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1, &blit,
+            VK_FILTER_LINEAR
+            );
+
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(
+            command_buffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+            );
+
+        if (mip_width > 1) mip_width /= 2;
+        if (mip_height > 1) mip_height /= 2;
+    }
+
+    barrier.subresourceRange.baseMipLevel = in_mip_levels - 1;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(
+        command_buffer,
+        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+        );
+
+    EndSingleTimeCommands(in_device, in_command_pool, in_graphic_queue, command_buffer);
 
 }

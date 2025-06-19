@@ -88,6 +88,7 @@ struct WTextureInfo
     VkDeviceMemory image_memory{VK_NULL_HANDLE};
     VkImageView image_view{VK_NULL_HANDLE};
     VkSampler sampler{VK_NULL_HANDLE};
+
     uint32_t mip_levels{1};
 };
 

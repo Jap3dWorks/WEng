@@ -413,33 +413,43 @@ namespace WVulkan
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
 
     void TransitionImageLayout(
-        const VkDevice& device, 
-        const VkCommandPool& command_pool, 
-        const VkQueue& graphics_queue, 
-        const VkImage& image, 
-        const VkFormat& format, 
-        const VkImageLayout& old_layout, 
-        const VkImageLayout& new_layout, 
-        const uint32_t& mip_levels
+        const VkDevice & device, 
+        const VkCommandPool & command_pool, 
+        const VkQueue & graphics_queue, 
+        const VkImage & image, 
+        const VkFormat & format, 
+        const VkImageLayout & old_layout, 
+        const VkImageLayout & new_layout, 
+        const uint32_t & mip_levels
     );
 
+    void CopyBufferToImage(
+        VkBuffer in_buffer,
+        VkImage in_image,
+        uint32_t in_width,
+        uint32_t in_height,
+        const VkDevice & in_device,
+        const VkCommandPool & in_command_pool,
+        const VkQueue & in_graphics_queue
+        );
+
     void CopyVkBuffer(
-        const VkDevice& device, 
-        const VkCommandPool& command_pool, 
-        const VkQueue& graphics_queue, 
-        const VkBuffer& src_buffer, 
-        const VkBuffer& dst_buffer, 
-        const VkDeviceSize& size
+        const VkDevice & device, 
+        const VkCommandPool & command_pool, 
+        const VkQueue & graphics_queue, 
+        const VkBuffer & src_buffer, 
+        const VkBuffer & dst_buffer, 
+        const VkDeviceSize & size
     );
     
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */
-    VkShaderStageFlagBits ToShaderStageFlagBits(const EShaderType& type);
+    VkShaderStageFlagBits ToShaderStageFlagBits(const EShaderType & type);
 
     VkCommandBuffer BeginSingleTimeCommands(
-        const VkDevice& device, 
-        const VkCommandPool& command_pool
+        const VkDevice & device, 
+        const VkCommandPool & command_pool
     );
 
     void EndSingleTimeCommands(
@@ -459,5 +469,19 @@ namespace WVulkan
 	);
 
     VkSampleCountFlagBits GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device);
+
+    void GenerateMipmaps(
+        VkImage in_image,
+        VkFormat in_image_format,
+        int32_t in_tex_width,
+        int32_t in_tex_height,
+        int32_t in_mip_levels,
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        const VkCommandPool & in_command_pool,
+        const VkQueue & in_graphic_queue
+        );
+
+
 
 }
