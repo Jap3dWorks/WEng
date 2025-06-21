@@ -3,6 +3,7 @@
 #include "WObjectManager/WObjectManager.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
+#include "WStructs/WTextureStructs.h"
 
 #include <vector>
 #include <unordered_map>
@@ -39,24 +40,29 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
     model.meshes.resize(shapes.size());
     uint32_t index_offset = 0;
 
-    for (const auto& shape : shapes)
+    for (const auto & shape : shapes)
     {
-        WMeshStruct& mesh = model.meshes[index_offset++];
+        WMeshStruct & mesh = model.meshes[index_offset++];
         std::unordered_map<WVertexStruct, uint32_t> unique_vertices = {};
 
-        for (const auto& index : shape.mesh.indices)
+        for (const auto & index : shape.mesh.indices)
         {
             WVertexStruct vertex = {};
 
             vertex.Position = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
+                attrib.vertices[(3 * index.vertex_index) + 0],
+                attrib.vertices[(3 * index.vertex_index) + 1],
+                attrib.vertices[(3 * index.vertex_index) + 2]
             };
 
-            vertex.Color = {1.0f, 1.0f, 1.0f, 1.0f};
+            vertex.TexCoords = {
+                attrib.texcoords[(2 * index.texcoord_index) + 0],
+                1.f - attrib.texcoords[(2 * index.texcoord_index) + 1]
+            };
 
-            if (!unique_vertices.count(vertex) == 0)
+            vertex.Color = {1.0f, 1.0f, 1.0f};
+
+            if (!unique_vertices.contains(vertex))
             {
                 unique_vertices[vertex] = static_cast<uint32_t>(mesh.vertices.size());
                 mesh.vertices.push_back(vertex);
@@ -68,8 +74,8 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
 
     // create an static asset
     WObjectManager & object_manager = WObjectManager::GetInstance();
-    WStaticModel* static_model = object_manager.CreateObject<WStaticModel>(
-        "StaticModel"
+    WStaticModel * static_model = object_manager.CreateObject<WStaticModel>(
+        "StaticModel"  // This is not used? CHECK
     );
     static_model->SetModel(std::move(model));
     static_model->SetPath(asset_path);
@@ -92,12 +98,12 @@ std::vector<std::string> WImportObj::Formats()
 // --------------
 std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* asset_path)
 {
-    int width, height, channels;
-    stbi_uc* Pixels = stbi_load(
+    int width, height, num_channels;
+    stbi_uc * Pixels = stbi_load(
         file_path,
         &width,
         &height,
-        &channels,
+        &num_channels,
         STBI_rgb_alpha
     );
 
@@ -109,8 +115,22 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
     WTextureStruct texture_struct = {};
     texture_struct.width = width;
     texture_struct.height = height;
-    texture_struct.channels = ETextureChannels::kRGBA;
-    texture_struct.data.resize(width * height * 4);
+
+    switch(num_channels) {
+    case 1:
+        texture_struct.channels = ETextureChannels::kR;
+    case 2:
+        texture_struct.channels = ETextureChannels::kRG;
+    case 3:
+        texture_struct.channels = ETextureChannels::kRGB;
+    case 4:
+        texture_struct.channels = ETextureChannels::kRGBA;
+    default:
+        texture_struct.channels = ETextureChannels::kRGBA;
+    }
+    
+    texture_struct.data.resize(width * height * num_channels);
+
     std::memcpy(
         texture_struct.data.data(), 
         Pixels, 

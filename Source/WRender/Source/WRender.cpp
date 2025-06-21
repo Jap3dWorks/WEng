@@ -234,7 +234,9 @@ void WRender::Draw()
         &in_flight_fence_.fences[current_frame]
         );
 
-    VkSemaphore signal_semaphores[] = {render_finished_semaphore_.semaphores[current_frame]};
+    VkSemaphore signal_semaphores[] = {
+        render_finished_semaphore_.semaphores[current_frame]
+    };
 
     for(WRenderPipeline & render_pipeline :
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])

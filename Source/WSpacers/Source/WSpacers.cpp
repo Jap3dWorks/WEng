@@ -42,7 +42,7 @@ bool UpdateUniformBuffers(
         glm::vec3(0.f, 0.f, 1.f)
         );
     ubo.view = glm::lookAt(
-        glm::vec3(2.f, 2.f, 2.f),
+        glm::vec3(-2.f, 2.f, 2.f),
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f, 0.f, 1.f)
         );
@@ -70,6 +70,47 @@ bool run(WRender & in_render)
     in_render.DeviceWaitIdle();
 
     return true;
+}
+
+WModelStruct MeshPlane()
+{
+    WModelStruct model;
+    WMeshStruct mesh;
+
+    mesh.vertices.push_back({
+            glm::vec3(-1.f, -1.f, 0.f),
+            glm::vec2(0.f, 0.f),
+            glm::vec3(0.f, 0.f, 1.f)
+        });
+
+    mesh.vertices.push_back({
+            glm::vec3(-1.f, 1.f, 0.f),
+            glm::vec2(0.f, 1.f),
+            glm::vec3(0.f, 0.f, 1.f)
+        });
+
+    mesh.vertices.push_back({
+            glm::vec3(1.f, 1.f, 0.f),
+            glm::vec2(1.f, 1.f),
+            glm::vec3(0.f, 0.f, 1.f)
+        });
+
+    mesh.vertices.push_back({
+            glm::vec3(1.f, -1.f, 0.f),
+            glm::vec2(1.f, 0.f),
+            glm::vec3(0.f, 0.f, 1.f)
+        });
+
+    mesh.indices.push_back(0);
+    mesh.indices.push_back(3);
+    mesh.indices.push_back(1);
+    mesh.indices.push_back(2);
+    mesh.indices.push_back(1);
+    mesh.indices.push_back(3);
+
+    model.meshes.push_back(mesh);
+
+    return model;
 }
 
 bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_asset)
@@ -179,7 +220,8 @@ int main(int argc, char** argv)
         WLOG("Texture Width: " << texture_asset->GetTexture().width);
         WLOG("Texture Height: " << texture_asset->GetTexture().height);
 
-        const WModelStruct & model_data = static_model->GetModel();
+        // const WModelStruct & model_data = static_model->GetModel();
+        WModelStruct model_data = MeshPlane();
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 
         WMeshInfo mesh_info;

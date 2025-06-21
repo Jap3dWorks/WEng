@@ -1096,7 +1096,7 @@ private:
     void CreateTextureImage()
     {
         int TexWidth, TexHeight, TexChannels;
-        stbi_uc* Pixels = stbi_load(
+        stbi_uc * Pixels = stbi_load(
             AssetConfig::TEXTURE_PATH.c_str(),
             &TexWidth, 
             &TexHeight, 
@@ -1123,7 +1123,7 @@ private:
             StagingBufferMemory
         );
         
-        void* Data;
+        void * Data;
         vkMapMemory(Device, StagingBufferMemory, 0, ImageSize, 0, &Data);
             memcpy(Data, Pixels, static_cast<size_t>(ImageSize));
         vkUnmapMemory(Device, StagingBufferMemory);

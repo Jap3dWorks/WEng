@@ -542,9 +542,12 @@ void WVulkan::Create(
                 std::log2(
                     std::max(texture_struct.width, texture_struct.height)))) + 1;
 
-    uint8_t channels_num = NumOfChannels(texture_struct.channels);
+    // uint8_t channels_num = NumOfChannels(texture_struct.channels);
 
-    VkDeviceSize image_size = texture_struct.width * texture_struct.height * channels_num;
+    WLOGFNAME("Num Channels: " << 4);
+
+    VkDeviceSize image_size = texture_struct.data.size();
+        // static_cast<VkDeviceSize>(texture_struct.width * texture_struct.height * channels_num);
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -560,7 +563,7 @@ void WVulkan::Create(
 
     void * data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-    memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
+        memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
     Create(
@@ -1353,11 +1356,9 @@ void WVulkan::RecordRenderCommandBuffer(
 
     std::array<VkClearValue, 2> clear_colors;
     
-    float r = (std::rand() % 100) / 99.f;
-    float g = (std::rand() % 100) / 99.f;
-    float b = (std::rand() % 100) / 99.f;
-
-    WLOG("- bg color R: " << r << ", G: " << g << ", B: " << b);
+    float r = 0.5;
+    float g = 0.5;
+    float b = 0.5;
 
     clear_colors[0].color = {{
             r,
@@ -1694,26 +1695,26 @@ VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabil
 }
 
 VkImageView WVulkan::CreateImageView(
-    const VkImage & image,
-    const VkFormat & format,
-    const VkImageAspectFlags & aspect_flags,
-    const uint32_t & mip_levels,
-    const VkDevice & device
+    const VkImage & in_image,
+    const VkFormat & in_format,
+    const VkImageAspectFlags & in_aspect_flags,
+    const uint32_t & in_mip_levels,
+    const VkDevice & in_device
     )
 {
     VkImageViewCreateInfo view_info{};
     view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    view_info.image = image;
+    view_info.image = in_image;
     view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    view_info.format = format;
-    view_info.subresourceRange.aspectMask = aspect_flags;
+    view_info.format = in_format;
+    view_info.subresourceRange.aspectMask = in_aspect_flags;
     view_info.subresourceRange.baseMipLevel = 0;
-    view_info.subresourceRange.levelCount = mip_levels;
+    view_info.subresourceRange.levelCount = in_mip_levels;
     view_info.subresourceRange.baseArrayLayer = 0;
     view_info.subresourceRange.layerCount = 1;
 
     VkImageView image_view;
-    if (vkCreateImageView(device, &view_info, nullptr, &image_view) != VK_SUCCESS)
+    if (vkCreateImageView(in_device, &view_info, nullptr, &image_view) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create texture image view!");
     }
@@ -1967,9 +1968,9 @@ VkSampler WVulkan::CreateTextureSampler(
     sampler_info.compareEnable = VK_FALSE;
     sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
     sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    sampler_info.minLod = 0;
+    sampler_info.minLod = 0.f;
     sampler_info.maxLod = static_cast<float>(mip_levels);
-    sampler_info.mipLodBias = 0;
+    sampler_info.mipLodBias = 0.f;
 
     VkSampler texture_sampler;
     if (vkCreateSampler(device, &sampler_info, nullptr, &texture_sampler) != VK_SUCCESS)
@@ -2125,6 +2126,7 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
     if (in_shader_type == EShaderType::Vertex)
     {
         result.attribute_descriptors.resize(3);
+
         result.attribute_descriptors[0].binding = 0;
         result.attribute_descriptors[0].location = 0;
         result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -2132,13 +2134,13 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
 
         result.attribute_descriptors[1].binding = 0;
         result.attribute_descriptors[1].location = 1;
-        result.attribute_descriptors[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        result.attribute_descriptors[1].offset = offsetof(WVertexStruct, Color);
+        result.attribute_descriptors[1].format = VK_FORMAT_R32G32_SFLOAT;
+        result.attribute_descriptors[1].offset = offsetof(WVertexStruct, TexCoords);
 
         result.attribute_descriptors[2].binding = 0;
         result.attribute_descriptors[2].location = 2;
-        result.attribute_descriptors[2].format = VK_FORMAT_R32G32_SFLOAT;
-        result.attribute_descriptors[2].offset = offsetof(WVertexStruct, TexCoords);
+        result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+        result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
 
         // more vertex data bindings here
 
@@ -2147,10 +2149,6 @@ WShaderStageInfo WVulkan::CreateShaderStageInfo(
         result.binding_descriptors[0].stride = sizeof(WVertexStruct);
         result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-    }
-    else if (in_shader_type == EShaderType::Fragment)
-    {
-        
     }
 
     return result;
