@@ -1,9 +1,4 @@
 #include "WImporters.h"
-#include "WAssets/WStaticModel.h"
-#include "WObjectManager/WObjectManager.h"
-#include "WAssets/WStaticModel.h"
-#include "WAssets/WTextureAsset.h"
-#include "WStructs/WTextureStructs.h"
 
 #include <vector>
 #include <unordered_map>
@@ -14,6 +9,20 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+
+#include "WAssets/WStaticModel.h"
+#include "WObjectManager/WObjectManager.h"
+#include "WAssets/WStaticModel.h"
+#include "WAssets/WTextureAsset.h"
+#include "WStructs/WTextureStructs.h"
+
+// WImportObj
+// -----------
+
+std::unique_ptr<WImporter> WImportObj::clone()
+{
+    return std::make_unique<WImportObj>(*this);
+}
 
 std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset_path)
 {
@@ -96,6 +105,12 @@ std::vector<std::string> WImportObj::Formats()
 
 // WImportTexture
 // --------------
+
+std::unique_ptr<WImporter> WImportTexture::clone()
+{
+    return std::make_unique<WImportTexture>(*this);
+}
+
 std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* asset_path)
 {
     int width, height, num_channels;

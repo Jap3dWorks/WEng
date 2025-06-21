@@ -117,7 +117,9 @@ namespace detail
 */
 class WCORE_API WObjectManager
 {
+
 public:
+
     WObjectManager() = default;
     virtual ~WObjectManager() = default;
 
@@ -127,11 +129,8 @@ public:
     WObjectManager(const WObjectManager&) = delete;
     WObjectManager& operator=(const WObjectManager&) = delete;
 
-private:
-
-    std::unordered_map<WClass, std::unique_ptr<detail::WObjectContainerBase>> containers_{};
-
 public:
+
     /**
      * @brief Create a new WObject of type T
     */
@@ -154,5 +153,10 @@ public:
         WClass object_class = T::GetDefaultObject()->GetClass();
         return reinterpret_cast<T*>(containers_[object_class]->GetObject(id));
     }
+
+private:
+
+    std::unordered_map<WClass, std::unique_ptr<detail::WObjectContainerBase>> containers_{};
+
 };
 

@@ -30,26 +30,14 @@ Modules structures will be explained next.
 
 *** Objectives
 
-Modules should be linkable bettween them and dinamically linkable with the core application.
+Modules should be linkable between them and dinamically linkable with the core application.
 Our source modules should avoid unneeded dependencies.
 Model controller paradigm.
 Data structure design paradigm (memory addresess sorted by component class).
 Use standard library for data types. 
 Use libraries to solve complex problems.
 
-*** WEngine
-
-/Main Module/
-
-WEngine is the starting point of the aplication, the main function will be here.
-Maybe basic classes and data structures will be here too, like.
-- int types
-- vector types
-- map types
-- ...
-
-WEngine will also load each module dinamically, this way the application can be extended using a plugin system, 
-modules for ours.
+*** WCore
 
 *** WCommand
 
@@ -57,3 +45,19 @@ modules for ours.
 
 This module will contain the system for command registation, base classes and command queues. 
 each module will be responsible of its commands creation and registation in the system.
+
+*** WRender
+
+Vulkan Rendering related code
+
+*** WEngine
+
+/Main Module/
+
+WEngine is the starting point of the aplication, the main function will be here.
+
+WEngine will also load each module dinamically, this way the application can be extended using a plugin system, 
+modules for ours.
+
+The engine class will reference to other modules in the aplication.
+

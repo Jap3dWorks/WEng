@@ -1,109 +1,134 @@
 #pragma once
 
+#include "WCore/WCore.h"
+#include "WCore/TFunction.h"
+
 /**
  * Optional Reference Template
 */
 template<typename T>
 struct TOptionalRef
 {
-    T *Object = nullptr;
 
+public:
+    
     TOptionalRef() = default;
 
-    TOptionalRef(T *Object)
-        : Object(Object)
+    TOptionalRef(T *object)
+        : object(object)
     {
     }
 
-    TOptionalRef(T &Other)
-        : Object(&Other)
+    TOptionalRef(T &other)
+        : object(&other)
     {
     }
 
-    TOptionalRef(const TOptionalRef &Other)
-        : Object(Other.Object)
+    TOptionalRef(const TOptionalRef &other)
+        : object(other.object)
     {
     }
 
-    TOptionalRef(TOptionalRef&& Other)
-        : Object(Other.Object)
+    TOptionalRef(TOptionalRef&& other)
+        : object(other.object)
     {
-        Other.Object = nullptr;
+        other.object = nullptr;
     }
 
-    TOptionalRef &operator=(T* Other)
+    TOptionalRef &operator=(T* other)
     {
-        Object = Other;
+        object = other;
         return *this;
     }
 
-    TOptionalRef &operator=(T& Other)
+    TOptionalRef &operator=(T& other)
     {
-        Object = &Other;
+        object = &other;
         return *this;
     }
 
-    TOptionalRef &operator=(const TOptionalRef& Other)
+    TOptionalRef &operator=(const TOptionalRef& other)
     {
-        Object = Other.Object;
+        object = other.object;
         return *this;
     }
 
-    TOptionalRef& operator=(TOptionalRef&& Other)
+    TOptionalRef& operator=(TOptionalRef&& other)
     {
-        Object = Other.Object;
-        Other.Object = nullptr;
+        object = other.object;
+        other.object = nullptr;
         return *this;
     }
 
-    operator T*() const
+    bool operator==(const TOptionalRef& other) const
     {
-        return Object;
+        return object == other.object;
     }
 
-    T* operator->() const
+    bool operator!=(const TOptionalRef& other) const
     {
-        return Object;
+        return object != other.object;
     }
 
-    T& operator*() const
+    bool operator==(T* other) const
     {
-        return *Object;
+        return object == other;
     }
 
-    bool operator==(const TOptionalRef& Other) const
+    bool operator!=(T* other) const
     {
-        return Object == Other.Object;
+        return object != other;
     }
 
-    bool operator!=(const TOptionalRef& Other) const
+    T * operator->()
     {
-        return Object != Other.Object;
+        return object;
     }
 
-
-    bool operator==(T* Other) const
+    const T * operator->() const
     {
-        return Object == Other;
+        return object;
     }
 
-    bool operator!=(T* Other) const
-    {
-        return Object != Other;
+    T & operator*() {
+        return *object;
     }
 
-    // bool operator==(std::nullptr_t) const
-    // {
-    //     return Object == nullptr;
-    // }
-
-    // bool operator!=(std::nullptr_t) const
-    // {
-    //     return Object != nullptr;
-    // }
+    const T& operator*() const
+    {
+        return *object;
+    }
 
     operator bool() const
     {
-        return Object != nullptr;
+        return !IsEmpty();
     }
+
+    bool IsEmpty() noexcept { return object == nullptr; }
+
+    T & Get() { return *object; }
+
+    const T & Get() const noexcept { return *object; }
+
+    // fill with IfEmpty IfEmptyOrElse 
+
+    void IfEmpty(TFunction<void()> p) {
+        if (IsEmpty()) { p(); }
+    }
+
+    void IfEmptyOrElse(TFunction<void()> p1, TFunction<void(T & in_item)> p2) {
+        if (IsEmpty()) {
+            p1();
+        }
+        else
+        {
+            p2(Get());
+        }
+    }
+
+private:
+
+    T * object = nullptr;
+
+
 };
