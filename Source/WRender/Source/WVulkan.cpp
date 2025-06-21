@@ -575,7 +575,7 @@ void WVulkan::Create(
         texture_struct.height,
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,  // TODO Try to deduce
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -586,7 +586,7 @@ void WVulkan::Create(
         command_pool_info.vk_command_pool,
         device_info.vk_graphics_queue,
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,  // TODO Try to deduce
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         out_texture_info.mip_levels
@@ -604,7 +604,7 @@ void WVulkan::Create(
 
     GenerateMipmaps(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,  // TODO deduce
         texture_struct.width,
         texture_struct.height,
         out_texture_info.mip_levels,
@@ -617,7 +617,7 @@ void WVulkan::Create(
     // Image view
     out_texture_info.image_view = CreateImageView(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,  // TODO deduce
         VK_IMAGE_ASPECT_COLOR_BIT,
         out_texture_info.mip_levels,
         device_info.vk_device

@@ -220,8 +220,7 @@ int main(int argc, char** argv)
         WLOG("Texture Width: " << texture_asset->GetTexture().width);
         WLOG("Texture Height: " << texture_asset->GetTexture().height);
 
-        // const WModelStruct & model_data = static_model->GetModel();
-        WModelStruct model_data = MeshPlane();
+        const WModelStruct & model_data = static_model->GetModel();
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 
         WMeshInfo mesh_info;
