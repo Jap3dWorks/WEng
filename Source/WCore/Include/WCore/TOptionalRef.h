@@ -106,6 +106,8 @@ public:
 
     bool IsEmpty() noexcept { return object == nullptr; }
 
+    bool IsPresent() noexcept { return !IsEmpty(); }
+
     T & Get() { return *object; }
 
     const T & Get() const noexcept { return *object; }
@@ -116,13 +118,20 @@ public:
         if (IsEmpty()) { p(); }
     }
 
-    void IfEmptyOrElse(TFunction<void()> p1, TFunction<void(T & in_item)> p2) {
-        if (IsEmpty()) {
-            p1();
+    void IfPresent(TFunction<void(T & item)> p)
+    {
+        if(IsPresent()) {
+            p(Get());
+        }
+    }
+
+    void IfPresentOrElse(TFunction<void(T & item)> p1, TFunction<void()> p2) {
+        if (IsPresent()) {
+            p1(Get());
         }
         else
         {
-            p2(Get());
+            p2();
         }
     }
 

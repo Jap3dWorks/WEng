@@ -1,5 +1,6 @@
 #include "WImporters.h"
 
+#include <utility>
 #include <vector>
 #include <unordered_map>
 
@@ -9,15 +10,57 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-
 #include "WAssets/WStaticModel.h"
 #include "WObjectManager/WObjectManager.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
 #include "WStructs/WTextureStructs.h"
 
+// WImporter
+// ---------
+
+WImporter::WImporter(WObjectManager & in_object_manager) :
+    object_manager_(in_object_manager) {}
+
+WImporter::WImporter(const WImporter & in_other) 
+{
+    object_manager_ = in_other.object_manager_;
+}
+
+WImporter::WImporter(WImporter && out_other) noexcept
+{
+    Move(std::move(out_other));
+}
+
+WImporter & WImporter::operator=(const WImporter & in_other) 
+{
+    object_manager_ = in_other.object_manager_;
+    return *this;
+}
+
+WImporter & WImporter::operator=(WImporter && out_other) noexcept
+{
+    Move(std::move(out_other));
+    return *this;
+}
+
+
+void WImporter::Move(WImporter && other) noexcept
+{
+    object_manager_ = std::move(other.object_manager_);
+}
+
+WObjectManager & WImporter::GetObjectManager() 
+{
+    return object_manager_.Get();
+}
+
+
 // WImportObj
 // -----------
+
+WImportObj::WImportObj(WObjectManager & in_object_manager) :
+    WImporter(in_object_manager){}
 
 std::unique_ptr<WImporter> WImportObj::clone()
 {
@@ -105,6 +148,9 @@ std::vector<std::string> WImportObj::Formats()
 
 // WImportTexture
 // --------------
+
+WImportTexture::WImportTexture(WObjectManager & in_object_manager) :
+    WImporter(in_object_manager) {}
 
 std::unique_ptr<WImporter> WImportTexture::clone()
 {
