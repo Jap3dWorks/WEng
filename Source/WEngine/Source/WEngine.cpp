@@ -14,6 +14,11 @@ WEngine::WEngine() {
 
 void WEngine::run() {}
 
+TRef<WImportersRegister> WEngine::ImportersRegister() noexcept
+{
+    return {importers_register_.get()};
+}
+
 void WEngine::InitializeObjectManager()
 {
     object_manager_ = std::make_unique<WObjectManager>();

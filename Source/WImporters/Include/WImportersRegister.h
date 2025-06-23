@@ -23,7 +23,7 @@ public:
     constexpr WImportersRegister & operator=(WImportersRegister && other) noexcept = default;
 
     template<std::derived_from<WImporter> T, typename ... Args>
-    constexpr void Register(Args&& ... args)
+    void Register(Args&& ... args)
     {
         registry_.push_back(std::make_unique<T>(std::forward<Args>(args)...));
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.h"
+#include "WCore/TRef.h"
 
 #include <memory>
 
@@ -18,8 +19,7 @@ public:
 
     void run();
 
-    
-    // WImporter * GetImporter()
+    TRef<WImportersRegister> ImportersRegister() noexcept;
 
 private:
 
