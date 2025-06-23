@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WCore/WCore.h"
+
 #include <vector>
 #include <memory>
 
@@ -32,13 +34,12 @@ public:
 public:    
 
     virtual std::unique_ptr<WImporter> clone() = 0;
-
-protected:
-
     virtual std::vector<std::string> Extensions() = 0;
     virtual std::vector<std::string> Formats() = 0;
 
-    WObjectManager & GetObjectManager();
+protected:
+
+    WObjectManager & ObjectManager();
 
 private:
 
@@ -67,8 +68,6 @@ public:
 
     std::unique_ptr<WImporter> clone() override;
 
-protected:
-    
     virtual std::vector<std::string> Extensions() override;
     virtual std::vector<std::string> Formats() override;
 };
@@ -92,8 +91,6 @@ public:
 
     std::unique_ptr<WImporter> clone() override;
 
-protected:
-    
     virtual std::vector<std::string> Extensions() override;
     virtual std::vector<std::string> Formats() override;
 };

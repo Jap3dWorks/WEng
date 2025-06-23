@@ -55,8 +55,8 @@ void detail::WObjectContainerBase::AssignNewId(WObject* object)
 // WObjectManager
 // --------------
 // TODO do not use singletons
-WObjectManager& WObjectManager::GetInstance()
-{
-    static WObjectManager instance;
-    return instance;
-}
+// WObjectManager& WObjectManager::GetInstance()
+// {
+//     static WObjectManager instance;
+//     return instance;
+// }

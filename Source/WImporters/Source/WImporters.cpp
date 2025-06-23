@@ -50,7 +50,7 @@ void WImporter::Move(WImporter && other) noexcept
     object_manager_ = std::move(other.object_manager_);
 }
 
-WObjectManager & WImporter::GetObjectManager() 
+WObjectManager & WImporter::ObjectManager() 
 {
     return object_manager_.Get();
 }
@@ -125,8 +125,7 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
     }
 
     // create an static asset
-    WObjectManager & object_manager = WObjectManager::GetInstance();
-    WStaticModel * static_model = object_manager.CreateObject<WStaticModel>(
+    WStaticModel * static_model = ObjectManager().CreateObject<WStaticModel>(
         "StaticModel"  // This is not used? CHECK
     );
     static_model->SetModel(std::move(model));
@@ -199,8 +198,7 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
     );
 
     stbi_image_free(Pixels);
-    WObjectManager& object_manager = WObjectManager::GetInstance();
-    WTextureAsset* texture_asset = object_manager.CreateObject<WTextureAsset>(
+    WTextureAsset* texture_asset = ObjectManager().CreateObject<WTextureAsset>(
         "TextureAsset"
     );
 

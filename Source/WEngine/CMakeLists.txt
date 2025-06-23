@@ -19,7 +19,9 @@ target_include_directories(
 target_link_libraries(
     WEngine
     PRIVATE
-        WCore::WCore
+    WCore::WCore
+        WImporters::WImporters
+        WRender::WRender
 )
 
 add_library(WEngine::WEngine ALIAS WEngine)

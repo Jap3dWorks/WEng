@@ -124,7 +124,7 @@ public:
     virtual ~WObjectManager() = default;
 
     // You can create a global instance of WObjectManager
-    static WObjectManager& GetInstance();
+    // static WObjectManager& GetInstance();
 
     WObjectManager(const WObjectManager&) = delete;
     WObjectManager& operator=(const WObjectManager&) = delete;

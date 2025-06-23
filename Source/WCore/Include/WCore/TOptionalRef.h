@@ -1,7 +1,14 @@
 #pragma once
 
-#include "WCore/WCore.h"
 #include "WCore/TFunction.h"
+
+struct NullOptionalRef_t
+{
+    enum class _Construct {_Token};
+    explicit constexpr NullOptionalRef_t(_Construct) noexcept {}
+};
+
+inline constexpr NullOptionalRef_t null_optional_ref{NullOptionalRef_t::_Construct::_Token};
 
 /**
  * Optional Reference Template
@@ -11,106 +18,107 @@ struct TOptionalRef
 {
 
 public:
-    
-    TOptionalRef() = default;
 
-    TOptionalRef(T *object)
+    constexpr TOptionalRef(NullOptionalRef_t) noexcept {}
+
+    constexpr TOptionalRef(T *object) noexcept
         : object(object)
     {
     }
 
-    TOptionalRef(T &other)
+    constexpr TOptionalRef(T &other) noexcept
         : object(&other)
     {
     }
 
-    TOptionalRef(const TOptionalRef &other)
+    constexpr TOptionalRef(const TOptionalRef &other) noexcept
         : object(other.object)
     {
     }
 
-    TOptionalRef(TOptionalRef&& other)
+    constexpr TOptionalRef(TOptionalRef&& other) noexcept
         : object(other.object)
     {
         other.object = nullptr;
     }
 
-    TOptionalRef &operator=(T* other)
+    constexpr TOptionalRef &operator=(T* other) noexcept
     {
         object = other;
         return *this;
     }
 
-    TOptionalRef &operator=(T& other)
+    constexpr TOptionalRef &operator=(T& other) noexcept
     {
         object = &other;
         return *this;
     }
 
-    TOptionalRef &operator=(const TOptionalRef& other)
+    constexpr TOptionalRef &operator=(const TOptionalRef& other) noexcept
     {
         object = other.object;
         return *this;
     }
 
-    TOptionalRef& operator=(TOptionalRef&& other)
+    constexpr TOptionalRef& operator=(TOptionalRef&& other) noexcept
     {
         object = other.object;
         other.object = nullptr;
         return *this;
     }
 
-    bool operator==(const TOptionalRef& other) const
+    constexpr bool operator==(const TOptionalRef& other) const noexcept
     {
         return object == other.object;
     }
 
-    bool operator!=(const TOptionalRef& other) const
+    constexpr bool operator!=(const TOptionalRef& other) const noexcept
     {
         return object != other.object;
     }
 
-    bool operator==(T* other) const
+    constexpr bool operator==(T* other) const noexcept
     {
         return object == other;
     }
 
-    bool operator!=(T* other) const
+    constexpr bool operator!=(T* other) const noexcept
     {
         return object != other;
     }
 
-    T * operator->()
+    constexpr T * operator->()
     {
         return object;
     }
 
-    const T * operator->() const
+    constexpr const T * operator->() const
     {
         return object;
     }
 
-    T & operator*() {
-        return *object;
-    }
-
-    const T& operator*() const
+    constexpr T & operator*()
     {
         return *object;
     }
 
-    operator bool() const
+    constexpr const T & operator*() const
+    {
+        return *object;
+    }
+
+    constexpr operator bool() const
     {
         return !IsEmpty();
     }
 
-    bool IsEmpty() noexcept { return object == nullptr; }
+    constexpr bool IsEmpty() noexcept { return object == nullptr; }
 
-    bool IsPresent() noexcept { return !IsEmpty(); }
+    constexpr bool IsPresent() noexcept { return !IsEmpty(); }
 
-    T & Get() { return *object; }
+    constexpr T & Get() { return *object; }
 
-    const T & Get() const noexcept { return *object; }
+    constexpr const T & Get() const noexcept { return *object; }
 
     // fill with IfEmpty IfEmptyOrElse 
 
@@ -138,6 +146,5 @@ public:
 private:
 
     T * object = nullptr;
-
 
 };
