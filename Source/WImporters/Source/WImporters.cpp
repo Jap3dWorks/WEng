@@ -179,12 +179,16 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
     switch(num_channels) {
     case 1:
         texture_struct.channels = ETextureChannels::kR;
+        break;
     case 2:
         texture_struct.channels = ETextureChannels::kRG;
+        break;
     case 3:
         texture_struct.channels = ETextureChannels::kRGB;
+        break;
     case 4:
         texture_struct.channels = ETextureChannels::kRGBA;
+        break;
     default:
         texture_struct.channels = ETextureChannels::kRGBA;
     }

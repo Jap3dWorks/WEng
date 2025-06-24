@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cstdint>
 #include <vector>
 
@@ -25,41 +26,34 @@ enum class ETextureChannels : uint8_t
     kRGBA32=47,
 };
 
-ETextureChannels operator|(ETextureChannels a, ETextureChannels b)
+inline ETextureChannels operator|(ETextureChannels a, ETextureChannels b)
 {
     return static_cast<ETextureChannels>(
         static_cast<uint8_t>(a) | static_cast<uint8_t>(b)
     );
 }
 
-ETextureChannels operator&(ETextureChannels a, ETextureChannels b)
+inline ETextureChannels operator&(ETextureChannels a, ETextureChannels b)
 {
     return static_cast<ETextureChannels>(
         static_cast<uint8_t>(a) & static_cast<uint8_t>(b)
     );
 }
 
-uint8_t NumOfChannels(ETextureChannels channels)
+inline uint8_t NumOfChannels(ETextureChannels channels)
 {
-    uint8_t num = 0;
-    if ((channels & ETextureChannels::kR) == ETextureChannels::kR)
-    {
-        num = 1;
+    switch(channels) {
+    case ETextureChannels::kR:
+        return 1;
+    case ETextureChannels::kRG:
+        return 2;
+    case ETextureChannels::kRGB:
+        return 3;
+    case ETextureChannels::kRGBA:
+        return 4;
+    default:
+        return 0;
     }
-    else if ((channels & ETextureChannels::kRG) == ETextureChannels::kRG)
-    {
-        num = 2;
-    }
-    else if ((channels & ETextureChannels::kRGB) == ETextureChannels::kRGB)
-    {
-        num = 3;
-    }
-    else if ((channels & ETextureChannels::kRGBA) == ETextureChannels::kRGBA)
-    {
-        num = 4;
-    }
-
-    return num;
 }
 
 struct WTextureStruct{

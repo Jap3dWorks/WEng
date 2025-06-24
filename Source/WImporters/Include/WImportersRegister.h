@@ -57,7 +57,7 @@ public:
     TOptionalRef<T> GetImporter()
     {
         for (auto& importer : *this) {
-            if (T * derived = dinamyc_cast<T*>(importer.get())) {
+            if (T * derived = dynamic_cast<T*>(importer.get())) {
                 return *derived;
             }
         }

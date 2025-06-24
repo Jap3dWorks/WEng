@@ -483,5 +483,8 @@ namespace WVulkan
         );
 
 
+    VkFormat GetImageFormat(uint8_t in_texture_channels );
+
+    WTextureStruct AddRGBAPadding(const WTextureStruct & in_texture_struct);
 
 }

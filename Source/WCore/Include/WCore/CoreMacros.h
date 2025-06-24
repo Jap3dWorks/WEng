@@ -13,7 +13,7 @@ public:                                                                         
         static _WCLASS_ default_object{};                                         \
         return default_object;                                                    \
     }                                                                             \
-        static const WClass& GetStaticClass() {                                   \
+    static const WClass& GetStaticClass() {                                       \
         static WClass static_class( #_WCLASS_ );                                  \
         return static_class;                                                      \
     }                                                                             \

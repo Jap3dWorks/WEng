@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.h"
 #include "WCore/TRef.h"
+#include "WObjectManager/WObjectManager.h"
 
 #include <memory>
 
@@ -15,13 +16,28 @@ class WENGINE_API WEngine
 
 public:
 
-    WEngine();    
+    virtual ~WEngine() = default;
+
+    WEngine(const WEngine & other) = delete;
+
+    WEngine(WEngine && other) = default;
+
+    WEngine & operator=(const WEngine & other) = delete;
+
+    WEngine & operator=(WEngine && other) = default;
 
     void run();
 
+    static WEngine Create();
+
     TRef<WImportersRegister> ImportersRegister() noexcept;
 
+    TRef<WRender> Render() noexcept;
+
+
 private:
+
+    WEngine();    
 
     void InitializeObjectManager();
 
@@ -34,6 +50,7 @@ private:
     std::unique_ptr<WObjectManager> object_manager_{nullptr};
 
     std::unique_ptr<WImportersRegister> importers_register_{nullptr};
-    
+
+    bool close{false};
 };
 

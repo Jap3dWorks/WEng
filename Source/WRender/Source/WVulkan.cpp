@@ -536,18 +536,33 @@ void WVulkan::Create(
     const WCommandPoolInfo &command_pool_info
     )
 {
+    
+    WTextureStruct texture_rgba;
+    const WTextureStruct * texture_ptr;
+
+    // Textures must be RGBA, graphic cards prefer RGBA padding.
+    if (texture_struct.channels == ETextureChannels::kRGBA) {
+        texture_ptr = &texture_struct;
+    }
+    else
+    {
+        texture_rgba = AddRGBAPadding(texture_struct);
+        texture_ptr = &texture_rgba;
+    }
+
+
+    assert(
+        texture_ptr->data.size() ==
+        (texture_ptr->width * texture_ptr->height * NumOfChannels(texture_ptr->channels))
+        );
+
     out_texture_info.mip_levels =
         static_cast<uint32_t>(
             std::floor(
                 std::log2(
-                    std::max(texture_struct.width, texture_struct.height)))) + 1;
+                    std::max(texture_ptr->width, texture_ptr->height)))) + 1;
 
-    // uint8_t channels_num = NumOfChannels(texture_struct.channels);
-
-    WLOGFNAME("Num Channels: " << 4);
-
-    VkDeviceSize image_size = texture_struct.data.size();
-        // static_cast<VkDeviceSize>(texture_struct.width * texture_struct.height * channels_num);
+    VkDeviceSize image_size = texture_ptr->height * texture_ptr->width * 4;
 
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
@@ -563,7 +578,7 @@ void WVulkan::Create(
 
     void * data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-        memcpy(data, texture_struct.data.data(), static_cast<size_t>(image_size));
+        memcpy(data, texture_ptr->data.data(), static_cast<size_t>(image_size));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
     Create(
@@ -571,11 +586,11 @@ void WVulkan::Create(
         out_texture_info.image_memory,
         device_info.vk_device,
         device_info.vk_physical_device,
-        texture_struct.width,
-        texture_struct.height,
+        texture_ptr->width,
+        texture_ptr->height,
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO Try to deduce
+        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -586,7 +601,7 @@ void WVulkan::Create(
         command_pool_info.vk_command_pool,
         device_info.vk_graphics_queue,
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO Try to deduce
+        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         out_texture_info.mip_levels
@@ -595,8 +610,8 @@ void WVulkan::Create(
     CopyBufferToImage(
         staging_buffer,
         out_texture_info.image,
-        texture_struct.width,
-        texture_struct.height,
+        texture_ptr->width,
+        texture_ptr->height,
         device_info.vk_device,
         command_pool_info.vk_command_pool,
         device_info.vk_graphics_queue
@@ -604,9 +619,9 @@ void WVulkan::Create(
 
     GenerateMipmaps(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO deduce
-        texture_struct.width,
-        texture_struct.height,
+        VK_FORMAT_R8G8B8A8_SRGB,
+        texture_ptr->width,
+        texture_ptr->height,
         out_texture_info.mip_levels,
         device_info.vk_device,
         device_info.vk_physical_device,
@@ -617,7 +632,7 @@ void WVulkan::Create(
     // Image view
     out_texture_info.image_view = CreateImageView(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO deduce
+        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
         out_texture_info.mip_levels,
         device_info.vk_device
@@ -2296,5 +2311,56 @@ void WVulkan::GenerateMipmaps(
         );
 
     EndSingleTimeCommands(in_device, in_command_pool, in_graphic_queue, command_buffer);
+
+}
+
+VkFormat WVulkan::GetImageFormat(uint8_t in_texture_channels)
+{
+    ETextureChannels value = static_cast<ETextureChannels>(in_texture_channels);
+    
+    switch(value) {
+    case ETextureChannels::kR:
+        return VK_FORMAT_R8_SRGB;
+    case ETextureChannels::kRG:
+        return VK_FORMAT_R8G8_SRGB;
+    case ETextureChannels::kRGB:
+        return VK_FORMAT_R8G8B8_SRGB;
+    case ETextureChannels::kRGBA:
+        return VK_FORMAT_R8G8B8A8_SRGB;
+    default:
+        return VK_FORMAT_R8G8B8A8_SRGB;
+    }
+}
+
+WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
+{
+    WTextureStruct result;
+    
+    result.channels = ETextureChannels::kRGBA;
+    result.height = in_texture.height;
+    result.width = in_texture.width;
+
+    result.data = in_texture.data;
+
+    result.data.resize(result.height * result.width * 4, 255);
+
+    // uint8_t channels = NumOfChannels(in_texture.channels);
+
+    // result.data.reserve(result.height * result.width * 4);
+    // size_t pixels = in_texture.height * in_texture.width;
+
+    // for (int i=0; i < pixels; i++) {
+    //     size_t p = i * channels;
+    //     for (int j=0; j < channels; j++) {
+    //         size_t v = p + j;
+    //         result.data.push_back(in_texture.data[v]);
+    //     }
+
+    //     for (int j = channels; j < 4; j++) {
+    //         result.data.push_back(255);
+    //     }
+    // }
+
+    return result;
 
 }

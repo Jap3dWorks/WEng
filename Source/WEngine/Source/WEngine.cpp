@@ -6,17 +6,48 @@
 #include "WImportersRegister.h"
 #include "WRender.h"
 
-WEngine::WEngine() {
+#ifndef GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
+
+#include <GLFW/glfw3.h>
+
+WEngine WEngine::Create()
+{
+    return {};
+}
+
+WEngine::WEngine()
+{
     InitializeObjectManager();
     InitializeImporters();
     InitializeRender();
 }
 
-void WEngine::run() {}
+void WEngine::run()
+{
+    
+    while(!glfwWindowShouldClose(Render()->WindowInfo().window)) {
+        glfwPollEvents();
+
+        
+
+        // draw
+
+        Render()->Draw();
+    }
+
+    Render()->DeviceWaitIdle();
+}
 
 TRef<WImportersRegister> WEngine::ImportersRegister() noexcept
 {
-    return {importers_register_.get()};
+    return importers_register_.get();
+}
+
+TRef<WRender> WEngine::Render() noexcept
+{
+    return render_.get();
 }
 
 void WEngine::InitializeObjectManager()
@@ -37,3 +68,4 @@ void WEngine::InitializeRender()
 {
     render_ = std::make_unique<WRender>();
 }
+

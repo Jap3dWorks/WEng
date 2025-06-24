@@ -5,6 +5,7 @@
 #include "WRender.h"
 #include "WCore/WCore.h"
 #include "WImporters.h"
+#include "WImportersRegister.h"
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
@@ -59,16 +60,9 @@ bool UpdateUniformBuffers(
     return true;
 }
 
-bool run(WRender & in_render)
+bool run(WEngine & engine)
 {
-    while(!glfwWindowShouldClose(in_render.WindowInfo().window))
-    {
-        glfwPollEvents();
-        in_render.Draw();
-    }
-
-    in_render.DeviceWaitIdle();
-
+    engine.run();
     return true;
 }
 
@@ -113,9 +107,12 @@ WModelStruct MeshPlane()
     return model;
 }
 
-bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_asset)
+bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsset *& out_texture_asset)
 {
-    std::vector<WAsset*> geo_asset = WImportObj().Import(
+    TOptionalRef<WImportObj> obj_importer =
+        engine.ImportersRegister()->GetImporter<WImportObj>();
+
+    std::vector<WAsset*> geo_asset = obj_importer->Import(
         "Content/Assets/Models/viking_room.obj", 
         "/Content/Assets/viking_room.viking_room"
     );
@@ -132,7 +129,10 @@ bool LoadAssets(WStaticModel *& out_static_model, WTextureAsset *& out_texture_a
         return false;
     }
 
-    std::vector<WAsset*> tex_asset = WImportTexture().Import(
+    TOptionalRef<WImportTexture> texture_importer =
+        engine.ImportersRegister()->GetImporter<WImportTexture>();
+
+    std::vector<WAsset*> tex_asset = texture_importer->Import(
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
     );
@@ -182,9 +182,12 @@ bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
 
 int main(int argc, char** argv)
 {
+    bool as_plane=false;
+    
     try
     {
-        WRender render;
+
+        WEngine engine = WEngine::Create();
 
         std::vector<WShaderStageInfo> shaders;
         LoadShaders(shaders);
@@ -192,12 +195,12 @@ int main(int argc, char** argv)
         // Render Pipeline
 
         WDescriptorSetLayoutInfo descriptor_set_layout =
-            render.RenderPipelinesManager().CreateDescriptorSetLayout();
+            engine.Render()->RenderPipelinesManager().CreateDescriptorSetLayout();
 
         WRenderPipelineInfo render_pipeline_info;
         render_pipeline_info.type = EPipelineType::Graphics;
 
-        WId pipeline_wid = render.RenderPipelinesManager().CreateRenderPipeline(
+        WId pipeline_wid = engine.Render()->RenderPipelinesManager().CreateRenderPipeline(
             render_pipeline_info,
             shaders,
             descriptor_set_layout
@@ -206,7 +209,7 @@ int main(int argc, char** argv)
         WStaticModel * static_model;
         WTextureAsset * texture_asset;
 
-        if (!LoadAssets(static_model, texture_asset))
+        if (!LoadAssets(engine, static_model, texture_asset))
         {
             return 1;
         }
@@ -220,23 +223,33 @@ int main(int argc, char** argv)
         WLOG("Texture Width: " << texture_asset->GetTexture().width);
         WLOG("Texture Height: " << texture_asset->GetTexture().height);
 
-        const WModelStruct & model_data = static_model->GetModel();
+        WModelStruct model_data;
+
+        if (as_plane)
+        {
+            model_data = MeshPlane();
+        }
+        else
+        {
+            model_data = static_model->GetModel();
+        }
+        
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 
         WMeshInfo mesh_info;
         WVulkan::Create(
             mesh_info,
             model_data.meshes[0],
-            render.DeviceInfo(),
-            render.RenderCommandPool().CommandPoolInfo()
-            );
+            engine.Render()->DeviceInfo(),
+            engine.Render()->RenderCommandPool().CommandPoolInfo()
+            );        
 
         WTextureInfo texture_info;
         WVulkan::Create(
             texture_info,
             texture_data,
-            render.DeviceInfo(),
-            render.RenderCommandPool().CommandPoolInfo()
+            engine.Render()->DeviceInfo(),
+            engine.Render()->RenderCommandPool().CommandPoolInfo()
             );
 
         WLOG("Texture Sampler: " << texture_info.sampler);
@@ -245,11 +258,11 @@ int main(int argc, char** argv)
         WLOG("Image: " << texture_info.image);
 
         WDescriptorSetInfo descriptor_set =
-            render.RenderPipelinesManager().CreateDescriptorSet(
+            engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
                 );
 
-        render.RenderPipelinesManager().AddBinding(
+        engine.Render()->RenderPipelinesManager().AddBinding(
             pipeline_wid, descriptor_set, mesh_info
             );
 
@@ -263,8 +276,8 @@ int main(int argc, char** argv)
 
         for(auto & uniform_buffer : uniform_buffer_info)
         {
-            WVulkan::Create(uniform_buffer, render.DeviceInfo());
-            UpdateUniformBuffers(render.SwapChainInfo(), uniform_buffer);
+            WVulkan::Create(uniform_buffer, engine.Render()->DeviceInfo());
+            UpdateUniformBuffers(engine.Render()->SwapChainInfo(), uniform_buffer);
         }
 
         for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
@@ -297,13 +310,13 @@ int main(int argc, char** argv)
             
             WVulkan::UpdateDescriptorSets(
                 write_descriptor_sets,
-                render.DeviceInfo()
+                engine.Render()->DeviceInfo()
                 );
         }
 
         // Start while loop
 
-        run(render);
+        run(engine);
 
     }
     catch(const std::exception& e)
