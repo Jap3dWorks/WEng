@@ -541,7 +541,7 @@ void WVulkan::Create(
     const WTextureStruct * texture_ptr;
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
-    if (texture_struct.channels == ETextureChannels::kRGBA) {
+    if (true /*texture_struct.channels == ETextureChannels::kRGBA*/) {
         texture_ptr = &texture_struct;
     }
     else
@@ -549,7 +549,6 @@ void WVulkan::Create(
         texture_rgba = AddRGBAPadding(texture_struct);
         texture_ptr = &texture_rgba;
     }
-
 
     assert(
         texture_ptr->data.size() ==
@@ -578,7 +577,7 @@ void WVulkan::Create(
 
     void * data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-        memcpy(data, texture_ptr->data.data(), static_cast<size_t>(image_size));
+    memcpy(data, texture_ptr->data.data(), std::min(texture_ptr->data.size(), static_cast<size_t>(image_size)));
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
     Create(
@@ -2343,23 +2342,6 @@ WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
     result.data = in_texture.data;
 
     result.data.resize(result.height * result.width * 4, 255);
-
-    // uint8_t channels = NumOfChannels(in_texture.channels);
-
-    // result.data.reserve(result.height * result.width * 4);
-    // size_t pixels = in_texture.height * in_texture.width;
-
-    // for (int i=0; i < pixels; i++) {
-    //     size_t p = i * channels;
-    //     for (int j=0; j < channels; j++) {
-    //         size_t v = p + j;
-    //         result.data.push_back(in_texture.data[v]);
-    //     }
-
-    //     for (int j = channels; j < 4; j++) {
-    //         result.data.push_back(255);
-    //     }
-    // }
 
     return result;
 

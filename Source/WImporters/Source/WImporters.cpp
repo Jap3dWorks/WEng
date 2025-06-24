@@ -192,13 +192,14 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
     default:
         texture_struct.channels = ETextureChannels::kRGBA;
     }
-    
+
     texture_struct.data.resize(width * height * num_channels);
 
     std::memcpy(
         texture_struct.data.data(), 
-        Pixels, 
-        texture_struct.data.size()
+        Pixels,
+        width * height * num_channels
+        // texture_struct.data.size()
     );
 
     stbi_image_free(Pixels);
@@ -211,7 +212,7 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
     );
     texture_asset->SetPath(asset_path);
 
-    return {std::move(texture_asset)};
+    return { texture_asset };
 }
 
 std::vector<std::string> WImportTexture::Extensions()

@@ -182,7 +182,7 @@ bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
 
 int main(int argc, char** argv)
 {
-    bool as_plane=false;
+    bool as_plane=true;
     
     try
     {

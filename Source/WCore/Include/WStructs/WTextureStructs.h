@@ -61,4 +61,33 @@ struct WTextureStruct{
     ETextureChannels channels;
     uint32_t width;
     uint32_t height;    
+
+    WTextureStruct()=default;
+    ~WTextureStruct()=default;
+    WTextureStruct(const WTextureStruct & other) {
+        data = other.data;
+        channels = other.channels;
+        width = other.width;
+        height = other.height;
+    }
+    WTextureStruct(WTextureStruct && other) {
+        data = std::move(other.data);
+        channels = std::move(other.channels);
+        width = std::move(other.width);
+        height = std::move(other.height);
+    }
+    WTextureStruct& operator=(const WTextureStruct & other) {
+        data = other.data;
+        channels = other.channels;
+        width = other.width;
+        height = other.height;
+        return *this;
+    }
+    WTextureStruct& operator=(WTextureStruct && other) {
+        data = std::move(other.data);
+        channels = std::move(other.channels);
+        width = std::move(other.width);
+        height = std::move(other.height);
+        return *this;
+    }
 };
