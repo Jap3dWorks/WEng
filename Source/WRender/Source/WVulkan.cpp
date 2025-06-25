@@ -541,7 +541,7 @@ void WVulkan::Create(
     const WTextureStruct * texture_ptr;
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
-    if (true /*texture_struct.channels == ETextureChannels::kRGBA*/) {
+    if (texture_struct.channels == ETextureChannels::kRGBA) {
         texture_ptr = &texture_struct;
     }
     else
@@ -577,7 +577,11 @@ void WVulkan::Create(
 
     void * data;
     vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
-    memcpy(data, texture_ptr->data.data(), std::min(texture_ptr->data.size(), static_cast<size_t>(image_size)));
+    memcpy(
+        data,
+        texture_ptr->data.data(),
+        std::min(texture_ptr->data.size(), static_cast<size_t>(image_size))
+        );
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
     Create(
@@ -2341,7 +2345,19 @@ WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
 
     result.data = in_texture.data;
 
+    size_t tex_size = result.height * result.width;
+
     result.data.resize(result.height * result.width * 4, 255);
+
+    int num_channels = NumOfChannels(in_texture.channels);
+
+    for (int i=num_channels; i < 4; i++) {
+        std::memcpy(
+            result.data.data() + (tex_size * i),
+            result.data.data(),
+            tex_size
+            );
+    }
 
     return result;
 

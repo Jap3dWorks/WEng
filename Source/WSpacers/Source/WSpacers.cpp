@@ -137,6 +137,27 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
         "/Content/Assets/viking_texture.viking_texture"
     );
 
+    if (false)
+    {
+        std::vector<WAsset*> tex_asset_rgba = texture_importer->Import(
+            "Content/Assets/Textures/viking_room_rgba.png",
+            "/Content/Assets/viking_texture_rgba.viking_texture_rgba"
+            );
+
+        WTextureAsset * a = static_cast<WTextureAsset*>(tex_asset[0]);
+        WTextureAsset * b = static_cast<WTextureAsset*>(tex_asset_rgba[0]);
+
+        for (int i=0; i < a->GetTexture().data.size(); i++) {
+            if (a->GetTexture().data[i] != b->GetTexture().data[i]) {
+                WLOGFNAME("- [" << i << "] are diferent, " <<
+                          (uint32_t)a->GetTexture().data[i] <<
+                          " != " <<
+                          (uint32_t)b->GetTexture().data[i]
+                    );
+            }
+        }
+    }
+
     if (tex_asset.size() < 1)
     {
         std::cout << "Failed to import tex_asset!" << std::endl;
@@ -158,6 +179,8 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
 
 bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
 {
+    // TODO create shaders from WEngine module, (or from pipelines).
+
     out_shaders.clear();
     out_shaders.reserve(2);
 
@@ -182,11 +205,10 @@ bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
 
 int main(int argc, char** argv)
 {
-    bool as_plane=true;
+    bool as_plane=false;
     
     try
     {
-
         WEngine engine = WEngine::Create();
 
         std::vector<WShaderStageInfo> shaders;
@@ -214,7 +236,8 @@ int main(int argc, char** argv)
             return 1;
         }
 	
-        for (auto& mesh : static_model->GetModel().meshes) {
+        for (auto& mesh : static_model->GetModel().meshes)
+        {
             WLOG("A Mesh with: " << mesh.indices.size() << " Indices");
             WLOG("A Mesh with: " << mesh.vertices.size() << " Vertices");
         }

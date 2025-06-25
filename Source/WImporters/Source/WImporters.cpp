@@ -1,4 +1,5 @@
 #include "WImporters.h"
+#include "WLog.h"
 
 #include <utility>
 #include <vector>
@@ -193,12 +194,14 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
         texture_struct.channels = ETextureChannels::kRGBA;
     }
 
-    texture_struct.data.resize(width * height * num_channels);
+    size_t csize = width * height;
+
+    texture_struct.data.resize(csize * 4, 0);
 
     std::memcpy(
         texture_struct.data.data(), 
         Pixels,
-        width * height * num_channels
+        csize * num_channels
         // texture_struct.data.size()
     );
 
