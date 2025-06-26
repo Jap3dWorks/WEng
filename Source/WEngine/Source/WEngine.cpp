@@ -24,9 +24,16 @@ WEngine::WEngine()
     InitializeRender();
 }
 
+WEngine::~WEngine()
+{
+    render_ = nullptr;
+    object_manager_ = nullptr;
+    importers_register_ = nullptr;
+}
+
 void WEngine::run()
 {
-    
+    // TODO Window out of WRender
     while(!glfwWindowShouldClose(Render()->WindowInfo().window)) {
         glfwPollEvents();
 

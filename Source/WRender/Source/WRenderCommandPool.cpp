@@ -1,19 +1,19 @@
-#include "WRenderCommandPool.h"
-#include "WRenderCore.h"
-#include "WVulkan.h"
+#include "WVulkan/WRenderCommandPool.h"
+#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WVulkan.h"
 #include <vulkan/vulkan_core.h>
 
 
-WRenderCommandPool::WRenderCommandPool() :
+WVkRenderCommandPool::WVkRenderCommandPool() :
     device_info_(), command_pool_info_()
 {
     
 }
 
-WRenderCommandPool::WRenderCommandPool(
-    WCommandPoolInfo in_command_pool_info,
-    const WDeviceInfo & in_device_info,
-    const WSurfaceInfo & in_surface_info
+WVkRenderCommandPool::WVkRenderCommandPool(
+    WVkCommandPoolInfo in_command_pool_info,
+    const WVkDeviceInfo & in_device_info,
+    const WVkSurfaceInfo & in_surface_info
     ) :
     command_pool_info_(in_command_pool_info),
     device_info_(in_device_info)
@@ -25,26 +25,24 @@ WRenderCommandPool::WRenderCommandPool(
 	);
 }
 
-WRenderCommandPool::~WRenderCommandPool()
+WVkRenderCommandPool::~WVkRenderCommandPool()
 {
-    if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE) {
-        WVulkan::Destroy(command_pool_info_, device_info_);
-    }
+    Destroy();
 }
 
-WRenderCommandPool::WRenderCommandPool(WRenderCommandPool && other) noexcept
+WVkRenderCommandPool::WVkRenderCommandPool(WVkRenderCommandPool && other) noexcept
 {
     Move(std::move(other));
 }
 
-WRenderCommandPool& WRenderCommandPool::operator=(WRenderCommandPool && other) noexcept
+WVkRenderCommandPool& WVkRenderCommandPool::operator=(WVkRenderCommandPool && other) noexcept
 {
     Move(std::move(other));
     
     return *this;
 }
 
-void WRenderCommandPool::Move(WRenderCommandPool && out_other) noexcept
+void WVkRenderCommandPool::Move(WVkRenderCommandPool && out_other) noexcept
 {
     if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE)
     {
@@ -58,10 +56,20 @@ void WRenderCommandPool::Move(WRenderCommandPool && out_other) noexcept
     out_other.command_pool_info_ = {};
 }
 
-WCommandBufferInfo WRenderCommandPool::CreateCommandBuffer()
+WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer()
 {
     command_buffers_.push_back({});
     WVulkan::Create(command_buffers_.back(), device_info_, command_pool_info_);
 
     return command_buffers_.back();
+}
+
+void WVkRenderCommandPool::Destroy()
+{
+    if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE) {
+        WVulkan::Destroy(command_pool_info_, device_info_);        
+        command_pool_info_ = {};
+    }
+
+    device_info_ = {};
 }

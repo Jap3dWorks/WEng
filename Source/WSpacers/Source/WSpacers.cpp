@@ -9,10 +9,10 @@
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
-#include "WRenderCore.h"
-#include "WRenderPipeline.h"
+#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WRenderPipeline.h"
 #include "WStructs/WGeometryStructs.h"
-#include "WVulkan.h"
+#include "WVulkan/WVulkan.h"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -31,11 +31,11 @@
 
 
 bool UpdateUniformBuffers(
-    const WSwapChainInfo & swap_chain_info_,
-    WUniformBufferObjectInfo & uniform_buffer_object_info_
+    const WVkSwapChainInfo & swap_chain_info_,
+    WVkUniformBufferObjectInfo & uniform_buffer_object_info_
     )
 {
-    WUniformBufferObject ubo{};
+    WVkUBOStruct ubo{};
 
     ubo.model = glm::rotate(
         glm::mat4(1.f),
@@ -177,7 +177,7 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
 
 }
 
-bool LoadShaders(std::vector<WShaderStageInfo> & out_shaders)
+bool LoadShaders(std::vector<WVkShaderStageInfo> & out_shaders)
 {
     // TODO create shaders from WEngine module, (or from pipelines).
 
@@ -211,15 +211,15 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::Create();
 
-        std::vector<WShaderStageInfo> shaders;
+        std::vector<WVkShaderStageInfo> shaders;
         LoadShaders(shaders);
 
         // Render Pipeline
 
-        WDescriptorSetLayoutInfo descriptor_set_layout =
+        WVkDescriptorSetLayoutInfo descriptor_set_layout =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSetLayout();
 
-        WRenderPipelineInfo render_pipeline_info;
+        WVkRenderPipelineInfo render_pipeline_info;
         render_pipeline_info.type = EPipelineType::Graphics;
 
         WId pipeline_wid = engine.Render()->RenderPipelinesManager().CreateRenderPipeline(
@@ -259,7 +259,7 @@ int main(int argc, char** argv)
         
         const WTextureStruct & texture_data = texture_asset->GetTexture();
 
-        WMeshInfo mesh_info;
+        WVkMeshInfo mesh_info;
         WVulkan::Create(
             mesh_info,
             model_data.meshes[0],
@@ -267,7 +267,7 @@ int main(int argc, char** argv)
             engine.Render()->RenderCommandPool().CommandPoolInfo()
             );        
 
-        WTextureInfo texture_info;
+        WVkTextureInfo texture_info;
         WVulkan::Create(
             texture_info,
             texture_data,
@@ -280,7 +280,7 @@ int main(int argc, char** argv)
         WLOG("Image View: " << texture_info.image_view);
         WLOG("Image: " << texture_info.image);
 
-        WDescriptorSetInfo descriptor_set =
+        WVkDescriptorSetInfo descriptor_set =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
                 );
@@ -293,7 +293,7 @@ int main(int argc, char** argv)
 
         // Update Descriptor Sets //
 
-        std::vector<WUniformBufferObjectInfo> uniform_buffer_info {
+        std::vector<WVkUniformBufferObjectInfo> uniform_buffer_info {
             descriptor_set.descriptor_sets.size()
         };
 

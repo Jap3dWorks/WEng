@@ -1,7 +1,7 @@
 #pragma once
 #include "WCore/WCore.h"
-#include "WRenderCore.h"
-#include "WRenderPipeline.h"
+#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WRenderPipeline.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <optional>
@@ -17,100 +17,100 @@ namespace WVulkan
     /**
      * Creates a Vulkan Instance.
     */
-    void Create(WInstanceInfo &out_instance_info, const WRenderDebugInfo &debug_info);
+    void Create(WVkInstanceInfo &out_instance_info, const WVkRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Surface.
     */
-    void Create(WSurfaceInfo & surface_info, WInstanceInfo & instance, WWindowInfo & window);
+    void Create(WVkSurfaceInfo & surface_info, WVkInstanceInfo & instance, WVkWindowInfo & window);
 
     /**
      * Creates a Vulkan Device.
     */
-    void Create(WDeviceInfo &Device, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info);
+    void Create(WVkDeviceInfo &Device, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Swap Chain.
     */
     void Create(
-        WSwapChainInfo & out_swap_chain, 
-        const WDeviceInfo &device_info, 
-        const WSurfaceInfo &surface_info, 
-        const WWindowInfo &window_info, 
-        const WRenderPassInfo &render_pass_info, 
-        const WRenderDebugInfo &debug_info
+        WVkSwapChainInfo & out_swap_chain, 
+        const WVkDeviceInfo &device_info, 
+        const WVkSurfaceInfo &surface_info, 
+        const WVkWindowInfo &window_info, 
+        const WVkRenderPassInfo &render_pass_info, 
+        const WVkRenderDebugInfo &debug_info
         );
 
     /**
      * @brief Creates a Vulkan Render Pass.
     */
-    void Create(WRenderPassInfo & render_pass, const WSwapChainInfo &swap_chain_info, const WDeviceInfo&);
+    void Create(WVkRenderPassInfo & render_pass, const WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo&);
 
     /**
      * @brief Creates a Vulkan Command Pool.
     */
     void Create(
-        WCommandPoolInfo & command_pool_info,
-        const WDeviceInfo & device_info,
-        const WSurfaceInfo & surface_info
+        WVkCommandPoolInfo & command_pool_info,
+        const WVkDeviceInfo & device_info,
+        const WVkSurfaceInfo & surface_info
 	);
 
     /**
      * @brief: Creates a GLFW Window.
     */
-    void Create(WWindowInfo &info);
+    void Create(WVkWindowInfo &info);
 
-    WShaderModule CreateShaderModule(
-        const WShaderStageInfo & in_shader_info,
-        const WDeviceInfo & in_device
+    VkShaderModule CreateShaderModule(
+        const WVkShaderStageInfo & in_shader_info,
+        const WVkDeviceInfo & in_device
     );
 
     void Create(
-        WTextureInfo& out_texture_info, 
+        WVkTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
-        const WDeviceInfo& device_info,
-        const WCommandPoolInfo& command_pool_info
+        const WVkDeviceInfo& device_info,
+        const WVkCommandPoolInfo& command_pool_info
     );
 
     void Create(
-        WRenderPipelineInfo &out_pipeline_info,
-        const WDeviceInfo &device,
-        const WDescriptorSetLayoutInfo &descriptor_set_layout_info,
-        const WRenderPassInfo &render_pass_info,
-        const std::vector<WShaderStageInfo> &in_shader_stage_infos // ,
+        WVkRenderPipelineInfo &out_pipeline_info,
+        const WVkDeviceInfo &device,
+        const WVkDescriptorSetLayoutInfo &descriptor_set_layout_info,
+        const WVkRenderPassInfo &render_pass_info,
+        const std::vector<WVkShaderStageInfo> &in_shader_stage_infos // ,
         // const std::vector<WShaderModule> &in_shader_modules
         );
 
     void Create(
-        WDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-        const WDeviceInfo &device
+        WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
+        const WVkDeviceInfo &device
         );
 
     /**
      * @brief Create a vulkan  mesh
      */
     void Create(
-        WMeshInfo & out_mesh_info,
+        WVkMeshInfo & out_mesh_info,
         const WMeshStruct & mesh_struct,
-        const WDeviceInfo & device,
-        const WCommandPoolInfo & command_pool_info
+        const WVkDeviceInfo & device,
+        const WVkCommandPoolInfo & command_pool_info
     );
 
     void Create(
-        WUniformBufferObjectInfo & out_uniform_buffer_info,
-        const WDeviceInfo & device
+        WVkUniformBufferObjectInfo & out_uniform_buffer_info,
+        const WVkDeviceInfo & device
     );
 
     void Create(
-        WDescriptorPoolInfo & out_descriptor_pool_info,
-        const WDeviceInfo & device
+        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        const WVkDeviceInfo & device
     );
 
     void Create(
-        WDescriptorSetInfo& out_descriptor_set_info,
-        const WDeviceInfo &device,
-        const WDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const WDescriptorPoolInfo& descriptor_pool_info // ,
+        WVkDescriptorSetInfo& out_descriptor_set_info,
+        const WVkDeviceInfo &device,
+        const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
+        const WVkDescriptorPoolInfo& descriptor_pool_info // ,
         // const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
     );
  
@@ -119,7 +119,7 @@ namespace WVulkan
     struct WVkWriteDescriptorSetUBOStruct
     {
         uint32_t binding;
-        WUniformBufferObjectInfo uniform_buffer_info;
+        WVkUniformBufferObjectInfo uniform_buffer_info;
         VkDescriptorSet descriptor_set;
 
         VkDescriptorBufferInfo buffer_info{};
@@ -128,7 +128,7 @@ namespace WVulkan
     struct WVkWriteDescriptorSetTextureStruct
     {
         uint32_t binding;
-        WTextureInfo texture_info;
+        WVkTextureInfo texture_info;
         VkDescriptorSet descriptor_set;
 
         VkDescriptorImageInfo image_info{};
@@ -139,9 +139,9 @@ namespace WVulkan
      * @brief Create a WCommandBufferInfo.
     */
     void Create(
-        WCommandBufferInfo & out_command_buffer_info,
-        const WDeviceInfo & device,
-        const WCommandPoolInfo & command_pool_info
+        WVkCommandBufferInfo & out_command_buffer_info,
+        const WVkDeviceInfo & device,
+        const WVkCommandPoolInfo & command_pool_info
     );
 
     void Create(
@@ -184,60 +184,57 @@ namespace WVulkan
     );
 
     void Create(
-        WSemaphoreInfo & out_semaphore_info,
-        const WDeviceInfo & in_device_info
+        WVkSemaphoreInfo & out_semaphore_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     void Create(
-        WFenceInfo & out_fence_info,
-        const WDeviceInfo & in_device_info
+        WVkFenceInfo & out_fence_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     // Destroy functions
     // -----------------
 
-    void Destroy(WInstanceInfo & instance_info);
+    void Destroy(WVkInstanceInfo & instance_info);
 
-    void Destroy(WSurfaceInfo & surface_info, const WInstanceInfo & instance_info);
+    void Destroy(WVkSurfaceInfo & surface_info, const WVkInstanceInfo & instance_info);
 
-    void Destroy(WDeviceInfo & device_info);
+    void Destroy(WVkDeviceInfo & device_info);
 
-    void Destroy(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
+    void Destroy(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info);
 
-    void DestroyImageView(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info);
+    void DestroyImageView(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info);
 
-    void Destroy(WRenderPassInfo & render_pass_info, const WDeviceInfo & device_info);
+    void Destroy(WVkRenderPassInfo & render_pass_info, const WVkDeviceInfo & device_info);
 
-    void Destroy(WWindowInfo &window_info);
+    void Destroy(WVkWindowInfo &window_info);
 
-    void Destroy(WShaderModule &out_shader_stage_info,
-                 const WDeviceInfo &in_device_info);
-
-    void Destroy(WRenderPipelineInfo &pipeline_info, const WDeviceInfo &device);
+    void Destroy(WVkRenderPipelineInfo &pipeline_info, const WVkDeviceInfo &device);
 
     void Destroy(
-        WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-        const WDeviceInfo & device
+        WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
+        const WVkDeviceInfo & device
         );
 
     void Destroy(
-        WDescriptorPoolInfo & out_descriptor_pool_info,
-        const WDeviceInfo & in_device
+        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        const WVkDeviceInfo & in_device
         );
 
     void Destroy(
-        WCommandPoolInfo & out_command_pool,
-        const WDeviceInfo & in_device_info
+        WVkCommandPoolInfo & out_command_pool,
+        const WVkDeviceInfo & in_device_info
         );
 
     void Destroy(
-        WSemaphoreInfo & out_semaphore_info,
-        const WDeviceInfo & in_device_info
+        WVkSemaphoreInfo & out_semaphore_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     void Destroy(
-        WFenceInfo & out_fence_info,
-        const WDeviceInfo & in_device_info
+        WVkFenceInfo & out_fence_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     // Record Commands
@@ -245,10 +242,10 @@ namespace WVulkan
 
     void RecordRenderCommandBuffer(
         VkCommandBuffer in_commandbuffer,
-        const WRenderPassInfo & in_render_pass_info,
-        const WSwapChainInfo & in_swap_chain_info,
-        const WRenderPipelineInfo & in_render_pipeline_info,
-        const std::vector<WPipelineBinding> & in_bindings,
+        const WVkRenderPassInfo & in_render_pass_info,
+        const WVkSwapChainInfo & in_swap_chain_info,
+        const WVkRenderPipelineInfo & in_render_pipeline_info,
+        const std::vector<WVkPipelineBindingInfo> & in_bindings,
         uint32_t in_image_index = 0,
         uint32_t in_framebuffer_index = 0
         );
@@ -263,30 +260,30 @@ namespace WVulkan
      * @brief Creates Vulkan Image Views.
     */
     void CreateSCImageViews(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo &in_device_info
+        WVkSwapChainInfo & out_swap_chain_info,
+        const WVkDeviceInfo &in_device_info
         );
 
     void CreateSCFramebuffers(
-        WSwapChainInfo & out_swap_chain_info,
-        const WRenderPassInfo & out_render_pass_info,
-        const WDeviceInfo & in_device_info
+        WVkSwapChainInfo & out_swap_chain_info,
+        const WVkRenderPassInfo & out_render_pass_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     void CreateSCColorResources(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo & in_device_info
+        WVkSwapChainInfo & out_swap_chain_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     void CreateSCDepthResources(
-        WSwapChainInfo & out_swap_chain_info,
-        const WDeviceInfo & in_device_info
+        WVkSwapChainInfo & out_swap_chain_info,
+        const WVkDeviceInfo & in_device_info
         );
 
     // Descriptor Set Layout
     // ---------------------
 
-    void AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout);
+    void AddDSLDefaultBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     /**
      * @brief Update VkWriteDescriptorSet Stop condition
@@ -305,7 +302,7 @@ namespace WVulkan
     {
         ubo_struct.buffer_info.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
         ubo_struct.buffer_info.offset = 0;
-        ubo_struct.buffer_info.range = sizeof(WUniformBufferObject);
+        ubo_struct.buffer_info.range = sizeof(WVkUBOStruct);
         
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         out_write_descriptor_set.dstSet = ubo_struct.descriptor_set;
@@ -349,7 +346,7 @@ namespace WVulkan
 
     void UpdateDescriptorSets(
         std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
-        const WDeviceInfo & in_device_info
+        const WVkDeviceInfo & in_device_info
         );
 
     // void DrawFrame()
@@ -360,7 +357,7 @@ namespace WVulkan
     /**
      * @brief Checks if the requested validation layers are available.
     */
-    bool CheckValidationLayerSupport(const WRenderDebugInfo &debug_info);
+    bool CheckValidationLayerSupport(const WVkRenderDebugInfo &debug_info);
 
     struct QueueFamilyIndices
     {
@@ -462,7 +459,7 @@ namespace WVulkan
     /**
      * @brief Creates a shader stage from a spir-v shader file in disk.
      */
-    WShaderStageInfo CreateShaderStageInfo(
+    WVkShaderStageInfo CreateShaderStageInfo(
 	const char* in_shader_file_path,
 	const char* int_entry_point,
 	EShaderType in_shader_type

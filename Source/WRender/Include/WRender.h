@@ -4,10 +4,10 @@
 
 #include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
-#include "WRenderConfig.h"
-#include "WRenderCore.h"
-#include "WRenderPipeline.h"
-#include "WRenderCommandPool.h"
+#include "WVulkan/WRenderConfig.h"
+#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WRenderPipeline.h"
+#include "WVulkan/WRenderCommandPool.h"
 #include <cstddef>
 #include <optional>
 
@@ -24,7 +24,7 @@ public:
 
     void Draw();
 
-    WNODISCARD WINLINE WRenderPipelinesManager & RenderPipelinesManager()
+    WNODISCARD WINLINE WVkRenderPipelinesManager & RenderPipelinesManager()
     {
         return render_pipelines_manager_;
     }
@@ -35,40 +35,40 @@ public:
 
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
 
-    WNODISCARD inline const WWindowInfo & WindowInfo() const noexcept
+    WNODISCARD inline const WVkWindowInfo & WindowInfo() const noexcept
     { return window_info_; }
 
-    WNODISCARD inline const WDeviceInfo & DeviceInfo() const noexcept
+    WNODISCARD inline const WVkDeviceInfo & DeviceInfo() const noexcept
     { return device_info_; }
 
-    WNODISCARD inline const WSwapChainInfo & SwapChainInfo() const noexcept
+    WNODISCARD inline const WVkSwapChainInfo & SwapChainInfo() const noexcept
     { return swap_chain_info_; }
 
     WNODISCARD inline const size_t FramesInFlight() const noexcept
     { return MAX_FRAMES_IN_FLIGHT; }
 
-    WNODISCARD inline const WRenderCommandPool & RenderCommandPool() const noexcept
+    WNODISCARD inline const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }
 
 private:
 
-    WInstanceInfo instance_info_;
-    WWindowInfo window_info_;
-    WSurfaceInfo surface_info_;
-    WDeviceInfo device_info_;
-    WRenderDebugInfo debug_info_;
+    WVkInstanceInfo instance_info_;
+    WVkWindowInfo window_info_;
+    WVkSurfaceInfo surface_info_;
+    WVkDeviceInfo device_info_;
+    WVkRenderDebugInfo debug_info_;
 
-    WSwapChainInfo swap_chain_info_;
-    WRenderPassInfo render_pass_info_;
+    WVkSwapChainInfo swap_chain_info_;
+    WVkRenderPassInfo render_pass_info_;
 
-    WRenderCommandPool render_command_pool_;
-    WCommandBufferInfo render_command_buffer_;
+    WVkRenderCommandPool render_command_pool_;
+    WVkCommandBufferInfo render_command_buffer_;
     
-    WRenderPipelinesManager render_pipelines_manager_;
+    WVkRenderPipelinesManager render_pipelines_manager_;
 
-    WSemaphoreInfo image_available_semaphore_;
-    WSemaphoreInfo render_finished_semaphore_;
-    WFenceInfo in_flight_fence_;
+    WVkSemaphoreInfo image_available_semaphore_;
+    WVkSemaphoreInfo render_finished_semaphore_;
+    WVkFenceInfo in_flight_fence_;
 
     uint32_t current_frame {0};
 

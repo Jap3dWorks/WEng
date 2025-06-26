@@ -3,7 +3,7 @@
 #include "WCore/WCore.h"
 #include <cstdint>
 #include <vulkan/vulkan.h>
-#include "WRenderConfig.h"
+#include "WVulkan/WRenderConfig.h"
 #include <vector>
 #include <array>
 
@@ -13,7 +13,35 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-struct WDeviceInfo{
+enum class EShaderType : uint8_t
+{
+    Vertex,
+    Fragment,
+    // Geometry,
+    Compute,
+    // TessellationControl,
+    // TessellationEvaluation
+};
+
+enum class EPipelineType : uint8_t
+{
+    Graphics,       // Default
+    Transparency,   // Alpha Blending
+    Compute,        // GPGPU
+    RayTracing      // Ray Tracing
+};
+
+/**
+ * Uniform buffer data structure
+*/
+struct WVkUBOStruct
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
+struct WVkDeviceInfo{
     WId wid;
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
@@ -28,7 +56,7 @@ struct WDeviceInfo{
     VkDevice vk_device {VK_NULL_HANDLE};
 };
 
-struct WWindowInfo
+struct WVkWindowInfo
 {
     WId wid;
     std::string title {"WEngine"};
@@ -41,29 +69,19 @@ struct WWindowInfo
 
 };
 
-enum class EShaderType : uint8_t
-{
-    Vertex,
-    Fragment,
-    // Geometry,
-    Compute,
-    // TessellationControl,
-    // TessellationEvaluation
-};
-
-struct WInstanceInfo
+struct WVkInstanceInfo
 {
     WId wid;
     VkInstance instance {nullptr};
 };
 
-struct WSurfaceInfo
+struct WVkSurfaceInfo
 {
     WId wid;
     VkSurfaceKHR surface{nullptr};
 };
 
-struct WRenderDebugInfo
+struct WVkRenderDebugInfo
 {
     WId wid;
     bool enable_validation_layers{false};
@@ -75,13 +93,13 @@ struct WRenderDebugInfo
     VkDebugUtilsMessengerEXT debug_messenger{VK_NULL_HANDLE};
 };
 
-struct WCommandPoolInfo
+struct WVkCommandPoolInfo
 {
     WId wid;
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
-struct WTextureInfo
+struct WVkTextureInfo
 {
     WId id;
     VkImage image{VK_NULL_HANDLE};
@@ -92,15 +110,10 @@ struct WTextureInfo
     uint32_t mip_levels{1};
 };
 
-struct WShaderModule
-{
-    VkShaderModule vk_shader_module{VK_NULL_HANDLE};
-};
-
 /**
  * @brief: Shader related data.
  */
-struct WShaderStageInfo
+struct WVkShaderStageInfo
 {
     WId id;
 
@@ -110,23 +123,16 @@ struct WShaderStageInfo
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors{};
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors{};
+
 };
 
-enum class EPipelineType : uint8_t
-{
-    Graphics,       // Default
-    Transparency,   // Alpha Blending
-    Compute,        // GPGPU
-    RayTracing      // Ray Tracing
-};
-
-struct WRenderPassInfo
+struct WVkRenderPassInfo
 {
     WId wid;
     VkRenderPass render_pass{nullptr};
 };
 
-struct WSwapChainInfo
+struct WVkSwapChainInfo
 {
     WId wid;
     VkFormat swap_chain_image_format;
@@ -148,7 +154,7 @@ struct WSwapChainInfo
     VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
 };
 
-struct WDescriptorSetLayoutInfo
+struct WVkDescriptorSetLayoutInfo
 {
     WId wid;
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
@@ -159,7 +165,7 @@ struct WDescriptorSetLayoutInfo
  * Descriptor pool is used to allocate descriptors memory., 
  * Represents the maximum number of descriptors that can be allocated.
 */
-struct WDescriptorPoolInfo
+struct WVkDescriptorPoolInfo
 {
     WId wid;
     std::vector<VkDescriptorPoolSize> pool_sizes {};
@@ -172,14 +178,14 @@ struct WDescriptorPoolInfo
  * you can have multiple descriptor sets with the same layout, 
  * this is used for multiple frames in flight
 */
-struct WDescriptorSetInfo
+struct WVkDescriptorSetInfo
 {
     WId wid;
     // The len of this vector is the number of frames in flight
     std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };
 
-struct WMeshInfo
+struct WVkMeshInfo
 {
     WId wid {0};
     VkBuffer vertex_buffer {VK_NULL_HANDLE};
@@ -192,14 +198,14 @@ struct WMeshInfo
 /**
  * @brief Render Pipeline Bindings data
  */
-struct WPipelineBinding
+struct WVkPipelineBindingInfo
 {
-    WDescriptorSetInfo descriptor {};
-    WMeshInfo mesh{};
+    WVkDescriptorSetInfo descriptor {};
+    WVkMeshInfo mesh{};
 };
 
 
-struct WRenderPipelineInfo
+struct WVkRenderPipelineInfo
 {
     WId wid;
     EPipelineType type{EPipelineType::Graphics};
@@ -215,20 +221,10 @@ struct WRenderPipelineInfo
 };
 
 /**
- * Uniform buffer data structure
-*/
-struct WUniformBufferObject
-{
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
-
-/**
  * single vulkan uniform buffer object, 
  * Create a vector of these for multiple frames in flight
 */
-struct WUniformBufferObjectInfo
+struct WVkUniformBufferObjectInfo
 {
     WId wid{};
 
@@ -240,20 +236,20 @@ struct WUniformBufferObjectInfo
 /**
  * @brief Helper struxt to store command buffer data
  */
-struct WCommandBufferInfo
+struct WVkCommandBufferInfo
 {
     WId wid;
     std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
-struct WSemaphoreInfo
+struct WVkSemaphoreInfo
 {
     WId wid;
     
     std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
 };
 
-struct WFenceInfo
+struct WVkFenceInfo
 {
     WId wid;
 

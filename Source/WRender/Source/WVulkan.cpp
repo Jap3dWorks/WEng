@@ -1,4 +1,4 @@
-#include "WVulkan.h"
+#include "WVulkan/WVulkan.h"
 
 #include <iostream>
 #include <GLFW/glfw3.h>
@@ -11,10 +11,10 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WRenderCore.h"
+#include "WVulkan/WRenderCore.h"
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
-#include "WRenderConfig.h"
+#include "WVulkan/WRenderConfig.h"
 #include <fstream>
 #include <vulkan/vulkan_core.h>
 #include <regex>
@@ -25,7 +25,7 @@
 // Create functions
 // ----------------
 
-void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo & debug_info)
+void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugInfo & debug_info)
 {
     if (debug_info.enable_validation_layers && !CheckValidationLayerSupport(debug_info))
     {
@@ -85,7 +85,7 @@ void WVulkan::Create(WInstanceInfo & out_instance_info, const WRenderDebugInfo &
     }
 }
 
-void WVulkan::Create(WSurfaceInfo & surface, WInstanceInfo & instance_info, WWindowInfo & window)
+void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, WVkWindowInfo & window)
 {
     VkResult result =
         glfwCreateWindowSurface(
@@ -101,7 +101,7 @@ void WVulkan::Create(WSurfaceInfo & surface, WInstanceInfo & instance_info, WWin
     }
 }
 
-void WVulkan::Create(WWindowInfo &out_window_info)
+void WVulkan::Create(WVkWindowInfo &out_window_info)
 {
     glfwInit();
 
@@ -126,12 +126,12 @@ void WVulkan::Create(WWindowInfo &out_window_info)
 }
 
 void WVulkan::Create(
-    WSwapChainInfo & out_swap_chain_info,
-    const WDeviceInfo & device_info,
-    const WSurfaceInfo & surface_info,
-    const WWindowInfo & window_info,
-    const WRenderPassInfo & render_pass_info,
-    const WRenderDebugInfo & debug_info
+    WVkSwapChainInfo & out_swap_chain_info,
+    const WVkDeviceInfo & device_info,
+    const WVkSurfaceInfo & surface_info,
+    const WVkWindowInfo & window_info,
+    const WVkRenderPassInfo & render_pass_info,
+    const WVkRenderDebugInfo & debug_info
     )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
@@ -201,7 +201,7 @@ void WVulkan::Create(
 
 }
 
-void WVulkan::CreateSCImageViews(WSwapChainInfo & swap_chain_info, const WDeviceInfo & device_info)
+void WVulkan::CreateSCImageViews(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info)
 {
     swap_chain_info.swap_chain_image_views.resize(
         swap_chain_info.swap_chain_images.size()
@@ -220,9 +220,9 @@ void WVulkan::CreateSCImageViews(WSwapChainInfo & swap_chain_info, const WDevice
 }
 
 void WVulkan::CreateSCFramebuffers(
-    WSwapChainInfo & out_swap_chain_info,
-    const WRenderPassInfo & out_render_pass_info,
-    const WDeviceInfo & in_device_info)
+    WVkSwapChainInfo & out_swap_chain_info,
+    const WVkRenderPassInfo & out_render_pass_info,
+    const WVkDeviceInfo & in_device_info)
 {
     out_swap_chain_info.swap_chain_framebuffers.resize(
         out_swap_chain_info.swap_chain_image_views.size()
@@ -259,8 +259,8 @@ void WVulkan::CreateSCFramebuffers(
 }
 
 void WVulkan::CreateSCColorResources(
-    WSwapChainInfo & out_swap_chain_info,
-    const WDeviceInfo & in_device_info
+    WVkSwapChainInfo & out_swap_chain_info,
+    const WVkDeviceInfo & in_device_info
     )
 {
     VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
@@ -290,8 +290,8 @@ void WVulkan::CreateSCColorResources(
 }
 
 void WVulkan::CreateSCDepthResources(
-    WSwapChainInfo & out_swap_chain_info,
-    const WDeviceInfo & in_device_info
+    WVkSwapChainInfo & out_swap_chain_info,
+    const WVkDeviceInfo & in_device_info
     )
 {
     VkFormat DepthFormat = FindDepthFormat(in_device_info.vk_physical_device);
@@ -321,7 +321,7 @@ void WVulkan::CreateSCDepthResources(
 
 }
 
-void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInfo &in_swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::Create(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChainInfo &in_swap_chain_info, const WVkDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = in_swap_chain_info.swap_chain_image_format;
@@ -400,9 +400,9 @@ void WVulkan::Create(WRenderPassInfo & out_render_pass_info, const WSwapChainInf
 }
 
 void WVulkan::Create(
-    WCommandPoolInfo & command_pool_info,
-    const WDeviceInfo & device_info,
-    const WSurfaceInfo & surface_info
+    WVkCommandPoolInfo & command_pool_info,
+    const WVkDeviceInfo & device_info,
+    const WVkSurfaceInfo & surface_info
     )
 {
     QueueFamilyIndices queue_family_indices =
@@ -426,7 +426,7 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(WDeviceInfo &device_info, const WInstanceInfo &instance_info, const WSurfaceInfo &surface_info, const WRenderDebugInfo &debug_info)
+void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info)
 {
     // Pick Physical Device
     uint32_t device_count = 0;
@@ -502,12 +502,12 @@ void WVulkan::Create(WDeviceInfo &device_info, const WInstanceInfo &instance_inf
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
 }
 
-WShaderModule WVulkan::CreateShaderModule(
-    const WShaderStageInfo & in_shader_info,
-    const WDeviceInfo & in_device
+VkShaderModule WVulkan::CreateShaderModule(
+    const WVkShaderStageInfo & in_shader_info,
+    const WVkDeviceInfo & in_device
     )
 {
-    WShaderModule result;
+    VkShaderModule result;
 
     VkShaderModuleCreateInfo shader_module_create_info{};
     shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -520,7 +520,7 @@ WShaderModule WVulkan::CreateShaderModule(
         in_device.vk_device, 
         &shader_module_create_info, 
         nullptr, 
-        &result.vk_shader_module
+        &result
     ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create shader module!");
@@ -530,10 +530,10 @@ WShaderModule WVulkan::CreateShaderModule(
 }
 
 void WVulkan::Create(
-    WTextureInfo &out_texture_info,
+    WVkTextureInfo &out_texture_info,
     const WTextureStruct &texture_struct,
-    const WDeviceInfo &device_info,
-    const WCommandPoolInfo &command_pool_info
+    const WVkDeviceInfo &device_info,
+    const WVkCommandPoolInfo &command_pool_info
     )
 {
     
@@ -651,11 +651,11 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WRenderPipelineInfo & out_pipeline_info,
-    const WDeviceInfo & in_device,
-    const WDescriptorSetLayoutInfo & in_descriptor_set_layout_info,
-    const WRenderPassInfo & in_render_pass_info,
-    const std::vector<WShaderStageInfo> & in_shader_stage_infos
+    WVkRenderPipelineInfo & out_pipeline_info,
+    const WVkDeviceInfo & in_device,
+    const WVkDescriptorSetLayoutInfo & in_descriptor_set_layout_info,
+    const WVkRenderPassInfo & in_render_pass_info,
+    const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
     )
 {
     // Create Shader Stages
@@ -663,9 +663,10 @@ void WVulkan::Create(
         in_shader_stage_infos.size()
         );
 
-    std::vector<WShaderModule> shader_modules(in_shader_stage_infos.size());
+    std::vector<VkShaderModule> shader_modules(in_shader_stage_infos.size(), VK_NULL_HANDLE);
+    // VkShaderModule vk_shader_module{VK_NULL_HANDLE};
 
-    const WShaderStageInfo * vertex_shader_stage = nullptr;
+    const WVkShaderStageInfo * vertex_shader_stage = nullptr;
 
     for (uint32_t i = 0; i < in_shader_stage_infos.size(); i++)
     {
@@ -682,7 +683,7 @@ void WVulkan::Create(
 
         shader_modules[i] = CreateShaderModule(in_shader_stage_infos[i], in_device);
 
-        shader_stages[i].module = shader_modules[i].vk_shader_module;
+        shader_stages[i].module = shader_modules[i];
         shader_stages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
     }
 
@@ -809,16 +810,17 @@ void WVulkan::Create(
 
     for (auto& shader_module : shader_modules)
     {
-        WVulkan::Destroy(
+        vkDestroyShaderModule(
+            in_device.vk_device, 
             shader_module,
-            in_device
-	    );
+            nullptr
+            );
     }
 }
 
 void WVulkan::Create(
-    WDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
-    const WDeviceInfo & device
+    WVkDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
+    const WVkDeviceInfo & device
     )
 {
     VkDescriptorSetLayoutCreateInfo create_info{};
@@ -898,10 +900,10 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WMeshInfo & out_mesh_info,
+    WVkMeshInfo & out_mesh_info,
     const WMeshStruct & mesh_struct,
-    const WDeviceInfo & device,
-    const WCommandPoolInfo & command_pool_info
+    const WVkDeviceInfo & device,
+    const WVkCommandPoolInfo & command_pool_info
     )
 {
     VkBuffer staging_buffer;
@@ -991,10 +993,10 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WUniformBufferObjectInfo &out_uniform_buffer_object_info,
-    const WDeviceInfo &device)
+    WVkUniformBufferObjectInfo &out_uniform_buffer_object_info,
+    const WVkDeviceInfo &device)
 {
-    VkDeviceSize buffer_size = sizeof(WUniformBufferObject);
+    VkDeviceSize buffer_size = sizeof(WVkUBOStruct);
     CreateVkBuffer(
         out_uniform_buffer_object_info.uniform_buffer,
         out_uniform_buffer_object_info.uniform_buffer_memory,
@@ -1016,8 +1018,8 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WDescriptorPoolInfo &out_descriptor_pool_info,
-    const WDeviceInfo &device)
+    WVkDescriptorPoolInfo &out_descriptor_pool_info,
+    const WVkDeviceInfo &device)
 {
     // if (out_descriptor_pool_info.pool_sizes.empty())
     // {
@@ -1049,10 +1051,10 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WDescriptorSetInfo & out_descriptor_set_info,
-    const WDeviceInfo & device,
-    const WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const WDescriptorPoolInfo & descriptor_pool_info
+    WVkDescriptorSetInfo & out_descriptor_set_info,
+    const WVkDeviceInfo & device,
+    const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
+    const WVkDescriptorPoolInfo & descriptor_pool_info
     )
 {
     std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts;
@@ -1083,7 +1085,7 @@ void WVulkan::UpdateWriteDescriptorSet()
 
 void WVulkan::UpdateDescriptorSets(
     std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
-    const WDeviceInfo & in_device_info
+    const WVkDeviceInfo & in_device_info
     )
 {
     WLOGFNAME("Update Descriptor Sets");
@@ -1098,9 +1100,9 @@ void WVulkan::UpdateDescriptorSets(
 }
 
 void WVulkan::Create(
-    WCommandBufferInfo& out_command_buffer_info,
-    const WDeviceInfo &device,
-    const WCommandPoolInfo &command_pool_info
+    WVkCommandBufferInfo& out_command_buffer_info,
+    const WVkDeviceInfo &device,
+    const WVkCommandPoolInfo &command_pool_info
 )
 {
     VkCommandBufferAllocateInfo alloc_info{};
@@ -1120,7 +1122,7 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in_device_info)
+void WVulkan::Create(WVkSemaphoreInfo & out_semaphore_info, const WVkDeviceInfo & in_device_info)
 {
     VkSemaphoreCreateInfo semaphore_create_info; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -1140,7 +1142,7 @@ void WVulkan::Create(WSemaphoreInfo & out_semaphore_info, const WDeviceInfo & in
     }
 }
 
-void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_info)
+void WVulkan::Create(WVkFenceInfo & out_fence_info, const WVkDeviceInfo & in_device_info)
 {
     VkFenceCreateInfo fence_create_info;
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -1162,24 +1164,27 @@ void WVulkan::Create(WFenceInfo & out_fence_info, const WDeviceInfo & in_device_
 // Destroy functions
 // -----------------
 
-void WVulkan::Destroy(WInstanceInfo &instance_info)
+void WVulkan::Destroy(WVkInstanceInfo &instance_info)
 {
+    WLOGFNAME("Destroy Vulkan Instance.");
     vkDestroyInstance(instance_info.instance, nullptr);
 }
 
-void WVulkan::Destroy(WSurfaceInfo &surface_info, const WInstanceInfo &instance_info)
+void WVulkan::Destroy(WVkSurfaceInfo &surface_info, const WVkInstanceInfo &instance_info)
 {
+    WLOGFNAME("Destroy Vulkan Surface.");
     vkDestroySurfaceKHR(instance_info.instance, surface_info.surface, nullptr);
 }
 
-void WVulkan::Destroy(WDeviceInfo &device_info)
+void WVulkan::Destroy(WVkDeviceInfo &device_info)
 {
+    WLOGFNAME("Destroy Vulkan Device.");
     vkDestroyDevice(device_info.vk_device, nullptr);
 }
 
-void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-
+    WLOGFNAME("Destroy Swap Chain and Image Views");
     vkDestroyImageView(device_info.vk_device, swap_chain_info.color_image_view, nullptr);
     vkDestroyImage(device_info.vk_device, swap_chain_info.color_image, nullptr);
     vkFreeMemory(device_info.vk_device, swap_chain_info.color_image_memory, nullptr);
@@ -1201,7 +1206,7 @@ void WVulkan::Destroy(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device
     vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
 }
 
-void WVulkan::DestroyImageView(WSwapChainInfo &swap_chain_info, const WDeviceInfo &device_info)
+void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
     for (auto image_view : swap_chain_info.swap_chain_image_views)
     {
@@ -1209,34 +1214,21 @@ void WVulkan::DestroyImageView(WSwapChainInfo &swap_chain_info, const WDeviceInf
     }
 }
 
-void WVulkan::Destroy(WRenderPassInfo &render_pass_info, const WDeviceInfo &device_info)
+void WVulkan::Destroy(WVkRenderPassInfo &render_pass_info, const WVkDeviceInfo &device_info)
 {
     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
 }
 
-void WVulkan::Destroy(WWindowInfo &window_info)
+void WVulkan::Destroy(WVkWindowInfo &window_info)
 {
+    WLOGFNAME("Destroy Window Info.");
     glfwDestroyWindow(window_info.window);
     glfwTerminate();
 }
 
 void WVulkan::Destroy(
-    WShaderModule & out_shader_module,
-    const WDeviceInfo & device
-    )
-{
-    vkDestroyShaderModule(
-	device.vk_device, 
-	out_shader_module.vk_shader_module,
-	nullptr
-    );
-
-    out_shader_module.vk_shader_module = VK_NULL_HANDLE;
-}
-
-void WVulkan::Destroy(
-    WRenderPipelineInfo & pipeline_info,
-    const WDeviceInfo & device
+    WVkRenderPipelineInfo & pipeline_info,
+    const WVkDeviceInfo & device
     )
 {
     if (pipeline_info.pipeline_layout)
@@ -1264,8 +1256,8 @@ void WVulkan::Destroy(
 }
 
 void WVulkan::Destroy(
-    WDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const WDeviceInfo & device
+    WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
+    const WVkDeviceInfo & device
     )
 {
     // destroy descriptor set layout
@@ -1277,8 +1269,8 @@ void WVulkan::Destroy(
 }
 
 void WVulkan::Destroy(
-    WDescriptorPoolInfo & out_descriptor_pool_info,
-    const WDeviceInfo & in_device
+    WVkDescriptorPoolInfo & out_descriptor_pool_info,
+    const WVkDeviceInfo & in_device
     )
 {
     vkDestroyDescriptorPool(
@@ -1293,10 +1285,11 @@ void WVulkan::Destroy(
 
 
 void WVulkan::Destroy(
-    WCommandPoolInfo & out_command_pool,
-    const WDeviceInfo & in_device_info
+    WVkCommandPoolInfo & out_command_pool,
+    const WVkDeviceInfo & in_device_info
     )
 {
+    WLOGFNAME("Destroy Command Pool");
     vkDestroyCommandPool(
         in_device_info.vk_device,
         out_command_pool.vk_command_pool,
@@ -1307,8 +1300,8 @@ void WVulkan::Destroy(
 }
 
 void WVulkan::Destroy(
-    WSemaphoreInfo & out_semaphore_info,
-    const WDeviceInfo & in_device_info
+    WVkSemaphoreInfo & out_semaphore_info,
+    const WVkDeviceInfo & in_device_info
     )
 {
     for(size_t i = 0; i<out_semaphore_info.semaphores.size(); i++)
@@ -1324,8 +1317,8 @@ void WVulkan::Destroy(
 }
 
 void WVulkan::Destroy(
-    WFenceInfo & out_fence_info,
-    const WDeviceInfo & in_device_info
+    WVkFenceInfo & out_fence_info,
+    const WVkDeviceInfo & in_device_info
     )
 {
     for(size_t i=0; i<out_fence_info.fences.size(); i++)
@@ -1345,10 +1338,10 @@ void WVulkan::Destroy(
 
 void WVulkan::RecordRenderCommandBuffer(
     VkCommandBuffer in_commandbuffer,
-    const WRenderPassInfo & in_render_pass,
-    const WSwapChainInfo & in_swap_chain,
-    const WRenderPipelineInfo & in_render_pipeline_info,
-    const std::vector<WPipelineBinding> & in_bindings,
+    const WVkRenderPassInfo & in_render_pass,
+    const WVkSwapChainInfo & in_swap_chain,
+    const WVkRenderPipelineInfo & in_render_pipeline_info,
+    const std::vector<WVkPipelineBindingInfo> & in_bindings,
     uint32_t in_image_index,
     uint32_t in_framebuffer_index
     )
@@ -1479,7 +1472,7 @@ void WVulkan::RecordRenderCommandBuffer(
 // Descriptor Set Layout
 // ---------------------
 
-void WVulkan::AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_set_layout)
+void WVulkan::AddDSLDefaultBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
 {
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
     ubo_layout_binding.binding = 0;
@@ -1504,7 +1497,7 @@ void WVulkan::AddDSLDefaultBindings(WDescriptorSetLayoutInfo & out_descriptor_se
 // Helper functions
 // ----------------
 
-bool WVulkan::CheckValidationLayerSupport(const WRenderDebugInfo & debug_info)
+bool WVulkan::CheckValidationLayerSupport(const WVkRenderDebugInfo & debug_info)
 {
     uint32_t layer_count;
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
@@ -2092,13 +2085,13 @@ void WVulkan::CopyVkBuffer(
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-WShaderStageInfo WVulkan::CreateShaderStageInfo(
+WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
     const char* in_shader_file_path,
     const char* in_entry_point,
     EShaderType in_shader_type
     )
 {
-    WShaderStageInfo result;
+    WVkShaderStageInfo result;
 
     std::string file_path = in_shader_file_path;
 

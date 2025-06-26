@@ -1,9 +1,9 @@
 #include "WRender.h"
 #include "WCore/WCore.h"
-#include "WRenderCommandPool.h"
-#include "WRenderConfig.h"
-#include "WRenderCore.h"
-#include "WRenderPipeline.h"
+#include "WVulkan/WRenderCommandPool.h"
+#include "WVulkan/WRenderConfig.h"
+#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WRenderPipeline.h"
 #include <cstdint>
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -22,7 +22,7 @@
     #define _ENABLE_VALIDATON_LAYERS true
 #endif
 
-#include "WVulkan.h"
+#include "WVulkan/WVulkan.h"
 
 // WRender
 // -------
@@ -103,13 +103,13 @@ WRender::WRender()
         device_info_
         );
 
-    render_pipelines_manager_ = WRenderPipelinesManager(
+    render_pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_
         );
 
-    render_command_pool_ = WRenderCommandPool( 
-        WCommandPoolInfo(),
+    render_command_pool_ = WVkRenderCommandPool( 
+        WVkCommandPoolInfo(),
         device_info_,
         surface_info_
         );
@@ -151,6 +151,10 @@ WRender::WRender()
 WRender::~WRender()
 {
 
+    WLOGFNAME("Destroy WRender");
+
+    render_pipelines_manager_ = {};
+
     WVulkan::Destroy(image_available_semaphore_, device_info_);
 
     WVulkan::Destroy(render_finished_semaphore_, device_info_);
@@ -160,12 +164,12 @@ WRender::~WRender()
     // Destroy Vulkan Render Pass
     WVulkan::Destroy(render_pass_info_, device_info_);
 
-    // Destroy Vulkan Image Views
+    // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
-    // Destroy Vulkan Swap Chain
-    WVulkan::Destroy(swap_chain_info_, device_info_);
-    
+    render_command_pool_ = {};
+    render_command_buffer_ = {};
+
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);
 
@@ -187,19 +191,7 @@ void WRender::DeviceWaitIdle() const
 void WRender::Draw()
 {
 
-    WLOGFNAME(" ");
-
-    for (auto& f : in_flight_fence_.fences) {
-        WLOGFNAME("Fence: " << f);
-    }
-
-    for (auto& s : image_available_semaphore_.semaphores) {
-        WLOGFNAME("Image Semaphore: " << s);
-    }
-
-    for (auto& s : render_finished_semaphore_.semaphores) {
-        WLOGFNAME("Render Semaphore: " << s);
-    }
+    WLOGFNAME("Drawing...");
 
     vkWaitForFences(
         device_info_.vk_device,
@@ -238,13 +230,13 @@ void WRender::Draw()
         render_finished_semaphore_.semaphores[current_frame]
     };
 
-    for(WRenderPipeline & render_pipeline :
+    for(WVkRenderPipeline & render_pipeline :
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
 
         WLOGFNAME("Render Pipeline: " << render_pipeline.WID());
 
-        const std::vector<WPipelineBinding> & bindings =
+        const std::vector<WVkPipelineBindingInfo> & bindings =
             render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
@@ -316,7 +308,7 @@ void WRender::Draw()
 
 void WRender::RecreateSwapChain()
 {
-    WLOG("- RECREATE SWAP CHAIN!");
+    WLOG("RECREATE SWAP CHAIN!");
     
     int width=0, height=0;
     glfwGetFramebufferSize(window_info_.window, &width, &height);

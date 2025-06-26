@@ -16,7 +16,7 @@ class WENGINE_API WEngine
 
 public:
 
-    virtual ~WEngine() = default;
+    virtual ~WEngine();
 
     WEngine(const WEngine & other) = delete;
 
