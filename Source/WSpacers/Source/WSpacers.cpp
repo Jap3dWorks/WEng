@@ -9,8 +9,8 @@
 #include "WActors/WActor.h"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
-#include "WVulkan/WRenderCore.h"
-#include "WVulkan/WRenderPipeline.h"
+#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderPipeline.h"
 #include "WStructs/WGeometryStructs.h"
 #include "WVulkan/WVulkan.h"
 

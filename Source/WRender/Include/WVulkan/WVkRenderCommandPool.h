@@ -2,7 +2,7 @@
 
 #include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
-#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WVkRenderCore.h"
 
 class WRENDER_API WVkRenderCommandPool
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include "WCore/WCore.h"
-#include "WVulkan/WRenderCore.h"
-#include "WVulkan/WRenderPipeline.h"
+#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderPipeline.h"
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
 #include <optional>

@@ -4,10 +4,10 @@
 
 #include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
-#include "WVulkan/WRenderConfig.h"
-#include "WVulkan/WRenderCore.h"
-#include "WVulkan/WRenderPipeline.h"
-#include "WVulkan/WRenderCommandPool.h"
+#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderPipeline.h"
+#include "WVulkan/WVkRenderCommandPool.h"
 #include <cstddef>
 #include <optional>
 

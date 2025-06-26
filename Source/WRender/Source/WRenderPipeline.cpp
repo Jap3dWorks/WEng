@@ -1,10 +1,10 @@
-#include "WVulkan/WRenderPipeline.h"
+#include "WVulkan/WVkRenderPipeline.h"
 #include <cassert>
 #include <stdexcept>
 #include <utility>
 #include <vulkan/vulkan_core.h>
 #include "WCore/WCore.h"
-#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WVkRenderCore.h"
 #include "WVulkan/WVulkan.h"
 #include <cassert>
 

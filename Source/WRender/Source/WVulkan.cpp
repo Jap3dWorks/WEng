@@ -11,10 +11,10 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WVulkan/WRenderCore.h"
+#include "WVulkan/WVkRenderCore.h"
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
-#include "WVulkan/WRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.h"
 #include <fstream>
 #include <vulkan/vulkan_core.h>
 #include <regex>
