@@ -23,6 +23,8 @@ public:
 
     WVkAssetCollection<T> & operator=(WVkAssetCollection<T> && other);
 
+    void AddAsset(const T & other);
+
 private:
 
     std::vector<T> data_{};
