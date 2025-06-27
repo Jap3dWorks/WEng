@@ -1333,6 +1333,25 @@ void WVulkan::Destroy(
     }
 }
 
+void WVulkan::Destroy(
+    WVkTextureInfo & in_texture_info,
+    const WVkDeviceInfo & in_device_info
+    ) {
+    
+    vkDestroySampler(in_device_info.vk_device, in_texture_info.sampler, nullptr);
+    in_texture_info.sampler = VK_NULL_HANDLE;
+    
+    vkDestroyImageView(in_device_info.vk_device, in_texture_info.image_view, nullptr);
+    in_texture_info.image_view = VK_NULL_HANDLE;
+
+    vkDestroyImage(in_device_info.vk_device, in_texture_info.image, nullptr);
+    in_texture_info.image = VK_NULL_HANDLE;
+
+    vkFreeMemory(in_device_info.vk_device, in_texture_info.image_memory, nullptr);
+    in_texture_info.image_memory = VK_NULL_HANDLE;
+
+}
+
 // Record Commands
 // ---------------
 
