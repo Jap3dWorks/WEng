@@ -257,7 +257,8 @@ int main(int argc, char** argv)
             model_data = static_model->GetModel();
         }
         
-        const WTextureStruct & texture_data = texture_asset->GetTexture();
+        const WTextureStruct & texture_data =
+            texture_asset->GetTexture();
 
         WVkMeshInfo mesh_info;
         WVulkan::Create(

@@ -1352,6 +1352,17 @@ void WVulkan::Destroy(
 
 }
 
+void WVulkan::Destroy(
+    WVkMeshInfo & out_mesh_info,
+    const WVkDeviceInfo & in_device_info
+    ) {
+    vkDestroyBuffer(in_device_info.vk_device,out_mesh_info.index_buffer, nullptr);
+    vkFreeMemory(in_device_info.vk_device, out_mesh_info.index_buffer_memory, nullptr);
+
+    vkDestroyBuffer(in_device_info.vk_device, out_mesh_info.vertex_buffer, nullptr);
+    vkFreeMemory(in_device_info.vk_device, out_mesh_info.vertex_buffer_memory, nullptr);
+}
+
 // Record Commands
 // ---------------
 

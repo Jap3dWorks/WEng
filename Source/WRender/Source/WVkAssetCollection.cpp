@@ -44,4 +44,46 @@ void WVkTextureCollection::Move(WVkTextureCollection && other) {
 // WVkStaticMeshCollection
 // -----------------------
 
+WVkStaticMeshCollection::WVkStaticMeshCollection(
+    const WVkDeviceInfo & in_device_info,
+    const WVkCommandPoolInfo & in_command_pool_info
+    ) :
+    device_info_(in_device_info), command_pool_info_(in_command_pool_info) {}
+
+WVkStaticMeshCollection::WVkStaticMeshCollection(WVkStaticMeshCollection && other) :
+    WVkAssetCollection(std::move(other)) {
+    Move(std::move(other));
+}
+
+WVkStaticMeshCollection & WVkStaticMeshCollection::operator=(WVkStaticMeshCollection && other) {
+    WVkAssetCollection::operator=(std::move(other));
+    Move(std::move(other));
+
+    return *this;
+}
+
+void WVkStaticMeshCollection::Move(WVkStaticMeshCollection && other) {
+    device_info_ = std::move(other.device_info_);
+    command_pool_info_ = std::move(other.command_pool_info_);
+}
+
+WVkMeshInfo WVkStaticMeshCollection::LoadAssetImpl(const WMeshStruct & in_asset) {
+    WVkMeshInfo mesh_info;
+    WVulkan::Create(
+        mesh_info,
+        in_asset,
+        device_info_,
+        command_pool_info_
+        );
+        
+    return mesh_info;
+}
+
+void WVkStaticMeshCollection::UnloadAssetImpl(WVkMeshInfo & in_data) {
+    WVulkan::Destroy(
+        in_data,
+        device_info_
+        );
+}
+
 

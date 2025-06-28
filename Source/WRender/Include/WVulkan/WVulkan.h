@@ -242,6 +242,11 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
+    void Destroy(
+        WVkMeshInfo & out_mesh_info,
+        const WVkDeviceInfo & in_device_info
+        );
+
     // Record Commands
     // ---------------
 

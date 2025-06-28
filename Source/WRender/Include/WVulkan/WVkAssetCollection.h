@@ -154,16 +154,21 @@ public:
 
     WVkStaticMeshCollection(
         const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info
-        ) :
-        device_info_(in_device_info), command_pool_info_(in_command_pool_info) {}
+        );
 
     ~WVkStaticMeshCollection() override = default;
 
     WVkStaticMeshCollection(const WVkStaticMeshCollection & other) = delete;
-    WVkStaticMeshCollection(WVkStaticMeshCollection && out_other);
+    WVkStaticMeshCollection(WVkStaticMeshCollection && other);
 
     WVkStaticMeshCollection & operator=(const WVkStaticMeshCollection & in_other) = delete;
     WVkStaticMeshCollection & operator=(WVkStaticMeshCollection && other);
+
+protected:
+
+    WVkMeshInfo LoadAssetImpl(const WMeshStruct & in_asset) override;
+
+    void UnloadAssetImpl(WVkMeshInfo & in_data) override;
 
 private:
 
