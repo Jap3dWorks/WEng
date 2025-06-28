@@ -8,6 +8,7 @@
 #include "WVulkan/WVkRenderCore.h"
 #include "WVulkan/WVkRenderPipeline.h"
 #include "WVulkan/WVkRenderCommandPool.h"
+#include "WVulkan/WVkAssetCollection.h"
 #include <cstddef>
 #include <optional>
 
@@ -24,7 +25,7 @@ public:
 
     void Draw();
 
-    WNODISCARD WINLINE WVkRenderPipelinesManager & RenderPipelinesManager()
+    WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {
         return render_pipelines_manager_;
     }
@@ -69,6 +70,9 @@ private:
     WVkSemaphoreInfo image_available_semaphore_;
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo in_flight_fence_;
+
+    WVkTextureCollection texture_collection_;
+    WVkStaticMeshCollection static_mesh_collection_;
 
     uint32_t current_frame {0};
 

@@ -146,6 +146,16 @@ WRender::WRender()
         in_flight_fence_,
         device_info_
         );
+
+    texture_collection_ = WVkTextureCollection(
+        device_info_,
+        render_command_pool_.CommandPoolInfo()
+        );
+
+    static_mesh_collection_ = WVkStaticMeshCollection(
+        device_info_,
+        render_command_pool_.CommandPoolInfo()
+        );
 }
 
 WRender::~WRender()
@@ -169,6 +179,9 @@ WRender::~WRender()
 
     render_command_pool_ = {};
     render_command_buffer_ = {};
+
+    texture_collection_ = {};
+    static_mesh_collection_ = {};
 
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);

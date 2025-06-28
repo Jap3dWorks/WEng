@@ -106,13 +106,15 @@ private:
 
 };
 
+// TODO staic Create methods and the constructor with parameters private.
+
 struct WTextureStruct;
 
 class WVkTextureCollection : public WVkAssetCollection<WVkTextureInfo, WTextureStruct> {
 
 public:
 
-    WVkTextureCollection()=delete;
+    WVkTextureCollection()=default;
 
     WVkTextureCollection(
         const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info
@@ -150,7 +152,7 @@ class WVkStaticMeshCollection : public WVkAssetCollection<WVkMeshInfo, WMeshStru
 
 public:
 
-    WVkStaticMeshCollection()=delete;
+    WVkStaticMeshCollection()=default;
 
     WVkStaticMeshCollection(
         const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info

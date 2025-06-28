@@ -16,6 +16,11 @@ WVkTextureCollection & WVkTextureCollection::operator=(WVkTextureCollection && o
     return *this;
 }
 
+void WVkTextureCollection::Move(WVkTextureCollection && other) {
+    device_info_ = std::move(other.device_info_);
+    command_pool_info_ = std::move(other.command_pool_info_);
+}
+
 WVkTextureInfo WVkTextureCollection::LoadAssetImpl(const WTextureStruct & in_asset) {
     WVkTextureInfo result;
 
@@ -34,11 +39,6 @@ void WVkTextureCollection::UnloadAssetImpl(WVkTextureInfo & in_texture_info) {
         in_texture_info,
         device_info_
         );
-}
-
-void WVkTextureCollection::Move(WVkTextureCollection && other) {
-    device_info_ = std::move(other.device_info_);
-    command_pool_info_ = std::move(other.command_pool_info_);
 }
 
 // WVkStaticMeshCollection
