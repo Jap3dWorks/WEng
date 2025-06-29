@@ -4,7 +4,7 @@
 #include "WObjectManager/WObjectManager.h"
 #include "WImporters.h"
 #include "WImportersRegister.h"
-#include "WRender.h"
+#include "WRender.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN

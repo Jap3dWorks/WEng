@@ -2,7 +2,7 @@
 
 #include "WEngine.h"
 #include "WLog.h"
-#include "WRender.h"
+#include "WRender.hpp"
 #include "WCore/WCore.h"
 #include "WImporters.h"
 #include "WImportersRegister.h"
@@ -13,6 +13,7 @@
 #include "WVulkan/WVkRenderPipeline.h"
 #include "WStructs/WGeometryStructs.h"
 #include "WVulkan/WVulkan.h"
+#include "IRenderResources.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -260,21 +261,24 @@ int main(int argc, char** argv)
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        WVkMeshInfo mesh_info;
-        WVulkan::Create(
-            mesh_info,
-            model_data.meshes[0],
-            engine.Render()->DeviceInfo(),
-            engine.Render()->RenderCommandPool().CommandPoolInfo()
-            );        
+        WId mesh_id = engine.Render()->RenderResources()->RegisterStaticMesh(model_data.meshes[0]);
+        WId texture_id = engine.Render()->RenderResources()->RegisterTexture(texture_data);
+            
+        // WVkMeshInfo mesh_info;
+        // WVulkan::Create(
+        //     mesh_info,
+        //     model_data.meshes[0],
+        //     engine.Render()->DeviceInfo(),
+        //     engine.Render()->RenderCommandPool().CommandPoolInfo()
+        //     );        
 
-        WVkTextureInfo texture_info;
-        WVulkan::Create(
-            texture_info,
-            texture_data,
-            engine.Render()->DeviceInfo(),
-            engine.Render()->RenderCommandPool().CommandPoolInfo()
-            );
+        // WVkTextureInfo texture_info;
+        // WVulkan::Create(
+        //     texture_info,
+        //     texture_data,
+        //     engine.Render()->DeviceInfo(),
+        //     engine.Render()->RenderCommandPool().CommandPoolInfo()
+        //     );
 
         WLOG("Texture Sampler: " << texture_info.sampler);
         WLOG("Image Memory: " << texture_info.image_memory);
@@ -286,9 +290,11 @@ int main(int argc, char** argv)
                 descriptor_set_layout
                 );
 
-        engine.Render()->RenderPipelinesManager().AddBinding(
-            pipeline_wid, descriptor_set, mesh_info
-            );
+        // engine.Render()->RenderPipelinesManager().AddBinding(
+        //     pipeline_wid,
+        //     descriptor_set,
+        //     // mesh_info // TODO: use mesh_id
+        //     );
 
         WLOG("Bind Pipeline: " << pipeline_wid);
 
@@ -306,6 +312,7 @@ int main(int argc, char** argv)
 
         for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
         {
+            // TODO Move into Render process
             std::vector<VkWriteDescriptorSet> write_descriptor_sets{2};
 
             WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
@@ -322,7 +329,7 @@ int main(int argc, char** argv)
             WVulkan::WVkWriteDescriptorSetTextureStruct texture_struct{};
 
             texture_struct.binding = 1;
-            texture_struct.texture_info = texture_info;
+            // texture_struct.texture_info = texture_info;
             texture_struct.descriptor_set = descriptor_set.descriptor_sets[i];
 
             WVulkan::UpdateWriteDescriptorSet(

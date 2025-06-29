@@ -2,15 +2,17 @@
 
 #pragma once
 
-#include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
+#include "WCore/CoreMacros.h"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.h"
 #include "WVulkan/WVkRenderPipeline.h"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkAssetCollection.h"
+
 #include <cstddef>
-#include <optional>
+
+class IRenderResources;
 
 /**
  * @brief Render related top class. Highest level abstraction.
@@ -34,24 +36,28 @@ public:
 
     void RecreateSwapChain();
 
+    TRef<IRenderResources> RenderResources();
+
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
 
-    WNODISCARD inline const WVkWindowInfo & WindowInfo() const noexcept
+    WNODISCARD const WVkWindowInfo & WindowInfo() const noexcept
     { return window_info_; }
 
-    WNODISCARD inline const WVkDeviceInfo & DeviceInfo() const noexcept
+    WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
     { return device_info_; }
 
-    WNODISCARD inline const WVkSwapChainInfo & SwapChainInfo() const noexcept
+    WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
     { return swap_chain_info_; }
 
-    WNODISCARD inline const size_t FramesInFlight() const noexcept
+    WNODISCARD const size_t FramesInFlight() const noexcept
     { return MAX_FRAMES_IN_FLIGHT; }
 
-    WNODISCARD inline const WVkRenderCommandPool & RenderCommandPool() const noexcept
+    WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }
 
 private:
+
+    std::unique_ptr<IRenderResources> render_resources_{nullptr};
 
     WVkInstanceInfo instance_info_;
     WVkWindowInfo window_info_;
@@ -70,9 +76,6 @@ private:
     WVkSemaphoreInfo image_available_semaphore_;
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo in_flight_fence_;
-
-    WVkTextureCollection texture_collection_;
-    WVkStaticMeshCollection static_mesh_collection_;
 
     uint32_t current_frame {0};
 

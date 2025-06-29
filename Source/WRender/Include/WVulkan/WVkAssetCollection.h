@@ -51,7 +51,7 @@ public:
         return id;
     }
 
-    WId UnregisterAsset(WId in_id) {
+    void UnregisterAsset(WId in_id) {
         assets_.erase(in_id);
     }
 

@@ -1,9 +1,12 @@
-#include "WRender.h"
+#include "WRender.hpp"
 #include "WCore/WCore.h"
+#include "WVulkan/WVulkan.h"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.h"
 #include "WVulkan/WVkRenderPipeline.h"
+#include "WVulkan/WVkRenderResources.hpp"
+
 #include <cstdint>
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -11,9 +14,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include <cstring>
-#include <set>
-#include <string>
 #include <array>
 
 #ifdef NDEBUG
@@ -22,7 +22,6 @@
     #define _ENABLE_VALIDATON_LAYERS true
 #endif
 
-#include "WVulkan/WVulkan.h"
 
 // WRender
 // -------
@@ -147,15 +146,11 @@ WRender::WRender()
         device_info_
         );
 
-    texture_collection_ = WVkTextureCollection(
+    render_resources_ = std::make_unique<WVkRenderResources>(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
 
-    static_mesh_collection_ = WVkStaticMeshCollection(
-        device_info_,
-        render_command_pool_.CommandPoolInfo()
-        );
 }
 
 WRender::~WRender()
@@ -180,8 +175,7 @@ WRender::~WRender()
     render_command_pool_ = {};
     render_command_buffer_ = {};
 
-    texture_collection_ = {};
-    static_mesh_collection_ = {};
+    render_resources_ = nullptr;
 
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);
@@ -357,6 +351,9 @@ void WRender::RecreateSwapChain()
         swap_chain_info_,
         device_info_
         );
-
-
 }
+
+TRef<IRenderResources> WRender::RenderResources() {
+    return render_resources_.get();
+}
+ 
