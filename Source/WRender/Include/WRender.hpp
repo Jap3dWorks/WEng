@@ -6,7 +6,7 @@
 #include "WCore/CoreMacros.h"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.h"
-#include "WVulkan/WVkRenderPipeline.h"
+#include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkAssetCollection.h"
 

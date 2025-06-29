@@ -10,7 +10,7 @@
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
 #include "WVulkan/WVkRenderCore.h"
-#include "WVulkan/WVkRenderPipeline.h"
+#include "WVulkan/WVkRenderPipeline.hpp"
 #include "WStructs/WGeometryStructs.h"
 #include "WVulkan/WVulkan.h"
 #include "IRenderResources.hpp"

@@ -1,4 +1,4 @@
-#include "WVulkan/WVkRenderPipeline.h"
+#include "WVulkan/WVkRenderPipeline.hpp"
 #include <cassert>
 #include <stdexcept>
 #include <utility>
