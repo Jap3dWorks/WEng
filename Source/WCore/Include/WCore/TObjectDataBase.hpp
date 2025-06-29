@@ -3,6 +3,7 @@
 #include "WCore/WCore.h"
 #include "WCore/WIdPool.h"
 #include "WCore/TFunction.h"
+#include "TSparseSet.hpp"
 
 #include <unordered_map>
 
@@ -42,7 +43,7 @@ public:
 
     WId Create(TFunction<T(WId)> in_predicate) {
         WId oid = id_pool_.Generate();
-        objects_[oid] = in_predicate(oid);
+        objects_.Insert(oid, in_predicate(oid));
 
         return oid;
     }
@@ -50,9 +51,9 @@ public:
     WId Create() override final { return Create(create_fn_); }
 
     void Remove(WId in_id, TFunction<void(T&)> in_destroy_fn) {
-        in_destroy_fn(objects_[in_id]);
+        in_destroy_fn(objects_.Get(in_id));
         id_pool_.Release(in_id);
-        objects_.erase(in_id);
+        objects_.Delete(in_id);
     }
 
     void Remove(WId in_id) override final { return Remove(destroy_fn_); }
@@ -63,7 +64,7 @@ public:
             id_pool_.Release(p.first);
         }
 
-        objects_.clear();
+        objects_.Clear();
     }
 
     void Clear() override final {
@@ -71,19 +72,19 @@ public:
     }
 
     T & Get(WId in_id) {
-        return objects_[in_id];
+        return objects_.Get(in_id);
     }
 
     void Get(WId in_id, void* & out_value) override final {
-        out_value = &objects_[in_id];
+        out_value = &objects_.Get(in_id);
     }
 
     size_t Count() override final {
-        return objects_.count();
+        return objects_.Count();
     }
 
     bool Contains(WId in_id) override final {
-        return objects_.contains(in_id);
+        return objects_.Contains(in_id);
     }
 
     void SetCreateFn(TFunction<T(WId)> in_create_fn) {
@@ -106,6 +107,6 @@ private:
     TFunction<void(T&)> destroy_fn_=[](T&){};
     TFunction<T(WId)> create_fn_=[](WId){return T{};};
     WIdPool id_pool_{};
-    std::unordered_map<WId, T> objects_{};  // TODO rethink a performant alignment and preformance
-
+    // std::unordered_map<WId, T> objects_{};  // TODO rethink a performant alignment and preformance
+    TSparseSet<T> objects_{};
 };
