@@ -63,4 +63,10 @@ void WVkRenderResources::UnloadStaticMesh(WId in_id) {
     static_mesh_collection.UnloadAsset(in_id);
 }
 
+WVkTextureInfo WVkRenderResources::TextureInfo(WId in_id) {
+    return texture_collection.GetData(in_id);
+}
 
+WVkMeshInfo WVkRenderResources::StaticMeshInfo(WId in_id) {
+    return static_mesh_collection.GetData(in_id);
+}

@@ -55,6 +55,11 @@ public:
     WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }
 
+    void AddPipelineBinding(
+        WId pipeline_id,
+        const WVkDescriptorSetInfo & in_descriptor_set_info,
+        WId in_mesh_id);
+
 private:
 
     std::unique_ptr<IRenderResources> render_resources_{nullptr};

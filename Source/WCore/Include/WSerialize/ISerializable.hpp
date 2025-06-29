@@ -8,16 +8,16 @@
 #include "WCore/WCore.h"
 
 /**
- * @brief Base class for all serializable objects.
+ * @brief Interface for all serializable objects.
 */
-class WSerializable
+class ISerializable
 {
 public:
-    WSerializable() = default;
-    virtual ~WSerializable() = default;
+    ISerializable() = default;
+    virtual ~ISerializable() = default;
 
-    virtual void Serialize() = 0;
-    virtual void Deserialize() = 0;
+    virtual void Serialize() {} // TODO make abstract
+    virtual void Deserialize() {}
     
     void SetPath(const std::string& file_path);
     std::string GetPath() const;

@@ -195,8 +195,7 @@ void WRender::DeviceWaitIdle() const
     vkDeviceWaitIdle(device_info_.vk_device);
 }
 
-void WRender::Draw()
-{
+void WRender::Draw() {
 
     WLOGFNAME("Drawing...");
 
@@ -237,6 +236,10 @@ void WRender::Draw()
         render_finished_semaphore_.semaphores[current_frame]
     };
 
+    // WVkRenderResources * render_resources = static_cast<WVkRenderResources*>(render_resources_.get());
+
+    // std::vector<WVkMeshInfo> mesh_bindings={}
+    
     for(WVkRenderPipeline & render_pipeline :
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
@@ -245,6 +248,11 @@ void WRender::Draw()
 
         const std::vector<WVkPipelineBindingInfo> & bindings =
             render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
+
+        // mesh_bindings_.clear
+        // for (auto & b : bindings) {
+        //     render_resources->StaticMeshInfo(b.mesh_id);
+        // }
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
 
@@ -313,8 +321,7 @@ void WRender::Draw()
 
 }
 
-void WRender::RecreateSwapChain()
-{
+void WRender::RecreateSwapChain() {
     WLOG("RECREATE SWAP CHAIN!");
     
     int width=0, height=0;
@@ -357,3 +364,18 @@ TRef<IRenderResources> WRender::RenderResources() {
     return render_resources_.get();
 }
  
+void WRender::AddPipelineBinding(
+    WId pipeline_id,
+    const WVkDescriptorSetInfo & in_descriptor_set_info,
+    WId in_mesh_id
+    ) {
+    
+    WVkRenderResources * resources =
+        static_cast<WVkRenderResources*>(render_resources_.get());
+    
+    render_pipelines_manager_.AddBinding(
+        pipeline_id,
+        in_descriptor_set_info,
+        resources->StaticMeshInfo(in_mesh_id)
+        );
+}

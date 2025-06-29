@@ -23,10 +23,10 @@ WVkRenderPipeline::WVkRenderPipeline(
     device_info_(in_device_info),
     render_pipeline_info_(in_pipeline_info)
 {
-
     WLOGFNAME("Create a Render Pipeline, ID: " << in_pipeline_info.wid);
 
     shader_stage_infos_ = in_shader_stages;
+    descriptor_set_layout_info = in_descriptor_set_layout_info;
 
     WVulkan::Create(
         render_pipeline_info_,
@@ -116,20 +116,18 @@ WVkRenderPipeline & WVkRenderPipelinesManager::CreateRenderPipeline(
         "render_pipeline_info.pipeline_layout must be nullptr"
     );
 
-    render_pipelines_[in_render_pipeline_info.type].emplace_back(
+    WId pid = pipelines_id_pool_.Generate();
+    render_pipelines_.emplace(
+        pid,
         device_info_,
         descriptor_set_layout_info,
         render_pass_info_,
         in_render_pipeline_info,
-        in_shader_stage_info
-    );
+        in_shader_stage_info);
 
-    WId wid{++pipelines_count_};
-    render_pipelines_[in_render_pipeline_info.type].back().WID(wid);
+    pipeline_bindings_[pid] = {};
 
-    pipeline_bindings_[wid] = {};  // future bindings here
-
-    return render_pipelines_[in_render_pipeline_info.type].back();
+    return render_pipelines_[pid];
 }
 
 WVkDescriptorSetLayoutInfo & WVkRenderPipelinesManager::CreateDescriptorSetLayout()
@@ -195,18 +193,20 @@ void WVkRenderPipelinesManager::AddBinding(
     )
 {
     assert(pipeline_bindings_.contains(in_pipeline_id) && "Not contains pipeline id.");
+    
+    // render_pipelines_[in_pipeline_id]
+    // CreateDescriptorSet()
 
     pipeline_bindings_[in_pipeline_id].push_back(
         {in_descriptor_set_info, in_mesh_info}
         );
-
 }
 
 void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
 {
     device_info_ = std::move(other.device_info_);
     render_pass_info_ = std::move(other.render_pass_info_);
-    render_pipelines_ = std::move(other.render_pipelines_);
+    stage_pipelines_ = std::move(other.stage_pipelines_);
     pipeline_bindings_ = std::move(other.pipeline_bindings_);
     descriptor_pool_info_ = std::move(other.descriptor_pool_info_);
     descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
@@ -218,9 +218,8 @@ void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
     other.descriptor_pool_info_ = {};
 }
 
-WVkRenderPipelinesManager::WPipelineDataMaps & WVkRenderPipelinesManager::RenderPipelines()noexcept
-{
-    return render_pipelines_;
+std::vector<WId> & WVkRenderPipelinesManager::StagePipelines(EPipelineType in_type) WNOEXCEPT {
+    return stage_pipelines_[in_type];
 }
 
 const std::vector<WVkPipelineBindingInfo> & WVkRenderPipelinesManager::PipelineBindings(WId pipeline_id) const

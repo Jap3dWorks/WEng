@@ -12,6 +12,8 @@
 
 #define WCONTAINER_MAX_OBJECTS 1024
 
+// TODO: LOOK TO USE TOBJECTDATABASE template class!!!
+
 /*
  * This class is a container for all WObjects of a specific type.
  * Each WObject that is created will be added to the appropriate WObjectContainer<T>.

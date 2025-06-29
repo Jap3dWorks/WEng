@@ -290,11 +290,11 @@ int main(int argc, char** argv)
                 descriptor_set_layout
                 );
 
-        // engine.Render()->RenderPipelinesManager().AddBinding(
-        //     pipeline_wid,
-        //     descriptor_set,
-        //     // mesh_info // TODO: use mesh_id
-        //     );
+        engine.Render()->AddPipelineBinding(
+            pipeline_wid,
+            descriptor_set,
+            mesh_id
+            );
 
         WLOG("Bind Pipeline: " << pipeline_wid);
 
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
             WVulkan::WVkWriteDescriptorSetTextureStruct texture_struct{};
 
             texture_struct.binding = 1;
-            // texture_struct.texture_info = texture_info;
+            // texture_struct.texture_id = texture_id;
             texture_struct.descriptor_set = descriptor_set.descriptor_sets[i];
 
             WVulkan::UpdateWriteDescriptorSet(

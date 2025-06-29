@@ -1,12 +1,12 @@
 #include "WSerialize/WSerialize.h"
 
 
-void WSerializable::SetPath(const std::string& file_path)
+void ISerializable::SetPath(const std::string& file_path)
 {
     file_path_ = file_path;
 }
 
-std::string WSerializable::GetPath() const
+std::string ISerializable::GetPath() const
 {
     return file_path_;
 }

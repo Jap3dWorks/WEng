@@ -42,6 +42,10 @@ public:
 
     void UnloadStaticMesh(WId in_id) override;
 
+    WVkTextureInfo TextureInfo(WId in_id);
+
+    WVkMeshInfo StaticMeshInfo(WId in_id);
+
 private:
 
     void Move(WVkRenderResources && other);

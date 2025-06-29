@@ -5,10 +5,12 @@
 
 #include "WCore/CoreMacros.h"
 #include "WCore/WCore.h"
+#include "WCore/WIdPool.h"
 #include "WVulkan/WVkRenderCore.h"
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
+#include "WCore/TObjectDataBase.hpp"
 
 class WRENDER_API WVkRenderPipeline
 {
@@ -24,7 +26,7 @@ public:
         std::vector<WVkShaderStageInfo> in_shader_stages
 	);
 
-    ~WVkRenderPipeline();
+     ~WVkRenderPipeline();  // TODO Delete pipelines in the manager (can be copied)
 
     WVkRenderPipeline(WVkRenderPipeline && out_other);
 
@@ -33,17 +35,22 @@ public:
     WVkRenderPipeline & operator=(const WVkRenderPipeline & in_render) = delete;
     WVkRenderPipeline(const WVkRenderPipeline & in_render) = delete;
 
-    WNODISCARD WVkRenderPipelineInfo RenderPipelineInfo() WCNOEXCEPT;
+    WNODISCARD WVkRenderPipelineInfo RenderPipelineInfo() const WNOEXCEPT;
+
+    WNODISCARD WVkDescriptorSetLayoutInfo DescriptorSetLayoutInfo() const WNOEXCEPT;
 
     WNODISCARD WId WID() const;
 
     void WID(WId in_wid);
+
+    
 
 private:
 
     WId wid_;
 
     WVkRenderPipelineInfo render_pipeline_info_;
+    WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
     WVkDeviceInfo device_info_;
 
     std::vector<WVkShaderStageInfo> shader_stage_infos_;
@@ -66,7 +73,7 @@ private:
 class WRENDER_API WVkRenderPipelinesManager
 {
 
-    using WPipelineDataMaps = std::unordered_map<EPipelineType, std::vector<WVkRenderPipeline>>;
+    using WStagePipelineMaps = std::unordered_map<EPipelineType, std::vector<WId>>;
 
 public:
 
@@ -105,7 +112,7 @@ public:
         const WVkMeshInfo & in_mesh_info
         );
 
-    WNODISCARD WPipelineDataMaps & RenderPipelines() WNOEXCEPT;
+    WNODISCARD std::vector<WId> & StagePipelines(EPipelineType in_type) WNOEXCEPT;
 
     WNODISCARD const std::vector<WVkPipelineBindingInfo> & PipelineBindings(WId in_pipeline_id) const;
 
@@ -115,16 +122,27 @@ private:
 
     void Move(WVkRenderPipelinesManager && out_other);
 
+    TOjectDataBase<WVkRenderPipeline>
+
+    std::unordered_map<WId, WVkRenderPipeline> render_pipelines_{};
+    std::unordered_map<WId, WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};
+    std::unordered_map<WId, WVkDescriptorSetInfo> descriptor_sets_{};
+
+    // std::vector<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
+    // std::vector<WVkDescriptorSetInfo> descriptor_sets_ {};
+
+    WStagePipelineMaps stage_pipelines_ {};
+
+    std::unordered_map<WId, std::vector<WVkPipelineBindingInfo>> pipeline_bindings_ {};
+
+    WIdPool pipelines_id_pool_{};
+    WIdPool descriptor_set_layouts_id_pool_{};
+    // WIdPool 
+
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
 
-    std::vector<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_ {};
-    std::vector<WVkDescriptorSetInfo> descriptor_sets_ {};
-    WPipelineDataMaps render_pipelines_ {};
 
-    std::unordered_map<WId, std::vector<WVkPipelineBindingInfo>> pipeline_bindings_ {};
-
-    uint32_t pipelines_count_{0};
 };
 

@@ -201,7 +201,7 @@ struct WVkMeshInfo
 struct WVkPipelineBindingInfo
 {
     WVkDescriptorSetInfo descriptor {};
-    WVkMeshInfo mesh{};
+    WVkMeshInfo mesh_info{};
 };
 
 
@@ -218,6 +218,8 @@ struct WVkRenderPipelineInfo
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};
+
+    WId descriptor_set_layout_id{0};
 };
 
 /**

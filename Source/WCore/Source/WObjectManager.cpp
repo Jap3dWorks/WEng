@@ -51,12 +51,3 @@ void detail::WObjectContainerBase::AssignNewId(WObject* object)
 {
     object->wid_ = WId(size_++);
 }
-
-// WObjectManager
-// --------------
-// TODO do not use singletons
-// WObjectManager& WObjectManager::GetInstance()
-// {
-//     static WObjectManager instance;
-//     return instance;
-// }

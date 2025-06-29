@@ -212,7 +212,9 @@ namespace WVulkan
 
     void Destroy(WVkWindowInfo &window_info);
 
-    void Destroy(WVkRenderPipelineInfo &pipeline_info, const WVkDeviceInfo &device);
+    void Destroy(
+        WVkRenderPipelineInfo &pipeline_info,
+        const WVkDeviceInfo &device);
 
     void Destroy(
         WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
