@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.h"
 #include "WCore/TRef.h"
-#include "WObjectManager/WObjectManager.h"
+#include "WObjectManager/WObjectManager.hpp"
 
 #include <memory>
 

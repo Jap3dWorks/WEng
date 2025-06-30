@@ -1,7 +1,7 @@
 #include "WEngine.h"
 // #include <iostream>
 
-#include "WObjectManager/WObjectManager.h"
+#include "WObjectManager/WObjectManager.hpp"
 #include "WImporters.h"
 #include "WImportersRegister.h"
 #include "WRender.hpp"

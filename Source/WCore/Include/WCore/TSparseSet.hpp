@@ -13,13 +13,24 @@ public:
     constexpr TSparseSet() noexcept = default;
     virtual ~TSparseSet() = default;
 
-    constexpr TSparseSet(const TSparseSet& other) = default;
-    constexpr TSparseSet(TSparseSet && other) noexcept = default;
-
-    constexpr TSparseSet & operator=(const TSparseSet & other) = default;
-    constexpr TSparseSet & operator=(TSparseSet && other) noexcept = default;
+    constexpr TSparseSet(const TSparseSet& other) {
+        Copy(other);
+    }
     
+    TSparseSet(TSparseSet && other) noexcept {
+        Move(std::move(other));
+    }
 
+    constexpr TSparseSet & operator=(const TSparseSet & other) {
+        Copy(other);
+        return *this;
+    }
+    
+    constexpr TSparseSet & operator=(TSparseSet && other) noexcept {
+        Move(std::move(other));
+        return *this;
+    }
+    
     void Insert(size_t in_index, const T& in_value) {
         assert(!index_pos_.contains(in_index));
         
@@ -63,15 +74,19 @@ public:
         compact_.clear();
     }
 
+    constexpr void Reserve(size_t in_size) {
+        compact_.reserve(in_size);
+    }
+
     WNODISCARD bool Contains(size_t in_index) const {
         return index_pos_.contains(in_index);
     }
 
-    T * begin() {
+    constexpr T * begin() noexcept {
         return compact_.begin();
     }
 
-    T * end() {
+    constexpr T * end() noexcept {
         return compact_.end();
     }
 
@@ -84,6 +99,18 @@ public:
     }
 
 private:
+
+    constexpr void Copy(const TSparseSet & other) {
+        pos_index_ = other.pos_index_;
+        index_pos_ = other.index_pos_;
+        compact_ = other.compact_;
+    }
+
+    constexpr void Move(TSparseSet && other) noexcept {
+        pos_index_ = std::move(other.pos_index_);
+        index_pos_ = std::move(other.index_pos_);
+        compact_ = std::move(other.compact_);
+    }
 
     std::unordered_map<size_t, size_t> pos_index_{};
     std::unordered_map<size_t, size_t> index_pos_{};

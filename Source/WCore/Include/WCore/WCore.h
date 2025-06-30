@@ -1,20 +1,13 @@
 #pragma once
 
 #include "DllDef.h"
-#include "WLibraryLink.h"
-#include "WLog.h"
 #include "WCore/CoreMacros.h"
 
 #include <string>
 #include <functional>
-#include <cstdint>
 
 #include "WCore.intermediate.h"
 
-namespace detail
-{
-    class WObjectContainerBase;
-}
 
 /**
  * @brief Basic identifier token
@@ -56,8 +49,6 @@ private:
     WId& operator-=(const WId &other);
 
     size_t id_=0; 
-
-    friend detail::WObjectContainerBase;
 };
 
 namespace std
@@ -131,8 +122,5 @@ protected:
 private:
 
     // static const WObject default_object_{}; 
-
-friend detail::WObjectContainerBase;
-
 };
 

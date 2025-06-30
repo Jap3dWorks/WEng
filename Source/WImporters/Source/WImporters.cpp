@@ -12,7 +12,7 @@
 #include <stb/stb_image.h>
 
 #include "WAssets/WStaticModel.h"
-#include "WObjectManager/WObjectManager.h"
+#include "WObjectManager/WObjectManager.hpp"
 #include "WAssets/WStaticModel.h"
 #include "WAssets/WTextureAsset.h"
 #include "WStructs/WTextureStructs.h"

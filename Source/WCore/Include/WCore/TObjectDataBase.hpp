@@ -5,9 +5,10 @@
 #include "WCore/TFunction.h"
 #include "TSparseSet.hpp"
 
-#include <unordered_map>
-
 class IObjectDataBase {
+public:
+    virtual ~IObjectDataBase()=default;
+    
     virtual WId Create() = 0;
     virtual void Remove(WId) =0;
     virtual void Clear() = 0;
@@ -15,7 +16,6 @@ class IObjectDataBase {
     virtual size_t Count()=0;
     virtual bool Contains(WId in_id);
 };
-
 
 template<typename T>
 class TObjectDataBase : public IObjectDataBase {
@@ -107,6 +107,5 @@ private:
     TFunction<void(T&)> destroy_fn_=[](T&){};
     TFunction<T(WId)> create_fn_=[](WId){return T{};};
     WIdPool id_pool_{};
-    // std::unordered_map<WId, T> objects_{};  // TODO rethink a performant alignment and preformance
     TSparseSet<T> objects_{};
 };

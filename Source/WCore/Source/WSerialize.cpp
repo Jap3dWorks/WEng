@@ -1,4 +1,4 @@
-#include "WSerialize/WSerialize.h"
+#include "WSerialize/ISerializable.hpp"
 
 
 void ISerializable::SetPath(const std::string& file_path)

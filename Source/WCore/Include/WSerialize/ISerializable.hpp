@@ -1,5 +1,5 @@
 /**
- * @file WSerialize.h
+ * @file WSerialize.hpp
  * @brief Serialization classes and functions.
 */
 #pragma once
