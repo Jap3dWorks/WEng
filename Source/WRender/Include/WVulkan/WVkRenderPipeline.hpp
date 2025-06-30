@@ -65,7 +65,7 @@ public:
 
     WNODISCARD const std::vector<WVkPipelineBindingInfo> & PipelineBindings(WId in_pipeline_id) const;
 
-    void Destroy();
+    void Clear();
 
 private:
 
@@ -77,7 +77,9 @@ private:
     TObjectDataBase<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};
     TObjectDataBase<WVkDescriptorSetInfo> descriptor_sets_{};
 
-    TObjectDataBase<std::vector<WVkPipelineBindingInfo>> pipeline_bindings_{};
+    // TObjectDataBase<WVkPipelineBindingInfo> pipeline_bindings_{};
+
+    std::unordered_map<WId, std::vector<WVkPipelineBindingInfo>> pb_{};
 
     WStagePipelineMaps stage_pipelines_ {};
 
@@ -86,7 +88,6 @@ private:
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
     
-
 
 };
 

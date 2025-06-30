@@ -100,7 +100,7 @@ WId WVkRenderPipelinesManager::CreateDescriptorSet(
 
 WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
 {
-    Destroy();
+    Clear();
 }
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
@@ -109,7 +109,6 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
 {
     Move(std::move(other));
 }
-
 
 WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
 {
@@ -126,19 +125,17 @@ WId WVkRenderPipelinesManager::AddBinding(
 {
     assert(pipeline_bindings_.Contains(in_pipeline_id));
 
-    // TODO: Rethink this
+    // pipeline_bindings_[in_pipeline_id].push_back({0, in_pipeline_id, in_descriptor_id, in_mesh_info});
 
     return pipeline_bindings_.Create(
         [&in_pipeline_id,
          &in_descriptor_id,
-         &in_mesh_info
-            ](WId in_id) {
-            return { {
-                    in_id,
-                    in_pipeline_id,
-                    in_descriptor_id,
-                    in_mesh_info
-                }
+         &in_mesh_info](WId in_id) {
+            return {
+                in_id,
+                in_pipeline_id,
+                in_descriptor_id,
+                in_mesh_info
             };
         }
         );
@@ -165,14 +162,13 @@ std::vector<WId> & WVkRenderPipelinesManager::StagePipelines(EPipelineType in_ty
     return stage_pipelines_[in_type];
 }
 
-const std::vector<WVkPipelineBindingInfo> & WVkRenderPipelinesManager::PipelineBindings(WId pipeline_id) const
-{
-    assert(pipeline_bindings_.Contains(pipeline_id));
+// const std::vector<WVkPipelineBindingInfo> & WVkRenderPipelinesManager::PipelineBindings(WId pipeline_id) const
+// {
+//     assert(pipeline_bindings_.Contains(pipeline_id));
+//     return pipeline_bindings_.Get(pipeline_id);
+// }
 
-    return pipeline_bindings_.Get(pipeline_id);
-}
-
-void WVkRenderPipelinesManager::Destroy()
+void WVkRenderPipelinesManager::Clear()
 {
     pipeline_bindings_.Clear();
     render_pipelines_.Clear();
@@ -186,10 +182,6 @@ void WVkRenderPipelinesManager::Destroy()
 
     descriptor_sets_.Clear();
     descriptor_set_layouts_.Clear();
-
-    device_info_ = {};
-    render_pass_info_ = {};
-    descriptor_pool_info_ = {};
 }
 
 void WVkRenderPipelinesManager::Initialize() {
