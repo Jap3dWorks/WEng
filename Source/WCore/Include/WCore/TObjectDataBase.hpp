@@ -13,6 +13,7 @@ public:
     virtual void Remove(WId) =0;
     virtual void Clear() = 0;
     virtual void Get(WId, void* &) = 0;
+    virtual void Get(WId, const void*&) const = 0;
     virtual size_t Count()=0;
     virtual bool Contains(WId in_id);
 };
@@ -75,7 +76,15 @@ public:
         return objects_.Get(in_id);
     }
 
+    const T & Get(WId in_id) const {
+        return objects_.Get(in_id);
+    }
+
     void Get(WId in_id, void* & out_value) override final {
+        out_value = &objects_.Get(in_id);
+    }
+
+    void Get(WId in_id, const void*& out_value) const override final {
         out_value = &objects_.Get(in_id);
     }
 

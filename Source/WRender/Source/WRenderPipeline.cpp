@@ -1,92 +1,14 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
-#include <cassert>
-#include <stdexcept>
-#include <utility>
-#include <vulkan/vulkan_core.h>
 #include "WCore/WCore.h"
 #include "WVulkan/WVkRenderCore.h"
 #include "WVulkan/WVulkan.h"
+#include "WLog.h"
+
 #include <cassert>
-
-// WRenderPipeline
-// ---------------
-
-WVkRenderPipeline::WVkRenderPipeline() {}
-
-WVkRenderPipeline::WVkRenderPipeline(
-    const WVkDeviceInfo& in_device_info,
-    const WVkDescriptorSetLayoutInfo& in_descriptor_set_layout_info,
-    const WVkRenderPassInfo& in_render_pass_info,
-    const WVkRenderPipelineInfo& in_pipeline_info,
-    std::vector<WVkShaderStageInfo> in_shader_stages
-    ) :
-    device_info_(in_device_info),
-    render_pipeline_info_(in_pipeline_info)
-{
-    WLOGFNAME("Create a Render Pipeline, ID: " << in_pipeline_info.wid);
-
-    shader_stage_infos_ = in_shader_stages;
-    descriptor_set_layout_info = in_descriptor_set_layout_info;
-
-    WVulkan::Create(
-        render_pipeline_info_,
-        device_info_,
-        in_descriptor_set_layout_info,
-        in_render_pass_info,
-        shader_stage_infos_
-    );
-}
-
-WVkRenderPipeline::~WVkRenderPipeline()
-{
-    if(render_pipeline_info_.pipeline != VK_NULL_HANDLE)
-    {
-        WVulkan::Destroy(
-            render_pipeline_info_,
-            device_info_
-        );
-    }
-}
-
-WVkRenderPipeline::WVkRenderPipeline(WVkRenderPipeline && out_other)
-{
-    Move(std::move(out_other));
-}
-
-WVkRenderPipeline & WVkRenderPipeline::operator=(WVkRenderPipeline && out_other)
-{
-    Move(std::move(out_other));
-    return *this;
-}
-
-void WVkRenderPipeline::Move(WVkRenderPipeline && out_other)
-{
-    render_pipeline_info_ = std::move(out_other.render_pipeline_info_);
-    device_info_ = std::move(out_other.device_info_);
-    shader_stage_infos_ = std::move(shader_stage_infos_);
-
-    out_other.render_pipeline_info_ = {};
-    out_other.device_info_ = {};
-    out_other.shader_stage_infos_ = {};
-}
-
-WVkRenderPipelineInfo WVkRenderPipeline::RenderPipelineInfo() WCNOEXCEPT
-{
-    return render_pipeline_info_;
-}
-
-
-WId WVkRenderPipeline::WID() const
-{
-    return wid_;
-}
-
-void WVkRenderPipeline::WID(WId in_wid)
-{
-    assert(!wid_.IsValid());
-
-    wid_ = in_wid;
-}
+#include <cassert>
+// #include <stdexcept>
+#include <utility>
+#include <vulkan/vulkan_core.h>
 
 // WRenderPipelinesManager
 // -------------------
@@ -98,72 +20,82 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     WVkDeviceInfo device, WVkRenderPassInfo render_pass_info
 ) : device_info_(device), render_pass_info_(render_pass_info)
 {
-    WVulkan::Create(descriptor_pool_info_, device_info_);
+    Initialize();
 }
 
-WVkRenderPipeline & WVkRenderPipelinesManager::CreateRenderPipeline(
+WId WVkRenderPipelinesManager::CreateRenderPipeline(
     WVkRenderPipelineInfo in_render_pipeline_info,
-    std::vector<WVkShaderStageInfo> in_shader_stage_info,
-    const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info
-)
+    std::vector<WVkShaderStageInfo> in_shader_stages,
+    WId in_descriptor_set_layout_id
+    )
 {
-    assert(
-        in_render_pipeline_info.pipeline == VK_NULL_HANDLE &&
-        "render_pipeline_info.pipeline must be nullptr"
-    );
-    assert(
-        in_render_pipeline_info.pipeline_layout == VK_NULL_HANDLE &&
-        "render_pipeline_info.pipeline_layout must be nullptr"
-    );
+    assert(in_render_pipeline_info.pipeline == VK_NULL_HANDLE);
+    assert(in_render_pipeline_info.pipeline_layout == VK_NULL_HANDLE);
 
-    WId pid = pipelines_id_pool_.Generate();
-    render_pipelines_.emplace(
-        pid,
-        device_info_,
-        descriptor_set_layout_info,
-        render_pass_info_,
-        in_render_pipeline_info,
-        in_shader_stage_info);
+    auto& d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
 
-    pipeline_bindings_[pid] = {};
+    WId pid = render_pipelines_.Create(
+        [this,
+         &in_render_pipeline_info,
+         &d_set_layout,
+         &in_shader_stages](WId in_id) -> auto {
+            WVulkan::Create(
+                in_render_pipeline_info,
+                device_info_,
+                d_set_layout,
+                render_pass_info_,
+                in_shader_stages);
+            
+            in_render_pipeline_info.wid = in_id;
+            return in_render_pipeline_info;
+        }
+        );
 
-    return render_pipelines_[pid];
+    return pid;
 }
 
-WVkDescriptorSetLayoutInfo & WVkRenderPipelinesManager::CreateDescriptorSetLayout()
-{
+WId WVkRenderPipelinesManager::CreateDescriptorSetLayout() {
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
     WVulkan::AddDSLDefaultBindings(descriptor_set_layout_info);
 
-    WVulkan::Create(
-        descriptor_set_layout_info,
-        device_info_
-        );
+    return descriptor_set_layouts_.Create(
+        [this,
+         &descriptor_set_layout_info](WId _in_id) -> auto {
+        WVulkan::Create(
+            descriptor_set_layout_info,
+            device_info_
+            );
 
-    descriptor_set_layouts_.push_back(descriptor_set_layout_info);
-
-
-    return descriptor_set_layouts_.back();
+        descriptor_set_layout_info.wid = _in_id;
+        return descriptor_set_layout_info;
+    });
 }
 
-const WVkDescriptorSetInfo & WVkRenderPipelinesManager::CreateDescriptorSet(
-    const WVkDescriptorSetLayoutInfo & in_descriptor_set_layout_info
+WId WVkRenderPipelinesManager::CreateDescriptorSet(
+    WId in_descriptor_set_layout_id
     )
 {
+    auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
     WVkDescriptorSetInfo descriptor_set_info;
 
-    WVulkan::Create(
-        descriptor_set_info,
-        device_info_,
-        in_descriptor_set_layout_info,
-        descriptor_pool_info_
+    return descriptor_sets_.Create(
+        [this,
+         &descriptor_set_info,
+         &d_set_layout]
+        (WId in_id) {
+            WVulkan::Create(
+                descriptor_set_info,
+                device_info_,
+                d_set_layout,
+                descriptor_pool_info_
+                );
+            
+            descriptor_set_info.wid = in_id;
+            return descriptor_set_info;
+        }
         );
-
-    descriptor_sets_.push_back(descriptor_set_info);
-
-    return descriptor_sets_.back();
 }
 
 WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
@@ -173,32 +105,42 @@ WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
         WVkRenderPipelinesManager && other
-    )
+    ) noexcept
 {
     Move(std::move(other));
 }
 
 
-WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other)
+WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
 {
     Move(std::move(other));
 
     return *this;
 }
 
-void WVkRenderPipelinesManager::AddBinding(
+WId WVkRenderPipelinesManager::AddBinding(
     WId in_pipeline_id,
-    const WVkDescriptorSetInfo & in_descriptor_set_info,
+    WId in_descriptor_id,
     const WVkMeshInfo & in_mesh_info
     )
 {
-    assert(pipeline_bindings_.contains(in_pipeline_id) && "Not contains pipeline id.");
-    
-    // render_pipelines_[in_pipeline_id]
-    // CreateDescriptorSet()
+    assert(pipeline_bindings_.Contains(in_pipeline_id));
 
-    pipeline_bindings_[in_pipeline_id].push_back(
-        {in_descriptor_set_info, in_mesh_info}
+    // TODO: Rethink this
+
+    return pipeline_bindings_.Create(
+        [&in_pipeline_id,
+         &in_descriptor_id,
+         &in_mesh_info
+            ](WId in_id) {
+            return { {
+                    in_id,
+                    in_pipeline_id,
+                    in_descriptor_id,
+                    in_mesh_info
+                }
+            };
+        }
         );
 }
 
@@ -206,12 +148,13 @@ void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
 {
     device_info_ = std::move(other.device_info_);
     render_pass_info_ = std::move(other.render_pass_info_);
-    stage_pipelines_ = std::move(other.stage_pipelines_);
-    pipeline_bindings_ = std::move(other.pipeline_bindings_);
     descriptor_pool_info_ = std::move(other.descriptor_pool_info_);
-    descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
 
-    pipelines_count_ = std::move(other.pipelines_count_);
+    render_pipelines_ = std::move(other.render_pipelines_);
+    descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+    descriptor_sets_ = std::move(other.descriptor_sets_);
+    pipeline_bindings_ = std::move(other.pipeline_bindings_);
+    stage_pipelines_ = std::move(other.stage_pipelines_);
 
     other.device_info_ = {};
     other.render_pass_info_ = {};
@@ -224,15 +167,15 @@ std::vector<WId> & WVkRenderPipelinesManager::StagePipelines(EPipelineType in_ty
 
 const std::vector<WVkPipelineBindingInfo> & WVkRenderPipelinesManager::PipelineBindings(WId pipeline_id) const
 {
-    assert(pipeline_bindings_.contains(pipeline_id));
+    assert(pipeline_bindings_.Contains(pipeline_id));
 
-    return pipeline_bindings_.find(pipeline_id)->second;
+    return pipeline_bindings_.Get(pipeline_id);
 }
 
 void WVkRenderPipelinesManager::Destroy()
 {
-    pipeline_bindings_.clear();
-    render_pipelines_.clear();
+    pipeline_bindings_.Clear();
+    render_pipelines_.Clear();
 
     if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
     {
@@ -241,19 +184,29 @@ void WVkRenderPipelinesManager::Destroy()
         descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
     }
 
-    descriptor_sets_.clear();
-
-    for(auto & descriptor_set_layout : descriptor_set_layouts_)
-    {
-        WVulkan::Destroy(
-            descriptor_set_layout,
-            device_info_
-            );
-    }
-
-    descriptor_set_layouts_.clear();
+    descriptor_sets_.Clear();
+    descriptor_set_layouts_.Clear();
 
     device_info_ = {};
     render_pass_info_ = {};
     descriptor_pool_info_ = {};
+}
+
+void WVkRenderPipelinesManager::Initialize() {
+
+    WVulkan::Create(descriptor_pool_info_, device_info_);
+
+    render_pipelines_.SetDestroyFn([this](auto & p) {
+        WVulkan::Destroy(
+            p,
+            device_info_
+            );
+    });
+
+    descriptor_set_layouts_.SetDestroyFn([this](auto & d) {
+        WVulkan::Destroy(
+            d,
+            device_info_
+            );
+    });
 }

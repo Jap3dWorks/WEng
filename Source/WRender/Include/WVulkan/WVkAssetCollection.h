@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <cassert>
-#include <set>
 
 #include "WCore/WCore.h"
 #include "WCore/TRef.h"

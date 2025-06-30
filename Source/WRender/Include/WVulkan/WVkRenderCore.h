@@ -42,7 +42,8 @@ struct WVkUBOStruct
 };
 
 struct WVkDeviceInfo{
-    WId wid;
+    WId wid{0};
+
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
 
@@ -58,7 +59,8 @@ struct WVkDeviceInfo{
 
 struct WVkWindowInfo
 {
-    WId wid;
+    WId wid{0};
+
     std::string title {"WEngine"};
     uint32_t width {800};
     uint32_t height {600};
@@ -71,19 +73,22 @@ struct WVkWindowInfo
 
 struct WVkInstanceInfo
 {
-    WId wid;
+    WId wid{0};
+
     VkInstance instance {nullptr};
 };
 
 struct WVkSurfaceInfo
 {
-    WId wid;
+    WId wid{0};
+
     VkSurfaceKHR surface{nullptr};
 };
 
 struct WVkRenderDebugInfo
 {
-    WId wid;
+    WId wid{0};
+    
     bool enable_validation_layers{false};
     std::vector<const char*> validation_layers{
         "VK_LAYER_KHRONOS_validation",
@@ -95,13 +100,15 @@ struct WVkRenderDebugInfo
 
 struct WVkCommandPoolInfo
 {
-    WId wid;
+    WId wid{0};
+    
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
 struct WVkTextureInfo
 {
-    WId id;
+    WId id{0};
+    
     VkImage image{VK_NULL_HANDLE};
     VkDeviceMemory image_memory{VK_NULL_HANDLE};
     VkImageView image_view{VK_NULL_HANDLE};
@@ -115,7 +122,7 @@ struct WVkTextureInfo
  */
 struct WVkShaderStageInfo
 {
-    WId id;
+    WId id{0};
 
     std::vector<char> code;
     EShaderType type;
@@ -128,13 +135,13 @@ struct WVkShaderStageInfo
 
 struct WVkRenderPassInfo
 {
-    WId wid;
+    WId wid{0};
     VkRenderPass render_pass{nullptr};
 };
 
 struct WVkSwapChainInfo
 {
-    WId wid;
+    WId wid{0};
     VkFormat swap_chain_image_format;
     VkExtent2D swap_chain_extent;
     
@@ -156,7 +163,7 @@ struct WVkSwapChainInfo
 
 struct WVkDescriptorSetLayoutInfo
 {
-    WId wid;
+    WId wid{0};
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
     VkDescriptorSetLayout descriptor_set_layout{VK_NULL_HANDLE};
 };
@@ -167,7 +174,7 @@ struct WVkDescriptorSetLayoutInfo
 */
 struct WVkDescriptorPoolInfo
 {
-    WId wid;
+    WId wid{0};
     std::vector<VkDescriptorPoolSize> pool_sizes {};
     VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
 };
@@ -180,7 +187,7 @@ struct WVkDescriptorPoolInfo
 */
 struct WVkDescriptorSetInfo
 {
-    WId wid;
+    WId wid{0};
     // The len of this vector is the number of frames in flight
     std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };
@@ -200,7 +207,9 @@ struct WVkMeshInfo
  */
 struct WVkPipelineBindingInfo
 {
-    WVkDescriptorSetInfo descriptor {};
+    WId wid{0};
+    WId render_pipeline_id{};
+    WId descriptor_set_id {};
     WVkMeshInfo mesh_info{};
 };
 
