@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DllDef.h"
-#include "WCore/CoreMacros.h"
+#include "WCore/CoreMacros.hpp"
 
 #include <string>
 #include <functional>

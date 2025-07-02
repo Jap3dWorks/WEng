@@ -3,9 +3,9 @@
 #pragma once
 
 #include "WCore/WCore.h"
-#include "WCore/CoreMacros.h"
+#include "WCore/CoreMacros.hpp"
 #include "WVulkan/WVkRenderConfig.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkAssetCollection.h"
@@ -57,8 +57,9 @@ public:
 
     void AddPipelineBinding(
         WId pipeline_id,
-        const WVkDescriptorSetInfo & in_descriptor_set_info,
-        WId in_mesh_id);
+        WId descriptor_set_id,
+        WId in_mesh_id
+        );
 
 private:
 

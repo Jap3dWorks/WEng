@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "WCore/CoreMacros.h"
+#include "WCore/CoreMacros.hpp"
 #include "WCore/WCore.h"
 #include "WCore/WIdPool.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
@@ -17,8 +17,6 @@
 */
 class WRENDER_API WVkRenderPipelinesManager
 {
-
-    using WStagePipelineMaps = std::unordered_map<EPipelineType, std::vector<WId>>;
 
 public:
 
@@ -61,9 +59,15 @@ public:
         const WVkMeshInfo & in_mesh_info
         );
 
-    WNODISCARD std::vector<WId> & StagePipelines(EPipelineType in_type) WNOEXCEPT;
+    const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id);
+    const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(WId in_id);
+    const WVkDescriptorSetInfo & DescriptorSet(WId in_id);
+    const WVkPipelineBindingInfo & Binding(WId in_id);
 
-    WNODISCARD const std::vector<WVkPipelineBindingInfo> & PipelineBindings(WId in_pipeline_id) const;
+    void ForEachPipeline(EPipelineType in_type, TFunction<void(WId)> in_predicate);
+    void ForEachPipeline(EPipelineType in_type, TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
+    void ForEachBinding(WId in_pipeline_id, TFunction<void(WId)> in_predicate);
+    void ForEachBinding(WId in_pipeline_id, TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
     void Clear();
 
@@ -77,11 +81,13 @@ private:
     TObjectDataBase<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};
     TObjectDataBase<WVkDescriptorSetInfo> descriptor_sets_{};
 
-    // TObjectDataBase<WVkPipelineBindingInfo> pipeline_bindings_{};
+    TObjectDataBase<WVkPipelineBindingInfo> bindings_{};
 
-    std::unordered_map<WId, std::vector<WVkPipelineBindingInfo>> pb_{};
+    /** Relation between each pipeline and its bindings*/
+    std::unordered_map<WId, std::vector<WId>> pipeline_bindings_{};
 
-    WStagePipelineMaps stage_pipelines_ {};
+    /** Pipelines by grouped by PipelineType*/
+    std::unordered_map<EPipelineType, std::vector<WId>> stage_pipelines_{};
 
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
 

@@ -2,7 +2,7 @@
 
 #include "IRenderResources.hpp"
 #include "WVulkan/WVkAssetCollection.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 
 class WVkRenderResources : public IRenderResources {
 

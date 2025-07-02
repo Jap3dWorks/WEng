@@ -1,8 +1,8 @@
 #pragma once
 
-#include "WCore/CoreMacros.h"
+#include "WCore/CoreMacros.hpp"
 #include "WCore/WCore.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 
 class WRENDER_API WVkRenderCommandPool
 {

@@ -208,6 +208,7 @@ struct WVkMeshInfo
 struct WVkPipelineBindingInfo
 {
     WId wid{0};
+
     WId render_pipeline_id{};
     WId descriptor_set_id {};
     WVkMeshInfo mesh_info{};

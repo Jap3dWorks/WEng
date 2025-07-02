@@ -3,9 +3,10 @@
 #include "WVulkan/WVulkan.h"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkRenderConfig.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
+#include "WLog.h"
 
 #include <cstdint>
 #include <stdexcept>
@@ -239,7 +240,21 @@ void WRender::Draw() {
     // WVkRenderResources * render_resources = static_cast<WVkRenderResources*>(render_resources_.get());
 
     // std::vector<WVkMeshInfo> mesh_bindings={}
-    
+
+    // render_pipelines_manager_.ForEachPipeline(
+    //     EPipelineType::Graphics,
+    //     [this](WId pid){
+    //         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
+
+    //         WVulkan::RecordRenderCommandBuffer(
+    //             render_command_buffer_.command_buffers[current_frame],
+    //             render_pass_info_,
+    //             swap_chain_info_,
+    //             render_pipeline
+    //             );
+    //     }
+    //     );
+
     for(WVkRenderPipeline & render_pipeline :
             render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
     {
@@ -322,7 +337,7 @@ void WRender::Draw() {
 }
 
 void WRender::RecreateSwapChain() {
-    WLOG("RECREATE SWAP CHAIN!");
+    WLOGFNAME("RECREATE SWAP CHAIN!");
     
     int width=0, height=0;
     glfwGetFramebufferSize(window_info_.window, &width, &height);
@@ -366,7 +381,7 @@ TRef<IRenderResources> WRender::RenderResources() {
  
 void WRender::AddPipelineBinding(
     WId pipeline_id,
-    const WVkDescriptorSetInfo & in_descriptor_set_info,
+    WId descriptor_set_id,
     WId in_mesh_id
     ) {
     
@@ -375,7 +390,7 @@ void WRender::AddPipelineBinding(
     
     render_pipelines_manager_.AddBinding(
         pipeline_id,
-        in_descriptor_set_info,
+        descriptor_set_id,
         resources->StaticMeshInfo(in_mesh_id)
         );
 }

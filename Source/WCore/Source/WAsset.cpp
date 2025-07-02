@@ -1,4 +1,4 @@
-#include "WAssets/WAsset.h"
+#include "WAssets/WAsset.hpp"
 
 
 // WAsset

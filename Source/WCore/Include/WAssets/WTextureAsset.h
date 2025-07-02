@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.h"
-#include "WAssets/WAsset.h"
+#include "WAssets/WAsset.hpp"
 #include "WStructs/WTextureStructs.h"
 #include <memory>
 

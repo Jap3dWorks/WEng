@@ -11,7 +11,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include "WStructs/WTextureStructs.h"
 #include "WStructs/WGeometryStructs.h"
 #include "WVulkan/WVkRenderConfig.h"

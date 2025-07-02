@@ -1,7 +1,8 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WCore/WCore.h"
-#include "WVulkan/WVkRenderCore.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.h"
+#include "WVulkan/WVkRenderCore.hpp"
 #include "WLog.h"
 
 #include <cassert>
@@ -50,6 +51,9 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
             return in_render_pipeline_info;
         }
         );
+
+    pipeline_bindings_[pid] = {};
+    stage_pipelines_[in_render_pipeline_info.type].push_back(pid);
 
     return pid;
 }
@@ -124,13 +128,11 @@ WId WVkRenderPipelinesManager::AddBinding(
     )
 {
     assert(pipeline_bindings_.Contains(in_pipeline_id));
-
-    // pipeline_bindings_[in_pipeline_id].push_back({0, in_pipeline_id, in_descriptor_id, in_mesh_info});
-
-    return pipeline_bindings_.Create(
+ 
+    WId result = bindings_.Create(
         [&in_pipeline_id,
          &in_descriptor_id,
-         &in_mesh_info](WId in_id) {
+         &in_mesh_info](WId in_id) -> WVkPipelineBindingInfo {
             return {
                 in_id,
                 in_pipeline_id,
@@ -139,6 +141,10 @@ WId WVkRenderPipelinesManager::AddBinding(
             };
         }
         );
+
+    pipeline_bindings_[in_pipeline_id].push_back(result);
+
+    return result;
 }
 
 void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
@@ -150,7 +156,7 @@ void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
     render_pipelines_ = std::move(other.render_pipelines_);
     descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
     descriptor_sets_ = std::move(other.descriptor_sets_);
-    pipeline_bindings_ = std::move(other.pipeline_bindings_);
+    bindings_ = std::move(other.bindings_);
     stage_pipelines_ = std::move(other.stage_pipelines_);
 
     other.device_info_ = {};
@@ -162,15 +168,9 @@ std::vector<WId> & WVkRenderPipelinesManager::StagePipelines(EPipelineType in_ty
     return stage_pipelines_[in_type];
 }
 
-// const std::vector<WVkPipelineBindingInfo> & WVkRenderPipelinesManager::PipelineBindings(WId pipeline_id) const
-// {
-//     assert(pipeline_bindings_.Contains(pipeline_id));
-//     return pipeline_bindings_.Get(pipeline_id);
-// }
-
 void WVkRenderPipelinesManager::Clear()
 {
-    pipeline_bindings_.Clear();
+    bindings_.Clear();
     render_pipelines_.Clear();
 
     if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
@@ -201,4 +201,5 @@ void WVkRenderPipelinesManager::Initialize() {
             device_info_
             );
     });
+
 }
