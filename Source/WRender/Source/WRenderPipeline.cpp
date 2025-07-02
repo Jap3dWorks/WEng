@@ -1,9 +1,9 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
-#include "WLog.h"
+#include "WLog.hpp"
 
 #include <cassert>
 #include <cassert>

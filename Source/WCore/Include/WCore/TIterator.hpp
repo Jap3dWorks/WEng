@@ -2,51 +2,93 @@
 
 #include <utility>
 
-template<typename T>
+template<typename ValueType, typename IterType>
 class TIterator {
 public:
 
-    constexpr TIterator(T* in_begin, T* in_end) : begin_(in_begin), end_(in_end), ptr_(in_begin) {}
+    constexpr TIterator(IterType in_begin, IterType in_end) :
+        begin_(in_begin), end_(in_end), current_(in_begin) {}
 
     ~TIterator() = default;
 
-    TIterator(const TIterator & other) noexcept {
+    constexpr TIterator(const TIterator & other) noexcept {
         Copy(other);
     }
 
-    TIterator(TIterator && other) noexcept {
+    constexpr TIterator(TIterator && other) noexcept {
         Move(other);
     }
 
-    constexpr T* begin() const noexcept {return begin;}
-    constexpr T* end() const noexcept {return end;}
+    constexpr TIterator & operator=(const TIterator & other) noexcept {
+        Copy(other);
+        return *this;
+    }
 
-    constexpr const T* cbegin() const noexcept {return begin;}
-    constexpr const T* cend() const noexcept {return end;}
+    constexpr TIterator & operator=(TIterator && other) noexcept {
+        Move(other);
+        return *this;
+    }
 
-    constexpr T& operator*() {return *ptr_;}
-    constexpr const T& operator*() const {return *ptr_; }
+    constexpr TIterator begin() const noexcept {return {begin_, end_}; }
+    constexpr TIterator end() const noexcept {return {end_, end_}; }
 
-    constexpr TIterator& operator++() {ptr_++; return *this;}
-    // constexpr TIterator& operator++() {}
+    constexpr ValueType& operator*() {return *current_;}
+    constexpr const ValueType& operator*() const {return *current_; }
 
+    constexpr TIterator& operator++() noexcept {current_++; return *this;}
+    constexpr TIterator operator++(int) {
+        TIterator r = *this;
+        operator++();
+        return r;
+    }
+
+    constexpr ValueType& operator[](int in_value) const noexcept {
+        return current_[in_value];
+    }
+
+    constexpr TIterator operator+(int in_value) const noexcept {
+        return {current_ + in_value, end_};
+    }
+
+    constexpr TIterator operator-(int in_value) const noexcept {
+        return {current_ - in_value, end_};
+    }
+
+    constexpr bool operator==(const TIterator & other) noexcept {
+        return current_ == other.current_;
+    }
+
+    constexpr TIterator& operator+=(int in_value) noexcept {
+        current_ += in_value;
+        return *this;
+    }
+
+    constexpr TIterator& operator-=(int in_value) noexcept {
+        current_ -= in_value;
+        return *this;
+    }
 
 private:
 
     constexpr void Copy(const TIterator & other) noexcept {
-        ptr_ = other.ptr_;
+        current_ = other.current_;
         begin_ = other.begin_;
         end_ = other.end_;        
     }
 
-    void Move(TIterator && other) noexcept {
-        ptr_ = std::move(other.ptr_);
+    constexpr void Move(TIterator && other) noexcept {
+        current_ = std::move(other.current_);
         begin_ = std::move(other.begin_);
         end_ = std::move(other.end_);
     }
 
-    T* ptr_{nullptr};
-    T* begin_{nullptr};
-    T* end_{nullptr};
+    IterType current_{nullptr};
+    IterType begin_{nullptr};
+    IterType end_{nullptr};
   
 };
+
+template<typename T>
+using TIteratorPtr = TIterator<T, T*>;
+
+

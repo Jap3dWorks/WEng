@@ -5,9 +5,9 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WCore/WIdPool.h"
+#include "WCore/WIdPool.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 
 // Manage the aquirement and release of texture or mesh buffer and stuffs like that.
 

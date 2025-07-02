@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include "WCore/CoreMacros.hpp"
 #include "WCore/WCore.hpp"
-#include "WCore/WIdPool.h"
+#include "WCore/TIterator.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
-#include <cstdint>
+
 #include <vector>
 #include <unordered_map>
 #include "WCore/TObjectDataBase.hpp"
@@ -69,6 +68,20 @@ public:
     void ForEachBinding(WId in_pipeline_id, TFunction<void(WId)> in_predicate);
     void ForEachBinding(WId in_pipeline_id, TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
+    TIteratorPtr<WId> IteratePipelines(EPipelineType in_pipeline_type) {
+        return {
+            &(*stage_pipelines_[in_pipeline_type].begin()),
+            &(*stage_pipelines_[in_pipeline_type].end())
+        };
+    }
+
+    TIteratorPtr<WId> IterateBindings(WId in_pipeline_id) {
+        return {
+            &(*pipeline_bindings_[in_pipeline_id].begin()),
+            &(*pipeline_bindings_[in_pipeline_id].end())
+        };
+    }
+
     void Clear();
 
 private:
@@ -93,7 +106,6 @@ private:
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
-    
 
 };
 

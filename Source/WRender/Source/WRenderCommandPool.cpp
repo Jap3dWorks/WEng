@@ -1,6 +1,6 @@
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkRenderCore.hpp"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
 

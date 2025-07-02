@@ -1,5 +1,5 @@
 #include "WVulkan/WVkAssetCollection.h"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 
 // WVkTextureCollection
 // --------------------

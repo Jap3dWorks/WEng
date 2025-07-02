@@ -1,4 +1,4 @@
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 
 #include <iostream>
 #include <GLFW/glfw3.h>

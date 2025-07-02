@@ -1,5 +1,5 @@
 #include "WCore/WCore.hpp"
-#include "WLog.h"
+#include "WLog.hpp"
 #include <cassert>
 
 // WId

@@ -1,7 +1,7 @@
 #include "WSpacers.h"
 
 #include "WEngine.h"
-#include "WLog.h"
+#include "WLog.hpp"
 #include "WRender.hpp"
 #include "WCore/WCore.hpp"
 #include "WImporters.h"
@@ -12,7 +12,7 @@
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WStructs/WGeometryStructs.h"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 #include "IRenderResources.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN

@@ -1,12 +1,12 @@
 #include "WRender.hpp"
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVulkan.h"
+#include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
-#include "WLog.h"
+#include "WLog.hpp"
 
 #include <cstdint>
 #include <stdexcept>
@@ -255,19 +255,25 @@ void WRender::Draw() {
     //     }
     //     );
 
-    for(WVkRenderPipeline & render_pipeline :
-            render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
-    {
+    for(auto pit : render_pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
+        const WVkRenderPipelineInfo & render_pipeline = render_pipelines_manager_.RenderPipelineInfo(pit);
+
+
+    // for(WVkRenderPipeline & render_pipeline :
+    //         render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
+    // {
 
         WLOGFNAME("Render Pipeline: " << render_pipeline.WID());
 
-        const std::vector<WVkPipelineBindingInfo> & bindings =
-            render_pipelines_manager_.PipelineBindings(render_pipeline.WID());
+        // const std::vector<WVkPipelineBindingInfo> & bindings =
+        //     render_pipelines_manager_.PipelineBindings(pit);
 
         // mesh_bindings_.clear
         // for (auto & b : bindings) {
         //     render_resources->StaticMeshInfo(b.mesh_id);
         // }
+
+        
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
 

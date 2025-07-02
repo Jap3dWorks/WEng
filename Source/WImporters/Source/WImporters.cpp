@@ -1,5 +1,5 @@
 #include "WImporters.h"
-#include "WLog.h"
+#include "WLog.hpp"
 
 #include <utility>
 #include <vector>
