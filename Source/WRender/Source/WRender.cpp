@@ -1,5 +1,5 @@
 #include "WRender.hpp"
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WVulkan/WVulkan.h"
 #include "WVulkan/WVkRenderCommandPool.h"
 #include "WVulkan/WVkRenderConfig.h"

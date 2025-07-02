@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WCore/WCore.h"
-#include "WCore/TOptionalRef.h"
+#include "WCore/WCore.hpp"
+#include "WCore/TOptionalRef.hpp"
 
 #include <utility>
 #include <vector>

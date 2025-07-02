@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/CoreMacros.hpp"
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 
 class WRENDER_API WVkRenderCommandPool

@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 
 /**
  * @brief Interface for all serializable objects.

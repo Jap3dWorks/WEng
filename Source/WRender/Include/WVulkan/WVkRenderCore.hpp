@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include <cstdint>
 #include <vulkan/vulkan.h>
 #include "WVulkan/WVkRenderConfig.h"

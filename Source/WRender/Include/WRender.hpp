@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WCore/CoreMacros.hpp"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.hpp"

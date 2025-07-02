@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include <vector>
 #include <memory>
 #include <unordered_map>

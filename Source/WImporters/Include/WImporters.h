@@ -1,12 +1,12 @@
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 
 #include <vector>
 #include <memory>
 
-#include "WCore/ICloneable.h"
-#include "WCore/TRef.h"
+#include "WCore/ICloneable.hpp"
+#include "WCore/TRef.hpp"
 
 class WAsset;
 class WObjectManager;

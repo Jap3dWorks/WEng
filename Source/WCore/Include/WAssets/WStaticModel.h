@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WAssets/WAsset.hpp"
 #include "WStructs/WGeometryStructs.h"
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 
 class WENGINE_API WLevelRegister {
     

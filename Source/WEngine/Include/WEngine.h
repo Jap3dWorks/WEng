@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WCore/WCore.h"
-#include "WCore/TRef.h"
+#include "WCore/WCore.hpp"
+#include "WCore/TRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
 
 #include <memory>

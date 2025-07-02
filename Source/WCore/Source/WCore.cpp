@@ -1,4 +1,4 @@
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WLog.h"
 #include <cassert>
 

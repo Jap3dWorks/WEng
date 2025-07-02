@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 
 /**
  * Base class for all actors in the engine. 

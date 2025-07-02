@@ -3,7 +3,7 @@
 #include "WEngine.h"
 #include "WLog.h"
 #include "WRender.hpp"
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include "WImporters.h"
 #include "WImportersRegister.h"
 #include "WActors/WActor.hpp"

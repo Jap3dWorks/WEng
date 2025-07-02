@@ -1,5 +1,5 @@
 #pragma once
 
 #include <exception>
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WCore.h"
+#include "WCore/WCore.hpp"
 #include <string>
 #include "WSerialize/ISerializable.hpp"
 

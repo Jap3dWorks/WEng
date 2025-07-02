@@ -1,5 +1,5 @@
 #include "WImportersRegister.h"
-#include "WCore/TOptionalRef.h"
+#include "WCore/TOptionalRef.hpp"
 
 #include "WImporters.h"
 

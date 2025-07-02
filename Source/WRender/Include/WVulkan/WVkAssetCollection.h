@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <cassert>
 
-#include "WCore/WCore.h"
-#include "WCore/TRef.h"
+#include "WCore/WCore.hpp"
+#include "WCore/TRef.hpp"
 #include "WCore/WIdPool.h"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.h"

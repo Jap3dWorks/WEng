@@ -1,8 +1,8 @@
 #pragma once
 
-#include "WCore/WCore.h"
-#include "WCore/WIdPool.h"
-#include "WCore/TFunction.h"
+#include "WCore/WCore.hpp"
+#include "WCore/WIdPool.hpp"
+#include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 
 class IObjectDataBase {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/TFunction.h"
+#include "WCore/TFunction.hpp"
 
 struct NullOptionalRef_t
 {
