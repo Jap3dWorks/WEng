@@ -58,6 +58,10 @@ public:
         return current_ == other.current_;
     }
 
+    constexpr bool operator!=(const TIterator & other) noexcept {
+        return current_ != other.current_;
+    }
+
     constexpr TIterator& operator+=(int in_value) noexcept {
         current_ += in_value;
         return *this;

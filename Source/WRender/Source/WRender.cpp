@@ -203,7 +203,7 @@ void WRender::Draw() {
     vkWaitForFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fences[current_frame],
+        &in_flight_fence_.fences[frame_index],
         VK_TRUE,
         UINT64_MAX
         );
@@ -214,7 +214,7 @@ void WRender::Draw() {
         device_info_.vk_device,
         swap_chain_info_.swap_chain,
         UINT64_MAX,
-        image_available_semaphore_.semaphores[current_frame],
+        image_available_semaphore_.semaphores[frame_index],
         VK_NULL_HANDLE,
         &image_index
         );
@@ -230,68 +230,30 @@ void WRender::Draw() {
     vkResetFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fences[current_frame]
+        &in_flight_fence_.fences[frame_index]
         );
 
     VkSemaphore signal_semaphores[] = {
-        render_finished_semaphore_.semaphores[current_frame]
+        render_finished_semaphore_.semaphores[frame_index]
     };
 
-    // WVkRenderResources * render_resources = static_cast<WVkRenderResources*>(render_resources_.get());
-
-    // std::vector<WVkMeshInfo> mesh_bindings={}
-
-    // render_pipelines_manager_.ForEachPipeline(
-    //     EPipelineType::Graphics,
-    //     [this](WId pid){
-    //         vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
-
-    //         WVulkan::RecordRenderCommandBuffer(
-    //             render_command_buffer_.command_buffers[current_frame],
-    //             render_pass_info_,
-    //             swap_chain_info_,
-    //             render_pipeline
-    //             );
-    //     }
-    //     );
-
     for(auto pit : render_pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
-        const WVkRenderPipelineInfo & render_pipeline = render_pipelines_manager_.RenderPipelineInfo(pit);
-
-
-    // for(WVkRenderPipeline & render_pipeline :
-    //         render_pipelines_manager_.RenderPipelines()[EPipelineType::Graphics])
-    // {
 
         WLOGFNAME("Render Pipeline: " << render_pipeline.WID());
 
-        // const std::vector<WVkPipelineBindingInfo> & bindings =
-        //     render_pipelines_manager_.PipelineBindings(pit);
+        vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index], 0);
 
-        // mesh_bindings_.clear
-        // for (auto & b : bindings) {
-        //     render_resources->StaticMeshInfo(b.mesh_id);
-        // }
-
-        
-
-        vkResetCommandBuffer(render_command_buffer_.command_buffers[current_frame], 0);
-
-        WVulkan::RecordRenderCommandBuffer(
-            render_command_buffer_.command_buffers[current_frame],
-            render_pass_info_,
-            swap_chain_info_,
-            render_pipeline.RenderPipelineInfo(),
-            bindings,
-            image_index,
-            current_frame
+        RecordRenderCommandBuffer(
+            pit,
+            frame_index,
+            image_index
             );
 
         VkSubmitInfo submit_info;
         submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submit_info.pNext = nullptr;
 
-        VkSemaphore wait_semaphores[] = { image_available_semaphore_.semaphores[current_frame] };
+        VkSemaphore wait_semaphores[] = { image_available_semaphore_.semaphores[frame_index] };
         VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
         submit_info.waitSemaphoreCount = 1;
@@ -299,7 +261,7 @@ void WRender::Draw() {
         submit_info.pWaitDstStageMask = wait_stages;
 
         submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[current_frame];
+        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index];
 
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores = signal_semaphores;
@@ -308,7 +270,7 @@ void WRender::Draw() {
                 device_info_.vk_graphics_queue,
                 1,
                 &submit_info,
-                in_flight_fence_.fences[current_frame]) != VK_SUCCESS)
+                in_flight_fence_.fences[frame_index]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to submit draw command buffer");
         }
@@ -338,8 +300,7 @@ void WRender::Draw() {
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
-
+    frame_index = (frame_index + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void WRender::RecreateSwapChain() {
@@ -400,3 +361,139 @@ void WRender::AddPipelineBinding(
         resources->StaticMeshInfo(in_mesh_id)
         );
 }
+
+void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index)
+{
+    const WVkRenderPipelineInfo & render_pipeline =
+        render_pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
+
+    VkCommandBufferBeginInfo begin_info{};
+    
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = 0;
+    begin_info.pInheritanceInfo = nullptr;
+
+    if (vkBeginCommandBuffer(
+            render_command_buffer_.command_buffers[in_frame_index],
+            &begin_info
+            ) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to begin recording command buffer!");
+    }
+
+    VkRenderPassBeginInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_info.renderPass =  render_pass_info_.render_pass;
+    render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
+    render_pass_info.renderArea.offset = {0,0};
+    render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;
+
+    std::array<VkClearValue, 2> clear_colors;
+    
+    float r = 0.5;
+    float g = 0.5;
+    float b = 0.5;
+
+    clear_colors[0].color = {{
+            r,
+            g,
+            b,
+            1.f}};
+
+    clear_colors[1].depthStencil = {1.f, 0};
+
+    render_pass_info.clearValueCount = clear_colors.size();
+    render_pass_info.pClearValues = clear_colors.data();
+
+    vkCmdBeginRenderPass(
+        // in_commandbuffer,
+        render_command_buffer_.command_buffers[in_frame_index],
+        &render_pass_info,
+        VK_SUBPASS_CONTENTS_INLINE
+        );
+
+    vkCmdBindPipeline(
+        // in_commandbuffer,
+        render_command_buffer_.command_buffers[in_frame_index],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        render_pipeline.pipeline
+        );
+
+    VkViewport viewport{};
+    viewport.x = 0.f;
+    viewport.y = 0.f;
+    viewport.width = static_cast<float>(swap_chain_info_.swap_chain_extent.width);
+    viewport.height = static_cast<float>(swap_chain_info_.swap_chain_extent.height);
+    viewport.minDepth = 0.f;
+    viewport.maxDepth = 1.f;
+    vkCmdSetViewport(
+        // in_commandbuffer,
+        render_command_buffer_.command_buffers[in_frame_index],
+        0, 1,
+        &viewport
+        );
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = swap_chain_info_.swap_chain_extent;
+    vkCmdSetScissor(
+        // in_commandbuffer,
+        render_command_buffer_.command_buffers[in_frame_index],
+        0, 1,
+        &scissor
+        );
+
+    for (auto & bid : render_pipelines_manager_.IterateBindings(in_pipeline_id))
+    {
+
+        auto& binding = render_pipelines_manager_.Binding(bid);
+        
+        auto& descriptor = render_pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
+
+        VkBuffer vertex_buffers[] = {binding.mesh_info.vertex_buffer};
+        VkDeviceSize offsets[] = {0};
+        
+        vkCmdBindVertexBuffers(
+            // in_commandbuffer,
+            render_command_buffer_.command_buffers[in_frame_index],
+            0,
+            1,
+            vertex_buffers,
+            offsets
+            );
+
+        vkCmdBindIndexBuffer(
+            // in_commandbuffer,
+            render_command_buffer_.command_buffers[in_frame_index],
+            binding.mesh_info.index_buffer,
+            0,
+            VK_INDEX_TYPE_UINT32
+            );
+
+        vkCmdBindDescriptorSets(
+            render_command_buffer_.command_buffers[in_frame_index],
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            render_pipeline.pipeline_layout,
+            0,
+            1,
+            &descriptor.descriptor_sets[in_frame_index],
+            0,
+            nullptr
+            );
+
+        vkCmdDrawIndexed(
+            render_command_buffer_.command_buffers[in_frame_index],
+            binding.mesh_info.index_count,
+            1,
+            0,
+            0,
+            0
+            );
+    }
+
+    vkCmdEndRenderPass(render_command_buffer_.command_buffers[in_frame_index]);
+
+    if(vkEndCommandBuffer(render_command_buffer_.command_buffers[in_frame_index]) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to record command buffer!");
+    }
+}
+

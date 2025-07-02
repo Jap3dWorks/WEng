@@ -1,17 +1,17 @@
-#include "WSpacers.h"
+#include "WSpacers.hpp"
 
-#include "WEngine.h"
+#include "WEngine.hpp"
 #include "WLog.hpp"
 #include "WRender.hpp"
 #include "WCore/WCore.hpp"
-#include "WImporters.h"
-#include "WImportersRegister.h"
+#include "WImporters.hpp"
+#include "WImportersRegister.hpp"
 #include "WActors/WActor.hpp"
-#include "WAssets/WStaticModel.h"
-#include "WAssets/WTextureAsset.h"
+#include "WAssets/WStaticModel.hpp"
+#include "WAssets/WTextureAsset.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
-#include "WStructs/WGeometryStructs.h"
+#include "WStructs/WGeometryStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include "IRenderResources.hpp"
 
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 
         // Render Pipeline
 
-        WVkDescriptorSetLayoutInfo descriptor_set_layout =
+        WId descriptor_set_layout =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSetLayout();
 
         WVkRenderPipelineInfo render_pipeline_info;
@@ -227,7 +227,7 @@ int main(int argc, char** argv)
             render_pipeline_info,
             shaders,
             descriptor_set_layout
-            ).WID();
+            );
 
         WStaticModel * static_model;
         WTextureAsset * texture_asset;
@@ -264,28 +264,12 @@ int main(int argc, char** argv)
         WId mesh_id = engine.Render()->RenderResources()->RegisterStaticMesh(model_data.meshes[0]);
         WId texture_id = engine.Render()->RenderResources()->RegisterTexture(texture_data);
             
-        // WVkMeshInfo mesh_info;
-        // WVulkan::Create(
-        //     mesh_info,
-        //     model_data.meshes[0],
-        //     engine.Render()->DeviceInfo(),
-        //     engine.Render()->RenderCommandPool().CommandPoolInfo()
-        //     );        
-
-        // WVkTextureInfo texture_info;
-        // WVulkan::Create(
-        //     texture_info,
-        //     texture_data,
-        //     engine.Render()->DeviceInfo(),
-        //     engine.Render()->RenderCommandPool().CommandPoolInfo()
-        //     );
-
         WLOG("Texture Sampler: " << texture_info.sampler);
         WLOG("Image Memory: " << texture_info.image_memory);
         WLOG("Image View: " << texture_info.image_view);
         WLOG("Image: " << texture_info.image);
 
-        WVkDescriptorSetInfo descriptor_set =
+        WId descriptor_set =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
                 );

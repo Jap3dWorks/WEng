@@ -1,7 +1,7 @@
-#include "WImportersRegister.h"
+#include "WImportersRegister.hpp"
 #include "WCore/TOptionalRef.hpp"
 
-#include "WImporters.h"
+#include "WImporters.hpp"
 
 #include <string>
 

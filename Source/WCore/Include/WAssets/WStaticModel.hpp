@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WAssets/WAsset.hpp"
-#include "WStructs/WGeometryStructs.h"
+#include "WStructs/WGeometryStructs.hpp"
 
 
 WCLASS()

@@ -1,9 +1,9 @@
-#include "WEngine.h"
+#include "WEngine.hpp"
 // #include <iostream>
 
 #include "WObjectManager/WObjectManager.hpp"
-#include "WImporters.h"
-#include "WImportersRegister.h"
+#include "WImporters.hpp"
+#include "WImportersRegister.hpp"
 #include "WRender.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN

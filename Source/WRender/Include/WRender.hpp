@@ -34,8 +34,6 @@ public:
 
     void DeviceWaitIdle() const;
 
-    void RecreateSwapChain();
-
     TRef<IRenderResources> RenderResources();
 
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
@@ -63,6 +61,10 @@ public:
 
 private:
 
+    void RecreateSwapChain();
+
+    void RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index);
+
     std::unique_ptr<IRenderResources> render_resources_{nullptr};
 
     WVkInstanceInfo instance_info_;
@@ -83,7 +85,7 @@ private:
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo in_flight_fence_;
 
-    uint32_t current_frame {0};
+    uint32_t frame_index {0};
 
     bool frame_buffer_resized {false};
 

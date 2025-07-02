@@ -1,4 +1,4 @@
-#include "WAssets/WStaticModel.h"
+#include "WAssets/WStaticModel.hpp"
 
 
 void WStaticModel::SetModel(const WModelStruct& model)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WStructs/WGeometryStructs.h"
+#include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTransformStructs.h"
 
 WCLASS()

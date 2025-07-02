@@ -251,18 +251,18 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
-    // Record Commands
-    // ---------------
+    // // Record Commands
+    // // ---------------
 
-    void RecordRenderCommandBuffer(
-        VkCommandBuffer in_commandbuffer,
-        const WVkRenderPassInfo & in_render_pass_info,
-        const WVkSwapChainInfo & in_swap_chain_info,
-        const WVkRenderPipelineInfo & in_render_pipeline_info,
-        const std::vector<WVkPipelineBindingInfo> & in_bindings,
-        uint32_t in_image_index = 0,
-        uint32_t in_framebuffer_index = 0
-        );
+    // void RecordRenderCommandBuffer(
+    //     VkCommandBuffer in_commandbuffer,
+    //     const WVkRenderPassInfo & in_render_pass_info,
+    //     const WVkSwapChainInfo & in_swap_chain_info,
+    //     const WVkRenderPipelineInfo & in_render_pipeline_info,
+    //     const std::vector<WVkPipelineBindingInfo> & in_bindings,
+    //     uint32_t in_image_index = 0,
+    //     uint32_t in_framebuffer_index = 0
+    //     );
 
     // Draw
     // ----

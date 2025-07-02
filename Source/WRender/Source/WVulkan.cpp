@@ -1,4 +1,5 @@
 #include "WVulkan/WVulkan.hpp"
+#include "WLog.hpp"
 
 #include <iostream>
 #include <GLFW/glfw3.h>
@@ -12,8 +13,8 @@
 #include <cmath>
 #include <cstdlib>
 #include "WVulkan/WVkRenderCore.hpp"
-#include "WStructs/WTextureStructs.h"
-#include "WStructs/WGeometryStructs.h"
+#include "WStructs/WTextureStructs.hpp"
+#include "WStructs/WGeometryStructs.hpp"
 #include "WVulkan/WVkRenderConfig.h"
 #include <fstream>
 #include <vulkan/vulkan_core.h>
@@ -1366,138 +1367,138 @@ void WVulkan::Destroy(
 // Record Commands
 // ---------------
 
-void WVulkan::RecordRenderCommandBuffer(
-    VkCommandBuffer in_commandbuffer,
-    const WVkRenderPassInfo & in_render_pass,
-    const WVkSwapChainInfo & in_swap_chain,
-    const WVkRenderPipelineInfo & in_render_pipeline_info,
-    const std::vector<WVkPipelineBindingInfo> & in_bindings,
-    uint32_t in_image_index,
-    uint32_t in_framebuffer_index
-    )
-{
-    VkCommandBufferBeginInfo begin_info{};
+// void WVulkan::RecordRenderCommandBuffer(
+//     VkCommandBuffer in_commandbuffer,
+//     const WVkRenderPassInfo & in_render_pass,
+//     const WVkSwapChainInfo & in_swap_chain,
+//     const WVkRenderPipelineInfo & in_render_pipeline_info,
+//     const std::vector<WVkPipelineBindingInfo> & in_bindings,
+//     uint32_t in_image_index,
+//     uint32_t in_framebuffer_index
+//     )
+// {
+//     VkCommandBufferBeginInfo begin_info{};
     
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = 0;
-    begin_info.pInheritanceInfo = nullptr;
+//     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+//     begin_info.flags = 0;
+//     begin_info.pInheritanceInfo = nullptr;
 
-    if (vkBeginCommandBuffer(
-            in_commandbuffer, &begin_info
-            ) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to begin recording command buffer!");
-    }
+//     if (vkBeginCommandBuffer(
+//             in_commandbuffer, &begin_info
+//             ) != VK_SUCCESS) {
+//         throw std::runtime_error("Failed to begin recording command buffer!");
+//     }
 
-    VkRenderPassBeginInfo render_pass_info{};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass =  in_render_pass.render_pass;
-    render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_image_index];
-    render_pass_info.renderArea.offset = {0,0};
-    render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
+//     VkRenderPassBeginInfo render_pass_info{};
+//     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//     render_pass_info.renderPass =  in_render_pass.render_pass;
+//     render_pass_info.framebuffer = in_swap_chain.swap_chain_framebuffers[in_image_index];
+//     render_pass_info.renderArea.offset = {0,0};
+//     render_pass_info.renderArea.extent = in_swap_chain.swap_chain_extent;
 
-    std::array<VkClearValue, 2> clear_colors;
+//     std::array<VkClearValue, 2> clear_colors;
     
-    float r = 0.5;
-    float g = 0.5;
-    float b = 0.5;
+//     float r = 0.5;
+//     float g = 0.5;
+//     float b = 0.5;
 
-    clear_colors[0].color = {{
-            r,
-            g,
-            b,
-            1.f}};
+//     clear_colors[0].color = {{
+//             r,
+//             g,
+//             b,
+//             1.f}};
 
-    clear_colors[1].depthStencil = {1.f, 0};
+//     clear_colors[1].depthStencil = {1.f, 0};
 
-    render_pass_info.clearValueCount = clear_colors.size();
-    render_pass_info.pClearValues = clear_colors.data();
+//     render_pass_info.clearValueCount = clear_colors.size();
+//     render_pass_info.pClearValues = clear_colors.data();
 
-    vkCmdBeginRenderPass(
-        in_commandbuffer,
-        &render_pass_info,
-        VK_SUBPASS_CONTENTS_INLINE
-	);
+//     vkCmdBeginRenderPass(
+//         in_commandbuffer,
+//         &render_pass_info,
+//         VK_SUBPASS_CONTENTS_INLINE
+// 	);
 
-    vkCmdBindPipeline(
-        in_commandbuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        in_render_pipeline_info.pipeline
-    );
+//     vkCmdBindPipeline(
+//         in_commandbuffer,
+//         VK_PIPELINE_BIND_POINT_GRAPHICS,
+//         in_render_pipeline_info.pipeline
+//     );
 
-    VkViewport viewport{};
-    viewport.x = 0.f;
-    viewport.y = 0.f;
-    viewport.width = static_cast<float>(in_swap_chain.swap_chain_extent.width);
-    viewport.height = static_cast<float>(in_swap_chain.swap_chain_extent.height);
-    viewport.minDepth = 0.f;
-    viewport.maxDepth = 1.f;
-    vkCmdSetViewport(
-        in_commandbuffer,
-        0, 1,
-        &viewport
-        );
+//     VkViewport viewport{};
+//     viewport.x = 0.f;
+//     viewport.y = 0.f;
+//     viewport.width = static_cast<float>(in_swap_chain.swap_chain_extent.width);
+//     viewport.height = static_cast<float>(in_swap_chain.swap_chain_extent.height);
+//     viewport.minDepth = 0.f;
+//     viewport.maxDepth = 1.f;
+//     vkCmdSetViewport(
+//         in_commandbuffer,
+//         0, 1,
+//         &viewport
+//         );
 
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = in_swap_chain.swap_chain_extent;
-    vkCmdSetScissor(
-        in_commandbuffer,
-        0, 1,
-        &scissor
-        );
+//     VkRect2D scissor{};
+//     scissor.offset = {0, 0};
+//     scissor.extent = in_swap_chain.swap_chain_extent;
+//     vkCmdSetScissor(
+//         in_commandbuffer,
+//         0, 1,
+//         &scissor
+//         );
 
-    for (const auto & binding : in_bindings)
-    {
+//     for (const auto & binding : in_bindings)
+//     {
 
-        WLOGFNAME("Index Buffer: " << binding.mesh.index_buffer);
-        WLOGFNAME("Vertex Buffer: " << binding.mesh.vertex_buffer);
-        WLOGFNAME("Index Count: " << binding.mesh.index_count);
+//         WLOGFNAME("Index Buffer: " << binding.mesh.index_buffer);
+//         WLOGFNAME("Vertex Buffer: " << binding.mesh.vertex_buffer);
+//         WLOGFNAME("Index Count: " << binding.mesh.index_count);
         
-        VkBuffer vertex_buffers[] = {binding.mesh.vertex_buffer};
-        VkDeviceSize offsets[] = {0};
+//         VkBuffer vertex_buffers[] = {binding.mesh.vertex_buffer};
+//         VkDeviceSize offsets[] = {0};
         
-        vkCmdBindVertexBuffers(
-            in_commandbuffer,
-            0,
-            1,
-            vertex_buffers,
-            offsets
-            );
+//         vkCmdBindVertexBuffers(
+//             in_commandbuffer,
+//             0,
+//             1,
+//             vertex_buffers,
+//             offsets
+//             );
 
-        vkCmdBindIndexBuffer(
-            in_commandbuffer,
-            binding.mesh.index_buffer,
-            0,
-            VK_INDEX_TYPE_UINT32
-            );
+//         vkCmdBindIndexBuffer(
+//             in_commandbuffer,
+//             binding.mesh.index_buffer,
+//             0,
+//             VK_INDEX_TYPE_UINT32
+//             );
 
-        vkCmdBindDescriptorSets(
-            in_commandbuffer, 
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            in_render_pipeline_info.pipeline_layout,
-            0,
-            1,
-            &binding.descriptor.descriptor_sets[in_framebuffer_index],
-            0,
-            nullptr
-            );
+//         vkCmdBindDescriptorSets(
+//             in_commandbuffer, 
+//             VK_PIPELINE_BIND_POINT_GRAPHICS,
+//             in_render_pipeline_info.pipeline_layout,
+//             0,
+//             1,
+//             &binding.descriptor.descriptor_sets[in_framebuffer_index],
+//             0,
+//             nullptr
+//             );
 
-        vkCmdDrawIndexed(
-            in_commandbuffer,
-            binding.mesh.index_count,
-            1,
-            0,
-            0,
-            0
-            );
-    }
+//         vkCmdDrawIndexed(
+//             in_commandbuffer,
+//             binding.mesh.index_count,
+//             1,
+//             0,
+//             0,
+//             0
+//             );
+//     }
 
-    vkCmdEndRenderPass(in_commandbuffer);
+//     vkCmdEndRenderPass(in_commandbuffer);
 
-    if(vkEndCommandBuffer(in_commandbuffer) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to record command buffer!");
-    }
-}
+//     if(vkEndCommandBuffer(in_commandbuffer) != VK_SUCCESS) {
+//         throw std::runtime_error("Failed to record command buffer!");
+//     }
+// }
 
 // Descriptor Set Layout
 // ---------------------

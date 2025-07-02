@@ -1,4 +1,4 @@
-#include "WImporters.h"
+#include "WImporters.hpp"
 #include "WLog.hpp"
 
 #include <utility>
@@ -11,11 +11,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include "WAssets/WStaticModel.h"
+#include "WAssets/WStaticModel.hpp"
 #include "WObjectManager/WObjectManager.hpp"
-#include "WAssets/WStaticModel.h"
-#include "WAssets/WTextureAsset.h"
-#include "WStructs/WTextureStructs.h"
+#include "WAssets/WStaticModel.hpp"
+#include "WAssets/WTextureAsset.hpp"
+#include "WStructs/WTextureStructs.hpp"
 
 // WImporter
 // ---------

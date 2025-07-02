@@ -1,4 +1,4 @@
-#include "WAssets/WTextureAsset.h"
+#include "WAssets/WTextureAsset.hpp"
 
 
 // WTextureAsset

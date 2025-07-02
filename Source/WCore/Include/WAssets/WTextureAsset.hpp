@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WAssets/WAsset.hpp"
-#include "WStructs/WTextureStructs.h"
+#include "WStructs/WTextureStructs.hpp"
 #include <memory>
 
 

@@ -1,17 +1,21 @@
 #pragma once
 
-#include <unordered_map>
-#include <cassert>
-
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
+#include "WAssets/WAsset.hpp"
+#include "WAssets/WTextureAsset.hpp"
 #include "WCore/WIdPool.hpp"
+#include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.hpp"
 
+#include <unordered_map>
+#include <cassert>
+#include <concepts>
+
 // Manage the aquirement and release of texture or mesh buffer and stuffs like that.
 
-template<typename D, typename A>
+template<typename D,  typename A>
 class WRENDER_API WVkAssetCollection
 {
 public:
@@ -41,13 +45,15 @@ public:
     }
 
     /** Assign a WId to identify the asset */
-    WId RegisterAsset(const A & in_asset) {
+    void RegisterAsset(const A & in_asset) {
         
-        WId id = id_pool_.Generate();
+        // WId id = id_pool_.Generate();
 
-        assets_.insert(id, in_asset);
-
-        return id;
+        in_asset.wid();
+        assets_.insert(in_asset.wid(), in_asset);
+        
+        // assets_.insert(id, in_asset);
+        // return id;
     }
 
     void UnregisterAsset(WId in_id) {
@@ -100,7 +106,8 @@ private:
     }
 
     std::unordered_map<WId, D> data_{};
-    std::unordered_map<WId, TRef<A>> assets_{};
+
+    std::unordered_map<WId, TRef<A>> assets_{};    
     WIdPool id_pool_{};  // TODO: use asset WId?
 
 };
