@@ -1,4 +1,4 @@
-#include "WVulkan/WVkAssetCollection.h"
+#include "WVulkan/WVkAssetCollection.hpp"
 #include "WVulkan/WVulkan.hpp"
 
 // WVkTextureCollection
@@ -21,12 +21,12 @@ void WVkTextureCollection::Move(WVkTextureCollection && other) {
     command_pool_info_ = std::move(other.command_pool_info_);
 }
 
-WVkTextureInfo WVkTextureCollection::LoadAssetImpl(const WTextureStruct & in_asset) {
+WVkTextureInfo WVkTextureCollection::LoadAssetImpl(const WTextureAsset & in_asset) {
     WVkTextureInfo result;
 
     WVulkan::Create(
         result,
-        in_asset,
+        in_asset.GetTexture(),
         device_info_,
         command_pool_info_
         );
@@ -67,11 +67,11 @@ void WVkStaticMeshCollection::Move(WVkStaticMeshCollection && other) {
     command_pool_info_ = std::move(other.command_pool_info_);
 }
 
-WVkMeshInfo WVkStaticMeshCollection::LoadAssetImpl(const WMeshStruct & in_asset) {
+WVkMeshInfo WVkStaticMeshCollection::LoadAssetImpl(const WStaticMeshAsset & in_asset) {
     WVkMeshInfo mesh_info;
     WVulkan::Create(
         mesh_info,
-        in_asset,
+        in_asset.GetMesh().meshes[0],
         device_info_,
         command_pool_info_
         );

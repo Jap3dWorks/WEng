@@ -4,6 +4,7 @@
 #include "WCore/TRef.hpp"
 #include "WAssets/WAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
@@ -15,12 +16,12 @@
 
 // Manage the aquirement and release of texture or mesh buffer and stuffs like that.
 
-template<typename D,  typename A>
+template<typename D,  std::derived_from<WAsset> A>
 class WRENDER_API WVkAssetCollection
 {
 public:
 
-    WVkAssetCollection()=default;
+    constexpr WVkAssetCollection()=default;
 
     virtual ~WVkAssetCollection() {
         Clear();
@@ -46,33 +47,41 @@ public:
 
     /** Assign a WId to identify the asset */
     void RegisterAsset(const A & in_asset) {
-        
-        // WId id = id_pool_.Generate();
-
-        in_asset.wid();
         assets_.insert(in_asset.wid(), in_asset);
-        
-        // assets_.insert(id, in_asset);
-        // return id;
     }
 
     void UnregisterAsset(WId in_id) {
+        assert(assets_.contains(in_id));
         assets_.erase(in_id);
+    }
+
+    void UnregisterAsset(const A & in_asset) {
+        UnregisterAsset(in_asset.Wid());
     }
 
     /** put the data in the graphical memory */
     void LoadAsset(WId in_id) {
-        D d = LoadAssetImpl(assets_[in_id].Get());
-        data_.insert(in_id, d);
+        assert(assets_.contains(in_id));
+        data_.insert(in_id, LoadAssetImpl(assets_[in_id].Get()));
+    }
+
+    void LoadAsset(const A & in_asset) {
+        LoadAsset(in_asset.Wid());
     }
 
     /** pop from graphical memory */
     void UnloadAsset(WId in_id) {
+        assert(assets_.contains(in_id));
+        
         UnloadAssetImpl(data_[in_id]);
         data_.extract(in_id);
     }
 
-    const D & GetData(WId in_id) const noexcept {
+    void UnloadAsset(const A & in_asset) {
+        UnloadAsset(in_asset.Wid());
+    }
+
+    constexpr const D & GetData(WId in_id) const noexcept {
         assert(data_.contains(in_id));
         return data_[in_id];
     }
@@ -88,13 +97,11 @@ private:
     void Move(WVkAssetCollection && other) {
         data_ = std::move(other.data_);
         assets_ = std::move(other.assets_);
-        id_pool_ = std::move(other.id_pool_);
     }
 
     void Copy(const WVkAssetCollection & other) {
         data_ = other.data_;
-        assets_ = std::move(other.assets_);
-        id_pool_ = other.id_pool_;
+        assets_ = other.assets_;
     }
 
     void Clear() {
@@ -105,18 +112,15 @@ private:
         data_.clear();
     }
 
-    std::unordered_map<WId, D> data_{};
-
     std::unordered_map<WId, TRef<A>> assets_{};    
-    WIdPool id_pool_{};  // TODO: use asset WId?
+    
+    std::unordered_map<WId, D> data_{};
 
 };
 
 // TODO staic Create methods and the constructor with parameters private.
 
-struct WTextureStruct;
-
-class WVkTextureCollection : public WVkAssetCollection<WVkTextureInfo, WTextureStruct> {
+class WVkTextureCollection : public WVkAssetCollection<WVkTextureInfo, WTextureAsset> {
 
 public:
 
@@ -139,7 +143,7 @@ public:
 
 protected:
 
-    WVkTextureInfo LoadAssetImpl(const WTextureStruct & in_asset) override;
+    WVkTextureInfo LoadAssetImpl(const WTextureAsset & in_asset) override;
 
     void UnloadAssetImpl(WVkTextureInfo & in_data) override;
 
@@ -152,9 +156,7 @@ private:
 
 };
 
-struct WMeshStruct;
-
-class WVkStaticMeshCollection : public WVkAssetCollection<WVkMeshInfo, WMeshStruct> {
+class WVkStaticMeshCollection : public WVkAssetCollection<WVkMeshInfo, WStaticMeshAsset> {
 
 public:
 
@@ -174,7 +176,7 @@ public:
 
 protected:
 
-    WVkMeshInfo LoadAssetImpl(const WMeshStruct & in_asset) override;
+    WVkMeshInfo LoadAssetImpl(const WStaticMeshAsset & in_asset) override;
 
     void UnloadAssetImpl(WVkMeshInfo & in_data) override;
 

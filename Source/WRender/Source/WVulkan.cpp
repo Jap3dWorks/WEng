@@ -1029,9 +1029,9 @@ void WVulkan::Create(
 
     out_descriptor_pool_info.pool_sizes.resize(2);
     out_descriptor_pool_info.pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    out_descriptor_pool_info.pool_sizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    out_descriptor_pool_info.pool_sizes[0].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
     out_descriptor_pool_info.pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    out_descriptor_pool_info.pool_sizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    out_descriptor_pool_info.pool_sizes[1].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1039,7 +1039,7 @@ void WVulkan::Create(
         out_descriptor_pool_info.pool_sizes.size()
         );
     pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
-    pool_info.maxSets = MAX_FRAMES_IN_FLIGHT;
+    pool_info.maxSets = WENG_MAX_FRAMES_IN_FLIGHT;
 
     if (vkCreateDescriptorPool(
             device.vk_device,
@@ -1058,9 +1058,9 @@ void WVulkan::Create(
     const WVkDescriptorPoolInfo & descriptor_pool_info
     )
 {
-    std::array<VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT> layouts;
+    std::array<VkDescriptorSetLayout, WENG_MAX_FRAMES_IN_FLIGHT> layouts;
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
     {
         layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
     }
@@ -1068,7 +1068,7 @@ void WVulkan::Create(
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
-    alloc_info.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+    alloc_info.descriptorSetCount = WENG_MAX_FRAMES_IN_FLIGHT;
     alloc_info.pSetLayouts = layouts.data();
 
     if (vkAllocateDescriptorSets(

@@ -239,8 +239,6 @@ void WRender::Draw() {
 
     for(auto pit : render_pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
 
-        WLOGFNAME("Render Pipeline: " << render_pipeline.WID());
-
         vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index], 0);
 
         RecordRenderCommandBuffer(
@@ -300,7 +298,7 @@ void WRender::Draw() {
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    frame_index = (frame_index + 1) % MAX_FRAMES_IN_FLIGHT;
+    frame_index = (frame_index + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
 void WRender::RecreateSwapChain() {

@@ -176,7 +176,7 @@ namespace VulkanUtils
 
 namespace VulkanConfig
 {
-    const int MAX_FRAMES_IN_FLIGHT = 2;
+    const int WENG_MAX_FRAMES_IN_FLIGHT = 2;
     
 }
 
@@ -264,7 +264,7 @@ private:
     const uint32_t Width{800};
     const uint32_t Height{600};
 
-    const int MAX_FRAMES_IN_FLIGHT = 2;
+    const int WENG_MAX_FRAMES_IN_FLIGHT = 2;
 
     uint32_t CurrentFrame = 0;
 
@@ -377,7 +377,7 @@ private:
         vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
         vkDestroyRenderPass(Device, RenderPass, nullptr);
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
         {
             vkDestroyBuffer(Device, UniformBuffers[i], nullptr);
             vkFreeMemory(Device, UniformBuffersMemory[i], nullptr);
@@ -403,7 +403,7 @@ private:
         vkDestroyBuffer(Device, VertexBuffer, nullptr);
         vkFreeMemory(Device, VertexBufferMemory, nullptr);
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
         {
             vkDestroySemaphore(Device, RenderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(Device, ImageAvailableSemaphores[i], nullptr);
@@ -1645,11 +1645,11 @@ private:
     {
         VkDeviceSize BufferSize = sizeof(SUniformBufferObject);
         
-        UniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-        UniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-        UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+        UniformBuffers.resize(WENG_MAX_FRAMES_IN_FLIGHT);
+        UniformBuffersMemory.resize(WENG_MAX_FRAMES_IN_FLIGHT);
+        UniformBuffersMapped.resize(WENG_MAX_FRAMES_IN_FLIGHT);
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
         {
             CreateBuffer(
                 BufferSize,
@@ -1673,15 +1673,15 @@ private:
     {
         std::array<VkDescriptorPoolSize, 2> PoolSizes{};
         PoolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        PoolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        PoolSizes[0].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
         PoolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        PoolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        PoolSizes[1].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
 
         VkDescriptorPoolCreateInfo PoolInfo{};
         PoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         PoolInfo.poolSizeCount = static_cast<uint32_t>(PoolSizes.size());
         PoolInfo.pPoolSizes = PoolSizes.data();
-        PoolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        PoolInfo.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
 
         if(vkCreateDescriptorPool(
                 Device,
@@ -1700,16 +1700,16 @@ private:
     void CreateDescriptorSets()
     {
         std::vector<VkDescriptorSetLayout> Layouts(
-            MAX_FRAMES_IN_FLIGHT, 
+            WENG_MAX_FRAMES_IN_FLIGHT, 
             DescriptorSetLayout
         );
         VkDescriptorSetAllocateInfo AllocInfo{};
         AllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         AllocInfo.descriptorPool = DescriptorPool;
-        AllocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+        AllocInfo.descriptorSetCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
         AllocInfo.pSetLayouts = Layouts.data();
 
-        DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+        DescriptorSets.resize(WENG_MAX_FRAMES_IN_FLIGHT);
         if (vkAllocateDescriptorSets(
                 Device,
                 &AllocInfo,
@@ -1722,7 +1722,7 @@ private:
             );
         }
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
         {
             std::array<VkWriteDescriptorSet, 2> DescriptorWrites{};
 
@@ -1891,7 +1891,7 @@ private:
 
     void CreateCommandBuffers()
     {
-        CommandBuffers.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+        CommandBuffers.resize(VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo AllocInfo{};
         AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1995,9 +1995,9 @@ private:
 
     void CreateSyncObjects()
     {
-        ImageAvailableSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
-        RenderFinishedSemaphores.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
-        InFlightFences.resize(VulkanConfig::MAX_FRAMES_IN_FLIGHT);
+        ImageAvailableSemaphores.resize(VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT);
+        RenderFinishedSemaphores.resize(VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT);
+        InFlightFences.resize(VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT);
 
         VkSemaphoreCreateInfo SemaphoreInfo{};
         SemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -2006,7 +2006,7 @@ private:
         FenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         FenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        for (size_t i = 0; i < VulkanConfig::MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT; i++)
         {
             if (
                 vkCreateSemaphore(Device, &SemaphoreInfo, nullptr, &ImageAvailableSemaphores[i]) != VK_SUCCESS ||
@@ -2129,7 +2129,7 @@ private:
             throw std::runtime_error("Failed to present swap chain image!");
         }
 
-        CurrentFrame = (CurrentFrame + 1) % VulkanConfig::MAX_FRAMES_IN_FLIGHT;
+        CurrentFrame = (CurrentFrame + 1) % VulkanConfig::WENG_MAX_FRAMES_IN_FLIGHT;
     }
 
     VkShaderModule CreateShaderModule(const std::vector<char>& InCode)

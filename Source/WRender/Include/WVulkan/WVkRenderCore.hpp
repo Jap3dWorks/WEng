@@ -189,7 +189,7 @@ struct WVkDescriptorSetInfo
 {
     WId wid{0};
     // The len of this vector is the number of frames in flight
-    std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
+    std::array<VkDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };
 
 struct WVkMeshInfo
@@ -251,21 +251,21 @@ struct WVkUniformBufferObjectInfo
 struct WVkCommandBufferInfo
 {
     WId wid;
-    std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
+    std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
 struct WVkSemaphoreInfo
 {
     WId wid;
     
-    std::array<VkSemaphore, MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
+    std::array<VkSemaphore, WENG_MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
 };
 
 struct WVkFenceInfo
 {
     WId wid;
 
-    std::array<VkFence, MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
+    std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
 
     VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
 };

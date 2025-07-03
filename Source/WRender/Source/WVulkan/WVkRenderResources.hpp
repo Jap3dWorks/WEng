@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IRenderResources.hpp"
-#include "WVulkan/WVkAssetCollection.h"
+#include "WVulkan/WVkAssetCollection.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 
 class WVkRenderResources : public IRenderResources {
@@ -24,7 +24,7 @@ public:
 
     // Texture
 
-    WId RegisterTexture(const WTextureStruct & in_texture_struct) override;
+    void RegisterTexture(const WTextureAsset & in_texture_struct) override;
 
     void UnregisterTexture(WId in_id) override;
 
@@ -34,7 +34,7 @@ public:
 
     // Static Mesh
 
-    WId RegisterStaticMesh(const WMeshStruct & in_mesh_struct) override;
+    void RegisterStaticMesh(const WStaticMeshAsset & in_mesh_struct) override;
 
     void UnregisterStaticMesh(WId in_id) override;
 
@@ -50,8 +50,8 @@ private:
 
     void Move(WVkRenderResources && other);
 
-    WVkTextureCollection texture_collection;
-    WVkStaticMeshCollection static_mesh_collection;
+    WVkTextureCollection texture_collection{};
+    WVkStaticMeshCollection static_mesh_collection{};
   
 };
 

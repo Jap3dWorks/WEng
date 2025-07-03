@@ -7,8 +7,9 @@
 #include "WImporters.hpp"
 #include "WImportersRegister.hpp"
 #include "WActors/WActor.hpp"
-#include "WAssets/WStaticModel.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WStructs/WGeometryStructs.hpp"
@@ -108,15 +109,16 @@ WModelStruct MeshPlane()
     return model;
 }
 
-bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsset *& out_texture_asset)
+bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTextureAsset *& out_texture_asset)
 {
     TOptionalRef<WImportObj> obj_importer =
         engine.ImportersRegister()->GetImporter<WImportObj>();
 
-    std::vector<WAsset*> geo_asset = obj_importer->Import(
-        "Content/Assets/Models/viking_room.obj", 
-        "/Content/Assets/viking_room.viking_room"
-    );
+    std::vector<WAsset*> geo_asset =
+        obj_importer->Import(
+            "Content/Assets/Models/viking_room.obj", 
+            "/Content/Assets/viking_room.viking_room"
+            );
 
     if (geo_asset.size() < 1)
     {
@@ -124,7 +126,7 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
         return false;
     }
 
-    if (geo_asset[0]->GetClass() != WStaticModel::GetStaticClass())
+    if (geo_asset[0]->GetClass() != WStaticMeshAsset::GetStaticClass())
     {
         std::cout << "geo_asset is not a static model!" << std::endl;
         return false;
@@ -138,27 +140,6 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
         "/Content/Assets/viking_texture.viking_texture"
     );
 
-    if (false)
-    {
-        std::vector<WAsset*> tex_asset_rgba = texture_importer->Import(
-            "Content/Assets/Textures/viking_room_rgba.png",
-            "/Content/Assets/viking_texture_rgba.viking_texture_rgba"
-            );
-
-        WTextureAsset * a = static_cast<WTextureAsset*>(tex_asset[0]);
-        WTextureAsset * b = static_cast<WTextureAsset*>(tex_asset_rgba[0]);
-
-        for (int i=0; i < a->GetTexture().data.size(); i++) {
-            if (a->GetTexture().data[i] != b->GetTexture().data[i]) {
-                WLOGFNAME("- [" << i << "] are diferent, " <<
-                          (uint32_t)a->GetTexture().data[i] <<
-                          " != " <<
-                          (uint32_t)b->GetTexture().data[i]
-                    );
-            }
-        }
-    }
-
     if (tex_asset.size() < 1)
     {
         std::cout << "Failed to import tex_asset!" << std::endl;
@@ -171,7 +152,7 @@ bool LoadAssets(WEngine & engine, WStaticModel *& out_static_model, WTextureAsse
         return false;
     }
 
-    out_static_model = static_cast<WStaticModel*>(geo_asset[0]);
+    out_static_model = static_cast<WStaticMeshAsset*>(geo_asset[0]);
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
 
     return true;
@@ -229,64 +210,39 @@ int main(int argc, char** argv)
             descriptor_set_layout
             );
 
-        WStaticModel * static_model;
+        WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;
 
-        if (!LoadAssets(engine, static_model, texture_asset))
+        if (!LoadAssets(engine, static_mesh, texture_asset))
         {
             return 1;
         }
-	
-        for (auto& mesh : static_model->GetModel().meshes)
-        {
-            WLOG("A Mesh with: " << mesh.indices.size() << " Indices");
-            WLOG("A Mesh with: " << mesh.vertices.size() << " Vertices");
-        }
-
-        WLOG("Texture Data Size: " << texture_asset->GetTexture().data.size());
-        WLOG("Texture Width: " << texture_asset->GetTexture().width);
-        WLOG("Texture Height: " << texture_asset->GetTexture().height);
-
-        WModelStruct model_data;
-
-        if (as_plane)
-        {
-            model_data = MeshPlane();
-        }
-        else
-        {
-            model_data = static_model->GetModel();
-        }
-        
+	        
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        WId mesh_id = engine.Render()->RenderResources()->RegisterStaticMesh(model_data.meshes[0]);
-        WId texture_id = engine.Render()->RenderResources()->RegisterTexture(texture_data);
+        engine.Render()->RenderResources()->RegisterStaticMesh(*static_mesh);
+        engine.Render()->RenderResources()->RegisterTexture(*texture_asset);
             
-        WLOG("Texture Sampler: " << texture_info.sampler);
-        WLOG("Image Memory: " << texture_info.image_memory);
-        WLOG("Image View: " << texture_info.image_view);
-        WLOG("Image: " << texture_info.image);
-
-        WId descriptor_set =
+        WId did =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
                 );
 
         engine.Render()->AddPipelineBinding(
             pipeline_wid,
-            descriptor_set,
-            mesh_id
+            did,
+            static_mesh->WID()
             );
 
         WLOG("Bind Pipeline: " << pipeline_wid);
 
         // Update Descriptor Sets //
 
-        std::vector<WVkUniformBufferObjectInfo> uniform_buffer_info {
-            descriptor_set.descriptor_sets.size()
-        };
+        const WVkDescriptorSetInfo descriptor_set =
+            engine.Render()->RenderPipelinesManager().DescriptorSet(did);
+
+        std::array<WVkUniformBufferObjectInfo, WENG_MAX_FRAMES_IN_FLIGHT> uniform_buffer_info{};
 
         for(auto & uniform_buffer : uniform_buffer_info)
         {

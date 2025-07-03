@@ -8,7 +8,7 @@
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.h"
-#include "WVulkan/WVkAssetCollection.h"
+#include "WVulkan/WVkAssetCollection.hpp"
 
 #include <cstddef>
 
@@ -48,7 +48,7 @@ public:
     { return swap_chain_info_; }
 
     WNODISCARD const size_t FramesInFlight() const noexcept
-    { return MAX_FRAMES_IN_FLIGHT; }
+    { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
     WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }

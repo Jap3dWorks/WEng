@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/TIterator.hpp"
 #include "WCore/WCore.hpp"
 
 #include <unordered_map>
@@ -37,8 +38,8 @@ public:
         size_t pos = compact_.size();
         compact_.push_back(in_value);
 
-        index_pos_.insert(in_index, pos);
-        pos_index_.insert(pos,in_index);
+        index_pos_[in_index] = pos;
+        pos_index_[pos] = in_index;
     }
 
     T & Get(size_t in_index) {
@@ -82,20 +83,26 @@ public:
         return index_pos_.contains(in_index);
     }
 
-    constexpr T * begin() noexcept {
+    constexpr std::vector<T>::iterator begin() noexcept {
         return compact_.begin();
     }
 
-    constexpr T * end() noexcept {
+    constexpr std::vector<T>::iterator end() noexcept {
         return compact_.end();
     }
 
-    constexpr const T * cbegin() const {
+    constexpr std::vector<T>::const_iterator cbegin() const {
         return compact_.cbegin();
     }
 
-    constexpr const T * cend() const {
+    constexpr std::vector<T>::const_iterator cend() const {
         return compact_.cend();
+    }
+
+    constexpr auto iter_index() noexcept {
+        return TIterator<size_t, decltype(index_pos_.begin())>(
+            index_pos_.begin(), index_pos_.end()
+            );
     }
 
 private:
@@ -112,8 +119,8 @@ private:
         compact_ = std::move(other.compact_);
     }
 
-    std::unordered_map<size_t, size_t> pos_index_{};
     std::unordered_map<size_t, size_t> index_pos_{};
+    std::unordered_map<size_t, size_t> pos_index_{};
     std::vector<T> compact_{};
 
 };

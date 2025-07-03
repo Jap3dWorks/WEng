@@ -27,9 +27,9 @@ public:
     /**
      * @brief Import an asset from a file
      * @param file_path The file path to import
-     * @param asset_path The asset path to import to, relative to the Content directory
+     * @param asset_directory, Engine based directory path to import to, Should start with /Content.
     */
-    virtual std::vector<WAsset*> Import(const char* file_path, const char* asset_path) = 0;
+    virtual std::vector<WAsset*> Import(const char* file_path, const char* asset_directory) = 0;
 
 public:    
 
@@ -64,7 +64,7 @@ public:
     WImportObj & operator=(const WImportObj & in_other) = default;
     WImportObj & operator=(WImportObj && out_other) noexcept = default;
 
-    std::vector<WAsset*> Import(const char * file_path, const char * asset_path) override;
+    std::vector<WAsset*> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 
@@ -87,7 +87,7 @@ public:
     WImportTexture & operator=(const WImportTexture & in_other) = default;
     WImportTexture & operator=(WImportTexture && out_other) noexcept = default;
 
-    std::vector<WAsset*> Import(const char * file_path, const char * asset_path) override;
+    std::vector<WAsset*> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 

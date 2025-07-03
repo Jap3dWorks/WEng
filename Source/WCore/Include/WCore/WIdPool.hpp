@@ -30,8 +30,12 @@ public:
     void Release(WId wid)
     {
         assert(wid.GetId() < last_id_);
-
         released_.push_back(wid.GetId());
+    }
+
+    void Reset() {
+        last_id_ = 0;
+        released_.clear();
     }
 
 private:

@@ -29,6 +29,7 @@ private:
     std::unique_ptr<CallableBase> callable;
 
 public:
+
     // Constructor from function pointer
     TFunction(Ret(*f)(Args...)) : callable(std::make_unique<Callable<decltype(f)>>(f)) {}
 
@@ -37,7 +38,6 @@ public:
     TFunction(F&& f) :
     callable(std::make_unique<Callable<std::decay_t<F>>>(std::forward<F>(f))) {}
 
-    // Invocation operator
     Ret operator()(Args... args) {
         if (!callable) {
             throw std::bad_function_call();

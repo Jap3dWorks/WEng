@@ -49,7 +49,11 @@ public:
         return oid;
     }
 
-    WId Create() override final { return Create(create_fn_); }
+    WId Create() override final {
+        WId oid = id_pool_.Generate();
+        objects_.Insert(oid, create_fn_(oid));
+        return oid;
+    }
 
     void Remove(WId in_id, TFunction<void(T&)> in_destroy_fn) {
         in_destroy_fn(objects_.Get(in_id));
@@ -57,19 +61,29 @@ public:
         objects_.Delete(in_id);
     }
 
-    void Remove(WId in_id) override final { return Remove(destroy_fn_); }
+    void Remove(WId in_id) override final {
+        destroy_fn_(objects_.Get(in_id));
+        id_pool_.Release(in_id);
+        objects_.Delete(in_id);
+    }
 
     void Clear(TFunction<void(T&)> in_destroy_fn) {
-        for (auto & p : objects_) {
-            in_destroy_fn(p.second);
-            id_pool_.Release(p.first);
+        for (auto & o : objects_) {
+            in_destroy_fn(o);
         }
-
+        
+        id_pool_.Reset();
         objects_.Clear();
     }
 
     void Clear() override final {
-        Clear(destroy_fn_);
+        for (auto & o : objects_) {
+            destroy_fn_(o);
+        }
+        
+        id_pool_.Reset();
+        objects_.Clear();
+
     }
 
     T & Get(WId in_id) {
@@ -113,8 +127,9 @@ private:
         id_pool_ = std::move(other.id_pool_);
     }
 
-    TFunction<void(T&)> destroy_fn_=[](T&){};
-    TFunction<T(WId)> create_fn_=[](WId){return T{};};
+    TFunction<void(T&)> destroy_fn_=[](T&)->void{};
+    TFunction<T(WId)> create_fn_=[](WId) -> T {return T{};};
+
     WIdPool id_pool_{};
     TSparseSet<T> objects_{};
 };

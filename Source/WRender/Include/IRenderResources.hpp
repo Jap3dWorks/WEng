@@ -2,8 +2,8 @@
 
 #include "WCore/WCore.hpp"
 
-struct WTextureStruct;
-struct WMeshStruct;
+class WTextureAsset;
+class WStaticMeshAsset;
 
 class IRenderResources {
 
@@ -11,7 +11,7 @@ public:
 
     virtual ~IRenderResources()=default;
 
-    WNODISCARD virtual WId RegisterTexture(const WTextureStruct & in_texture_struct)=0;
+    virtual void RegisterTexture(const WTextureAsset & in_texture_asset)=0;
 
     virtual void UnregisterTexture(WId in_id)=0;
 
@@ -19,7 +19,7 @@ public:
 
     virtual void UnloadTexture(WId in_id)=0;
 
-    WNODISCARD virtual WId RegisterStaticMesh(const WMeshStruct & in_mesh_struct)=0;
+    virtual void RegisterStaticMesh(const WStaticMeshAsset & in_static_mesh_asset)=0;
 
     virtual void UnregisterStaticMesh(WId in_id)=0;
 

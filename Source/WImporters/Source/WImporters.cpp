@@ -1,21 +1,23 @@
 #include "WImporters.hpp"
 #include "WLog.hpp"
+#include "WCore/WStringUtils.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
+#include "WObjectManager/WObjectManager.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
+#include "WAssets/WTextureAsset.hpp"
+#include "WStructs/WTextureStructs.hpp"
 
+#include <string>
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <format>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
-
-#include "WAssets/WStaticModel.hpp"
-#include "WObjectManager/WObjectManager.hpp"
-#include "WAssets/WStaticModel.hpp"
-#include "WAssets/WTextureAsset.hpp"
-#include "WStructs/WTextureStructs.hpp"
 
 // WImporter
 // ---------
@@ -68,7 +70,7 @@ std::unique_ptr<WImporter> WImportObj::clone()
     return std::make_unique<WImportObj>(*this);
 }
 
-std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset_path)
+std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset_directory)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -89,13 +91,20 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
         throw std::runtime_error(warning + error);
     }
 
-    WModelStruct model = {};
-    model.meshes.resize(shapes.size());
+    // WModelStruct model = {};
+    // model.meshes.resize(shapes.size());
     uint32_t index_offset = 0;
+    
+    std::vector<WMeshStruct> meshes(shapes.size());
+    std::vector<std::string> names(shapes.size());
 
     for (const auto & shape : shapes)
     {
-        WMeshStruct & mesh = model.meshes[index_offset++];
+        WMeshStruct & mesh = meshes[index_offset];
+        names[index_offset] = shape.name;
+
+        ++index_offset;
+
         std::unordered_map<WVertexStruct, uint32_t> unique_vertices = {};
 
         for (const auto & index : shape.mesh.indices)
@@ -125,14 +134,17 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
         }
     }
 
-    // create an static asset
-    WStaticModel * static_model = ObjectManager().CreateObject<WStaticModel>(
-        "StaticModel"  // This is not used? CHECK
-    );
-    static_model->SetModel(std::move(model));
-    static_model->SetPath(asset_path);
+    std::vector<WAsset*> imported_assets(shapes.size());
 
-    std::vector<WAsset*> imported_assets = {static_model};
+    for (uint32_t i; i < meshes.size(); i++) {
+        WStaticMeshAsset * static_mesh = ObjectManager().CreateObject<WStaticMeshAsset>(
+            "StaticMesh"
+            );
+
+        static_mesh->SetMesh(std::move(meshes[i]));
+        static_mesh->SetPath(WStringUtils::AssetPath(asset_directory, file_path, names[i]));
+    }
+
     return imported_assets;
 };
 
@@ -157,7 +169,7 @@ std::unique_ptr<WImporter> WImportTexture::clone()
     return std::make_unique<WImportTexture>(*this);
 }
 
-std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* asset_path)
+std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* asset_directory)
 {
     int width, height, num_channels;
     stbi_uc * Pixels = stbi_load(
@@ -210,10 +222,8 @@ std::vector<WAsset*> WImportTexture::Import(const char* file_path, const char* a
         "TextureAsset"
     );
 
-    texture_asset->SetTexture(
-        std::move(texture_struct)
-    );
-    texture_asset->SetPath(asset_path);
+    texture_asset->SetTexture(std::move(texture_struct));
+    texture_asset->SetPath(WStringUtils::AssetPath(asset_directory, file_path, "texture"));
 
     return { texture_asset };
 }
