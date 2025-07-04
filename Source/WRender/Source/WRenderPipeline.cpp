@@ -45,7 +45,8 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
                 device_info_,
                 d_set_layout,
                 render_pass_info_,
-                in_shader_stages);
+                in_shader_stages
+                );
             
             in_render_pipeline_info.wid = in_id;
             return in_render_pipeline_info;
@@ -162,10 +163,6 @@ void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
     other.device_info_ = {};
     other.render_pass_info_ = {};
     other.descriptor_pool_info_ = {};
-}
-
-std::vector<WId> & WVkRenderPipelinesManager::StagePipelines(EPipelineType in_type) WNOEXCEPT {
-    return stage_pipelines_[in_type];
 }
 
 void WVkRenderPipelinesManager::Clear()

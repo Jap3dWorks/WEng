@@ -23,7 +23,9 @@ class TObjectDataBase : public IObjectDataBase {
 
 public:
 
-    TObjectDataBase()=default;
+    TObjectDataBase() :
+        destroy_fn_([](T&)->void{}),
+        create_fn_([](WId){return T{}; }) {}
 
     ~TObjectDataBase() {
         Clear();
@@ -127,8 +129,8 @@ private:
         id_pool_ = std::move(other.id_pool_);
     }
 
-    TFunction<void(T&)> destroy_fn_=[](T&)->void{};
-    TFunction<T(WId)> create_fn_=[](WId) -> T {return T{};};
+    TFunction<void(T&)> destroy_fn_; // =[](T&)->void{};
+    TFunction<T(WId)> create_fn_; // =[](WId) -> T {return T{};};
 
     WIdPool id_pool_{};
     TSparseSet<T> objects_{};
