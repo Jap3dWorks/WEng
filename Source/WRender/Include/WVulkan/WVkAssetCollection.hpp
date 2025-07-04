@@ -32,7 +32,7 @@ public:
     }
 
     WVkAssetCollection(WVkAssetCollection && other) noexcept {
-        Move(other);
+        Move(std::move(other));
     }
 
     WVkAssetCollection & operator=(const WVkAssetCollection & other) {
@@ -41,13 +41,13 @@ public:
     }
 
     WVkAssetCollection & operator=(WVkAssetCollection && other) noexcept {
-        Move(other);
+        Move(std::move(other));
         return *this;
     }
 
     /** Assign a WId to identify the asset */
-    void RegisterAsset(const A & in_asset) {
-        assets_.insert(in_asset.wid(), in_asset);
+    void RegisterAsset(A & in_asset) {
+        assets_.insert({in_asset.WID(), TRef<A>(&in_asset)});
     }
 
     void UnregisterAsset(WId in_id) {
@@ -62,7 +62,7 @@ public:
     /** put the data in the graphical memory */
     void LoadAsset(WId in_id) {
         assert(assets_.contains(in_id));
-        data_.insert(in_id, LoadAssetImpl(assets_[in_id].Get()));
+        data_.insert({in_id, LoadAssetImpl(assets_[in_id].Get())});
     }
 
     void LoadAsset(const A & in_asset) {
@@ -78,12 +78,12 @@ public:
     }
 
     void UnloadAsset(const A & in_asset) {
-        UnloadAsset(in_asset.Wid());
+        UnloadAsset(in_asset.WID());
     }
 
-    constexpr const D & GetData(WId in_id) const noexcept {
+    const D & GetData(WId in_id) const noexcept {
         assert(data_.contains(in_id));
-        return data_[in_id];
+        return data_.at(in_id);
     }
 
 protected:

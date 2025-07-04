@@ -71,7 +71,7 @@ WVkMeshInfo WVkStaticMeshCollection::LoadAssetImpl(const WStaticMeshAsset & in_a
     WVkMeshInfo mesh_info;
     WVulkan::Create(
         mesh_info,
-        in_asset.GetMesh().meshes[0],
+        in_asset.GetMesh(),
         device_info_,
         command_pool_info_
         );

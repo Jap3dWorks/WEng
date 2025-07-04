@@ -14,7 +14,7 @@ private:
     // Type erasure base class
     struct CallableBase {
         virtual ~CallableBase() = default;
-        virtual Ret Invoke(Args && ... args) = 0;
+        virtual Ret Invoke(Args... args) = 0;
         virtual std::unique_ptr<CallableBase> Clone()=0;
     };
 
@@ -29,7 +29,7 @@ private:
 
         virtual ~Callable()=default;
 
-        Ret Invoke(Args && ... args) override {
+        Ret Invoke(Args ... args) override {
             return func(std::forward<Args>(args)...);
         }
 
@@ -86,7 +86,7 @@ public:
         return *this;
     }
 
-    Ret operator()(Args&&... args) {
+    Ret operator()(Args... args) {
         if (!callable) {
             throw std::bad_function_call();
         }

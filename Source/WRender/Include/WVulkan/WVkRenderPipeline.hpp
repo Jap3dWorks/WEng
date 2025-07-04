@@ -58,10 +58,25 @@ public:
         const WVkMeshInfo & in_mesh_info
         );
 
-    const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id);
-    const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(WId in_id);
-    const WVkDescriptorSetInfo & DescriptorSet(WId in_id);
-    const WVkPipelineBindingInfo & Binding(WId in_id);
+    WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {
+        assert(render_pipelines_.Contains(in_id));
+        return render_pipelines_.Get(in_id);
+    }
+    
+    WNODISCARD const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(WId in_id) const {
+        assert(descriptor_set_layouts_.Contains(in_id));
+        return descriptor_set_layouts_.Get(in_id);
+    }
+    
+    WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(WId in_id) const {
+        assert(descriptor_sets_.Contains(in_id));
+        return descriptor_sets_.Get(in_id);
+    }
+    
+    WNODISCARD const WVkPipelineBindingInfo & Binding(WId in_id) const {
+        assert(bindings_.Contains(in_id));
+        return bindings_.Get(in_id);
+    }
 
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WId)> in_predicate);
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WVkRenderPipelineInfo&)> in_predicate);

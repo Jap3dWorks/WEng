@@ -1,10 +1,12 @@
 #pragma once
 
+#include "WCore/WCore.hpp"
+
 #include "IRenderResources.hpp"
 #include "WVulkan/WVkAssetCollection.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 
-class WVkRenderResources : public IRenderResources {
+class WRENDER_API WVkRenderResources : public IRenderResources {
 
 public:
 
@@ -24,7 +26,7 @@ public:
 
     // Texture
 
-    void RegisterTexture(const WTextureAsset & in_texture_struct) override;
+    void RegisterTexture(WTextureAsset & in_texture_struct) override;
 
     void UnregisterTexture(WId in_id) override;
 
@@ -34,7 +36,7 @@ public:
 
     // Static Mesh
 
-    void RegisterStaticMesh(const WStaticMeshAsset & in_mesh_struct) override;
+    void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) override;
 
     void UnregisterStaticMesh(WId in_id) override;
 
@@ -42,9 +44,9 @@ public:
 
     void UnloadStaticMesh(WId in_id) override;
 
-    WVkTextureInfo TextureInfo(WId in_id);
+    const WVkTextureInfo & TextureInfo(WId in_id) const;
 
-    WVkMeshInfo StaticMeshInfo(WId in_id);
+    const WVkMeshInfo & StaticMeshInfo(WId in_id) const;
 
 private:
 

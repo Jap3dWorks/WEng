@@ -128,7 +128,7 @@ WId WVkRenderPipelinesManager::AddBinding(
     const WVkMeshInfo & in_mesh_info
     )
 {
-    assert(pipeline_bindings_.Contains(in_pipeline_id));
+    assert(pipeline_bindings_.contains(in_pipeline_id));
  
     WId result = bindings_.Create(
         [&in_pipeline_id,

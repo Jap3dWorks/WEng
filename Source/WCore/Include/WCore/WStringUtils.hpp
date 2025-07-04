@@ -35,7 +35,7 @@ namespace WStringUtils {
         const std::string & asset_name
         ) {
 
-        assert(package_path.starts_with("/Content"));
+        assert(asset_directory.starts_with("/Content"));
 
         std::string p_name = WStringUtils::Split(
             WStringUtils::Split(package_name, ".")[0], "/"

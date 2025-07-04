@@ -56,11 +56,11 @@ public:
 
         WId id = containers_[object_class]->Create();
 
-        T* result;
+        void* result;
 
         containers_[object_class]->Get(id, result);
 
-        return result;
+        return reinterpret_cast<T*>(result);
     }
 
     template <std::derived_from<WObject> T>
@@ -68,10 +68,10 @@ public:
     {
         WClass object_class = T::GetDefaultObject()->GetClass();
 
-        T* result;
+        void * result;
         containers_[object_class]->Get(in_id, result);
 
-        return result;
+        return reinterpret_cast<T*>(result);
     }
 
 private:

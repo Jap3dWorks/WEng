@@ -11,7 +11,7 @@ public:
 
     virtual ~IRenderResources()=default;
 
-    virtual void RegisterTexture(const WTextureAsset & in_texture_asset)=0;
+    virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
 
     virtual void UnregisterTexture(WId in_id)=0;
 
@@ -19,7 +19,7 @@ public:
 
     virtual void UnloadTexture(WId in_id)=0;
 
-    virtual void RegisterStaticMesh(const WStaticMeshAsset & in_static_mesh_asset)=0;
+    virtual void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset)=0;
 
     virtual void UnregisterStaticMesh(WId in_id)=0;
 

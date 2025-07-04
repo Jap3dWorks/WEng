@@ -5,7 +5,7 @@
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 
-class IObjectDataBase {
+class WCORE_API IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
     
@@ -14,8 +14,8 @@ public:
     virtual void Clear() = 0;
     virtual void Get(WId, void* &) = 0;
     virtual void Get(WId, const void*&) const = 0;
-    virtual size_t Count()=0;
-    virtual bool Contains(WId in_id);
+    virtual size_t Count() const = 0;
+    virtual bool Contains(WId in_id) const = 0;
 };
 
 template<typename T>
@@ -23,9 +23,12 @@ class TObjectDataBase : public IObjectDataBase {
 
 public:
 
-    TObjectDataBase() :
-        destroy_fn_([](T&)->void{}),
-        create_fn_([](WId){return T{}; }) {}
+    constexpr TObjectDataBase() :
+        create_fn_([](WId) -> T {return T{}; }),
+        destroy_fn_([](T&) -> void {})
+        {
+            
+        }
 
     ~TObjectDataBase() {
         Clear();
@@ -46,14 +49,19 @@ public:
 
     WId Create(TFunction<T(WId)> in_predicate) {
         WId oid = id_pool_.Generate();
+        T value = in_predicate(oid);
         objects_.Insert(oid, in_predicate(oid));
 
         return oid;
     }
 
-    WId Create() override final {
+    WId Create() override {
         WId oid = id_pool_.Generate();
-        objects_.Insert(oid, create_fn_(oid));
+        this->create_fn_(oid);
+        // objects_.Insert(oid, create_fn_(oid));
+
+        // objects_.Insert(oid, value);
+
         return oid;
     }
 
@@ -104,11 +112,11 @@ public:
         out_value = &objects_.Get(in_id);
     }
 
-    size_t Count() override final {
+    size_t Count() const override final {
         return objects_.Count();
     }
 
-    bool Contains(WId in_id) override final {
+    bool Contains(WId in_id) const override final {
         return objects_.Contains(in_id);
     }
 
@@ -130,8 +138,7 @@ private:
     }
 
     TFunction<void(T&)> destroy_fn_; // =[](T&)->void{};
-    TFunction<T(WId)> create_fn_; // =[](WId) -> T {return T{};};
-
+    TFunction<T(const WId &)> create_fn_; // =[](WId) -> T {return T{};};
     WIdPool id_pool_{};
     TSparseSet<T> objects_{};
 };
