@@ -7,17 +7,18 @@
 private:                                                                          \
     static inline std::unique_ptr<_WCLASS_> default_object_{};                    \
 public:                                                                           \
-    _WCLASS_() = default;                                                         \
+    constexpr _WCLASS_() noexcept = default;                                      \
     ~_WCLASS_() = default;                                                        \
-    static const _WCLASS_& GetDefaultObject() {                                   \
+    static const _WCLASS_& GetDefaultObject() noexcept {                          \
         static _WCLASS_ default_object{};                                         \
         return default_object;                                                    \
     }                                                                             \
-    static const WClass& GetStaticClass() {                                       \
+    static const WClass& GetStaticClass() noexcept {                              \
         static WClass static_class( #_WCLASS_ );                                  \
         return static_class;                                                      \
     }                                                                             \
-    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); }     
+    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); } \
+
 
 
 #define WOBJECT_BODY(_WCLASS_)  \

@@ -31,8 +31,8 @@ void WVkRenderResources::Move(WVkRenderResources && other) {
     static_mesh_collection = std::move(other.static_mesh_collection);
 }
 
-void WVkRenderResources::RegisterTexture(WTextureAsset & in_texture_asset) {
-    return texture_collection.RegisterAsset(in_texture_asset);
+void WVkRenderResources::RegisterTexture(TRef<WTextureAsset> in_texture_asset) {
+    return texture_collection.RegisterAsset(in_texture_asset.Get());
 }
 
 void WVkRenderResources::UnregisterTexture(WId in_id) {
@@ -47,8 +47,8 @@ void WVkRenderResources::UnloadTexture(WId in_id) {
     texture_collection.UnloadAsset(in_id);
 }
 
-void WVkRenderResources::RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) {
-    return static_mesh_collection.RegisterAsset(in_static_mesh_asset);
+void WVkRenderResources::RegisterStaticMesh(TRef<WStaticMeshAsset> in_static_mesh_asset) {
+    return static_mesh_collection.RegisterAsset(in_static_mesh_asset.Get());
 }
 
 void WVkRenderResources::UnregisterStaticMesh(WId in_id) {

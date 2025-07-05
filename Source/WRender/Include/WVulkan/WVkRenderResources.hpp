@@ -26,7 +26,7 @@ public:
 
     // Texture
 
-    void RegisterTexture(WTextureAsset & in_texture_struct) override;
+    void RegisterTexture(TRef<WTextureAsset> in_texture_struct) override;
 
     void UnregisterTexture(WId in_id) override;
 
@@ -34,17 +34,17 @@ public:
 
     void UnloadTexture(WId in_id) override;
 
+    const WVkTextureInfo & TextureInfo(WId in_id) const;
+
     // Static Mesh
 
-    void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) override;
+    void RegisterStaticMesh(TRef<WStaticMeshAsset> in_mesh_struct) override;
 
     void UnregisterStaticMesh(WId in_id) override;
 
     void LoadStaticMesh(WId in_id) override;
 
     void UnloadStaticMesh(WId in_id) override;
-
-    const WVkTextureInfo & TextureInfo(WId in_id) const;
 
     const WVkMeshInfo & StaticMeshInfo(WId in_id) const;
 

@@ -136,13 +136,15 @@ std::vector<WAsset*> WImportObj::Import(const char* file_path, const char* asset
 
     std::vector<WAsset*> imported_assets(shapes.size());
 
-    for (uint32_t i; i < meshes.size(); i++) {
+    for (uint32_t i=0; i < meshes.size(); i++) {
         WStaticMeshAsset * static_mesh = ObjectManager().CreateObject<WStaticMeshAsset>(
             "StaticMesh"
             );
 
         static_mesh->SetMesh(std::move(meshes[i]));
         static_mesh->SetPath(WStringUtils::AssetPath(asset_directory, file_path, names[i]));
+
+        imported_assets[i] = std::move(static_mesh);
     }
 
     return imported_assets;

@@ -114,19 +114,19 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     TOptionalRef<WImportObj> obj_importer =
         engine.ImportersRegister()->GetImporter<WImportObj>();
 
-    std::vector<WAsset*> geo_asset =
+    std::vector<WAsset*> geo_assets =
         obj_importer->Import(
             "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/viking_room.viking_room"
             );
 
-    if (geo_asset.size() < 1)
+    if (geo_assets.size() < 1)
     {
         std::cout << "Failed to import geo_asset!" << std::endl;
         return false;
     }
 
-    if (geo_asset[0]->GetClass() != WStaticMeshAsset::GetStaticClass())
+    if (geo_assets[0]->GetClass() != WStaticMeshAsset::GetStaticClass())
     {
         std::cout << "geo_asset is not a static model!" << std::endl;
         return false;
@@ -152,7 +152,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    out_static_model = static_cast<WStaticMeshAsset*>(geo_asset[0]);
+    out_static_model = static_cast<WStaticMeshAsset*>(geo_assets[0]);
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
 
     return true;
@@ -221,9 +221,11 @@ int main(int argc, char** argv)
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        engine.Render()->RenderResources()->RegisterStaticMesh(*static_mesh);
-        engine.Render()->RenderResources()->RegisterTexture(*texture_asset);
-            
+        engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
+        engine.Render()->RenderResources()->RegisterTexture(texture_asset);
+        engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
+        engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
+
         WId did =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
@@ -235,7 +237,7 @@ int main(int argc, char** argv)
             static_mesh->WID()
             );
 
-        WLOG("Bind Pipeline: " << pipeline_wid);
+        WLOG("Bind Pipeline: " << pipeline_wid.GetId());
 
         // Update Descriptor Sets //
 
@@ -253,6 +255,7 @@ int main(int argc, char** argv)
         for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
         {
             // TODO Move into Render process
+
             std::vector<VkWriteDescriptorSet> write_descriptor_sets{2};
 
             WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
@@ -269,7 +272,8 @@ int main(int argc, char** argv)
             WVulkan::WVkWriteDescriptorSetTextureStruct texture_struct{};
 
             texture_struct.binding = 1;
-            // texture_struct.texture_id = texture_id;
+            // TODO Fix this
+            // texture_struct.texture_info = engine.Render()->RenderResources()->TextureInfo(TextureAsset->WID());
             texture_struct.descriptor_set = descriptor_set.descriptor_sets[i];
 
             WVulkan::UpdateWriteDescriptorSet(

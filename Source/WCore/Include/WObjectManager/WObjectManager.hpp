@@ -22,16 +22,16 @@ class WObjectManager
 
 public:
 
-    WObjectManager() = default;
+    constexpr WObjectManager() noexcept = default;
     virtual ~WObjectManager() = default;
 
     // You can create a global instance of WObjectManager
 
-    constexpr WObjectManager(const WObjectManager&) = delete;
+    WObjectManager(const WObjectManager&) = delete;
     
-    WObjectManager(WObjectManager && other) noexcept {
-        Move(std::move(other));
-    }
+    WObjectManager(WObjectManager && other) noexcept :
+        containers_(std::move(other.containers_))
+        {}
     
     constexpr WObjectManager & operator=(const WObjectManager&) = delete;
     constexpr WObjectManager & operator=(WObjectManager && other) noexcept {
@@ -60,7 +60,10 @@ public:
 
         containers_[object_class]->Get(id, result);
 
-        return reinterpret_cast<T*>(result);
+        T* asset = reinterpret_cast<T*>(result);
+        asset->WID(id);
+
+        return asset;
     }
 
     template <std::derived_from<WObject> T>

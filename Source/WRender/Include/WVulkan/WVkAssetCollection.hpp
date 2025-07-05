@@ -9,7 +9,9 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include "WLog.hpp"
 
+#include <iostream>
 #include <unordered_map>
 #include <cassert>
 #include <concepts>
@@ -21,7 +23,8 @@ class WRENDER_API WVkAssetCollection
 {
 public:
 
-    constexpr WVkAssetCollection() noexcept = default;
+    constexpr WVkAssetCollection() noexcept :
+    assets_(), data_() {}
 
     virtual ~WVkAssetCollection() {
         Clear();
@@ -49,10 +52,10 @@ public:
 
     /** Assign a WId to identify the asset */
     void RegisterAsset(A & in_asset) {
-        assets_.insert({in_asset.WID(), TRef<A>(&in_asset)});
+        assets_.insert({in_asset.WID(), TRef<A>(in_asset)});
     }
 
-    void UnregisterAsset(WId in_id) {
+    void UnregisterAsset(const WId & in_id) {
         assert(assets_.contains(in_id));
         assets_.erase(in_id);
     }
@@ -62,7 +65,7 @@ public:
     }
 
     /** put the data in the graphical memory */
-    void LoadAsset(WId in_id) {
+    void LoadAsset(const WId & in_id) {
         assert(assets_.contains(in_id));
         data_.insert({in_id, LoadAssetImpl(assets_[in_id].Get())});
     }
@@ -72,7 +75,7 @@ public:
     }
 
     /** pop from graphical memory */
-    void UnloadAsset(WId in_id) {
+    void UnloadAsset(const WId & in_id) {
         assert(assets_.contains(in_id));
         
         UnloadAssetImpl(data_[in_id]);
@@ -83,9 +86,13 @@ public:
         UnloadAsset(in_asset.WID());
     }
 
-    const D & GetData(WId in_id) const noexcept {
+    const D & GetData(const WId & in_id) const noexcept {
         assert(data_.contains(in_id));
         return data_.at(in_id);
+    }
+
+    bool Contains(const WId & in_id) const noexcept {
+        return data_.contains(in_id);
     }
 
 protected:
@@ -115,9 +122,9 @@ private:
         assets_.clear();
     }
 
-    std::unordered_map<WId, TRef<A>> assets_{};    
+    std::unordered_map<WId, TRef<A>> assets_;    
     
-    std::unordered_map<WId, D> data_{};
+    std::unordered_map<WId, D> data_;
 
 };
 

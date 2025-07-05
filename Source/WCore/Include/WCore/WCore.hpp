@@ -3,8 +3,11 @@
 #include "DllDef.h"
 #include "WCore/CoreMacros.hpp"
 
+#include <cstring>
 #include <string>
 #include <functional>
+#include <string_view>
+#include <cassert>
 
 #include "WCore.intermediate.h"
 
@@ -16,37 +19,99 @@ class WCORE_API WId
 {
 public:
 
-    WId() = default;
-    WId(size_t id);
+    constexpr WId() noexcept :
+    id_(0) {}
 
-    size_t GetId() const;
+    constexpr WId(size_t id) noexcept :
+    id_(id) {}
 
-    bool operator==(const WId &other) const;
-    bool operator!=(const WId &other) const;
+    constexpr size_t GetId() const noexcept {
+        return id_;
+    }
 
-    bool operator<(const WId &other) const;
-    bool operator>(const WId &other) const;
+    constexpr bool operator==(const WId &other) const noexcept {
+        return id_ == other.id_;
+    }
+    
+    constexpr bool operator!=(const WId &other) const noexcept {
+        return id_ != other.id_;
+    }
 
-    bool operator<=(const WId &other) const;
-    bool operator>=(const WId &other) const;
+    constexpr bool operator<(const WId &other) const noexcept {
+        return id_ < other.id_;
+    }
+    
+    constexpr bool operator>(const WId &other) const noexcept {
+        return id_ > other.id_;
+    }
 
-    WId operator+(const WId &other) const;
-    WId operator-(const WId &other) const;
+    constexpr bool operator<=(const WId &other) const noexcept {
+        return id_ <= other.id_;
+    }
+    
+    constexpr bool operator>=(const WId &other) const noexcept {
+        return id_ >= other.id_;
+    }
 
-    operator size_t() const;
+    constexpr WId operator+(const WId &other) const noexcept {
+        return WId(id_ + other.id_);
+    }
+    
+    constexpr WId operator-(const WId &other) const noexcept {
+        return WId(id_ - other.id_);
+    }
 
-    bool IsValid() const;
+    constexpr WId& operator++() noexcept
+    {
+        ++id_;
+        return *this;
+    }
+
+    constexpr WId operator++(int) noexcept
+    {
+        WId temp = WId(id_);
+        ++id_;
+        return temp;
+    }
+
+    constexpr WId& operator--() noexcept
+    {
+        --id_;
+        return *this;
+    }
+
+    constexpr WId operator--(int) noexcept
+    {
+        WId temp = WId(id_);
+        --id_;
+        return temp;
+    }
+
+    constexpr WId& operator+=(const WId &other) noexcept
+    {
+        id_ += other.id_;
+        return *this;
+    }
+
+    constexpr WId& operator-=(const WId &other) noexcept
+    {
+        id_ -= other.id_;
+        return *this;
+    }
+
+    constexpr operator size_t() const noexcept {
+        return id_;
+    }
+
+    constexpr bool IsValid() const noexcept {
+        return id_ > 0;
+    }
+
+    constexpr operator bool() const noexcept {
+        return IsValid();
+    }
 
 private:
-
-    WId& operator++();
-    WId operator++(int);
-
-    WId& operator--();
-    WId operator--(int);
-
-    WId& operator+=(const WId &other);
-    WId& operator-=(const WId &other);
 
     size_t id_=0; 
 };
@@ -68,25 +133,51 @@ class WCORE_API WClass
 {
 public:
 
-    WClass() = delete;
-    WClass(const char *name);
+    constexpr WClass() noexcept = default;
+    constexpr WClass(const char *name) noexcept :
+    name_(name) {}
 
     virtual ~WClass() = default;
 
-    const char *GetName() const;
+    constexpr const char *GetName() const noexcept {
+        return name_;
+    }
 
 public:
-    bool operator==(const WClass &other) const;
-    bool operator!=(const WClass &other) const;
 
-    bool operator<(const WClass &other) const;
-    bool operator>(const WClass &other) const;
+    constexpr bool operator==(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) == other.name_;
+    }
+    
+    constexpr bool operator!=(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) != other.name_;
+    }
 
-    bool operator<=(const WClass &other) const;
-    bool operator>=(const WClass &other) const;
+    constexpr bool operator<(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) < other.name_;
+    }
+    
+    constexpr bool operator>(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) > other.name_;
+    }
+
+    constexpr bool operator<=(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) <= other.name_;
+    }
+    
+    constexpr bool operator>=(const WClass &other) const noexcept
+    {
+        return std::string_view(name_) >= other.name_;
+    }
 
 private:
     const char * name_;
+    
 };
 
 namespace std
@@ -109,18 +200,19 @@ class WCORE_API WObject
 
 public:
 
-    WNODISCARD WId WID() const { return wid_; }
+    WNODISCARD constexpr WId WID() const noexcept
+    { return wid_; }
 
-    void WID(WId in_wid);
-
-    
+    constexpr void WID(WId in_wid) noexcept {
+        assert(wid_.GetId() == 0);
+        wid_ = in_wid;
+    }
 
 protected:
 
-    WId wid_{};
+    WId wid_;
 
 private:
 
-    // static const WObject default_object_{}; 
 };
 

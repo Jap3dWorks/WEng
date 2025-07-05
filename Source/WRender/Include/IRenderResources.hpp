@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/TRef.hpp"
 
 class WTextureAsset;
 class WStaticMeshAsset;
@@ -11,7 +12,7 @@ public:
 
     virtual ~IRenderResources()=default;
 
-    virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
+    virtual void RegisterTexture(TRef<WTextureAsset> in_texture_asset)=0;
 
     virtual void UnregisterTexture(WId in_id)=0;
 
@@ -19,7 +20,7 @@ public:
 
     virtual void UnloadTexture(WId in_id)=0;
 
-    virtual void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset)=0;
+    virtual void RegisterStaticMesh(TRef<WStaticMeshAsset> in_static_mesh_asset)=0;
 
     virtual void UnregisterStaticMesh(WId in_id)=0;
 
