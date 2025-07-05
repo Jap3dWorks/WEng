@@ -21,26 +21,28 @@ class WRENDER_API WVkAssetCollection
 {
 public:
 
-    constexpr WVkAssetCollection()=default;
+    constexpr WVkAssetCollection() noexcept = default;
 
     virtual ~WVkAssetCollection() {
         Clear();
     }
 
-    WVkAssetCollection(const WVkAssetCollection & other) {
-        Copy(other);
-    }
+    WVkAssetCollection(const WVkAssetCollection & other) :
+    assets_(other.assets_),
+    data_(other.data_)
+    {}
 
-    WVkAssetCollection(WVkAssetCollection && other) noexcept {
-        Move(std::move(other));
-    }
+    constexpr WVkAssetCollection(WVkAssetCollection && other) noexcept :
+    assets_(std::move(other.assets_)),
+    data_(std::move(other.data_))
+    {}
 
     WVkAssetCollection & operator=(const WVkAssetCollection & other) {
         Copy(other);
         return *this;
     }
 
-    WVkAssetCollection & operator=(WVkAssetCollection && other) noexcept {
+    constexpr WVkAssetCollection & operator=(WVkAssetCollection && other) noexcept {
         Move(std::move(other));
         return *this;
     }
@@ -94,7 +96,7 @@ protected:
 
 private:
 
-    void Move(WVkAssetCollection && other) {
+    constexpr void Move(WVkAssetCollection && other) noexcept {
         data_ = std::move(other.data_);
         assets_ = std::move(other.assets_);
     }
@@ -110,6 +112,7 @@ private:
         }
 
         data_.clear();
+        assets_.clear();
     }
 
     std::unordered_map<WId, TRef<A>> assets_{};    
@@ -124,35 +127,50 @@ class WVkTextureCollection : public WVkAssetCollection<WVkTextureInfo, WTextureA
 
 public:
 
-    WVkTextureCollection()=default;
+    constexpr WVkTextureCollection() noexcept = default;
 
-    WVkTextureCollection(
-        const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info
-        ) :
-        device_info_(in_device_info), command_pool_info_(in_command_pool_info) {
-        
-    }
+    constexpr WVkTextureCollection(
+        const WVkDeviceInfo & in_device_info,
+        const WVkCommandPoolInfo & in_command_pool_info
+        ) noexcept :
+        WVkAssetCollection(),
+        device_info_(in_device_info),
+        command_pool_info_(in_command_pool_info) {}
 
-    ~WVkTextureCollection() override = default;
+    ~WVkTextureCollection() = default;
 
     WVkTextureCollection(const WVkTextureCollection & other) = delete;
-    WVkTextureCollection(WVkTextureCollection && other);
+    
+    constexpr WVkTextureCollection(WVkTextureCollection && other) noexcept :
+        WVkAssetCollection(std::move(other)),
+        device_info_(std::move(other.device_info_)),
+        command_pool_info_(std::move(other.command_pool_info_)) {}
+
 
     WVkTextureCollection & operator=(const WVkTextureCollection & other) = delete;
-    WVkTextureCollection & operator=(WVkTextureCollection && other);
+
+    constexpr WVkTextureCollection & operator=(WVkTextureCollection && other) noexcept {
+        WVkAssetCollection::operator=(std::move(other));
+        Move(std::move(other));
+
+        return *this;
+
+    }
 
 protected:
 
     WVkTextureInfo LoadAssetImpl(const WTextureAsset & in_asset) override;
-
     void UnloadAssetImpl(WVkTextureInfo & in_data) override;
 
 private:
 
-    void Move(WVkTextureCollection && other);
+    constexpr void Move(WVkTextureCollection && other) noexcept {
+        device_info_ = std::move(other.device_info_);
+        command_pool_info_ = std::move(other.command_pool_info_);
+    }
 
-    WVkDeviceInfo device_info_{};
-    WVkCommandPoolInfo command_pool_info_{};
+    WVkDeviceInfo device_info_;
+    WVkCommandPoolInfo command_pool_info_;
 
 };
 
@@ -160,31 +178,48 @@ class WVkStaticMeshCollection : public WVkAssetCollection<WVkMeshInfo, WStaticMe
 
 public:
 
-    WVkStaticMeshCollection()=default;
+    constexpr WVkStaticMeshCollection() noexcept =default;
 
-    WVkStaticMeshCollection(
-        const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info
-        );
+    constexpr WVkStaticMeshCollection(
+        const WVkDeviceInfo & in_device_info,
+        const WVkCommandPoolInfo & in_command_pool_info
+        ) noexcept :
+        WVkAssetCollection(),
+        device_info_(in_device_info),
+        command_pool_info_(in_command_pool_info) {}
 
-    ~WVkStaticMeshCollection() override = default;
+
+    ~WVkStaticMeshCollection() = default;
 
     WVkStaticMeshCollection(const WVkStaticMeshCollection & other) = delete;
-    WVkStaticMeshCollection(WVkStaticMeshCollection && other);
+
+    constexpr WVkStaticMeshCollection(WVkStaticMeshCollection && other) noexcept :
+        WVkAssetCollection(std::move(other)),
+        device_info_(std::move(other.device_info_)),
+        command_pool_info_(std::move(other.command_pool_info_)) {}
 
     WVkStaticMeshCollection & operator=(const WVkStaticMeshCollection & in_other) = delete;
-    WVkStaticMeshCollection & operator=(WVkStaticMeshCollection && other);
+
+    constexpr WVkStaticMeshCollection & operator=(WVkStaticMeshCollection && other) noexcept {
+        WVkAssetCollection::operator=(std::move(other));
+        Move(std::move(other));
+
+        return *this;
+    }
 
 protected:
 
     WVkMeshInfo LoadAssetImpl(const WStaticMeshAsset & in_asset) override;
-
     void UnloadAssetImpl(WVkMeshInfo & in_data) override;
 
 private:
 
-    void Move(WVkStaticMeshCollection && other);
+    constexpr void Move(WVkStaticMeshCollection && other) noexcept {
+        device_info_ = std::move(other.device_info_);
+        command_pool_info_ = std::move(other.command_pool_info_);
+    }
 
-    WVkDeviceInfo device_info_{};
-    WVkCommandPoolInfo command_pool_info_{};
+    WVkDeviceInfo device_info_;
+    WVkCommandPoolInfo command_pool_info_;
 };
 

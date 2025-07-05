@@ -23,33 +23,35 @@ class TObjectDataBase : public IObjectDataBase {
 
 public:
 
-    constexpr TObjectDataBase() :
-        create_fn_([](WId) -> T {return T{}; }),
-        destroy_fn_([](T&) -> void {})
-        {
-            
-        }
+    constexpr TObjectDataBase() noexcept :
+        destroy_fn_([](T&)->void{}),
+        create_fn_([](WId) -> T {return T{};}),
+        id_pool_(),
+        objects_()
+        {}
 
-    ~TObjectDataBase() {
+    virtual ~TObjectDataBase() {
         Clear();
     }
 
     TObjectDataBase(const TObjectDataBase & other) = delete;
 
-    TObjectDataBase(TObjectDataBase && other) {
-        Move(std::move(other));
-    }
+    constexpr TObjectDataBase(TObjectDataBase && other) noexcept :
+        destroy_fn_(std::move(other.destroy_fn_)),
+        create_fn_(std::move(other.create_fn_)),
+        id_pool_(std::move(other.id_pool_)),
+        objects_(std::move(other.objects_))
+        {}
 
     TObjectDataBase & operator=(const TObjectDataBase & other) = delete;
 
-    TObjectDataBase & operator=(TObjectDataBase && other) {
+    constexpr TObjectDataBase & operator=(TObjectDataBase && other) noexcept {
         Move(std::move(other));
         return *this;
     }
 
     WId Create(TFunction<T(WId)> in_predicate) {
         WId oid = id_pool_.Generate();
-        T value = in_predicate(oid);
         objects_.Insert(oid, in_predicate(oid));
 
         return oid;
@@ -57,10 +59,7 @@ public:
 
     WId Create() override {
         WId oid = id_pool_.Generate();
-        this->create_fn_(oid);
-        // objects_.Insert(oid, create_fn_(oid));
-
-        // objects_.Insert(oid, value);
+        objects_.Insert(oid, create_fn_(oid));
 
         return oid;
     }
@@ -93,7 +92,6 @@ public:
         
         id_pool_.Reset();
         objects_.Clear();
-
     }
 
     T & Get(WId in_id) {
@@ -130,15 +128,16 @@ public:
 
 private:
 
-    void Move(TObjectDataBase && other) {
+    constexpr void Move(TObjectDataBase && other) noexcept {
         destroy_fn_ = std::move(other.destroy_fn_);
         create_fn_ = std::move(other.create_fn_);
         objects_ = std::move(other.objects_);
         id_pool_ = std::move(other.id_pool_);
     }
 
-    TFunction<void(T&)> destroy_fn_; // =[](T&)->void{};
-    TFunction<T(const WId &)> create_fn_; // =[](WId) -> T {return T{};};
-    WIdPool id_pool_{};
-    TSparseSet<T> objects_{};
+    TFunction<void(T&)> destroy_fn_; 
+    TFunction<T(const WId &)> create_fn_;
+    WIdPool id_pool_;
+    TSparseSet<T> objects_;
+    
 };

@@ -4,23 +4,6 @@
 // WVkTextureCollection
 // --------------------
 
-WVkTextureCollection::WVkTextureCollection(WVkTextureCollection && other) :
-    WVkAssetCollection(std::move(other)) {
-    Move(std::move(other));
-}
-
-WVkTextureCollection & WVkTextureCollection::operator=(WVkTextureCollection && other) {
-    WVkAssetCollection::operator=(std::move(other));
-    Move(std::move(other));
-
-    return *this;
-}
-
-void WVkTextureCollection::Move(WVkTextureCollection && other) {
-    device_info_ = std::move(other.device_info_);
-    command_pool_info_ = std::move(other.command_pool_info_);
-}
-
 WVkTextureInfo WVkTextureCollection::LoadAssetImpl(const WTextureAsset & in_asset) {
     WVkTextureInfo result;
 
@@ -43,29 +26,6 @@ void WVkTextureCollection::UnloadAssetImpl(WVkTextureInfo & in_texture_info) {
 
 // WVkStaticMeshCollection
 // -----------------------
-
-WVkStaticMeshCollection::WVkStaticMeshCollection(
-    const WVkDeviceInfo & in_device_info,
-    const WVkCommandPoolInfo & in_command_pool_info
-    ) :
-    device_info_(in_device_info), command_pool_info_(in_command_pool_info) {}
-
-WVkStaticMeshCollection::WVkStaticMeshCollection(WVkStaticMeshCollection && other) :
-    WVkAssetCollection(std::move(other)) {
-    Move(std::move(other));
-}
-
-WVkStaticMeshCollection & WVkStaticMeshCollection::operator=(WVkStaticMeshCollection && other) {
-    WVkAssetCollection::operator=(std::move(other));
-    Move(std::move(other));
-
-    return *this;
-}
-
-void WVkStaticMeshCollection::Move(WVkStaticMeshCollection && other) {
-    device_info_ = std::move(other.device_info_);
-    command_pool_info_ = std::move(other.command_pool_info_);
-}
 
 WVkMeshInfo WVkStaticMeshCollection::LoadAssetImpl(const WStaticMeshAsset & in_asset) {
     WVkMeshInfo mesh_info;
