@@ -25,6 +25,8 @@ public:
 
     ~WRender();
 
+    void Initialize();
+
     void Draw();
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()

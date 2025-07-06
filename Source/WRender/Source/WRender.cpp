@@ -105,7 +105,8 @@ WRender::WRender()
 
     render_pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
-        render_pass_info_
+        render_pass_info_,
+        swap_chain_info_
         );
 
     render_command_pool_ = WVkRenderCommandPool( 
@@ -194,6 +195,10 @@ WRender::~WRender()
 void WRender::DeviceWaitIdle() const
 {
     vkDeviceWaitIdle(device_info_.vk_device);
+}
+
+void WRender::Initialize() {
+    
 }
 
 void WRender::Draw() {
@@ -457,23 +462,7 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
                 binding.mesh_asset_id
                 );
 
-        // TODO: Update Descriptor Sets
-
-        std::vector<VkWriteDescriptorSet> write_descriptor_sets{1};
-
-        // TODO: update buffer_info from actor transform component
-
-        WVulkan::UpdateWriteDescriptorSet_UBO(
-            write_descriptor_sets[0],
-            binding.ubo[in_frame_index].binding,
-            descriptor.descriptor_sets[in_frame_index],
-            &binding.ubo[in_frame_index].buffer_info
-            );
-
-        WVulkan::UpdateDescriptorSets(
-            write_descriptor_sets,
-            device_info_
-            );
+        // TODO Update pipeline binding descriptors
 
         VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
         VkDeviceSize offsets[] = {0};

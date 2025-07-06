@@ -18,8 +18,12 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager()
 {}
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
-    WVkDeviceInfo device, WVkRenderPassInfo render_pass_info
-) : device_info_(device), render_pass_info_(render_pass_info)
+    WVkDeviceInfo device,
+    WVkRenderPassInfo render_pass_info,
+    WVkSwapChainInfo swap_chain_info
+) : device_info_(device),
+    render_pass_info_(render_pass_info),
+    swap_chain_info_(swap_chain_info)
 {
     Initialize();
 }
@@ -128,8 +132,6 @@ WId WVkRenderPipelinesManager::AddBinding(
     WId in_mesh_asset_id,
     std::vector<WId> in_textures,
     std::vector<uint32_t> in_textures_bindings
-
-    // std::vector<WVkDescriptorSetTextureBinding> in_textures
     )
 {
     assert(pipeline_bindings_.contains(in_pipeline_id));
@@ -137,12 +139,53 @@ WId WVkRenderPipelinesManager::AddBinding(
     // Create uniform buffers bindings
     // Lambda ensures NRVO and avoids moves
 
-    auto f = [this]() {
+    auto f = [this,
+              &in_descriptor_id]
+        () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
-        for(auto & binding : b) {
-            binding.binding = 0;
-            WVulkan::Create(binding.uniform_buffer_info, device_info_);
+        WVkDescriptorSetInfo ds = DescriptorSet(in_descriptor_id);
+        std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> write_ds;
+
+        for(uint32_t i = 0; i < b.size(); i++) {
+        // for(auto & binding : b) {
+            
+            b[i].binding = 0;
+            WVulkan::Create(b[i].uniform_buffer_info, device_info_);
+
+            WVulkan::UpdateUniformBuffer(
+                b[i].uniform_buffer_info,
+                glm::rotate(
+                    glm::mat4(1.f),
+                    glm::radians(90.f),
+                    glm::vec3(0.f, 0.f, 1.f)
+                    ),
+                glm::lookAt(
+                    glm::vec3(-2.f, 2.f, 2.f),
+                    glm::vec3(0.f, 0.f, 0.f),
+                    glm::vec3(0.f, 0.f, 1.f)
+                    ),
+                glm::perspective(
+                    glm::radians(45.f),
+                    swap_chain_info_.swap_chain_extent.width / (float) swap_chain_info_.swap_chain_extent.height,
+                    1.f, 10.f
+                    )
+                );
+
+            
+            // TODO FIX binding buffer_info parameters
+            WVulkan::UpdateWriteDescriptorSet_UBO(
+                write_ds[i],
+                b[i].binding,
+                ds.descriptor_sets[i],
+                &b[i].buffer_info
+                );
+            
+            WVulkan::UpdateDescriptorSets(
+                {write_ds[0]},
+                device_info_
+                );
         }
+
         return b;
     };
 
@@ -152,6 +195,8 @@ WId WVkRenderPipelinesManager::AddBinding(
             tx[i].binding = in_textures_bindings[i];
             tx[i].texture_info_id = in_textures[i];
         }
+
+        // Update Descriptor set
 
         return tx;
     };

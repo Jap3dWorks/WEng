@@ -1080,9 +1080,9 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::UpdateWriteDescriptorSet()
-{
-}
+// void WVulkan::UpdateWriteDescriptorSet()
+// {
+// }
 
 void WVulkan::UpdateDescriptorSets(
     std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,

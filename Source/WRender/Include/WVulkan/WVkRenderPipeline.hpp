@@ -25,7 +25,8 @@ public:
 
     WVkRenderPipelinesManager(
         WVkDeviceInfo device, 
-        WVkRenderPassInfo render_pass_info
+        WVkRenderPassInfo render_pass_info,
+        WVkSwapChainInfo swap_chain_info
         );
 
     WVkRenderPipelinesManager(const WVkRenderPipelinesManager & other)=delete;
@@ -124,6 +125,7 @@ private:
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
+    WVkSwapChainInfo swap_chain_info_ {};
 
 };
 
