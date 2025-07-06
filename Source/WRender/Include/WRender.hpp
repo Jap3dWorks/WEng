@@ -56,7 +56,9 @@ public:
     void AddPipelineBinding(
         WId pipeline_id,
         WId descriptor_set_id,
-        WId in_mesh_id
+        WId in_mesh_id,
+        std::vector<WId> in_textures,
+        std::vector<uint32_t> in_textures_bindings
         );
 
 private:

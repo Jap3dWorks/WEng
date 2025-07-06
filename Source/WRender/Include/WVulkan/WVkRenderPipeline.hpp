@@ -55,7 +55,10 @@ public:
     WId AddBinding(
         WId in_pipeline_id,
         WId in_descriptor_set_id,
-        const WVkMeshInfo & in_mesh_info
+        WId in_mesh_asset_id,
+        std::vector<WId> in_textures,
+        std::vector<uint32_t> in_textures_bindings
+        // std::vector<WVkDescriptorSetTextureBinding> in_textures
         );
 
     WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {

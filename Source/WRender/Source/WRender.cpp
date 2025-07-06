@@ -347,16 +347,21 @@ TRef<IRenderResources> WRender::RenderResources() {
 void WRender::AddPipelineBinding(
     WId pipeline_id,
     WId descriptor_set_id,
-    WId in_mesh_id
-    ) {
+    WId in_mesh_id,
+    std::vector<WId> in_textures,
+    std::vector<uint32_t> in_textures_bindings
+    )
+{
     
-    WVkRenderResources * resources =
-        static_cast<WVkRenderResources*>(render_resources_.get());
+    // WVkRenderResources * resources =
+    //     static_cast<WVkRenderResources*>(render_resources_.get());
     
     render_pipelines_manager_.AddBinding(
         pipeline_id,
         descriptor_set_id,
-        resources->StaticMeshInfo(in_mesh_id)
+        in_mesh_id,
+        in_textures,
+        in_textures_bindings
         );
 }
 
@@ -447,7 +452,30 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
         
         auto& descriptor = render_pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
 
-        VkBuffer vertex_buffers[] = {binding.mesh_info.vertex_buffer};
+        auto& mesh_info =
+            static_cast<WVkRenderResources*>(render_resources_.get())->StaticMeshInfo(
+                binding.mesh_asset_id
+                );
+
+        // TODO: Update Descriptor Sets
+
+        std::vector<VkWriteDescriptorSet> write_descriptor_sets{1};
+
+        // TODO: update buffer_info from actor transform component
+
+        WVulkan::UpdateWriteDescriptorSet_UBO(
+            write_descriptor_sets[0],
+            binding.ubo[in_frame_index].binding,
+            descriptor.descriptor_sets[in_frame_index],
+            &binding.ubo[in_frame_index].buffer_info
+            );
+
+        WVulkan::UpdateDescriptorSets(
+            write_descriptor_sets,
+            device_info_
+            );
+
+        VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
         VkDeviceSize offsets[] = {0};
         
         vkCmdBindVertexBuffers(
@@ -462,7 +490,7 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
         vkCmdBindIndexBuffer(
             // in_commandbuffer,
             render_command_buffer_.command_buffers[in_frame_index],
-            binding.mesh_info.index_buffer,
+            mesh_info.index_buffer,
             0,
             VK_INDEX_TYPE_UINT32
             );
@@ -480,7 +508,7 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
 
         vkCmdDrawIndexed(
             render_command_buffer_.command_buffers[in_frame_index],
-            binding.mesh_info.index_count,
+            mesh_info.index_count,
             1,
             0,
             0,

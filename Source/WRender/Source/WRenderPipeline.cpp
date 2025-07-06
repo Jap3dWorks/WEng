@@ -125,22 +125,54 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
 WId WVkRenderPipelinesManager::AddBinding(
     WId in_pipeline_id,
     WId in_descriptor_id,
-    const WVkMeshInfo & in_mesh_info
+    WId in_mesh_asset_id,
+    std::vector<WId> in_textures,
+    std::vector<uint32_t> in_textures_bindings
+
+    // std::vector<WVkDescriptorSetTextureBinding> in_textures
     )
 {
     assert(pipeline_bindings_.contains(in_pipeline_id));
- 
+
+    // Create uniform buffers bindings
+    // Lambda ensures NRVO and avoids moves
+
+    auto f = [this]() {
+        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
+        for(auto & binding : b) {
+            binding.binding = 0;
+            WVulkan::Create(binding.uniform_buffer_info, device_info_);
+        }
+        return b;
+    };
+
+    auto t = [this, &in_textures, &in_textures_bindings] () {
+        std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
+        for(int i=0; i<tx.size(); i++) {
+            tx[i].binding = in_textures_bindings[i];
+            tx[i].texture_info_id = in_textures[i];
+        }
+
+        return tx;
+    };
+
     WId result = bindings_.Create(
         [&in_pipeline_id,
          &in_descriptor_id,
-         &in_mesh_info](WId in_id) -> WVkPipelineBindingInfo {
-            return {
-                in_id,
-                in_pipeline_id,
-                in_descriptor_id,
-                in_mesh_info
-            };
-        }
+         &in_mesh_asset_id,
+         &t,
+         &f]
+        (WId in_id) -> WVkPipelineBindingInfo
+            {
+                return {
+                    in_id,                // TODO: use actor id binding
+                    in_pipeline_id,
+                    in_descriptor_id,
+                    in_mesh_asset_id,
+                    t(),
+                    f()
+                };
+            }
         );
 
     pipeline_bindings_[in_pipeline_id].push_back(result);
