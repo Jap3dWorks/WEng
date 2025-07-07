@@ -1,7 +1,7 @@
 #include "WRender.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVkRenderCommandPool.h"
+#include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
@@ -23,7 +23,6 @@
     #define _ENABLE_VALIDATON_LAYERS true
 #endif
 
-
 // WRender
 // -------
 
@@ -43,7 +42,7 @@ WRender::WRender() :
     render_pass_info_(),
     render_command_pool_(),
     render_command_buffer_(),
-    render_pipelines_manager_(),
+    pipelines_manager_(),
     image_available_semaphore_(),
     render_finished_semaphore_(),
     flight_fence_()
@@ -53,11 +52,10 @@ WRender::WRender() :
 
 WRender::~WRender()
 {
-
     WLOGFNAME("Destroy WRender");
 
-    // TODO FIX this! explicit cleanup!!
-    render_pipelines_manager_ = {};
+    pipelines_manager_.Clear();
+    pipelines_manager_ = {};
 
     WVulkan::Destroy(image_available_semaphore_, device_info_);
 
@@ -71,8 +69,9 @@ WRender::~WRender()
     // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
-    // TODO FIX this! explicit cleanup!!
+    render_command_pool_.Clear();
     render_command_pool_ = {};
+    
     render_command_buffer_ = {};
 
     render_resources_ = nullptr;
@@ -148,7 +147,7 @@ void WRender::Initialize()
         device_info_
         );
 
-    render_pipelines_manager_ = WVkRenderPipelinesManager(
+    pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
         window_info_.width,
@@ -243,7 +242,7 @@ void WRender::Draw()
         render_finished_semaphore_.semaphores[frame_index]
     };
 
-    for(auto pit : render_pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
+    for(auto pit : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index], 0);
 
@@ -353,8 +352,8 @@ void WRender::RecreateSwapChain() {
         device_info_
         );
 
-    render_pipelines_manager_.Width(width);
-    render_pipelines_manager_.Height(height);
+    pipelines_manager_.Width(width);
+    pipelines_manager_.Height(height);
 }
 
 TRef<IRenderResources> WRender::RenderResources() {
@@ -378,7 +377,7 @@ void WRender::AddPipelineBinding(
         tinfo[i] = resources->TextureInfo(in_textures[i]);
     }
 
-    render_pipelines_manager_.AddBinding(
+    pipelines_manager_.AddBinding(
         pipeline_id,
         descriptor_set_id,
         in_mesh_id,
@@ -390,7 +389,7 @@ void WRender::AddPipelineBinding(
 void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index)
 {
     const WVkRenderPipelineInfo & render_pipeline =
-        render_pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
+        pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
 
     VkCommandBufferBeginInfo begin_info{};
     
@@ -467,12 +466,12 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
         &scissor
         );
 
-    for (auto & bid : render_pipelines_manager_.IterateBindings(in_pipeline_id))
+    for (auto & bid : pipelines_manager_.IterateBindings(in_pipeline_id))
     {
 
-        auto& binding = render_pipelines_manager_.Binding(bid);
+        auto& binding = pipelines_manager_.Binding(bid);
         
-        auto& descriptor = render_pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
+        auto& descriptor = pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
 
         auto& mesh_info =
             static_cast<WVkRenderResources*>(render_resources_.get())->StaticMeshInfo(

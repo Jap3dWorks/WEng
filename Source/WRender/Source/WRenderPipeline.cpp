@@ -28,6 +28,37 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     Initialize();
 }
 
+WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
+{
+    Clear();
+}
+
+WVkRenderPipelinesManager::WVkRenderPipelinesManager(
+        WVkRenderPipelinesManager && other
+    ) noexcept :
+    render_pipelines_(std::move(other.render_pipelines_)),
+    descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
+    descriptor_sets_(std::move(other.descriptor_sets_)),
+    bindings_(std::move(other.bindings_)),
+    pipeline_bindings_(std::move(other.pipeline_bindings_)),
+    stage_pipelines_(std::move(other.stage_pipelines_)),
+    descriptor_pool_info_(std::move(other.descriptor_pool_info_)),
+    device_info_(std::move(other.device_info_)),
+    render_pass_info_(std::move(other.render_pass_info_)),
+    width(std::move(other.width)),
+    height(std::move(other.height))
+{
+
+}
+
+WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
+{
+    Clear();
+    Move(std::move(other));
+
+    return *this;
+}
+
 WId WVkRenderPipelinesManager::CreateRenderPipeline(
     WVkRenderPipelineInfo in_render_pipeline_info,
     std::vector<WVkShaderStageInfo> in_shader_stages,
@@ -105,36 +136,6 @@ WId WVkRenderPipelinesManager::CreateDescriptorSet(
             return descriptor_set_info;
         }
         );
-}
-
-WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
-{
-    Clear();
-}
-
-WVkRenderPipelinesManager::WVkRenderPipelinesManager(
-        WVkRenderPipelinesManager && other
-    ) noexcept :
-    render_pipelines_(std::move(other.render_pipelines_)),
-    descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
-    descriptor_sets_(std::move(other.descriptor_sets_)),
-    bindings_(std::move(other.bindings_)),
-    pipeline_bindings_(std::move(other.pipeline_bindings_)),
-    stage_pipelines_(std::move(other.stage_pipelines_)),
-    descriptor_pool_info_(std::move(other.descriptor_pool_info_)),
-    device_info_(std::move(other.device_info_)),
-    render_pass_info_(std::move(other.render_pass_info_)),
-    width(std::move(other.width)),
-    height(std::move(other.height))
-{
-
-}
-
-WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
-{
-    Move(std::move(other));
-
-    return *this;
 }
 
 WId WVkRenderPipelinesManager::AddBinding(
@@ -286,6 +287,12 @@ void WVkRenderPipelinesManager::Clear()
 
     descriptor_sets_.Clear();
     descriptor_set_layouts_.Clear();
+
+    device_info_ = {};
+    render_pass_info_ = {};
+
+    width = 0;
+    height = 0;
 }
 
 void WVkRenderPipelinesManager::Initialize() {

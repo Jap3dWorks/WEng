@@ -30,14 +30,14 @@ public:
     WNODISCARD const WVkCommandPoolInfo & CommandPoolInfo() const noexcept
     { return command_pool_info_; }
 
-    void Destroy();
+    void Clear();
 
 private:
 
     void Move(WVkRenderCommandPool&& out_other) noexcept;
 
-    WVkCommandPoolInfo command_pool_info_;
     WVkDeviceInfo device_info_;
+    WVkCommandPoolInfo command_pool_info_;
 
     std::vector<WVkCommandBufferInfo> command_buffers_;
     

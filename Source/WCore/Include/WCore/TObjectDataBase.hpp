@@ -41,11 +41,13 @@ public:
         create_fn_(std::move(other.create_fn_)),
         id_pool_(std::move(other.id_pool_)),
         objects_(std::move(other.objects_))
-        {}
+        {
+        }
 
     TObjectDataBase & operator=(const TObjectDataBase & other) = delete;
 
-    constexpr TObjectDataBase & operator=(TObjectDataBase && other) noexcept {
+    TObjectDataBase & operator=(TObjectDataBase && other) {
+        Clear();
         Move(std::move(other));
         return *this;
     }

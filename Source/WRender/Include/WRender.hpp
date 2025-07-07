@@ -7,7 +7,7 @@
 #include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
-#include "WVulkan/WVkRenderCommandPool.h"
+#include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WCore/TRef.hpp"
 
 #include <cstddef>
@@ -31,7 +31,7 @@ public:
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {
-        return render_pipelines_manager_;
+        return pipelines_manager_;
     }
 
     void DeviceWaitIdle() const;
@@ -83,7 +83,7 @@ private:
     WVkRenderCommandPool render_command_pool_;
     WVkCommandBufferInfo render_command_buffer_;
     
-    WVkRenderPipelinesManager render_pipelines_manager_;
+    WVkRenderPipelinesManager pipelines_manager_;
 
     WVkSemaphoreInfo image_available_semaphore_;
     WVkSemaphoreInfo render_finished_semaphore_;
