@@ -31,33 +31,6 @@
 
 #include <iostream>
 
-bool UpdateUniformBuffers(
-    const WVkSwapChainInfo & swap_chain_info_,
-    WVkUniformBufferObjectInfo & uniform_buffer_object_info_
-    )
-{
-    WVulkan::UpdateUniformBuffer(
-        uniform_buffer_object_info_,
-        glm::rotate(
-            glm::mat4(1.f),
-            glm::radians(90.f),
-            glm::vec3(0.f, 0.f, 1.f)
-            ),
-        glm::lookAt(
-            glm::vec3(-2.f, 2.f, 2.f),
-            glm::vec3(0.f, 0.f, 0.f),
-            glm::vec3(0.f, 0.f, 1.f)
-            ),
-        glm::perspective(
-            glm::radians(45.f),
-            swap_chain_info_.swap_chain_extent.width / (float) swap_chain_info_.swap_chain_extent.height,
-            1.f, 10.f
-            )
-        );
-
-    return true;
-}
-
 bool run(WEngine & engine)
 {
     engine.run();
@@ -219,17 +192,18 @@ int main(int argc, char** argv)
 
         engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
         engine.Render()->RenderResources()->RegisterTexture(texture_asset);
+
         engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
         engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
 
-        WId did =
+        WId dset_id =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout
                 );
 
         engine.Render()->AddPipelineBinding(
             pipeline_wid,
-            did,
+            dset_id,
             static_mesh->WID(),
             {texture_asset->WID()},
             {1}
@@ -237,64 +211,12 @@ int main(int argc, char** argv)
 
         WLOG("Bind Pipeline: " << pipeline_wid.GetId());
 
-        // Update Descriptor Sets //
-
-        const WVkDescriptorSetInfo descriptor_set =
-            engine.Render()->RenderPipelinesManager().DescriptorSet(did);
-
-        // std::array<WVkUniformBufferObjectInfo, WENG_MAX_FRAMES_IN_FLIGHT> uniform_buffer_info{};
-
-        // for(auto & uniform_buffer : uniform_buffer_info)
-        // {
-        //     WVulkan::Create(uniform_buffer, engine.Render()->DeviceInfo());
-        //     UpdateUniformBuffers(engine.Render()->SwapChainInfo(), uniform_buffer);
-        // }
-
-        // for (int i=0; i<descriptor_set.descriptor_sets.size(); i++)
-        // {
-            // TODO Move into Render process
-
-            // std::vector<VkWriteDescriptorSet> write_descriptor_sets{2};
-
-            // WVulkan::WVkWriteDescriptorSetUBOStruct ubo_struct{};
-
-            // ubo_struct.binding = 0;
-            // ubo_struct.uniform_buffer_info = uniform_buffer_info[i];
-            // ubo_struct.descriptor_set = descriptor_set.descriptor_sets[i];
-
-            // WVulkan::UpdateWriteDescriptorSet(
-            //     write_descriptor_sets[0],
-            //     ubo_struct
-            //     );
-
-            // WVulkan::WVkWriteDescriptorSetTextureStruct texture_struct{};
-
-            // texture_struct.binding = 1;
-            // TODO Fix this
-            // texture_struct.texture_info = engine.Render()->RenderResources()->TextureInfo(TextureAsset->WID());
-            // texture_struct.descriptor_set = descriptor_set.descriptor_sets[i];
-
-            // WVulkan::UpdateWriteDescriptorSet(
-            //     write_descriptor_sets[1],
-            //     texture_struct
-            //     );
-
-            // Update // 
-            
-        //     WVulkan::UpdateDescriptorSets(
-        //         write_descriptor_sets,
-        //         engine.Render()->DeviceInfo()
-        //         );
-        // }
-
-        // Start while loop
-
         run(engine);
 
     }
     catch(const std::exception& e)
     {
-        std::cout << std::string("[ERROR] ") + e.what() << std::endl;
+        WLOG("[ERROR]" << e.what());
 
         return 1;
     }

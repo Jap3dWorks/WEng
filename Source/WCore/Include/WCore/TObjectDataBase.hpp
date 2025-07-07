@@ -138,6 +138,7 @@ private:
     TFunction<void(T&)> destroy_fn_; 
     TFunction<T(const WId &)> create_fn_;
     WIdPool id_pool_;
+    
     TSparseSet<T> objects_;
     
 };

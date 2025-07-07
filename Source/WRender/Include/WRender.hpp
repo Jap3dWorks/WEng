@@ -8,7 +8,7 @@
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.h"
-#include "WVulkan/WVkAssetCollection.hpp"
+#include "WCore/TRef.hpp"
 
 #include <cstddef>
 
@@ -87,7 +87,7 @@ private:
 
     WVkSemaphoreInfo image_available_semaphore_;
     WVkSemaphoreInfo render_finished_semaphore_;
-    WVkFenceInfo in_flight_fence_;
+    WVkFenceInfo flight_fence_;
 
     uint32_t frame_index {0};
 

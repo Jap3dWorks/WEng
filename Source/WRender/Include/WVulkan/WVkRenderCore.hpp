@@ -218,7 +218,7 @@ struct WVkUniformBufferObjectInfo
 
 struct WVkDescriptorSetTextureBinding {
     uint32_t binding{0};
-    // WId texture_info_id{0};
+
     VkDescriptorImageInfo image_info{};
     VkImageView image_view{VK_NULL_HANDLE};
     VkSampler sampler{VK_NULL_HANDLE};

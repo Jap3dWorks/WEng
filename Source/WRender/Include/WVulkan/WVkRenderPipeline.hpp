@@ -23,7 +23,7 @@ public:
 
     virtual ~WVkRenderPipelinesManager();
 
-     WVkRenderPipelinesManager(
+    WVkRenderPipelinesManager(
         WVkDeviceInfo device, 
         WVkRenderPassInfo render_pass_info,
         uint32_t in_width,
@@ -134,8 +134,8 @@ private:
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
 
-    uint32_t width{};
-    uint32_t height{};
+    uint32_t width{0};
+    uint32_t height{0};
 
 };
 

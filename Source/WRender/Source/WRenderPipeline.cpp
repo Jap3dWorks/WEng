@@ -114,9 +114,20 @@ WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
         WVkRenderPipelinesManager && other
-    ) noexcept
+    ) noexcept :
+    render_pipelines_(std::move(other.render_pipelines_)),
+    descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
+    descriptor_sets_(std::move(other.descriptor_sets_)),
+    bindings_(std::move(other.bindings_)),
+    pipeline_bindings_(std::move(other.pipeline_bindings_)),
+    stage_pipelines_(std::move(other.stage_pipelines_)),
+    descriptor_pool_info_(std::move(other.descriptor_pool_info_)),
+    device_info_(std::move(other.device_info_)),
+    render_pass_info_(std::move(other.render_pass_info_)),
+    width(std::move(other.width)),
+    height(std::move(other.height))
 {
-    Move(std::move(other));
+
 }
 
 WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
@@ -150,6 +161,7 @@ WId WVkRenderPipelinesManager::AddBinding(
         for(uint32_t i = 0; i < b.size(); i++) {
             
             b[i].binding = 0;
+            
             WVulkan::Create(b[i].uniform_buffer_info, device_info_);
 
             WVulkan::UpdateUniformBuffer(
@@ -166,7 +178,7 @@ WId WVkRenderPipelinesManager::AddBinding(
                     ),
                 glm::perspective(
                     glm::radians(45.f),
-                    width / (float) height,
+                    (float) width / (float) height,
                     1.f, 10.f
                     )
                 );
@@ -252,6 +264,9 @@ void WVkRenderPipelinesManager::Move(WVkRenderPipelinesManager && other)
     bindings_ = std::move(other.bindings_);
     stage_pipelines_ = std::move(other.stage_pipelines_);
 
+    width = std::move(other.width);
+    height = std::move(other.height);
+
     other.device_info_ = {};
     other.render_pass_info_ = {};
     other.descriptor_pool_info_ = {};
@@ -277,7 +292,22 @@ void WVkRenderPipelinesManager::Initialize() {
 
     WVulkan::Create(descriptor_pool_info_, device_info_);
 
+    // Destroy UBOs
+    bindings_.SetDestroyFn([this](auto & b) {
+        WLOG("[PipelineManager] Destroy binding UBOs");
+        for(auto& ubo: b.ubo) {
+            vkDestroyBuffer(device_info_.vk_device,
+                            ubo.uniform_buffer_info.uniform_buffer,
+                            nullptr);
+
+            vkFreeMemory(device_info_.vk_device,
+                         ubo.uniform_buffer_info.uniform_buffer_memory,
+                         nullptr);
+        }
+    });
+
     render_pipelines_.SetDestroyFn([this](auto & p) {
+        WLOG("[PipelineManager] Destory Render Pipelines");
         WVulkan::Destroy(
             p,
             device_info_
@@ -285,6 +315,7 @@ void WVkRenderPipelinesManager::Initialize() {
     });
 
     descriptor_set_layouts_.SetDestroyFn([this](auto & d) {
+        WLOG("[PipelineManager] Destroy descriptor Set layouts");
         WVulkan::Destroy(
             d,
             device_info_

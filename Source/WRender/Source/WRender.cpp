@@ -33,24 +33,72 @@ void WRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
     app->frame_buffer_resized = true;
 }
 
-WRender::WRender() 
+WRender::WRender() :
+    instance_info_(),
+    window_info_(),
+    surface_info_(),
+    device_info_(),
+    debug_info_(),
+    swap_chain_info_(),
+    render_pass_info_(),
+    render_command_pool_(),
+    render_command_buffer_(),
+    render_pipelines_manager_(),
+    image_available_semaphore_(),
+    render_finished_semaphore_(),
+    flight_fence_()
 {
-    instance_info_ = {};
-    instance_info_.wid = {}; // WId::GenerateId();
+    Initialize();
+}
 
-    window_info_ = {};
-    window_info_.wid = {}; // WId::GenerateId();
+WRender::~WRender()
+{
+
+    WLOGFNAME("Destroy WRender");
+
+    // TODO FIX this! explicit cleanup!!
+    render_pipelines_manager_ = {};
+
+    WVulkan::Destroy(image_available_semaphore_, device_info_);
+
+    WVulkan::Destroy(render_finished_semaphore_, device_info_);
+
+    WVulkan::Destroy(flight_fence_, device_info_);
+    
+    // Destroy Vulkan Render Pass
+    WVulkan::Destroy(render_pass_info_, device_info_);
+
+    // Destroy Swap Chain and Image Views
+    WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    // TODO FIX this! explicit cleanup!!
+    render_command_pool_ = {};
+    render_command_buffer_ = {};
+
+    render_resources_ = nullptr;
+
+    // Destroy Vulkan Device
+    WVulkan::Destroy(device_info_);
+
+    // Destroy Vulkan Surface
+    WVulkan::Destroy(surface_info_, instance_info_);
+
+    // Destroy Vulkan Instance
+    WVulkan::Destroy(instance_info_);
+
+    // Destroy Window
+    WVulkan::Destroy(window_info_);
+}
+
+void WRender::DeviceWaitIdle() const
+{
+    vkDeviceWaitIdle(device_info_.vk_device);
+}
+
+void WRender::Initialize()
+{
     window_info_.user_pointer = this;
     window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
-
-    surface_info_ = {};
-    surface_info_.wid = {}; // WId::GenerateId();
-
-    device_info_ = {};
-    device_info_.wid = {}; // WId::GenerateId();
-
-    debug_info_ = {};
-    debug_info_.wid = {}; // WId::GenerateId();
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
     WVulkan::Create(
@@ -103,8 +151,8 @@ WRender::WRender()
     render_pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
-        swap_chain_info_.swap_chain_extent.height,
-        swap_chain_info_.swap_chain_extent.width
+        window_info_.width,
+        window_info_.height
         );
 
     render_command_pool_ = WVkRenderCommandPool( 
@@ -142,7 +190,7 @@ WRender::WRender()
         );
 
     WVulkan::Create(
-        in_flight_fence_,
+        flight_fence_,
         device_info_
         );
 
@@ -153,53 +201,6 @@ WRender::WRender()
 
 }
 
-WRender::~WRender()
-{
-
-    WLOGFNAME("Destroy WRender");
-
-    render_pipelines_manager_ = {};
-
-    WVulkan::Destroy(image_available_semaphore_, device_info_);
-
-    WVulkan::Destroy(render_finished_semaphore_, device_info_);
-
-    WVulkan::Destroy(in_flight_fence_, device_info_);
-    
-    // Destroy Vulkan Render Pass
-    WVulkan::Destroy(render_pass_info_, device_info_);
-
-    // Destroy Swap Chain and Image Views
-    WVulkan::Destroy(swap_chain_info_, device_info_);
-
-    render_command_pool_ = {};
-    render_command_buffer_ = {};
-
-    render_resources_ = nullptr;
-
-    // Destroy Vulkan Device
-    WVulkan::Destroy(device_info_);
-
-    // Destroy Vulkan Surface
-    WVulkan::Destroy(surface_info_, instance_info_);
-
-    // Destroy Vulkan Instance
-    WVulkan::Destroy(instance_info_);
-
-    // Destroy Window
-    WVulkan::Destroy(window_info_);
-}
-
-void WRender::DeviceWaitIdle() const
-{
-    vkDeviceWaitIdle(device_info_.vk_device);
-}
-
-void WRender::Initialize()
-{
-    
-}
-
 void WRender::Draw()
 {
 
@@ -208,7 +209,7 @@ void WRender::Draw()
     vkWaitForFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fences[frame_index],
+        &flight_fence_.fences[frame_index],
         VK_TRUE,
         UINT64_MAX
         );
@@ -235,7 +236,7 @@ void WRender::Draw()
     vkResetFences(
         device_info_.vk_device,
         1,
-        &in_flight_fence_.fences[frame_index]
+        &flight_fence_.fences[frame_index]
         );
 
     VkSemaphore signal_semaphores[] = {
@@ -273,7 +274,7 @@ void WRender::Draw()
                 device_info_.vk_graphics_queue,
                 1,
                 &submit_info,
-                in_flight_fence_.fences[frame_index]) != VK_SUCCESS)
+                flight_fence_.fences[frame_index]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to submit draw command buffer");
         }
@@ -317,10 +318,18 @@ void WRender::RecreateSwapChain() {
         glfwWaitEvents();
     }
 
+    window_info_.width = width;
+    window_info_.height = height;
+
     DeviceWaitIdle();
 
     WVulkan::Destroy(
         swap_chain_info_,
+        device_info_
+        );
+
+    WVulkan::Destroy(
+        render_pass_info_,
         device_info_
         );
 

@@ -186,7 +186,11 @@ void WVulkan::Create(
     create_info.presentMode = present_mode;
     create_info.clipped = VK_TRUE;
 
-    if (vkCreateSwapchainKHR(device_info.vk_device, &create_info, nullptr, &out_swap_chain_info.swap_chain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(
+            device_info.vk_device,
+            &create_info,
+            nullptr,
+            &out_swap_chain_info.swap_chain) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create swap chain!");
     }
@@ -194,7 +198,11 @@ void WVulkan::Create(
     // Retrieve Swap Chain Images
     vkGetSwapchainImagesKHR(device_info.vk_device, out_swap_chain_info.swap_chain, &image_count, nullptr);
     out_swap_chain_info.swap_chain_images.resize(image_count);
-    vkGetSwapchainImagesKHR(device_info.vk_device, out_swap_chain_info.swap_chain, &image_count, out_swap_chain_info.swap_chain_images.data());
+    vkGetSwapchainImagesKHR(
+        device_info.vk_device,
+        out_swap_chain_info.swap_chain,
+        &image_count,
+        out_swap_chain_info.swap_chain_images.data());
 
     // Save Swap Chain Image Format
     out_swap_chain_info.swap_chain_image_format = surface_format.format;

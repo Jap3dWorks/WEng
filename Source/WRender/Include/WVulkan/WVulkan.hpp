@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
+#include "WLog.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
@@ -317,6 +318,7 @@ namespace WVulkan
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         out_write_descriptor_set.descriptorCount = 1;
         out_write_descriptor_set.pBufferInfo = &out_ubo_binding.buffer_info;
+        out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
     constexpr void UpdateWriteDescriptorSet_Texture(
@@ -407,9 +409,10 @@ namespace WVulkan
         const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info
         ) {
+        WLOGFNAME("N = " << N);
         vkUpdateDescriptorSets(
             in_device_info.vk_device,
-            static_cast<uint32_t>(in_write_descriptor_sets.size()),
+            static_cast<uint32_t>(N),
             in_write_descriptor_sets.data(),
             0,
             nullptr
@@ -432,7 +435,7 @@ namespace WVulkan
 
         ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
 
-        memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(ubo));
+        memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(WVkUBOStruct));
 
         return true;
     }
