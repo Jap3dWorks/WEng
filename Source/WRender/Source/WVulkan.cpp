@@ -1080,12 +1080,8 @@ void WVulkan::Create(
     }
 }
 
-// void WVulkan::UpdateWriteDescriptorSet()
-// {
-// }
-
 void WVulkan::UpdateDescriptorSets(
-    std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
+    const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
     const WVkDeviceInfo & in_device_info
     )
 {

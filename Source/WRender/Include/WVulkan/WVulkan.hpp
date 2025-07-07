@@ -302,34 +302,40 @@ namespace WVulkan
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,
-        const uint32_t & dst_binding,
-        const VkDescriptorSet & dst_set,
-        const VkDescriptorBufferInfo * buffer_info
+        WVkDescriptorSetUBOBinding & out_ubo_binding,
+        const VkDescriptorSet & dst_set
         )
     {
+        out_ubo_binding.buffer_info.buffer = out_ubo_binding.uniform_buffer_info.uniform_buffer;
+        out_ubo_binding.buffer_info.offset = 0;
+        out_ubo_binding.buffer_info.range = sizeof(WVkUBOStruct);
+
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = dst_binding;
+        out_write_descriptor_set.dstBinding = out_ubo_binding.binding;
         out_write_descriptor_set.dstSet = dst_set;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pBufferInfo = buffer_info;
+        out_write_descriptor_set.pBufferInfo = &out_ubo_binding.buffer_info;
     }
 
     constexpr void UpdateWriteDescriptorSet_Texture(
         VkWriteDescriptorSet & out_write_descriptor_set,
-        const uint32_t & dst_binding,
-        const VkDescriptorSet & dst_set,
-        const VkDescriptorImageInfo * image_info
+        WVkDescriptorSetTextureBinding & out_texture_binding,
+        const VkDescriptorSet & dst_set
         )
     {
+        out_texture_binding.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        out_texture_binding.image_info.imageView = out_texture_binding.image_view;
+        out_texture_binding.image_info.sampler = out_texture_binding.sampler;
+        
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = dst_binding;
+        out_write_descriptor_set.dstBinding = out_texture_binding.binding;
         out_write_descriptor_set.dstSet = dst_set;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pImageInfo = image_info;
+        out_write_descriptor_set.pImageInfo = &out_texture_binding.image_info;
     }
 
     // /**
@@ -392,10 +398,24 @@ namespace WVulkan
     // }
 
     void UpdateDescriptorSets(
-        std::vector<VkWriteDescriptorSet> in_write_descriptor_sets,
+        const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info
         );
 
+    template<size_t N>
+    void UpdateDescriptorSets(
+        const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
+        const WVkDeviceInfo & in_device_info
+        ) {
+        vkUpdateDescriptorSets(
+            in_device_info.vk_device,
+            static_cast<uint32_t>(in_write_descriptor_sets.size()),
+            in_write_descriptor_sets.data(),
+            0,
+            nullptr
+            );
+
+    }
 
     inline bool UpdateUniformBuffer(
         WVkUniformBufferObjectInfo & uniform_buffer_object_info_,
@@ -409,22 +429,6 @@ namespace WVulkan
         ubo.model = model;
         ubo.view = view;
         ubo.proj = proj;
-
-        // ubo.model = glm::rotate(
-        //     glm::mat4(1.f),
-        //     glm::radians(90.f),
-        //     glm::vec3(0.f, 0.f, 1.f)
-        //     );
-        // ubo.view = glm::lookAt(
-        //     glm::vec3(-2.f, 2.f, 2.f),
-        //     glm::vec3(0.f, 0.f, 0.f),
-        //     glm::vec3(0.f, 0.f, 1.f)
-        //     );
-        // ubo.proj = glm::perspective(
-        //     glm::radians(45.f),
-        //     swap_chain_info_.swap_chain_extent.width / (float) swap_chain_info_.swap_chain_extent.height,
-        //     1.f, 10.f
-        //     );
 
         ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
 

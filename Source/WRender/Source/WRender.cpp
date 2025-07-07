@@ -87,9 +87,6 @@ WRender::WRender()
         debug_info_
         );
 
-    WLOG("Swap Chain: " << swap_chain_info_.swap_chain);
-    WLOG("Swap Chain Image Format: " << swap_chain_info_.swap_chain_image_format);
-
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(
         swap_chain_info_,
@@ -106,7 +103,8 @@ WRender::WRender()
     render_pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
-        swap_chain_info_
+        swap_chain_info_.swap_chain_extent.height,
+        swap_chain_info_.swap_chain_extent.width
         );
 
     render_command_pool_ = WVkRenderCommandPool( 
@@ -197,11 +195,13 @@ void WRender::DeviceWaitIdle() const
     vkDeviceWaitIdle(device_info_.vk_device);
 }
 
-void WRender::Initialize() {
+void WRender::Initialize()
+{
     
 }
 
-void WRender::Draw() {
+void WRender::Draw()
+{
 
     WLOGFNAME("Drawing...");
 
@@ -343,6 +343,9 @@ void WRender::RecreateSwapChain() {
         swap_chain_info_,
         device_info_
         );
+
+    render_pipelines_manager_.Width(width);
+    render_pipelines_manager_.Height(height);
 }
 
 TRef<IRenderResources> WRender::RenderResources() {
@@ -353,19 +356,24 @@ void WRender::AddPipelineBinding(
     WId pipeline_id,
     WId descriptor_set_id,
     WId in_mesh_id,
-    std::vector<WId> in_textures,
-    std::vector<uint32_t> in_textures_bindings
+    const std::vector<WId> & in_textures,
+    const std::vector<uint32_t> & in_textures_bindings
     )
 {
-    
-    // WVkRenderResources * resources =
-    //     static_cast<WVkRenderResources*>(render_resources_.get());
-    
+    WVkRenderResources * resources =
+        static_cast<WVkRenderResources*>(render_resources_.get());
+
+    std::vector<WVkTextureInfo> tinfo{in_textures.size()};
+
+    for (uint32_t i=0; i < in_textures.size(); i++) {
+        tinfo[i] = resources->TextureInfo(in_textures[i]);
+    }
+
     render_pipelines_manager_.AddBinding(
         pipeline_id,
         descriptor_set_id,
         in_mesh_id,
-        in_textures,
+        tinfo,
         in_textures_bindings
         );
 }

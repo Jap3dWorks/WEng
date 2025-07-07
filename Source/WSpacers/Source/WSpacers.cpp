@@ -31,7 +31,6 @@
 
 #include <iostream>
 
-
 bool UpdateUniformBuffers(
     const WVkSwapChainInfo & swap_chain_info_,
     WVkUniformBufferObjectInfo & uniform_buffer_object_info_

@@ -19,14 +19,15 @@ class WRENDER_API WVkRenderPipelinesManager
 
 public:
 
-    WVkRenderPipelinesManager();
+    WVkRenderPipelinesManager() noexcept {}
 
     virtual ~WVkRenderPipelinesManager();
 
-    WVkRenderPipelinesManager(
+     WVkRenderPipelinesManager(
         WVkDeviceInfo device, 
         WVkRenderPassInfo render_pass_info,
-        WVkSwapChainInfo swap_chain_info
+        uint32_t in_width,
+        uint32_t in_height
         );
 
     WVkRenderPipelinesManager(const WVkRenderPipelinesManager & other)=delete;
@@ -57,9 +58,8 @@ public:
         WId in_pipeline_id,
         WId in_descriptor_set_id,
         WId in_mesh_asset_id,
-        std::vector<WId> in_textures,
+        std::vector<WVkTextureInfo> in_textures,
         std::vector<uint32_t> in_textures_bindings
-        // std::vector<WVkDescriptorSetTextureBinding> in_textures
         );
 
     WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {
@@ -81,6 +81,14 @@ public:
         assert(bindings_.Contains(in_id));
         return bindings_.Get(in_id);
     }
+
+    WNODISCARD constexpr uint32_t Width() const noexcept { return width; }
+
+    void constexpr Width(uint32_t in_width) noexcept { width = in_width; }
+
+    WNODISCARD constexpr uint32_t Heigth() const noexcept { return height; }
+
+    void constexpr Height(uint32_t in_height) noexcept { height = in_height; }
 
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WId)> in_predicate);
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
@@ -125,7 +133,9 @@ private:
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
-    WVkSwapChainInfo swap_chain_info_ {};
+
+    uint32_t width{};
+    uint32_t height{};
 
 };
 

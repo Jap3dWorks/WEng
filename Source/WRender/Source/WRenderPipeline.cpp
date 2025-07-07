@@ -1,3 +1,4 @@
+#include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
@@ -14,16 +15,15 @@
 // WRenderPipelinesManager
 // -------------------
 
-WVkRenderPipelinesManager::WVkRenderPipelinesManager()
-{}
-
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     WVkDeviceInfo device,
     WVkRenderPassInfo render_pass_info,
-    WVkSwapChainInfo swap_chain_info
+    uint32_t in_width,
+    uint32_t in_height
 ) : device_info_(device),
     render_pass_info_(render_pass_info),
-    swap_chain_info_(swap_chain_info)
+    width(in_width),
+    height(in_height)
 {
     Initialize();
 }
@@ -130,7 +130,7 @@ WId WVkRenderPipelinesManager::AddBinding(
     WId in_pipeline_id,
     WId in_descriptor_id,
     WId in_mesh_asset_id,
-    std::vector<WId> in_textures,
+    std::vector<WVkTextureInfo> in_textures,
     std::vector<uint32_t> in_textures_bindings
     )
 {
@@ -139,15 +139,15 @@ WId WVkRenderPipelinesManager::AddBinding(
     // Create uniform buffers bindings
     // Lambda ensures NRVO and avoids moves
 
+    // Create Descriptor binding objects with default values
     auto f = [this,
               &in_descriptor_id]
         () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
         WVkDescriptorSetInfo ds = DescriptorSet(in_descriptor_id);
-        std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> write_ds;
+        std::array<VkWriteDescriptorSet, ds.descriptor_sets.size()> write_ds;
 
         for(uint32_t i = 0; i < b.size(); i++) {
-        // for(auto & binding : b) {
             
             b[i].binding = 0;
             WVulkan::Create(b[i].uniform_buffer_info, device_info_);
@@ -166,41 +166,56 @@ WId WVkRenderPipelinesManager::AddBinding(
                     ),
                 glm::perspective(
                     glm::radians(45.f),
-                    swap_chain_info_.swap_chain_extent.width / (float) swap_chain_info_.swap_chain_extent.height,
+                    width / (float) height,
                     1.f, 10.f
                     )
                 );
-
             
-            // TODO FIX binding buffer_info parameters
             WVulkan::UpdateWriteDescriptorSet_UBO(
                 write_ds[i],
-                b[i].binding,
-                ds.descriptor_sets[i],
-                &b[i].buffer_info
+                b[i],
+                ds.descriptor_sets[i]
                 );
             
-            WVulkan::UpdateDescriptorSets(
-                {write_ds[0]},
-                device_info_
-                );
         }
+        
+        WVulkan::UpdateDescriptorSets<write_ds.size()>(
+            write_ds,
+            device_info_
+            );
 
         return b;
     };
 
-    auto t = [this, &in_textures, &in_textures_bindings] () {
+    // Create Descriptor binding objects with default values
+    auto t = [this, &in_textures, &in_textures_bindings, &in_descriptor_id] () {
         std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        for(int i=0; i<tx.size(); i++) {
-            tx[i].binding = in_textures_bindings[i];
-            tx[i].texture_info_id = in_textures[i];
+        WVkDescriptorSetInfo ds = DescriptorSet(in_descriptor_id);
+        std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * ds.descriptor_sets.size()};
+        
+        for (uint32_t i=0; i<ds.descriptor_sets.size(); i++) {
+            for (uint32_t j = 0; j<tx.size(); j++) {
+                tx[j].binding = in_textures_bindings[j];
+                tx[j].image_view = in_textures[j].image_view;
+                tx[j].sampler = in_textures[j].sampler;
+
+                WVulkan::UpdateWriteDescriptorSet_Texture(
+                    write_ds[(i * tx.size()) + j],
+                    tx[j],
+                    ds.descriptor_sets[i]
+                    );
+            }
         }
 
-        // Update Descriptor set
+        WVulkan::UpdateDescriptorSets(
+            write_ds,
+            device_info_
+            );
 
         return tx;
     };
 
+    // TODO user TSparseSet for bindings_, and the Actor WId as id.
     WId result = bindings_.Create(
         [&in_pipeline_id,
          &in_descriptor_id,
@@ -275,5 +290,4 @@ void WVkRenderPipelinesManager::Initialize() {
             device_info_
             );
     });
-
 }

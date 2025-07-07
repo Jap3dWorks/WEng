@@ -218,8 +218,10 @@ struct WVkUniformBufferObjectInfo
 
 struct WVkDescriptorSetTextureBinding {
     uint32_t binding{0};
-    WId texture_info_id{0};
-// WVkTextureInfo texture_info{};
+    // WId texture_info_id{0};
+    VkDescriptorImageInfo image_info{};
+    VkImageView image_view{VK_NULL_HANDLE};
+    VkSampler sampler{VK_NULL_HANDLE};
 };
 
 struct WVkDescriptorSetUBOBinding {
@@ -240,7 +242,6 @@ struct WVkPipelineBindingInfo
     WId mesh_asset_id{0};
 
     std::vector<WVkDescriptorSetTextureBinding> textures{};
-    
     std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
 };
 
