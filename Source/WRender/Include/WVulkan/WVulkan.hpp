@@ -299,7 +299,7 @@ namespace WVulkan
     // Descriptor Set Layout
     // ---------------------
 
-    void AddDSLDefaultBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
+    void AddDSLDefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,

@@ -63,6 +63,8 @@ public:
         const std::vector<uint32_t> & in_textures_bindings
         );
 
+    void Clear();
+
 private:
 
     void RecreateSwapChain();

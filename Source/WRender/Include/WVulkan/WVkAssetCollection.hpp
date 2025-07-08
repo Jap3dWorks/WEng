@@ -6,6 +6,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WCore/WIdPool.hpp"
+#include "WCore/TFunction.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -17,6 +18,7 @@
 #include <concepts>
 
 // Manage the aquirement and release of texture or mesh buffer and stuffs like that.
+// TODO Use ObjectDataBase so inheritance will not be required to release resources.
 
 template<typename D,  std::derived_from<WAsset> A>
 class WRENDER_API WVkAssetCollection
@@ -25,6 +27,9 @@ public:
 
     constexpr WVkAssetCollection() noexcept :
     assets_(), data_() {}
+
+    constexpr WVkAssetCollection(TFunction<D(const WId & id)> in_create_fn, TFunction<void(D&)> in_clear_fn) :
+    db_(in_create_fn, in_clear_fn) {}
 
     virtual ~WVkAssetCollection() {
         Clear();
@@ -126,9 +131,9 @@ private:
     
     std::unordered_map<WId, D> data_;
 
-};
+    TObjectDataBase<D> db_;
 
-// TODO staic Create methods and the constructor with parameters private.
+};
 
 class WVkTextureCollection : public WVkAssetCollection<WVkTextureInfo, WTextureAsset> {
 
@@ -161,7 +166,6 @@ public:
         Move(std::move(other));
 
         return *this;
-
     }
 
 protected:

@@ -1507,8 +1507,9 @@ void WVulkan::Destroy(
 // Descriptor Set Layout
 // ---------------------
 
-void WVulkan::AddDSLDefaultBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
+void WVulkan::AddDSLDefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
 {
+    // Ubo existence
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
     ubo_layout_binding.binding = 0;
     ubo_layout_binding.descriptorCount = 1;
@@ -1516,6 +1517,8 @@ void WVulkan::AddDSLDefaultBindings(WVkDescriptorSetLayoutInfo & out_descriptor_
     ubo_layout_binding.pImmutableSamplers = nullptr;
     ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+    
+    // A texture in the fragment shader
     VkDescriptorSetLayoutBinding sampler_layout_biding{};
     sampler_layout_biding.binding = 1;
     sampler_layout_biding.descriptorCount = 1;
@@ -2172,6 +2175,8 @@ WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
     if (in_shader_type == EShaderType::Vertex)
     {
         result.attribute_descriptors.resize(3);
+
+        // Geometry data structure
 
         result.attribute_descriptors[0].binding = 0;
         result.attribute_descriptors[0].location = 0;

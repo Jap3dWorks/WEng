@@ -49,9 +49,10 @@ public:
     WId CreateDescriptorSet(WId in_descriptor_set_layout_id);
 
     WId CreateRenderPipeline(
-        WVkRenderPipelineInfo in_render_pipeline_info,
-        std::vector<WVkShaderStageInfo> in_shader_stages,
-        WId in_descriptor_set_layout_id
+        EPipelineType in_pipeline_type,
+        WId in_descriptor_set_layout_id,
+        const std::vector<std::string> & in_shader_files,
+        const std::vector<EShaderType> & in_shader_types
         );
 
     WId AddBinding(
@@ -63,8 +64,8 @@ public:
         );
 
     WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {
-        assert(render_pipelines_.Contains(in_id));
-        return render_pipelines_.Get(in_id);
+        assert(pipelines_.Contains(in_id));
+        return pipelines_.Get(in_id);
     }
     
     WNODISCARD const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(WId in_id) const {
@@ -115,12 +116,9 @@ private:
 
     void Initialize();
 
-    void Move(WVkRenderPipelinesManager && out_other);
-
-    TObjectDataBase<WVkRenderPipelineInfo> render_pipelines_{};
+    TObjectDataBase<WVkRenderPipelineInfo> pipelines_{};
     TObjectDataBase<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};
     TObjectDataBase<WVkDescriptorSetInfo> descriptor_sets_{};
-
     TObjectDataBase<WVkPipelineBindingInfo> bindings_{};
 
     /** Relation between each pipeline and its bindings*/
@@ -129,13 +127,13 @@ private:
     /** Pipelines by grouped by PipelineType*/
     std::unordered_map<EPipelineType, std::vector<WId>> stage_pipelines_{};
 
+    uint32_t width{0};
+    uint32_t height{0};
+
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};
-
-    uint32_t width{0};
-    uint32_t height{0};
 
 };
 

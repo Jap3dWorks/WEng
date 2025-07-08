@@ -14,21 +14,31 @@ public:
     constexpr TSparseSet() noexcept = default;
     virtual ~TSparseSet() = default;
 
-    constexpr TSparseSet(const TSparseSet& other) {
-        Copy(other);
-    }
+    constexpr TSparseSet(const TSparseSet& other) :
+        index_pos_(other.index_pos_),
+        pos_index_(other.pos_index_),
+        compact_(other.compact_)
+        {}
     
-    TSparseSet(TSparseSet && other) noexcept {
-        Move(std::move(other));
-    }
+    TSparseSet(TSparseSet && other) noexcept :
+        index_pos_(std::move(other.index_pos_)),
+        pos_index_(std::move(other.pos_index_)),
+        compact_(std::move(other.compact_))
+        {}
 
     constexpr TSparseSet & operator=(const TSparseSet & other) {
-        Copy(other);
+        index_pos_ = other.index_pos_;
+        pos_index_ = other.pos_index_;
+        compact_ = other.compact_;
+        
         return *this;
     }
     
     constexpr TSparseSet & operator=(TSparseSet && other) noexcept {
-        Move(std::move(other));
+        index_pos_ = std::move(other.index_pos_);
+        pos_index_ = std::move(other.pos_index_);
+        compact_ = std::move(other.compact_);
+        
         return *this;
     }
     
@@ -106,18 +116,6 @@ public:
     }
 
 private:
-
-    constexpr void Copy(const TSparseSet & other) {
-        pos_index_ = other.pos_index_;
-        index_pos_ = other.index_pos_;
-        compact_ = other.compact_;
-    }
-
-    constexpr void Move(TSparseSet && other) noexcept {
-        pos_index_ = std::move(other.pos_index_);
-        index_pos_ = std::move(other.index_pos_);
-        compact_ = std::move(other.compact_);
-    }
 
     std::unordered_map<size_t, size_t> index_pos_{};
     std::unordered_map<size_t, size_t> pos_index_{};

@@ -34,11 +34,8 @@ public:
 
 private:
 
-    void Move(WVkRenderCommandPool&& out_other) noexcept;
-
     WVkDeviceInfo device_info_;
     WVkCommandPoolInfo command_pool_info_;
-
     std::vector<WVkCommandBufferInfo> command_buffers_;
     
 };

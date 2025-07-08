@@ -53,40 +53,7 @@ WRender::WRender() :
 WRender::~WRender()
 {
     WLOGFNAME("Destroy WRender");
-
-    pipelines_manager_.Clear();
-    pipelines_manager_ = {};
-
-    WVulkan::Destroy(image_available_semaphore_, device_info_);
-
-    WVulkan::Destroy(render_finished_semaphore_, device_info_);
-
-    WVulkan::Destroy(flight_fence_, device_info_);
-    
-    // Destroy Vulkan Render Pass
-    WVulkan::Destroy(render_pass_info_, device_info_);
-
-    // Destroy Swap Chain and Image Views
-    WVulkan::Destroy(swap_chain_info_, device_info_);
-
-    render_command_pool_.Clear();
-    render_command_pool_ = {};
-    
-    render_command_buffer_ = {};
-
-    render_resources_ = nullptr;
-
-    // Destroy Vulkan Device
-    WVulkan::Destroy(device_info_);
-
-    // Destroy Vulkan Surface
-    WVulkan::Destroy(surface_info_, instance_info_);
-
-    // Destroy Vulkan Instance
-    WVulkan::Destroy(instance_info_);
-
-    // Destroy Window
-    WVulkan::Destroy(window_info_);
+    Clear();
 }
 
 void WRender::DeviceWaitIdle() const
@@ -528,3 +495,38 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
     }
 }
 
+void WRender::Clear() {
+    pipelines_manager_.Clear();
+    pipelines_manager_ = {};
+
+    WVulkan::Destroy(image_available_semaphore_, device_info_);
+
+    WVulkan::Destroy(render_finished_semaphore_, device_info_);
+
+    WVulkan::Destroy(flight_fence_, device_info_);
+    
+    // Destroy Vulkan Render Pass
+    WVulkan::Destroy(render_pass_info_, device_info_);
+
+    // Destroy Swap Chain and Image Views
+    WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    render_command_pool_.Clear();
+    render_command_pool_ = {};
+    
+    render_command_buffer_ = {};
+
+    render_resources_ = nullptr;
+
+    // Destroy Vulkan Device
+    WVulkan::Destroy(device_info_);
+
+    // Destroy Vulkan Surface
+    WVulkan::Destroy(surface_info_, instance_info_);
+
+    // Destroy Vulkan Instance
+    WVulkan::Destroy(instance_info_);
+
+    // Destroy Window
+    WVulkan::Destroy(window_info_);    
+}

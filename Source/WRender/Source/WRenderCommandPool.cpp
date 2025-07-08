@@ -3,7 +3,6 @@
 #include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
-
 WVkRenderCommandPool::WVkRenderCommandPool() :
     device_info_(),
     command_pool_info_(),
@@ -35,21 +34,28 @@ WVkRenderCommandPool::WVkRenderCommandPool(WVkRenderCommandPool && other) noexce
     device_info_(std::move(other.device_info_)),
     command_pool_info_(std::move(other.command_pool_info_)),
     command_buffers_(std::move(other.command_buffers_))
-{}
+{
+    other.device_info_={};
+    other.command_pool_info_={};
+    other.command_buffers_={};
+}
 
 WVkRenderCommandPool& WVkRenderCommandPool::operator=(WVkRenderCommandPool && other) noexcept
 {
-    Clear();
-    Move(std::move(other));
+    if (this != &other) {
+
+        Clear();
+        device_info_ = std::move(other.device_info_);
+        command_pool_info_ = std::move(other.command_pool_info_);
+        command_buffers_ = std::move(other.command_buffers_);
+
+        other.device_info_={};
+        other.command_pool_info_={};
+        other.command_buffers_={};
+        
+    }
     
     return *this;
-}
-
-void WVkRenderCommandPool::Move(WVkRenderCommandPool && other) noexcept
-{
-    device_info_ = std::move(other.device_info_);
-    command_pool_info_ = std::move(other.command_pool_info_);
-    command_buffers_ = std::move(other.command_buffers_);
 }
 
 WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer()
@@ -63,7 +69,7 @@ WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer()
 void WVkRenderCommandPool::Clear()
 {
     if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE) {
-        WVulkan::Destroy(command_pool_info_, device_info_);        
+        WVulkan::Destroy(command_pool_info_, device_info_);
         command_pool_info_ = {};
     }
 
