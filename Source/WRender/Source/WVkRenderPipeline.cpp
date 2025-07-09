@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
-#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"

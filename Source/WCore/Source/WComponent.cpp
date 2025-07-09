@@ -1,2 +1,2 @@
-#include "WComponents/WComponent.h"
+#include "WComponents/WComponent.hpp"
 

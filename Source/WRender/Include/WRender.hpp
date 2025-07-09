@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/CoreMacros.hpp"
-#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"

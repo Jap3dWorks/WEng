@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DllDef.h"
+#include "DllDef.hpp"
 #include "WCore/CoreMacros.hpp"
 
 #include <cstring>
@@ -9,7 +9,7 @@
 #include <string_view>
 #include <cassert>
 
-#include "WCore.intermediate.h"
+#include "WCore.intermediate.hpp"
 
 
 /**

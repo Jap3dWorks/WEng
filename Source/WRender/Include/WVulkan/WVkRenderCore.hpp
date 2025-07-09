@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include <cstdint>
 #include <vulkan/vulkan.h>
-#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include <vector>
 #include <array>
 

@@ -15,7 +15,7 @@
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WStructs/WGeometryStructs.hpp"
-#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include <fstream>
 #include <vulkan/vulkan_core.h>
 #include <regex>

@@ -9,7 +9,7 @@
 #include "WActors/WActor.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
-#include "WVulkan/WVkRenderConfig.h"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WStructs/WGeometryStructs.hpp"
