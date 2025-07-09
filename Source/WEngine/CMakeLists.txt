@@ -22,6 +22,7 @@ target_link_libraries(
     WCore::WCore
         WImporters::WImporters
         WRender::WRender
+        WEngineInterfaces::WEngineInterfaces
 )
 
 add_library(WEngine::WEngine ALIAS WEngine)

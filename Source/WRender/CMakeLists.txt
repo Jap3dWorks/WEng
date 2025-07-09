@@ -33,6 +33,7 @@ target_link_libraries(
     WRender
     PRIVATE
         WCore::WCore
+        WEngineInterfaces::WEngineInterfaces
         glm::glm
         glfw
         Vulkan::Vulkan

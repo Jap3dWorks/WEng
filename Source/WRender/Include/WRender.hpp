@@ -7,6 +7,7 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WCore/TRef.hpp"
+#include "IRender.hpp"
 
 #include <cstddef>
 
@@ -15,7 +16,7 @@ class IRenderResources;
 /**
  * @brief Render related top class. Highest level abstraction.
 */
-class WRENDER_API WRender
+class WRENDER_API WRender : public IRender
 {
 public:
 
@@ -25,7 +26,7 @@ public:
 
     void Initialize();
 
-    void Draw();
+    void Draw() override ;
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {
@@ -59,9 +60,9 @@ public:
         WId in_mesh_id,
         const std::vector<WId> & in_textures,
         const std::vector<uint32_t> & in_textures_bindings
-        );
+        ) override ;
 
-    void Clear();
+    void Clear() override;
 
 private:
 

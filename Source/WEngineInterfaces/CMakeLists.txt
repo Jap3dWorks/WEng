@@ -15,7 +15,7 @@ target_include_directories(
         Source
 )
 
-add_library(WEngineInterfaces::WEngineInterfaces ALIAS WEngine)
+add_library(WEngineInterfaces::WEngineInterfaces ALIAS WEngineInterfaces)
 
 install(
     TARGETS WEngineInterfaces

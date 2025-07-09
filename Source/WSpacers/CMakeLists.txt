@@ -15,12 +15,13 @@ target_include_directories(
 target_link_libraries(
     WSpacers
     PUBLIC
+    PRIVATE
+        glfw
+        WEngineInterfaces::WEngineInterfaces
         WCore::WCore
         WRender::WRender
         WImporters::WImporters
         WEngine::WEngine
-    PRIVATE
-        glfw
 )
 
 install(
