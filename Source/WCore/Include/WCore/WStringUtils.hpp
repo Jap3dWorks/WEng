@@ -3,6 +3,7 @@
 #include <string>
 #include <format>
 #include <cassert>
+#include <filesystem>
 
 namespace WStringUtils {
 
@@ -47,5 +48,20 @@ namespace WStringUtils {
 
         return std::format("{}/{}.{}", asset_directory, p_name, asset_name);
 
+    }
+
+    /**
+     * Translate a engine based path (starts with /Content) with the system path.
+     * @param in_path, the path to be translated.
+     */
+    inline std::string SystemPath(
+        std::string in_path
+        )
+    {
+        if (in_path.starts_with("/")) {
+            in_path = in_path.substr(1, in_path.length());
+        }
+
+        return std::filesystem::absolute(in_path).string();
     }
 }

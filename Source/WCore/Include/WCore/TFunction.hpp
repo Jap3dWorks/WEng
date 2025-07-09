@@ -71,7 +71,9 @@ public:
         {}
 
     constexpr TFunction(TFunction && other) noexcept :
-        callable(std::move(other.callable)) {}
+        callable(std::move(other.callable)) {
+        other.callable = nullptr;
+    }
 
     // Constructor from any callable (lambda, functor, etc.)
     template<typename F>
@@ -79,12 +81,17 @@ public:
     callable(std::make_unique<Callable<std::decay_t<F>>>(std::forward<F>(f))) {}
 
     TFunction & operator=(const TFunction & other) {
-        callable = other.callable->Clone();
+        if (this != &other) {
+            callable = other.callable->Clone();
+        }
         return *this;
     }
 
     TFunction & operator=(TFunction && other) {
-        callable = std::move(other.callable);
+        if (this != &other) {
+            callable = std::move(other.callable);            
+            other.callable = nullptr;
+        }
         return *this;
     }
 
@@ -95,7 +102,9 @@ public:
         return callable->Invoke(std::forward<Args>(args)...);
     }
 
-    // Empty state check
+    /**
+     * Empty state check
+     */
     explicit operator bool() const noexcept {
         return static_cast<bool>(callable);
     }

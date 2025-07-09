@@ -34,7 +34,9 @@ public:
         objects_()
         {}
 
-    constexpr TObjectDataBase(const TFunction<T(const WId &)> & in_create_fn, const TFunction<void(T&)> & in_destroy_fn) :
+    constexpr TObjectDataBase(
+        const TFunction<T(const WId &)> & in_create_fn,
+        const TFunction<void(T&)> & in_destroy_fn) :
         create_fn_(in_create_fn),
         clear_fn_(in_destroy_fn) {}
 

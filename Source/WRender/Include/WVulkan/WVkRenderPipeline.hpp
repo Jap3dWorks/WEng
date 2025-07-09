@@ -114,7 +114,7 @@ public:
 
 private:
 
-    void Initialize();
+    void InitializeClearLambdas();
 
     TObjectDataBase<WVkRenderPipelineInfo> pipelines_{};
     TObjectDataBase<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};

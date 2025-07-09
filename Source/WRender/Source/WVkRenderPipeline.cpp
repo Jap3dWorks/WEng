@@ -1,5 +1,6 @@
-#include "WVulkan/WVkRenderConfig.h"
 #include "WVulkan/WVkRenderPipeline.hpp"
+#include "WVulkan/WVkRenderConfig.h"
+#include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -11,7 +12,6 @@
 #include <cassert>
 #include <cassert>
 #include <utility>
-#include <filesystem>
 
 // WRenderPipelinesManager
 // -------------------
@@ -26,7 +26,7 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     width(in_width),
     height(in_height)
 {
-    Initialize();
+    InitializeClearLambdas();
 }
 
 WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
@@ -99,7 +99,7 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
     for(uint32_t i=0; i<in_shader_files.size(); i++) {
         shaders.push_back(
             WVulkan::CreateShaderStageInfo(
-                std::filesystem::absolute(in_shader_files[i]).c_str(),
+                WStringUtils::SystemPath(in_shader_files[i]).c_str(),
                 "main",
                 in_shader_types[i]
                 )
@@ -313,37 +313,37 @@ void WVkRenderPipelinesManager::Clear()
     height = 0;
 }
 
-void WVkRenderPipelinesManager::Initialize() {
+void WVkRenderPipelinesManager::InitializeClearLambdas() {
 
     WVulkan::Create(descriptor_pool_info_, device_info_);
 
     // Destroy UBOs lambda
-    bindings_.SetClearFn([this](auto & b) {
+    bindings_.SetClearFn([di_=device_info_](auto & b) {
         WLOG("[PipelineManager] Destroy binding UBOs");
         for(auto& ubo: b.ubo) {
-            vkDestroyBuffer(device_info_.vk_device,
+            vkDestroyBuffer(di_.vk_device,
                             ubo.uniform_buffer_info.uniform_buffer,
                             nullptr);
 
-            vkFreeMemory(device_info_.vk_device,
+            vkFreeMemory(di_.vk_device,
                          ubo.uniform_buffer_info.uniform_buffer_memory,
                          nullptr);
         }
     });
 
-    pipelines_.SetClearFn([this](auto & p) {
+    pipelines_.SetClearFn([di_=device_info_](auto & p) {
         WLOG("[PipelineManager] Destory Render Pipelines");
         WVulkan::Destroy(
             p,
-            device_info_
+            di_
             );
     });
 
-    descriptor_set_layouts_.SetClearFn([this](auto & d) {
+    descriptor_set_layouts_.SetClearFn([di_=device_info_](auto & d) {
         WLOG("[PipelineManager] Destroy descriptor Set layouts");
         WVulkan::Destroy(
             d,
-            device_info_
+            di_
             );
     });
 }
