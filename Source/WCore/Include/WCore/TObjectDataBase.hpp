@@ -5,11 +5,15 @@
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 
-class WCORE_API IObjectDataBase {
+class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
-    
+
+    /** Create and assign an WId */
     virtual WId Create() = 0;
+    /** Insert at WId  */
+    virtual void Insert(WId)=0;
+    virtual void Insert(WId, void* &)=0;
     virtual void Remove(WId) =0;
     virtual void Clear() = 0;
     virtual void Get(WId, void* &) = 0;
@@ -30,7 +34,7 @@ public:
         objects_()
         {}
 
-    constexpr TObjectDataBase(TFunction<T(const WId &)> in_create_fn, TFunction<void(T&)> in_destroy_fn) :
+    constexpr TObjectDataBase(const TFunction<T(const WId &)> & in_create_fn, const TFunction<void(T&)> & in_destroy_fn) :
         create_fn_(in_create_fn),
         clear_fn_(in_destroy_fn) {}
 
@@ -61,7 +65,7 @@ public:
         return *this;
     }
 
-    WId Create(TFunction<T(const WId &)> in_predicate) {
+    WId Create(const TFunction<T(const WId &)> & in_predicate) {
         WId oid = id_pool_.Generate();
         objects_.Insert(oid, in_predicate(oid));
 
@@ -75,7 +79,22 @@ public:
         return oid;
     }
 
-    void Remove(WId in_id, TFunction<void(T&)> in_destroy_fn) {
+    void Insert(WId in_id) override {
+        id_pool_.Reserve(in_id);
+        objects_.Insert(in_id, create_fn_(in_id));
+    }
+
+    void Insert(WId in_id, void* & in_value) override {
+        id_pool_.Reserve(in_id);
+        objects_.Insert(in_id, *static_cast<T*>(in_value));
+    }
+
+    void Insert(WId in_id, const TFunction<T(const WId &)> & in_predicate) {
+        id_pool_.Reserve(in_id);
+        objects_.Insert(in_id, in_predicate(in_id));
+    }
+
+    void Remove(WId in_id, const TFunction<void(T&)> & in_destroy_fn) {
         in_destroy_fn(objects_.Get(in_id));
         id_pool_.Release(in_id);
         objects_.Delete(in_id);
@@ -87,12 +106,12 @@ public:
         objects_.Delete(in_id);
     }
 
-    void Clear(TFunction<void(T&)> in_destroy_fn) {
+    void Clear(const TFunction<void(T&)> & in_destroy_fn) {
         for (auto & o : objects_) {
             in_destroy_fn(o);
         }
         
-        id_pool_.Reset();
+        id_pool_.Clear();
         objects_.Clear();
     }
 
@@ -101,7 +120,7 @@ public:
             clear_fn_(o);
         }
         
-        id_pool_.Reset();
+        id_pool_.Clear();
         objects_.Clear();
     }
 
@@ -129,11 +148,11 @@ public:
         return objects_.Contains(in_id);
     }
 
-    void SetCreateFn(TFunction<T(WId)> in_create_fn) {
+    void SetCreateFn(const TFunction<T(WId)> & in_create_fn) {
         create_fn_ = in_create_fn;
     }
 
-    void SetClearFn(TFunction<void(T&)> in_destroy_fn) {
+    void SetClearFn(const TFunction<void(T&)> & in_destroy_fn) {
         clear_fn_ = in_destroy_fn;
     }
 

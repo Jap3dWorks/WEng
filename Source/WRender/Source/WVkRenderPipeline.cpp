@@ -90,9 +90,6 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
     const std::vector<EShaderType> & in_shader_types
     )
 {
-    assert(in_render_pipeline_info.pipeline == VK_NULL_HANDLE);
-    assert(in_render_pipeline_info.pipeline_layout == VK_NULL_HANDLE);
-
     WVkRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = in_pipeline_type;
 

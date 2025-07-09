@@ -1,5 +1,3 @@
-// WEng Render Header File
-
 #pragma once
 
 #include "WCore/WCore.hpp"

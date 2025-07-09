@@ -1,6 +1,9 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WVulkan/WVkRenderCore.hpp"
+#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
 
 #include "IRenderResources.hpp"
 #include "WVulkan/WVkAssetCollection.hpp"
@@ -12,7 +15,10 @@ public:
 
     WVkRenderResources();
 
-    WVkRenderResources(const WVkDeviceInfo & in_device_info, const WVkCommandPoolInfo & in_command_pool_info);
+    WVkRenderResources(
+        const WVkDeviceInfo & in_device_info,
+        const WVkCommandPoolInfo & in_command_pool_info
+        );
 
     virtual ~WVkRenderResources();
 
@@ -50,10 +56,8 @@ public:
 
 private:
 
-    void Move(WVkRenderResources && other);
+    WVkAssetCollection<WVkTextureInfo, WTextureAsset> texture_collection_;
+    WVkAssetCollection<WVkMeshInfo, WStaticMeshAsset> static_mesh_collection_;
 
-    WVkTextureCollection texture_collection{};
-    WVkStaticMeshCollection static_mesh_collection{};
-  
 };
 

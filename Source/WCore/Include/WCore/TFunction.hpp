@@ -14,7 +14,7 @@ private:
     // Type erasure base class
     struct CallableBase {
         virtual ~CallableBase() = default;
-        virtual Ret Invoke(Args... args) = 0;
+        virtual Ret Invoke(Args... args) const = 0;
         virtual std::unique_ptr<CallableBase> Clone()=0;
     };
 
@@ -29,7 +29,7 @@ private:
 
         virtual ~Callable()=default;
 
-        Ret Invoke(Args ... args) override {
+        Ret Invoke(Args ... args) const override {
             return func(std::forward<Args>(args)...);
         }
 
@@ -62,19 +62,21 @@ public:
     // Constructor from function pointer
     TFunction(Ret(*f)(Args...)) : callable(std::make_unique<Callable<decltype(f)>>(f)) {}
 
+    TFunction(const TFunction & other) :
+        callable(other.callable->Clone())
+    {}
+
+    TFunction(TFunction & other) :
+        callable(other.callable->clone())
+        {}
+
+    constexpr TFunction(TFunction && other) noexcept :
+        callable(std::move(other.callable)) {}
+
     // Constructor from any callable (lambda, functor, etc.)
     template<typename F>
     TFunction(F&& f) :
     callable(std::make_unique<Callable<std::decay_t<F>>>(std::forward<F>(f))) {}
-
-    TFunction(const TFunction & other)
-    {
-        callable = other.callable.Clone();
-    }
-
-    constexpr TFunction(TFunction && other) noexcept {
-        callable = std::move(other.callable);
-    }
 
     TFunction & operator=(const TFunction & other) {
         callable = other.callable->Clone();
@@ -86,7 +88,7 @@ public:
         return *this;
     }
 
-    Ret operator()(Args... args) {
+    Ret operator()(Args... args) const {
         if (!callable) {
             throw std::bad_function_call();
         }

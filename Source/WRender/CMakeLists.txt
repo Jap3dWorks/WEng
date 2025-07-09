@@ -5,8 +5,7 @@ add_library(
         Source/WRender.cpp
         Source/WVkRenderPipeline.cpp
         Source/WVulkan.cpp
-	    Source/WVkRenderCommandPool.cpp
-        Source/WVkAssetCollection.cpp
+	    Source/WRenderCommandPool.cpp
         Source/WVulkan/WVkRenderResources.cpp
     )
 
