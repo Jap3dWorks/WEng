@@ -90,6 +90,8 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
     const std::vector<EShaderType> & in_shader_types
     )
 {
+    // TODO also create Descriptor Set Here
+    
     WVkRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = in_pipeline_type;
 
@@ -182,7 +184,7 @@ WId WVkRenderPipelinesManager::AddBinding(
     WId in_mesh_asset_id,
     std::vector<WVkTextureInfo> in_textures,
     std::vector<uint32_t> in_textures_bindings
-    )
+    ) noexcept
 {
     assert(pipeline_bindings_.contains(in_pipeline_id));
 

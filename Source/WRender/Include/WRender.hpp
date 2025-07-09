@@ -11,7 +11,7 @@
 
 #include <cstddef>
 
-class IRenderResources;
+// class IRenderResources;
 
 /**
  * @brief Render related top class. Highest level abstraction.
@@ -35,7 +35,7 @@ public:
 
     void DeviceWaitIdle() const;
 
-    TRef<IRenderResources> RenderResources();
+    WNODISCARD TRef<IRenderResources> RenderResources() override;
 
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
 

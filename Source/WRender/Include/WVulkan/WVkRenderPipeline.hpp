@@ -61,7 +61,7 @@ public:
         WId in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
         std::vector<uint32_t> in_textures_bindings
-        );
+        ) noexcept;
 
     WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {
         assert(pipelines_.Contains(in_id));

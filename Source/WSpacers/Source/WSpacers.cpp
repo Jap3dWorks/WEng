@@ -157,6 +157,8 @@ int main(int argc, char** argv)
             }
             );
 
+        // TODO do not create descriptor set here
+
         WId dset_id =
             engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
                 descriptor_set_layout

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/TRef.hpp"
+#include "IRenderResources.hpp"
 
 #include <vector>
 
@@ -18,5 +20,7 @@ public:
         )=0;
 
     virtual void Clear()=0;
+
+    virtual TRef<IRenderResources> RenderResources()=0;
 
 };
