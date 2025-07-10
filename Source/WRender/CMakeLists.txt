@@ -21,6 +21,7 @@ target_include_directories(
         PublicGenerated
     PRIVATE 
         PrivateGenerated
+        WEngineObjects::WEngineObjects
         WCore::WCore
         ${STB_INCLUDE_DIRS} 
         ${GLM_INCLUDE_DIRS} 
@@ -32,6 +33,7 @@ target_include_directories(
 target_link_libraries(
     WRender
     PRIVATE
+        WEngineObjects::WEngineObjects
         WCore::WCore
         WEngineInterfaces::WEngineInterfaces
         glm::glm

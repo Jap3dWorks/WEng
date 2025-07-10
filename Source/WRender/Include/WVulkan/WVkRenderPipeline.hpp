@@ -44,20 +44,15 @@ public:
         WVkRenderPipelinesManager && other
         ) noexcept;
 
-    WId CreateDescriptorSetLayout();
-
-    WId CreateDescriptorSet(WId in_descriptor_set_layout_id);
-
     WId CreateRenderPipeline(
         EPipelineType in_pipeline_type,
-        WId in_descriptor_set_layout_id,
         const std::vector<std::string> & in_shader_files,
         const std::vector<EShaderType> & in_shader_types
         );
 
     WId AddBinding(
         WId in_pipeline_id,
-        WId in_descriptor_set_id,
+        // WId in_descriptor_set_id,
         WId in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
         std::vector<uint32_t> in_textures_bindings
@@ -113,6 +108,10 @@ public:
     void Clear();
 
 private:
+
+    WId CreateDescriptorSetLayout();
+
+    WId CreateDescriptorSet(WId in_descriptor_set_layout_id);
 
     void InitializeClearLambdas();
 

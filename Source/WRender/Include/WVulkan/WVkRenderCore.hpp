@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "IRender.hpp"
 #include <cstdint>
 #include <vulkan/vulkan.h>
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -12,24 +13,6 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-enum class EShaderType : uint8_t
-{
-    Vertex,
-    Fragment,
-    // Geometry,
-    Compute,
-    // TessellationControl,
-    // TessellationEvaluation
-};
-
-enum class EPipelineType : uint8_t
-{
-    Graphics,       // Default
-    Transparency,   // Alpha Blending
-    Compute,        // GPGPU
-    RayTracing      // Ray Tracing
-};
 
 /**
  * Uniform buffer data structure
@@ -250,14 +233,10 @@ struct WVkRenderPipelineInfo
     WId wid;
     EPipelineType type{EPipelineType::Graphics};
 
-    // std::vector<WShaderStageInfo> shaders{};  // We need the shaders at creation time
-
-    // VkSampleCountFlagBits sample_count{VK_SAMPLE_COUNT_1_BIT};  // No Multisampling
-
     uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
 
     VkPipeline pipeline{VK_NULL_HANDLE};
-    VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};
+    VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
     WId descriptor_set_layout_id{0};
 };
@@ -268,6 +247,7 @@ struct WVkRenderPipelineInfo
 struct WVkCommandBufferInfo
 {
     WId wid;
+
     std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 

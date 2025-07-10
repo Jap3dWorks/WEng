@@ -3,6 +3,8 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
+#include "IRender.hpp"
+#include "ILevel.hpp"
 
 #include <memory>
 
@@ -32,8 +34,9 @@ public:
 
     TRef<WImportersRegister> ImportersRegister() noexcept;
 
-    TRef<WRender> Render() noexcept;
+    TRef<IRender> Render() noexcept;
 
+    TRef<ILevel> CurrentLevel() noexcept;
 
 private:
 

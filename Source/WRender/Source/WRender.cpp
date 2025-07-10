@@ -56,7 +56,7 @@ WRender::~WRender()
     Clear();
 }
 
-void WRender::DeviceWaitIdle() const
+void WRender::WaitIdle() const
 {
     vkDeviceWaitIdle(device_info_.vk_device);
 }
@@ -273,6 +273,19 @@ void WRender::Draw()
     frame_index = (frame_index + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
+WId WRender::CreateRenderPipeline(
+    EPipelineType in_pipeline_type,
+    const std::vector<std::string> & in_shader_files,
+    const std::vector<EShaderType> & in_shader_types
+    ) {
+    return pipelines_manager_.CreateRenderPipeline(
+        in_pipeline_type,
+        in_shader_files,
+        in_shader_types
+        );
+}
+
+
 void WRender::RecreateSwapChain() {
     WLOGFNAME("RECREATE SWAP CHAIN!");
     
@@ -287,7 +300,7 @@ void WRender::RecreateSwapChain() {
     window_info_.width = width;
     window_info_.height = height;
 
-    DeviceWaitIdle();
+    WaitIdle();
 
     WVulkan::Destroy(
         swap_chain_info_,
@@ -329,7 +342,6 @@ TRef<IRenderResources> WRender::RenderResources() {
  
 void WRender::AddPipelineBinding(
     WId pipeline_id,
-    WId descriptor_set_id,
     WId in_mesh_id,
     const std::vector<WId> & in_textures,
     const std::vector<uint32_t> & in_textures_bindings
@@ -346,7 +358,6 @@ void WRender::AddPipelineBinding(
 
     pipelines_manager_.AddBinding(
         pipeline_id,
-        descriptor_set_id,
         in_mesh_id,
         tinfo,
         in_textures_bindings
@@ -357,6 +368,8 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
 {
     const WVkRenderPipelineInfo & render_pipeline =
         pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
+
+    // Update pipeline descriptor data
 
     VkCommandBufferBeginInfo begin_info{};
     
@@ -436,16 +449,17 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
     for (auto & bid : pipelines_manager_.IterateBindings(in_pipeline_id))
     {
 
+        // TODO Update Descriptor Actor UBO data
+
         auto& binding = pipelines_manager_.Binding(bid);
-        
-        auto& descriptor = pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
+
+        const WVkDescriptorSetInfo & descriptor =
+            pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
 
         auto& mesh_info =
             static_cast<WVkRenderResources*>(render_resources_.get())->StaticMeshInfo(
                 binding.mesh_asset_id
                 );
-
-        // TODO Update pipeline binding descriptors
 
         VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
         VkDeviceSize offsets[] = {0};

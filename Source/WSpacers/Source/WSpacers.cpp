@@ -2,19 +2,12 @@
 
 #include "WEngine.hpp"
 #include "WLog.hpp"
-#include "WRender.hpp"
 #include "WCore/WCore.hpp"
 #include "WImporters.hpp"
 #include "WImportersRegister.hpp"
-#include "WActors/WActor.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
-#include "WVulkan/WVkRenderPipeline.hpp"
 #include "WStructs/WGeometryStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
-#include "IRenderResources.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -22,12 +15,9 @@
 
 #include <GLFW/glfw3.h>
 
-#include <cstddef>
 #include <exception>
-#include <filesystem>
 #include <glm/ext/matrix_transform.hpp>
 #include <vector>
-#include <cstring>
 
 #include <iostream>
 
@@ -136,17 +126,8 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::Create();
 
-        // Render Pipeline
-
-        // TODO: one descriptor_set_layout for each Pipeline?
-        //  So two Graphic Pipelines can use different textures count
-
-        WId descriptor_set_layout =
-            engine.Render()->RenderPipelinesManager().CreateDescriptorSetLayout();
-
-        WId pipeline_wid = engine.Render()->RenderPipelinesManager().CreateRenderPipeline(
+        WId pipeline_wid = engine.Render()->CreateRenderPipeline(
             EPipelineType::Graphics,
-            descriptor_set_layout,
             {
                 "/Content/Shaders/Spacers_ShaderBase.vert",
                 "/Content/Shaders/Spacers_ShaderBase.frag"
@@ -156,13 +137,6 @@ int main(int argc, char** argv)
                 EShaderType::Fragment
             }
             );
-
-        // TODO do not create descriptor set here
-
-        WId dset_id =
-            engine.Render()->RenderPipelinesManager().CreateDescriptorSet(
-                descriptor_set_layout
-                );
 
         WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;
@@ -178,12 +152,12 @@ int main(int argc, char** argv)
         engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
         engine.Render()->RenderResources()->RegisterTexture(texture_asset);
 
+        // Load Resources into Graphics Memory
         engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
         engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
 
         engine.Render()->AddPipelineBinding(
             pipeline_wid,
-            dset_id,
             static_mesh->WID(),
             {texture_asset->WID()},
             {1}

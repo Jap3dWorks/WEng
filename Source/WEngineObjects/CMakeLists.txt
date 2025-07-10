@@ -1,37 +1,36 @@
 
 add_library(
-    WImporters 
+    WEngineObjects
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WImporters.cpp
+        Source/WAsset.cpp
+        Source/WActor.cpp
+        Source/WObjectManager.cpp
+        Source/WComponent.cpp
+        Source/WTextureAsset.cpp
 )
 
-find_package(tinyobjloader REQUIRED)
-
 target_include_directories(
-    WImporters 
+    WEngineObjects 
     PUBLIC 
         Include
         PublicGenerated
     PRIVATE
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        PrivateGenerated
         Source
-        ${tinyobjloader_INCLUDE_DIRS}
-)
+        PrivateGenerated
+        WCore::WCore
+    )
 
 target_link_libraries(
-    WImporters 
+    WEngineObjects
     PRIVATE
         WCore::WCore
-        WEngineObjects::WEngineObjects
-)
+)    
 
-add_library(WImporters::WImporters ALIAS WImporters)
+add_library(WEngineObjects::WEngineObjects ALIAS WEngineObjects)
 
 install(
-    TARGETS WImporters 
+    TARGETS WEngineObjects 
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin

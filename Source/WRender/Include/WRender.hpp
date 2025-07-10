@@ -28,14 +28,34 @@ public:
 
     void Draw() override ;
 
+    WId CreateRenderPipeline(
+        EPipelineType in_pipeline_type,
+        const std::vector<std::string> & in_shader_files,
+        const std::vector<EShaderType> & in_shader_types
+        ) override;
+
+    void AddPipelineBinding(
+        WId pipeline_id,
+        WId in_mesh_id,
+        const std::vector<WId> & in_textures,
+        const std::vector<uint32_t> & in_textures_bindings
+        ) override ;
+
+    void Clear() override;
+
+
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {
         return pipelines_manager_;
     }
 
-    void DeviceWaitIdle() const;
+    void WaitIdle() const override;
 
     WNODISCARD TRef<IRenderResources> RenderResources() override;
+
+    WNODISCARD GLFWwindow * Window() const noexcept override {
+        return window_info_.window;
+    }
 
     static void FrameBufferSizeCallback(GLFWwindow*, int, int);
 
@@ -53,16 +73,6 @@ public:
 
     WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }
-
-    void AddPipelineBinding(
-        WId pipeline_id,
-        WId descriptor_set_id,
-        WId in_mesh_id,
-        const std::vector<WId> & in_textures,
-        const std::vector<uint32_t> & in_textures_bindings
-        ) override ;
-
-    void Clear() override;
 
 private:
 

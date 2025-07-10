@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include <string>
-#include "WSerialize/ISerializable.hpp"
+#include "WInterfaces/ISerializable.hpp"
 
 WCLASS()
 class WCORE_API WAsset : public WObject, public ISerializable

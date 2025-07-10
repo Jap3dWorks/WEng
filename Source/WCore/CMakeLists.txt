@@ -3,14 +3,6 @@ add_library(
     WCore 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WCore.cpp
-        Source/WAsset.cpp
-        Source/WActor.cpp
-        Source/WObjectManager.cpp
-        Source/WComponent.cpp
-        Source/WSerialize.cpp
-        Source/WStaticModel.cpp
-        Source/WTextureAsset.cpp
 )
 
 target_include_directories(

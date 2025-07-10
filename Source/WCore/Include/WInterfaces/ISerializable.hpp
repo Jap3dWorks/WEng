@@ -19,11 +19,11 @@ public:
     virtual void Serialize() {} // TODO make abstract
     virtual void Deserialize() {}
     
-    void SetPath(const std::string& file_path);
-    std::string GetPath() const;
+//     void SetPath(const std::string& file_path);
+//     std::string GetPath() const;
 
-private:
-    // Game based path
-    std::string file_path_{};
+// private:
+//     // Game based path
+//     std::string file_path_{};
 };
 

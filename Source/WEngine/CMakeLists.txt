@@ -12,6 +12,7 @@ target_include_directories(
         PublicGenerated
     PRIVATE
         WCore::WCore
+        WEngineObjects::WEngineObjects
         PrivateGenerated
         Source
 )
@@ -19,7 +20,8 @@ target_include_directories(
 target_link_libraries(
     WEngine
     PRIVATE
-    WCore::WCore
+        WCore::WCore
+        WEngineObjects::WEngineObjects
         WImporters::WImporters
         WRender::WRender
         WEngineInterfaces::WEngineInterfaces

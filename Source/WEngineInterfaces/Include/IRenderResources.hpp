@@ -10,8 +10,6 @@ class IRenderResources {
 
 public:
 
-    virtual ~IRenderResources()=default;
-
     virtual void RegisterTexture(TRef<WTextureAsset> in_texture_asset)=0;
 
     virtual void UnregisterTexture(WId in_id)=0;

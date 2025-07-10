@@ -85,13 +85,11 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
 
 WId WVkRenderPipelinesManager::CreateRenderPipeline(
     EPipelineType in_pipeline_type,
-    WId in_descriptor_set_layout_id,
     const std::vector<std::string> & in_shader_files,
     const std::vector<EShaderType> & in_shader_types
     )
 {
-    // TODO also create Descriptor Set Here
-    
+
     WVkRenderPipelineInfo render_pipeline_info;
     render_pipeline_info.type = in_pipeline_type;
 
@@ -108,13 +106,17 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
             );
     }
 
-    auto& d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
+    WId dset_lay_id = CreateDescriptorSetLayout();
 
     WId pid = pipelines_.Create(
         [this,
          &render_pipeline_info,
-         &d_set_layout,
-         &shaders](WId in_id) -> auto {
+         &shaders,
+         &dset_lay_id
+            ](WId in_id) -> auto {
+            
+            auto& d_set_layout = descriptor_set_layouts_.Get(dset_lay_id);
+
             WVulkan::Create(
                 render_pipeline_info,
                 device_info_,
@@ -124,6 +126,8 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
                 );
             
             render_pipeline_info.wid = in_id;
+            render_pipeline_info.descriptor_set_layout_id = dset_lay_id;
+            
             return render_pipeline_info;
         }
         );
@@ -180,7 +184,7 @@ WId WVkRenderPipelinesManager::CreateDescriptorSet(
 
 WId WVkRenderPipelinesManager::AddBinding(
     WId in_pipeline_id,
-    WId in_descriptor_id,
+    // WId in_descriptor_id,
     WId in_mesh_asset_id,
     std::vector<WVkTextureInfo> in_textures,
     std::vector<uint32_t> in_textures_bindings
@@ -188,15 +192,22 @@ WId WVkRenderPipelinesManager::AddBinding(
 {
     assert(pipeline_bindings_.contains(in_pipeline_id));
 
-    // Create uniform buffers bindings
-    // Lambda ensures NRVO and avoids moves
+    WVkRenderPipelineInfo pipeline_info = RenderPipelineInfo(in_pipeline_id);
 
+    // Create a Descriptor set by binding,
+    //  so each binding can use a different ubo buffer (each actor has a different transform).
+
+    WId dset_id = CreateDescriptorSet(
+        pipeline_info.descriptor_set_layout_id
+        );
+
+    WVkDescriptorSetInfo ds = DescriptorSet(dset_id);
+
+    // Lambda ensures NRVO and avoids moves
     // Create Descriptor binding objects with default values
-    auto f = [this,
-              &in_descriptor_id]
-        () {
+    auto f = [this, &ds] () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
-        WVkDescriptorSetInfo ds = DescriptorSet(in_descriptor_id);
+
         std::array<VkWriteDescriptorSet, ds.descriptor_sets.size()> write_ds;
 
         for(uint32_t i = 0; i < b.size(); i++) {
@@ -240,10 +251,11 @@ WId WVkRenderPipelinesManager::AddBinding(
         return b;
     };
 
-    // Create Descriptor binding objects with default values
-    auto t = [this, &in_textures, &in_textures_bindings, &in_descriptor_id] () {
+    auto t = [this,
+              &in_textures,
+              &in_textures_bindings,
+              &ds] () {
         std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        WVkDescriptorSetInfo ds = DescriptorSet(in_descriptor_id);
         std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * ds.descriptor_sets.size()};
         
         for (uint32_t i=0; i<ds.descriptor_sets.size(); i++) {
@@ -271,8 +283,8 @@ WId WVkRenderPipelinesManager::AddBinding(
     // TODO user TSparseSet for bindings_, and the Actor WId as id.
     WId result = bindings_.Create(
         [&in_pipeline_id,
-         &in_descriptor_id,
          &in_mesh_asset_id,
+         &dset_id,
          &t,
          &f]
         (WId in_id) -> WVkPipelineBindingInfo
@@ -280,7 +292,7 @@ WId WVkRenderPipelinesManager::AddBinding(
                 return {
                     in_id,                // TODO: use actor id binding
                     in_pipeline_id,
-                    in_descriptor_id,
+                    dset_id,
                     in_mesh_asset_id,
                     t(),
                     f()

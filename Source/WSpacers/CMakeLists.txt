@@ -17,6 +17,7 @@ target_link_libraries(
     PUBLIC
     PRIVATE
         glfw
+        WEngineObjects::WEngineObjects
         WEngineInterfaces::WEngineInterfaces
         WCore::WCore
         WRender::WRender

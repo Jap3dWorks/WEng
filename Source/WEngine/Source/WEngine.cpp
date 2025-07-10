@@ -34,7 +34,7 @@ WEngine::~WEngine()
 void WEngine::run()
 {
     // TODO Window out of WRender
-    while(!glfwWindowShouldClose(Render()->WindowInfo().window)) {
+    while(!glfwWindowShouldClose(Render()->Window())) {
         glfwPollEvents();
 
         
@@ -44,7 +44,7 @@ void WEngine::run()
         Render()->Draw();
     }
 
-    Render()->DeviceWaitIdle();
+    Render()->WaitIdle();
 }
 
 TRef<WImportersRegister> WEngine::ImportersRegister() noexcept
@@ -52,9 +52,13 @@ TRef<WImportersRegister> WEngine::ImportersRegister() noexcept
     return importers_register_.get();
 }
 
-TRef<WRender> WEngine::Render() noexcept
+TRef<IRender> WEngine::Render() noexcept
 {
     return render_.get();
+}
+
+TRef<ILevel> WEngine::CurrentLevel() noexcept {
+    return nullptr;
 }
 
 void WEngine::InitializeObjectManager()

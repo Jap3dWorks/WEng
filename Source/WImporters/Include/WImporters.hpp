@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-#include "WCore/ICloneable.hpp"
+#include "WInterfaces/ICloneable.hpp"
 #include "WCore/TRef.hpp"
 
 class WAsset;
