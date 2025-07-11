@@ -1,6 +1,9 @@
 #pragma once
-#include <string>
+
 #include "WCore/WCore.hpp"
+#include "WEngineObjects/WObject.hpp"
+
+#include <string>
 
 /**
  * Base class for all actors in the engine. 

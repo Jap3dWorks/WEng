@@ -1,8 +1,10 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include <string>
+#include "WEngineObjects/WObject.hpp"
 #include "WInterfaces/ISerializable.hpp"
+
+#include <string>
 
 WCLASS()
 class WCORE_API WAsset : public WObject, public ISerializable

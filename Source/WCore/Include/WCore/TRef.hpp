@@ -1,7 +1,9 @@
 #pragma once
 
-#include "WCore/WCore.hpp"
-#include <stdexcept>
+// #include "WCore/WCore.hpp"
+// #include <stdexcept>
+
+#include <cassert>
 
 template<typename T>
 struct TRef
@@ -9,121 +11,115 @@ struct TRef
     
 public:
 
-    constexpr TRef() = default;
+    constexpr TRef() noexcept = default;
 
-    TRef(T * in_object) :
-    object(in_object) {}
+    constexpr TRef(T * in_object) noexcept :
+    object_(in_object) {}
 
-    TRef(T & in_object) :
-    object(&in_object) {}
+    constexpr TRef(T & in_object) noexcept :
+    object_(&in_object) {}
 
-    TRef(const TRef & in_other) :
-    object(in_other.object) {}
+    constexpr TRef(const TRef & in_other) noexcept :
+    object_(in_other.object_) {}
 
-    TRef(TRef && in_other) :
-    object(in_other.object) {
-        in_other.object = nullptr;
+    constexpr TRef(TRef && in_other) noexcept :
+    object_(in_other.object_) {
+        in_other.object_ = nullptr;
     }
 
-    TRef & operator=(const TRef & other)
-    {
+    constexpr TRef & operator=(const TRef & other) noexcept {
         if (this != &other) {
-            object = other.object;            
+            object_ = other.object_;            
         }
 
         return *this;
     }
 
-    TRef & operator=(TRef&& other) {
+    constexpr TRef & operator=(TRef&& other) noexcept {
 
         if (this != &other) {
-            object = other.object;
-            other.object = nullptr;
+            object_ = other.object_;
+            other.object_ = nullptr;
             
         }
         return *this;
     }
 
-    TRef & operator=(T * in_value) {
-        object = in_value;
+    constexpr TRef & operator=(T * in_value) noexcept {
+        object_ = in_value;
         return *this;
     }
 
-    TRef & operator=(T& in_value)
-    {
-        object = &in_value;
+    constexpr TRef & operator=(T & in_value) noexcept {
+        object_ = &in_value;
         return *this;
     }
 
     TRef & operator=(const T & other) = delete;
-
     TRef & operator=(T && other) = delete;
 
-    bool operator==(const TRef & other) const
+    constexpr bool operator==(const TRef & other) const noexcept
     {
-        return object == other.object;
+        return object_ == other.object_;
     }
 
-    bool operator!=(const TRef & other) const
+    constexpr bool operator!=(const TRef & other) const noexcept
     {
-        return object != other.object;
+        return object_ != other.object_;
     }
 
 
-    bool operator==(T* other) const
+    constexpr bool operator==(T* other) const noexcept
     {
-        return object == other;
+        return object_ == other;
     }
 
-    bool operator!=(T* other) const
+    constexpr bool operator!=(T* other) const noexcept
     {
-        return object != other;
+        return object_ != other;
     }
 
-    T * operator->() 
-    {
-        return &Get();
-    }
-
-    const T * operator->() const
+    constexpr T * operator->() noexcept
     {
         return &Get();
     }
 
-    T & operator*()
+    constexpr const T * operator->() const noexcept
+    {
+        return &Get();
+    }
+
+    constexpr T & operator*() noexcept
     {
         return Get();
     }
 
-    const T & operator*() const
+    constexpr const T & operator*() const noexcept
     {
         return Get();
     }
 
     operator bool() const { return !IsEmpty(); }
 
-    constexpr bool IsValid() const noexcept { return object != nullptr; }
+    constexpr bool IsValid() const noexcept { return object_ != nullptr; }
 
-    constexpr bool IsEmpty() const noexcept { return object == nullptr; }
+    constexpr bool IsEmpty() const noexcept { return object_ == nullptr; }
 
-    T & Get() {
-        if (!object) {
-            throw std::runtime_error("Referencing to a null object");
-        }
+    constexpr T & Get() noexcept {
+        assert(object_);
         
-        return *object;
+        return *object_;
     } 
 
-    const T & Get() const {
-        if (!object) {
-            throw std::runtime_error("Referencing to a null object");
-        }
-        return *object;
+    constexpr const T & Get() const noexcept {
+        assert(object_);
+
+        return *object_;
     }
 
 private:
     
-    T * object{nullptr};
+    T * object_{nullptr};
 
 };
 

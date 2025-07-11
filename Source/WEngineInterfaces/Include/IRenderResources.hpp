@@ -9,6 +9,8 @@ class WStaticMeshAsset;
 class IRenderResources {
 
 public:
+    
+    virtual ~IRenderResources()=default;
 
     virtual void RegisterTexture(TRef<WTextureAsset> in_texture_asset)=0;
 

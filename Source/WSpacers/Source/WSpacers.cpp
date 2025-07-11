@@ -73,7 +73,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     TOptionalRef<WImportObj> obj_importer =
         engine.ImportersRegister()->GetImporter<WImportObj>();
 
-    std::vector<WAsset*> geo_assets =
+    std::vector<TWRef<WAsset>> geo_assets =
         obj_importer->Import(
             "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/viking_room.viking_room"
@@ -94,7 +94,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     TOptionalRef<WImportTexture> texture_importer =
         engine.ImportersRegister()->GetImporter<WImportTexture>();
 
-    std::vector<WAsset*> tex_asset = texture_importer->Import(
+    std::vector<TWRef<WAsset>> tex_asset = texture_importer->Import(
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
     );
@@ -111,8 +111,8 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    out_static_model = static_cast<WStaticMeshAsset*>(geo_assets[0]);
-    out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0]);
+    out_static_model = static_cast<WStaticMeshAsset*>(geo_assets[0].Ptr());
+    out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0].Ptr());
 
     return true;
 

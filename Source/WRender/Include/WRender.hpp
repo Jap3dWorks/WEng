@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/CoreMacros.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"

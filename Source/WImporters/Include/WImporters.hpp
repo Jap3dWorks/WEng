@@ -1,14 +1,14 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WInterfaces/ICloneable.hpp"
+#include "WCore/TRef.hpp"
+#include "WEngineObjects/TWRef.hpp"
+#include "WAssets/WAsset.hpp"
 
 #include <vector>
 #include <memory>
 
-#include "WInterfaces/ICloneable.hpp"
-#include "WCore/TRef.hpp"
-
-class WAsset;
 class WObjectManager;
 
 class WIMPORTERS_API WImporter : public ICloneable<WImporter>
@@ -29,7 +29,7 @@ public:
      * @param file_path The file path to import
      * @param asset_directory, Engine based directory path to import to, Should start with /Content.
     */
-    virtual std::vector<WAsset*> Import(const char* file_path, const char* asset_directory) = 0;
+    virtual std::vector<TWRef<WAsset>> Import(const char* file_path, const char* asset_directory) = 0;
 
 public:    
 
@@ -64,7 +64,7 @@ public:
     WImportObj & operator=(const WImportObj & in_other) = default;
     WImportObj & operator=(WImportObj && out_other) noexcept = default;
 
-    std::vector<WAsset*> Import(const char * file_path, const char * asset_directory) override;
+    std::vector<TWRef<WAsset>> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 
@@ -87,7 +87,7 @@ public:
     WImportTexture & operator=(const WImportTexture & in_other) = default;
     WImportTexture & operator=(WImportTexture && out_other) noexcept = default;
 
-    std::vector<WAsset*> Import(const char * file_path, const char * asset_directory) override;
+    std::vector<TWRef<WAsset>> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 

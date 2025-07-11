@@ -1,29 +1,30 @@
 #pragma once
 
-#include "WCore/TRef.hpp"
 #include <unordered_map>
 #include <vector>
 #include <concepts>
+
+#include <cassert>
 
 class WObject;
 
 template<typename T>
 struct TWRefTrack_ {
 
-    static void UnregInstnc(void * in_address, T * in_obj) {
+    static void UnregInstance(void * in_address, T * in_obj) {
         if (!in_obj) return;
 
-        assert(Track()[in_address].contains(in_obj));
+        // assert(Track()[in_address].contains(in_obj));
 
         // TODO erase elements
 
     }
 
-    static void RegInstnc(void * in_address, T * in_obj) {
+    static void RegInstance(void * in_address, T * in_obj) {
         if (!in_obj) return;
         
         if (!Track().contains(in_address)) {
-            Track().insert(in_address, {});
+            Track()[in_address] = {};
             Track()[in_address].reserve(64);
         }
 
@@ -46,29 +47,38 @@ private:
 
 class BWRef {
 public:
+
     using TRACK = TWRefTrack_<BWRef>;
 
-    constexpr BWRef() noexcept : object_(nullptr) {}
+    constexpr BWRef() noexcept :
+        object_(nullptr) {}
 
-    constexpr BWRef(WObject * in_object) :
+    BWRef(WObject * in_object) :
         object_(in_object) {
-        TRACK::RegInstnc(Ptr(), this);
+        TRACK::RegInstance(object_, this);
     }
 
     BWRef(const BWRef & other) :
         object_(other.object_) {
-        TRACK::RegInstnc(Ptr(), this);
+        TRACK::RegInstance(object_, this);
     }
 
     BWRef(BWRef && other) :
         object_(std::move(other.object_)) {
-        TRACK::UnregInstnc(Ptr(), &other);
-        TRACK::RegInstnc(Ptr(), this);
+        TRACK::UnregInstance(object_, &other);
+        TRACK::RegInstance(object_, this);
+    }
+
+    virtual ~BWRef() {
+        if (object_) {
+            TRACK::UnregInstance(object_, this);
+            object_ = nullptr;
+        }
     }
 
     BWRef & operator=(const BWRef & other) {
         if (this != &other) {
-            Set(other.object_);
+            BSet(other.object_);
         }
 
         return *this;
@@ -76,12 +86,12 @@ public:
 
     BWRef & operator=(BWRef && other) {
         if (this != &other) {
-            TRACK::UnregInstnc(Ptr(), this);
-            TRACK::UnregInstnc(other.Ptr(), &other);
+            TRACK::UnregInstance(object_, this);
+            TRACK::UnregInstance(other.object_, &other);
             object_ = std::move(other.object_);
             other.object_=nullptr;
 
-            TRACK::RegInstnc(Ptr(), this);
+            TRACK::RegInstance(object_, this);
         }
 
         return *this;
@@ -89,26 +99,22 @@ public:
 
     BWRef & operator=(WObject * in_value) {
         if (object_ != in_value) {
-            Set(in_value);
+            BSet(in_value);
         }
 
         return *this;
     }
 
-    // BWRef & operator=(const WObject & other) = delete;
-    // BWRef & operator=(WObject && other) = delete;
+    BWRef & operator=(const WObject & other) = delete;
+    BWRef & operator=(WObject && other) = delete;
     
-    void Set(WObject * in_address) {
-        TRACK::UnregInstnc(Ptr(), this);
+    virtual void BSet(WObject * in_address) {
+        TRACK::UnregInstance(object_, this);
         object_ = in_address;
-        TRACK::RegInstnc(Ptr(), this);
+        TRACK::RegInstance(object_, this);
     }
 
-    WObject & Get() {
-        return *object_;
-    }
-
-    WObject * Ptr() {
+    WObject * BPtr() {
         return object_;
     }
 
@@ -121,7 +127,6 @@ public:
     {
         return object_ != other.object_;
     }
-
 
     bool operator==(WObject * other) const
     {
@@ -143,6 +148,8 @@ public:
         return TRACK::Instances(in_ptr);
     }
 
+protected:    
+
 private:
 
     WObject * object_;
@@ -150,47 +157,76 @@ private:
 };
 
 template<std::derived_from<WObject> T>
-class TWRef : BWRef {
-private:
+class TWRef : public BWRef {
 
-    using TRACK = TWRefTrack_<TWRef<WObject>>;
-    
 public:
 
-    constexpr TWRef()=default;
-
-    TWRef(T * in_object)=default;
-
-    TWRef(T & in_object) :
-        BWRef(&in_object) {}
+    constexpr TWRef() noexcept = default;
 
     TWRef(const TWRef & in_other) = default;
 
     TWRef(TWRef && in_other) = default;
 
-    
+    ~TWRef() = default;
+
+    TWRef(T * in_object) :
+        BWRef(in_object) {}
+
+    TWRef(T & in_object) :
+        BWRef(&in_object) {}
+
+    TWRef & operator=(T * in_value) {
+        BWRef::operator=(in_value);
+        return *this;
+    }
+
+    TWRef & operator=(T & in_value) {
+        BWRef::operator=(&in_value);
+        return *this;
+    }
 
     TWRef & operator=(const T & other) = delete;
     TWRef & operator=(T && other) = delete;
 
+    void BSet(WObject * in_object) override final {
+        if (in_object == nullptr) {
+            BWRef::BSet(in_object);
+        }
+        else {
+            // Debugging assert only
+            // Should do I add a runtime check?
+            assert(dynamic_cast<T*>(in_object));
+
+            BWRef::BSet(in_object);
+        }
+    }
+
+    void Set(T * in_object) {
+        BWRef::BSet(in_object);
+    }
+
+    constexpr T * Ptr() noexcept {
+        return static_cast<T*>(BPtr());
+    }
+
     T * operator->() 
     {
-        return static_cast<T*>(Ptr());
+        return static_cast<T*>(BPtr());
     }
 
     const T * operator->() const
     {
-        return static_cast<T*>(Ptr());
+        return static_cast<T*>(BPtr());
     }
 
     T & operator*()
     {
-        return *static_cast<T*>(Ptr());
+        return *static_cast<T*>(BPtr());
     }
 
     const T & operator*() const
     {
-        return *static_cast<T*>(Ptr());
+        return *static_cast<T*>(BPtr());
     }
 
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/CoreMacros.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 
