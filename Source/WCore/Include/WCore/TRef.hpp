@@ -9,7 +9,7 @@ struct TRef
     
 public:
 
-    TRef() = default;
+    constexpr TRef() = default;
 
     TRef(T * in_object) :
     object(in_object) {}
@@ -25,30 +25,39 @@ public:
         in_other.object = nullptr;
     }
 
-    TRef &operator=(T * other)
+    TRef & operator=(const TRef & other)
     {
-        object = other;
+        if (this != &other) {
+            object = other.object;            
+        }
+
         return *this;
     }
 
-    TRef &operator=(T& other)
-    {
-        object = &other;
+    TRef & operator=(TRef&& other) {
+
+        if (this != &other) {
+            object = other.object;
+            other.object = nullptr;
+            
+        }
         return *this;
     }
 
-    TRef &operator=(const TRef & other)
-    {
-        object = other.object;
+    TRef & operator=(T * in_value) {
+        object = in_value;
         return *this;
     }
 
-    TRef& operator=(TRef&& other)
+    TRef & operator=(T& in_value)
     {
-        object = other.object;
-        other.object = nullptr;
+        object = &in_value;
         return *this;
     }
+
+    TRef & operator=(const T & other) = delete;
+
+    TRef & operator=(T && other) = delete;
 
     bool operator==(const TRef & other) const
     {
@@ -93,7 +102,9 @@ public:
 
     operator bool() const { return !IsEmpty(); }
 
-    bool IsEmpty() noexcept { return object == nullptr; }
+    constexpr bool IsValid() const noexcept { return object != nullptr; }
+
+    constexpr bool IsEmpty() const noexcept { return object == nullptr; }
 
     T & Get() {
         if (!object) {

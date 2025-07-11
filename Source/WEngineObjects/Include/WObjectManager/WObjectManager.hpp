@@ -42,6 +42,8 @@ public:
 
 public:
 
+    // TODO implement TWRef reference track wrappers
+
     /**
      * @brief Create a new WObject of type T
     */
