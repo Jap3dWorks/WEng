@@ -116,6 +116,11 @@ public:
             );
     }
 
+    constexpr Allocator & GetAllocator() noexcept {
+        Allocator n;
+        compact_.get_allocator(n);
+    }
+
 private:
 
     std::unordered_map<size_t, size_t> index_pos_{};

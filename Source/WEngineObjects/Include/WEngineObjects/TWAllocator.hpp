@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <memory>
+// #include <memory>
 #include <type_traits>
 #include "WCore/TFunction.hpp"
 
@@ -47,7 +47,7 @@ public:
     }
 
     constexpr void deallocate (pointer p, std::size_t n) {
-        deallocate_t_(p, n);
+        deallocate_fn_(p, n);
         delete[] p;
     }
 

@@ -4,6 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 
 dnf install glm-devel glfw-devel stb-devel -y
 dnf install vulkan-devel vulkan-tools vulkan-validation-layers libXxf86vm libXxf86vm-devel glslc -y
+dnf install catch2-devel
 dnf install cmake -y
 
 if [ -e $SCRIPT_DIR/../../tinyobjloader ]
