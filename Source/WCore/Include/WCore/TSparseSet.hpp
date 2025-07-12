@@ -15,6 +15,12 @@ public:
     constexpr TSparseSet() noexcept = default;
     virtual ~TSparseSet() = default;
 
+    constexpr TSparseSet(const Allocator & in_allocator) :
+        index_pos_(),
+        pos_index_(),
+        compact_(in_allocator)
+        {}
+
     constexpr TSparseSet(const TSparseSet& other) :
         index_pos_(other.index_pos_),
         pos_index_(other.pos_index_),
@@ -94,19 +100,19 @@ public:
         return index_pos_.contains(in_index);
     }
 
-    constexpr std::vector<T>::iterator begin() noexcept {
+    constexpr std::vector<T, Allocator>::iterator begin() noexcept {
         return compact_.begin();
     }
 
-    constexpr std::vector<T>::iterator end() noexcept {
+    constexpr std::vector<T, Allocator>::iterator end() noexcept {
         return compact_.end();
     }
 
-    constexpr std::vector<T>::const_iterator cbegin() const {
+    constexpr std::vector<T, Allocator>::const_iterator cbegin() const {
         return compact_.cbegin();
     }
 
-    constexpr std::vector<T>::const_iterator cend() const {
+    constexpr std::vector<T, Allocator>::const_iterator cend() const {
         return compact_.cend();
     }
 
@@ -123,8 +129,8 @@ public:
 
 private:
 
-    std::unordered_map<size_t, size_t> index_pos_{};
-    std::unordered_map<size_t, size_t> pos_index_{};
-    std::vector<T, Allocator> compact_{};
+    std::unordered_map<size_t, size_t> index_pos_;
+    std::unordered_map<size_t, size_t> pos_index_;
+    std::vector<T, Allocator> compact_;
 
 };

@@ -4,7 +4,6 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
         Source/WAsset.cpp
         Source/WActor.cpp
-        Source/WObjectManager.cpp
         Source/WComponent.cpp
         Source/WTextureAsset.cpp
 )

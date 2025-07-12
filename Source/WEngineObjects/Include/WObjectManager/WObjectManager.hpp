@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TObjectDataBase.hpp"
+#include "WEngineObjects/TWAllocator.hpp"
 #include "WEngineObjects/WObject.hpp"
 #include "WEngineObjects/TWRef.hpp"
 
@@ -13,7 +14,7 @@
 #include <type_traits>
 #include <concepts>
 
-#define WCONTAINER_MAX_OBJECTS 1024
+#define WOBJECTMANAGER_INITIAL_MEMORY 1
 
 /*
  * This class is a container for all WObjectContainer.
@@ -42,7 +43,6 @@ public:
         return *this;
     }
     
-
 public:
 
     // TODO implement TWRef reference track wrappers
@@ -56,7 +56,14 @@ public:
         const WClass& object_class = T::GetStaticClass();
 
         if (!containers_.contains(object_class)) {
-            containers_[object_class] = std::make_unique<TObjectDataBase<T>>();
+            containers_[object_class] =
+                std::make_unique<TObjectDataBase<T, TWAllocator<T>>>(
+                    CreateAllocator<T>()
+                    );
+            
+            containers_[object_class]->Reserve(
+                WOBJECTMANAGER_INITIAL_MEMORY
+                );
         }
 
         WId id = containers_[object_class]->Create();
@@ -83,6 +90,44 @@ public:
     }
 
 private:
+
+    template<std::derived_from<WObject> T>
+    TWAllocator<T> CreateAllocator() const {
+        TWAllocator<T> a;
+        
+        a.SetAllocateFn(
+            []
+            (T* ptr, size_t n) {
+                if (PtrTrack<T>::Get()) {
+                    for(size_t i=0; i<n; i++) {
+                        for (auto & ref : BWRef::Instances(PtrTrack<T>::Get() + i)) {
+                            if (ref == nullptr) continue;
+                            
+                            ref->BSet(ptr + i);
+                        }
+                    }
+                }
+                
+                PtrTrack<T>::Set(ptr);
+            });
+
+        return a;
+    }
+
+    template<std::derived_from<WObject> T>
+    struct PtrTrack {
+        static T* Get() {
+            return PtrTrack<T>::ptr_;
+        }
+
+        static void Set(T* in_ptr) {
+            PtrTrack<T>::ptr_ = in_ptr;
+        }
+
+    private:
+        
+        static inline T* ptr_{nullptr};
+    };
 
     constexpr void Move(WObjectManager && other) noexcept {
         containers_ = std::move(other.containers_);

@@ -20,25 +20,50 @@ public:
     virtual void Get(WId, const void*&) const = 0;
     virtual size_t Count() const = 0;
     virtual bool Contains(WId in_id) const = 0;
+    virtual void Reserve(size_t in_value) = 0;
 };
 
-template<typename T>
+template<typename T, typename Allocator=std::allocator<T>>
 class TObjectDataBase : public IObjectDataBase {
 
 public:
 
     constexpr TObjectDataBase() noexcept :
         create_fn_([](WId) -> T {return T{};}),
-        clear_fn_([](T&)->void{}),
+        clear_fn_([](T&)->void {}),
+        id_pool_(),
+        objects_()
+        {}
+
+    constexpr TObjectDataBase(
+        const Allocator & in_allocator
+        ) :
+        create_fn_([](WId) -> T { return T{}; }),
+        clear_fn_([](T&) -> void {}),
+        id_pool_(),
+        objects_(in_allocator)
+        {}
+
+    constexpr TObjectDataBase(
+        const TFunction<T(const WId &)> & in_create_fn,
+        const TFunction<void(T&)> & in_destroy_fn
+        ) :
+        create_fn_(in_create_fn),
+        clear_fn_(in_destroy_fn),
         id_pool_(),
         objects_()
         {}
 
     constexpr TObjectDataBase(
         const TFunction<T(const WId &)> & in_create_fn,
-        const TFunction<void(T&)> & in_destroy_fn) :
+        const TFunction<void(T&)> & in_destroy_fn,
+        const Allocator & in_allocator
+        ) :
         create_fn_(in_create_fn),
-        clear_fn_(in_destroy_fn) {}
+        clear_fn_(in_destroy_fn),
+        id_pool_(),
+        objects_(in_allocator)
+        {}
 
     virtual ~TObjectDataBase() {
         Clear();
@@ -158,12 +183,16 @@ public:
         clear_fn_ = in_destroy_fn;
     }
 
+    void Reserve(size_t in_value) override {
+        objects_.Reserve(in_value);
+    }
+
 private:
 
     TFunction<T(const WId &)> create_fn_;
     TFunction<void(T&)> clear_fn_; 
 
-    WIdPool id_pool_;    
-    TSparseSet<T> objects_;
+    WIdPool id_pool_;
+    TSparseSet<T, Allocator> objects_;
     
 };
