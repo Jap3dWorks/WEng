@@ -1,9 +1,9 @@
+
 #pragma once
 
 #include <memory>
 #include <type_traits>
 #include "WCore/TFunction.hpp"
-
 
 template<typename T>
 class TWAllocator {
@@ -19,22 +19,58 @@ public:
     using propagate_on_container_move_assignment = std::true_type;
     using is_always_equal = std::true_type;
 
-    constexpr TWAllocator() noexcept {}
+    using DeallocateFunction = TFunction<void(pointer, std::size_t)>;
+    using AllocateFunction = TFunction<void(pointer, std::size_t)>;
 
-    TWAllocator(const TWAllocator & other) noexcept {}
+    constexpr TWAllocator() noexcept :
+        allocate_fn_([](pointer, std::size_t){}),
+        deallocate_fn_([](pointer, std::size_t){})
+        {}
 
-    TWAllocator(TWAllocator && other) noexcept {}
+    TWAllocator(const TWAllocator & other) :
+        allocate_fn_(other.allocate_fn_),
+        deallocate_fn_(other.deallocate_fn_)
+        {}
 
-    constexpr ~TWAllocator(){}
+    TWAllocator(TWAllocator && other) noexcept :
+        allocate_fn_(std::move(other.allocate_fn_)),
+        deallocate_fn_(std::move(other.deallocate_fn_))
+        {}
 
-    constexpr pointer allocate(std::size_t n) {}
+    constexpr ~TWAllocator() {}
 
-    constexpr void deallocate (pointer p, std::size_t n) {}
+    constexpr pointer allocate(std::size_t n) {
+        pointer p = new T[n];
+        allocate_fn_(p, n);
+
+        return p;
+    }
+
+    constexpr void deallocate (pointer p, std::size_t n) {
+        deallocate_t_(p, n);
+        delete[] p;
+    }
+
+    void SetAllocateFn(const AllocateFunction & in_fn) {
+        allocate_fn_ = in_fn;
+    }
+
+    void SetAllocateFn(AllocateFunction && in_fn) noexcept {
+        allocate_fn_ = std::move(in_fn);
+    }
+
+    void SetDeallocateFn(const DeallocateFunction & in_fn) {
+        deallocate_fn_ = in_fn;
+    }
+
+    void SetDeallocateFn(DeallocateFunction && in_fn) noexcept {
+        deallocate_fn_ = std::move(in_fn);
+    }
 
 private:
 
-    TFunction<void(pointer, pointer)> allocate_fn_;
-
+    AllocateFunction allocate_fn_;
+    DeallocateFunction deallocate_fn_;
 
 };
 

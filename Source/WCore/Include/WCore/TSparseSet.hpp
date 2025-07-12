@@ -3,11 +3,12 @@
 #include "WCore/TIterator.hpp"
 #include "WCore/WCore.hpp"
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 #include <cassert>
 
-template<typename T>
+template<typename T, typename Allocator=std::allocator<T>>
 class TSparseSet {
 public:
 
@@ -119,6 +120,6 @@ private:
 
     std::unordered_map<size_t, size_t> index_pos_{};
     std::unordered_map<size_t, size_t> pos_index_{};
-    std::vector<T> compact_{};
+    std::vector<T, Allocator> compact_{};
 
 };
