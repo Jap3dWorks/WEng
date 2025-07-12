@@ -9,7 +9,6 @@
 #include <vector>
 #include <cstdio>
 
-
 bool TWAllocator_in_vector() {
 
     TWAllocator<size_t> a;
@@ -59,7 +58,6 @@ TEST_CASE("TWAllocator") {
     SECTION("T1") {
         CHECK(TWAllocator_in_vector());
     }
-
     
 }
 
