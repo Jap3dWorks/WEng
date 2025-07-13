@@ -13,17 +13,12 @@
 class ISerializable
 {
 public:
+    
     ISerializable() = default;
     virtual ~ISerializable() = default;
 
-    virtual void Serialize() {} // TODO make abstract
-    virtual void Deserialize() {}
+    virtual void Serialize(const std::string &) =0;
+    virtual void Deserialize(const std::string &)=0;
     
-//     void SetPath(const std::string& file_path);
-//     std::string GetPath() const;
-
-// private:
-//     // Game based path
-//     std::string file_path_{};
 };
 

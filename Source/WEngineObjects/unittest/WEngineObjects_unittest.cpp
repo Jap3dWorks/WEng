@@ -1,13 +1,17 @@
 #define CATCH_CONFIG_MAIN
+#define WOBJECTMANAGER_INITIAL_MEMORY 1
 
 #include <catch2/catch.hpp>
 
+#include "WCore/TRef.hpp"
 #include "WCore/TFunction.hpp"
 #include "WEngineObjects/TWAllocator.hpp"
-#include "WCore/TRef.hpp"
+#include "WObjectManager/WObjectManager.hpp"
+#include "WAssets/WStaticMeshAsset.hpp"
 
 #include <vector>
 #include <cstdio>
+
 
 bool TWAllocator_in_vector() {
 
@@ -54,9 +58,29 @@ bool TWAllocator_in_vector() {
     return true;
 }
 
+bool WObjectManager_TWRef_test() {
+    WObjectManager man;
+
+    TWRef<WStaticMeshAsset> a  = man.CreateObject<WStaticMeshAsset>("a");
+    a->Name("a");
+
+    std::printf("Initial a ptr to: %d\n" , a.BPtr());
+    std::printf("Name: %s\n", a->Name().c_str());
+
+    for (size_t i=0; i<10; i++) {
+        auto z = man.CreateObject<WStaticMeshAsset>("z");
+    }
+
+    std::printf("Final a ptr to: %d\n", a.BPtr());
+    std::printf("Name: %s\n", a->Name().c_str());
+    
+    return true;
+}
+
 TEST_CASE("TWAllocator") {
-    SECTION("T1") {
+    SECTION("S1") {
         CHECK(TWAllocator_in_vector());
+        CHECK(WObjectManager_TWRef_test());
     }
     
 }

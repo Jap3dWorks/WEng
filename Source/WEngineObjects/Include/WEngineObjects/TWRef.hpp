@@ -31,6 +31,10 @@ struct TWRefTrack_ {
         Track()[in_address].push_back(in_obj);
     }
 
+    static bool Contains(void * in_address) {
+        return Track().contains(in_address);
+    }
+
     static const std::vector<T*> & Instances(void * in_address) {
         assert(Track().contains(in_address));
 
@@ -143,6 +147,10 @@ public:
     constexpr bool IsValid() const noexcept { return object_ != nullptr; }
 
     constexpr bool IsEmpty() const noexcept { return object_ == nullptr; }
+
+    static bool IsInstanced(WObject * in_ptr) {
+        return TRACK::Contains(in_ptr);
+    }
 
     static const std::vector<BWRef*> & Instances(WObject * in_ptr) {
         return TRACK::Instances(in_ptr);

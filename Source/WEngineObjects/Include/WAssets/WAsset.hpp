@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObject.hpp"
 #include "WInterfaces/ISerializable.hpp"
+#include "WEngineObjects/WClass.hpp"
 
 #include <string>
 
@@ -13,8 +14,9 @@ class WCORE_API WAsset : public WObject, public ISerializable
 
 public:
 
-    virtual void Serialize() override;
-    virtual void Deserialize() override;
+    void Serialize(const std::string & in_path) override;
+    void Deserialize(const std::string & in_path) override;
+    
 };
 
 

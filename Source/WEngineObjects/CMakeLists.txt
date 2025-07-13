@@ -67,6 +67,7 @@ if (DEFINED WUNITTEST OR DEFINED ENV{WUNITTEST})
         PRIVATE
             Catch2::Catch2
             WCore::WCore
+            WEngineObjects::WEngineObjects
     )
 
     install(

@@ -1,14 +1,14 @@
 #include "WAssets/WAsset.hpp"
 
-
 // WAsset
 // ------
-void WAsset::Serialize()
+
+void WAsset::Serialize(const std::string & in_path)
 {
 
 }
 
-void WAsset::Deserialize()
+void WAsset::Deserialize(const std::string & in_path)
 {
 
 }

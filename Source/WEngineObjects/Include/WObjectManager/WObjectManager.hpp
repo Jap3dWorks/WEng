@@ -14,7 +14,9 @@
 #include <type_traits>
 #include <concepts>
 
-#define WOBJECTMANAGER_INITIAL_MEMORY 1
+#ifndef WOBJECTMANAGER_INITIAL_MEMORY
+#define WOBJECTMANAGER_INITIAL_MEMORY 1024
+#endif
 
 /*
  * This class is a container for all WObjectContainer.
@@ -100,6 +102,10 @@ private:
             (T* ptr, size_t n) {
                 if (PtrTrack<T>::Get()) {
                     for(size_t i=0; i<n; i++) {
+                        if (!BWRef::IsInstanced(PtrTrack<T>::Get() + i)) {
+                            continue;
+                        }
+                        
                         for (auto & ref : BWRef::Instances(PtrTrack<T>::Get() + i)) {
                             if (ref == nullptr) continue;
                             

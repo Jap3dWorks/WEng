@@ -3,6 +3,13 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
 
+#include <string>
+#include <cstring>
+
+#ifndef WOBJECT_NAME_SIZE
+#define WOBJECT_NAME_SIZE 256
+#endif
+
 WCLASS()
 class WCORE_API WObject
 {
@@ -18,9 +25,19 @@ public:
         wid_ = in_wid;
     }
 
+    void Name(const char * in_name) noexcept {
+        std::strcpy(name_, in_name);
+    }
+
+    constexpr std::string Name() {
+        return name_;
+    }
+
 protected:
 
     WId wid_;
+
+    char name_[WOBJECT_NAME_SIZE];
 
 private:
 
