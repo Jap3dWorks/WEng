@@ -12,7 +12,6 @@
 #include <vector>
 #include <cstdio>
 
-
 bool TWAllocator_in_vector() {
 
     TWAllocator<size_t> a;
@@ -64,22 +63,26 @@ bool WObjectManager_TWRef_test() {
     TWRef<WStaticMeshAsset> a  = man.CreateObject<WStaticMeshAsset>("a");
     a->Name("a");
 
-    std::printf("Initial a ptr to: %d\n" , a.BPtr());
+    std::printf("Initial \"a\" ptr to: %d\n" , a.BPtr());
     std::printf("Name: %s\n", a->Name().c_str());
+
+    void* ptr = a.BPtr();
 
     for (size_t i=0; i<10; i++) {
         auto z = man.CreateObject<WStaticMeshAsset>("z");
     }
 
-    std::printf("Final a ptr to: %d\n", a.BPtr());
+    std::printf("Final \"a\" ptr to: %d\n", a.BPtr());
     std::printf("Name: %s\n", a->Name().c_str());
-    
-    return true;
+
+    return ptr != a.BPtr();
 }
 
-TEST_CASE("TWAllocator") {
-    SECTION("S1") {
+TEST_CASE("WEngineObjects") {
+    SECTION("TWAllocator") {
         CHECK(TWAllocator_in_vector());
+    }
+    SECTION("WOBjectManager") {
         CHECK(WObjectManager_TWRef_test());
     }
     
