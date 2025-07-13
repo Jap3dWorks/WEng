@@ -8,13 +8,14 @@ add_library(
 target_include_directories(
     WLevel
     PUBLIC
-    Include
-    PublicGenerated
+        Include
+        PublicGenerated
     PRIVATE
-    WCore::WCore
-    WEngineObjects::WEngineObjects
-    WEngineInterfaces::WEngineInterfaces
-    Source
+        PrivateGenerated
+        WCore::WCore
+        WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
+        Source
 )    
 
 target_link_libraries(

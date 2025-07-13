@@ -16,3 +16,41 @@
     - *CMakeLists.txt*: All modules needs a CMakeLists file with the compile instructions.
     - *Shaders*: 
     - *Assets*: 
+
+* Modules Dependencies
+
+#+BEGIN_SRC plantuml :file Docs/images/modules_dependencies_1.png
+@startuml
+
+Rectangle WEngine
+Rectangle WEngineInterfaces
+Rectangle WEngineObjects
+Rectangle WCore
+Rectangle WLevel
+Rectangle WRender
+
+WEngineInterfaces -[dashed]-> WEngineObjects
+WEngineInterfaces -[dashed]-> WCore
+
+WEngineObjects -[dashed]-> WCore
+
+WEngine -[dashed]-> WEngineObjects
+WEngine -[dashed]-> WEngineInterfaces
+WEngine -[dashed]-> WCore
+
+WLevel -[dashed]-> WEngineInterfaces
+WLevel -[dashed]-> WEngineObjects
+WLevel -[dashed]-> WCore
+
+WRender -[dashed]-> WEngineInterfaces
+WRender -[dashed]-> WEngineObjects
+WRender -[dashed]-> WCore
+
+@enduml
+#+END_SRC
+
+#+RESULTS:
+[[file:Docs/images/modules_dependencies_1.png]]
+
+
+
