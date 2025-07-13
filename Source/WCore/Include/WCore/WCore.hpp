@@ -7,7 +7,7 @@
 #include <string>
 #include <functional>
 #include <string_view>
-#include <cassert>
+#include <cstdint>
 
 #include "WCore.intermediate.hpp"
 
