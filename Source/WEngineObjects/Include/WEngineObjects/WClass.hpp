@@ -1,22 +1,63 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/TObjectDataBase.hpp"
+#include "WEngineObjects/TWRef.hpp"
+#include "WEngineObjects/TWAllocator.hpp"
+
+#include <memory>
+
+class WObject;
 
 class WENGINEOBJECTS_API WClass
 {
 public:
 
     constexpr WClass() noexcept = default;
+    
     constexpr WClass(const char *name) noexcept :
-    name_(name) {}
+    name_(name)
+    {}
 
     virtual ~WClass() = default;
+
+    constexpr WClass(const WClass & other) noexcept :
+    name_(other.name_)
+    {}
+
+    constexpr WClass(WClass && other) noexcept :
+    name_(std::move(other.name_))
+    {}
+
+    constexpr WClass & operator=(const WClass & other) noexcept
+    {
+        if (this != &other) {
+            name_ = other.name_;
+        }
+
+        return *this;
+    }
+
+    const WClass & operator=(WClass && other) noexcept
+    {
+        if (this != &other) {
+            name_ = std::move(other.name_);
+        }
+
+        return *this;
+    }
+
+public:
+
+    virtual std::unique_ptr<IObjectDataBase> CreateObjectDatabase()=0;
+
+    virtual WObject * DefaultObject() const;
+
+public:
 
     constexpr const char *GetName() const noexcept {
         return name_;
     }
-
-public:
 
     constexpr bool operator==(const WClass &other) const noexcept
     {
@@ -48,7 +89,39 @@ public:
         return std::string_view(name_) >= other.name_;
     }
 
+protected:
+
+    /**
+     * @brief Create a new WObject of type T
+    */
+    template<std::derived_from<WObject> T>
+    TWAllocator<T> CreateAllocator(T* & ptr_) const {
+        TWAllocator<T> a;
+        a.SetAllocateFn(
+            [&ptr_]
+            (T* ptr, size_t n) mutable {
+                if (ptr_) {
+                    for(size_t i=0; i<n; i++) {
+                        if (!BWRef::IsInstanced(ptr_ + i)) {
+                            continue;
+                        }
+                        
+                        for (auto & ref : BWRef::Instances(ptr_ + i)) {
+                            if (ref == nullptr) continue;
+                            
+                            ref->BSet(ptr + i);
+                        }
+                    }
+                }
+
+                ptr_ = ptr;
+            });
+
+        return a;
+    }
+
 private:
+
     const char * name_;
     
 };

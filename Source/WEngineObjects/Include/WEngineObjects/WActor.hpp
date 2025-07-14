@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include "WActor.WEngine.hpp"
+
 /**
  * Base class for all actors in the engine. 
  * Actors are all entities present in a level.

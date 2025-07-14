@@ -2,40 +2,18 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
+#include "WEngineObjects/WObjectMacros.hpp"
 
 #include <string>
 #include <cstring>
 #include <cassert>
 
-#ifndef WOBJECT_NAME_SIZE
-#define WOBJECT_NAME_SIZE 256
-#endif
-
-#define WCLASS(...)
-
-#define _WOBJECT_BODY_(_WCLASS_)                                                  \
-public:                                                                           \
-    constexpr _WCLASS_() noexcept = default;                                      \
-    ~_WCLASS_() = default;                                                        \
-    static const _WCLASS_& GetDefaultObject() noexcept {                          \
-        static _WCLASS_ default_object{};                                         \
-        return default_object;                                                    \
-    }                                                                             \
-    static const WClass& GetStaticClass() noexcept {                              \
-        static WClass static_class( #_WCLASS_ );                                  \
-        return static_class;                                                      \
-    }                                                                             \
-    virtual const WClass& GetClass() const { return _WCLASS_::GetStaticClass(); }
-
-
-#define WOBJECT_BODY(_WCLASS_)  \
-    _WOBJECT_BODY_(_WCLASS_)
-
+#include "WObject.WEngine.hpp"
 
 WCLASS()
 class WCORE_API WObject
 {
-    WOBJECT_BODY(WObject)
+    _WOBJECT_ORIGINAL_BODY_(WObject)
 
 public:
 

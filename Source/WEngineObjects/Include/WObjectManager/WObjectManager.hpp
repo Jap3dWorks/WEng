@@ -40,6 +40,7 @@ public:
         {}
     
     constexpr WObjectManager & operator=(const WObjectManager&) = delete;
+
     constexpr WObjectManager & operator=(WObjectManager && other) noexcept {
         Move(std::move(other));
         return *this;
@@ -53,26 +54,25 @@ public:
      * @brief Create a new WObject of type T
     */
     template <std::derived_from<WObject> T>
-    TWRef<T> CreateObject(const char* in_object_path)
-    {
-        const WClass& object_class = T::GetStaticClass();
+    TWRef<T> CreateObject(const char* in_object_path) {
+        WClass * object_class = T::GetStaticClass();
 
-        if (!containers_.contains(object_class)) {
-            containers_[object_class] =
+        if (!containers_.contains(*object_class)) {
+            containers_[*object_class] =
                 std::make_unique<TObjectDataBase<T, TWAllocator<T>>>(
                     CreateAllocator<T>()
                     );
             
-            containers_[object_class]->Reserve(
+            containers_[*object_class]->Reserve(
                 WOBJECTMANAGER_INITIAL_MEMORY
                 );
         }
 
-        WId id = containers_[object_class]->Create();
+        WId id = containers_[*object_class]->Create();
 
         void* result;
 
-        containers_[object_class]->Get(id, result);
+        containers_[*object_class]->Get(id, result);
 
         T* asset = reinterpret_cast<T*>(result);
         asset->WID(id);
@@ -80,13 +80,31 @@ public:
         return asset;
     }
 
+    // WId CreateObject(const WClass & in_object_class, const char* in_object_path) {
+    //     if (!containers_.contains(in_object_class)) {
+            
+    //         containers_[in_object_class] =
+    //             std::make_unique<TObjectDataBase<T, TWAllocator<T>>>(
+    //                 CreateAllocator<T>()
+    //                 );
+            
+    //         containers_[in_object_class]->Reserve(
+    //             WOBJECTMANAGER_INITIAL_MEMORY
+    //             );
+    //     }
+
+    //     WId id = containers_[in_object_class]->Create();
+
+    //     return id;
+    // }
+
     template <std::derived_from<WObject> T>
     TWRef<T> GetObject(WId in_id)
     {
-        WClass object_class = T::GetDefaultObject()->GetClass();
+        WClass * object_class = T::GetDefaultObject()->GetClass();
 
         void * result;
-        containers_[object_class]->Get(in_id, result);
+        containers_[*object_class]->Get(in_id, result);
 
         return reinterpret_cast<T*>(result);
     }
@@ -138,6 +156,8 @@ private:
     constexpr void Move(WObjectManager && other) noexcept {
         containers_ = std::move(other.containers_);
     }
+
+private:    
 
     std::unordered_map<WClass, std::unique_ptr<IObjectDataBase>> containers_{};
 

@@ -1,5 +1,4 @@
 #define CATCH_CONFIG_MAIN
-#define WOBJECTMANAGER_INITIAL_MEMORY 1
 
 #include <catch2/catch.hpp>
 
@@ -11,6 +10,13 @@
 
 #include <vector>
 #include <cstdio>
+
+#ifdef WOBJECTMANAGER_INITIAL_MEMORY
+    #undef WOBJECTMANAGER_INITIAL_MEMORY
+#endif
+
+#define WOBJECTMANAGER_INITIAL_MEMORY 1
+
 
 bool TWAllocator_in_vector() {
 

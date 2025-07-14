@@ -5,24 +5,26 @@
 #include "WStructs/WTransformStructs.hpp"
 #include "WEngineObjects/WObject.hpp"
 
+#include "WComponent.WEngine.hpp"
+
 WCLASS()
 class WCORE_API WComponent : public WObject
 {
     WOBJECT_BODY(WComponent)
 };
 
-WCLASS()
-class WCORE_API WTransformComponent : public WComponent
-{
-    WOBJECT_BODY(WTransformComponent)
-public:
-    WTransformStruct transform{};
-};
+// WCLASS()
+// class WCORE_API WTransformComponent : public WComponent
+// {
+//     WOBJECT_BODY(WTransformComponent)
+// public:
+//     WTransformStruct transform{};
+// };
 
-WCLASS()
-class WCORE_API WStaticModelComponent : public WComponent
-{
-    WOBJECT_BODY(WStaticModelComponent)
-public:
-    WModelStruct* model=nullptr;
-};
+// WCLASS()
+// class WCORE_API WStaticModelComponent : public WComponent
+// {
+//     WOBJECT_BODY(WStaticModelComponent)
+// public:
+//     WModelStruct* model=nullptr;
+// };
