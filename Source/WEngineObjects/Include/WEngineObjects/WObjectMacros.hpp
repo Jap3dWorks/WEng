@@ -43,16 +43,15 @@ public:                                                  \
 #define WOBJECT_BODY(_WCLASS_)                           \
     _WOBJECT_BODY_(_WCLASS_)
 
-#define _H() #
-
-#define _INCLUDE(_HEADER) _H()include _HEADER
+#define _INCLUDES_                              \
+    #include "WCore/WCore.hpp"                  \
+    #include "WEngineObjects/WClass.hpp"        \
+    #include "WCore/TObjectDataBase.hpp"
 
 #define _STR(VAL) #VAL
 
 #define DECLARE_WCLASS(_WCLASS_)                                      \
-_INCLUDE("WCore/WCore.hpp")                                           \    
-_INCLUDE("WEngineObjects/WClass.hpp")                                 \
-_INCLUDE("WCore/TObjectDataBase.hpp")                                 \
+    _INCLUDES_                                                        \
 class _WCLASS_ ;                                                      \
 class WENGINEOBJECTS_API WClass__ ## _WCLASS_ : public WClass{        \
 public :                                                              \

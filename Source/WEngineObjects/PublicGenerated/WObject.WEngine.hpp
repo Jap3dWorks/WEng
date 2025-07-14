@@ -1,10 +1,6 @@
 #pragma once
 #include "WEngineObjects/WObjectMacros.hpp"
 
-_H()
-
-_INCLUDE("cosa")
-
 
 DECLARE_WCLASS(WObject)
 
