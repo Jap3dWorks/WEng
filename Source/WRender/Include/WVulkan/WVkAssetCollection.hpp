@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WAssets/WAsset.hpp"
+#include "WEngineObjects/WAsset.hpp"
 #include "WCore/TFunction.hpp"
 #include "WCore/TObjectDataBase.hpp"
 

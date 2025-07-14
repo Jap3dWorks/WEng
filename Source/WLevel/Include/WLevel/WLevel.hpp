@@ -3,9 +3,9 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
 #include "ILevel.hpp"
-#include "WActors/WActor.hpp"
+#include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/TWRef.hpp"
-
+#include "WObjectManager/WObjectManager.hpp"
 
 class WLEVEL_API WLevel : public ILevel {
 public:
@@ -38,6 +38,6 @@ public:
 
 private:
 
-    
+    WObjectManager object_manager_{};
 
 };

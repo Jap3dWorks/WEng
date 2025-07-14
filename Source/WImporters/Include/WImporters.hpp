@@ -4,7 +4,7 @@
 #include "WInterfaces/ICloneable.hpp"
 #include "WCore/TRef.hpp"
 #include "WEngineObjects/TWRef.hpp"
-#include "WAssets/WAsset.hpp"
+#include "WEngineObjects/WAsset.hpp"
 
 #include <vector>
 #include <memory>

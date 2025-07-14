@@ -1,2 +1,2 @@
-#include "WComponents/WComponent.hpp"
+#include "WEngineObjects/WComponent.hpp"
 

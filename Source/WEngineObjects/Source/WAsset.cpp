@@ -1,4 +1,4 @@
-#include "WAssets/WAsset.hpp"
+#include "WEngineObjects/WAsset.hpp"
 
 // WAsset
 // ------
