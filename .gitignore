@@ -29,5 +29,5 @@ hx.sh
 *~
 *#
 *.xcf
-
+*.tmp
 *.ORIG

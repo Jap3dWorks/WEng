@@ -6,7 +6,6 @@
 
 #include "WStaticMeshAsset.WEngine.hpp"
 
-
 WCLASS()
 class WCORE_API WStaticMeshAsset : public WAsset
 {

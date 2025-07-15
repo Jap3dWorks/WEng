@@ -91,35 +91,6 @@ public:
 
 protected:
 
-    /**
-     * @brief Create a new WObject of type T
-    */
-    template<std::derived_from<WObject> T>
-    TWAllocator<T> CreateAllocator(T* & ptr_) const {
-        TWAllocator<T> a;
-        a.SetAllocateFn(
-            [&ptr_]
-            (T* ptr, size_t n) mutable {
-                if (ptr_) {
-                    for(size_t i=0; i<n; i++) {
-                        if (!BWRef::IsInstanced(ptr_ + i)) {
-                            continue;
-                        }
-                        
-                        for (auto & ref : BWRef::Instances(ptr_ + i)) {
-                            if (ref == nullptr) continue;
-                            
-                            ref->BSet(ptr + i);
-                        }
-                    }
-                }
-
-                ptr_ = ptr;
-            });
-
-        return a;
-    }
-
 private:
 
     const char * name_;

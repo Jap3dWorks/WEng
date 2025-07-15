@@ -22,7 +22,7 @@ public:
     using AllocateFunction = TFunction<void(pointer& _prev, pointer _new, std::size_t)>;
 
     constexpr TWAllocator() noexcept :
-        allocate_fn_([](pointer, std::size_t){}),
+        allocate_fn_([](pointer&, pointer, std::size_t){}),
         deallocate_fn_([](pointer, std::size_t){}),
         prev_(nullptr)
         {}

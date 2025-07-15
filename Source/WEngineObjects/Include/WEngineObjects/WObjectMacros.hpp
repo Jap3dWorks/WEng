@@ -45,10 +45,4 @@ public:                                                  \
 #define WOBJECT_BODY(_WCLASS_)                           \
     _WOBJECT_BODY_(_WCLASS_)
 
-#ifdef _WCLASS_DEFFINITION_
-#define _WCLASS_HEADER_(_WCLASS_) #_WCLASS_ ## .WENGINE.hpp
-#include _WCLASS_H(_WCLASS_)
-#define DEFINE_WCLASS(_WCLASS_) \
 
-
-#endif
