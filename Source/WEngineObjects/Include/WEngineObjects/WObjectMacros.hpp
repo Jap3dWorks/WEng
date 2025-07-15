@@ -1,8 +1,10 @@
 #pragma once
 
 #ifndef WOBJECT_NAME_SIZE
-#define WOBJECT_NAME_SIZE 256
+    #define WOBJECT_NAME_SIZE 256
 #endif
+
+#define _STR(VAL) #VAL
 
 #define WCLASS(...)
 
@@ -43,23 +45,10 @@ public:                                                  \
 #define WOBJECT_BODY(_WCLASS_)                           \
     _WOBJECT_BODY_(_WCLASS_)
 
-#define _INCLUDES_                              \
-    #include "WCore/WCore.hpp"                  \
-    #include "WEngineObjects/WClass.hpp"        \
-    #include "WCore/TObjectDataBase.hpp"
+#ifdef _WCLASS_DEFFINITION_
+#define _WCLASS_HEADER_(_WCLASS_) #_WCLASS_ ## .WENGINE.hpp
+#include _WCLASS_H(_WCLASS_)
+#define DEFINE_WCLASS(_WCLASS_) \
 
-#define _STR(VAL) #VAL
 
-#define DECLARE_WCLASS(_WCLASS_)                                      \
-    _INCLUDES_                                                        \
-class _WCLASS_ ;                                                      \
-class WENGINEOBJECTS_API WClass__ ## _WCLASS_ : public WClass{        \
-public :                                                              \
-    constexpr WClass__ ## _WCLASS_ () :                               \
-        WClass( _STR(WClass ## _WCLASS_ )) {}                         \
-    ~WClass__ ## _WCLASS_ () override = default;                      \
-public:                                                               \
-    std::unique_ptr<IObjectDataBase> CreateObjectDatabase() override; \
-    WObject * DefaultObject() const override;                         \
-};
-
+#endif

@@ -51,7 +51,7 @@ public:
 
     virtual std::unique_ptr<IObjectDataBase> CreateObjectDatabase()=0;
 
-    virtual WObject * DefaultObject() const;
+    virtual const WObject * DefaultObject() const=0;
 
 public:
 

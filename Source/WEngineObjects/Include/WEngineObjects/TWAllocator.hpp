@@ -19,28 +19,37 @@ public:
     using is_always_equal = std::true_type;
 
     using DeallocateFunction = TFunction<void(pointer, std::size_t)>;
-    using AllocateFunction = TFunction<void(pointer, std::size_t)>;
+    using AllocateFunction = TFunction<void(pointer& _prev, pointer _new, std::size_t)>;
 
     constexpr TWAllocator() noexcept :
         allocate_fn_([](pointer, std::size_t){}),
-        deallocate_fn_([](pointer, std::size_t){})
+        deallocate_fn_([](pointer, std::size_t){}),
+        prev_(nullptr)
         {}
 
     TWAllocator(const TWAllocator & other) :
         allocate_fn_(other.allocate_fn_),
-        deallocate_fn_(other.deallocate_fn_)
+        deallocate_fn_(other.deallocate_fn_),
+        prev_(other.prev_)
         {}
 
     TWAllocator(TWAllocator && other) noexcept :
         allocate_fn_(std::move(other.allocate_fn_)),
-        deallocate_fn_(std::move(other.deallocate_fn_))
-        {}
+        deallocate_fn_(std::move(other.deallocate_fn_)),
+        prev_(std::move(other))
+        {
+            other.prev_ = nullptr;
+        }
 
-    constexpr ~TWAllocator() {}
+    constexpr ~TWAllocator() {
+        prev_ = nullptr;
+    }
 
     constexpr pointer allocate(std::size_t n) {
         pointer p = new T[n];
-        allocate_fn_(p, n);
+        allocate_fn_(prev_, p, n);
+
+        prev_=p;
 
         return p;
     }
@@ -70,6 +79,8 @@ private:
 
     AllocateFunction allocate_fn_;
     DeallocateFunction deallocate_fn_;
+
+    pointer prev_;
 
 };
 

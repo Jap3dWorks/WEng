@@ -4,7 +4,7 @@
 #undef _WCLASS_
 #endif
 
-#define _WCLASS_ WObject
+#define _WCLASS_ WAsset
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

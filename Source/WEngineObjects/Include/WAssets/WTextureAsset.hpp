@@ -5,6 +5,7 @@
 #include "WStructs/WTextureStructs.hpp"
 #include <memory>
 
+#include "WTextureAsset.WEngine.hpp"
 
 WCLASS()
 class WCORE_API WTextureAsset : public WAsset

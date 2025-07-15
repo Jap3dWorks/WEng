@@ -4,6 +4,8 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 
+#include "WStaticMeshAsset.WEngine.hpp"
+
 
 WCLASS()
 class WCORE_API WStaticMeshAsset : public WAsset
