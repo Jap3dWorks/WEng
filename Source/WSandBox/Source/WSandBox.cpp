@@ -1,43 +1,37 @@
+#include <cstdint>
+#include <vector>
 
-class A {
-    
-};
+struct EngData;
 
-struct B {
+struct A {
 public:
 
-    virtual void Method()=0;
+    A() {}
 
-    virtual A* Get() =0;
-    
-};
-
-template<typename T>
-struct D : B {
-
-    void Method() override {
-        T val;
+    uint32_t val() {
+        return a;
     }
 
-    A * Get() {
-        return nullptr;
-    }
-    
+private:
+
+    uint32_t a;
 };
 
-struct C;
-
-using CD = D<C>;
-
-
-struct C : public A {    
-};
+struct EngData {};
 
 int main(int argc, char* argv[])
 {
-    CD cd;
 
-    A * ptr = cd.Get();
+    std::vector<A> v;
+
+    v.reserve(15);
+
+    EngData b;
+
+    for (uint32_t i=0; i<15; i++) {
+        v.push_back(A());
+    }
 
 	return 0;
+
 }
