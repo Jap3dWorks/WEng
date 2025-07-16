@@ -52,7 +52,7 @@ WRender::WRender() :
 
 WRender::~WRender()
 {
-    WLOGFNAME("Destroy WRender");
+    WFLOG("Destroy WRender");
     Clear();
 }
 
@@ -170,7 +170,7 @@ void WRender::Initialize()
 void WRender::Draw()
 {
 
-    WLOGFNAME("Drawing...");
+    WFLOG("Drawing...");
 
     vkWaitForFences(
         device_info_.vk_device,
@@ -247,7 +247,7 @@ void WRender::Draw()
         
     }
 
-    WLOGFNAME("Signal Semaphores: " << signal_semaphores[0]);
+    WFLOG("Signal Semaphores: {:d}", (size_t)signal_semaphores[0]);
 
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -261,7 +261,7 @@ void WRender::Draw()
     present_info.pResults = nullptr;
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
-    WLOGFNAME("QueuePresentKHR Result: " << result);
+    WFLOG("QueuePresentKHR Result: {:d}", (size_t)result);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
         frame_buffer_resized = false;
@@ -287,7 +287,7 @@ WId WRender::CreateRenderPipeline(
 
 
 void WRender::RecreateSwapChain() {
-    WLOGFNAME("RECREATE SWAP CHAIN!");
+    WFLOG("RECREATE SWAP CHAIN!");
     
     int width=0, height=0;
     glfwGetFramebufferSize(window_info_.window, &width, &height);

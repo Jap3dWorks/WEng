@@ -1,37 +1,18 @@
 #include <cstdint>
-#include <vector>
+#include <format>
+#include <print>
+#include <string>
 
-struct EngData;
+#define WLOG(msg, ...) std::print( msg ,##__VA_ARGS__ )
+#define WFLOG(msg, ...) std::print("[{}] {}\n", __func__, std::format(msg ,##__VA_ARGS__))
 
-struct A {
-public:
+void Funcc() {
+    WFLOG("Printing {}", "something");
 
-    A() {}
-
-    uint32_t val() {
-        return a;
-    }
-
-private:
-
-    uint32_t a;
-};
-
-struct EngData {};
+}
 
 int main(int argc, char* argv[])
 {
-
-    std::vector<A> v;
-
-    v.reserve(15);
-
-    EngData b;
-
-    for (uint32_t i=0; i<15; i++) {
-        v.push_back(A());
-    }
-
-	return 0;
-
+    Funcc();
+    return 0;
 }

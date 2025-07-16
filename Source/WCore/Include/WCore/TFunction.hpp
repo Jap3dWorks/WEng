@@ -67,7 +67,7 @@ public:
     {}
 
     TFunction(TFunction & other) :
-        callable(other.callable->clone())
+        callable(other.callable->Clone())
         {}
 
     constexpr TFunction(TFunction && other) noexcept :

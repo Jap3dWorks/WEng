@@ -120,7 +120,7 @@ protected:
 private:
 
     std::unordered_map<WId, TRef<A>> assets_;    
-    TObjectDataBase<D> data_;
+    TObjectDataBase<D, void> data_;
 
 };
 

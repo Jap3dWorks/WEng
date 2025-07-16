@@ -115,10 +115,10 @@ private:
 
     void InitializeClearLambdas();
 
-    TObjectDataBase<WVkRenderPipelineInfo> pipelines_{};
-    TObjectDataBase<WVkDescriptorSetLayoutInfo> descriptor_set_layouts_{};
-    TObjectDataBase<WVkDescriptorSetInfo> descriptor_sets_{};
-    TObjectDataBase<WVkPipelineBindingInfo> bindings_{};
+    TObjectDataBase<WVkRenderPipelineInfo, void> pipelines_{};
+    TObjectDataBase<WVkDescriptorSetLayoutInfo, void> descriptor_set_layouts_{};
+    TObjectDataBase<WVkDescriptorSetInfo, void> descriptor_sets_{};
+    TObjectDataBase<WVkPipelineBindingInfo, void> bindings_{};
 
     /** Relation between each pipeline and its bindings*/
     std::unordered_map<WId, std::vector<WId>> pipeline_bindings_{};

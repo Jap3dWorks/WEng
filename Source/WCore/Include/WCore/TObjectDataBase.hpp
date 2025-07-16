@@ -5,6 +5,7 @@
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 
+template<typename T=void>
 class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
@@ -13,18 +14,21 @@ public:
     virtual WId Create() = 0;
     /** Insert at WId  */
     virtual void Insert(WId)=0;
-    virtual void Insert(WId, void* &)=0;
+    virtual void Insert(WId, T* &)=0;
     virtual void Remove(WId) =0;
     virtual void Clear() = 0;
-    virtual void Get(WId, void* &) = 0;
-    virtual void Get(WId, const void*&) const = 0;
+    virtual void Get(WId, T* &) = 0;
+    virtual void Get(WId, const T* &) const = 0;
     virtual size_t Count() const = 0;
     virtual bool Contains(WId in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
+    virtual std::vector<WId> Indices() = 0;
+    virtual void ForEach(TFunction<void(T*)> in_function)=0;
+    
 };
 
-template<typename T, typename Allocator=std::allocator<T>>
-class TObjectDataBase : public IObjectDataBase {
+template<typename T, typename P=void, typename Allocator=std::allocator<T>>
+class TObjectDataBase : public IObjectDataBase<P> {
 
 public:
 
@@ -111,7 +115,7 @@ public:
         objects_.Insert(in_id, create_fn_(in_id));
     }
 
-    void Insert(WId in_id, void* & in_value) override {
+    void Insert(WId in_id, P* & in_value) override {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id, *static_cast<T*>(in_value));
     }
@@ -159,11 +163,11 @@ public:
         return objects_.Get(in_id);
     }
 
-    void Get(WId in_id, void* & out_value) override final {
+    void Get(WId in_id, P* & out_value) override final {
         out_value = &objects_.Get(in_id);
     }
 
-    void Get(WId in_id, const void*& out_value) const override final {
+    void Get(WId in_id, const P* & out_value) const override final {
         out_value = &objects_.Get(in_id);
     }
 
@@ -185,6 +189,24 @@ public:
 
     void Reserve(size_t in_value) override {
         objects_.Reserve(in_value);
+    }
+
+    std::vector<WId> Indices() override {
+        std::vector<WId> result;
+        result.reserve(objects_.Count());
+
+        for (auto& p : objects_.IterIndex()) {
+            
+            result.push_back(p.first);
+        }
+
+        return result;
+    }
+
+    void ForEach(TFunction<void(P*)> in_function) override {
+        for (auto& v : objects_) {
+            in_function(static_cast<P*>(&v));
+        }
     }
 
 private:

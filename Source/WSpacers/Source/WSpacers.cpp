@@ -85,7 +85,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    if (geo_assets[0]->GetClass() != WStaticMeshAsset::GetStaticClass())
+    if (geo_assets[0]->Class() != WStaticMeshAsset::StaticClass())
     {
         std::cout << "geo_asset is not a static model!" << std::endl;
         return false;
@@ -105,7 +105,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    if (tex_asset[0]->GetClass() != WTextureAsset::GetStaticClass())
+    if (tex_asset[0]->Class() != WTextureAsset::StaticClass())
     {
         std::cout << "tex_asset is not a texture!" << std::endl;
         return false;
@@ -163,14 +163,14 @@ int main(int argc, char** argv)
             {1}
             );
 
-        WLOG("Bind Pipeline: " << pipeline_wid.GetId());
+        WLOG("Bind Pipeline: {:d}", pipeline_wid.GetId());
 
         run(engine);
 
     }
     catch(const std::exception& e)
     {
-        WLOG("[ERROR]" << e.what());
+        WLOG("[ERROR] {}", e.what());
 
         return 1;
     }

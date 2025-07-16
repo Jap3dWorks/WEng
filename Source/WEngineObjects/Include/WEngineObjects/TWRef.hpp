@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <vector>
 #include <concepts>
-
 #include <cassert>
 
 class WObject;
@@ -12,12 +11,22 @@ template<typename T>
 struct TWRefTrack_ {
 
     static void UnregInstance(void * in_address, T * in_obj) {
+        // TODO: use a better data structure
+        
         if (!in_obj) return;
 
-        // assert(Track()[in_address].contains(in_obj));
+        assert(Track().contains(in_address));
 
-        // TODO erase elements
+        std::vector<T*> v;
+        v.reserve(Track()[in_address].size());
+        
+        for (T* p : Track()[in_address]) {
+            if (p != in_obj) {
+                v.push_back(p);
+            }
+        }
 
+        Track()[in_address] = std::move(v);
     }
 
     static void RegInstance(void * in_address, T * in_obj) {

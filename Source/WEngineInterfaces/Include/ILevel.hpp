@@ -11,6 +11,7 @@
 class WClass;
 
 class  ILevel {
+
 public:
 
     virtual ~ILevel()=default;
@@ -23,7 +24,7 @@ public:
     /**
      * Get an Actor reference from WId.
      */
-    virtual TWRef<WActor> Actor(const WId & in_id)=0;
+    virtual TWRef<WActor> Actor(WClass * in_class, const WId & in_id)=0;
 
     virtual void ForEachActor(WClass * in_class, TFunction<void(TWRef<WActor>)> in_predicate)=0;
 

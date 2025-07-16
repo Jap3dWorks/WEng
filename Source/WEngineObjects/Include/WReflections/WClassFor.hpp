@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WEngineObjects/WClass.hpp"
+#include "WEngineObjects/TWRef.hpp"
+#include "WLog.hpp"
 
 /**
  * @brief WClass declaration for an WObject.
@@ -15,33 +17,33 @@ public:
 
 public:
 
-    std::unique_ptr<IObjectDataBase> CreateObjectDatabase() override {
+    std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() override {
         TWAllocator<T> a;
 
         a.SetAllocateFn(
             []
-            (T *& prev, T* nptr, size_t n) {
-                if (prev) {
-                    for(size_t i=0; i<n; i++) {
-                        if (!BWRef::IsInstanced(prev + i)) {
+            (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
+                if (_pptr) {
+                    for(size_t i=0; i<_pn; i++) {
+                        if (!BWRef::IsInstanced(_pptr + i)) {
                             continue;
                         }
                         
-                        for (auto & ref : BWRef::Instances(prev + i)) {
+                        for (auto & ref : BWRef::Instances(_pptr + i)) {
                             if (ref == nullptr) continue;
                             
-                            ref->BSet(nptr + i);
+                            ref->BSet(_nptr + i);
                         }
                     }
                 }
             });
 
-        return std::make_unique<TObjectDataBase<T, TWAllocator<T>>>(a);
+        return std::make_unique<TObjectDataBase<T, WObject, TWAllocator<T>>>(a);
 
     }
 
     const WObject * DefaultObject() const override {
-        return &T::GetDefaultObject();
+        return &T::DefaultObject();
     }
     
 };

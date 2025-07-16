@@ -49,13 +49,13 @@ public:
 
 public:
 
-    virtual std::unique_ptr<IObjectDataBase> CreateObjectDatabase()=0;
+    virtual std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase()=0;
 
     virtual const WObject * DefaultObject() const=0;
 
 public:
 
-    constexpr const char *GetName() const noexcept {
+    constexpr const char *Name() const noexcept {
         return name_;
     }
 
@@ -104,7 +104,7 @@ namespace std
     {
         std::size_t operator()(const WClass &wclass) const
         {
-            return std::hash<std::string>{}(wclass.GetName());
+            return std::hash<std::string>{}(wclass.Name());
         }
 
     };

@@ -19,37 +19,39 @@ public:
     using is_always_equal = std::true_type;
 
     using DeallocateFunction = TFunction<void(pointer, std::size_t)>;
-    using AllocateFunction = TFunction<void(pointer& _prev, pointer _new, std::size_t)>;
+    using AllocateFunction = TFunction<void(pointer _pptr, std::size_t _pn, pointer _nptr, std::size_t _nn)>;
 
     constexpr TWAllocator() noexcept :
-        allocate_fn_([](pointer&, pointer, std::size_t){}),
+        allocate_fn_([](pointer, std::size_t, pointer, std::size_t){}),
         deallocate_fn_([](pointer, std::size_t){}),
-        prev_(nullptr)
+        pptr_(nullptr)
         {}
 
     TWAllocator(const TWAllocator & other) :
         allocate_fn_(other.allocate_fn_),
         deallocate_fn_(other.deallocate_fn_),
-        prev_(other.prev_)
+        pptr_(other.pptr_)
         {}
 
     TWAllocator(TWAllocator && other) noexcept :
         allocate_fn_(std::move(other.allocate_fn_)),
         deallocate_fn_(std::move(other.deallocate_fn_)),
-        prev_(std::move(other))
+        pptr_(std::move(other))
         {
-            other.prev_ = nullptr;
+            other.pptr_ = nullptr;
         }
 
     constexpr ~TWAllocator() {
-        prev_ = nullptr;
+        pptr_ = nullptr;
     }
 
     constexpr pointer allocate(std::size_t n) {
         pointer p = new T[n];
-        allocate_fn_(prev_, p, n);
+        
+        allocate_fn_(pptr_, pn_, p, n);
 
-        prev_=p;
+        pptr_=p;
+        pn_=n;
 
         return p;
     }
@@ -80,7 +82,8 @@ private:
     AllocateFunction allocate_fn_;
     DeallocateFunction deallocate_fn_;
 
-    pointer prev_;
+    pointer pptr_;
+    std::size_t pn_;
 
 };
 

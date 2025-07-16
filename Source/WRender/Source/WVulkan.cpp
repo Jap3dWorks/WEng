@@ -1093,7 +1093,7 @@ void WVulkan::UpdateDescriptorSets(
     const WVkDeviceInfo & in_device_info
     )
 {
-    WLOGFNAME("Update Descriptor Sets");
+    WFLOG("Update Descriptor Sets");
     vkUpdateDescriptorSets(
         in_device_info.vk_device,
         static_cast<uint32_t>(in_write_descriptor_sets.size()),
@@ -1171,25 +1171,25 @@ void WVulkan::Create(WVkFenceInfo & out_fence_info, const WVkDeviceInfo & in_dev
 
 void WVulkan::Destroy(WVkInstanceInfo &instance_info)
 {
-    WLOGFNAME("Destroy Vulkan Instance.");
+    WFLOG("Destroy Vulkan Instance.");
     vkDestroyInstance(instance_info.instance, nullptr);
 }
 
 void WVulkan::Destroy(WVkSurfaceInfo &surface_info, const WVkInstanceInfo &instance_info)
 {
-    WLOGFNAME("Destroy Vulkan Surface.");
+    WFLOG("Destroy Vulkan Surface.");
     vkDestroySurfaceKHR(instance_info.instance, surface_info.surface, nullptr);
 }
 
 void WVulkan::Destroy(WVkDeviceInfo &device_info)
 {
-    WLOGFNAME("Destroy Vulkan Device.");
+    WFLOG("Destroy Vulkan Device.");
     vkDestroyDevice(device_info.vk_device, nullptr);
 }
 
 void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-    WLOGFNAME("Destroy Swap Chain and Image Views");
+    WFLOG("Destroy Swap Chain and Image Views");
     vkDestroyImageView(device_info.vk_device, swap_chain_info.color_image_view, nullptr);
     vkDestroyImage(device_info.vk_device, swap_chain_info.color_image, nullptr);
     vkFreeMemory(device_info.vk_device, swap_chain_info.color_image_memory, nullptr);
@@ -1226,7 +1226,7 @@ void WVulkan::Destroy(WVkRenderPassInfo &render_pass_info, const WVkDeviceInfo &
 
 void WVulkan::Destroy(WVkWindowInfo &window_info)
 {
-    WLOGFNAME("Destroy Window Info.");
+    WFLOG("Destroy Window Info.");
     glfwDestroyWindow(window_info.window);
     glfwTerminate();
 }
@@ -1294,7 +1294,7 @@ void WVulkan::Destroy(
     const WVkDeviceInfo & in_device_info
     )
 {
-    WLOGFNAME("Destroy Command Pool");
+    WFLOG("Destroy Command Pool");
     vkDestroyCommandPool(
         in_device_info.vk_device,
         out_command_pool.vk_command_pool,
@@ -1776,7 +1776,7 @@ void WVulkan::TransitionImageLayout(
         new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
         )
     {
-        WLOGFNAME("From VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTINAL");
+        WFLOG("From VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTINAL");
         
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -1844,7 +1844,7 @@ void WVulkan::EndSingleTimeCommands(
     const VkQueue &graphics_queue,
     const VkCommandBuffer &command_buffer)
 {
-    WLOGFNAME("End Single Time Commands from " << command_buffer);
+    WFLOG("End Single Time Commands from {}", (size_t)command_buffer);
     
     vkEndCommandBuffer(command_buffer);
 
@@ -1952,7 +1952,7 @@ void WVulkan::CopyVkBuffer(
     const VkDeviceSize & size
     )
 {
-    WLOGFNAME("Copy Vk Buffer - src: " << src_buffer << " dst: " << dst_buffer);
+    WFLOG("Copy Vk Buffer - src: {}, dst: {}", (size_t)src_buffer, (size_t)dst_buffer);
     
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

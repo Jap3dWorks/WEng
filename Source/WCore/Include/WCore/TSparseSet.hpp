@@ -21,7 +21,7 @@ public:
         compact_(in_allocator)
         {}
 
-    constexpr TSparseSet(const TSparseSet& other) :
+    constexpr TSparseSet(const TSparseSet & other) :
         index_pos_(other.index_pos_),
         pos_index_(other.pos_index_),
         compact_(other.compact_)
@@ -116,15 +116,13 @@ public:
         return compact_.cend();
     }
 
-    constexpr auto iter_index() noexcept {
-        return TIterator<size_t, decltype(index_pos_.begin())>(
+    constexpr auto IterIndex() noexcept {
+        return TIterator<
+            // decltype(*std::declval(decltype(index_pos_)::iterator)),
+            std::pair<const size_t, size_t>,
+            typename decltype(index_pos_)::iterator>(
             index_pos_.begin(), index_pos_.end()
             );
-    }
-
-    constexpr Allocator & GetAllocator() noexcept {
-        Allocator n;
-        compact_.get_allocator(n);
     }
 
 private:

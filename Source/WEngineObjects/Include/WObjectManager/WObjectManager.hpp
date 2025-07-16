@@ -47,23 +47,16 @@ public:
      * @brief Create a new WObject of type T.
      */
     template<std::derived_from<WObject> T>
-    TWRef<T> CreateObject(const char* in_object_path) {
+    TWRef<T> CreateObject(const char * in_fullname) {
         
-        WClass * object_class = T::GetStaticClass();
+        WClass * w_class = T::StaticClass();
+        return static_cast<T*>(
+            CreateObject(w_class, in_fullname).Ptr()
+            );
 
-        WId id = CreateObject(object_class, in_object_path);
-
-        void* result;
-
-        containers_[object_class]->Get(id, result);
-
-        T* asset = reinterpret_cast<T*>(result);
-        asset->WID(id);
-
-        return asset;
     }
 
-    WId CreateObject(WClass * in_class, const char * in_object) {
+    TWRef<WObject> CreateObject(WClass * in_class, const char * in_fullname) {
         
         if (!containers_.contains(in_class)) {
             containers_[in_class] =
@@ -75,18 +68,48 @@ public:
         }
 
         WId id = containers_[in_class]->Create();
+        
+        WObject * obj;
+        containers_[in_class]->Get(id, obj);
 
-        return id;
+        obj->WID(id);
+        obj->Name(in_fullname);
+
+        return obj;
+
     }
 
     template <std::derived_from<WObject> T>
     TWRef<T> GetObject(WId in_id) {
-        WClass * object_class = T::GetDefaultObject()->GetClass();
+        WClass * object_class = T::StaticClass();
 
-        void * result;
-        containers_[object_class]->Get(in_id, result);
+        return static_cast<T*>(GetObject(object_class, in_id).Ptr());
+    }
 
-        return reinterpret_cast<T*>(result);
+    TWRef<WObject> GetObject(WClass * in_class, WId in_id) {
+        WObject * result;
+        containers_[in_class]->Get(in_id, result);
+
+        return static_cast<WObject*>(result);
+    }
+
+    template<std::derived_from<WObject> T>
+    void ForEach(TFunction<void(T*)> in_predicate) {
+        if (!containers_[T::StaticClass()]) {
+            return;
+        }
+
+        containers_[T::StaticClass()]->ForEach(
+            [&in_predicate](WObject* ptr_) {
+                in_predicate(
+                    static_cast<T*>(ptr_)
+                    );
+            }
+            );
+    }
+
+    void ForEach(WClass * in_class, TFunction<void(WObject*)> in_predicate) {
+        containers_[in_class]->ForEach(in_predicate);
     }
 
 private:
@@ -97,7 +120,7 @@ private:
 
 private:    
 
-    std::unordered_map<WClass *, std::unique_ptr<IObjectDataBase>> containers_{};
+    std::unordered_map<WClass *, std::unique_ptr<IObjectDataBase<WObject>>> containers_{};
 
 };
 

@@ -409,7 +409,7 @@ namespace WVulkan
         const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info
         ) {
-        WLOGFNAME("N = " << N);
+        WFLOG("N = {:d}", N);
         vkUpdateDescriptorSets(
             in_device_info.vk_device,
             static_cast<uint32_t>(N),
