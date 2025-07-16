@@ -1,7 +1,9 @@
-# Coding Style
-C -> class
-S -> struct
-T -> templates
+#+title: Coding Style
 
-W -> WEng Object | Engine modules
-A -> Actor Object
+* Classes Initial letter
+
+- T -> templates
+- B -> Base Clases not Interfaces
+- I -> Interfaces
+- W -> WEng Object | Engine modules | Engine classes
+

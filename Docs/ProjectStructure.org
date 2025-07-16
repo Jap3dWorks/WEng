@@ -1,27 +1,7 @@
-# Project Structure
+#+title: Project Structure
 
-Each submodule inside Source is a core Module of the project.
+Inside the directory ./Source each folder is a library or an executable. Each one of this folders contains a CMakeLists.txt file to config the build.
 
-Each Game using WEng will also contain a Source directory with all submodules inside.
-One of those submodules will be the main module.
+Each library should create an Alias at compile time like WModuleName::WModuleName that can be used to include and link in other module compilations. You can check some of the CMakeLists.txt files.
 
-A Game using WEng should be located in an external structure.
-
-* DevsDir
-  * MyGame
-    * Source
-    * Install
-      * <arch>
-        * lib
-        * bin
-  * WEng
-    * Source
-    * Install
-      * <arch>
-        * lib
-        * bin
-
-So WEng can be located in any directory in your system.
-
-Each Module contains a CMakeLists.txt file that will manage the compile and link process of the module.
-
+The Idea is that once the engine is compiled, you can use this libraries to create an executable.

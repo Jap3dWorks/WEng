@@ -1,24 +1,31 @@
 #+TITLE: Readme
 
 * Introduction 
-WEng is a for fun project based in c++, cmake and OpenGL.
+
+WEng is a for fun project based in c++, cmake and Vulkan
 The intention is to create a simply modular Game Engine for learning porpuses.
 
-In this initial state our data files will be USD both for models as for levels.
-
-There are intention to try to migrate to Vulkan.
+WEng itself will be a set of libraries that you could use to create an executable.
 
 ** Dependencies
-You can use setup scripts to install basic dependencies.
+
+You can use setup scripts to install basic dependencies. Only [[file:./Setup/Fedora_setup.sh]] is tested, you can use it as an example to create your own Setup script.
 
 #+BEGIN_SRC sh
 ./Setup/Fedora_setup.sh
 #+END_SRC
 
-** Project Structure
-
 ** wcli
-Add ./Scripts to your PATH variable to use wcli
+
+Python scripts to automate some processes
+
+There is and scripts to setup the required python environment at [[file:./Setup/PythonVenv_setup.sh]].
+
+#+BEGIN_SRC sh
+./Setup/PythonVenv_setup.sh
+#+END_SRC
+
+Once you have the python environment created, add ./Scripts to your PATH variable to use wcli.
 
 #+BEGIN_SRC sh
 PATH=$PATH:./Scripts wcli -h
@@ -30,13 +37,16 @@ You can create a new project using the following code.
 PATH=$PATH:./Scripts wcli Project -p /path/to/project_folder
 #+END_SRC
 
-Also you can create any number of modules using the follogind code.
+Also you can create any number of modules using the followind code.
 
 #+BEGIN_SRC sh
 PATH=$PATH:./Scripts wcli Project -p /path/to/project_folder -m Module1 Module2
 #+END_SRC
 
-** LSP
+And you can compile the project using.
 
-*** Clangd
+#+BEGIN_SRC sh
+wcli Build -t Release -a x86_64
+#+END_SRC
 
+You have some example scripts at ./Scripts directory.

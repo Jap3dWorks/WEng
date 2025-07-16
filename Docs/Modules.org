@@ -6,7 +6,7 @@ Modules structures will be explained next.
 
 ** Tree
 
-*** modules (camelCase)
+*** Modules (PascalCase)
 
     - ModulesNames _(PascalCase)_
         - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
