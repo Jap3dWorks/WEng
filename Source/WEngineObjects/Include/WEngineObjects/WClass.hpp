@@ -6,6 +6,7 @@
 #include "WEngineObjects/TWAllocator.hpp"
 
 #include <memory>
+#include <unordered_set>
 
 class WObject;
 
@@ -19,7 +20,7 @@ public:
     name_(name)
     {}
 
-    virtual ~WClass() = default;
+    constexpr ~WClass() = default;
 
     constexpr WClass(const WClass & other) noexcept :
     name_(other.name_)
@@ -38,7 +39,7 @@ public:
         return *this;
     }
 
-    const WClass & operator=(WClass && other) noexcept
+    constexpr const WClass & operator=(WClass && other) noexcept
     {
         if (this != &other) {
             name_ = std::move(other.name_);
@@ -49,13 +50,15 @@ public:
 
 public:
 
-    virtual std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase()=0;
+    virtual std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() const =0;
 
-    virtual const WObject * DefaultObject() const=0;
+    virtual constexpr const WClass * BaseClass() const=0;
+
+    virtual constexpr std::unordered_set<const WClass*> Bases() const =0;
 
 public:
 
-    constexpr const char *Name() const noexcept {
+    constexpr std::string Name() const noexcept {
         return name_;
     }
 
@@ -94,7 +97,7 @@ protected:
 private:
 
     const char * name_;
-    
+
 };
 
 namespace std

@@ -23,21 +23,27 @@ class WObjectManager {
 
 public:
 
-    constexpr WObjectManager() noexcept = default;
+    constexpr WObjectManager() :
+        containers_(),
+        initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
+        {}
+    
     virtual ~WObjectManager() = default;
-
-    // You can create a global instance of WObjectManager
 
     WObjectManager(const WObjectManager&) = delete;
     
-    WObjectManager(WObjectManager && other) noexcept :
-        containers_(std::move(other.containers_))
+    constexpr WObjectManager(WObjectManager && other) noexcept :
+        containers_(std::move(other.containers_)),
+        initial_memory_size_(std::move(other.initial_memory_size_))
         {}
     
     constexpr WObjectManager & operator=(const WObjectManager&) = delete;
 
     constexpr WObjectManager & operator=(WObjectManager && other) noexcept {
-        Move(std::move(other));
+        if (this != &other) {
+            containers_ = std::move(other.containers_);
+            initial_memory_size_ = std::move(other.initial_memory_size_);
+        }
         return *this;
     }
     
@@ -49,35 +55,13 @@ public:
     template<std::derived_from<WObject> T>
     TWRef<T> CreateObject(const char * in_fullname) {
         
-        WClass * w_class = T::StaticClass();
+        const WClass * w_class = T::StaticClass();
         return static_cast<T*>(
             CreateObject(w_class, in_fullname).Ptr()
             );
-
     }
 
-    TWRef<WObject> CreateObject(WClass * in_class, const char * in_fullname) {
-        
-        if (!containers_.contains(in_class)) {
-            containers_[in_class] =
-                in_class->CreateObjectDatabase();
-            
-            containers_[in_class]->Reserve(
-                WOBJECTMANAGER_INITIAL_MEMORY
-                );
-        }
-
-        WId id = containers_[in_class]->Create();
-        
-        WObject * obj;
-        containers_[in_class]->Get(id, obj);
-
-        obj->WID(id);
-        obj->Name(in_fullname);
-
-        return obj;
-
-    }
+    TWRef<WObject> CreateObject(const WClass * in_class, const char * in_fullname);
 
     template <std::derived_from<WObject> T>
     TWRef<T> GetObject(WId in_id) {
@@ -86,12 +70,7 @@ public:
         return static_cast<T*>(GetObject(object_class, in_id).Ptr());
     }
 
-    TWRef<WObject> GetObject(WClass * in_class, WId in_id) {
-        WObject * result;
-        containers_[in_class]->Get(in_id, result);
-
-        return static_cast<WObject*>(result);
-    }
+    TWRef<WObject> GetObject(const WClass * in_class, WId in_id);
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) {
@@ -108,19 +87,17 @@ public:
             );
     }
 
-    void ForEach(WClass * in_class, TFunction<void(WObject*)> in_predicate) {
-        containers_[in_class]->ForEach(in_predicate);
-    }
+    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate);
+
+    void InitialMemorySize(size_t in_ammount);
+
+    WNODISCARD size_t InitialMemorySize() const;
 
 private:
 
-    constexpr void Move(WObjectManager && other) noexcept {
-        containers_ = std::move(other.containers_);
-    }
+    std::unordered_map<const WClass *, std::unique_ptr<IObjectDataBase<WObject>>> containers_;
 
-private:    
-
-    std::unordered_map<WClass *, std::unique_ptr<IObjectDataBase<WObject>>> containers_{};
+    size_t initial_memory_size_;
 
 };
 

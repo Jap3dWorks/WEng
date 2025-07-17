@@ -15,6 +15,8 @@ You can use setup scripts to install basic dependencies. Only [[file:./Setup/Fed
 ./Setup/Fedora_setup.sh
 #+END_SRC
 
+C++23
+
 ** wcli
 
 Python scripts to automate some processes

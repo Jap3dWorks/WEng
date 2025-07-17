@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WCore/TSingleton.hpp"
+
 #ifndef WOBJECT_NAME_SIZE
 #define WOBJECT_NAME_SIZE 256
 #endif
@@ -8,41 +10,33 @@
 
 #define WCLASS(...)
 
-#define _WOBJECT_ORIGINAL_BODY_(_WCLASS_)               \
-    public :                                            \
-    constexpr _WCLASS_() noexcept = default;            \
-    virtual ~_WCLASS_() = default;                      \
-    static const _WCLASS_& DefaultObject() noexcept {   \
-        static _WCLASS_ do_{};                          \
-        return do_;                                     \
-    }                                                   \
-    static WClass * StaticClass() noexcept {            \
-        static WClass__ ## _WCLASS_ sc_{};              \
-        return &sc_;                                    \
-    }                                                   \
-    virtual WClass * Class() const {                    \
-        return _WCLASS_::StaticClass();                 \
+class WClass;
+
+#define _WOBJECT_ORIGINAL_BODY_(_WCLASS)                            \
+    public :                                                        \
+    constexpr _WCLASS() noexcept = default;                         \
+    virtual ~_WCLASS() = default;                                   \
+    static inline constexpr const WClass * StaticClass() noexcept { \
+        return &TSingleton<WClass, WClass__ ## _WCLASS>::value;     \
+    }                                                               \
+    virtual const WClass * Class() const {                          \
+        return _WCLASS::StaticClass();                              \
     }
 
 
-#define _WOBJECT_BODY_(_WCLASS_)                        \
-    public:                                             \
-    constexpr _WCLASS_() noexcept = default;            \
-    ~_WCLASS_() override = default;                     \
-    static const _WCLASS_& DefaultObject() noexcept {   \
-        static _WCLASS_ default_object{};               \
-        return default_object;                          \
-    }                                                   \
-    static WClass * StaticClass() noexcept {            \
-        static WClass__ ## _WCLASS_ static_class;       \
-        return &static_class;                           \
-    }                                                   \
-    WClass * Class() const override {                   \
-        return _WCLASS_::StaticClass();                 \
+#define _WOBJECT_BODY_(_WCLASS)                                     \
+    public:                                                         \
+    constexpr _WCLASS() noexcept = default;                         \
+    ~_WCLASS() override = default;                                  \
+    static inline constexpr const WClass * StaticClass() noexcept { \
+        return &TSingleton<WClass, WClass__ ## _WCLASS>::value;     \
+    }                                                               \
+    const WClass * Class() const override {                         \
+        return _WCLASS::StaticClass();                              \
     }
 
 
-#define WOBJECT_BODY(_WCLASS_)                  \
-    _WOBJECT_BODY_(_WCLASS_)
+#define WOBJECT_BODY(_WCLASS)                   \
+    _WOBJECT_BODY_(_WCLASS)
 
 

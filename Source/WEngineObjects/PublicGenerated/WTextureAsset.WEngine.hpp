@@ -4,7 +4,12 @@
 #undef _WCLASS_
 #endif
 
+#ifdef _PWCLASS_
+#undef _PWCLASS_
+#endif
+
 #define _WCLASS_ WTextureAsset
+#define _PWCLASS_ WAsset
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

@@ -34,7 +34,7 @@ public:
 
 public:    
 
-    WId CreateActor(WClass * in_class) override {
+    WId CreateActor(const WClass * in_class) override {
         std::string actor_path = "/path/to/level.level:actor_name";
         
         object_manager_.CreateObject(
@@ -45,13 +45,11 @@ public:
         return {};
     }
 
-    TWRef<WActor> Actor(WClass * in_class, const WId & in_id) override {
+    TWRef<WActor> Actor(const WClass * in_class, const WId & in_id) override {
         return static_cast<WActor*>(object_manager_.GetObject(in_class, in_id).Ptr());
     }
 
-    void ForEachActor(WClass * in_class, TFunction<void(TWRef<WActor>)> in_predicate) override {
-        
-    }
+    void ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) override;
 
     WId CreateComponent(const WId & in_actor, const WClass & in_class) override {
         return {};

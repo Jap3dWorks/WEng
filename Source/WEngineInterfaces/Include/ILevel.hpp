@@ -19,14 +19,14 @@ public:
     /**
      * Create WActor derived objects.
      */
-    virtual WId CreateActor(WClass * in_class)=0;
+    virtual WId CreateActor(const WClass * in_class)=0;
 
     /**
      * Get an Actor reference from WId.
      */
-    virtual TWRef<WActor> Actor(WClass * in_class, const WId & in_id)=0;
+    virtual TWRef<WActor> Actor(const WClass * in_class, const WId & in_id)=0;
 
-    virtual void ForEachActor(WClass * in_class, TFunction<void(TWRef<WActor>)> in_predicate)=0;
+    virtual void ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate)=0;
 
     virtual WId CreateComponent(const WId & in_actor, const WClass & in_class)=0;
 

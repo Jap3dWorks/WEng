@@ -3,21 +3,29 @@
 #include "WEngineObjects/WClass.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WLog.hpp"
+#include <concepts>
+#include <type_traits>
+
+#ifndef WCLASSFOR_N_SIZE
+#define WCLASSFOR_N_SIZE 32
+#endif
+
+class WObject;
 
 /**
  * @brief WClass declaration for an WObject.
  */
-template<typename T>
+template<typename T, const char N[WCLASSFOR_N_SIZE], std::derived_from<WObject> P=WObject>
 class WClassFor : public WClass {
     
 public:
 
-    WClassFor() : WClass(typeid(T).name()) {}
-    ~WClassFor() override = default;
-
+    constexpr WClassFor() noexcept :
+        WClass(N) {}
+    
 public:
 
-    std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() override {
+    std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() const override {
         TWAllocator<T> a;
 
         a.SetAllocateFn(
@@ -36,14 +44,39 @@ public:
                         }
                     }
                 }
-            });
+            }
+            );
 
         return std::make_unique<TObjectDataBase<T, WObject, TWAllocator<T>>>(a);
 
     }
 
-    const WObject * DefaultObject() const override {
-        return &T::DefaultObject();
+    constexpr const WClass * BaseClass() const override {
+        return BaseClassConstexpr();
     }
-    
+
+    constexpr const WClass * BaseClassConstexpr() const {
+        if constexpr (std::is_same_v<T, WObject>) {
+            return nullptr;
+        }
+        else {
+            return P::StaticClass();
+        }
+    }
+
+    constexpr std::unordered_set<const WClass*> Bases() const {
+        return BasesConstexpr();
+    }
+
+    constexpr std::unordered_set<const WClass*> BasesConstexpr() const {
+        std::unordered_set<const WClass*> result;
+        const WClass* b = BaseClassConstexpr();
+        while(b) {
+            result.insert(b);             // I think this is constexpr in c++23 
+            b = b->BaseClass();           // in c++23 virtual methods can be constexpr
+        }
+
+        return result;
+    }
+
 };

@@ -1,5 +1,4 @@
 #define CATCH_CONFIG_MAIN
-#define WOBJECTMANAGER_INITIAL_MEMORY 1
 
 #include <catch2/catch.hpp>
 
@@ -50,6 +49,8 @@ bool TWAllocator_in_vector() {
 bool WObjectManager_TWRef_test() {
     WObjectManager man;
 
+    man.InitialMemorySize(1);
+
     TWRef<WStaticMeshAsset> a  = man.CreateObject<WStaticMeshAsset>("a");
     a->Name("a");
 
@@ -77,8 +78,8 @@ bool WObjectManager_WClass_test() {
     WFLOG("Create a2");
     TWRef<WObject> a2 = man.CreateObject(WActor::StaticClass(), "/Content/a2.a2");
 
-    WFLOG("{}", a1->Name());
-    WFLOG("{}", a2->Name());
+    WFLOG("{} is a {}", a1->Name(), a1->Class()->Name());
+    WFLOG("{} is a {}", a2->Name(), a2->Class()->Name());
 
     WFLOG("PRINT ACTORS TEMPLATE:");
 
@@ -86,11 +87,11 @@ bool WObjectManager_WClass_test() {
 
     WFLOG("PRINT ACTORS WCLASS:");
 
-    man.ForEach(WActor::StaticClass(), [](WObject* in){ WLOG("{}", in->Name());});
+    man.ForEach(WActor::StaticClass(), [](WObject* in){ WLOG("{}", in->Class()->Name());});
 
     WFLOG("End");
 
-    return true;
+    return a2->Class()->Name() == "WActor";
 }
 
 TEST_CASE("WEngineObjects") {
