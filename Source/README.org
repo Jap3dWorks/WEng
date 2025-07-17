@@ -52,5 +52,3 @@ WRender -[dashed]-> WCore
 #+RESULTS:
 [[file:Docs/images/modules_dependencies_1.png]]
 
-
-

@@ -1,3 +1,4 @@
+#include "WEngineObjects/WObjectMacros.hpp"
 #define CATCH_CONFIG_MAIN
 
 #include <catch2/catch.hpp>
@@ -15,6 +16,7 @@
 #include <cstdio>
 
 bool TWAllocator_in_vector() {
+    WFLOG("START")
 
     TWAllocator<size_t> a;
 
@@ -35,18 +37,34 @@ bool TWAllocator_in_vector() {
         v.push_back(i);
     }
 
-    WLOG();
+    WFLOG("");
 
     for (auto& n : v) {
         WFLOG("{:d}", n);
     }
     
-    WLOG();
+    WFLOG("END");
 
     return true;
 }
 
-bool WObjectManager_TWRef_test() {
+bool WClass_Derived_Test() {
+    WFLOG("START")
+        
+    const WClass * cls1 = WObject::StaticClass();
+    const WClass * cls2 = WObject::StaticClass();
+
+    const WClass * cls3 = WActor::StaticClass();
+
+    WFLOG("WObject is base of WObject: {}", cls1->IsBaseOf(cls2));
+
+    WFLOG("END")
+
+    return cls1 == cls2 && cls1->IsBaseOf(cls3);
+}
+
+bool WObjectManager_TWRef_Test() {
+    WFLOG("START")
     WObjectManager man;
 
     man.InitialMemorySize(1);
@@ -66,11 +84,14 @@ bool WObjectManager_TWRef_test() {
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
     WFLOG("Name: {}", a->Name().c_str());
 
+    WFLOG("END")
+
     return ptr != a.BPtr();
 }
 
-bool WObjectManager_WClass_test() {
+bool WObjectManager_WClass_Test() {
     WFLOG("Start");
+    
     WObjectManager man;
 
     WFLOG("Create a1");
@@ -98,9 +119,12 @@ TEST_CASE("WEngineObjects") {
     SECTION("TWAllocator") {
         CHECK(TWAllocator_in_vector());
     }
+    SECTION("WClass") {
+        CHECK(WClass_Derived_Test());
+    }
     SECTION("WObjectManager") {
-        CHECK(WObjectManager_TWRef_test());
-        CHECK(WObjectManager_WClass_test());
+        CHECK(WObjectManager_TWRef_Test());
+        CHECK(WObjectManager_WClass_Test());
     }
 }
 

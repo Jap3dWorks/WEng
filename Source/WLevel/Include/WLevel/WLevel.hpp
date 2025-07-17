@@ -51,6 +51,9 @@ public:
         return static_cast<WActor*>(object_manager_.GetObject(in_class, in_id).Ptr());
     }
 
+    /**
+     * run in_predicate for each actor of class in_class or derived from in_class.
+     */
     void ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) override;
 
     WId CreateComponent(const WId & in_actor, const WClass & in_class) override {

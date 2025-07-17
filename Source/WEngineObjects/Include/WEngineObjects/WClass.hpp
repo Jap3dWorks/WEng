@@ -56,6 +56,13 @@ public:
 
     virtual constexpr std::unordered_set<const WClass*> Bases() const =0;
 
+    /**
+     * Returns true if other is derived from this.
+     */
+    bool IsBaseOf(const WClass * other) const {
+        return other->Bases().contains(this);
+    }
+
 public:
 
     constexpr std::string Name() const noexcept {
