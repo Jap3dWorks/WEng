@@ -29,6 +29,8 @@ TWRef<WObject> WObjectManager::GetObject(const WClass * in_class, WId in_id) {
 }
 
 void WObjectManager::ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) {
+    assert(containers_.contains(in_class));
+    
     containers_[in_class]->ForEach(in_predicate);
 }
 
@@ -38,5 +40,21 @@ void WObjectManager::InitialMemorySize(size_t in_ammount) {
 
 size_t WObjectManager::InitialMemorySize() const {
     return initial_memory_size_;
+}
+
+std::vector<const WClass*> WObjectManager::Classes() const {
+    std::vector<const WClass*> r;
+    r.reserve(containers_.size());
+
+    for(auto& c : containers_) {
+        r.push_back(c.first);
+    }
+
+    return r;
+}
+
+size_t WObjectManager::Size(const WClass * in_class) const {
+    assert(containers_.contains(in_class));
+    return containers_.at(in_class)->Count();
 }
 

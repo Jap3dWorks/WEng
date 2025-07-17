@@ -7,6 +7,8 @@
 #include "WEngineObjects/TWRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
 
+#include <format>
+
 class WLEVEL_API WLevel : public ILevel {
 public:
     
@@ -35,14 +37,14 @@ public:
 public:    
 
     WId CreateActor(const WClass * in_class) override {
-        std::string actor_path = "/path/to/level.level:actor_name";
-        
-        object_manager_.CreateObject(
+        std::string actor_path =
+            Name() + ":" + in_class->Name() + "_" +
+            std::format("{}", object_manager_.Size(in_class));
+
+        return object_manager_.CreateObject(
             in_class,
             actor_path.c_str()
-            );
-            
-        return {};
+            )->WID();
     }
 
     TWRef<WActor> Actor(const WClass * in_class, const WId & in_id) override {
@@ -60,6 +62,10 @@ public:
     }
 
     void Update(const WEngineCycleData & in_cycle_data) override {}
+
+    std::string Name() const override {
+        return "/path/to/level.level";
+    }
 
 private:
 

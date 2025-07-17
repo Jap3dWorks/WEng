@@ -37,5 +37,7 @@ public:
      */
     virtual void Update(const WEngineCycleData & in_cycle_data)=0;
 
+    virtual std::string Name() const=0;
+
 };
 

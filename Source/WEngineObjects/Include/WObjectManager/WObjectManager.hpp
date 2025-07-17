@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <memory>
 #include <concepts>
+#include <vector>
 
 #ifndef WOBJECTMANAGER_INITIAL_MEMORY
 #define WOBJECTMANAGER_INITIAL_MEMORY 1024
@@ -74,9 +75,7 @@ public:
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) {
-        if (!containers_[T::StaticClass()]) {
-            return;
-        }
+        assert(containers_.contains(T::StaticClass()));
 
         containers_[T::StaticClass()]->ForEach(
             [&in_predicate](WObject* ptr_) {
@@ -89,9 +88,16 @@ public:
 
     void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate);
 
+    /**
+     * Returns the classes that are (or have been) present in this object.
+     */
+    std::vector<const WClass *> Classes() const;
+
     void InitialMemorySize(size_t in_ammount);
 
     WNODISCARD size_t InitialMemorySize() const;
+
+    WNODISCARD size_t Size(const WClass * in_class) const;
 
 private:
 
