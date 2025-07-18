@@ -6,7 +6,7 @@
 #define WOBJECT_NAME_SIZE 256
 #endif
 
-#define _STR(VAL) #VAL
+// #define _STR(VAL) #VAL
 
 #define WCLASS(...)
 

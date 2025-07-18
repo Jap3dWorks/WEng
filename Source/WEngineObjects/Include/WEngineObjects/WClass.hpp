@@ -59,7 +59,7 @@ public:
     /**
      * Returns true if other is derived from this.
      */
-    bool IsBaseOf(const WClass * other) const {
+    constexpr bool IsBaseOf(const WClass * other) const {
         return other->Bases().contains(this);
     }
 

@@ -69,7 +69,7 @@ bool WObjectManager_TWRef_Test() {
 
     man.InitialMemorySize(1);
 
-    TWRef<WStaticMeshAsset> a  = man.CreateObject<WStaticMeshAsset>("a");
+    TWRef<WStaticMeshAsset> a  = man.Create<WStaticMeshAsset>("a");
     a->Name("a");
 
     WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
@@ -78,7 +78,7 @@ bool WObjectManager_TWRef_Test() {
     void* ptr = a.BPtr();
 
     for (size_t i=0; i<10; i++) {
-        auto z = man.CreateObject<WStaticMeshAsset>("z");
+        auto z = man.Create<WStaticMeshAsset>("z");
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
@@ -95,9 +95,9 @@ bool WObjectManager_WClass_Test() {
     WObjectManager man;
 
     WFLOG("Create a1");
-    TWRef<WActor> a1 = man.CreateObject<WActor>("/Content/a1.a1");
+    TWRef<WActor> a1 = man.Create<WActor>("/Content/a1.a1");
     WFLOG("Create a2");
-    TWRef<WObject> a2 = man.CreateObject(WActor::StaticClass(), "/Content/a2.a2");
+    TWRef<WObject> a2 = man.Create(WActor::StaticClass(), "/Content/a2.a2");
 
     WFLOG("{} is a {}", a1->Name(), a1->Class()->Name());
     WFLOG("{} is a {}", a2->Name(), a2->Class()->Name());

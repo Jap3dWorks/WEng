@@ -8,6 +8,7 @@
 #include "WEngineObjects/WEngineCycleData.hpp"
 
 // TODO Serializable
+
 class WClass;
 
 class  ILevel {
@@ -17,25 +18,39 @@ public:
     virtual ~ILevel()=default;
 
     /**
-     * Create WActor derived objects.
+     * @brief Call this method before Level starts.
+     */
+    virtual void Init();
+
+    /**
+     * @brief Create WActor derived objects.
      */
     virtual WId CreateActor(const WClass * in_class)=0;
 
     /**
-     * Get an Actor reference from WId.
+     * @brief Get an Actor reference from WId.
      */
-    virtual TWRef<WActor> Actor(const WClass * in_class, const WId & in_id)=0;
+    virtual TWRef<WActor> GetActor(const WId & in_id) const =0;
 
-    virtual void ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate)=0;
+    virtual void ForEachActor(const WClass * in_class,
+                              TFunction<void(WActor*)> in_predicate) const=0;
 
-    virtual WId CreateComponent(const WId & in_actor, const WClass & in_class)=0;
+    virtual WId CreateComponent(const WId & in_actor,
+                                const WClass * in_class)=0;
 
-    virtual TWRef<WComponent> Component(const WId & in_component_id)=0;
+    virtual TWRef<WComponent> GetComponent(const WClass * in_class,
+                                        const WId & in_component_id) const=0;
 
     /**
-     * Call each cycle
+     * @brief Call each cycle.
      */
     virtual void Update(const WEngineCycleData & in_cycle_data)=0;
+
+    /**
+     * @breif Close the resources in Use.
+     * This is method should be called just before the level use ends.
+     */
+    virtual void Close()=0;
 
     virtual std::string Name() const=0;
 

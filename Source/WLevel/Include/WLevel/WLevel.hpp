@@ -7,71 +7,62 @@
 #include "WEngineObjects/TWRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
 
-#include <format>
-
 class WLEVEL_API WLevel : public ILevel {
 public:
     
-    WLevel() :
-        object_manager_()
-    {}
-
+    WLevel(const char* in_name);
+    
     ~WLevel() override  = default;
 
     WLevel(const WLevel& other) = delete;
 
-    WLevel(WLevel && other) :
-        object_manager_(std::move(other.object_manager_))
-    {}
+    WLevel(WLevel && other);
 
     WLevel & operator=(const WLevel& other) = delete;
 
-    WLevel & operator=(WLevel && other) {
-        if (this != &other) {
-            object_manager_ = std::move(other.object_manager_);
-        }
-
-        return *this;
-    }
+    WLevel & operator=(WLevel && other);
 
 public:    
 
-    WId CreateActor(const WClass * in_class) override {
-        std::string actor_path =
-            Name() + ":" + in_class->Name() + "_" +
-            std::format("{}", object_manager_.Size(in_class));
+    void Init() override;
 
-        return object_manager_.CreateObject(
-            in_class,
-            actor_path.c_str()
-            )->WID();
-    }
+    WId CreateActor(const WClass * in_class) override;
 
-    TWRef<WActor> Actor(const WClass * in_class, const WId & in_id) override {
-        return static_cast<WActor*>(object_manager_.GetObject(in_class, in_id).Ptr());
-    }
+    TWRef<WActor> GetActor(const WId & in_id) const override;
 
     /**
-     * run in_predicate for each actor of class in_class or derived from in_class.
+     * @brief Run in_predicate for each in_class actor (derived from in_class).
      */
-    void ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) override;
+    void ForEachActor(const WClass * in_class,
+                      TFunction<void(WActor*)> in_predicate) const override;
 
-    WId CreateComponent(const WId & in_actor, const WClass & in_class) override {
-        return {};
-    }
+    WId CreateComponent(const WId & in_actor_id,
+                        const WClass * in_class) override;
 
-    TWRef<WComponent> Component(const WId & in_component_id) override {
-        return nullptr;
-    }
+    TWRef<WComponent> GetComponent(const WClass * in_class,
+                                const WId & in_component_id) const override;
 
-    void Update(const WEngineCycleData & in_cycle_data) override {}
+    void Update(const WEngineCycleData & in_cycle_data) override;
 
-    std::string Name() const override {
-        return "/path/to/level.level";
-    }
+    void Close() override;
+
+    std::string Name() const override;
 
 private:
 
+    WId CreateActorId(const WClass * in_class);
+
+    std::string ActorPath(const WClass* in_class) const;
+
+    std::string ComponentPath(const WId & in_actor,
+                              const WClass * in_class) const;
+
+    WIdPool actor_id_pool_;
+
+    std::unordered_map<WId, const WClass *> id_actorclass_;
+
     WObjectManager object_manager_;
+
+    const char * name_;
 
 };

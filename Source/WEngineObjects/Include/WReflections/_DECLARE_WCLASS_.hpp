@@ -16,8 +16,8 @@
 
 #define _CLASSNAME(_CLS) DCONCAT(WClass__,_CLS)
 
-#define _XSTR(x) #x
-#define _STR(x) _XSTR(x)
+// #define _XSTR(x) #x
+// #define _STR(x) _XSTR(x)
 
 #define _MP(x) x
 

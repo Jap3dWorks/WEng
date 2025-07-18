@@ -51,33 +51,60 @@ public:
 public:
 
     /**
-     * @brief Create a new WObject of type T.
+     * @brief Create a new object of type T and assign a WId.
+     * Assigned WId is unique by class type.
      */
     template<std::derived_from<WObject> T>
-    TWRef<T> CreateObject(const char * in_fullname) {
+    TWRef<T> Create(const char * in_fullname) {
         
         const WClass * w_class = T::StaticClass();
         return static_cast<T*>(
-            CreateObject(w_class, in_fullname).Ptr()
+            Create(w_class, in_fullname).Ptr()
             );
     }
 
-    TWRef<WObject> CreateObject(const WClass * in_class, const char * in_fullname);
-
-    template <std::derived_from<WObject> T>
-    TWRef<T> GetObject(WId in_id) {
-        WClass * object_class = T::StaticClass();
-
-        return static_cast<T*>(GetObject(object_class, in_id).Ptr());
+    /**
+     * @brief Create a new object of type T at the specified in_id.
+     * Asserts that the WId doesn't exists for the indicated class already (only in debug).
+     * If you replace an existing WId for the indicated class behaviour is undeffined.
+     */
+    template<std::derived_from<WObject> T>
+    TWRef<T> Create(const WId in_id,
+                          const char * in_fullname) {
+        
+        return static_cast<T*>(Create(T::StaticClass(),
+                                            in_id,
+                                            in_fullname));
     }
 
-    TWRef<WObject> GetObject(const WClass * in_class, WId in_id);
+    /**
+     *@brief Create a new object of type WClass and assign a WId.
+     * Assigned WId id unique by class type.
+     */
+    TWRef<WObject> Create(const WClass * in_class,
+                          const char * in_fullname);
+
+    /**
+     * @brief Create a new object of type WClass at the specified in_id.
+     * Asserts that the WId doesn't exists for the indicated class already (only in debug).
+     * If your replace an existing WId for the indicated class behaviour is undeffined.
+     */
+    TWRef<WObject> Create(const WClass * in_class,
+                          const WId& in_id,
+                          const char * in_fullname);
+
+    template <std::derived_from<WObject> T>
+    TWRef<T> Get(WId in_id) const {
+        return static_cast<T*>(Get(T::StaticClass(), in_id).Ptr());
+    }
+
+    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
 
     template<std::derived_from<WObject> T>
-    void ForEach(TFunction<void(T*)> in_predicate) {
+    void ForEach(TFunction<void(T*)> in_predicate) const {
         assert(containers_.contains(T::StaticClass()));
 
-        containers_[T::StaticClass()]->ForEach(
+        containers_.at(T::StaticClass())->ForEach(
             [&in_predicate](WObject* ptr_) {
                 in_predicate(
                     static_cast<T*>(ptr_)
@@ -86,13 +113,20 @@ public:
             );
     }
 
-    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate);
+    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const;
+
+    bool Contains(const WClass * in_class, WId in_id) const;
+
+    bool Contains(const WClass * in_class) const;
 
     /**
-     * Returns the classes that are (or have been) present in this object.
+     * @brief Returns present (or that have been present) classes in this object.
      */
     std::vector<const WClass *> Classes() const;
 
+    /**
+     * @brief Ammount of memory initially present for each stored class.
+     */
     void InitialMemorySize(size_t in_ammount);
 
     WNODISCARD size_t InitialMemorySize() const;
@@ -100,6 +134,8 @@ public:
     WNODISCARD size_t Size(const WClass * in_class) const;
 
 private:
+
+    void EnsureClassStorage(const WClass * in_class);
 
     std::unordered_map<const WClass *, std::unique_ptr<IObjectDataBase<WObject>>> containers_;
 

@@ -64,7 +64,7 @@ public:
         }
     }
 
-    constexpr std::unordered_set<const WClass*> Bases() const {
+    constexpr std::unordered_set<const WClass*> Bases() const override {
         return BasesConstexpr();
     }
 

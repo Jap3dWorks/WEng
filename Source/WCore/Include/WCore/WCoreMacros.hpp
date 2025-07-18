@@ -14,3 +14,7 @@
 #define WDEBUGBUILD 0
 #endif
 
+#ifndef _STR
+#define _XSTR(x) #x
+#define _STR(x) _XSTR(x)
+#endif

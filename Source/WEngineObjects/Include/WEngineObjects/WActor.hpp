@@ -1,11 +1,10 @@
 #pragma once
 
 #include "WEngineObjects/WObject.hpp"
-#include "WCore/WCore.hpp"
-
-#include <string>
 
 #include "WActor.WEngine.hpp"
+
+class ILevel;
 
 /**
  * @brief Base class for all actors in the engine. 
@@ -15,9 +14,18 @@
 WCLASS()
 class WCORE_API WActor : public WObject
 {
+
     WOBJECT_BODY(WActor)
-    
+
+public:
+
+    ILevel * Level() const;
+
+    void Level(ILevel * in_level);
+
 private:
+
+    ILevel * level;
 
 };
 
