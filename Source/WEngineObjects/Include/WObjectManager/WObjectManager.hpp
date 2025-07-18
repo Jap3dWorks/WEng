@@ -55,12 +55,9 @@ public:
      * Assigned WId is unique by class type.
      */
     template<std::derived_from<WObject> T>
-    TWRef<T> Create(const char * in_fullname) {
-        
-        const WClass * w_class = T::StaticClass();
-        return static_cast<T*>(
-            Create(w_class, in_fullname).Ptr()
-            );
+    WId Create(const char * in_fullname) {
+        return Create(T::StaticClass(),
+                      in_fullname);
     }
 
     /**
@@ -69,27 +66,26 @@ public:
      * If you replace an existing WId for the indicated class behaviour is undeffined.
      */
     template<std::derived_from<WObject> T>
-    TWRef<T> Create(const WId in_id,
-                          const char * in_fullname) {
-        
-        return static_cast<T*>(Create(T::StaticClass(),
-                                            in_id,
-                                            in_fullname));
+    WId Create(const WId in_id,
+               const char * in_fullname) {
+        return Create(T::StaticClass(),
+                      in_id,
+                      in_fullname);
     }
 
     /**
-     *@brief Create a new object of type WClass and assign a WId.
+     * @brief Create a new object of type WClass and assign a WId.
      * Assigned WId id unique by class type.
      */
-    TWRef<WObject> Create(const WClass * in_class,
-                          const char * in_fullname);
+    WId Create(const WClass * in_class,
+               const char * in_fullname);
 
     /**
      * @brief Create a new object of type WClass at the specified in_id.
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If your replace an existing WId for the indicated class behaviour is undeffined.
      */
-    TWRef<WObject> Create(const WClass * in_class,
+    WId Create(const WClass * in_class,
                           const WId& in_id,
                           const char * in_fullname);
 
@@ -114,6 +110,9 @@ public:
     }
 
     void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const;
+
+    // TODO: ForEachWId could be a faster iterator?
+    //  useful for objects already in graphics memory.
 
     bool Contains(const WClass * in_class, WId in_id) const;
 

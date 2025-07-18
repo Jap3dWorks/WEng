@@ -134,9 +134,11 @@ std::vector<TWRef<WAsset>> WImportObj::Import(const char* file_path, const char*
     std::vector<TWRef<WAsset>> imported_assets(shapes.size());
 
     for (uint32_t i=0; i < meshes.size(); i++) {
-        TWRef<WStaticMeshAsset> static_mesh = ObjectManager().Create<WStaticMeshAsset>(
-            "StaticMesh"
-            );
+        TWRef<WStaticMeshAsset> static_mesh =
+            ObjectManager().Get<WStaticMeshAsset>(
+                ObjectManager().Create<WStaticMeshAsset>(
+                    "StaticMesh"
+                    ));
 
         static_mesh->SetMesh(std::move(meshes[i]));
         // static_mesh->SetPath(WStringUtils::AssetPath(asset_directory, file_path, names[i]));
@@ -218,9 +220,11 @@ std::vector<TWRef<WAsset>> WImportTexture::Import(const char* file_path, const c
     );
 
     stbi_image_free(Pixels);
-    TWRef<WTextureAsset> texture_asset = ObjectManager().Create<WTextureAsset>(
-        "TextureAsset"
-    );
+    TWRef<WTextureAsset> texture_asset =
+        ObjectManager().Get<WTextureAsset>(
+            ObjectManager().Create<WTextureAsset>(
+                "TextureAsset"
+                ));
 
     texture_asset->SetTexture(std::move(texture_struct));
     // texture_asset->SetPath(WStringUtils::AssetPath(asset_directory, file_path, "texture"));

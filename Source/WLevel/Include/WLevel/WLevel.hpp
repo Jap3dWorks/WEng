@@ -9,8 +9,17 @@
 
 class WLEVEL_API WLevel : public ILevel {
 public:
-    
+
+    using InitFn = TFunction<void(ILevel*)>;
+    using UpdateFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
+    using CloseFn = TFunction<void(ILevel*)>;
+
     WLevel(const char* in_name);
+
+    WLevel(const char* in_name,
+           const InitFn & in_init_fn,
+           const UpdateFn & in_update_fn,
+           const CloseFn & in_close_fn);
     
     ~WLevel() override  = default;
 
@@ -48,6 +57,30 @@ public:
 
     std::string Name() const override;
 
+    void SetInitFn(const InitFn & in_fn) {
+        init_fn_ = in_fn;
+    }
+    
+    void SetInitFn(InitFn && in_fn) {
+        init_fn_ = std::move(in_fn);
+    }
+
+    void SetUpdateFn(const UpdateFn & in_fn) {
+        update_fn_ = in_fn;
+    }
+
+    void SetUpdateFn(UpdateFn && in_fn) {
+        update_fn_ = std::move(in_fn);
+    }
+
+    void SetCloseFn(const CloseFn & in_fn) {
+        close_fn_ = in_fn;
+    }
+
+    void SetCloseFn(CloseFn && in_fn) {
+        close_fn_ = std::move(in_fn);
+    }
+
 private:
 
     WId CreateActorId(const WClass * in_class);
@@ -57,12 +90,18 @@ private:
     std::string ComponentPath(const WId & in_actor,
                               const WClass * in_class) const;
 
+    const char * name_;
+
+    WObjectManager object_manager_;
+
     WIdPool actor_id_pool_;
 
     std::unordered_map<WId, const WClass *> id_actorclass_;
 
-    WObjectManager object_manager_;
+    InitFn init_fn_;
 
-    const char * name_;
+    UpdateFn update_fn_;
+
+    CloseFn close_fn_;
 
 };

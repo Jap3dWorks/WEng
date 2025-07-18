@@ -53,6 +53,5 @@ public:
     virtual void Close()=0;
 
     virtual std::string Name() const=0;
-
 };
 

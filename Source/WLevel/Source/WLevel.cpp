@@ -6,11 +6,36 @@
 
 WLevel::WLevel(const char * in_name) :
     name_(in_name),
-    object_manager_() {}
+    object_manager_(),
+    actor_id_pool_(),
+    id_actorclass_(),
+    init_fn_([](ILevel*){}),
+    update_fn_([](ILevel*, const WEngineCycleData &){}),
+    close_fn_([](ILevel*){})
+{}
+
+WLevel::WLevel(const char * in_name,
+               const InitFn & in_init_fn,
+               const UpdateFn & in_update_fn,
+               const CloseFn & in_close_fn) :
+    name_(in_name),
+    object_manager_(),
+    actor_id_pool_(),
+    id_actorclass_(),
+    init_fn_(in_init_fn),
+    update_fn_(in_update_fn),
+    close_fn_(in_close_fn)
+{}
 
 WLevel::WLevel(WLevel && other) :
     name_(std::move(other.name_)),
-    object_manager_(std::move(other.object_manager_)) {
+    object_manager_(std::move(other.object_manager_)),
+    actor_id_pool_(std::move(other.actor_id_pool_)),
+    id_actorclass_(std::move(other.id_actorclass_)),
+    init_fn_(std::move(other.init_fn_)),
+    update_fn_(std::move(other.update_fn_)),
+    close_fn_(std::move(other.close_fn_))
+{
     name_=nullptr;
 }
 
@@ -18,6 +43,11 @@ WLevel & WLevel::operator=(WLevel && other) {
     if (this != &other) {
         name_ = std::move(other.name_);
         object_manager_ = std::move(other.object_manager_);
+        actor_id_pool_ = std::move(other.actor_id_pool_);
+        id_actorclass_ = std::move(other.id_actorclass_);
+        init_fn_ = std::move(other.init_fn_);
+        update_fn_ = std::move(other.update_fn_);
+        close_fn_ = std::move(other.close_fn_);
 
         other.name_=nullptr;
     }
@@ -25,7 +55,9 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-void WLevel::Init() {}
+void WLevel::Init() {
+    init_fn_(this);
+}
 
 WId WLevel::CreateActor(const WClass * in_class) {
     assert(in_class == WActor::StaticClass() ||
@@ -37,15 +69,15 @@ WId WLevel::CreateActor(const WClass * in_class) {
 
     WId id = CreateActorId(in_class);
 
-    TWRef<WObject> r = object_manager_.Create(
+    object_manager_.Create(
         in_class,
         id,
         actor_path.c_str()
         );
 
-    static_cast<WActor*>(r.Ptr())->Level(this);
+    object_manager_.Get<WActor>(id)->Level(this);
 
-    return r->WID();
+    return id;
 }
 
 TWRef<WActor> WLevel::GetActor(const WId & in_id) const {
@@ -99,10 +131,12 @@ TWRef<WComponent> WLevel::GetComponent(const WClass * in_class,
 }
 
 void WLevel::Update(const WEngineCycleData & in_cycle_data) {
-    
+    update_fn_(this, in_cycle_data);
 }
 
-void WLevel::Close() {}
+void WLevel::Close() {
+    close_fn_(this);
+}
 
 std::string WLevel::Name() const {
     return "/path/to/level.level";
@@ -127,7 +161,8 @@ std::string WLevel::ComponentPath(const WId & in_actor_id,
 }
 
 WId WLevel::CreateActorId(const WClass * in_class) {
-    assert(WActor::StaticClass() == in_class || WActor::StaticClass()->IsBaseOf(in_class));
+    assert(WActor::StaticClass() == in_class ||
+           WActor::StaticClass()->IsBaseOf(in_class));
 
     WId id = actor_id_pool_.Generate();
     id_actorclass_[id] = in_class;

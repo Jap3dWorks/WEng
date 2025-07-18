@@ -1,8 +1,11 @@
 #pragma once
 
 /**
- * Create and manage Levels
+ * @brief Create and manage Levels.
  */
 class ILevelRegister {
-    
+public:
+
+    virtual ~ILevelRegister() = default;
+
 };

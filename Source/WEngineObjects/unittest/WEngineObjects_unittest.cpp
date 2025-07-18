@@ -1,3 +1,4 @@
+#include "WAssets/WTextureAsset.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
 #define CATCH_CONFIG_MAIN
 
@@ -69,7 +70,9 @@ bool WObjectManager_TWRef_Test() {
 
     man.InitialMemorySize(1);
 
-    TWRef<WStaticMeshAsset> a  = man.Create<WStaticMeshAsset>("a");
+    TWRef<WStaticMeshAsset> a = man.Get<WStaticMeshAsset>(man.Create<WStaticMeshAsset>("a"));
+    TWRef<WTextureAsset> t = man.Get<WTextureAsset>(man.Create<WTextureAsset>("t"));
+    
     a->Name("a");
 
     WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
@@ -95,9 +98,11 @@ bool WObjectManager_WClass_Test() {
     WObjectManager man;
 
     WFLOG("Create a1");
-    TWRef<WActor> a1 = man.Create<WActor>("/Content/a1.a1");
+    TWRef<WActor> a1 = man.Get<WActor>(man.Create<WActor>("/Content/a1.a1"));
     WFLOG("Create a2");
-    TWRef<WObject> a2 = man.Create(WActor::StaticClass(), "/Content/a2.a2");
+    TWRef<WObject> a2 = man.Get(WActor::StaticClass(),
+                                man.Create(WActor::StaticClass(),
+                                           "/Content/a2.a2"));
 
     WFLOG("{} is a {}", a1->Name(), a1->Class()->Name());
     WFLOG("{} is a {}", a2->Name(), a2->Class()->Name());

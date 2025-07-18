@@ -1,7 +1,7 @@
 #include "WObjectManager/WObjectManager.hpp"
 
-TWRef<WObject> WObjectManager::Create(const WClass * in_class,
-                                            const char * in_fullname) {
+WId WObjectManager::Create(const WClass * in_class,
+                           const char * in_fullname) {
     EnsureClassStorage(in_class);
     
     WId id = containers_[in_class]->Create();
@@ -12,12 +12,12 @@ TWRef<WObject> WObjectManager::Create(const WClass * in_class,
     obj->WID(id);
     obj->Name(in_fullname);
 
-    return obj;
+    return id;
 }
 
-TWRef<WObject> WObjectManager::Create(const WClass * in_class,
-                                            const WId& in_id,
-                                            const char * in_fullname) {
+WId WObjectManager::Create(const WClass * in_class,
+                           const WId& in_id,
+                           const char * in_fullname) {
     EnsureClassStorage(in_class);
 
     assert(!containers_[in_class]->Contains(in_id));
@@ -30,7 +30,7 @@ TWRef<WObject> WObjectManager::Create(const WClass * in_class,
     obj->WID(in_id);
     obj->Name(in_fullname);
 
-    return obj;
+    return in_id;
 }
 
 TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
