@@ -3,6 +3,7 @@ add_library(
     SHARED
         CompileGenerated/CompileGenerated.cpp
         Source/WLevel.cpp
+        Source/WLevelRegister.cpp
     )
 
 target_include_directories(

@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <memory>
 
+class ILevel;
+
 /**
  * @brief Register Open and Close Levels.
  */
@@ -18,22 +20,15 @@ public:
 
     ~WLevelRegister() override = default;
 
-    WId RegisterLevel(std::unique_ptr<ILevelRegister> && in_level) {
-        WId id = id_pool_.Generate();
-        levels_[id] = std::move(in_level);
+    WId RegisterLevel(std::unique_ptr<ILevel> && in_level) override;
 
-        return id;
-    }
+    bool LoadLevel(const WId & in_id) override;
 
-    void LoadLevel(const WId & in_id) {}
+    WId Current() const override;
 
-    void CloseCurrent() {}
+    void ApplyCurrent(const TFunction<void(ILevel*)> & fn) const override;
 
-    WId Current();
-
-    void ApplyCurrent(const TFunction<void(ILevelRegister*)> & fn);
-
-    void Apply(const WId & in_id, const TFunction<void(ILevelRegister*)> & fn);
+    void Apply(const WId & in_id, const TFunction<void(ILevel*)> & fn) const override;
 
 private:
     
@@ -41,6 +36,7 @@ private:
 
     WId current_;
 
-    std::unordered_map<WId, std::unique_ptr<ILevelRegister>> levels_;
+    std::unordered_map<WId, std::unique_ptr<ILevel>> levels_;
 
 };
+

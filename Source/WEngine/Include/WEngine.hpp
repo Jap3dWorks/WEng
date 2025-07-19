@@ -3,15 +3,15 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
-#include "IRender.hpp"
-#include "ILevel.hpp"
 
 #include <memory>
 
-class WRender;
+class IRender;
+class ILevel;
 class WObjectManager;
 class WImportersRegister;
 class WImporter;
+class ILevelRegister;
 
 class WENGINE_API WEngine
 {
@@ -48,11 +48,14 @@ private:
 
     void InitializeRender();
 
-    std::unique_ptr<WRender> render_{nullptr};
+    std::unique_ptr<IRender> render_{nullptr};
 
-    std::unique_ptr<WObjectManager> object_manager_{nullptr};
+    std::unique_ptr<ILevelRegister> level_register_{nullptr};
+
+    std::unique_ptr<WObjectManager> asset_manager_{nullptr};
 
     std::unique_ptr<WImportersRegister> importers_register_{nullptr};
+
 
     bool close{false};
 };

@@ -36,7 +36,7 @@ WLevel::WLevel(WLevel && other) :
     update_fn_(std::move(other.update_fn_)),
     close_fn_(std::move(other.close_fn_))
 {
-    name_=nullptr;
+    other.name_=nullptr;
 }
 
 WLevel & WLevel::operator=(WLevel && other) {
@@ -139,7 +139,7 @@ void WLevel::Close() {
 }
 
 std::string WLevel::Name() const {
-    return "/path/to/level.level";
+    return name_;
 }
 
 std::string WLevel::ActorPath(const WClass * in_class) const {

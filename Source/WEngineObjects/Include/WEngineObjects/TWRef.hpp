@@ -2,10 +2,7 @@
 
 #include <unordered_map>
 #include <vector>
-#include <concepts>
 #include <cassert>
-
-class WObject;
 
 template<typename T>
 struct TWRefTrack_ {
@@ -58,6 +55,7 @@ private:
     }
 };
 
+
 class BWRef {
 public:
 
@@ -66,7 +64,7 @@ public:
     constexpr BWRef() noexcept :
         object_(nullptr) {}
 
-    BWRef(WObject * in_object) :
+    BWRef(void * in_object) :
         object_(in_object) {
         TRACK::RegInstance(object_, this);
     }
@@ -110,7 +108,7 @@ public:
         return *this;
     }
 
-    BWRef & operator=(WObject * in_value) {
+    BWRef & operator=(void * in_value) {
         if (object_ != in_value) {
             BSet(in_value);
         }
@@ -118,16 +116,16 @@ public:
         return *this;
     }
 
-    BWRef & operator=(const WObject & other) = delete;
-    BWRef & operator=(WObject && other) = delete;
+    // BWRef & operator=(const void & other) = delete;
+    // BWRef & operator=(void && other) = delete;
     
-    virtual void BSet(WObject * in_address) {
+    virtual void BSet(void * in_address) {
         TRACK::UnregInstance(object_, this);
         object_ = in_address;
         TRACK::RegInstance(object_, this);
     }
 
-    WObject * BPtr() {
+    void * BPtr() {
         return object_;
     }
 
@@ -141,12 +139,12 @@ public:
         return object_ != other.object_;
     }
 
-    bool operator==(WObject * other) const
+    bool operator==(void * other) const
     {
         return object_ == other;
     }
 
-    bool operator!=(WObject * other) const
+    bool operator!=(void * other) const
     {
         return object_ != other;
     }
@@ -157,11 +155,11 @@ public:
 
     constexpr bool IsEmpty() const noexcept { return object_ == nullptr; }
 
-    static bool IsInstanced(WObject * in_ptr) {
+    static bool IsInstanced(void * in_ptr) {
         return TRACK::Contains(in_ptr);
     }
 
-    static const std::vector<BWRef*> & Instances(WObject * in_ptr) {
+    static const std::vector<BWRef*> & Instances(void * in_ptr) {
         return TRACK::Instances(in_ptr);
     }
 
@@ -169,11 +167,11 @@ protected:
 
 private:
 
-    WObject * object_;
+    void * object_;
 
 };
 
-template<std::derived_from<WObject> T>
+template<typename T>
 class TWRef : public BWRef {
 
 public:
@@ -205,18 +203,18 @@ public:
     TWRef & operator=(const T & other) = delete;
     TWRef & operator=(T && other) = delete;
 
-    void BSet(WObject * in_object) override final {
-        if (in_object == nullptr) {
-            BWRef::BSet(in_object);
-        }
-        else {
-            // Debugging assert only
-            // Should do I add a runtime check?
-            assert(dynamic_cast<T*>(in_object));
+    // void BSet(WObject * in_object) override final {
+    //     if (in_object == nullptr) {
+    //         BWRef::BSet(in_object);
+    //     }
+    //     else {
+    //         // Debugging assert only
+    //         // Should do I add a runtime check?
+    //         assert(dynamic_cast<T*>(in_object));
 
-            BWRef::BSet(in_object);
-        }
-    }
+    //         BWRef::BSet(in_object);
+    //     }
+    // }
 
     void Set(T * in_object) {
         BWRef::BSet(in_object);

@@ -27,7 +27,7 @@ WEngine::WEngine()
 WEngine::~WEngine()
 {
     render_ = nullptr;
-    object_manager_ = nullptr;
+    asset_manager_ = nullptr;
     importers_register_ = nullptr;
 }
 
@@ -63,15 +63,15 @@ TRef<ILevel> WEngine::CurrentLevel() noexcept {
 
 void WEngine::InitializeObjectManager()
 {
-    object_manager_ = std::make_unique<WObjectManager>();
+    asset_manager_ = std::make_unique<WObjectManager>();
 }
 
 void WEngine::InitializeImporters()
 {
     importers_register_ = std::make_unique<WImportersRegister>();
 
-    importers_register_->Register<WImportObj>(*object_manager_.get());
-    importers_register_->Register<WImportTexture>(*object_manager_.get());
+    importers_register_->Register<WImportObj>(*asset_manager_.get());
+    importers_register_->Register<WImportTexture>(*asset_manager_.get());
     
 }
 

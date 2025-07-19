@@ -53,5 +53,9 @@ public:
     virtual void Close()=0;
 
     virtual std::string Name() const=0;
+
+    virtual WId WID()=0;
+
+    virtual void WID(const WId & in_id)=0;
 };
 
