@@ -11,10 +11,10 @@ class WAsset;
 /**
  * @brief WRapper class for a WObjectManager specialized in the asset management
  */
-class WENGINEOBJECTS_API WAssetManager {
+class WENGINEOBJECTS_API WAssetManagerFacade {
 public:
 
-    WAssetManager(WObjectManager & in_object_manager) :
+    WAssetManagerFacade(WObjectManager & in_object_manager) :
     object_manager_(in_object_manager) {
         InitializeIdPool();
     }

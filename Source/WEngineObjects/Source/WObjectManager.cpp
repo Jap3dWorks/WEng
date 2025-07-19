@@ -88,3 +88,10 @@ void WObjectManager::EnsureClassStorage(const WClass * in_class) {
             );
     }
 }
+
+std::vector<WId> WObjectManager::Indexes(const WClass * in_class) const {
+    assert(containers_.contains(in_class));
+    
+    return containers_.at(in_class)->Indexes();
+}
+

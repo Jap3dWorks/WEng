@@ -128,6 +128,8 @@ public:
      */
     void InitialMemorySize(size_t in_ammount);
 
+    std::vector<WId> Indexes(const WClass * in_class) const;
+
     WNODISCARD size_t InitialMemorySize() const;
 
     WNODISCARD size_t Size(const WClass * in_class) const;

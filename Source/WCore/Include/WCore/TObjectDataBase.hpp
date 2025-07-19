@@ -22,7 +22,7 @@ public:
     virtual size_t Count() const = 0;
     virtual bool Contains(WId in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
-    virtual std::vector<WId> Indices() = 0;
+    virtual std::vector<WId> Indexes() = 0;
     virtual void ForEach(TFunction<void(T*)> in_function)=0;
     
 };
