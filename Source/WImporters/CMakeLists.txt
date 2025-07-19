@@ -16,6 +16,7 @@ target_include_directories(
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
         PrivateGenerated
         Source
         ${tinyobjloader_INCLUDE_DIRS}
@@ -26,6 +27,7 @@ target_link_libraries(
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
 )
 
 add_library(WImporters::WImporters ALIAS WImporters)

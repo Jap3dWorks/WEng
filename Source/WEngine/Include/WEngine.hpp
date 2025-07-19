@@ -9,7 +9,7 @@
 class IRender;
 class ILevel;
 class WObjectManager;
-class WImportersRegister;
+class WImporterRegister;
 class WImporter;
 class ILevelRegister;
 
@@ -32,7 +32,7 @@ public:
 
     static WEngine Create();
 
-    TRef<WImportersRegister> ImportersRegister() noexcept;
+    TRef<WImporterRegister> ImportersRegister() noexcept;
 
     TRef<IRender> Render() noexcept;
 
@@ -54,7 +54,7 @@ private:
 
     std::unique_ptr<WObjectManager> asset_manager_{nullptr};
 
-    std::unique_ptr<WImportersRegister> importers_register_{nullptr};
+    std::unique_ptr<WImporterRegister> importers_register_{nullptr};
 
 
     bool close{false};

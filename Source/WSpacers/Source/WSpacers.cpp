@@ -4,7 +4,7 @@
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
 #include "WImporters.hpp"
-#include "WImportersRegister.hpp"
+#include "WImporterRegister.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"

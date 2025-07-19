@@ -3,7 +3,7 @@
 
 #include "WObjectManager/WObjectManager.hpp"
 #include "WImporters.hpp"
-#include "WImportersRegister.hpp"
+#include "WImporterRegister.hpp"
 #include "WRender.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
@@ -47,7 +47,7 @@ void WEngine::run()
     Render()->WaitIdle();
 }
 
-TRef<WImportersRegister> WEngine::ImportersRegister() noexcept
+TRef<WImporterRegister> WEngine::ImportersRegister() noexcept
 {
     return importers_register_.get();
 }
@@ -68,7 +68,7 @@ void WEngine::InitializeObjectManager()
 
 void WEngine::InitializeImporters()
 {
-    importers_register_ = std::make_unique<WImportersRegister>();
+    importers_register_ = std::make_unique<WImporterRegister>();
 
     importers_register_->Register<WImportObj>(*asset_manager_.get());
     importers_register_->Register<WImportTexture>(*asset_manager_.get());
