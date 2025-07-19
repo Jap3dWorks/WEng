@@ -20,7 +20,7 @@
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
 */
-class WObjectManager {
+class WENGINEOBJECTS_API WObjectManager {
 
 public:
 
