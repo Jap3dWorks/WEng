@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WInterfaces/ICloneable.hpp"
+#include "IImporter.hpp"
 #include "WCore/TRef.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WAsset.hpp"
@@ -11,30 +11,36 @@
 
 class WObjectManager;
 
-class WIMPORTERS_API WImporter : public ICloneable<WImporter>
+class WIMPORTERS_API WImporter : public IImporter
 {
+
 public:
 
-    explicit WImporter(WObjectManager & in_object_manager);
+    constexpr explicit WImporter(WObjectManager & in_object_manager) noexcept;
+
     virtual ~WImporter() = default;
 
-    WImporter(const WImporter & in_other);
-    WImporter(WImporter && out_other) noexcept;
+    constexpr WImporter(const WImporter & in_other) noexcept;
+    
+    constexpr WImporter(WImporter && out_other) noexcept;
 
-    WImporter & operator=(const WImporter & in_other);
-    WImporter & operator=(WImporter && out_other) noexcept;
+    constexpr WImporter & operator=(const WImporter & in_other) noexcept;
+
+    constexpr WImporter & operator=(WImporter && out_other) noexcept;
+
+public:    
 
     /**
      * @brief Import an asset from a file
      * @param file_path The file path to import
      * @param asset_directory, Engine based directory path to import to, Should start with /Content.
     */
-    virtual std::vector<TWRef<WAsset>> Import(const char* file_path, const char* asset_directory) = 0;
-
-public:    
+    virtual std::vector<WId> Import(const char* file_path, const char* asset_directory) = 0;
 
     virtual std::unique_ptr<WImporter> clone() = 0;
+
     virtual std::vector<std::string> Extensions() = 0;
+
     virtual std::vector<std::string> Formats() = 0;
 
 protected:
@@ -43,9 +49,7 @@ protected:
 
 private:
 
-    void Move(WImporter && other) noexcept;
-
-    TRef<WObjectManager> object_manager_{nullptr};
+    TRef<WObjectManager> object_manager_{nullptr};  // TODO each WObject an unique WId (WAssetManager)
     
 };
 
@@ -54,22 +58,27 @@ class WIMPORTERS_API WImportObj : public WImporter
     
 public:
     
-    explicit WImportObj(WObjectManager & in_object_manager);
+    constexpr explicit WImportObj(WObjectManager & in_object_manager) noexcept;
 
     virtual ~WImportObj() = default;
 
-    WImportObj(const WImportObj & in_other) = default;
-    WImportObj(WImportObj && out_other) noexcept = default;
-    
-    WImportObj & operator=(const WImportObj & in_other) = default;
-    WImportObj & operator=(WImportObj && out_other) noexcept = default;
+    constexpr WImportObj(const WImportObj & in_other) noexcept = default;
 
-    std::vector<TWRef<WAsset>> Import(const char * file_path, const char * asset_directory) override;
+    constexpr WImportObj(WImportObj && out_other) noexcept = default;
+    
+    constexpr WImportObj & operator=(const WImportObj & in_other) noexcept = default;
+
+    constexpr WImportObj & operator=(WImportObj && out_other) noexcept = default;
+
+public:
+
+    std::vector<WId> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 
-    virtual std::vector<std::string> Extensions() override;
-    virtual std::vector<std::string> Formats() override;
+    std::vector<std::string> Extensions() override;
+
+    std::vector<std::string> Formats() override;
 };
 
 class WIMPORTERS_API WImportTexture : public WImporter
@@ -77,20 +86,25 @@ class WIMPORTERS_API WImportTexture : public WImporter
     
 public:
 
-    explicit WImportTexture(WObjectManager & in_object_manager);
+    constexpr explicit WImportTexture(WObjectManager & in_object_manager) noexcept;
 
     virtual ~WImportTexture() = default;
 
-    WImportTexture(const WImportTexture & in_other) = default;
-    WImportTexture(WImportTexture && out_other) noexcept = default;
-    
-    WImportTexture & operator=(const WImportTexture & in_other) = default;
-    WImportTexture & operator=(WImportTexture && out_other) noexcept = default;
+    constexpr WImportTexture(const WImportTexture & in_other) noexcept = default;
 
-    std::vector<TWRef<WAsset>> Import(const char * file_path, const char * asset_directory) override;
+    constexpr WImportTexture(WImportTexture && out_other) noexcept = default;
+    
+    constexpr WImportTexture & operator=(const WImportTexture & in_other) noexcept = default;
+
+    constexpr WImportTexture & operator=(WImportTexture && out_other) noexcept = default;
+
+public:
+    
+    std::vector<WId> Import(const char * file_path, const char * asset_directory) override;
 
     std::unique_ptr<WImporter> clone() override;
 
-    virtual std::vector<std::string> Extensions() override;
-    virtual std::vector<std::string> Formats() override;
+    std::vector<std::string> Extensions() override;
+
+    std::vector<std::string> Formats() override;
 };

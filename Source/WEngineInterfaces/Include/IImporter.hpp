@@ -12,10 +12,13 @@ class IImporter {
 public:
 
     virtual ~IImporter()=default;
-    
-    virtual constexpr WId Import(const char * file_path, const char * asset_dir) const=0;
 
-    virtual std::unique_ptr<IImporter> Clone()=0;
+    /**
+     * Imported assets id. Later you can get the asset using its WId.
+     */
+    virtual std::vector<WId> Import(const char * file_path, const char * asset_dir) const=0;
+
+    virtual std::unique_ptr<IImporter> Clone() const =0;
 
     virtual constexpr std::vector<std::string> Extensions() const=0;
 

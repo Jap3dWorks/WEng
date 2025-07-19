@@ -19,35 +19,31 @@
 // WImporter
 // ---------
 
-WImporter::WImporter(WObjectManager & in_object_manager) :
+constexpr WImporter::WImporter(WObjectManager & in_object_manager) noexcept :
     object_manager_(in_object_manager) {}
 
-WImporter::WImporter(const WImporter & in_other) 
-{
-    object_manager_ = in_other.object_manager_;
-}
+constexpr WImporter::WImporter(const WImporter & other) noexcept :
+    object_manager_(other.object_manager_) {}
 
-WImporter::WImporter(WImporter && out_other) noexcept
-{
-    Move(std::move(out_other));
-}
+constexpr WImporter::WImporter(WImporter && out_other) noexcept :
+    object_manager_(std::move(out_other.object_manager_)) {}
 
-WImporter & WImporter::operator=(const WImporter & in_other) 
+constexpr WImporter & WImporter::operator=(const WImporter & other)  noexcept
 {
-    object_manager_ = in_other.object_manager_;
+    if (this != &other) {
+        object_manager_ = other.object_manager_;        
+    }
+
     return *this;
 }
 
-WImporter & WImporter::operator=(WImporter && out_other) noexcept
+constexpr WImporter & WImporter::operator=(WImporter && other) noexcept
 {
-    Move(std::move(out_other));
+    if (this != &other) {
+        object_manager_ = std::move(other.object_manager_);
+    }
+    
     return *this;
-}
-
-
-void WImporter::Move(WImporter && other) noexcept
-{
-    object_manager_ = std::move(other.object_manager_);
 }
 
 WObjectManager & WImporter::ObjectManager() 
