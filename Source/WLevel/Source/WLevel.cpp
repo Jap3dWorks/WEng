@@ -65,7 +65,7 @@ WId WLevel::CreateActor(const WClass * in_class) {
     
     std::string actor_path =
         Name() + ":" + in_class->Name() + "_" +
-        std::format("{}", object_manager_.Size(in_class));
+        std::format("{}", object_manager_.Count(in_class));
 
     WId id = CreateActorId(in_class);
 
@@ -146,7 +146,7 @@ std::string WLevel::ActorPath(const WClass * in_class) const {
     assert(in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class));
     
     return Name() + ":" + in_class->Name() + "_" +
-        std::format("{}", object_manager_.Size(in_class));
+        std::format("{}", object_manager_.Count(in_class));
 }
 
 std::string WLevel::ComponentPath(const WId & in_actor_id,

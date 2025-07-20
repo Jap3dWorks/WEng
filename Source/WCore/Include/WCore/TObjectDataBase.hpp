@@ -32,8 +32,7 @@ class TObjectDataBase : public IObjectDataBase<P> {
 public:
 
     using ObjectsType = TSparseSet<T, Allocator>;
-
-    using IterIndex = TIterator<WId, typename ObjectsType::IndexIterator>;
+    using ConstIterIndexType = TIterator<WId, typename ObjectsType::ConstIndexIterator, WId, WId>;
 
 public:
 
@@ -196,19 +195,25 @@ public:
         objects_.Reserve(in_value);
     }
 
-    IterIndex Indexes() override {
-        // std::vector<WId> result;
-        // result.reserve(objects_.Count());
-
-        objects_.IterIndex();
-
-        return IterIndex(
-            objects_.IterIndex().begin(),
-            objects_.IterIndex().end(),
-            [](TSparseSet<T,Allocator>::IndexIterator & _itr, const size_t & _val) {
+    ConstIterIndexType IterIndexes() const {
+        return ConstIterIndexType(
+            objects_.IterIndexes().begin(),
+            objects_.IterIndexes().end(),
+            [](ConstIterIndexType::IterType & _itr, const size_t & _val) {
                 return *_itr;
             }
             );
+    }
+
+    std::vector<WId> Indexes() override {
+        std::vector<WId> result;
+        result.reserve(objects_.Count());
+        
+        for (WId d : IterIndexes()) {
+            result.push_back(d);
+        }
+
+        return result;
     }
 
     void ForEach(TFunction<void(P*)> in_function) override {
@@ -220,9 +225,11 @@ public:
 private:
 
     TFunction<T(const WId &)> create_fn_;
+
     TFunction<void(T&)> clear_fn_; 
 
     WIdPool id_pool_;
-    TSparseSet<T, Allocator> objects_;
+
+    ObjectsType objects_;
     
 };

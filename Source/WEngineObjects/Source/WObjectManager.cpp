@@ -62,18 +62,18 @@ size_t WObjectManager::InitialMemorySize() const {
     return initial_memory_size_;
 }
 
-std::vector<const WClass*> WObjectManager::Classes() const {
-    std::vector<const WClass*> r;
-    r.reserve(containers_.size());
+WObjectManager::ClassIterator WObjectManager::Classes() const {
 
-    for(auto& c : containers_) {
-        r.push_back(c.first);
-    }
-
-    return r;
+    return ClassIterator(
+        containers_.cbegin(),
+        containers_.cend(),
+        [](ClassIterator::IterType & _iter, const size_t & _n) -> const WClass *const {
+            return (*_iter).first;
+        }
+        );
 }
 
-size_t WObjectManager::Size(const WClass * in_class) const {
+size_t WObjectManager::Count(const WClass * in_class) const {
     assert(containers_.contains(in_class));
     return containers_.at(in_class)->Count();
 }

@@ -25,6 +25,16 @@ class WENGINEOBJECTS_API WObjectManager {
 
 public:
 
+    using ContainersType = std::unordered_map<const WClass *,
+        std::unique_ptr<IObjectDataBase<WObject>>>;
+
+    using ClassIterator = TIterator<const WClass *,
+        ContainersType::const_iterator,
+        const WClass *const,
+        const WClass *const>;
+
+public:
+
     constexpr WObjectManager() :
         containers_(),
         initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
@@ -122,7 +132,7 @@ public:
     /**
      * @brief Returns present (or that have been present) classes in this object.
      */
-    std::vector<const WClass *> Classes() const;
+    ClassIterator Classes() const;
 
     /**
      * @brief Ammount of memory initially present for each stored class.
@@ -133,13 +143,13 @@ public:
 
     WNODISCARD size_t InitialMemorySize() const;
 
-    WNODISCARD size_t Size(const WClass * in_class) const;
+    WNODISCARD size_t Count(const WClass * in_class) const;
 
 private:
 
     void EnsureClassStorage(const WClass * in_class);
 
-    std::unordered_map<const WClass *, std::unique_ptr<IObjectDataBase<WObject>>> containers_;
+    ContainersType containers_;
 
     size_t initial_memory_size_;
 

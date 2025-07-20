@@ -12,12 +12,22 @@ template<typename T, typename Allocator=std::allocator<T>>
 class TSparseSet {
 
 public:
-    
-    using IndexIterator = TIterator<WId, std::unordered_map<size_t, size_t>::iterator>;
+
+    using IndexPosType = std::unordered_map<size_t, size_t>;
+
+    using IndexIterator = TIterator<size_t,
+                                    IndexPosType::iterator,
+                                    const size_t &
+                                    >;
+
+    using ConstIndexIterator = TIterator<size_t,
+                                         IndexPosType::const_iterator,
+                                         const size_t &>;
 
 public:
 
     constexpr TSparseSet() noexcept = default;
+
     virtual ~TSparseSet() = default;
 
     constexpr TSparseSet(const Allocator & in_allocator) :
@@ -121,19 +131,32 @@ public:
         return compact_.cend();
     }
 
-    constexpr IndexIterator IterIndex() noexcept {
-        return IndexIterator(index_pos_.begin(),
-                             index_pos_.end(),
-                             [] (IndexIterator::IterType & _iter, const size_t & _idx) {
-                                 return (*_iter).first;
-                             }
+    IndexIterator IterIndexes() {
+        return IndexIterator(
+            index_pos_.begin(),
+            index_pos_.end(),
+            [](IndexIterator::IterType & _iter, const size_t & _idx) -> const size_t & {
+                return (*_iter).first;
+            }
+            );
+    }
+
+    ConstIndexIterator IterIndexes() const {
+        return ConstIndexIterator(
+            index_pos_.cbegin(),
+            index_pos_.cend(),
+            [] (ConstIndexIterator::IterType & _iter, const size_t & _idx) -> const size_t & {
+                return (*_iter).first;
+            }
             );
     }
 
 private:
 
     std::unordered_map<size_t, size_t> index_pos_;
+
     std::unordered_map<size_t, size_t> pos_index_;
+
     std::vector<T, Allocator> compact_;
 
 };

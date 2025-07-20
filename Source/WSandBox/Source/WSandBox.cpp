@@ -31,9 +31,15 @@ int main(int argc, char* argv[])
 
     std::vector<uint32_t>* ptr = &v;
 
-    auto t = v.begin()[2];
+    const std::vector<uint32_t> & crf = v;
 
-    for (auto& a : *ptr) {
+    const std::vector<uint32_t*> cvptr;
+
+    for (uint32_t * const& p : cvptr) {
+        
+    }
+
+    for (const uint32_t & c : crf) {
         
     }
 
