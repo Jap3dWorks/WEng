@@ -29,6 +29,11 @@ public:
 
 template<typename T, typename P=void, typename Allocator=std::allocator<T>>
 class TObjectDataBase : public IObjectDataBase<P> {
+public:
+
+    using ObjectsType = TSparseSet<T, Allocator>;
+
+    using IterIndex = TIterator<WId, typename ObjectsType::IndexIterator>;
 
 public:
 
@@ -191,16 +196,19 @@ public:
         objects_.Reserve(in_value);
     }
 
-    std::vector<WId> Indices() override {
-        std::vector<WId> result;
-        result.reserve(objects_.Count());
+    IterIndex Indexes() override {
+        // std::vector<WId> result;
+        // result.reserve(objects_.Count());
 
-        for (auto& p : objects_.IterIndex()) {
-            
-            result.push_back(p.first);
-        }
+        objects_.IterIndex();
 
-        return result;
+        return IterIndex(
+            objects_.IterIndex().begin(),
+            objects_.IterIndex().end(),
+            [](TSparseSet<T,Allocator>::IndexIterator & _itr, const size_t & _val) {
+                return *_itr;
+            }
+            );
     }
 
     void ForEach(TFunction<void(P*)> in_function) override {

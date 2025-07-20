@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/TIterator.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WEngineObjects/WObject.hpp"
 #include "WEngineObjects/TWRef.hpp"

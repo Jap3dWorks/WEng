@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WCore/TIterator.hpp"
 #include "WCore/WCore.hpp"
+#include "WCore/TIterator.hpp"
 
 #include <memory>
 #include <unordered_map>
@@ -10,6 +10,11 @@
 
 template<typename T, typename Allocator=std::allocator<T>>
 class TSparseSet {
+
+public:
+    
+    using IndexIterator = TIterator<WId, std::unordered_map<size_t, size_t>::iterator>;
+
 public:
 
     constexpr TSparseSet() noexcept = default;
@@ -116,12 +121,12 @@ public:
         return compact_.cend();
     }
 
-    constexpr auto IterIndex() noexcept {
-        return TIterator<
-            // decltype(*std::declval(decltype(index_pos_)::iterator)),
-            std::pair<const size_t, size_t>,
-            typename decltype(index_pos_)::iterator>(
-            index_pos_.begin(), index_pos_.end()
+    constexpr IndexIterator IterIndex() noexcept {
+        return IndexIterator(index_pos_.begin(),
+                             index_pos_.end(),
+                             [] (IndexIterator::IterType & _iter, const size_t & _idx) {
+                                 return (*_iter).first;
+                             }
             );
     }
 

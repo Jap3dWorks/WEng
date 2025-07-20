@@ -3,9 +3,10 @@
 #include <print>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 template<typename A, const char na[32], size_t N=0>
-struct SA{
+struct SA {
     SA():name_("NONE"){}
 
     const char * Name() { return name_; }
@@ -13,8 +14,6 @@ struct SA{
 private:
     const char* name_;
 };
-
-
 
 constexpr const char * _name_ = "NONE";
 
@@ -26,17 +25,17 @@ constexpr const char _other_2_[32] = "NONE";
 
 int main(int argc, char* argv[])
 {
-
-    constexpr const char* n = "NONE";
-
-    SA<size_t, _other_> a;
-    SA<size_t, _other_2_> b;
-
-    static_assert(std::is_same_v<SA<size_t, _other_>, SA<size_t, _other_>>);
-
-    std::print("*{}*\n", a.Name());
-
     
+
+    std::vector<uint32_t> v(5);
+
+    std::vector<uint32_t>* ptr = &v;
+
+    auto t = v.begin()[2];
+
+    for (auto& a : *ptr) {
+        
+    }
 
     return 0;
 }
