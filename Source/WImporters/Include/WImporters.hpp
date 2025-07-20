@@ -10,13 +10,14 @@
 #include <memory>
 
 class WObjectManager;
+class WAssetManagerFacade;
 
 class WIMPORTERS_API WImporter : public IImporter
 {
 
 public:
 
-    constexpr explicit WImporter(WObjectManager & in_object_manager) noexcept;
+    constexpr explicit WImporter(WAssetManagerFacade & in_object_manager) noexcept;
 
     virtual ~WImporter() = default;
 
@@ -45,11 +46,11 @@ public:
 
 protected:
 
-    WObjectManager & ObjectManager();
+    WAssetManagerFacade &ObjectManager();
 
 private:
 
-    TRef<WObjectManager> object_manager_{nullptr};  // TODO each WObject an unique WId (WAssetManager)
+    TRef<WAssetManagerFacade> object_manager_{nullptr};  // TODO each WObject an unique WId (WAssetManager)
     
 };
 
@@ -58,7 +59,7 @@ class WIMPORTERS_API WImportObj : public WImporter
     
 public:
     
-    constexpr explicit WImportObj(WObjectManager & in_object_manager) noexcept;
+    constexpr explicit WImportObj(WAssetManagerFacade & in_object_manager) noexcept;
 
     virtual ~WImportObj() = default;
 
@@ -86,7 +87,7 @@ class WIMPORTERS_API WImportTexture : public WImporter
     
 public:
 
-    constexpr explicit WImportTexture(WObjectManager & in_object_manager) noexcept;
+    constexpr explicit WImportTexture(WAssetManagerFacade & in_object_manager) noexcept;
 
     virtual ~WImportTexture() = default;
 
