@@ -20,9 +20,9 @@ target_include_directories(
 target_link_libraries(
     WLevel
     PRIVATE
-    WCore::WCore
-    WEngineObjects::WEngineObjects
-    WEngineInterfaces::WEngineInterfaces
+        WCore::WCore
+        WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
 )
 
 add_library(WLevel::WLevel ALIAS WLevel)
@@ -35,6 +35,7 @@ install(
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
+
 # Generate and install config files
 install(
     EXPORT WLevelTargets

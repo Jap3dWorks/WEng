@@ -15,10 +15,14 @@ install(
     TARGETS WEngineInterfaces
     EXPORT WEngineInterfacesTargets
     INCLUDES DESTINATION include
+)
 
-    # LIBRARY DESTINATION lib
-    # ARCHIVE DESTINATION lib
-    # RUNTIME DESTINATION bin
+# Install config files
+install(
+    EXPORT WEngineInterfacesTargets
+    FILE WEngineInterfacesConfig.cmake
+    NAMESPACE WEngineInterfaces::
+    DESTINATION lib/cmake/WEngineInterfaces
 )
 
 install(
@@ -29,11 +33,23 @@ install(
     PATTERN "*.h"
 )
 
-# Install config files
 install(
-    EXPORT WEngineInterfacesTargets
-    FILE WEngineInterfacesConfig.cmake
-    NAMESPACE WEngineInterfaces::
+    DIRECTORY PublicGenerated/
+    DESTINATION include
+    FILES_MATCHING
+    PATTERN "*.hpp"
+    PATTERN "*.h"
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    WEngineInterfacesConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion    
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/WEngineInterfacesConfigVersion.cmake
     DESTINATION lib/cmake/WEngineInterfaces
 )
 

@@ -17,17 +17,15 @@ find_package(Vulkan REQUIRED)
 target_include_directories(
     WRender 
     PUBLIC 
-        Include
-        PublicGenerated
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PublicGenerated>
     PRIVATE 
-        PrivateGenerated
-        WEngineObjects::WEngineObjects
-        WCore::WCore
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Source>
         ${STB_INCLUDE_DIRS} 
         ${GLM_INCLUDE_DIRS} 
         ${GLFW_INCLUDE_DIRS}
         ${VULKAN_INCLUDE_DIRS}
-        Source
 )
 
 target_link_libraries(
@@ -51,8 +49,48 @@ add_library(WRender::WRender ALIAS WRender)
 
 install(
     TARGETS WRender
+    EXPORT WRenderTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
+
+# Generate and install config files
+install(
+    EXPORT WRenderTargets
+    FILE WRenderConfig.cmake
+    NAMESPACE WRender::
+    DESTINATION lib/cmake/WRender
+)
+
+# Install public headers
+install(
+    DIRECTORY Include/
+    DESTINATION include
+    FILES_MATCHING
+        PATTERN "*.hpp"
+        PATTERN "*.h"
+)
+    
+install(
+    DIRECTORY PublicGenerated/
+    DESTINATION include
+    FILES_MATCHING
+        PATTERN "*.hpp"
+        PATTERN "*.h"
+)
+
+# Version config file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    WRenderConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/WRenderConfigVersion.cmake
+    DESTINATION lib/cmake/WRender
+)
+
