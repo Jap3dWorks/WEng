@@ -80,7 +80,7 @@ WId WLevel::CreateActor(const WClass * in_class) {
     return id;
 }
 
-TWRef<WActor> WLevel::GetActor(const WId & in_id) const {
+TWRef<WActor> WLevel::GetActor(const WId & in_id) {
     assert(id_actorclass_.contains(in_id));
     
     return static_cast<WActor*>(object_manager_.Get(
@@ -92,7 +92,7 @@ TWRef<WActor> WLevel::GetActor(const WId & in_id) const {
 void WLevel::ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) const {
     assert(in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class));
     
-    for(auto& c : object_manager_.Classes()) {
+    for(const WClass * c : object_manager_.Classes()) {
         if(in_class == c || in_class->IsBaseOf(c)) {
             object_manager_.ForEach(in_class,
                                     [&in_predicate](WObject* _obj) {
@@ -120,7 +120,7 @@ WId WLevel::CreateComponent(const WId & in_actor_id,
 }
 
 TWRef<WComponent> WLevel::GetComponent(const WClass * in_class,
-                                    const WId & in_component_id) const {
+                                    const WId & in_component_id) {
 
     assert(object_manager_.Contains(in_class, in_component_id));
 

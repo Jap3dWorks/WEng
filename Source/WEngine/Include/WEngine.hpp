@@ -2,21 +2,28 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WObjectManager/WObjectManager.hpp"
+
+#include "IRender.hpp"
+#include "ILevel.hpp"
+#include "ILevelRegister.hpp"
+#include "IImporterRegister.hpp"
 
 #include <memory>
 
-class IRender;
-class ILevel;
 class WObjectManager;
 class WImporterRegister;
 class WImporter;
-class ILevelRegister;
+class WAssetManagerFacade;
 
 class WENGINE_API WEngine
 {
 
 public:
+
+    WEngine(std::unique_ptr<IRender> && in_render,
+            std::unique_ptr<IImporterRegister> && in_importers_register,
+            std::unique_ptr<ILevelRegister> && in_level_register,
+            std::unique_ptr<WAssetManagerFacade> && in_asset_manager);
 
     virtual ~WEngine();
 
@@ -30,33 +37,33 @@ public:
 
     void run();
 
-    static WEngine Create();
+    static WEngine DefaultCreate();
 
-    TRef<WImporterRegister> ImportersRegister() noexcept;
+    TRef<IImporterRegister> ImportersRegister() noexcept;
 
     TRef<IRender> Render() noexcept;
 
     TRef<ILevel> CurrentLevel() noexcept;
 
+    TRef<WAssetManagerFacade> AssetManager() noexcept;
+
 private:
 
-    WEngine();    
+    // void InitializeObjectManager();
 
-    void InitializeObjectManager();
+    // void InitializeImporters();
 
-    void InitializeImporters();
+    // void InitializeRender();
 
-    void InitializeRender();
+    std::unique_ptr<IRender> render_;
 
-    std::unique_ptr<IRender> render_{nullptr};
+    std::unique_ptr<IImporterRegister> importers_register_;
 
-    std::unique_ptr<ILevelRegister> level_register_{nullptr};
+    std::unique_ptr<ILevelRegister> level_register_;
 
-    std::unique_ptr<WObjectManager> asset_manager_{nullptr};
-
-    std::unique_ptr<WImporterRegister> importers_register_{nullptr};
-
+    std::unique_ptr<WAssetManagerFacade> asset_manager_;
 
     bool close{false};
+
 };
 

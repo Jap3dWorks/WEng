@@ -15,8 +15,8 @@ class WAsset;
 class WENGINEOBJECTS_API WAssetManagerFacade {
 public:
 
-    WAssetManagerFacade(WObjectManager & in_object_manager) :
-    object_manager_(in_object_manager),
+    constexpr WAssetManagerFacade() noexcept :
+    object_manager_(),
     id_pool_(),
     id_class_() {
         InitializeIdPool();
@@ -25,22 +25,21 @@ public:
     template<std::derived_from<WObject> T>
     WId Create(const char * in_fullname) {}
 
-    WId Create(const WClass * in_class, const char * in_fullname);
+    WId Create(const WClass * in_class,
+               const char * in_fullname);
 
-    TWRef<WAsset> Get(const WId & in_id) const;
+    TWRef<WAsset> Get(const WId & in_id);
 
     TRef<WObjectManager> ObjectManager() noexcept;
-
-    const TRef<WObjectManager> ObjectManager() const noexcept;
 
 private:
 
     void InitializeIdPool();
 
-    TRef<WObjectManager> object_manager_;
+    WObjectManager object_manager_;
 
     WIdPool id_pool_;
 
     std::unordered_map<WId, const WClass *> id_class_;
-    
+
 };

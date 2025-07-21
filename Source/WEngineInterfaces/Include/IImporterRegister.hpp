@@ -2,11 +2,11 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TOptionalRef.hpp"
-
+#include "IImporter.hpp"
 #include <memory>
 #include <vector>
 
-class IImporter;
+// class IImporter;
 
 /**
  * @brief 
@@ -16,11 +16,6 @@ public:
 
     virtual ~IImporterRegister()=default;
 
-    template<typename T, typename ...Args>
-    void Register(Args && ... args) {
-        Register(std::make_unique<T>(std::forward<Args>(args)...));
-    }
-
     virtual void Register(std::unique_ptr<IImporter> && in_importer)=0;
 
     /**
@@ -28,9 +23,27 @@ public:
      * If in_fn returns true, the process should continue,
      * if in_fn returns false, the process should stop.
      */
-    virtual void ForEach(const TFunction<bool(IImporter*)> & in_fn) const;
+    virtual void ForEach(const TFunction<bool(IImporter*)> & in_fn) const=0;
 
-    TOptionalRef<IImporter> GetImporter(const char * in_extension) const;
+    TOptionalRef<IImporter> GetImporter(const char * in_extension) const {
+        IImporter* r=nullptr;
+
+        ForEach([&r, &in_extension](IImporter* _imp) ->bool {
+            for (const std::string & s : _imp->Extensions()) {
+                if (in_extension == s) {
+                    r=_imp;
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        if (r) {
+            return r;
+        } else {
+            return null_optional_ref;
+        }
+    }
     
     template<std::derived_from<IImporter> T>
     TOptionalRef<T> GetImporter() const {

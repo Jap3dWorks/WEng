@@ -3,13 +3,13 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TFunction.hpp"
 #include "WEngineObjects/TWRef.hpp"
-#include "WEngineObjects/WActor.hpp"
-#include "WEngineObjects/WComponent.hpp"
 #include "WEngineObjects/WEngineCycleData.hpp"
 
 // TODO Serializable
 
 class WClass;
+class WActor;
+class WComponent;
 
 class  ILevel {
 
@@ -20,7 +20,7 @@ public:
     /**
      * @brief Call this method before Level starts.
      */
-    virtual void Init();
+    virtual void Init()=0;
 
     /**
      * @brief Create WActor derived objects.
@@ -30,7 +30,7 @@ public:
     /**
      * @brief Get an Actor reference from WId.
      */
-    virtual TWRef<WActor> GetActor(const WId & in_id) const =0;
+    virtual TWRef<WActor> GetActor(const WId & in_id) =0;
 
     virtual void ForEachActor(const WClass * in_class,
                               TFunction<void(WActor*)> in_predicate) const=0;
@@ -39,7 +39,7 @@ public:
                                 const WClass * in_class)=0;
 
     virtual TWRef<WComponent> GetComponent(const WClass * in_class,
-                                        const WId & in_component_id) const=0;
+                                        const WId & in_component_id)=0;
 
     /**
      * @brief Call each cycle.

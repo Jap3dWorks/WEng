@@ -7,7 +7,10 @@ target_include_directories(
         WCore::WCore
         WEngine::WEngine
         WRender::WRender
+        WLevel::WLevel
         WImporters::WImporters
+        WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
     PRIVATE 
         PrivateGenerated
 )
@@ -23,6 +26,7 @@ target_link_libraries(
         WRender::WRender
         WImporters::WImporters
         WEngine::WEngine
+        WLevel::WLevel
 )
 
 install(

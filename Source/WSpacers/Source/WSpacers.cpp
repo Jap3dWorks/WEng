@@ -73,19 +73,21 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     TOptionalRef<WImportObj> obj_importer =
         engine.ImportersRegister()->GetImporter<WImportObj>();
 
-    std::vector<TWRef<WAsset>> geo_assets =
+    std::vector<WId> geo_ids =
         obj_importer->Import(
             "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/viking_room.viking_room"
             );
 
-    if (geo_assets.size() < 1)
+    if (geo_ids.size() < 1)
     {
         std::cout << "Failed to import geo_asset!" << std::endl;
         return false;
     }
 
-    if (geo_assets[0]->Class() != WStaticMeshAsset::StaticClass())
+    TWRef<WAsset> geo_asset = engine.AssetManager()->Get(geo_ids[0]);
+
+    if (geo_asset->Class() != WStaticMeshAsset::StaticClass())
     {
         std::cout << "geo_asset is not a static model!" << std::endl;
         return false;
@@ -94,25 +96,27 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     TOptionalRef<WImportTexture> texture_importer =
         engine.ImportersRegister()->GetImporter<WImportTexture>();
 
-    std::vector<TWRef<WAsset>> tex_asset = texture_importer->Import(
+    std::vector<WId> tex_ids = texture_importer->Import(
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
     );
 
-    if (tex_asset.size() < 1)
+    if (tex_ids.size() < 1)
     {
         std::cout << "Failed to import tex_asset!" << std::endl;
         return false;
     }
 
-    if (tex_asset[0]->Class() != WTextureAsset::StaticClass())
+    TWRef<WAsset> tex_asset = engine.AssetManager()->Get(tex_ids[0]);
+
+    if (tex_asset->Class() != WTextureAsset::StaticClass())
     {
         std::cout << "tex_asset is not a texture!" << std::endl;
         return false;
     }
 
-    out_static_model = static_cast<WStaticMeshAsset*>(geo_assets[0].Ptr());
-    out_texture_asset = static_cast<WTextureAsset*>(tex_asset[0].Ptr());
+    out_static_model = static_cast<WStaticMeshAsset*>(geo_asset.Ptr());
+    out_texture_asset = static_cast<WTextureAsset*>(tex_asset.Ptr());
 
     return true;
 
@@ -124,7 +128,7 @@ int main(int argc, char** argv)
     
     try
     {
-        WEngine engine = WEngine::Create();
+        WEngine engine = WEngine::DefaultCreate();
 
         WId pipeline_wid = engine.Render()->CreateRenderPipeline(
             EPipelineType::Graphics,

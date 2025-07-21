@@ -33,11 +33,18 @@ WId WObjectManager::Create(const WClass * in_class,
     return in_id;
 }
 
-TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
+TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) {
     WObject * result;
     containers_.at(in_class)->Get(in_id, result);
 
-    return static_cast<WObject*>(result);
+    return result;
+}
+
+const TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
+    const WObject * result;
+    containers_.at(in_class)->Get(in_id, result);
+
+    return const_cast<WObject*>(result);
 }
 
 bool WObjectManager::Contains(const WClass * in_class, WId in_id) const {

@@ -7,6 +7,7 @@ add_library(
         Source/WComponent.cpp
         Source/WTextureAsset.cpp
         Source/WObjectManager.cpp
+        Source/WAssetManagerFacade.cpp
 )
 
 target_include_directories(
@@ -18,6 +19,7 @@ target_include_directories(
         Source
         PrivateGenerated
         WCore::WCore
+        WEngineInterfaces::WEngineInterfaces
     )
 
 target_link_libraries(

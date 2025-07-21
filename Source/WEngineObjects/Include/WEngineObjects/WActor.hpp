@@ -19,9 +19,9 @@ class WCORE_API WActor : public WObject
 
 public:
 
-    ILevel * Level() const;
+    ILevel * Level() const { return level; }
 
-    void Level(ILevel * in_level);
+    void Level(ILevel * in_level) { level = in_level; }
 
 private:
 

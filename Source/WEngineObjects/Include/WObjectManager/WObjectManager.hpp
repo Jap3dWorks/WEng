@@ -101,11 +101,13 @@ public:
                           const char * in_fullname);
 
     template <std::derived_from<WObject> T>
-    TWRef<T> Get(WId in_id) const {
+    TWRef<T> Get(WId in_id) {
         return static_cast<T*>(Get(T::StaticClass(), in_id).Ptr());
     }
 
-    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
+    TWRef<WObject> Get(const WClass * in_class, const WId & in_id);
+
+    const TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {

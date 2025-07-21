@@ -22,7 +22,7 @@ public:
 
     WRender();
 
-    ~WRender();
+    ~WRender() override;
 
     void Initialize();
 

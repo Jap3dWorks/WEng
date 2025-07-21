@@ -21,7 +21,7 @@ public:
            const UpdateFn & in_update_fn,
            const CloseFn & in_close_fn);
     
-    ~WLevel() override  = default;
+    virtual ~WLevel() = default;
 
     WLevel(const WLevel& other) = delete;
 
@@ -37,7 +37,7 @@ public:
 
     WId CreateActor(const WClass * in_class) override;
 
-    TWRef<WActor> GetActor(const WId & in_id) const override;
+    TWRef<WActor> GetActor(const WId & in_id) override;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
@@ -49,7 +49,7 @@ public:
                         const WClass * in_class) override;
 
     TWRef<WComponent> GetComponent(const WClass * in_class,
-                                const WId & in_component_id) const override;
+                                const WId & in_component_id) override;
 
     void Update(const WEngineCycleData & in_cycle_data) override;
 

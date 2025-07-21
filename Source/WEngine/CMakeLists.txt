@@ -13,6 +13,10 @@ target_include_directories(
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
+        WEngineInterfaces::WEngineInterfaces
+        WRender::WRender
+        WImporters::WImporters
+        WLevel::WLevel
         PrivateGenerated
         Source
 )
@@ -25,6 +29,7 @@ target_link_libraries(
         WImporters::WImporters
         WRender::WRender
         WEngineInterfaces::WEngineInterfaces
+        WLevel::WLevel
 )
 
 add_library(WEngine::WEngine ALIAS WEngine)

@@ -30,6 +30,8 @@ struct GLFWwindow;
 class IRender {
 public:
 
+    virtual ~IRender()=default;
+
     virtual void Draw()=0;
 
     virtual WId CreateRenderPipeline(

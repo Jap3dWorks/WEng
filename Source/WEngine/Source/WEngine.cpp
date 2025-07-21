@@ -1,10 +1,14 @@
 #include "WEngine.hpp"
-// #include <iostream>
 
-#include "WObjectManager/WObjectManager.hpp"
+#include "IImporterRegister.hpp"
+#include "ILevelRegister.hpp"
+#include "ILevel.hpp"
+#include "IRender.hpp"
+
 #include "WImporters.hpp"
 #include "WImporterRegister.hpp"
 #include "WRender.hpp"
+#include "WLevelRegister/WLevelRegister.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -12,23 +16,39 @@
 
 #include <GLFW/glfw3.h>
 
-WEngine WEngine::Create()
+WEngine WEngine::DefaultCreate()
 {
-    return {};
+    
+    std::unique_ptr<WAssetManagerFacade> asset_manager =
+        std::make_unique<WAssetManagerFacade>();
+
+    std::unique_ptr<IImporterRegister> importer_reg =
+        std::make_unique<WImporterRegister>(*asset_manager.get());
+    
+    return WEngine(
+        std::make_unique<WRender>(),
+        std::move(importer_reg),
+        std::make_unique<WLevelRegister>(),
+        std::move(asset_manager)
+        );
 }
 
-WEngine::WEngine()
-{
-    InitializeObjectManager();
-    InitializeImporters();
-    InitializeRender();
-}
+WEngine::WEngine(std::unique_ptr<IRender> && in_render,
+                 std::unique_ptr<IImporterRegister> && in_importers_register,
+                 std::unique_ptr<ILevelRegister> && in_level_register,
+                 std::unique_ptr<WAssetManagerFacade> && in_asset_manager) :
+    render_(std::move(in_render)),
+    importers_register_(std::move(in_importers_register)),
+    level_register_(std::move(in_level_register)),
+    asset_manager_(std::move(in_asset_manager))
+{}
 
 WEngine::~WEngine()
 {
     render_ = nullptr;
-    asset_manager_ = nullptr;
     importers_register_ = nullptr;
+    level_register_ = nullptr;
+    asset_manager_ = nullptr;
 }
 
 void WEngine::run()
@@ -47,7 +67,7 @@ void WEngine::run()
     Render()->WaitIdle();
 }
 
-TRef<WImporterRegister> WEngine::ImportersRegister() noexcept
+TRef<IImporterRegister> WEngine::ImportersRegister() noexcept
 {
     return importers_register_.get();
 }
@@ -61,22 +81,7 @@ TRef<ILevel> WEngine::CurrentLevel() noexcept {
     return nullptr;
 }
 
-void WEngine::InitializeObjectManager()
-{
-    asset_manager_ = std::make_unique<WObjectManager>();
-}
-
-void WEngine::InitializeImporters()
-{
-    importers_register_ = std::make_unique<WImporterRegister>();
-
-    importers_register_->Register<WImportObj>(*asset_manager_.get());
-    importers_register_->Register<WImportTexture>(*asset_manager_.get());
-    
-}
-
-void WEngine::InitializeRender()
-{
-    render_ = std::make_unique<WRender>();
+TRef<WAssetManagerFacade> WEngine::AssetManager() noexcept {
+    return asset_manager_.get();
 }
 

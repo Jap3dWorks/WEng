@@ -129,6 +129,10 @@ public:
         return object_;
     }
 
+    const void * BPtr() const {
+        return object_;
+    }
+
     bool operator==(const BWRef & other) const
     {
         return object_ == other.object_;
@@ -231,7 +235,7 @@ public:
 
     const T * operator->() const
     {
-        return static_cast<T*>(BPtr());
+        return static_cast<const T*>(BPtr());
     }
 
     T & operator*()
@@ -241,7 +245,7 @@ public:
 
     const T & operator*() const
     {
-        return *static_cast<T*>(BPtr());
+        return *static_cast<const T*>(BPtr());
     }
 
 };

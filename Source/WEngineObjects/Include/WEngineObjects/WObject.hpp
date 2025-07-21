@@ -29,7 +29,7 @@ public:
         std::strcpy(name_, in_name);
     }
 
-    constexpr std::string Name() {
+    constexpr std::string Name() const {
         return name_;
     }
 
@@ -37,7 +37,7 @@ public:
         remove_=true;
     }
 
-    constexpr bool IsMarkedToRemove() {
+    constexpr bool IsMarkedToRemove() const {
         return remove_;
     }
     
