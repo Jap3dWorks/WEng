@@ -13,10 +13,6 @@ target_include_directories(
         PublicGenerated
     PRIVATE
         PrivateGenerated
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        # WEngineInterfaces::WEngineInterfaces
-        ../WEngineInterfaces/Include
         Source
 )    
 
@@ -25,6 +21,7 @@ target_link_libraries(
     PRIVATE
     WCore::WCore
     WEngineObjects::WEngineObjects
+    WEngineInterfaces::WEngineInterfaces
 )
 
 add_library(WLevel::WLevel ALIAS WLevel)
