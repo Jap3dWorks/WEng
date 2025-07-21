@@ -5,7 +5,7 @@ add_library(
 target_include_directories(
     WEngineInterfaces INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/PublicGenerated>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PublicGenerated>
         $<INSTALL_INTERFACE:include>
 )
 
