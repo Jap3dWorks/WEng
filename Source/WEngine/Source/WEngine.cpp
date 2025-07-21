@@ -9,6 +9,7 @@
 #include "WImporterRegister.hpp"
 #include "WRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
+#include "WObjectManager/WAssetManagerFacade.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -23,8 +24,11 @@ WEngine WEngine::DefaultCreate()
         std::make_unique<WAssetManagerFacade>();
 
     std::unique_ptr<IImporterRegister> importer_reg =
-        std::make_unique<WImporterRegister>(*asset_manager.get());
-    
+        std::make_unique<WImporterRegister>();
+
+    importer_reg->Register(std::make_unique<WImportObj>(*asset_manager.get()));
+    importer_reg->Register(std::make_unique<WImportTexture>(*asset_manager.get()));
+
     return WEngine(
         std::make_unique<WRender>(),
         std::move(importer_reg),

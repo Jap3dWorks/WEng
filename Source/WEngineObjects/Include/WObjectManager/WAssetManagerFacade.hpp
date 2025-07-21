@@ -23,7 +23,9 @@ public:
     }
 
     template<std::derived_from<WObject> T>
-    WId Create(const char * in_fullname) {}
+    WId Create(const char * in_fullname) {
+        return Create(T::StaticClass(), in_fullname);
+    }
 
     WId Create(const WClass * in_class,
                const char * in_fullname);

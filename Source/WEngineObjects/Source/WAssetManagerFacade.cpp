@@ -12,8 +12,6 @@ void WAssetManagerFacade::InitializeIdPool() {
     }
 }
 
-
-
 WId WAssetManagerFacade::Create(const WClass * in_class, const char * in_fullname) {
     WId id = id_pool_.Generate();
     id_class_[id] = in_class;

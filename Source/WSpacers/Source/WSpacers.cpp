@@ -3,11 +3,12 @@
 #include "WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
-#include "WImporters.hpp"
 #include "WImporterRegister.hpp"
+#include "WImporters.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
+#include "WObjectManager/WAssetManagerFacade.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
