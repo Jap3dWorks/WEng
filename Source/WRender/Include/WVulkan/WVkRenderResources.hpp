@@ -5,10 +5,13 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 
-#include "IRenderResources.hpp"
+#include "WEngineInterfaces/IRenderResources.hpp"
 #include "WVulkan/WVkAssetCollection.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 
+/**
+ * @brief Manage the lifetime of render resources like geometries or textures.
+ */
 class WRENDER_API WVkRenderResources : public IRenderResources {
 
 public:

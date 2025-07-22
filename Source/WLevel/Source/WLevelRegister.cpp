@@ -1,5 +1,5 @@
 #include "WLevelRegister/WLevelRegister.hpp"
-#include "ILevel.hpp"
+#include "WEngineInterfaces/ILevel.hpp"
 
 #include <cassert>
 
@@ -28,6 +28,11 @@ void WLevelRegister::ApplyCurrent(const TFunction<void(ILevel*)> & in_fn) const 
 void WLevelRegister::Apply(const WId & in_id, const TFunction<void(ILevel*)> & in_fn) const {
     assert(levels_.contains(in_id));
     in_fn(levels_.at(in_id).get());
+}
+
+TOptionalRef<ILevel> WLevelRegister::Get(const WId & in_id) {
+    assert(levels_.contains(in_id));
+    return levels_.at(in_id).get();
 }
 
 

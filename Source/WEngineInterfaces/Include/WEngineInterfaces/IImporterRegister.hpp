@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TOptionalRef.hpp"
-#include "IImporter.hpp"
+#include "WEngineInterfaces/IImporter.hpp"
 #include <memory>
 #include <vector>
 

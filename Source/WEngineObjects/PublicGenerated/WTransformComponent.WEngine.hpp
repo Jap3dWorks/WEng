@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma once
+
 #ifdef _WCLASS_
 #undef _WCLASS_
 #endif
@@ -8,8 +10,8 @@
 #undef _PWCLASS_
 #endif
 
-#define _WCLASS_ WActor
-#define _PWCLASS_ WLevelObject
+#define _WCLASS_ WTransformComponent
+#define _PWCLASS_ WComponent
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

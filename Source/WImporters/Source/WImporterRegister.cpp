@@ -1,6 +1,6 @@
 #include "WImporterRegister.hpp"
 #include "WCore/TOptionalRef.hpp"
-#include "IImporter.hpp"
+#include "WEngineInterfaces/IImporter.hpp"
 
 #include <string>
 

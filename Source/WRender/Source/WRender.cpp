@@ -285,7 +285,6 @@ WId WRender::CreateRenderPipeline(
         );
 }
 
-
 void WRender::RecreateSwapChain() {
     WFLOG("RECREATE SWAP CHAIN!");
     

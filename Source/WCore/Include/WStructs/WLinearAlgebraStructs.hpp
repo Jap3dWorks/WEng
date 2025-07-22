@@ -4,12 +4,9 @@
 #include <glm/glm.hpp>
 
 
- struct WTransformStruct
+struct WTransformStruct
 {
 public:
-    WTransformStruct() = default;
-    virtual ~WTransformStruct() = default;
-
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
