@@ -5,11 +5,15 @@
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 
+#include <memory>
+
 template<typename T=void>
 class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
 
+    virtual std::unique_ptr<IObjectDataBase> Clone() const=0;
+    // virtual 
     /** Create and assign an WId */
     virtual WId Create() = 0;
     /** Insert at WId  */
@@ -27,18 +31,30 @@ public:
     
 };
 
+/**
+ * @brief Container for objects of type T.
+ * Objects are aligned continously in memory.
+ * Object in the containe can be accesed by WId.
+ * You can specify a create_fn to create objects inside the container.
+ * And a destroy_fn called when remove objects in the container.
+ */
 template<typename T, typename P=void, typename Allocator=std::allocator<T>>
 class TObjectDataBase : public IObjectDataBase<P> {
 public:
 
+    using Super = IObjectDataBase<P>;
+    using Type = TObjectDataBase<T, P, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
     using ConstIterIndexType = TIterator<WId, typename ObjectsType::ConstIndexIterator, WId, WId>;
+
+    using CreateFn = TFunction<T(const WId &)>;
+    using DestroyFn = TFunction<void(T&)>;
 
 public:
 
     constexpr TObjectDataBase() noexcept :
         create_fn_([](WId) -> T {return T{};}),
-        clear_fn_([](T&)->void {}),
+        destroy_fn_([](T&)->void {}),
         id_pool_(),
         objects_()
         {}
@@ -47,28 +63,28 @@ public:
         const Allocator & in_allocator
         ) :
         create_fn_([](WId) -> T { return T{}; }),
-        clear_fn_([](T&) -> void {}),
+        destroy_fn_([](T&) -> void {}),
         id_pool_(),
         objects_(in_allocator)
         {}
 
     constexpr TObjectDataBase(
-        const TFunction<T(const WId &)> & in_create_fn,
-        const TFunction<void(T&)> & in_destroy_fn
+        const CreateFn & in_create_fn,
+        const DestroyFn & in_destroy_fn
         ) :
         create_fn_(in_create_fn),
-        clear_fn_(in_destroy_fn),
+        destroy_fn_(in_destroy_fn),
         id_pool_(),
         objects_()
         {}
 
     constexpr TObjectDataBase(
-        const TFunction<T(const WId &)> & in_create_fn,
-        const TFunction<void(T&)> & in_destroy_fn,
+        const CreateFn & in_create_fn,
+        const DestroyFn & in_destroy_fn,
         const Allocator & in_allocator
         ) :
         create_fn_(in_create_fn),
-        clear_fn_(in_destroy_fn),
+        destroy_fn_(in_destroy_fn),
         id_pool_(),
         objects_(in_allocator)
         {}
@@ -77,36 +93,58 @@ public:
         Clear();
     }
 
-    TObjectDataBase(const TObjectDataBase & other) = delete;
+    TObjectDataBase(const TObjectDataBase & other) :
+        create_fn_(other.create_fn_),
+        destroy_fn_(other.crear_fn_),
+        id_pool_(other.id_pool_),
+        objects_(other.objects_) {}
 
     constexpr TObjectDataBase(TObjectDataBase && other) noexcept :
         create_fn_(std::move(other.create_fn_)),
-        clear_fn_(std::move(other.clear_fn_)),
+        destroy_fn_(std::move(other.destroy_fn_)),
         id_pool_(std::move(other.id_pool_)),
         objects_(std::move(other.objects_))
         {}
 
-    TObjectDataBase & operator=(const TObjectDataBase & other) = delete;
+    TObjectDataBase & operator=(const TObjectDataBase & other) {
+        if (this != &other) {
+            Clear();
+            create_fn_ = other.create_fn_;
+            destroy_fn_ = other.destroy_fn_;
+            objects_ = other.objects_;
+            id_pool_ = other.id_pool_;
+        }
+
+        return *this;
+    }
 
     TObjectDataBase & operator=(TObjectDataBase && other) noexcept {
         if (this != &other) {
             Clear();
             create_fn_ = std::move(other.create_fn_);
-            clear_fn_ = std::move(other.clear_fn_);
+            destroy_fn_ = std::move(other.destroy_fn_);
             objects_ = std::move(other.objects_);
             id_pool_ = std::move(other.id_pool_);            
         }
-        
+
         return *this;
     }
 
-    WId Create(const TFunction<T(const WId &)> & in_predicate) {
+    virtual std::unique_ptr<Super> Clone() const {
+        return std::make_unique<Type>(*this);
+    }
+
+    WId Create(const CreateFn & in_predicate) {
         WId oid = id_pool_.Generate();
         objects_.Insert(oid, in_predicate(oid));
 
         return oid;
     }
 
+    /**
+     * @brief Create an object in the container and return the assigned id.
+     * create_fn is used to create the object.
+     */
     WId Create() override {
         WId oid = id_pool_.Generate();
         objects_.Insert(oid, create_fn_(oid));
@@ -124,24 +162,24 @@ public:
         objects_.Insert(in_id, *static_cast<T*>(in_value));
     }
 
-    void Insert(WId in_id, const TFunction<T(const WId &)> & in_predicate) {
+    void Insert(WId in_id, const CreateFn & in_predicate) {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id, in_predicate(in_id));
     }
 
-    void Remove(WId in_id, const TFunction<void(T&)> & in_destroy_fn) {
+    void Remove(WId in_id, const DestroyFn & in_destroy_fn) {
         in_destroy_fn(objects_.Get(in_id));
         id_pool_.Release(in_id);
         objects_.Delete(in_id);
     }
 
     void Remove(WId in_id) override final {
-        clear_fn_(objects_.Get(in_id));
+        destroy_fn_(objects_.Get(in_id));
         id_pool_.Release(in_id);
         objects_.Delete(in_id);
     }
 
-    void Clear(const TFunction<void(T&)> & in_destroy_fn) {
+    void Clear(const DestroyFn & in_destroy_fn) {
         for (auto & o : objects_) {
             in_destroy_fn(o);
         }
@@ -152,7 +190,7 @@ public:
 
     void Clear() override final {
         for (auto & o : objects_) {
-            clear_fn_(o);
+            destroy_fn_(o);
         }
         
         id_pool_.Clear();
@@ -183,12 +221,12 @@ public:
         return objects_.Contains(in_id);
     }
 
-    void SetCreateFn(const TFunction<T(WId)> & in_create_fn) {
+    void SetCreateFn(const CreateFn & in_create_fn) {
         create_fn_ = in_create_fn;
     }
 
-    void SetClearFn(const TFunction<void(T&)> & in_destroy_fn) {
-        clear_fn_ = in_destroy_fn;
+    void SetDestroyFn(const DestroyFn & in_destroy_fn) {
+        destroy_fn_ = in_destroy_fn;
     }
 
     void Reserve(size_t in_value) override {
@@ -224,9 +262,9 @@ public:
 
 private:
 
-    TFunction<T(const WId &)> create_fn_;
+    CreateFn create_fn_;
 
-    TFunction<void(T&)> clear_fn_; 
+    DestroyFn destroy_fn_; 
 
     WIdPool id_pool_;
 

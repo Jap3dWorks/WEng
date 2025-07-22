@@ -42,14 +42,33 @@ public:
     
     virtual ~WObjectManager() = default;
 
-    WObjectManager(const WObjectManager&) = delete;
+    WObjectManager(const WObjectManager& other) :
+    containers_(),
+    initial_memory_size_(other.initial_memory_size_) {
+        for (auto & p : other.containers_) {
+            containers_.insert(
+                { p.first, p.second->Clone() }
+                );
+        }
+    }
     
     constexpr WObjectManager(WObjectManager && other) noexcept :
-        containers_(std::move(other.containers_)),
-        initial_memory_size_(std::move(other.initial_memory_size_))
-        {}
+    containers_(std::move(other.containers_)),
+    initial_memory_size_(std::move(other.initial_memory_size_))
+    {}
     
-    constexpr WObjectManager & operator=(const WObjectManager&) = delete;
+    constexpr WObjectManager & operator=(const WObjectManager& other) {
+        if (this != &other) {
+            initial_memory_size_ = other.initial_memory_size_;
+            for (auto & p : other.containers_) {
+                containers_.insert(
+                    {p.first, p.second->Clone()}
+                    );
+            }
+        }
+
+        return *this;
+    }
 
     constexpr WObjectManager & operator=(WObjectManager && other) noexcept {
         if (this != &other) {

@@ -4,45 +4,27 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <memory>
 
-template<typename A, const char na[32], size_t N=0>
-struct SA {
-    SA():name_("NONE"){}
-
-    const char * Name() { return name_; }
-
-private:
-    const char* name_;
+struct B {
+    virtual ~B() {
+        std::print("B Destructor!\n");
+    }
 };
 
-constexpr const char * _name_ = "NONE";
+struct A : public B {
+    ~A() override {
+        std::print("A Destructor!\n");
+    }
+};
 
-constexpr const char* GetName() { return "NONE"; }
-
-constexpr const char _other_[32] = "NONE";
-
-constexpr const char _other_2_[32] = "NONE";
+std::unique_ptr<B> Create() {
+    return std::unique_ptr<B>(new A);
+}
 
 int main(int argc, char* argv[])
 {
-    
-
-    std::vector<uint32_t> v(5);
-
-    std::vector<uint32_t>* ptr = &v;
-
-    const std::vector<uint32_t> & crf = v;
-
-    const std::vector<uint32_t*> cvptr;
-
-    for (uint32_t * const& p : cvptr) {
-        
-    }
-
-    for (const uint32_t & c : crf) {
-        
-    }
-
-    return 0;
+    std::print("Init Main\n");
+    std::unique_ptr<B> b = Create();
 }
 
