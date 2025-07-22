@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WEngineObjects/WObject.hpp"
+#include "WEngineObjects/WLevelObject.hpp"
 
 #include "WActor.WEngine.hpp"
 
@@ -12,20 +12,14 @@ class ILevel;
  * Actors has runtime properties.
 */
 WCLASS()
-class WCORE_API WActor : public WObject
+class WCORE_API WActor : public WLevelObject
 {
 
     WOBJECT_BODY(WActor)
 
 public:
 
-    ILevel * Level() const { return level; }
-
-    void Level(ILevel * in_level) { level = in_level; }
-
 private:
-
-    ILevel * level;
 
 };
 

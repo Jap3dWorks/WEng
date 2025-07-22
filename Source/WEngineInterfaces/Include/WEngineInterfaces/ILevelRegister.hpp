@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TFunction.hpp"
+#include "WCore/TOptionalRef.hpp"
 
 #include <memory>
 
@@ -29,6 +30,8 @@ public:
      * Returns current level WId.
      */
     virtual WId Current() const=0;
+
+    virtual TOptionalRef<ILevel> Get(const WId & in_id)=0;
 
     /**
      * Apply in_fn over the current level.

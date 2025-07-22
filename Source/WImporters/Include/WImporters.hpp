@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "IImporter.hpp"
+#include "WEngineInterfaces/IImporter.hpp"
 #include "WCore/TRef.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WAsset.hpp"

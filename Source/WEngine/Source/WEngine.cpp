@@ -1,14 +1,16 @@
 #include "WEngine.hpp"
 
-#include "IImporterRegister.hpp"
-#include "ILevelRegister.hpp"
-#include "ILevel.hpp"
-#include "IRender.hpp"
+#include "WEngineInterfaces/IImporterRegister.hpp"
+#include "WEngineInterfaces/ILevelRegister.hpp"
+#include "WEngineInterfaces/ILevel.hpp"
+#include "WEngineInterfaces/IRender.hpp"
 
 #include "WImporters.hpp"
 #include "WImporterRegister.hpp"
 #include "WRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
+#include "WEngineObjects/WActor.hpp"
+#include "WEngineObjects/WComponent.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -53,14 +55,27 @@ WEngine::~WEngine()
 
 void WEngine::run()
 {
+    TOptionalRef<ILevel> level = level_register_->Get(level_register_->Current());
+        
     // TODO Window out of WRender
     while(!glfwWindowShouldClose(Render()->Window())) {
         glfwPollEvents();
 
-        
+        // Update Components
+        level->ForEachComponent(
+            WComponent::StaticClass(),
+            [&level](WComponent * in_component) {
+                in_component->OnUpdate();
+            });
+
+        // Update Actors
+        level->ForEachActor(
+            WActor::StaticClass(),
+            [&level](WActor * in_actor) {
+                in_actor->OnUpdate();
+            });
 
         // draw
-
         Render()->Draw();
     }
 

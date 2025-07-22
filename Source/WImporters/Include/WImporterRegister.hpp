@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "IImporter.hpp"
-#include "IImporterRegister.hpp"
+#include "WEngineInterfaces/IImporter.hpp"
+#include "WEngineInterfaces/IImporterRegister.hpp"
 #include "WObjectManager/WAssetManagerFacade.hpp"
 #include "WObjectManager/WObjectManager.hpp"
 

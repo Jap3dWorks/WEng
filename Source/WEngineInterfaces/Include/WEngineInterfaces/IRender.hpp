@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "IRenderResources.hpp"
+#include "WEngineInterfaces/IRenderResources.hpp"
 
 #include <vector>
 

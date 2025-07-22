@@ -32,14 +32,27 @@ public:
      */
     virtual TWRef<WActor> GetActor(const WId & in_id) =0;
 
+    /**
+     * @brief Iter over all actors of class in_class and derived classes.
+     * So WActor should iterate over all level actors.
+     */
     virtual void ForEachActor(const WClass * in_class,
                               TFunction<void(WActor*)> in_predicate) const=0;
 
     virtual WId CreateComponent(const WId & in_actor,
                                 const WClass * in_class)=0;
 
+    /**
+     * @brief Get component of class in_class and id in_component_id.
+     */
     virtual TWRef<WComponent> GetComponent(const WClass * in_class,
-                                        const WId & in_component_id)=0;
+                                           const WId & in_component_id)=0;
+
+    // virtual void ForEachComponent(const WId & in_actor_id,
+    //                               TFunction<void(WComponent*)> in_component)=0;
+
+    virtual void ForEachComponent(const WClass * in_component_class,
+                                  TFunction<void(WComponent*)> in_predicate)=0;
 
     /**
      * @brief Call each cycle.

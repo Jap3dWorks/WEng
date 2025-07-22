@@ -2,10 +2,12 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
-#include "ILevel.hpp"
+#include "WEngineInterfaces/ILevel.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WObjectManager/WObjectManager.hpp"
+
+#include <unordered_set>
 
 class WLEVEL_API WLevel : public ILevel {
 public:
@@ -51,6 +53,12 @@ public:
     TWRef<WComponent> GetComponent(const WClass * in_class,
                                 const WId & in_component_id) override;
 
+    // void ForEachComponent(const WId & in_actor_id,
+    //                       TFunction<void(WComponent*)> in_component) override;
+
+    void ForEachComponent(const WClass * in_class,
+                          TFunction<void(WComponent*)> in_predicate) override;
+
     void Update(const WEngineCycleData & in_cycle_data) override;
 
     void Close() override;
@@ -85,6 +93,8 @@ private:
 
     WId CreateActorId(const WClass * in_class);
 
+    void UpdateComponentMetadata(const WClass * in_component_class, const WId& in_Id);
+
     std::string ActorPath(const WClass* in_class) const;
 
     std::string ComponentPath(const WId & in_actor,
@@ -92,11 +102,17 @@ private:
 
     const char * name_;
 
-    WObjectManager object_manager_;
+    WObjectManager actor_manager_;
+
+    WObjectManager component_manager_;
 
     WIdPool actor_id_pool_;
 
+    // Track where the asset is stored
     std::unordered_map<WId, const WClass *> id_actorclass_;
+
+    // Track which components has each actor
+    std::unordered_map<WId, std::unordered_set<const WClass *>> actor_components_;
 
     InitFn init_fn_;
 

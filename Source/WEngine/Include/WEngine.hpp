@@ -3,10 +3,10 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 
-#include "IRender.hpp"
-#include "ILevel.hpp"
-#include "ILevelRegister.hpp"
-#include "IImporterRegister.hpp"
+#include "WEngineInterfaces/IRender.hpp"
+#include "WEngineInterfaces/ILevel.hpp"
+#include "WEngineInterfaces/ILevelRegister.hpp"
+#include "WEngineInterfaces/IImporterRegister.hpp"
 
 #include <memory>
 
@@ -48,12 +48,6 @@ public:
     TRef<WAssetManagerFacade> AssetManager() noexcept;
 
 private:
-
-    // void InitializeObjectManager();
-
-    // void InitializeImporters();
-
-    // void InitializeRender();
 
     std::unique_ptr<IRender> render_;
 

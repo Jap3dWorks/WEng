@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "ILevelRegister.hpp"
+#include "WEngineInterfaces/ILevelRegister.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TFunction.hpp"
 
@@ -18,13 +18,15 @@ public:
 
     WLevelRegister() = default;
 
-    ~WLevelRegister() override = default;
+    virtual ~WLevelRegister() = default;
 
     WId RegisterLevel(std::unique_ptr<ILevel> && in_level) override;
 
     bool LoadLevel(const WId & in_id) override;
 
     WId Current() const override;
+
+    TOptionalRef<ILevel> Get(const WId & in_id) override;
 
     void ApplyCurrent(const TFunction<void(ILevel*)> & fn) const override;
 

@@ -7,7 +7,7 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WCore/TRef.hpp"
-#include "IRender.hpp"
+#include "WEngineInterfaces/IRender.hpp"
 
 #include <cstddef>
 

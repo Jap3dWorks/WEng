@@ -6,6 +6,9 @@
 class WTextureAsset;
 class WStaticMeshAsset;
 
+/**
+ * @brief Interface for classes that manage the lifetime of render resources like geometries or textures.
+ */
 class IRenderResources {
 
 public:
