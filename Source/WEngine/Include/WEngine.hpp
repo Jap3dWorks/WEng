@@ -35,9 +35,13 @@ public:
 
     WEngine & operator=(WEngine && other) = default;
 
+    static WEngine DefaultCreate();
+
     void run();
 
-    static WEngine DefaultCreate();
+    void StartupLevel(const WId & in_id) noexcept;
+
+    void LoadLevel(const WId& in_level);
 
     TRef<IImporterRegister> ImportersRegister() noexcept;
 
@@ -48,6 +52,15 @@ public:
     TRef<WAssetManagerFacade> AssetManager() noexcept;
 
 private:
+
+    struct LevelInfo {
+        WId current_level{0};
+        bool level_loaded{false};
+    } level_info_;
+
+    struct StartupInfo {
+        WId startup_level{0};
+    } startup_info_;
 
     std::unique_ptr<IRender> render_;
 

@@ -12,9 +12,9 @@
 class WLEVEL_API WLevel : public ILevel {
 public:
 
-    using InitFn = TFunction<void(ILevel*)>;
+    using InitFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
     using UpdateFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
-    using CloseFn = TFunction<void(ILevel*)>;
+    using CloseFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
 
     WLevel(const char* in_name);
 
@@ -35,7 +35,13 @@ public:
 
 public:    
 
-    void Init() override;
+    std::unique_ptr<ILevel> Clone() override;
+
+    void Init(const WEngineCycleData & in_cycle_data) override;
+
+    void Update(const WEngineCycleData & in_cycle_data) override;
+
+    void Close(const WEngineCycleData & in_cycle_data) override;
 
     WId CreateActor(const WClass * in_class) override;
 
@@ -58,10 +64,6 @@ public:
 
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) override;
-
-    void Update(const WEngineCycleData & in_cycle_data) override;
-
-    void Close() override;
 
     std::string Name() const override;
 

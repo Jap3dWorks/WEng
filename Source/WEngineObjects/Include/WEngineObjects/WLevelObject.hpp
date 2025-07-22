@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WEngineObjects/WObject.hpp"
+#include "WEngineObjects/WEngineCycleData.hpp"
 
 #include "WLevelObject.WEngine.hpp"
 
@@ -18,7 +19,7 @@ class WCORE_API WLevelObject : public WObject
 
 public:
 
-    virtual void OnUpdate() {}
+    virtual void OnUpdate(const WEngineCycleData & in_cycle_data) {}
 
     virtual void OnInit() {}
 

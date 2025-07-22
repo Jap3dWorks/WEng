@@ -59,31 +59,62 @@ WEngine::~WEngine()
 
 void WEngine::run()
 {
-    TOptionalRef<ILevel> level = level_register_->Get(level_register_->Current());
-        
+    assert(startup_info_.startup_level);
+    
+    std::unique_ptr<ILevel> level = nullptr;
+
+    level_info_.current_level = startup_info_.startup_level;
+    level_info_.level_loaded = false;
+
     // TODO Window out of WRender
     while(!glfwWindowShouldClose(Render()->Window())) {
         glfwPollEvents();
+        
+        WEngineCycleData engine_cycle_data;
 
-        // Update Components
-        level->ForEachComponent(
-            WComponent::StaticClass(),
-            [&level](WComponent * in_component) {
-                in_component->OnUpdate();
-            });
+        if (!level_info_.level_loaded) {
+            // TODO: get a copy of the level.
+            level = level_register_->Get(level_info_.current_level)->Clone();
+            
+            level->Init(engine_cycle_data);
+            level_info_.level_loaded = true;
+        }
+        else {
+            // Update Components
+            level->ForEachComponent(
+                WComponent::StaticClass(),
+                [&level,
+                 &engine_cycle_data](WComponent * in_component) {
+                    in_component->OnUpdate(
+                        engine_cycle_data
+                        );
+                });
 
-        // Update Actors
-        level->ForEachActor(
-            WActor::StaticClass(),
-            [&level](WActor * in_actor) {
-                in_actor->OnUpdate();
-            });
+            // Update Actors
+            level->ForEachActor(
+                WActor::StaticClass(),
+                [&level,
+                 &engine_cycle_data](WActor * in_actor) {
+                    in_actor->OnUpdate(
+                        engine_cycle_data
+                        );
+                });
 
-        // draw
-        Render()->Draw();
+            // draw
+            Render()->Draw();
+            
+        }
     }
 
     Render()->WaitIdle();
+}
+
+void WEngine::LoadLevel(const WId & in_level) {
+    
+}
+
+void WEngine::StartupLevel(const WId& in_id) noexcept {
+    startup_info_.startup_level = in_id;
 }
 
 TRef<IImporterRegister> WEngine::ImportersRegister() noexcept

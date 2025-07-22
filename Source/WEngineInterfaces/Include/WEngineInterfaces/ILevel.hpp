@@ -5,6 +5,8 @@
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WEngineCycleData.hpp"
 
+#include <memory>
+
 // TODO Serializable
 
 class WClass;
@@ -17,10 +19,23 @@ public:
 
     virtual ~ILevel()=default;
 
+    virtual std::unique_ptr<ILevel> Clone()=0;
+
     /**
      * @brief Call this method before Level starts.
      */
-    virtual void Init()=0;
+    virtual void Init(const WEngineCycleData & in_cycle_data)=0;
+
+    /**
+     * @brief Call each cycle.
+     */
+    virtual void Update(const WEngineCycleData & in_cycle_data)=0;
+
+    /**
+     * @breif Close the resources in Use.
+     * This is method should be called just before the level use ends.
+     */
+    virtual void Close(const WEngineCycleData & in_cycle_data)=0;
 
     /**
      * @brief Create WActor derived objects.
@@ -53,17 +68,6 @@ public:
 
     virtual void ForEachComponent(const WClass * in_component_class,
                                   TFunction<void(WComponent*)> in_predicate)=0;
-
-    /**
-     * @brief Call each cycle.
-     */
-    virtual void Update(const WEngineCycleData & in_cycle_data)=0;
-
-    /**
-     * @breif Close the resources in Use.
-     * This is method should be called just before the level use ends.
-     */
-    virtual void Close()=0;
 
     virtual std::string Name() const=0;
 

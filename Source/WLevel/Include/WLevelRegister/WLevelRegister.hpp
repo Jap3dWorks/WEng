@@ -22,15 +22,7 @@ public:
 
     WId RegisterLevel(std::unique_ptr<ILevel> && in_level) override;
 
-    bool LoadLevel(const WId & in_id) override;
-
-    WId Current() const override;
-
     TOptionalRef<ILevel> Get(const WId & in_id) override;
-
-    void ApplyCurrent(const TFunction<void(ILevel*)> & fn) const override;
-
-    void Apply(const WId & in_id, const TFunction<void(ILevel*)> & fn) const override;
 
 private:
     

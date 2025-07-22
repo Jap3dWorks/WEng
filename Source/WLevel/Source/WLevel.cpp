@@ -63,8 +63,20 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-void WLevel::Init() {
-    init_fn_(this);
+std::unique_ptr<ILevel> WLevel::Clone() {
+    
+}
+
+void WLevel::Init(const WEngineCycleData & in_cycle_data) {
+    init_fn_(this, in_cycle_data);
+}
+
+void WLevel::Update(const WEngineCycleData & in_cycle_data) {
+    update_fn_(this, in_cycle_data);
+}
+
+void WLevel::Close(const WEngineCycleData & in_cycle_data) {
+    close_fn_(this, in_cycle_data);
 }
 
 WId WLevel::CreateActor(const WClass * in_class) {
@@ -153,14 +165,6 @@ void WLevel::ForEachComponent(const WClass * in_class,
                                         });
         }
     }
-}
-
-void WLevel::Update(const WEngineCycleData & in_cycle_data) {
-    update_fn_(this, in_cycle_data);
-}
-
-void WLevel::Close() {
-    close_fn_(this);
 }
 
 std::string WLevel::Name() const {
