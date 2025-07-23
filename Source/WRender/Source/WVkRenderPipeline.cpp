@@ -332,7 +332,7 @@ void WVkRenderPipelinesManager::InitializeClearLambdas() {
     WVulkan::Create(descriptor_pool_info_, device_info_);
 
     // Destroy UBOs lambda
-    bindings_.SetClearFn([di_=device_info_](auto & b) {
+    bindings_.SetDestroyFn([di_=device_info_](auto & b) {
         WLOG("[PipelineManager] Destroy binding UBOs");
         for(auto& ubo: b.ubo) {
             vkDestroyBuffer(di_.vk_device,
@@ -345,7 +345,7 @@ void WVkRenderPipelinesManager::InitializeClearLambdas() {
         }
     });
 
-    pipelines_.SetClearFn([di_=device_info_](auto & p) {
+    pipelines_.SetDestroyFn([di_=device_info_](auto & p) {
         WLOG("[PipelineManager] Destory Render Pipelines");
         WVulkan::Destroy(
             p,
@@ -353,7 +353,7 @@ void WVkRenderPipelinesManager::InitializeClearLambdas() {
             );
     });
 
-    descriptor_set_layouts_.SetClearFn([di_=device_info_](auto & d) {
+    descriptor_set_layouts_.SetDestroyFn([di_=device_info_](auto & d) {
         WLOG("[PipelineManager] Destroy descriptor Set layouts");
         WVulkan::Destroy(
             d,

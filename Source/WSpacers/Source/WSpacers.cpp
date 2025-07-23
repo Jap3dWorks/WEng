@@ -8,7 +8,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
-#include "WObjectManager/WAssetManagerFacade.hpp"
+#include "WObjectManager/WAssetManager.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -71,11 +71,12 @@ WModelStruct MeshPlane()
 
 bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTextureAsset *& out_texture_asset)
 {
-    TOptionalRef<WImportObj> obj_importer =
+    WImportObj obj_importer =
         engine.ImportersRegister()->GetImporter<WImportObj>();
 
     std::vector<WId> geo_ids =
-        obj_importer->Import(
+        obj_importer.Import(
+            engine.AssetManager().Get(),
             "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/viking_room.viking_room"
             );
@@ -94,10 +95,11 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    TOptionalRef<WImportTexture> texture_importer =
+    WImportTexture texture_importer =
         engine.ImportersRegister()->GetImporter<WImportTexture>();
 
-    std::vector<WId> tex_ids = texture_importer->Import(
+    std::vector<WId> tex_ids = texture_importer.Import(
+        engine.AssetManager().Get(),
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
     );

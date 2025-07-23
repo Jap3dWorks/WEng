@@ -1,10 +1,9 @@
 #include "WImporters.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
-#include "WObjectManager/WObjectManager.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WTextureStructs.hpp"
-#include "WObjectManager/WAssetManagerFacade.hpp"
+#include "WObjectManager/WAssetManager.hpp"
 #include "WCore/WStringUtils.hpp"
 
 #include <string>
@@ -21,8 +20,7 @@
 // WImporter
 // ---------
 
-WImporter::WImporter(WAssetManagerFacade & in_object_manager) noexcept :
-    asset_manager_(in_object_manager) {}
+WImporter::WImporter() noexcept {}
 
 WImporter::WImporter(const WImporter & other) noexcept :
     asset_manager_(other.asset_manager_) {}
@@ -48,23 +46,15 @@ WImporter & WImporter::operator=(WImporter && other) noexcept
     return *this;
 }
 
-WAssetManagerFacade & WImporter::AssetManager()
-{
-    return asset_manager_.Get();
-}
-
 // WImportObj
 // -----------
 
-WImportObj::WImportObj(WAssetManagerFacade & in_object_manager) noexcept :
-    WImporter(in_object_manager) {}
+WImportObj::WImportObj() noexcept {}
 
-std::unique_ptr<IImporter> WImportObj::Clone() const
-{
-    return std::make_unique<WImportObj>(*this);
-}
-
-std::vector<WId> WImportObj::Import(const char* file_path, const char* asset_directory)
+std::vector<WId> WImportObj::Import(
+    WAssetManager & in_asset_manager,
+    const char* file_path,
+    const char* asset_directory)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -131,13 +121,13 @@ std::vector<WId> WImportObj::Import(const char* file_path, const char* asset_dir
     std::vector<WId> result(shapes.size());
 
     for (uint32_t i=0; i < meshes.size(); i++) {
-        WId id = AssetManager().Create(
+        WId id = in_asset_manager.Create(
             WStaticMeshAsset::StaticClass(),
             "StaticMesh"
             );
 
         TWRef<WStaticMeshAsset> static_mesh =
-            static_cast<WStaticMeshAsset*>(AssetManager().Get(id).Ptr());
+            static_cast<WStaticMeshAsset*>(in_asset_manager.Get(id).Ptr());
 
         static_mesh->SetMesh(std::move(meshes[i]));
 
@@ -150,15 +140,12 @@ std::vector<WId> WImportObj::Import(const char* file_path, const char* asset_dir
 // WImportTexture
 // --------------
 
-WImportTexture::WImportTexture(WAssetManagerFacade & in_asset_manager) noexcept :
-    WImporter(in_asset_manager) {}
+WImportTexture::WImportTexture() noexcept {}
 
-std::unique_ptr<IImporter> WImportTexture::Clone() const
-{
-    return std::make_unique<WImportTexture>(*this);
-}
-
-std::vector<WId> WImportTexture::Import(const char* file_path, const char* asset_directory)
+std::vector<WId> WImportTexture::Import(
+    WAssetManager & in_asset_manager,
+    const char* file_path,
+    const char* asset_directory)
 {
     int width, height, num_channels;
     stbi_uc * Pixels = stbi_load(
@@ -208,11 +195,11 @@ std::vector<WId> WImportTexture::Import(const char* file_path, const char* asset
 
     stbi_image_free(Pixels);
 
-    WId id = AssetManager().Create<WTextureAsset>(
+    WId id = in_asset_manager.Create<WTextureAsset>(
         WStringUtils::AssetPath(asset_directory, file_path, "texture").c_str()
         );
 
-    static_cast<WTextureAsset*>(AssetManager().Get(id).Ptr())->
+    static_cast<WTextureAsset*>(in_asset_manager.Get(id).Ptr())->
         SetTexture(std::move(texture_struct));
 
     return { id };

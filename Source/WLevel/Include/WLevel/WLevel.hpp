@@ -25,17 +25,17 @@ public:
     
     virtual ~WLevel() = default;
 
-    WLevel(const WLevel& other) = delete;
+    WLevel(const WLevel& other);
 
     WLevel(WLevel && other);
 
-    WLevel & operator=(const WLevel& other) = delete;
+    WLevel & operator=(const WLevel& other);
 
     WLevel & operator=(WLevel && other);
 
 public:    
 
-    std::unique_ptr<ILevel> Clone() override;
+    std::unique_ptr<ILevel> Clone() const override;
 
     void Init(const WEngineCycleData & in_cycle_data) override;
 
@@ -66,6 +66,10 @@ public:
                           TFunction<void(WComponent*)> in_predicate) override;
 
     std::string Name() const override;
+
+    WId WID() const override;
+
+    void WID(const WId & in_id) override;
 
     void SetInitFn(const InitFn & in_fn) {
         init_fn_ = in_fn;
@@ -104,6 +108,7 @@ private:
 
     const char * name_;
 
+    // TODO: Actor(Component)Manager;
     WObjectManager actor_manager_;
 
     WObjectManager component_manager_;
@@ -121,5 +126,7 @@ private:
     UpdateFn update_fn_;
 
     CloseFn close_fn_;
+
+    WId wid_;
 
 };

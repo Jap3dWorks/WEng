@@ -94,3 +94,22 @@
 #else
     #define WENGINE_API
 #endif
+
+// WLevel
+// ------
+
+#if defined(_WIN32)
+    #ifdef WLEVEL_EXPORTS
+        #define WLEVEL_API __declspec(dllexport)
+    #else
+        #define WLEVEL_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WLEVEL_EXPORTS
+        #define WLEVEL_API __attribute__((visibility("default")))
+    #else
+        #define WLEVEL_API
+    #endif
+#else
+    #define WLEVEL_API
+#endif

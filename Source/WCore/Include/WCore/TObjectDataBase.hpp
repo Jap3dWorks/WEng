@@ -95,7 +95,7 @@ public:
 
     TObjectDataBase(const TObjectDataBase & other) :
         create_fn_(other.create_fn_),
-        destroy_fn_(other.crear_fn_),
+        destroy_fn_(other.destroy_fn_),
         id_pool_(other.id_pool_),
         objects_(other.objects_) {}
 
@@ -130,7 +130,7 @@ public:
         return *this;
     }
 
-    virtual std::unique_ptr<Super> Clone() const {
+    virtual std::unique_ptr<Super> Clone() const override {
         return std::make_unique<Type>(*this);
     }
 

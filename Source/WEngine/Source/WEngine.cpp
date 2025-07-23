@@ -1,6 +1,5 @@
 #include "WEngine.hpp"
 
-#include "WEngineInterfaces/IImporterRegister.hpp"
 #include "WEngineInterfaces/ILevelRegister.hpp"
 #include "WEngineInterfaces/ILevel.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -9,7 +8,7 @@
 #include "WImporterRegister.hpp"
 #include "WRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
-#include "WObjectManager/WAssetManagerFacade.hpp"
+#include "WObjectManager/WAssetManager.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
@@ -21,40 +20,24 @@
 
 WEngine WEngine::DefaultCreate()
 {
-    
-    std::unique_ptr<WAssetManagerFacade> asset_manager =
-        std::make_unique<WAssetManagerFacade>();
+    WEngine result(std::make_unique<WRender>());
 
-    std::unique_ptr<IImporterRegister> importer_reg =
-        std::make_unique<WImporterRegister>();
+    result.ImportersRegister()->Register<WImportObj>();
+    result.ImportersRegister()->Register<WImportTexture>();
 
-    importer_reg->Register(std::make_unique<WImportObj>(*asset_manager.get()));
-    importer_reg->Register(std::make_unique<WImportTexture>(*asset_manager.get()));
-
-    return WEngine(
-        std::make_unique<WRender>(),
-        std::move(importer_reg),
-        std::make_unique<WLevelRegister>(),
-        std::move(asset_manager)
-        );
+    return result;
 }
 
-WEngine::WEngine(std::unique_ptr<IRender> && in_render,
-                 std::unique_ptr<IImporterRegister> && in_importers_register,
-                 std::unique_ptr<ILevelRegister> && in_level_register,
-                 std::unique_ptr<WAssetManagerFacade> && in_asset_manager) :
+WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
     render_(std::move(in_render)),
-    importers_register_(std::move(in_importers_register)),
-    level_register_(std::move(in_level_register)),
-    asset_manager_(std::move(in_asset_manager))
+    importers_register_(),
+    level_register_(),
+    asset_manager_()
 {}
 
 WEngine::~WEngine()
 {
     render_ = nullptr;
-    importers_register_ = nullptr;
-    level_register_ = nullptr;
-    asset_manager_ = nullptr;
 }
 
 void WEngine::run()
@@ -73,8 +56,10 @@ void WEngine::run()
         WEngineCycleData engine_cycle_data;
 
         if (!level_info_.level_loaded) {
-            // TODO: get a copy of the level.
-            level = level_register_->Get(level_info_.current_level)->Clone();
+
+            level = level_register_.Get(
+                level_info_.current_level
+                )->Clone();
             
             level->Init(engine_cycle_data);
             level_info_.level_loaded = true;
@@ -102,7 +87,6 @@ void WEngine::run()
 
             // draw
             Render()->Draw();
-            
         }
     }
 
@@ -117,9 +101,9 @@ void WEngine::StartupLevel(const WId& in_id) noexcept {
     startup_info_.startup_level = in_id;
 }
 
-TRef<IImporterRegister> WEngine::ImportersRegister() noexcept
+TRef<WImporterRegister> WEngine::ImportersRegister() noexcept
 {
-    return importers_register_.get();
+    return importers_register_;
 }
 
 TRef<IRender> WEngine::Render() noexcept
@@ -131,7 +115,7 @@ TRef<ILevel> WEngine::CurrentLevel() noexcept {
     return nullptr;
 }
 
-TRef<WAssetManagerFacade> WEngine::AssetManager() noexcept {
-    return asset_manager_.get();
+TRef<WAssetManager> WEngine::AssetManager() noexcept {
+    return asset_manager_;
 }
 

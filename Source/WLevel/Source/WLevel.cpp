@@ -3,6 +3,7 @@
 #include "WEngineObjects/WComponent.hpp"
 
 #include <format>
+#include <memory>
 
 WLevel::WLevel(const char * in_name) :
     name_(in_name),
@@ -11,9 +12,9 @@ WLevel::WLevel(const char * in_name) :
     actor_id_pool_(),
     id_actorclass_(),
     actor_components_(),
-    init_fn_([](ILevel*){}),
+    init_fn_([](ILevel*, const WEngineCycleData &){}),
     update_fn_([](ILevel*, const WEngineCycleData &){}),
-    close_fn_([](ILevel*){})
+    close_fn_([](ILevel*, const WEngineCycleData &){})
 {}
 
 WLevel::WLevel(const char * in_name,
@@ -31,6 +32,18 @@ WLevel::WLevel(const char * in_name,
     close_fn_(in_close_fn)
 {}
 
+WLevel::WLevel(const WLevel& other) :
+    name_(other.name_),
+    actor_manager_(other.actor_manager_),
+    component_manager_(other.component_manager_),
+    actor_id_pool_(other.actor_id_pool_),
+    id_actorclass_(other.id_actorclass_),
+    actor_components_(other.actor_components_),
+    init_fn_(other.init_fn_),
+    update_fn_(other.update_fn_),
+    close_fn_(other.close_fn_)
+{}
+
 WLevel::WLevel(WLevel && other) :
     name_(std::move(other.name_)),
     actor_manager_(std::move(other.actor_manager_)),
@@ -43,6 +56,21 @@ WLevel::WLevel(WLevel && other) :
     close_fn_(std::move(other.close_fn_))
 {
     other.name_=nullptr;
+}
+
+WLevel & WLevel::operator=(const WLevel& other) {
+    if (this != &other) {
+        name_ = other.name_;
+        actor_manager_ = other.actor_manager_;
+        component_manager_ = other.component_manager_;
+        actor_id_pool_ = other.actor_id_pool_;
+        id_actorclass_ = other.id_actorclass_;
+        actor_components_ = other.actor_components_;
+        init_fn_ = other.init_fn_;
+        update_fn_ = other.update_fn_;
+        close_fn_ = other.close_fn_;
+    }
+    return *this;
 }
 
 WLevel & WLevel::operator=(WLevel && other) {
@@ -63,8 +91,8 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-std::unique_ptr<ILevel> WLevel::Clone() {
-    
+std::unique_ptr<ILevel> WLevel::Clone() const {
+    return std::make_unique<WLevel>(*this);
 }
 
 void WLevel::Init(const WEngineCycleData & in_cycle_data) {
@@ -206,4 +234,12 @@ void WLevel::UpdateComponentMetadata(const WClass * in_component_class, const WI
     }
     
     actor_components_[in_id].insert(in_component_class);
+}
+
+WId WLevel::WID() const {
+    return wid_;
+}
+
+void WLevel::WID(const WId & in_id) {
+    wid_ = in_id;
 }

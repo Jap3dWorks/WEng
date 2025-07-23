@@ -14,7 +14,7 @@
 // class IRenderResources;
 
 /**
- * @brief Render related top class. Highest level abstraction.
+ * @brief Default Rendere class
 */
 class WRENDER_API WRender : public IRender
 {
@@ -42,7 +42,6 @@ public:
         ) override ;
 
     void Clear() override;
-
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {

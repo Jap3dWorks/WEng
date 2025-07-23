@@ -20,7 +20,7 @@
  * @brief This class is a container for all WObjectContainer.
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
-*/
+ */
 class WENGINEOBJECTS_API WObjectManager {
 
 public:
@@ -45,11 +45,7 @@ public:
     WObjectManager(const WObjectManager& other) :
     containers_(),
     initial_memory_size_(other.initial_memory_size_) {
-        for (auto & p : other.containers_) {
-            containers_.insert(
-                { p.first, p.second->Clone() }
-                );
-        }
+        CopyContainersFrom(other);
     }
     
     constexpr WObjectManager(WObjectManager && other) noexcept :
@@ -60,11 +56,7 @@ public:
     constexpr WObjectManager & operator=(const WObjectManager& other) {
         if (this != &other) {
             initial_memory_size_ = other.initial_memory_size_;
-            for (auto & p : other.containers_) {
-                containers_.insert(
-                    {p.first, p.second->Clone()}
-                    );
-            }
+            CopyContainersFrom(other);
         }
 
         return *this;
@@ -167,6 +159,15 @@ public:
     WNODISCARD size_t Count(const WClass * in_class) const;
 
 private:
+
+    void CopyContainersFrom(const WObjectManager & other) {
+        containers_.clear();
+        for (auto & p : other.containers_) {
+            containers_.insert(
+                {p.first, p.second->Clone()}
+                );
+        }
+    }
 
     void EnsureClassStorage(const WClass * in_class);
 

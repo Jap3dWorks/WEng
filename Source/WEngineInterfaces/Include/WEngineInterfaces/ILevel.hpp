@@ -19,7 +19,7 @@ public:
 
     virtual ~ILevel()=default;
 
-    virtual std::unique_ptr<ILevel> Clone()=0;
+    virtual std::unique_ptr<ILevel> Clone() const =0;
 
     /**
      * @brief Call this method before Level starts.
@@ -71,7 +71,7 @@ public:
 
     virtual std::string Name() const=0;
 
-    virtual WId WID()=0;
+    virtual WId WID() const=0;
 
     virtual void WID(const WId & in_id)=0;
 };
