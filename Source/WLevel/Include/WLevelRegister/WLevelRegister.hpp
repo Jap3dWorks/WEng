@@ -28,7 +28,7 @@ public:
 
     WLevelRegister& operator=(WLevelRegister && other);
 
-    WId RegisterLevel(std::unique_ptr<WLevel> && in_level);
+    WLevel & Create();    
 
     TOptionalRef<WLevel> Get(const WId & in_id);
 
@@ -39,8 +39,6 @@ private:
     WId current_;
 
     TObjectDataBase<WLevel> levels_;
-
-    // std::unordered_map<WId, std::unique_ptr<ILevel>> levels_;
 
 };
 

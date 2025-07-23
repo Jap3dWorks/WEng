@@ -1,16 +1,17 @@
 #include "WLevelRegister/WLevelRegister.hpp"
-#include "WEngineInterfaces/ILevel.hpp"
+#include "WLevel/WLevel.hpp"
 
 #include <cassert>
 
+WLevelRegister::WLevelRegister() :
+    levels_([](const WId& id){ WLevel lvl("WLevel"); lvl.WID(id); return lvl;},
+            [](WLevel&){}),
+    current_() {}
+
+
 WLevelRegister::WLevelRegister(const WLevelRegister & other) :
-    levels_(),
-    id_pool_(other.id_pool_),
-    current_(other.current_) {
-    for (auto & p : other.levels_) {
-        levels_[p.first] = p.second->Clone();
-    }
-}
+    levels_(other.levels_),
+    current_(other.current_) {}
 
 WLevelRegister::WLevelRegister(WLevelRegister && other) :
     levels_(std::move(other.levels_)),
@@ -20,14 +21,10 @@ WLevelRegister::WLevelRegister(WLevelRegister && other) :
 
 WLevelRegister& WLevelRegister::operator=(const WLevelRegister & other) {
     if (this != &other) {
-        levels_.clear();
-
+        levels_.Clear();
+        levels_ = other.levels_;
         id_pool_ = other.id_pool_;
         current_ = other.current_;
-
-        for (auto & p : other.levels_) {
-            levels_[p.first] = p.second->Clone();
-        }
     }
 
     return *this;
@@ -35,7 +32,7 @@ WLevelRegister& WLevelRegister::operator=(const WLevelRegister & other) {
 
 WLevelRegister& WLevelRegister::operator=(WLevelRegister && other){
     if (this != &other) {
-        levels_.clear();
+        levels_.Clear();
         
         levels_ = std::move(other.levels_);
         id_pool_ = std::move(other.id_pool_);
@@ -45,18 +42,14 @@ WLevelRegister& WLevelRegister::operator=(WLevelRegister && other){
     return *this;
 }
 
-WId WLevelRegister::RegisterLevel(std::unique_ptr<ILevel> && in_level) {
-    WId id = id_pool_.Generate();
-    levels_[id] = std::move(in_level);
-
-    levels_[id]->WID(id);
-
-    return id;
+WLevel & WLevelRegister::Create() {
+    WId id =  levels_.Create();
+    return levels_.Get(id);
 }
 
-TOptionalRef<ILevel> WLevelRegister::Get(const WId & in_id) {
+TOptionalRef<WLevel> WLevelRegister::Get(const WId & in_id) {
     assert(levels_.contains(in_id));
-    return levels_.at(in_id).get();
+    return levels_.Get(in_id);
 }
 
 

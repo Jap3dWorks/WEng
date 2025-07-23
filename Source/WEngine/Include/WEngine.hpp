@@ -41,7 +41,7 @@ public:
 
     TRef<IRender> Render() noexcept;
 
-    TRef<ILevel> CurrentLevel() noexcept;
+    TRef<WLevel> CurrentLevel() noexcept;
 
     TRef<WAssetManager> AssetManager() noexcept;
 

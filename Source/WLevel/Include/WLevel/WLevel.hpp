@@ -2,19 +2,19 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
-#include "WEngineInterfaces/ILevel.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/TWRef.hpp"
+#include "WEngineObjects/WComponent.hpp"
 #include "WObjectManager/WObjectManager.hpp"
 
 #include <unordered_set>
 
-class WLEVEL_API WLevel : public ILevel {
+class WLEVEL_API WLevel {
 public:
 
-    using InitFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
-    using UpdateFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
-    using CloseFn = TFunction<void(ILevel*, const WEngineCycleData&)>;
+    using InitFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
+    using UpdateFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
+    using CloseFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
 
     WLevel(const char* in_name);
 
@@ -35,41 +35,41 @@ public:
 
 public:    
 
-    std::unique_ptr<ILevel> Clone() const override;
+    // std::unique_ptr<ILevel> Clone() const ;
 
-    void Init(const WEngineCycleData & in_cycle_data) override;
+    void Init(const WEngineCycleData & in_cycle_data) ;
 
-    void Update(const WEngineCycleData & in_cycle_data) override;
+    void Update(const WEngineCycleData & in_cycle_data) ;
 
-    void Close(const WEngineCycleData & in_cycle_data) override;
+    void Close(const WEngineCycleData & in_cycle_data) ;
 
-    WId CreateActor(const WClass * in_class) override;
+    WId CreateActor(const WClass * in_class) ;
 
-    TWRef<WActor> GetActor(const WId & in_id) override;
+    TWRef<WActor> GetActor(const WId & in_id) ;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
      */
     void ForEachActor(const WClass * in_class,
-                      TFunction<void(WActor*)> in_predicate) const override;
+                      TFunction<void(WActor*)> in_predicate) const ;
 
     WId CreateComponent(const WId & in_actor_id,
-                        const WClass * in_class) override;
+                        const WClass * in_class) ;
 
     TWRef<WComponent> GetComponent(const WClass * in_class,
-                                const WId & in_component_id) override;
+                                const WId & in_component_id) ;
 
     // void ForEachComponent(const WId & in_actor_id,
     //                       TFunction<void(WComponent*)> in_component) override;
 
     void ForEachComponent(const WClass * in_class,
-                          TFunction<void(WComponent*)> in_predicate) override;
+                          TFunction<void(WComponent*)> in_predicate) ;
 
-    std::string Name() const override;
+    std::string Name() const ;
 
-    WId WID() const override;
+    WId WID() const ;
 
-    void WID(const WId & in_id) override;
+    void WID(const WId & in_id) ;
 
     void SetInitFn(const InitFn & in_fn) {
         init_fn_ = in_fn;

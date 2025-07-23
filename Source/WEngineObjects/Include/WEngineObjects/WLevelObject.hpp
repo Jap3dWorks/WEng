@@ -6,7 +6,7 @@
 #include "WLevelObject.WEngine.hpp"
 
 
-class ILevel;
+class WLevel;
 
 /**
  * @brief Base class for objects that can be present in a level (WActors and WComponents).
@@ -25,13 +25,13 @@ public:
 
     virtual void OnClose() {}
 
-    ILevel * Level() const { return level; }
+    WLevel * Level() const { return level; }
 
-    void Level(ILevel * in_level) { level = in_level; }
+    void Level(WLevel * in_level) { level = in_level; }
 
 private:
 
-    ILevel * level;
+    WLevel * level;
 
 };
 

@@ -91,9 +91,9 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-std::unique_ptr<ILevel> WLevel::Clone() const {
-    return std::make_unique<WLevel>(*this);
-}
+// std::unique_ptr<ILevel> WLevel::Clone() const {
+//     return std::make_unique<WLevel>(*this);
+// }
 
 void WLevel::Init(const WEngineCycleData & in_cycle_data) {
     init_fn_(this, in_cycle_data);
