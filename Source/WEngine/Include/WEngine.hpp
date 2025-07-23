@@ -4,7 +4,6 @@
 #include "WCore/TRef.hpp"
 
 #include "WEngineInterfaces/IRender.hpp"
-#include "WEngineInterfaces/ILevel.hpp"
 #include "WImporterRegister.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectManager/WAssetManager.hpp"
@@ -12,9 +11,6 @@
 #include <memory>
 
 class WObjectManager;
-// class WImporterRegister;
-class WImporter;
-class WAssetManager;
 
 class WENGINE_API WEngine
 {
@@ -67,12 +63,6 @@ private:
     WLevelRegister level_register_;
 
     WAssetManager asset_manager_;
-    
-    // std::unique_ptr<IImporterRegister> importers_register_;
-
-    // std::unique_ptr<ILevelRegister> level_register_;
-
-    // std::unique_ptr<WAssetManager> asset_manager_;
 
     bool close{false};
 

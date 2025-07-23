@@ -1,28 +1,36 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WEngineInterfaces/ILevelRegister.hpp"
+#include "WCore/TOptionalRef.hpp"
 #include "WCore/WIdPool.hpp"
-#include "WCore/TFunction.hpp"
+#include "WCore/TObjectDataBase.hpp"
 
-#include <unordered_map>
+
 #include <memory>
 
-class ILevel;
+class WLevel;
 
 /**
  * @brief Register Open and Close Levels.
  */
-class WLEVEL_API WLevelRegister: public ILevelRegister {
+class WLEVEL_API WLevelRegister {
 public:
 
-    WLevelRegister() = default;
+    WLevelRegister();
 
     virtual ~WLevelRegister() = default;
 
-    WId RegisterLevel(std::unique_ptr<ILevel> && in_level) override;
+    WLevelRegister(const WLevelRegister & other);
 
-    TOptionalRef<ILevel> Get(const WId & in_id) override;
+    WLevelRegister(WLevelRegister && other);
+
+    WLevelRegister& operator=(const WLevelRegister & other);
+
+    WLevelRegister& operator=(WLevelRegister && other);
+
+    WId RegisterLevel(std::unique_ptr<WLevel> && in_level);
+
+    TOptionalRef<WLevel> Get(const WId & in_id);
 
 private:
     
@@ -30,7 +38,9 @@ private:
 
     WId current_;
 
-    std::unordered_map<WId, std::unique_ptr<ILevel>> levels_;
+    TObjectDataBase<WLevel> levels_;
+
+    // std::unordered_map<WId, std::unique_ptr<ILevel>> levels_;
 
 };
 

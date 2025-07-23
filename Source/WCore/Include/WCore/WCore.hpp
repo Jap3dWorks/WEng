@@ -4,7 +4,6 @@
 #include "WCore/WCoreMacros.hpp"
 
 #include <cstring>
-#include <string>
 #include <functional>
 #include <string_view>
 #include <cstdint>
