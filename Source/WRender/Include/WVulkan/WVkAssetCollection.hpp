@@ -25,9 +25,7 @@ public:
         TFunction<void(D&)> in_clear_fn) :
     data_(in_create_fn, in_clear_fn) {}
 
-    virtual ~WVkAssetCollection() {
-        Clear();
-    }
+    virtual ~WVkAssetCollection() { Clear(); }
 
     WVkAssetCollection(const WVkAssetCollection & other) :
     assets_(other.assets_),
@@ -40,7 +38,6 @@ public:
     {}
 
     WVkAssetCollection & operator=(const WVkAssetCollection & other) {
-
         if (this != &other) {
             assets_ = other.assets_;
             data_ = other.data_;            
@@ -115,11 +112,13 @@ public:
 protected:
 
     virtual D LoadAssetImpl(const A & in_asset) {return {};}
+    
     virtual void UnloadAssetImpl(D & in_data) {}
 
 private:
 
-    std::unordered_map<WId, TRef<A>> assets_;    
+    std::unordered_map<WId, TRef<A>> assets_;
+    
     TObjectDataBase<D, void> data_;
 
 };

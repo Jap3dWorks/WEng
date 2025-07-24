@@ -60,6 +60,7 @@ public:
 private:
 
     WVkAssetCollection<WVkTextureInfo, WTextureAsset> texture_collection_;
+
     WVkAssetCollection<WVkMeshInfo, WStaticMeshAsset> static_mesh_collection_;
 
 };

@@ -54,6 +54,13 @@ public:
         return *this;
     }
 
+    template<std::derived_from<WAsset> T>
+    void ForEach(TFunction<void(T*)> in_predicate) const {
+        object_manager_.ForEach<T>([&in_predicate](WObject* in_object) {
+            in_predicate(static_cast<T*>(in_object));
+        });
+    }
+
     template<std::derived_from<WObject> T>
     WId Create(const char * in_fullname) {
         return Create(T::StaticClass(), in_fullname);
