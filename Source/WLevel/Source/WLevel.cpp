@@ -3,7 +3,6 @@
 #include "WEngineObjects/WComponent.hpp"
 
 #include <format>
-#include <memory>
 
 WLevel::WLevel() :
     name_("InvalidLevel"),
@@ -102,11 +101,12 @@ WId WLevel::CreateActor(const WClass * in_class) {
     return id;
 }
 
-TWRef<WActor> WLevel::GetActor(const WId & in_id) {
+TWRef<WActor> WLevel::GetActor(const WId & in_id) const {
     return actor_component_db_.GetActor(in_id);
 }
 
-void WLevel::ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) const {
+void WLevel::ForEachActor(const WClass * in_class,
+                          TFunction<void(WActor*)> in_predicate) const {
     actor_component_db_.ForEachActor(in_class, in_predicate);
 }
 
@@ -123,17 +123,25 @@ WId WLevel::CreateComponent(const WId & in_actor_id,
 }
 
 TWRef<WComponent> WLevel::GetComponent(const WClass * in_class,
-                                       const WId & in_component_id) {
+                                       const WId & in_component_id) const {
     return actor_component_db_.GetComponent(in_class, in_component_id);
 }
 
 void WLevel::ForEachComponent(const WClass * in_class,
-                              TFunction<void(WComponent*)> in_predicate) {
+                              TFunction<void(WComponent*)> in_predicate) const {
     actor_component_db_.ForEachComponent(in_class, in_predicate);
 }
 
 std::string WLevel::Name() const {
     return name_;
+}
+
+WId WLevel::WID() const {
+    return wid_;
+}
+
+void WLevel::WID(const WId & in_id) {
+    wid_ = in_id;
 }
 
 std::string WLevel::ActorPath(const WClass * in_class) const {
@@ -153,10 +161,3 @@ std::string WLevel::ComponentPath(const WId & in_actor_id,
     return actor->Name() + ":" + in_class->Name();
 }
 
-WId WLevel::WID() const {
-    return wid_;
-}
-
-void WLevel::WID(const WId & in_id) {
-    wid_ = in_id;
-}

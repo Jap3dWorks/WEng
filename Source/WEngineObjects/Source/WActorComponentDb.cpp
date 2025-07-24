@@ -1,4 +1,4 @@
-#include "WObjectManager/WActorComponentDb.hpp"
+#include "WObjectDb/WActorComponentDb.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
@@ -14,25 +14,16 @@ WId WActorComponentDb::CreateActor(const WClass * in_class, const std::string & 
         in_name.c_str()
         );
 
-    // actor_manager_.Get<WActor>(id)->Level(this);
-
     return id;
 
 }
 
-const TWRef<WActor> WActorComponentDb::GetActor(const WId & in_id) const {
+TWRef<WActor> WActorComponentDb::GetActor(const WId & in_id) const {
     assert(id_actorclass_.contains(in_id));
 
-    const TWRef<WObject> obj = actor_manager_.Get(
-                                    id_actorclass_.at(in_id),
-                                    in_id);
-
-    return static_cast<const WActor*>(obj.Ptr());
-
-    // return static_cast<const WActor*>(actor_manager_.Get(
-    //                                 id_actorclass_.at(in_id),
-    //                                 in_id)
-    //                             .Ptr());
+    return static_cast<WActor *>(actor_manager_.Get(
+                                     id_actorclass_.at(in_id),
+                                     in_id).Ptr());
 }
 
 /**
@@ -69,7 +60,7 @@ WId WActorComponentDb::CreateComponent(const WId & in_actor_id,
 }
 
 TWRef<WComponent> WActorComponentDb::GetComponent(const WClass * in_class,
-                                                  const WId & in_component_id) {
+                                                  const WId & in_component_id) const {
     assert(component_manager_.Contains(in_class, in_component_id));
 
     return static_cast<WComponent*>(component_manager_.Get(
@@ -80,7 +71,7 @@ TWRef<WComponent> WActorComponentDb::GetComponent(const WClass * in_class,
 }
 
 void WActorComponentDb::ForEachComponent(const WClass * in_class,
-                                         TFunction<void(WComponent*)> in_predicate) {
+                                         TFunction<void(WComponent*)> in_predicate) const {
     for(const WClass * c : component_manager_.Classes()) {
         if (c == in_class || in_class->IsBaseOf(c)) {
             component_manager_.ForEach(c,

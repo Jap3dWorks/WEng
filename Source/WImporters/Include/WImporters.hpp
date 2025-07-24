@@ -5,8 +5,8 @@
 
 #include <vector>
 
-class WObjectManager;
-class WAssetManager;
+class WObjectDb;
+class WAssetDb;
 
 class WIMPORTERS_API WImporter {
 
@@ -32,7 +32,7 @@ public:
      * @param asset_directory, Engine based directory path to import to, Should start with /Content.
     */
     virtual std::vector<WId> Import(
-        WAssetManager & in_asset_manager,
+        WAssetDb & in_asset_manager,
         const char* file_path,
         const char* asset_directory) = 0;
 
@@ -42,13 +42,13 @@ public:
 
     virtual std::unique_ptr<WImporter> Clone()=0;
 
-    TOptionalRef<WAssetManager> AssetManager();
+    TOptionalRef<WAssetDb> AssetManager();
 
-    void AssetManager(WAssetManager & asset_manager);
+    void AssetManager(WAssetDb & asset_manager);
 
 private:
 
-    TOptionalRef<WAssetManager> asset_manager_{nullptr};
+    TOptionalRef<WAssetDb> asset_manager_{nullptr};
     
 };
 
@@ -74,7 +74,7 @@ public:
 public:
 
     std::vector<WId> Import(
-        WAssetManager & in_asset_manager,
+        WAssetDb & in_asset_manager,
         const char * file_path,
         const char * asset_directory) override;
 
@@ -109,7 +109,7 @@ public:
 public:
     
     std::vector<WId> Import(
-        WAssetManager & in_asset_manager,
+        WAssetDb & in_asset_manager,
         const char * file_path,
         const char * asset_directory) override;
 

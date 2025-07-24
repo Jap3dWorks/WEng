@@ -7,7 +7,7 @@
 #include "WImporterRegister.hpp"
 #include "WRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
-#include "WObjectManager/WAssetManager.hpp"
+#include "WObjectDb/WAssetDb.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WLog.hpp"
@@ -109,7 +109,7 @@ TRef<IRender> WEngine::Render() noexcept
     return render_.get();
 }
 
-WAssetManager & WEngine::AssetManager() noexcept {
+WAssetDb & WEngine::AssetManager() noexcept {
     return asset_manager_;
 }
 

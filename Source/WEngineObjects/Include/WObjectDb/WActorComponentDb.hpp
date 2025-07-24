@@ -2,12 +2,12 @@
 
 #include "WCore/WCore.hpp"
 
-#include "WObjectManager/WObjectManager.hpp"
+#include "WObjectDb/WObjectDb.hpp"
 #include "WCore/WIdPool.hpp"
 
 #include <unordered_map>
 #include <unordered_set>
-
+#include <concepts>
 
 class WActor;
 class WComponent;
@@ -17,9 +17,7 @@ public:
 
     WId CreateActor(const WClass * in_class, const std::string& in_name) ;
 
-    TWRef<WActor> GetActor(const WId & in_id);
-
-    const TWRef<WActor> GetActor(const WId & in_id) const;
+    TWRef<WActor> GetActor(const WId & in_id) const;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
@@ -36,13 +34,18 @@ public:
                         const std::string & in_name) ;
 
     TWRef<WComponent> GetComponent(const WClass * in_class,
-                                const WId & in_component_id) ;
-
-    // void ForEachComponent(const WId & in_actor_id,
-    //                       TFunction<void(WComponent*)> in_component) override;
+                                const WId & in_component_id) const ;
 
     void ForEachComponent(const WClass * in_class,
-                          TFunction<void(WComponent*)> in_predicate) ;
+                          TFunction<void(WComponent*)> in_predicate) const ;
+
+    template<std::derived_from<WComponent> T>
+    void ForEachComponent(TFunction<void(T*)> in_predicate) const {
+        ForEachComponent(T::StaticClass(),
+                         [&in_predicate](WComponent* in_component) {
+                             in_predicate(static_cast<T*>(in_component));
+                         });
+    }
 
 private:
 
@@ -50,9 +53,9 @@ private:
 
     void UpdateComponentMetadata(const WClass * in_component_class, const WId& in_Id);
 
-    WObjectManager actor_manager_;
+    WObjectDb actor_manager_;
 
-    WObjectManager component_manager_;
+    WObjectDb component_manager_;
 
     WIdPool actor_id_pool_;
 

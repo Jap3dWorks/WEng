@@ -116,9 +116,6 @@ public:
         return *this;
     }
 
-    // BWRef & operator=(const void & other) = delete;
-    // BWRef & operator=(void && other) = delete;
-    
     virtual void BSet(void * in_address) {
         TRACK::UnregInstance(object_, this);
         object_ = in_address;
@@ -186,7 +183,7 @@ public:
 
     TWRef(TWRef && in_other) = default;
 
-    ~TWRef() = default;
+    ~TWRef() override = default;
 
     TWRef(T * in_object) :
         BWRef(in_object) {}
@@ -204,21 +201,7 @@ public:
         return *this;
     }
 
-    TWRef & operator=(const T & other) = delete;
     TWRef & operator=(T && other) = delete;
-
-    // void BSet(WObject * in_object) override final {
-    //     if (in_object == nullptr) {
-    //         BWRef::BSet(in_object);
-    //     }
-    //     else {
-    //         // Debugging assert only
-    //         // Should do I add a runtime check?
-    //         assert(dynamic_cast<T*>(in_object));
-
-    //         BWRef::BSet(in_object);
-    //     }
-    // }
 
     void Set(T * in_object) {
         BWRef::BSet(in_object);

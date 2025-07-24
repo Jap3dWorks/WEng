@@ -3,7 +3,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WTextureStructs.hpp"
-#include "WObjectManager/WAssetManager.hpp"
+#include "WObjectDb/WAssetDb.hpp"
 #include "WCore/WStringUtils.hpp"
 
 #include <string>
@@ -52,7 +52,7 @@ WImporter & WImporter::operator=(WImporter && other) noexcept
 WImportObj::WImportObj() noexcept {}
 
 std::vector<WId> WImportObj::Import(
-    WAssetManager & in_asset_manager,
+    WAssetDb & in_asset_manager,
     const char* file_path,
     const char* asset_directory)
 {
@@ -143,7 +143,7 @@ std::vector<WId> WImportObj::Import(
 WImportTexture::WImportTexture() noexcept {}
 
 std::vector<WId> WImportTexture::Import(
-    WAssetManager & in_asset_manager,
+    WAssetDb & in_asset_manager,
     const char* file_path,
     const char* asset_directory)
 {

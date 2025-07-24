@@ -5,10 +5,7 @@
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WObjectManager/WObjectManager.hpp"
-#include "WObjectManager/WActorComponentDb.hpp"
-
-#include <unordered_set>
+#include "WObjectDb/WActorComponentDb.hpp"
 
 class WLEVEL_API WLevel {
 public:
@@ -39,8 +36,6 @@ public:
 
 public:    
 
-    // std::unique_ptr<ILevel> Clone() const ;
-
     void Init(const WEngineCycleData & in_cycle_data) ;
 
     void Update(const WEngineCycleData & in_cycle_data) ;
@@ -49,7 +44,7 @@ public:
 
     WId CreateActor(const WClass * in_class) ;
 
-    TWRef<WActor> GetActor(const WId & in_id) ;
+    TWRef<WActor> GetActor(const WId & in_id) const ;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
@@ -61,13 +56,10 @@ public:
                         const WClass * in_class) ;
 
     TWRef<WComponent> GetComponent(const WClass * in_class,
-                                const WId & in_component_id) ;
-
-    // void ForEachComponent(const WId & in_actor_id,
-    //                       TFunction<void(WComponent*)> in_component) override;
+                                   const WId & in_component_id) const ;
 
     void ForEachComponent(const WClass * in_class,
-                          TFunction<void(WComponent*)> in_predicate) ;
+                          TFunction<void(WComponent*)> in_predicate) const ;
 
     std::string Name() const ;
 
@@ -109,18 +101,6 @@ private:
     const char * name_;
 
     WActorComponentDb actor_component_db_;
-
-    // WObjectManager actor_manager_;
-
-    // WObjectManager component_manager_;
-
-    // WIdPool actor_id_pool_;
-
-    // // Track where the asset is stored
-    // std::unordered_map<WId, const WClass *> id_actorclass_;
-
-    // // Track which components has each actor
-    // std::unordered_map<WId, std::unordered_set<const WClass *>> actor_components_;
 
     InitFn init_fn_;
 

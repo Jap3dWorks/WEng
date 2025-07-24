@@ -7,11 +7,11 @@
 #include "WLevel/WLevel.hpp"
 #include "WImporterRegister.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
-#include "WObjectManager/WAssetManager.hpp"
+#include "WObjectDb/WAssetDb.hpp"
 
 #include <memory>
 
-class WObjectManager;
+class WObjectDb;
 
 class WENGINE_API WEngine
 {
@@ -42,7 +42,7 @@ public:
 
     TRef<IRender> Render() noexcept;
 
-    WAssetManager & AssetManager() noexcept;
+    WAssetDb & AssetManager() noexcept;
 
 private:
 
@@ -62,7 +62,7 @@ private:
 
     WLevelRegister level_register_;
 
-    WAssetManager asset_manager_;
+    WAssetDb asset_manager_;
 
     bool close{false};
 

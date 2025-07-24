@@ -6,8 +6,9 @@ add_library(
         Source/WActor.cpp
         Source/WComponent.cpp
         Source/WTextureAsset.cpp
-        Source/WObjectManager.cpp
-        Source/WAssetManagerFacade.cpp
+        Source/WObjectDb.cpp
+        Source/WAssetDb.cpp
+        Source/WActorComponentDb.cpp
 )
 
 target_include_directories(

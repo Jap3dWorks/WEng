@@ -21,7 +21,7 @@
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
  */
-class WENGINEOBJECTS_API WObjectManager {
+class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
@@ -35,25 +35,25 @@ public:
 
 public:
 
-    constexpr WObjectManager() :
+    constexpr WObjectDb() :
         containers_(),
         initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
         {}
     
-    virtual ~WObjectManager() = default;
+    virtual ~WObjectDb() = default;
 
-    WObjectManager(const WObjectManager& other) :
+    WObjectDb(const WObjectDb& other) :
     containers_(),
     initial_memory_size_(other.initial_memory_size_) {
         CopyContainersFrom(other);
     }
     
-    constexpr WObjectManager(WObjectManager && other) noexcept :
+    constexpr WObjectDb(WObjectDb && other) noexcept :
     containers_(std::move(other.containers_)),
     initial_memory_size_(std::move(other.initial_memory_size_))
     {}
     
-    constexpr WObjectManager & operator=(const WObjectManager& other) {
+    constexpr WObjectDb & operator=(const WObjectDb& other) {
         if (this != &other) {
             initial_memory_size_ = other.initial_memory_size_;
             CopyContainersFrom(other);
@@ -62,7 +62,7 @@ public:
         return *this;
     }
 
-    constexpr WObjectManager & operator=(WObjectManager && other) noexcept {
+    constexpr WObjectDb & operator=(WObjectDb && other) noexcept {
         if (this != &other) {
             containers_ = std::move(other.containers_);
             initial_memory_size_ = std::move(other.initial_memory_size_);
@@ -112,13 +112,11 @@ public:
                           const char * in_fullname);
 
     template <std::derived_from<WObject> T>
-    TWRef<T> Get(WId in_id) {
+    TWRef<T> Get(WId in_id) const {
         return static_cast<T*>(Get(T::StaticClass(), in_id).Ptr());
     }
 
-    TWRef<WObject> Get(const WClass * in_class, const WId & in_id);
-
-    TWRef<const WObject> Get(const WClass * in_class, const WId & in_id) const;
+    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {
@@ -160,7 +158,7 @@ public:
 
 private:
 
-    void CopyContainersFrom(const WObjectManager & other) {
+    void CopyContainersFrom(const WObjectDb & other) {
         containers_.clear();
         for (auto & p : other.containers_) {
             containers_.insert(

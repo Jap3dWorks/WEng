@@ -1,6 +1,6 @@
-#include "WObjectManager/WObjectManager.hpp"
+#include "WObjectDb/WObjectDb.hpp"
 
-WId WObjectManager::Create(const WClass * in_class,
+WId WObjectDb::Create(const WClass * in_class,
                            const char * in_fullname) {
     EnsureClassStorage(in_class);
     
@@ -15,7 +15,7 @@ WId WObjectManager::Create(const WClass * in_class,
     return id;
 }
 
-WId WObjectManager::Create(const WClass * in_class,
+WId WObjectDb::Create(const WClass * in_class,
                            const WId& in_id,
                            const char * in_fullname) {
     EnsureClassStorage(in_class);
@@ -33,43 +33,43 @@ WId WObjectManager::Create(const WClass * in_class,
     return in_id;
 }
 
-TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) {
+// TWRef<WObject> WObjectDb::Get(const WClass * in_class, const WId & in_id) {
+//     WObject * result;
+//     containers_.at(in_class)->Get(in_id, result);
+
+//     return result;
+// }
+
+TWRef<WObject> WObjectDb::Get(const WClass * in_class, const WId & in_id) const {
     WObject * result;
     containers_.at(in_class)->Get(in_id, result);
 
     return result;
 }
 
-TWRef<const WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
-    const WObject * result;
-    containers_.at(in_class)->Get(in_id, result);
-
-    return result;
-}
-
-bool WObjectManager::Contains(const WClass * in_class, WId in_id) const {
+bool WObjectDb::Contains(const WClass * in_class, WId in_id) const {
     return containers_.contains(in_class) && containers_.at(in_class)->Contains(in_id);
 }
 
-bool WObjectManager::Contains(const WClass * in_class) const {
+bool WObjectDb::Contains(const WClass * in_class) const {
     return containers_.contains(in_class);
 }
 
-void WObjectManager::ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const {
+void WObjectDb::ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const {
     assert(containers_.contains(in_class));
     
     containers_.at(in_class)->ForEach(in_predicate);
 }
 
-void WObjectManager::InitialMemorySize(size_t in_ammount) {
+void WObjectDb::InitialMemorySize(size_t in_ammount) {
     initial_memory_size_ = in_ammount;
 }
 
-size_t WObjectManager::InitialMemorySize() const {
+size_t WObjectDb::InitialMemorySize() const {
     return initial_memory_size_;
 }
 
-WObjectManager::ClassIterator WObjectManager::Classes() const {
+WObjectDb::ClassIterator WObjectDb::Classes() const {
 
     return ClassIterator(
         containers_.cbegin(),
@@ -80,12 +80,12 @@ WObjectManager::ClassIterator WObjectManager::Classes() const {
         );
 }
 
-size_t WObjectManager::Count(const WClass * in_class) const {
+size_t WObjectDb::Count(const WClass * in_class) const {
     assert(containers_.contains(in_class));
     return containers_.at(in_class)->Count();
 }
 
-void WObjectManager::EnsureClassStorage(const WClass * in_class) {
+void WObjectDb::EnsureClassStorage(const WClass * in_class) {
     if (!containers_.contains(in_class)) {
         containers_[in_class] =
             in_class->CreateObjectDatabase();
@@ -96,7 +96,7 @@ void WObjectManager::EnsureClassStorage(const WClass * in_class) {
     }
 }
 
-std::vector<WId> WObjectManager::Indexes(const WClass * in_class) const {
+std::vector<WId> WObjectDb::Indexes(const WClass * in_class) const {
     assert(containers_.contains(in_class));
     
     return containers_.at(in_class)->Indexes();

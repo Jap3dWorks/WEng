@@ -8,7 +8,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
-#include "WObjectManager/WAssetManager.hpp"
+#include "WObjectDb/WAssetDb.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN

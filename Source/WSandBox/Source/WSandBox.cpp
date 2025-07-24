@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include <print>
 #include <memory>
+#include <vector>
 
 struct B {
     virtual ~B() {
@@ -12,6 +13,8 @@ struct A : public B {
     ~A() override {
         std::print("A Destructor!\n");
     }
+
+    
 };
 
 std::unique_ptr<B> Create() {
@@ -38,15 +41,18 @@ inline constexpr RetType KK = ImporterKey<T>::Value();
 
 int main(int argc, char* argv[])
 {
-    std::unordered_map<const void*, std::string> v;
-
     static_assert(KK<B> == ImporterKey<B>::Value());
 
-    v[KK<B>] = "B value!";
-    v[ImporterKey<A>::Value()] = "A Value!";
+    std::vector<size_t> v={1,2,3,4,5};
 
-    std::print("B val: {}\n", v[ImporterKey<B>::Value()]);
-    std::print("A val: {}\n", v[ImporterKey<A>::Value()]);
+    const std::vector<size_t> & cv = v;
 
+    auto it = cv.begin();
+
+    const std::unique_ptr<char> p = std::make_unique<char>('9');
+
+    // p = std::make_unique<char>('j');
+
+    const size_t & _v = cv[1];
 }
 

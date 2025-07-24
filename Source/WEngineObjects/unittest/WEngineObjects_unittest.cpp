@@ -7,7 +7,7 @@
 #include "WCore/TRef.hpp"
 #include "WCore/TFunction.hpp"
 #include "WEngineObjects/TWAllocator.hpp"
-#include "WObjectManager/WObjectManager.hpp"
+#include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WEngineObjects/WActor.hpp"
@@ -64,9 +64,9 @@ bool WClass_Derived_Test() {
     return cls1 == cls2 && cls1->IsBaseOf(cls3);
 }
 
-bool WObjectManager_TWRef_Test() {
+bool WObjectDb_TWRef_Test() {
     WFLOG("START")
-    WObjectManager man;
+    WObjectDb man;
 
     man.InitialMemorySize(1);
 
@@ -92,10 +92,10 @@ bool WObjectManager_TWRef_Test() {
     return ptr != a.BPtr();
 }
 
-bool WObjectManager_WClass_Test() {
+bool WObjectDb_WClass_Test() {
     WFLOG("Start");
     
-    WObjectManager man;
+    WObjectDb man;
 
     WFLOG("Create a1");
     TWRef<WActor> a1 = man.Get<WActor>(man.Create<WActor>("/Content/a1.a1"));
@@ -127,9 +127,9 @@ TEST_CASE("WEngineObjects") {
     SECTION("WClass") {
         CHECK(WClass_Derived_Test());
     }
-    SECTION("WObjectManager") {
-        CHECK(WObjectManager_TWRef_Test());
-        CHECK(WObjectManager_WClass_Test());
+    SECTION("WObjectDb") {
+        CHECK(WObjectDb_TWRef_Test());
+        CHECK(WObjectDb_WClass_Test());
     }
 }
 

@@ -3,40 +3,40 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WCore/WIdPool.hpp"
-#include "WObjectManager/WObjectManager.hpp"
+#include "WObjectDb/WObjectDb.hpp"
 
 #include <unordered_map>
 
 class WAsset;
 
 /**
- * @brief Facade class for a WObjectManager specialized in the asset management.
- * Core functionalities are derived to WObjectManager.
+ * @brief Facade class for a WObjectDb specialized in the asset management.
+ * Core functionalities are derived to WObjectDb.
  */
-class WENGINEOBJECTS_API WAssetManager {
+class WENGINEOBJECTS_API WAssetDb {
     
 public:
 
-    constexpr WAssetManager() noexcept :
+    constexpr WAssetDb() noexcept :
     object_manager_(),
     id_pool_(),
     id_class_() {
         InitializeIdPool();
     }
 
-    virtual ~WAssetManager() = default;
+    virtual ~WAssetDb() = default;
 
-    WAssetManager(const WAssetManager & other) :
+    WAssetDb(const WAssetDb & other) :
     object_manager_(other.object_manager_),
     id_pool_(other.id_pool_),
     id_class_(other.id_class_) {}
     
-    WAssetManager(WAssetManager && other) :
+    WAssetDb(WAssetDb && other) :
     object_manager_(std::move(other.object_manager_)),
     id_pool_(std::move(other.id_pool_)),
     id_class_(std::move(other.id_class_)) {}
 
-    WAssetManager & operator=(const WAssetManager & other) {
+    WAssetDb & operator=(const WAssetDb & other) {
         if (this != &other) {
             object_manager_ = other.object_manager_;
             id_pool_ = other.id_pool_;
@@ -45,7 +45,7 @@ public:
         return *this;
     }
 
-    WAssetManager & operator=(WAssetManager && other) {
+    WAssetDb & operator=(WAssetDb && other) {
         if (this != &other) {
             object_manager_ = std::move(other.object_manager_);
             id_pool_ = std::move(other.id_pool_);
@@ -64,13 +64,13 @@ public:
 
     TWRef<WAsset> Get(const WId & in_id);
 
-    TRef<WObjectManager> ObjectManager() noexcept;
+    TRef<WObjectDb> ObjectManager() noexcept;
 
 private:
 
     void InitializeIdPool();
 
-    WObjectManager object_manager_;
+    WObjectDb object_manager_;
 
     WIdPool id_pool_;
 
