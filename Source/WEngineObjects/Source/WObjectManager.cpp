@@ -40,11 +40,11 @@ TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) {
     return result;
 }
 
-const TWRef<WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
+TWRef<const WObject> WObjectManager::Get(const WClass * in_class, const WId & in_id) const {
     const WObject * result;
     containers_.at(in_class)->Get(in_id, result);
 
-    return const_cast<WObject*>(result);
+    return result;
 }
 
 bool WObjectManager::Contains(const WClass * in_class, WId in_id) const {

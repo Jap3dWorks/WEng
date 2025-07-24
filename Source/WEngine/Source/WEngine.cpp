@@ -1,8 +1,7 @@
 #include "WEngine.hpp"
 
-#include "WEngineInterfaces/ILevelRegister.hpp"
-#include "WEngineInterfaces/ILevel.hpp"
 #include "WEngineInterfaces/IRender.hpp"
+#include "WLevel/WLevel.hpp"
 
 #include "WImporters.hpp"
 #include "WImporterRegister.hpp"
@@ -11,6 +10,7 @@
 #include "WObjectManager/WAssetManager.hpp"
 #include "WEngineObjects/WActor.hpp"
 #include "WEngineObjects/WComponent.hpp"
+#include "WLog.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -22,8 +22,8 @@ WEngine WEngine::DefaultCreate()
 {
     WEngine result(std::make_unique<WRender>());
 
-    result.ImportersRegister()->Register<WImportObj>();
-    result.ImportersRegister()->Register<WImportTexture>();
+    result.ImportersRegister().Register<WImportObj>();
+    result.ImportersRegister().Register<WImportTexture>();
 
     return result;
 }
@@ -44,10 +44,9 @@ void WEngine::run()
 {
     assert(startup_info_.startup_level);
     
-    std::unique_ptr<ILevel> level = nullptr;
-
     level_info_.current_level = startup_info_.startup_level;
     level_info_.level_loaded = false;
+    level_info_.level = level_register_.GetCopy(level_info_.current_level);
 
     // TODO Window out of WRender
     while(!glfwWindowShouldClose(Render()->Window())) {
@@ -57,29 +56,27 @@ void WEngine::run()
 
         if (!level_info_.level_loaded) {
 
-            level = level_register_.Get(
+            level_info_.level = level_register_.GetCopy(
                 level_info_.current_level
-                )->Clone();
+                );
             
-            level->Init(engine_cycle_data);
+            level_info_.level.Init(engine_cycle_data);
             level_info_.level_loaded = true;
         }
         else {
             // Update Components
-            level->ForEachComponent(
+            level_info_.level.ForEachComponent(
                 WComponent::StaticClass(),
-                [&level,
-                 &engine_cycle_data](WComponent * in_component) {
+                [&engine_cycle_data](WComponent * in_component) {
                     in_component->OnUpdate(
                         engine_cycle_data
                         );
                 });
 
             // Update Actors
-            level->ForEachActor(
+            level_info_.level.ForEachActor(
                 WActor::StaticClass(),
-                [&level,
-                 &engine_cycle_data](WActor * in_actor) {
+                [&engine_cycle_data](WActor * in_actor) {
                     in_actor->OnUpdate(
                         engine_cycle_data
                         );
@@ -94,14 +91,15 @@ void WEngine::run()
 }
 
 void WEngine::LoadLevel(const WId & in_level) {
-    
+    // TODO
+    WFLOG("NOT IMPLEMENTED!");
 }
 
 void WEngine::StartupLevel(const WId& in_id) noexcept {
     startup_info_.startup_level = in_id;
 }
 
-TRef<WImporterRegister> WEngine::ImportersRegister() noexcept
+WImporterRegister & WEngine::ImportersRegister() noexcept
 {
     return importers_register_;
 }
@@ -111,11 +109,7 @@ TRef<IRender> WEngine::Render() noexcept
     return render_.get();
 }
 
-TRef<ILevel> WEngine::CurrentLevel() noexcept {
-    return nullptr;
-}
-
-TRef<WAssetManager> WEngine::AssetManager() noexcept {
+WAssetManager & WEngine::AssetManager() noexcept {
     return asset_manager_;
 }
 

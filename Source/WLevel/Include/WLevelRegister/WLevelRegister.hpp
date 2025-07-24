@@ -5,9 +5,6 @@
 #include "WCore/WIdPool.hpp"
 #include "WCore/TObjectDataBase.hpp"
 
-
-#include <memory>
-
 class WLevel;
 
 /**
@@ -28,15 +25,15 @@ public:
 
     WLevelRegister& operator=(WLevelRegister && other);
 
-    WLevel & Create();    
+    WId Create();    
 
     TOptionalRef<WLevel> Get(const WId & in_id);
+
+    WLevel GetCopy(const WId & in_id) const;
 
 private:
     
     WIdPool id_pool_;
-
-    WId current_;
 
     TObjectDataBase<WLevel> levels_;
 

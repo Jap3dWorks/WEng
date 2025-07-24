@@ -5,28 +5,33 @@
 #include <format>
 #include <memory>
 
-WLevel::WLevel(const char * in_name) :
-    name_(in_name),
-    actor_manager_(),
-    component_manager_(),
-    actor_id_pool_(),
-    id_actorclass_(),
-    actor_components_(),
-    init_fn_([](ILevel*, const WEngineCycleData &){}),
-    update_fn_([](ILevel*, const WEngineCycleData &){}),
-    close_fn_([](ILevel*, const WEngineCycleData &){})
+WLevel::WLevel() :
+    name_("InvalidLevel"),
+    wid_(0),
+    actor_component_db_(),
+    init_fn_([](WLevel*, const WEngineCycleData&){}),
+    update_fn_([](WLevel*, const WEngineCycleData&){}),
+    close_fn_([](WLevel*, const WEngineCycleData&){})
 {}
 
 WLevel::WLevel(const char * in_name,
+               const WId & in_id) :
+    name_(in_name),
+    wid_(in_id),
+    actor_component_db_(),
+    init_fn_([](WLevel*, const WEngineCycleData &){}),
+    update_fn_([](WLevel*, const WEngineCycleData &){}),
+    close_fn_([](WLevel*, const WEngineCycleData &){})
+{}
+
+WLevel::WLevel(const char * in_name,
+               const WId & in_id,
                const InitFn & in_init_fn,
                const UpdateFn & in_update_fn,
                const CloseFn & in_close_fn) :
     name_(in_name),
-    actor_manager_(),
-    component_manager_(),
-    actor_id_pool_(),
-    id_actorclass_(),
-    actor_components_(),
+    wid_(in_id),
+    actor_component_db_(),
     init_fn_(in_init_fn),
     update_fn_(in_update_fn),
     close_fn_(in_close_fn)
@@ -34,11 +39,7 @@ WLevel::WLevel(const char * in_name,
 
 WLevel::WLevel(const WLevel& other) :
     name_(other.name_),
-    actor_manager_(other.actor_manager_),
-    component_manager_(other.component_manager_),
-    actor_id_pool_(other.actor_id_pool_),
-    id_actorclass_(other.id_actorclass_),
-    actor_components_(other.actor_components_),
+    actor_component_db_(other.actor_component_db_),
     init_fn_(other.init_fn_),
     update_fn_(other.update_fn_),
     close_fn_(other.close_fn_)
@@ -46,11 +47,7 @@ WLevel::WLevel(const WLevel& other) :
 
 WLevel::WLevel(WLevel && other) :
     name_(std::move(other.name_)),
-    actor_manager_(std::move(other.actor_manager_)),
-    component_manager_(std::move(other.component_manager_)),
-    actor_id_pool_(std::move(other.actor_id_pool_)),
-    id_actorclass_(std::move(other.id_actorclass_)),
-    actor_components_(std::move(other.actor_components_)),
+    actor_component_db_(other.actor_component_db_),
     init_fn_(std::move(other.init_fn_)),
     update_fn_(std::move(other.update_fn_)),
     close_fn_(std::move(other.close_fn_))
@@ -61,11 +58,7 @@ WLevel::WLevel(WLevel && other) :
 WLevel & WLevel::operator=(const WLevel& other) {
     if (this != &other) {
         name_ = other.name_;
-        actor_manager_ = other.actor_manager_;
-        component_manager_ = other.component_manager_;
-        actor_id_pool_ = other.actor_id_pool_;
-        id_actorclass_ = other.id_actorclass_;
-        actor_components_ = other.actor_components_;
+        actor_component_db_ = other.actor_component_db_;
         init_fn_ = other.init_fn_;
         update_fn_ = other.update_fn_;
         close_fn_ = other.close_fn_;
@@ -76,11 +69,7 @@ WLevel & WLevel::operator=(const WLevel& other) {
 WLevel & WLevel::operator=(WLevel && other) {
     if (this != &other) {
         name_ = std::move(other.name_);
-        actor_manager_ = std::move(other.actor_manager_);
-        component_manager_ = std::move(other.component_manager_);
-        actor_id_pool_ = std::move(other.actor_id_pool_);
-        id_actorclass_ = std::move(other.id_actorclass_);
-        actor_components_ = std::move(other.actor_components_);
+        actor_component_db_ = std::move(other.actor_component_db_);
         init_fn_ = std::move(other.init_fn_);
         update_fn_ = std::move(other.update_fn_);
         close_fn_ = std::move(other.close_fn_);
@@ -90,10 +79,6 @@ WLevel & WLevel::operator=(WLevel && other) {
 
     return *this;
 }
-
-// std::unique_ptr<ILevel> WLevel::Clone() const {
-//     return std::make_unique<WLevel>(*this);
-// }
 
 void WLevel::Init(const WEngineCycleData & in_cycle_data) {
     init_fn_(this, in_cycle_data);
@@ -108,91 +93,43 @@ void WLevel::Close(const WEngineCycleData & in_cycle_data) {
 }
 
 WId WLevel::CreateActor(const WClass * in_class) {
-    assert(in_class == WActor::StaticClass() ||
-           WActor::StaticClass()->IsBaseOf(in_class));
+    std::string actor_path = ActorPath(in_class);
+
+    WId id = actor_component_db_.CreateActor(in_class, actor_path);
     
-    std::string actor_path =
-        Name() + ":" + in_class->Name() + "_" +
-        std::format("{}", actor_manager_.Count(in_class));
-
-    WId id = CreateActorId(in_class);
-
-    actor_manager_.Create(
-        in_class,
-        id,
-        actor_path.c_str()
-        );
-
-    actor_manager_.Get<WActor>(id)->Level(this);
+    actor_component_db_.GetActor(id)->Level(this);
 
     return id;
 }
 
 TWRef<WActor> WLevel::GetActor(const WId & in_id) {
-    assert(id_actorclass_.contains(in_id));
-    
-    return static_cast<WActor*>(actor_manager_.Get(
-                                    id_actorclass_.at(in_id),
-                                    in_id)
-                                .Ptr());
+    return actor_component_db_.GetActor(in_id);
 }
 
 void WLevel::ForEachActor(const WClass * in_class, TFunction<void(WActor*)> in_predicate) const {
-    assert(in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class));
-    
-    for(const WClass * c : actor_manager_.Classes()) {
-        if(in_class == c || in_class->IsBaseOf(c)) {
-            actor_manager_.ForEach(c,
-                                   [&in_predicate](WObject* _obj) {
-                                       in_predicate(static_cast<WActor*>(_obj));
-                                   }
-                );
-        }
-    }
+    actor_component_db_.ForEachActor(in_class, in_predicate);
 }
 
 WId WLevel::CreateComponent(const WId & in_actor_id,
                             const WClass * in_class) {
-    
-    assert(WComponent::StaticClass()->IsBaseOf(in_class));
-    assert(actor_manager_.Contains(id_actorclass_[in_actor_id], in_actor_id));
 
     std::string component_path=ComponentPath(in_actor_id, in_class);
 
-    UpdateComponentMetadata(in_class, in_actor_id);
-    
-    component_manager_.Create(in_class,
-                           in_actor_id,
-                           component_path.c_str());
+    actor_component_db_.CreateComponent(in_actor_id, in_class, component_path);
+
+    actor_component_db_.GetComponent(in_class, in_actor_id)->Level(this);
 
     return in_actor_id;
 }
 
 TWRef<WComponent> WLevel::GetComponent(const WClass * in_class,
-                                    const WId & in_component_id) {
-    assert(component_manager_.Contains(in_class, in_component_id));
-
-    return static_cast<WComponent*>(component_manager_.Get(
-                                        in_class,
-                                        in_component_id
-                                        ).Ptr());
+                                       const WId & in_component_id) {
+    return actor_component_db_.GetComponent(in_class, in_component_id);
 }
-
-// void WLevel::ForEachComponent(const WId & in_actor_id,
-//                               TFunction<void(WComponent*)> in_component) {
-//     // TODO
-// }
 
 void WLevel::ForEachComponent(const WClass * in_class,
                               TFunction<void(WComponent*)> in_predicate) {
-    for(const WClass * c : component_manager_.Classes()) {
-        if (c == in_class || in_class->IsBaseOf(c)) {
-            component_manager_.ForEach(c,
-                                        [&in_predicate](WObject * _obj) {
-                                            in_predicate(static_cast<WComponent*>(_obj));
-                                        });
-        }
-    }
+    actor_component_db_.ForEachComponent(in_class, in_predicate);
 }
 
 std::string WLevel::Name() const {
@@ -201,10 +138,9 @@ std::string WLevel::Name() const {
 
 std::string WLevel::ActorPath(const WClass * in_class) const {
     assert(in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class));
-    
-    return Name() + ":" +
-        in_class->Name() + "_" +
-        std::format("{}", actor_manager_.Count(in_class));
+
+    return Name() + ":" + in_class->Name() + "_" +
+        std::format("{}", actor_component_db_.ActorCount(in_class));
 }
 
 std::string WLevel::ComponentPath(const WId & in_actor_id,
@@ -212,28 +148,9 @@ std::string WLevel::ComponentPath(const WId & in_actor_id,
     assert(object_manager_.Contains(id_actorclass_.at(in_actor_id), in_actor_id));
     assert((in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class)));
 
-    return actor_manager_.Get(id_actorclass_.at(in_actor_id),
-                              in_actor_id)->Name() +
-        ":" +
-        in_class->Name();
-}
+    TWRef<WActor> actor = actor_component_db_.GetActor(in_actor_id);
 
-WId WLevel::CreateActorId(const WClass * in_class) {
-    assert(WActor::StaticClass() == in_class ||
-           WActor::StaticClass()->IsBaseOf(in_class));
-
-    WId id = actor_id_pool_.Generate();
-    id_actorclass_[id] = in_class;
-
-    return id;
-}
-
-void WLevel::UpdateComponentMetadata(const WClass * in_component_class, const WId & in_id) {
-    if (!actor_components_.contains(in_id)) {
-        actor_components_[in_id] = {};
-    }
-    
-    actor_components_[in_id].insert(in_component_class);
+    return actor->Name() + ":" + in_class->Name();
 }
 
 WId WLevel::WID() const {

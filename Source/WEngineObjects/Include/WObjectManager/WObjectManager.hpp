@@ -118,7 +118,7 @@ public:
 
     TWRef<WObject> Get(const WClass * in_class, const WId & in_id);
 
-    const TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
+    TWRef<const WObject> Get(const WClass * in_class, const WId & in_id) const;
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {

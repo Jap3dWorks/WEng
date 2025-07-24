@@ -228,6 +228,10 @@ public:
         return static_cast<T*>(BPtr());
     }
 
+    constexpr const T * Ptr() const noexcept {
+        return static_cast<const T*>(BPtr());
+    }
+
     T * operator->() 
     {
         return static_cast<T*>(BPtr());

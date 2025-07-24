@@ -72,11 +72,11 @@ WModelStruct MeshPlane()
 bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTextureAsset *& out_texture_asset)
 {
     WImportObj obj_importer =
-        engine.ImportersRegister()->GetImporter<WImportObj>();
+        engine.ImportersRegister().GetImporter<WImportObj>();
 
     std::vector<WId> geo_ids =
         obj_importer.Import(
-            engine.AssetManager().Get(),
+            engine.AssetManager(),
             "Content/Assets/Models/viking_room.obj", 
             "/Content/Assets/viking_room.viking_room"
             );
@@ -87,7 +87,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    TWRef<WAsset> geo_asset = engine.AssetManager()->Get(geo_ids[0]);
+    TWRef<WAsset> geo_asset = engine.AssetManager().Get(geo_ids[0]);
 
     if (geo_asset->Class() != WStaticMeshAsset::StaticClass())
     {
@@ -96,10 +96,10 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     }
 
     WImportTexture texture_importer =
-        engine.ImportersRegister()->GetImporter<WImportTexture>();
+        engine.ImportersRegister().GetImporter<WImportTexture>();
 
     std::vector<WId> tex_ids = texture_importer.Import(
-        engine.AssetManager().Get(),
+        engine.AssetManager(),
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
     );
@@ -110,7 +110,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         return false;
     }
 
-    TWRef<WAsset> tex_asset = engine.AssetManager()->Get(tex_ids[0]);
+    TWRef<WAsset> tex_asset = engine.AssetManager().Get(tex_ids[0]);
 
     if (tex_asset->Class() != WTextureAsset::StaticClass())
     {

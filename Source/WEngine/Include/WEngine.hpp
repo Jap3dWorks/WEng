@@ -4,6 +4,7 @@
 #include "WCore/TRef.hpp"
 
 #include "WEngineInterfaces/IRender.hpp"
+#include "WLevel/WLevel.hpp"
 #include "WImporterRegister.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectManager/WAssetManager.hpp"
@@ -37,19 +38,18 @@ public:
 
     void LoadLevel(const WId& in_level);
 
-    TRef<WImporterRegister> ImportersRegister() noexcept;
+    WImporterRegister & ImportersRegister() noexcept;
 
     TRef<IRender> Render() noexcept;
 
-    TRef<WLevel> CurrentLevel() noexcept;
-
-    TRef<WAssetManager> AssetManager() noexcept;
+    WAssetManager & AssetManager() noexcept;
 
 private:
 
     struct LevelInfo {
         WId current_level{0};
         bool level_loaded{false};
+        WLevel level{};
     } level_info_;
 
     struct StartupInfo {
