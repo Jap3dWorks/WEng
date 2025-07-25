@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 
 #include <cstdint>
@@ -15,16 +15,6 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-/**
- * Uniform buffer data structure
-*/
-struct WVkUBOStruct
-{
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
 
 struct WVkDeviceInfo{
     WId wid{0};

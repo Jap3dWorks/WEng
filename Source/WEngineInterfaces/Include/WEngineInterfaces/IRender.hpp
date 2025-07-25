@@ -2,28 +2,11 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WEngineInterfaces/IRenderResources.hpp"
 
 #include <vector>
 
-enum class EShaderType : uint8_t
-{
-    Vertex,
-    Fragment,
-    // Geometry,
-    Compute,
-    // TessellationControl,
-    // TessellationEvaluation
-};
-
-enum class EPipelineType : uint8_t
-{
-    Graphics,       // Default
-    Transparency,   // Alpha Blending
-    Compute,        // GPGPU
-    RayTracing,     // Ray Tracing
-    Postprocess     // Camera shader pipelines
-};
 
 struct GLFWwindow;
 

@@ -33,32 +33,12 @@ WId WObjectDb::Create(const WClass * in_class,
     return in_id;
 }
 
-// TWRef<WObject> WObjectDb::Get(const WClass * in_class, const WId & in_id) {
-//     WObject * result;
-//     containers_.at(in_class)->Get(in_id, result);
-
-//     return result;
-// }
-
-TWRef<WObject> WObjectDb::Get(const WClass * in_class, const WId & in_id) const {
-    WObject * result;
-    containers_.at(in_class)->Get(in_id, result);
-
-    return result;
-}
-
 bool WObjectDb::Contains(const WClass * in_class, WId in_id) const {
     return containers_.contains(in_class) && containers_.at(in_class)->Contains(in_id);
 }
 
 bool WObjectDb::Contains(const WClass * in_class) const {
     return containers_.contains(in_class);
-}
-
-void WObjectDb::ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const {
-    assert(containers_.contains(in_class));
-    
-    containers_.at(in_class)->ForEach(in_predicate);
 }
 
 void WObjectDb::InitialMemorySize(size_t in_ammount) {

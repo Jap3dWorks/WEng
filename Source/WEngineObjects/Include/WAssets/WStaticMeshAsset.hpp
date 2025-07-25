@@ -7,7 +7,7 @@
 #include "WStaticMeshAsset.WEngine.hpp"
 
 WCLASS()
-class WCORE_API WStaticMeshAsset : public WAsset
+class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 {
     WOBJECT_BODY(WStaticMeshAsset)
 
@@ -30,3 +30,4 @@ private:
     WMeshStruct mesh_{};
 
 };
+

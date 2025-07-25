@@ -113,10 +113,24 @@ public:
 
     template <std::derived_from<WObject> T>
     TWRef<T> Get(WId in_id) const {
-        return static_cast<T*>(Get(T::StaticClass(), in_id).Ptr());
+        return GetRaw<T>(in_id);
     }
 
-    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const;
+    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const {
+        return GetRaw(in_class, in_id);
+    }
+
+    WObject* GetRaw(const WClass * in_class, const WId & in_id) const {
+        WObject * result;
+        containers_.at(in_class)->Get(in_id, result);
+
+        return result;
+    }
+
+    template<std::derived_from<WObject> T>
+    T* GetRaw(WId in_id) const {
+        return static_cast<T*>(GetRaw(T::StaticClass(), in_id));
+    }
 
     template<std::derived_from<WObject> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {
@@ -131,7 +145,11 @@ public:
             );
     }
 
-    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const;
+    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const {
+        assert(containers_.contains(in_class));
+    
+        containers_.at(in_class)->ForEach(in_predicate);
+    }
 
     // TODO: ForEachWId could be a faster iterator?
     //  useful for objects already in graphics memory.

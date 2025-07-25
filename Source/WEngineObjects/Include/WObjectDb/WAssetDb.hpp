@@ -4,6 +4,7 @@
 #include "WCore/TRef.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WObjectDb/WObjectDb.hpp"
+#include "WEngineObjects/WAsset.hpp"
 
 #include <unordered_map>
 
@@ -67,11 +68,27 @@ public:
     }
 
     WId Create(const WClass * in_class,
-               const char * in_fullname);
+               const char * in_fullname) {
+        WId id = id_pool_.Generate();
+        id_class_[id] = in_class;
+    
+        object_manager_.Create(in_class, id, in_fullname);
 
-    TWRef<WAsset> Get(const WId & in_id);
+        return id;
+    }
 
-    TRef<WObjectDb> ObjectManager() noexcept;
+    TWRef<WAsset> Get(const WId & in_id) const {
+        return GetRaw(in_id);
+    }
+
+    WAsset * GetRaw(const WId & in_id) const {
+        assert(id_class_.contains(in_id));
+        return static_cast<WAsset*>(object_manager_.GetRaw(id_class_.at(in_id), in_id));
+    }
+
+    WObjectDb & ObjectManager() noexcept {
+        return object_manager_;
+    }
 
 private:
 
