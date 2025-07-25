@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/TRef.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
@@ -77,13 +76,13 @@ public:
         return id;
     }
 
-    TWRef<WAsset> Get(const WId & in_id) const {
-        return GetRaw(in_id);
+    WAsset * Get(const WId & in_id) const {
+        assert(id_class_.contains(in_id));
+        return static_cast<WAsset*>(object_manager_.Get(id_class_.at(in_id), in_id));
     }
 
-    WAsset * GetRaw(const WId & in_id) const {
-        assert(id_class_.contains(in_id));
-        return static_cast<WAsset*>(object_manager_.GetRaw(id_class_.at(in_id), in_id));
+    TWRef<WAsset> GetRef(const WId & in_id) const {
+        return Get(in_id);
     }
 
     WObjectDb & ObjectManager() noexcept {

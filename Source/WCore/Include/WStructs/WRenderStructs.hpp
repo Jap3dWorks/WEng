@@ -19,6 +19,7 @@ struct WVkUBOStruct
 
 enum class EShaderType : uint8_t
 {
+    None,
     Vertex,
     Fragment,
     // Geometry,
@@ -37,13 +38,16 @@ enum class EPipelineType : uint8_t
 };
 
 struct WShaderStruct {
-    EShaderType type{};
-    const char file[64];
+    EShaderType type{EShaderType::None};
+    char file[64]{""};
 };
 
+using WShaderList = std::array<WShaderStruct, 4>;
+
 struct WRenderPipelineStruct {
-    EPipelineType type {};
-    std::array<WShaderStruct, 4> shaders;
+    EPipelineType type {EPipelineType::Graphics};
+    WShaderList shaders{};
+    uint8_t shaders_count{0};
 };
 
 template<typename T>
@@ -52,8 +56,11 @@ struct TRPParameter {
     T value;
 };
 
+using WRPFloatParameterList = std::array<TRPParameter<float>, 8>;
+using WRPWIdParameterList = std::array<TRPParameter<WId>, 8>;
+
 struct WRenderPipelineParametersStruct {
-    std::array<TRPParameter<float>, 8> float_parameters;
-    std::array<TRPParameter<WId>, 8> texture_assets;
+    WRPFloatParameterList float_parameters;
+    WRPWIdParameterList texture_assets;
 };
 

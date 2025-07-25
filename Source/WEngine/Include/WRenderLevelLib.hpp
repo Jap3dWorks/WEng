@@ -9,8 +9,6 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 
-#include <unordered_set>
-
 namespace WRenderLevelLib {
 
     inline void InitilizeResources(
@@ -48,7 +46,7 @@ namespace WRenderLevelLib {
         for (const WId & id : pipeline_parameters) {
 
             auto * pparam = static_cast<WRenderPipelineParametersAsset*>(
-                in_asset_db.GetRaw(id)
+                in_asset_db.Get(id)
                 );
             
             for(auto & tparam : pparam->RenderPipelineParameters().texture_assets) {
@@ -59,23 +57,25 @@ namespace WRenderLevelLib {
 
         // Register Meshes
         for (const WId & id : static_meshes) {
-            auto * static_mesh = static_cast<WStaticMeshAsset*>(in_asset_db.GetRaw(id));
+            auto * static_mesh = static_cast<WStaticMeshAsset*>(in_asset_db.Get(id));
             in_render->RenderResources()->RegisterStaticMesh(static_mesh);
             in_render->RenderResources()->LoadStaticMesh(static_mesh->WID());
         }
 
         // Register Textures
         for (const WId & id : texture_assets) {
-            auto * texture_asset = static_cast<WTextureAsset*>(in_asset_db.GetRaw(id));
+            auto * texture_asset = static_cast<WTextureAsset*>(in_asset_db.Get(id));
             in_render->RenderResources()->RegisterTexture(texture_asset);
             in_render->RenderResources()->LoadTexture(texture_asset->WID());
         }
 
         // Initialize Render
         for (const WId & id : render_pipelines) {
-            auto * render_pipeline = static_cast<WRenderPipelineAsset*>(in_asset_db.GetRaw(id));
-            // in_render->CreateRenderPipeline(render_pipeline);  // TODO pipeline from asset
+            auto * render_pipeline = static_cast<WRenderPipelineAsset*>(in_asset_db.Get(id));
+            in_render->CreateRenderPipeline(render_pipeline);
         }
+
+        // TODO Render Parameters
 
     }
 

@@ -16,14 +16,14 @@ public:
 
     WId CreateActor(const WClass * in_class, const std::string& in_name) ;
 
-    TWRef<WActor> GetActor(const WId & in_id) const {
-        return GetActorRaw(in_id);
+    TWRef<WActor> GetActorRef(const WId & in_id) const {
+        return GetActor(in_id);
     }
 
-    WActor * GetActorRaw(const WId & in_id) const {
+    WActor * GetActor(const WId & in_id) const {
         assert(id_actorclass_.contains(in_id));
 
-        return static_cast<WActor *>(actor_manager_.GetRaw(
+        return static_cast<WActor *>(actor_manager_.Get(
                                          id_actorclass_.at(in_id),
                                          in_id));
     }
@@ -54,15 +54,15 @@ public:
                         const WClass * in_class,
                         const std::string & in_name) ;
 
-    TWRef<WComponent> GetComponent(const WClass * in_class,
+    TWRef<WComponent> GetComponentRef(const WClass * in_class,
                                    const WId & in_component_id) const {
-        return GetComponentRaw(in_class, in_component_id);
+        return GetComponent(in_class, in_component_id);
     }
 
-    WComponent * GetComponentRaw(const WClass * in_class, const WId & in_component_id) const {
+    WComponent * GetComponent(const WClass * in_class, const WId & in_component_id) const {
         assert(component_manager_.Contains(in_class, in_component_id));
 
-        return static_cast<WComponent*>(component_manager_.GetRaw(
+        return static_cast<WComponent*>(component_manager_.Get(
                                             in_class,
                                             in_component_id
                                             ));

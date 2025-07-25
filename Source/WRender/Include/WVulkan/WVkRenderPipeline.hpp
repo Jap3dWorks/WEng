@@ -6,7 +6,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
-
+#include "WStructs/WRenderStructs.hpp"
 #include <vector>
 #include <unordered_map>
 #include "WCore/TObjectDataBase.hpp"
@@ -44,10 +44,15 @@ public:
         WVkRenderPipelinesManager && other
         ) noexcept;
 
-    WId CreateRenderPipeline(
-        EPipelineType in_pipeline_type,
-        const std::vector<std::string> & in_shader_files,
-        const std::vector<EShaderType> & in_shader_types
+    // WId CreateRenderPipeline(
+    //     EPipelineType in_pipeline_type,
+    //     const std::vector<std::string> & in_shader_files,
+    //     const std::vector<EShaderType> & in_shader_types
+    //     );
+
+    void CreateRenderPipeline(
+        const WId & in_id,
+        const WRenderPipelineStruct & pstruct
         );
 
     WId AddBinding(
@@ -109,7 +114,9 @@ public:
 
 private:
 
-    WId CreateDescriptorSetLayout();
+    // WId CreateDescriptorSetLayout();
+
+    void CreateDescriptorSetLayout(const WId & in_id);
 
     WId CreateDescriptorSet(WId in_descriptor_set_layout_id);
 

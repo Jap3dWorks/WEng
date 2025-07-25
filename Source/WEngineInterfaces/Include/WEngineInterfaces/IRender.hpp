@@ -7,6 +7,7 @@
 
 #include <vector>
 
+class WRenderPipelineAsset;
 
 struct GLFWwindow;
 
@@ -17,10 +18,13 @@ public:
 
     virtual void Draw()=0;
 
-    virtual WId CreateRenderPipeline(
-        EPipelineType in_pipeline_type,
-        const std::vector<std::string> & in_shader_files,
-        const std::vector<EShaderType> & in_shader_types
+    /**
+     * @brief Create a render pipeline in graphics card for in_pipeline_asset parameter.
+     * The render pipeline create should share the same WId
+     * than the WRenderPipelineAsset * parameter.
+     */
+    virtual void CreateRenderPipeline(
+        WRenderPipelineAsset * in_pipeline_asset
         )=0;
 
     virtual void AddPipelineBinding(

@@ -112,15 +112,11 @@ public:
                           const char * in_fullname);
 
     template <std::derived_from<WObject> T>
-    TWRef<T> Get(WId in_id) const {
+    TWRef<T> GetRef(WId in_id) const {
         return GetRaw<T>(in_id);
     }
 
-    TWRef<WObject> Get(const WClass * in_class, const WId & in_id) const {
-        return GetRaw(in_class, in_id);
-    }
-
-    WObject* GetRaw(const WClass * in_class, const WId & in_id) const {
+    WObject * Get(const WClass * in_class, const WId & in_id) const {
         WObject * result;
         containers_.at(in_class)->Get(in_id, result);
 
@@ -128,8 +124,8 @@ public:
     }
 
     template<std::derived_from<WObject> T>
-    T* GetRaw(WId in_id) const {
-        return static_cast<T*>(GetRaw(T::StaticClass(), in_id));
+    T * Get(WId in_id) const {
+        return static_cast<T*>(Get(T::StaticClass(), in_id));
     }
 
     template<std::derived_from<WObject> T>

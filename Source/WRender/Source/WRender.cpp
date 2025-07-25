@@ -1,5 +1,6 @@
 #include "WRender.hpp"
 #include "WCore/WCore.hpp"
+#include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -273,15 +274,24 @@ void WRender::Draw()
     frame_index = (frame_index + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
-WId WRender::CreateRenderPipeline(
-    EPipelineType in_pipeline_type,
-    const std::vector<std::string> & in_shader_files,
-    const std::vector<EShaderType> & in_shader_types
+// WId WRender::CreateRenderPipeline(
+//     EPipelineType in_pipeline_type,
+//     const std::vector<std::string> & in_shader_files,
+//     const std::vector<EShaderType> & in_shader_types
+//     ) {
+//     return pipelines_manager_.CreateRenderPipeline(
+//         in_pipeline_type,
+//         in_shader_files,
+//         in_shader_types
+//         );
+// }
+
+void WRender::CreateRenderPipeline(
+    WRenderPipelineAsset * render_pipeline
     ) {
-    return pipelines_manager_.CreateRenderPipeline(
-        in_pipeline_type,
-        in_shader_files,
-        in_shader_types
+    pipelines_manager_.CreateRenderPipeline(
+        render_pipeline->WID(),
+        render_pipeline->RenderPipeline()
         );
 }
 

@@ -28,10 +28,8 @@ public:
 
     void Draw() override ;
 
-    WId CreateRenderPipeline(
-        EPipelineType in_pipeline_type,
-        const std::vector<std::string> & in_shader_files,
-        const std::vector<EShaderType> & in_shader_types
+    void CreateRenderPipeline(
+        WRenderPipelineAsset * in_pipeline_asset
         ) override;
 
     void AddPipelineBinding(

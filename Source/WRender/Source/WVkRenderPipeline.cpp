@@ -83,39 +83,37 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
     return *this;
 }
 
-WId WVkRenderPipelinesManager::CreateRenderPipeline(
-    EPipelineType in_pipeline_type,
-    const std::vector<std::string> & in_shader_files,
-    const std::vector<EShaderType> & in_shader_types
-    )
-{
+void WVkRenderPipelinesManager::CreateRenderPipeline(
+    const WId & in_id,
+    const WRenderPipelineStruct & pstruct
+    ) {
 
     WVkRenderPipelineInfo render_pipeline_info;
-    render_pipeline_info.type = in_pipeline_type;
+    render_pipeline_info.type = pstruct.type;
 
     std::vector<WVkShaderStageInfo> shaders;
-    shaders.reserve(in_shader_files.size());
+    shaders.reserve(pstruct.shaders.size());
 
-    for(uint32_t i=0; i<in_shader_files.size(); i++) {
+    for (uint8_t i=0; i < pstruct.shaders_count; i++) {
         shaders.push_back(
             WVulkan::CreateShaderStageInfo(
-                WStringUtils::SystemPath(in_shader_files[i]).c_str(),
+                WStringUtils::SystemPath(pstruct.shaders[i].file).c_str(),
                 "main",
-                in_shader_types[i]
+                pstruct.shaders[i].type
                 )
             );
     }
 
-    WId dset_lay_id = CreateDescriptorSetLayout();
+    CreateDescriptorSetLayout(in_id); // use asset pipeline id too.
 
-    WId pid = pipelines_.Create(
+    pipelines_.Insert(
+        in_id,
         [this,
          &render_pipeline_info,
          &shaders,
-         &dset_lay_id
-            ](WId in_id) -> auto {
+         &in_id](WId _id) -> auto {
             
-            auto& d_set_layout = descriptor_set_layouts_.Get(dset_lay_id);
+            auto& d_set_layout = descriptor_set_layouts_.Get(in_id);
 
             WVulkan::Create(
                 render_pipeline_info,
@@ -126,25 +124,24 @@ WId WVkRenderPipelinesManager::CreateRenderPipeline(
                 );
             
             render_pipeline_info.wid = in_id;
-            render_pipeline_info.descriptor_set_layout_id = dset_lay_id;
+            render_pipeline_info.descriptor_set_layout_id = in_id;
             
             return render_pipeline_info;
         }
         );
 
-    pipeline_bindings_[pid] = {};
-    stage_pipelines_[render_pipeline_info.type].push_back(pid);
-
-    return pid;
+    pipeline_bindings_[in_id] = {};
+    stage_pipelines_[render_pipeline_info.type].push_back(in_id);
 }
 
-WId WVkRenderPipelinesManager::CreateDescriptorSetLayout() {
+void WVkRenderPipelinesManager::CreateDescriptorSetLayout(const WId & in_id) {
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
     WVulkan::AddDSLDefaultGraphicBindings(descriptor_set_layout_info);
 
-    return descriptor_set_layouts_.Create(
+    descriptor_set_layouts_.Insert(
+        in_id,
         [this,
          &descriptor_set_layout_info](WId _in_id) -> auto {
         WVulkan::Create(

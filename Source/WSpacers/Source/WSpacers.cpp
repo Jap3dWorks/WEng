@@ -7,6 +7,7 @@
 #include "WImporters.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WAssets/WRenderPipelineAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 
@@ -133,17 +134,26 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::DefaultCreate();
 
-        WId pipeline_wid = engine.Render()->CreateRenderPipeline(
-            EPipelineType::Graphics,
-            {
-                "/Content/Shaders/Spacers_ShaderBase.vert",
-                "/Content/Shaders/Spacers_ShaderBase.frag"
-            },
-            {
-                EShaderType::Vertex,
-                EShaderType::Fragment
-            }
-            );
+        // TODO use WRenderPipelineAsset
+        WId pipeline_wid = engine.AssetManager().Create(
+            WRenderPipelineAsset::StaticClass(),
+            "/Content/RenderPipeline/RPip.RPip");
+
+        TWRef<WRenderPipelineAsset> render_pipeline =
+            static_cast<WRenderPipelineAsset*>(
+                engine.AssetManager().Get(pipeline_wid)
+                );
+
+        render_pipeline->RenderPipeline().type = EPipelineType::Graphics;
+        render_pipeline->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+        std::strcpy(render_pipeline->RenderPipeline().shaders[0].file,
+                    "/Content/Shaders/Spacers_ShaderBase.vert");
+
+        render_pipeline->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+        std::strcpy(render_pipeline->RenderPipeline().shaders[1].file,
+                    "/Content/Shaders/Spacers_ShaderBase.frag");
+
+        engine.Render()->CreateRenderPipeline(render_pipeline.Ptr());
 
         WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;
