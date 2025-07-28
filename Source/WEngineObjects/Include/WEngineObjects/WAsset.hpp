@@ -18,6 +18,17 @@ public:
 
     void Serialize(const std::string & in_path) override;
     void Deserialize(const std::string & in_path) override;
+
+    constexpr WAssetId WID() const noexcept {
+        return wid_;
+    }
+
+    constexpr void WID(const WAssetId & in_id) noexcept {
+        assert(wid_.GetId() == 0);
+        wid_ = in_id;
+    }
+
+    WAssetId wid_;
     
 };
 

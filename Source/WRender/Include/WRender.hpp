@@ -73,7 +73,7 @@ public:
 
     void ClearPipelines() override;
 
-    void UnloadCurrentResources() override;
+    void UnloadAllResources() override;
 
     void RegisterTexture(WTextureAsset & in_texture_asset) override {
         render_resources_.RegisterTexture(in_texture_asset);

@@ -20,6 +20,13 @@ public:
 
     virtual void Destroy()=0;
 
+    virtual void WaitIdle() const=0;
+
+    virtual GLFWwindow * Window() const=0;
+
+    // Pipeline Section
+    // ----------------
+
     /**
      * @brief Create a render pipeline in graphics card for in_pipeline_asset parameter.
      * The render pipeline create should share the same WId
@@ -29,6 +36,10 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         )=0;
 
+    /**
+     * @brief Create a pipeline binding to component.
+     * Pipeline binding shares the same WId than the component.
+     */
     virtual void CreatePipelineBinding(
         const WId & component_id,
         const WId & pipeline_id,
@@ -37,14 +48,33 @@ public:
         )=0;
 
     /**
-     * @brief Remove current Render Pipelines.
+     * @brief Remove all Render Pipelines.
      */
     virtual void ClearPipelines() =0;
 
+    /**
+     * @brief Delete the created render pipeline and its binidngs with WId in_id.
+     */
+    virtual void DeletePipeline(const WId & in_id)=0;
+
+    /**
+     * @brief Delete the create render pipeline binding.
+     */
+    virtual void DeletePipelineBinding(const WId & in_id)=0;
+
+    // Resources Section
+    // -----------------
+
+    /**
+     * @brief Register a texture, later you can load it using the asset id.
+     */
     virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
 
     virtual void UnregisterTexture(const WId & in_id)=0;
 
+    /**
+     * @brief Load the registered texture asset with id in_id.
+     */
     virtual void LoadTexture(const WId & in_id)=0;
 
     virtual void UnloadTexture(const WId & in_id)=0;
@@ -60,10 +90,6 @@ public:
     /**
      * @brief Unload all render resources.
      */
-    virtual void UnloadCurrentResources() = 0;
-
-    virtual void WaitIdle() const=0;
-
-    virtual GLFWwindow * Window() const=0;
+    virtual void UnloadAllResources() = 0;
 
 };

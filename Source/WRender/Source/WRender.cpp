@@ -520,7 +520,7 @@ void WRender::ClearPipelines() {
     pipelines_manager_.Clear();
 }
 
-void WRender::UnloadCurrentResources() {
+void WRender::UnloadAllResources() {
     render_resources_.Clear();
 }
 

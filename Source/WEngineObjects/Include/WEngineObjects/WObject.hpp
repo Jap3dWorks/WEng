@@ -17,13 +17,13 @@ class WCORE_API WObject
 
 public:
 
-    WNODISCARD constexpr WId WID() const noexcept
-    { return wid_; }
+    // WNODISCARD constexpr WId WID() const noexcept
+    // { return wid_; }
 
-    constexpr void WID(WId in_wid) noexcept {
-        assert(wid_.GetId() == 0);
-        wid_ = in_wid;
-    }
+    // constexpr void WID(WId in_wid) noexcept {
+    //     assert(wid_.GetId() == 0);
+    //     wid_ = in_wid;
+    // }
 
     void Name(const char * in_name) noexcept {
         std::strcpy(name_, in_name);
@@ -45,9 +45,9 @@ protected:
 
 private:
 
-    WId wid_;
-    char name_[WOBJECT_NAME_SIZE];
-    bool remove_;
+    // WId wid_;
+    char name_[WOBJECT_NAME_SIZE]; // TODO MOVE to WAsset WComponent WActor
+    bool remove_;                  // TODO Move to WAsset WComponent WActor
 
 };
 

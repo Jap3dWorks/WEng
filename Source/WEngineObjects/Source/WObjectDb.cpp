@@ -1,19 +1,19 @@
 #include "WObjectDb/WObjectDb.hpp"
 
-WId WObjectDb::Create(const WClass * in_class,
-                           const char * in_fullname) {
-    EnsureClassStorage(in_class);
+// WId WObjectDb::Create(const WClass * in_class,
+//                            const char * in_fullname) {
+//     EnsureClassStorage(in_class);
     
-    WId id = containers_[in_class]->Create();
+//     WId id = containers_[in_class]->Create();
         
-    WObject * obj;
-    containers_[in_class]->Get(id, obj);
+//     WObject * obj;
+//     containers_[in_class]->Get(id, obj);
 
-    obj->WID(id);
-    obj->Name(in_fullname);
+//     obj->WID(id);
+//     obj->Name(in_fullname);
 
-    return id;
-}
+//     return id;
+// }
 
 WId WObjectDb::Create(const WClass * in_class,
                            const WId& in_id,

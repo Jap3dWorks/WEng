@@ -13,91 +13,92 @@
 /**
  * @brief Basic identifier token
 */
-class WCORE_API WId
+template<typename T>
+class WCORE_API _WId
 {
 public:
 
-    constexpr WId() noexcept :
+    constexpr _WId() noexcept :
     id_(0) {}
 
-    constexpr WId(size_t id) noexcept :
+    constexpr _WId(T id) noexcept :
     id_(id) {}
 
-    constexpr size_t GetId() const noexcept {
+    constexpr T GetId() const noexcept {
         return id_;
     }
 
-    constexpr bool operator==(const WId &other) const noexcept {
+    constexpr bool operator==(const _WId &other) const noexcept {
         return id_ == other.id_;
     }
     
-    constexpr bool operator!=(const WId &other) const noexcept {
+    constexpr bool operator!=(const _WId &other) const noexcept {
         return id_ != other.id_;
     }
 
-    constexpr bool operator<(const WId &other) const noexcept {
+    constexpr bool operator<(const _WId &other) const noexcept {
         return id_ < other.id_;
     }
     
-    constexpr bool operator>(const WId &other) const noexcept {
+    constexpr bool operator>(const _WId &other) const noexcept {
         return id_ > other.id_;
     }
 
-    constexpr bool operator<=(const WId &other) const noexcept {
+    constexpr bool operator<=(const _WId &other) const noexcept {
         return id_ <= other.id_;
     }
     
-    constexpr bool operator>=(const WId &other) const noexcept {
+    constexpr bool operator>=(const _WId &other) const noexcept {
         return id_ >= other.id_;
     }
 
-    constexpr WId operator+(const WId &other) const noexcept {
-        return WId(id_ + other.id_);
+    constexpr _WId operator+(const _WId &other) const noexcept {
+        return _WId(id_ + other.id_);
     }
     
-    constexpr WId operator-(const WId &other) const noexcept {
-        return WId(id_ - other.id_);
+    constexpr _WId operator-(const _WId &other) const noexcept {
+        return _WId(id_ - other.id_);
     }
 
-    constexpr WId& operator++() noexcept
+    constexpr _WId& operator++() noexcept
     {
         ++id_;
         return *this;
     }
 
-    constexpr WId operator++(int) noexcept
+    constexpr _WId operator++(int) noexcept
     {
-        WId temp = WId(id_);
+        _WId temp = _WId(id_);
         ++id_;
         return temp;
     }
 
-    constexpr WId& operator--() noexcept
+    constexpr _WId& operator--() noexcept
     {
         --id_;
         return *this;
     }
 
-    constexpr WId operator--(int) noexcept
+    constexpr _WId operator--(int) noexcept
     {
-        WId temp = WId(id_);
+        _WId temp = _WId(id_);
         --id_;
         return temp;
     }
 
-    constexpr WId& operator+=(const WId &other) noexcept
+    constexpr _WId& operator+=(const _WId &other) noexcept
     {
         id_ += other.id_;
         return *this;
     }
 
-    constexpr WId& operator-=(const WId &other) noexcept
+    constexpr _WId& operator-=(const _WId &other) noexcept
     {
         id_ -= other.id_;
         return *this;
     }
 
-    constexpr operator size_t() const noexcept {
+    constexpr operator T() const noexcept {
         return id_;
     }
 
@@ -111,17 +112,22 @@ public:
 
 private:
 
-    size_t id_=0; 
+    T id_=0; 
 };
+
+using WId = _WId<std::size_t>;
+using WComponentId = _WId<std::uint8_t>;
+using WEntityId = _WId<std::uint32_t>;
+using WAssetId = _WId<std::size_t>;
 
 namespace std
 {
-    template <>
-    struct hash<WId>
+    template <typename T>
+    struct hash<_WId<T>>
     {
         std::size_t operator()(const WId & in_wid) const
         {
-            return std::hash<std::size_t>{}(in_wid.GetId());
+            return std::hash<T>{}(in_wid.GetId());
         }
     };
 }

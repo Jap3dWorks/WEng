@@ -7,6 +7,7 @@
 #include "WEngineObjects/TWRef.hpp"
 
 #include <memory>
+#include <type_traits>
 #include <unordered_map>
 #include <memory>
 #include <concepts>
@@ -16,20 +17,27 @@
 #define WOBJECTMANAGER_INITIAL_MEMORY 1024
 #endif
 
+template<typename T>
+concept wobject_derived = std::is_base_of_v<WObject, T> && requires(T a) {
+    a.WID();
+};
+
+
 /**
  * @brief This class is a container for all WObjectContainer.
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
  */
+template<wobject_derived WObjClass, typename WIdClass=WId>
 class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
     using ContainersType = std::unordered_map<const WClass *,
-        std::unique_ptr<IObjectDataBase<WObject>>>;
+        std::unique_ptr<IObjectDataBase<WObjClass>>>;
 
     using ClassIterator = TIterator<const WClass *,
-        ContainersType::const_iterator,
+        typename ContainersType::const_iterator,
         const WClass *const,
         const WClass *const>;
 
@@ -76,8 +84,8 @@ public:
      * @brief Create a new object of type T and assign a WId.
      * Assigned WId is unique by class type.
      */
-    template<std::derived_from<WObject> T>
-    WId Create(const char * in_fullname) {
+    template<std::derived_from<WObjClass> T>
+    WIdClass Create(const char * in_fullname) {
         return Create(T::StaticClass(),
                       in_fullname);
     }
@@ -87,9 +95,9 @@ public:
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If you replace an existing WId for the indicated class behaviour is undeffined.
      */
-    template<std::derived_from<WObject> T>
-    WId Create(const WId in_id,
-               const char * in_fullname) {
+    template<std::derived_from<WObjClass> T>
+    WIdClass Create(const WId in_id,
+                    const char * in_fullname) {
         return Create(T::StaticClass(),
                       in_id,
                       in_fullname);
@@ -99,41 +107,53 @@ public:
      * @brief Create a new object of type WClass and assign a WId.
      * Assigned WId id unique by class type.
      */
-    WId Create(const WClass * in_class,
-               const char * in_fullname);
+    WIdClass Create(const WClass * in_class,
+                    const char * in_fullname) {
+        EnsureClassStorage(in_class);
+    
+        WIdClass id = containers_[in_class]->Create();
+        
+        WObject * obj;
+        containers_[in_class]->Get(id, obj);
+
+        obj->WID(id);
+        obj->Name(in_fullname);
+
+        return id;
+    }
 
     /**
      * @brief Create a new object of type WClass at the specified in_id.
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If your replace an existing WId for the indicated class behaviour is undeffined.
      */
-    WId Create(const WClass * in_class,
-                          const WId& in_id,
-                          const char * in_fullname);
+    WIdClass Create(const WClass * in_class,
+                    const WIdClass& in_id,
+                    const char * in_fullname);
 
-    template <std::derived_from<WObject> T>
+    template <std::derived_from<WObjClass> T>
     TWRef<T> GetRef(WId in_id) const {
         return GetRaw<T>(in_id);
     }
 
-    WObject * Get(const WClass * in_class, const WId & in_id) const {
-        WObject * result;
+    WObjClass * Get(const WClass * in_class, const WId & in_id) const {
+        WObjClass * result;
         containers_.at(in_class)->Get(in_id, result);
 
         return result;
     }
 
-    template<std::derived_from<WObject> T>
-    T * Get(WId in_id) const {
+    template<std::derived_from<WObjClass> T>
+    T * Get(WIdClass in_id) const {
         return static_cast<T*>(Get(T::StaticClass(), in_id));
     }
 
-    template<std::derived_from<WObject> T>
+    template<std::derived_from<WObjClass> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {
         assert(containers_.contains(T::StaticClass()));
 
         containers_.at(T::StaticClass())->ForEach(
-            [&in_predicate](WObject* ptr_) {
+            [&in_predicate](WObjClass* ptr_) {
                 in_predicate(
                     static_cast<T*>(ptr_)
                     );
@@ -141,7 +161,7 @@ public:
             );
     }
 
-    void ForEach(const WClass * in_class, TFunction<void(WObject*)> in_predicate) const {
+    void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
         assert(containers_.contains(in_class));
     
         containers_.at(in_class)->ForEach(in_predicate);
@@ -150,7 +170,7 @@ public:
     // TODO: ForEachWId could be a faster iterator?
     //  useful for objects already in graphics memory.
 
-    bool Contains(const WClass * in_class, WId in_id) const;
+    bool Contains(const WClass * in_class, WIdClass in_id) const;
 
     bool Contains(const WClass * in_class) const;
 

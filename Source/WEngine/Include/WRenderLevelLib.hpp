@@ -104,8 +104,85 @@ namespace WRenderLevelLib {
 
         // TODO Release Render Resources from components.
 
+        TSparseSet<WId> static_meshes;
+        static_meshes.Reserve(64);
+        TSparseSet<WId> texture_assets;
+        texture_assets.Reserve(64);
         TSparseSet<WId> render_pipelines;
         render_pipelines.Reserve(64);
+        TSparseSet<WId> pipeline_bindings;
+        pipeline_bindings.Reserve(64);
+        
+        in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
+            [&in_render,
+             &in_asset_db,
+             &static_meshes,
+             &texture_assets,
+             &render_pipelines](WStaticMeshComponent * _component) {
+                static_meshes.Insert(
+                    _component->StaticMeshAsset().GetId(),
+                    _component->StaticMeshAsset()
+                    );
+
+                render_pipelines.Insert(
+                    _component->RenderPipelineAsset().GetId(),
+                    _component->RenderPipelineAsset()
+                    );
+
+                auto pipeline_parameters =
+                    static_cast<WRenderPipelineParametersAsset*>(
+                        in_asset_db.Get(
+                            _component->RenderPipelineParametersAsset()
+                            ));
+
+                auto & parameters_struct = pipeline_parameters
+                    ->RenderPipelineParameters();
+
+                for(uint8_t i=0; i < parameters_struct.texture_assets_count; i++) {
+                    WId t_id = parameters_struct.texture_assets[i].value;
+                    
+                    texture_assets.Insert(
+                        t_id.GetId(),
+                        t_id
+                        );
+                }
+
+                in_render->DeletePipelineBinding(_component->WID());
+            }
+            );
+        
+        for(auto & id : static_meshes) {
+            in_render->UnloadStaticMesh(id);
+        }
+
+        for(auto & id : texture_assets) {
+            in_render->UnloadTexture(id);
+        }
+
+        for(auto & id : render_pipelines) {
+            in_render->DeletePipeline(id);
+        }
+
+        // auto pipeline_parameters = static_cast<WRenderPipelineParametersAsset*>(
+        //     in_asset_db.Get(
+        //         in_component->RenderPipelineParametersAsset()
+        //         ));
+
+        // uint8_t textures_count = pipeline_parameters
+        //     ->RenderPipelineParameters()
+        //     .texture_assets_count;
+
+        // for(uint8_t i=0; i < textures_count; i++) {
+        //     WId t_id = pipeline_parameters
+        //         ->RenderPipelineParameters()
+        //         .texture_assets[i].value;
+                    
+        //     texture_assets.Insert(
+        //         t_id.GetId(),
+        //         t_id
+        //         );
+
+        // render_pipelines.Reserve(64);
 
         // in_level.
 
