@@ -46,9 +46,11 @@ public:
 
 private:
 
+    void InitializeLevel(WLevel * in_level);
+
     struct LevelInfo {
         WId current_level{0};
-        bool level_loaded{false};
+        bool loaded{false};
         WLevel level{};
     } level_info_;
 

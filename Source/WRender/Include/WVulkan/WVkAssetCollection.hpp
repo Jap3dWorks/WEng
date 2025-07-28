@@ -58,7 +58,7 @@ public:
 
     /** Assign a WId to identify the asset */
     void RegisterAsset(A & in_asset) {
-        assets_.insert({in_asset.WID(), TRef<A>(in_asset)});
+        assets_.insert({in_asset.WID(), in_asset});
     }
 
     void UnregisterAsset(const WId & in_id) {
@@ -111,13 +111,13 @@ public:
 
 protected:
 
-    virtual D LoadAssetImpl(const A & in_asset) {return {};}
+    // virtual D LoadAssetImpl(const A & in_asset) {return {};}
     
-    virtual void UnloadAssetImpl(D & in_data) {}
+    // virtual void UnloadAssetImpl(D & in_data) {}
 
 private:
-
-    std::unordered_map<WId, TRef<A>> assets_;
+    // TWRef to ensure that the reference to asset is alive
+    std::unordered_map<WId, TWRef<A>> assets_;
     
     TObjectDataBase<D, void> data_;
 

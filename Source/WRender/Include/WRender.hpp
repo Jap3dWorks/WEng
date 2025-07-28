@@ -6,8 +6,8 @@
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
-#include "WCore/TRef.hpp"
 #include "WEngineInterfaces/IRender.hpp"
+#include "WVulkan/WVkRenderResources.hpp"
 
 #include <cstddef>
 
@@ -32,14 +32,16 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
 
-    void AddPipelineBinding(
-        WId pipeline_id,
-        WId in_mesh_id,
-        const std::vector<WId> & in_textures,
-        const std::vector<uint32_t> & in_textures_bindings
+    void CreatePipelineBinding(
+        const WId & component_id,
+        const WId & pipeline_id,
+        const WId & in_mesh_id,
+        const WRenderPipelineParametersStruct & in_parameters
+        // const std::vector<WId> & in_textures,
+        // const std::vector<uint32_t> & in_textures_bindings
         ) override ;
 
-    void Clear() override;
+    void Destroy() override;
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {
@@ -47,8 +49,6 @@ public:
     }
 
     void WaitIdle() const override;
-
-    WNODISCARD TRef<IRenderResources> RenderResources() override;
 
     WNODISCARD GLFWwindow * Window() const noexcept override {
         return window_info_.window;
@@ -71,13 +71,49 @@ public:
     WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
     { return render_command_pool_; }
 
+    void ClearPipelines() override;
+
+    void UnloadCurrentResources() override;
+
+    void RegisterTexture(WTextureAsset & in_texture_asset) override {
+        render_resources_.RegisterTexture(in_texture_asset);
+    }
+
+    void UnregisterTexture(const WId & in_id) override {
+        render_resources_.UnregisterTexture(in_id);
+    }
+
+    void LoadTexture(const WId & in_id) override {
+        render_resources_.LoadTexture(in_id);
+    }
+
+    void UnloadTexture(const WId & in_id) override {
+        render_resources_.UnloadTexture(in_id);
+    }
+
+    void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) override {
+        render_resources_.RegisterStaticMesh(in_static_mesh_asset);
+    }
+
+    void UnregisterStaticMesh(const WId & in_id) override {
+        render_resources_.UnregisterStaticMesh(in_id);
+    }
+
+    void LoadStaticMesh(const WId & in_id) override {
+        render_resources_.LoadStaticMesh(in_id);
+    }
+
+    void UnloadStaticMesh(const WId & in_id) override {
+        render_resources_.UnloadStaticMesh(in_id);
+    }
+
 private:
 
     void RecreateSwapChain();
 
     void RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index);
 
-    std::unique_ptr<IRenderResources> render_resources_{nullptr};
+    WVkRenderResources render_resources_{};
 
     WVkInstanceInfo instance_info_;
     WVkWindowInfo window_info_;

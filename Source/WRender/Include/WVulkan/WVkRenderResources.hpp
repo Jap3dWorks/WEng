@@ -12,7 +12,7 @@
 /**
  * @brief Manage the lifetime of render resources like geometries or textures.
  */
-class WRENDER_API WVkRenderResources : public IRenderResources {
+class WRENDER_API WVkRenderResources {
 
 public:
 
@@ -35,27 +35,29 @@ public:
 
     // Texture
 
-    void RegisterTexture(TRef<WTextureAsset> in_texture_struct) override;
+    void RegisterTexture(WTextureAsset & in_texture_struct);
 
-    void UnregisterTexture(WId in_id) override;
+    void UnregisterTexture(const WId & in_id);
 
-    void LoadTexture(WId in_id) override;
+    void LoadTexture(const WId & in_id);
 
-    void UnloadTexture(WId in_id) override;
+    void UnloadTexture(const WId & in_id);
 
-    const WVkTextureInfo & TextureInfo(WId in_id) const;
+    const WVkTextureInfo & TextureInfo(const WId & in_id) const;
 
     // Static Mesh
 
-    void RegisterStaticMesh(TRef<WStaticMeshAsset> in_mesh_struct) override;
+    void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) ;
 
-    void UnregisterStaticMesh(WId in_id) override;
+    void UnregisterStaticMesh(const WId & in_id);
 
-    void LoadStaticMesh(WId in_id) override;
+    void LoadStaticMesh(const WId & in_id);
 
-    void UnloadStaticMesh(WId in_id) override;
+    void UnloadStaticMesh(const WId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(WId in_id) const;
+    const WVkMeshInfo & StaticMeshInfo(const WId & in_id) const;
+
+    void Clear();
 
 private:
 

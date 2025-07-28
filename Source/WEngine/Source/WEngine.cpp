@@ -12,6 +12,8 @@
 #include "WEngineObjects/WComponent.hpp"
 #include "WLog.hpp"
 
+#include "WRenderLevelLib.hpp"
+
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
 #endif
@@ -45,7 +47,7 @@ void WEngine::run()
     assert(startup_info_.startup_level);
     
     level_info_.current_level = startup_info_.startup_level;
-    level_info_.level_loaded = false;
+    level_info_.loaded = false;
     level_info_.level = level_register_.GetCopy(level_info_.current_level);
 
     // TODO Window out of WRender
@@ -54,14 +56,14 @@ void WEngine::run()
         
         WEngineCycleData engine_cycle_data;
 
-        if (!level_info_.level_loaded) {
+        if (!level_info_.loaded) {
 
             level_info_.level = level_register_.GetCopy(
                 level_info_.current_level
                 );
             
             level_info_.level.Init(engine_cycle_data);
-            level_info_.level_loaded = true;
+            level_info_.loaded = true;
         }
         else {
             // Update Components
@@ -91,7 +93,38 @@ void WEngine::run()
 }
 
 void WEngine::LoadLevel(const WId & in_level) {
-    // TODO
+    if (level_info_.current_level &&
+        level_info_.loaded) {
+
+        WRenderLevelLib::ReleaseRenderResources(
+            render_.get(),
+            level_info_.level.ActorComponentDb(),
+            asset_manager_
+            );
+    }
+
+    level_info_.loaded = false;
+
+    TOptionalRef<WLevel> level = level_register_.Get(in_level);
+
+    if (level.IsEmpty()) {
+        WFLOG("[RENDER] Level {} do not exists!", in_level.GetId());
+        return;
+    }
+
+    // Copy registered level
+    level_info_.level = *level;
+
+    // Initialize new level
+    WRenderLevelLib::InitializeResources(
+        render_.get(),
+        level_info_.level.ActorComponentDb(),
+        asset_manager_
+        );
+
+    level_info_.current_level = in_level;
+    level_info_.loaded = true;
+
     WFLOG("NOT IMPLEMENTED!");
 }
 

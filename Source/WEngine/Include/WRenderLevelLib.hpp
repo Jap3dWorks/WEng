@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -11,21 +12,21 @@
 
 namespace WRenderLevelLib {
 
-    inline void InitilizeResources(
-        TRef<IRender> in_render,
-        WActorComponentDb & in_actor_component_db,
-        WAssetDb & in_asset_db
+    inline void InitializeResources(
+        IRender * in_render,
+        const WActorComponentDb & in_actor_component_db,
+        const WAssetDb & in_asset_db
         ) {
 
         TSparseSet<WId> static_meshes;
         static_meshes.Reserve(64);
+        TSparseSet<WId> texture_assets;
+        texture_assets.Reserve(64);
         TSparseSet<WId> render_pipelines;
         render_pipelines.Reserve(64);
         TSparseSet<WId> pipeline_parameters;
         pipeline_parameters.Reserve(64);
-        TSparseSet<WId> texture_assets;
-        texture_assets.Reserve(64);
-
+        
         in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
             [&static_meshes,
              &render_pipelines,
@@ -39,6 +40,8 @@ namespace WRenderLevelLib {
 
                 pipeline_parameters.Insert(in_component->RenderPipelineParametersAsset().GetId(),
                                            in_component->RenderPipelineParametersAsset());
+
+                
 
             }
             );
@@ -58,15 +61,15 @@ namespace WRenderLevelLib {
         // Register Meshes
         for (const WId & id : static_meshes) {
             auto * static_mesh = static_cast<WStaticMeshAsset*>(in_asset_db.Get(id));
-            in_render->RenderResources()->RegisterStaticMesh(static_mesh);
-            in_render->RenderResources()->LoadStaticMesh(static_mesh->WID());
+            in_render->RegisterStaticMesh(*static_mesh);
+            in_render->LoadStaticMesh(static_mesh->WID());
         }
 
         // Register Textures
         for (const WId & id : texture_assets) {
             auto * texture_asset = static_cast<WTextureAsset*>(in_asset_db.Get(id));
-            in_render->RenderResources()->RegisterTexture(texture_asset);
-            in_render->RenderResources()->LoadTexture(texture_asset->WID());
+            in_render->RegisterTexture(*texture_asset);
+            in_render->LoadTexture(texture_asset->WID());
         }
 
         // Initialize Render
@@ -75,7 +78,37 @@ namespace WRenderLevelLib {
             in_render->CreateRenderPipeline(render_pipeline);
         }
 
-        // TODO Render Parameters
+        // Pipeline Bindings
+        in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
+            [&in_render,
+             &in_asset_db]
+            (WStaticMeshComponent* in_component) {
+                auto param =static_cast<WRenderPipelineParametersAsset*> (
+                    in_asset_db.Get(in_component->RenderPipelineParametersAsset())
+                    );
+
+                in_render->CreatePipelineBinding(
+                    in_component->WID(),
+                    in_component->RenderPipelineAsset(),
+                    in_component->StaticMeshAsset(),
+                    param->RenderPipelineParameters()
+                    );
+            });
+    }
+
+    inline void ReleaseRenderResources(
+        IRender * in_render,
+        const WActorComponentDb & in_actor_component_db,
+        const WAssetDb & in_asset_db
+        ) {
+
+        // TODO Release Render Resources from components.
+
+        TSparseSet<WId> render_pipelines;
+        render_pipelines.Reserve(64);
+
+        // in_level.
+
 
     }
 

@@ -44,23 +44,17 @@ public:
         WVkRenderPipelinesManager && other
         ) noexcept;
 
-    // WId CreateRenderPipeline(
-    //     EPipelineType in_pipeline_type,
-    //     const std::vector<std::string> & in_shader_files,
-    //     const std::vector<EShaderType> & in_shader_types
-    //     );
-
     void CreateRenderPipeline(
         const WId & in_id,
         const WRenderPipelineStruct & pstruct
         );
 
-    WId AddBinding(
-        WId in_pipeline_id,
-        // WId in_descriptor_set_id,
-        WId in_mesh_asset_id,
+    WId CreateBinding(
+        const WId & component_id,
+        const WId & in_pipeline_id,
+        const WId & in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
-        std::vector<uint32_t> in_textures_bindings
+        std::vector<uint16_t> in_textures_bindings
         ) noexcept;
 
     WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WId in_id) const {
@@ -83,13 +77,13 @@ public:
         return bindings_.Get(in_id);
     }
 
-    WNODISCARD constexpr uint32_t Width() const noexcept { return width; }
+    WNODISCARD constexpr uint32_t Width() const noexcept { return width_; }
 
-    void constexpr Width(uint32_t in_width) noexcept { width = in_width; }
+    void constexpr Width(uint32_t in_width) noexcept { width_ = in_width; }
 
-    WNODISCARD constexpr uint32_t Heigth() const noexcept { return height; }
+    WNODISCARD constexpr uint32_t Heigth() const noexcept { return height_; }
 
-    void constexpr Height(uint32_t in_height) noexcept { height = in_height; }
+    void constexpr Height(uint32_t in_height) noexcept { height_ = in_height; }
 
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WId)> in_predicate);
     void ForEachPipeline(EPipelineType in_type, TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
@@ -110,7 +104,15 @@ public:
         };
     }
 
+    /**
+     * @brief Remove current active pipelines and bindings, resulting instance can be used.
+     */
     void Clear();
+
+    /**
+     * @brief destroy the obejct, resulting instance is useless.
+     */
+    void Destroy();
 
 private:
 
@@ -133,8 +135,8 @@ private:
     /** Pipelines by grouped by PipelineType*/
     std::unordered_map<EPipelineType, std::vector<WId>> stage_pipelines_{};
 
-    uint32_t width{0};
-    uint32_t height{0};
+    uint32_t width_{0};
+    uint32_t height_{0};
 
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
 

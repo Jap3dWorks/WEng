@@ -18,6 +18,8 @@ public:
 
     virtual void Draw()=0;
 
+    virtual void Destroy()=0;
+
     /**
      * @brief Create a render pipeline in graphics card for in_pipeline_asset parameter.
      * The render pipeline create should share the same WId
@@ -27,16 +29,38 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         )=0;
 
-    virtual void AddPipelineBinding(
-        WId pipeline_id,
-        WId in_mesh_id,
-        const std::vector<WId> & in_textures,
-        const std::vector<uint32_t> & in_textures_bindings
+    virtual void CreatePipelineBinding(
+        const WId & component_id,
+        const WId & pipeline_id,
+        const WId & in_mesh_id,
+        const WRenderPipelineParametersStruct & in_parameters
         )=0;
 
-    virtual void Clear()=0;
+    /**
+     * @brief Remove current Render Pipelines.
+     */
+    virtual void ClearPipelines() =0;
 
-    virtual TRef<IRenderResources> RenderResources()=0;
+    virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
+
+    virtual void UnregisterTexture(const WId & in_id)=0;
+
+    virtual void LoadTexture(const WId & in_id)=0;
+
+    virtual void UnloadTexture(const WId & in_id)=0;
+
+    virtual void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset)=0;
+
+    virtual void UnregisterStaticMesh(const WId & in_id)=0;
+
+    virtual void LoadStaticMesh(const WId & in_id)=0;
+
+    virtual void UnloadStaticMesh(const WId & in_id)=0;
+
+    /**
+     * @brief Unload all render resources.
+     */
+    virtual void UnloadCurrentResources() = 0;
 
     virtual void WaitIdle() const=0;
 

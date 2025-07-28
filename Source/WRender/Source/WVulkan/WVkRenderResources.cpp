@@ -1,6 +1,7 @@
 #include "WVulkan/WVkRenderResources.hpp"
 #include "WVulkan/WVkRenderCore.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include <vector>
 
 WVkRenderResources::WVkRenderResources() :
     texture_collection_(),
@@ -8,8 +9,7 @@ WVkRenderResources::WVkRenderResources() :
 {}
 
 WVkRenderResources::~WVkRenderResources() {
-    texture_collection_.Clear();
-    static_mesh_collection_.Clear();
+    Clear();
 }
 
 WVkRenderResources::WVkRenderResources(
@@ -74,42 +74,48 @@ WVkRenderResources & WVkRenderResources::operator=(WVkRenderResources && other) 
     return *this;
 }
 
-void WVkRenderResources::RegisterTexture(TRef<WTextureAsset> in_texture_asset) {
-    return texture_collection_.RegisterAsset(in_texture_asset.Get());
+void WVkRenderResources::RegisterTexture(WTextureAsset & in_texture_asset) {
+    return texture_collection_.RegisterAsset(in_texture_asset);
 }
 
-void WVkRenderResources::UnregisterTexture(WId in_id) {
+void WVkRenderResources::UnregisterTexture(const  WId & in_id) {
     texture_collection_.UnregisterAsset(in_id);
 }
 
-void WVkRenderResources::LoadTexture(WId in_id) {
+void WVkRenderResources::LoadTexture(const WId & in_id) {
     texture_collection_.LoadAsset(in_id);
 }
 
-void WVkRenderResources::UnloadTexture(WId in_id) {
+void WVkRenderResources::UnloadTexture(const WId & in_id) {
     texture_collection_.UnloadAsset(in_id);
 }
 
-void WVkRenderResources::RegisterStaticMesh(TRef<WStaticMeshAsset> in_static_mesh_asset) {
-    return static_mesh_collection_.RegisterAsset(in_static_mesh_asset.Get());
+void WVkRenderResources::RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) {
+    return static_mesh_collection_.RegisterAsset(in_static_mesh_asset);
 }
 
-void WVkRenderResources::UnregisterStaticMesh(WId in_id) {
+void WVkRenderResources::UnregisterStaticMesh(const WId & in_id) {
     static_mesh_collection_.UnregisterAsset(in_id);
 }
 
-void WVkRenderResources::LoadStaticMesh(WId in_id) {
+void WVkRenderResources::LoadStaticMesh(const WId & in_id) {
     static_mesh_collection_.LoadAsset(in_id);
 }
 
-void WVkRenderResources::UnloadStaticMesh(WId in_id) {
+void WVkRenderResources::UnloadStaticMesh(const WId & in_id) {
     static_mesh_collection_.UnloadAsset(in_id);
 }
 
-const WVkTextureInfo & WVkRenderResources::TextureInfo(WId in_id) const {
+const WVkTextureInfo & WVkRenderResources::TextureInfo(const WId & in_id) const {
     return texture_collection_.GetData(in_id);
 }
 
-const WVkMeshInfo & WVkRenderResources::StaticMeshInfo(WId in_id) const {
+const WVkMeshInfo & WVkRenderResources::StaticMeshInfo(const WId & in_id) const {
     return static_mesh_collection_.GetData(in_id);
 }
+
+void WVkRenderResources::Clear() {
+    texture_collection_.Clear();
+    static_mesh_collection_.Clear();    
+}
+

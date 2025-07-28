@@ -54,7 +54,7 @@ WRender::WRender() :
 WRender::~WRender()
 {
     WFLOG("Destroy WRender");
-    Clear();
+    Destroy();
 }
 
 void WRender::WaitIdle() const
@@ -161,7 +161,7 @@ void WRender::Initialize()
         device_info_
         );
 
-    render_resources_ = std::make_unique<WVkRenderResources>(
+    render_resources_ = WVkRenderResources(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
@@ -274,18 +274,6 @@ void WRender::Draw()
     frame_index = (frame_index + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
-// WId WRender::CreateRenderPipeline(
-//     EPipelineType in_pipeline_type,
-//     const std::vector<std::string> & in_shader_files,
-//     const std::vector<EShaderType> & in_shader_types
-//     ) {
-//     return pipelines_manager_.CreateRenderPipeline(
-//         in_pipeline_type,
-//         in_shader_files,
-//         in_shader_types
-//         );
-// }
-
 void WRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
     ) {
@@ -345,31 +333,41 @@ void WRender::RecreateSwapChain() {
     pipelines_manager_.Height(height);
 }
 
-TRef<IRenderResources> WRender::RenderResources() {
-    return render_resources_.get();
-}
+// TRef<IRenderResources> WRender::RenderResources() {
+//     return render_resources_.get();
+// }
  
-void WRender::AddPipelineBinding(
-    WId pipeline_id,
-    WId in_mesh_id,
-    const std::vector<WId> & in_textures,
-    const std::vector<uint32_t> & in_textures_bindings
+void WRender::CreatePipelineBinding(
+    const WId & component_id,
+    const WId & pipeline_id,
+    const WId & in_mesh_id,
+    const WRenderPipelineParametersStruct & in_parameters
+    // const std::vector<WId> & in_textures,
+    // const std::vector<uint32_t> & in_textures_bindings
     )
 {
-    WVkRenderResources * resources =
-        static_cast<WVkRenderResources*>(render_resources_.get());
+    // WVkRenderResources * resources =
+    //     static_cast<WVkRenderResources*>(render_resources_.get());
 
-    std::vector<WVkTextureInfo> tinfo{in_textures.size()};
+    std::vector<WVkTextureInfo> tinfo{
+        in_parameters.texture_assets_count
+    };
 
-    for (uint32_t i=0; i < in_textures.size(); i++) {
-        tinfo[i] = resources->TextureInfo(in_textures[i]);
+    std::vector<uint16_t> tbinding{in_parameters.texture_assets_count};
+
+    for (uint8_t i=0; i < in_parameters.texture_assets_count; i++) {
+        tinfo[i] = render_resources_.TextureInfo(
+            in_parameters.texture_assets[i].value
+            );
+        tbinding[i] = in_parameters.texture_assets[i].binding;
     }
 
-    pipelines_manager_.AddBinding(
+    pipelines_manager_.CreateBinding(
+        component_id,
         pipeline_id,
         in_mesh_id,
         tinfo,
-        in_textures_bindings
+        tbinding
         );
 }
 
@@ -466,7 +464,7 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
             pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
 
         auto& mesh_info =
-            static_cast<WVkRenderResources*>(render_resources_.get())->StaticMeshInfo(
+            render_resources_.StaticMeshInfo(
                 binding.mesh_asset_id
                 );
 
@@ -518,9 +516,16 @@ void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_in
     }
 }
 
-void WRender::Clear() {
+void WRender::ClearPipelines() {
     pipelines_manager_.Clear();
-    pipelines_manager_ = {};
+}
+
+void WRender::UnloadCurrentResources() {
+    render_resources_.Clear();
+}
+
+void WRender::Destroy() {
+    pipelines_manager_.Destroy();
 
     WVulkan::Destroy(image_available_semaphore_, device_info_);
 
@@ -539,7 +544,7 @@ void WRender::Clear() {
     
     render_command_buffer_ = {};
 
-    render_resources_ = nullptr;
+    render_resources_.Clear();
 
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);
@@ -553,3 +558,4 @@ void WRender::Clear() {
     // Destroy Window
     WVulkan::Destroy(window_info_);    
 }
+

@@ -91,6 +91,10 @@ public:
         close_fn_ = std::move(in_fn);
     }
 
+    const WActorComponentDb & ActorComponentDb() const {
+        return actor_component_db_;
+    }
+
 private:
 
     std::string ActorPath(const WClass* in_class) const;

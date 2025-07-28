@@ -52,7 +52,7 @@ struct WRenderPipelineStruct {
 
 template<typename T>
 struct TRPParameter {
-    size_t binding;
+    uint16_t binding;
     T value;
 };
 
@@ -60,7 +60,9 @@ using WRPFloatParameterList = std::array<TRPParameter<float>, 8>;
 using WRPWIdParameterList = std::array<TRPParameter<WId>, 8>;
 
 struct WRenderPipelineParametersStruct {
-    WRPFloatParameterList float_parameters;
-    WRPWIdParameterList texture_assets;
+    WRPFloatParameterList float_parameters{};
+    uint8_t float_parameters_count{0};
+    WRPWIdParameterList texture_assets{};
+    uint8_t texture_assets_count{0};
 };
 

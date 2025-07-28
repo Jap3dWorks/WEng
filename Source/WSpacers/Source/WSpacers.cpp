@@ -134,7 +134,6 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::DefaultCreate();
 
-        // TODO use WRenderPipelineAsset
         WId pipeline_wid = engine.AssetManager().Create(
             WRenderPipelineAsset::StaticClass(),
             "/Content/RenderPipeline/RPip.RPip");
@@ -173,7 +172,7 @@ int main(int argc, char** argv)
         engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
         engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
 
-        engine.Render()->AddPipelineBinding(
+        engine.Render()->CreatePipelineBinding(
             pipeline_wid,
             static_mesh->WID(),
             {texture_asset->WID()},
