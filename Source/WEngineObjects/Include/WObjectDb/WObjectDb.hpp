@@ -18,9 +18,10 @@
 #endif
 
 template<typename T>
-concept wobject_derived = std::is_base_of_v<WObject, T> && requires(T a) {
-    a.WID();
-};
+concept has_wid = requires(T a) { a.WID(); };
+
+template<typename T>
+concept wobject_derived = std::is_base_of_v<WObject, T> && has_wid<T>;
 
 
 /**
@@ -129,7 +130,21 @@ public:
      */
     WIdClass Create(const WClass * in_class,
                     const WIdClass& in_id,
-                    const char * in_fullname);
+                    const char * in_fullname) {
+        EnsureClassStorage(in_class);
+
+        assert(!containers_[in_class]->Contains(in_id));
+
+        containers_[in_class]->Insert(in_id);
+
+        WObject * obj;
+        containers_[in_class]->Get(in_id, obj);
+
+        obj->WID(in_id);
+        obj->Name(in_fullname);
+
+        return in_id;
+    }
 
     template <std::derived_from<WObjClass> T>
     TWRef<T> GetRef(WId in_id) const {
@@ -170,25 +185,48 @@ public:
     // TODO: ForEachWId could be a faster iterator?
     //  useful for objects already in graphics memory.
 
-    bool Contains(const WClass * in_class, WIdClass in_id) const;
+    bool Contains(const WClass * in_class, WIdClass in_id) const {
+        return containers_.contains(in_class) && containers_.at(in_class)->Contains(in_id);
+    }
 
-    bool Contains(const WClass * in_class) const;
+    bool Contains(const WClass * in_class) const {
+        return containers_.contains(in_class);
+    }
 
     /**
      * @brief Returns present (or that have been present) classes in this object.
      */
-    ClassIterator Classes() const;
+    ClassIterator Classes() const {
+        return ClassIterator(
+            containers_.cbegin(),
+            containers_.cend(),
+            [](ClassIterator::IterType & _iter, const size_t & _n) -> const WClass *const {
+                return (*_iter).first;
+            }
+            );
+    }
 
     /**
      * @brief Ammount of memory initially present for each stored class.
      */
-    void InitialMemorySize(size_t in_ammount);
+    void InitialMemorySize(size_t in_ammount) {
+        initial_memory_size_ = in_ammount;
+    }
 
-    std::vector<WId> Indexes(const WClass * in_class) const;
+    std::vector<WId> Indexes(const WClass * in_class) const {
+        assert(containers_.contains(in_class));
+    
+        return containers_.at(in_class)->Indexes();
+    }
 
-    WNODISCARD size_t InitialMemorySize() const;
+    WNODISCARD size_t InitialMemorySize() const {
+        return initial_memory_size_;
+    }
 
-    WNODISCARD size_t Count(const WClass * in_class) const;
+    WNODISCARD size_t Count(const WClass * in_class) const {
+        assert(containers_.contains(in_class));
+        return containers_.at(in_class)->Count();
+    }
 
 private:
 
@@ -201,7 +239,16 @@ private:
         }
     }
 
-    void EnsureClassStorage(const WClass * in_class);
+    void EnsureClassStorage(const WClass * in_class) {
+        if (!containers_.contains(in_class)) {
+            containers_[in_class] =
+                in_class->CreateObjectDatabase();
+            
+            containers_[in_class]->Reserve(
+                initial_memory_size_
+                );
+        }
+    }
 
     ContainersType containers_;
 
