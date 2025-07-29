@@ -17,21 +17,13 @@ class WCORE_API WObject
 
 public:
 
-    // WNODISCARD constexpr WId WID() const noexcept
-    // { return wid_; }
-
-    // constexpr void WID(WId in_wid) noexcept {
-    //     assert(wid_.GetId() == 0);
-    //     wid_ = in_wid;
+    // void Name(const char * in_name) noexcept {
+    //     std::strcpy(name_, in_name);
     // }
 
-    void Name(const char * in_name) noexcept {
-        std::strcpy(name_, in_name);
-    }
-
-    constexpr std::string Name() const {
-        return name_;
-    }
+    // constexpr std::string Name() const {
+    //     return name_;
+    // }
 
     constexpr void MarkToRemove() {
         remove_=true;
@@ -46,8 +38,8 @@ protected:
 private:
 
     // WId wid_;
-    char name_[WOBJECT_NAME_SIZE]; // TODO MOVE to WAsset WComponent WActor
-    bool remove_;                  // TODO Move to WAsset WComponent WActor
+    // char name_[WOBJECT_NAME_SIZE]; // TODO MOVE to WAsset WComponent WEntity
+    bool remove_;                  // TODO Move to WAsset WComponent WEntity
 
 };
 

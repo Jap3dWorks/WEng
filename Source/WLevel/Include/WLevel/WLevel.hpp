@@ -2,10 +2,10 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
-#include "WEngineObjects/WActor.hpp"
+#include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WObjectDb/WActorComponentDb.hpp"
+#include "WObjectDb/WEntityComponentDb.hpp"
 
 class WLEVEL_API WLevel {
 public:
@@ -44,13 +44,13 @@ public:
 
     WId CreateActor(const WClass * in_class) ;
 
-    TWRef<WActor> GetActor(const WId & in_id) const ;
+    TWRef<WEntity> GetActor(const WId & in_id) const ;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
      */
     void ForEachActor(const WClass * in_class,
-                      TFunction<void(WActor*)> in_predicate) const ;
+                      TFunction<void(WEntity*)> in_predicate) const ;
 
     WId CreateComponent(const WId & in_actor_id,
                         const WClass * in_class) ;
@@ -91,7 +91,7 @@ public:
         close_fn_ = std::move(in_fn);
     }
 
-    const WActorComponentDb & ActorComponentDb() const {
+    const WEntityComponentDb & ActorComponentDb() const {
         return actor_component_db_;
     }
 
@@ -104,7 +104,7 @@ private:
 
     const char * name_;
 
-    WActorComponentDb actor_component_db_;
+    WEntityComponentDb actor_component_db_;
 
     InitFn init_fn_;
 

@@ -10,7 +10,7 @@
 // TODO Serializable
 
 class WClass;
-class WActor;
+class WEntity;
 class WComponent;
 
 class  ILevel {
@@ -38,21 +38,21 @@ public:
     virtual void Close(const WEngineCycleData & in_cycle_data)=0;
 
     /**
-     * @brief Create WActor derived objects.
+     * @brief Create WEntity derived objects.
      */
     virtual WId CreateActor(const WClass * in_class)=0;
 
     /**
      * @brief Get an Actor reference from WId.
      */
-    virtual TWRef<WActor> GetActor(const WId & in_id) =0;
+    virtual TWRef<WEntity> GetActor(const WId & in_id) =0;
 
     /**
      * @brief Iter over all actors of class in_class and derived classes.
-     * So WActor should iterate over all level actors.
+     * So WEntity should iterate over all level actors.
      */
     virtual void ForEachActor(const WClass * in_class,
-                              TFunction<void(WActor*)> in_predicate) const=0;
+                              TFunction<void(WEntity*)> in_predicate) const=0;
 
     virtual WId CreateComponent(const WId & in_actor,
                                 const WClass * in_class)=0;

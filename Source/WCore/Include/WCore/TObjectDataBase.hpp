@@ -7,7 +7,7 @@
 
 #include <memory>
 
-template<typename T=void>
+template<typename T=void, typename WIdClass=WId>
 class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
@@ -15,18 +15,18 @@ public:
     virtual std::unique_ptr<IObjectDataBase> Clone() const=0;
     // virtual 
     /** Create and assign an WId */
-    virtual WId Create() = 0;
+    virtual WIdClass Create() = 0;
     /** Insert at WId  */
-    virtual void Insert(WId)=0;
-    virtual void Insert(WId, T* &)=0;
-    virtual void Remove(WId) =0;
+    virtual void Insert(WIdClass)=0;
+    virtual void Insert(WIdClass, T* &)=0;
+    virtual void Remove(WIdClass) =0;
     virtual void Clear() = 0;
-    virtual void Get(WId, T* &) = 0;
-    virtual void Get(WId, const T* &) const = 0;
+    virtual void Get(WIdClass, T* &) = 0;
+    virtual void Get(WIdClass, const T* &) const = 0;
     virtual size_t Count() const = 0;
-    virtual bool Contains(WId in_id) const = 0;
+    virtual bool Contains(WIdClass in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
-    virtual std::vector<WId> Indexes() = 0;
+    virtual std::vector<WIdClass> Indexes() = 0;
     virtual void ForEach(TFunction<void(T*)> in_function)=0;
     
 };
@@ -38,22 +38,25 @@ public:
  * You can specify a create_fn to create objects inside the container.
  * And a destroy_fn called when remove objects in the container.
  */
-template<typename T, typename P=void, typename Allocator=std::allocator<T>>
-class TObjectDataBase : public IObjectDataBase<P> {
+template<typename T, typename P=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
+class TObjectDataBase : public IObjectDataBase<P, WIdClass> {
 public:
 
     using Super = IObjectDataBase<P>;
     using Type = TObjectDataBase<T, P, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
-    using ConstIterIndexType = TIterator<WId, typename ObjectsType::ConstIndexIterator, WId, WId>;
+    using ConstIterIndexType = TIterator<WIdClass,
+                                         typename ObjectsType::ConstIndexIterator,
+                                         WIdClass,
+                                         WIdClass>;
 
-    using CreateFn = TFunction<T(const WId &)>;
+    using CreateFn = TFunction<T(const WIdClass &)>;
     using DestroyFn = TFunction<void(T&)>;
 
 public:
 
     constexpr TObjectDataBase() noexcept :
-        create_fn_([](WId) -> T {return T{};}),
+        create_fn_([](WIdClass) -> T {return T{};}),
         destroy_fn_([](T&)->void {}),
         id_pool_(),
         objects_()
@@ -62,7 +65,7 @@ public:
     constexpr TObjectDataBase(
         const Allocator & in_allocator
         ) :
-        create_fn_([](WId) -> T { return T{}; }),
+        create_fn_([](WIdClass) -> T { return T{}; }),
         destroy_fn_([](T&) -> void {}),
         id_pool_(),
         objects_(in_allocator)
@@ -135,7 +138,7 @@ public:
     }
 
     WId Create(const CreateFn & in_predicate) {
-        WId oid = id_pool_.Generate();
+        WIdClass oid = id_pool_.Generate();
         objects_.Insert(oid, in_predicate(oid));
 
         return oid;
@@ -146,34 +149,34 @@ public:
      * create_fn is used to create the object.
      */
     WId Create() override {
-        WId oid = id_pool_.Generate();
+        WIdClass oid = id_pool_.Generate();
         objects_.Insert(oid, create_fn_(oid));
 
         return oid;
     }
 
-    void Insert(WId in_id) override {
+    void Insert(WIdClass in_id) override {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id, create_fn_(in_id));
     }
 
-    void Insert(WId in_id, P* & in_value) override {
+    void Insert(WIdClass in_id, P* & in_value) override {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id, *static_cast<T*>(in_value));
     }
 
-    void Insert(WId in_id, const CreateFn & in_predicate) {
+    void Insert(WIdClass in_id, const CreateFn & in_predicate) {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id, in_predicate(in_id));
     }
 
-    void Remove(WId in_id, const DestroyFn & in_destroy_fn) {
+    void Remove(WIdClass in_id, const DestroyFn & in_destroy_fn) {
         in_destroy_fn(objects_.Get(in_id));
         id_pool_.Release(in_id);
         objects_.Delete(in_id);
     }
 
-    void Remove(WId in_id) override final {
+    void Remove(WIdClass in_id) override final {
         destroy_fn_(objects_.Get(in_id));
         id_pool_.Release(in_id);
         objects_.Delete(in_id);
@@ -197,19 +200,19 @@ public:
         objects_.Clear();
     }
 
-    T & Get(WId in_id) {
+    T & Get(WIdClass in_id) {
         return objects_.Get(in_id);
     }
 
-    const T & Get(WId in_id) const {
+    const T & Get(WIdClass in_id) const {
         return objects_.Get(in_id);
     }
 
-    void Get(WId in_id, P* & out_value) override final {
+    void Get(WIdClass in_id, P* & out_value) override final {
         out_value = &objects_.Get(in_id);
     }
 
-    void Get(WId in_id, const P* & out_value) const override final {
+    void Get(WIdClass in_id, const P* & out_value) const override final {
         out_value = &objects_.Get(in_id);
     }
 
@@ -217,7 +220,7 @@ public:
         return objects_.Count();
     }
 
-    bool Contains(WId in_id) const override final {
+    bool Contains(WIdClass in_id) const override final {
         return objects_.Contains(in_id);
     }
 
@@ -243,11 +246,11 @@ public:
             );
     }
 
-    std::vector<WId> Indexes() override {
-        std::vector<WId> result;
+    std::vector<WIdClass> Indexes() override {
+        std::vector<WIdClass> result;
         result.reserve(objects_.Count());
         
-        for (WId d : IterIndexes()) {
+        for (WIdClass d : IterIndexes()) {
             result.push_back(d);
         }
 
@@ -266,7 +269,7 @@ private:
 
     DestroyFn destroy_fn_; 
 
-    WIdPool id_pool_;
+    WIdPool<WIdClass> id_pool_;
 
     ObjectsType objects_;
     

@@ -17,6 +17,8 @@ class WENGINEOBJECTS_API WAssetDb {
     
 public:
 
+    using WAssetDbType = WObjectDb<WAsset, WAssetId>;
+
     constexpr WAssetDb() noexcept :
     object_manager_(),
     id_pool_(),
@@ -71,21 +73,21 @@ public:
         WId id = id_pool_.Generate();
         id_class_[id] = in_class;
     
-        object_manager_.Create(in_class, id, in_fullname);
+        object_manager_.Insert(in_class, id, in_fullname);
 
         return id;
     }
 
     WAsset * Get(const WId & in_id) const {
         assert(id_class_.contains(in_id));
-        return static_cast<WAsset*>(object_manager_.Get(id_class_.at(in_id), in_id));
+        return object_manager_.Get(id_class_.at(in_id), in_id);
     }
 
     TWRef<WAsset> GetRef(const WId & in_id) const {
         return Get(in_id);
     }
 
-    WObjectDb & ObjectManager() noexcept {
+    WAssetDbType & ObjectManager() noexcept {
         return object_manager_;
     }
 
@@ -93,7 +95,7 @@ private:
 
     void InitializeIdPool();
 
-    WObjectDb object_manager_;
+    WAssetDbType object_manager_;
 
     WIdPool id_pool_;
 

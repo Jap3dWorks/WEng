@@ -210,7 +210,7 @@ struct WVkDescriptorSetUBOBinding {
  */
 struct WVkPipelineBindingInfo
 {
-    WId wid{0};  // WActor id
+    WId wid{0};  // WEntity id
 
     WId render_pipeline_id{0};
     WId descriptor_set_id {0};

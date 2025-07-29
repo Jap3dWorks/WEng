@@ -8,7 +8,7 @@
 #include "WRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WEngineObjects/WActor.hpp"
+#include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WLog.hpp"
 
@@ -77,8 +77,8 @@ void WEngine::run()
 
             // Update Actors
             level_info_.level.ForEachActor(
-                WActor::StaticClass(),
-                [&engine_cycle_data](WActor * in_actor) {
+                WEntity::StaticClass(),
+                [&engine_cycle_data](WEntity * in_actor) {
                     in_actor->OnUpdate(
                         engine_cycle_data
                         );

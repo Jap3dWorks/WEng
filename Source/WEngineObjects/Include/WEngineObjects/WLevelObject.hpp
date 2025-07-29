@@ -9,7 +9,7 @@
 class WLevel;
 
 /**
- * @brief Base class for objects that can be present in a level (WActors and WComponents).
+ * @brief Base class for objects that can be present in a level (WEntitys and WComponents).
 */
 WCLASS()
 class WCORE_API WLevelObject : public WObject

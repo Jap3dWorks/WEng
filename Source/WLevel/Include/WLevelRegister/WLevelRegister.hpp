@@ -13,6 +13,10 @@ class WLevel;
 class WLEVEL_API WLevelRegister {
 public:
 
+    using WLevelIdPool = WIdPool<WAssetId>;
+
+    using WLevelDb = TObjectDataBase<WLevel, void, WAssetId>;
+
     WLevelRegister();
 
     virtual ~WLevelRegister() = default;
@@ -25,17 +29,17 @@ public:
 
     WLevelRegister& operator=(WLevelRegister && other);
 
-    WId Create();    
+    WAssetId Create();
 
-    TOptionalRef<WLevel> Get(const WId & in_id);
+    TOptionalRef<WLevel> Get(const WAssetId & in_id);
 
-    WLevel GetCopy(const WId & in_id) const;
+    WLevel GetCopy(const WAssetId & in_id) const;
 
 private:
     
-    WIdPool id_pool_;
+    WLevelIdPool id_pool_;
 
-    TObjectDataBase<WLevel> levels_;
+    WLevelDb levels_;
 
 };
 

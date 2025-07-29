@@ -5,7 +5,7 @@
 #include "WCore/TSparseSet.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WObjectDb/WActorComponentDb.hpp"
+#include "WObjectDb/WEntityComponentDb.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
@@ -14,7 +14,7 @@ namespace WRenderLevelLib {
 
     inline void InitializeResources(
         IRender * in_render,
-        const WActorComponentDb & in_actor_component_db,
+        const WEntityComponentDb & in_actor_component_db,
         const WAssetDb & in_asset_db
         ) {
 
@@ -98,7 +98,7 @@ namespace WRenderLevelLib {
 
     inline void ReleaseRenderResources(
         IRender * in_render,
-        const WActorComponentDb & in_actor_component_db,
+        const WEntityComponentDb & in_actor_component_db,
         const WAssetDb & in_asset_db
         ) {
 

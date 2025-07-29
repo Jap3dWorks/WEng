@@ -25,7 +25,7 @@ public:
     
 public:
 
-    std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() const override {
+    std::unique_ptr<IObjectDataBase<WObject, WId>> CreateObjectDatabase() const override {
         TWAllocator<T> a;
 
         a.SetAllocateFn(
@@ -47,8 +47,10 @@ public:
             }
             );
 
-        return std::make_unique<TObjectDataBase<T, WObject, TWAllocator<T>>>(a);
-
+        return std::make_unique<TObjectDataBase<T,
+                                                WObject,
+                                                WId,
+                                                TWAllocator<T>>>(a);
     }
 
     constexpr const WClass * BaseClass() const override {

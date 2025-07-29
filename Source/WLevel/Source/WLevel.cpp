@@ -1,5 +1,5 @@
 #include "WLevel/WLevel.hpp"
-#include "WEngineObjects/WActor.hpp"
+#include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
 #include <format>
@@ -94,20 +94,20 @@ void WLevel::Close(const WEngineCycleData & in_cycle_data) {
 WId WLevel::CreateActor(const WClass * in_class) {
     std::string actor_path = ActorPath(in_class);
 
-    WId id = actor_component_db_.CreateActor(in_class, actor_path);
+    WId id = actor_component_db_.CreateEntity(in_class, actor_path);
     
-    actor_component_db_.GetActor(id)->Level(this);
+    actor_component_db_.GetEntity(id)->Level(this);
 
     return id;
 }
 
-TWRef<WActor> WLevel::GetActor(const WId & in_id) const {
-    return actor_component_db_.GetActor(in_id);
+TWRef<WEntity> WLevel::GetActor(const WId & in_id) const {
+    return actor_component_db_.GetEntity(in_id);
 }
 
 void WLevel::ForEachActor(const WClass * in_class,
-                          TFunction<void(WActor*)> in_predicate) const {
-    actor_component_db_.ForEachActor(in_class, in_predicate);
+                          TFunction<void(WEntity*)> in_predicate) const {
+    actor_component_db_.ForEachEntity(in_class, in_predicate);
 }
 
 WId WLevel::CreateComponent(const WId & in_actor_id,
@@ -145,18 +145,18 @@ void WLevel::WID(const WId & in_id) {
 }
 
 std::string WLevel::ActorPath(const WClass * in_class) const {
-    assert(in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class));
+    assert(in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class));
 
     return Name() + ":" + in_class->Name() + "_" +
-        std::format("{}", actor_component_db_.ActorCount(in_class));
+        std::format("{}", actor_component_db_.EntityCount(in_class));
 }
 
 std::string WLevel::ComponentPath(const WId & in_actor_id,
                                   const WClass * in_class) const {
     assert(object_manager_.Contains(id_actorclass_.at(in_actor_id), in_actor_id));
-    assert((in_class == WActor::StaticClass() || WActor::StaticClass()->IsBaseOf(in_class)));
+    assert((in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class)));
 
-    TWRef<WActor> actor = actor_component_db_.GetActor(in_actor_id);
+    TWRef<WEntity> actor = actor_component_db_.GetEntity(in_actor_id);
 
     return actor->Name() + ":" + in_class->Name();
 }

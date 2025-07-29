@@ -3,12 +3,12 @@ add_library(
     SHARED 
         CompileGenerated/CompileGenerated.cpp
         Source/WAsset.cpp
-        Source/WActor.cpp
+        Source/WEntity.cpp
         Source/WComponent.cpp
         Source/WTextureAsset.cpp
         Source/WObjectDb.cpp
         Source/WAssetDb.cpp
-        Source/WActorComponentDb.cpp
+        Source/WEntityComponentDb.cpp
 )
 
 target_include_directories(

@@ -4,20 +4,19 @@
 
 #include "WEngineObjects/WLevelObject.hpp"
 
-#include "WActor.WEngine.hpp"
+#include "WEntity.WEngine.hpp"
 
 class ILevel;
 
 /**
  * @brief Base class for all actors in the engine. 
- * Actors are all entities present in a level.
- * Actors has runtime properties.
+ * Entities are composed by components in the level.
 */
 WCLASS()
-class WCORE_API WActor : public WLevelObject
+class WCORE_API WEntity : public WLevelObject
 {
 
-    WOBJECT_BODY(WActor)
+    WOBJECT_BODY(WEntity)
 
 public:
 
@@ -33,8 +32,6 @@ public:
     WEntityId wid_;
 
 private:
-
-        
 
 };
 

@@ -17,11 +17,13 @@ class WRENDER_API WVkAssetCollection
 {
 public:
 
+    using WVkAssetDb = TObjectDataBase<D, void, WAssetId>;
+
     constexpr WVkAssetCollection() noexcept :
     assets_(), data_() {}
 
     constexpr WVkAssetCollection(
-        TFunction<D(const WId & id)> in_create_fn,
+        TFunction<D(const WAssetId & id)> in_create_fn,
         TFunction<void(D&)> in_clear_fn) :
     data_(in_create_fn, in_clear_fn) {}
 
@@ -56,12 +58,12 @@ public:
         return *this;
     }
 
-    /** Assign a WId to identify the asset */
+    /** Assign a WAssetId to identify the asset */
     void RegisterAsset(A & in_asset) {
         assets_.insert({in_asset.WID(), in_asset});
     }
 
-    void UnregisterAsset(const WId & in_id) {
+    void UnregisterAsset(const WAssetId & in_id) {
         assert(assets_.contains(in_id));
         assets_.erase(in_id);
     }
@@ -71,7 +73,7 @@ public:
     }
 
     /** put the data in the graphical memory */
-    void LoadAsset(const WId & in_id) {
+    void LoadAsset(const WAssetId & in_id) {
         assert(assets_.contains(in_id));
         data_.Insert(in_id);
     }
@@ -81,7 +83,7 @@ public:
     }
 
     /** pop from graphical memory */
-    void UnloadAsset(const WId & in_id) {
+    void UnloadAsset(const WAssetId & in_id) {
         assert(assets_.contains(in_id));
         data_.Remove(in_id);
     }
@@ -90,17 +92,17 @@ public:
         UnloadAsset(in_asset.WID());
     }
 
-    const D & GetData(const WId & in_id) const noexcept {
+    const D & GetData(const WAssetId & in_id) const noexcept {
         assert(data_.Contains(in_id));
         return data_.Get(in_id);
     }
 
-    bool Contains(const WId & in_id) const noexcept {
+    bool Contains(const WAssetId & in_id) const noexcept {
         // return data_.contains(in_id);
         return data_.Contains(in_id);
     }
 
-    const A & GetAsset(const WId & in_id) const {
+    const A & GetAsset(const WAssetId & in_id) const {
         return assets_.at(in_id).Get();
     }
 
@@ -111,15 +113,12 @@ public:
 
 protected:
 
-    // virtual D LoadAssetImpl(const A & in_asset) {return {};}
-    
-    // virtual void UnloadAssetImpl(D & in_data) {}
-
 private:
+
     // TWRef to ensure that the reference to asset is alive
-    std::unordered_map<WId, TWRef<A>> assets_;
+    std::unordered_map<WAssetId, TWRef<A>> assets_;
     
-    TObjectDataBase<D, void> data_;
+    WVkAssetDb data_;
 
 };
 

@@ -9,6 +9,7 @@
 /**
  * WId pool to generate and store unnused ids.
  */
+template<typename T=WId>
 class WCORE_API WIdPool
 {
 
@@ -50,9 +51,9 @@ public:
         return *this;
     }
 
-    WId Generate()
+    T Generate()
     {
-        size_t r = 0;
+        T r = 0;
         if (!released_.empty())
         {
             r = released_.back();
@@ -69,23 +70,23 @@ public:
         return r;
     }
 
-    void Release(WId wid)
+    void Release(T wid)
     {
         assert(wid.GetId() < last_id_ || reserved_.contains(wid.GetId()));
 
-        if (reserved_.contains(wid.GetId())) {
-            reserved_.erase(wid.GetId());
+        if (reserved_.contains(wid)) {
+            reserved_.erase(wid);
         }
         
-        released_.push_back(wid.GetId());
+        released_.push_back(wid);
     }
 
-    void Reserve(WId in_id) {
-        assert(!reserved_.contains(in_id.GetId()));
+    void Reserve(T in_id) {
+        assert(!reserved_.contains(in_id));
         
-        released_.remove(in_id.GetId());
-        if (in_id.GetId() >= last_id_) {
-            reserved_.insert(in_id.GetId());            
+        released_.remove(in_id);
+        if (in_id >= last_id_) {
+            reserved_.insert(in_id);
         }
     }
 
@@ -97,9 +98,9 @@ public:
 
 private:
 
-    size_t last_id_{0};
-    std::unordered_set<size_t> reserved_{};
-    std::list<size_t> released_{};
-    
+    T last_id_{0};
+    std::unordered_set<T> reserved_{};
+    std::list<T> released_{};
+
 };
 

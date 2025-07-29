@@ -6,6 +6,7 @@
 #include "WEngineObjects/WObject.hpp"
 #include "WEngineObjects/TWRef.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
@@ -34,31 +35,32 @@ class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
-    using ContainersType = std::unordered_map<const WClass *,
-        std::unique_ptr<IObjectDataBase<WObjClass>>>;
+    using DbType =
+        std::unordered_map<const WClass *,
+                           std::unique_ptr<IObjectDataBase<WObjClass, WId>>>;
 
     using ClassIterator = TIterator<const WClass *,
-        typename ContainersType::const_iterator,
-        const WClass *const,
-        const WClass *const>;
+        typename DbType::const_iterator,
+        const WClass * const,
+        const WClass * const>;
 
 public:
 
     constexpr WObjectDb() :
-        containers_(),
+        db_(),
         initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
         {}
     
     virtual ~WObjectDb() = default;
 
     WObjectDb(const WObjectDb& other) :
-    containers_(),
+    db_(),
     initial_memory_size_(other.initial_memory_size_) {
         CopyContainersFrom(other);
     }
     
     constexpr WObjectDb(WObjectDb && other) noexcept :
-    containers_(std::move(other.containers_)),
+    db_(std::move(other.db_)),
     initial_memory_size_(std::move(other.initial_memory_size_))
     {}
     
@@ -73,7 +75,7 @@ public:
 
     constexpr WObjectDb & operator=(WObjectDb && other) noexcept {
         if (this != &other) {
-            containers_ = std::move(other.containers_);
+            db_ = std::move(other.db_);
             initial_memory_size_ = std::move(other.initial_memory_size_);
         }
         return *this;
@@ -87,8 +89,51 @@ public:
      */
     template<std::derived_from<WObjClass> T>
     WIdClass Create(const char * in_fullname) {
-        return Create(T::StaticClass(),
-                      in_fullname);
+        return Create(T::StaticClass());
+    }
+
+    /**
+     * @brief Create a new object of type WClass and assign a WId.
+     * Assigned WId id unique by class type.
+     */
+    WIdClass Create(const WClass * in_class) {
+        EnsureClassStorage(in_class);
+    
+        WId id = db_[in_class]->Create();
+
+        return id.GetId();
+        
+        // WObject * obj;
+        // db_[in_class]->Get(id, obj);
+
+        // obj->WID(id);
+        // obj->Name(in_fullname);
+
+        // return id;
+    }
+
+    /**
+     * @brief Create a new object of type WClass at the specified in_id.
+     * Asserts that the WId doesn't exists for the indicated class already (only in debug).
+     * If your replace an existing WId for the indicated class behaviour is undeffined.
+     */
+    WIdClass Insert(const WClass * in_class,
+                    const WIdClass& in_id,
+                    const char * in_fullname) {
+        EnsureClassStorage(in_class);
+
+        assert(!containers_[in_class]->Contains(in_id));
+
+        db_[in_class]->Insert(in_id.GetId());
+
+        return in_id;
+
+        // WObject * obj;
+        // db_[in_class]->Get(in_id, obj);
+
+        // obj->WID(in_id);
+        // obj->Name(in_fullname);
+
     }
 
     /**
@@ -97,53 +142,11 @@ public:
      * If you replace an existing WId for the indicated class behaviour is undeffined.
      */
     template<std::derived_from<WObjClass> T>
-    WIdClass Create(const WId in_id,
+    WIdClass Insert(const WIdClass in_id,
                     const char * in_fullname) {
-        return Create(T::StaticClass(),
+        return Insert(T::StaticClass(),
                       in_id,
                       in_fullname);
-    }
-
-    /**
-     * @brief Create a new object of type WClass and assign a WId.
-     * Assigned WId id unique by class type.
-     */
-    WIdClass Create(const WClass * in_class,
-                    const char * in_fullname) {
-        EnsureClassStorage(in_class);
-    
-        WIdClass id = containers_[in_class]->Create();
-        
-        WObject * obj;
-        containers_[in_class]->Get(id, obj);
-
-        obj->WID(id);
-        obj->Name(in_fullname);
-
-        return id;
-    }
-
-    /**
-     * @brief Create a new object of type WClass at the specified in_id.
-     * Asserts that the WId doesn't exists for the indicated class already (only in debug).
-     * If your replace an existing WId for the indicated class behaviour is undeffined.
-     */
-    WIdClass Create(const WClass * in_class,
-                    const WIdClass& in_id,
-                    const char * in_fullname) {
-        EnsureClassStorage(in_class);
-
-        assert(!containers_[in_class]->Contains(in_id));
-
-        containers_[in_class]->Insert(in_id);
-
-        WObject * obj;
-        containers_[in_class]->Get(in_id, obj);
-
-        obj->WID(in_id);
-        obj->Name(in_fullname);
-
-        return in_id;
     }
 
     template <std::derived_from<WObjClass> T>
@@ -151,9 +154,9 @@ public:
         return GetRaw<T>(in_id);
     }
 
-    WObjClass * Get(const WClass * in_class, const WId & in_id) const {
+    WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {
         WObjClass * result;
-        containers_.at(in_class)->Get(in_id, result);
+        db_.at(in_class)->Get(in_id.GetId(), result);
 
         return result;
     }
@@ -167,30 +170,35 @@ public:
     void ForEach(TFunction<void(T*)> in_predicate) const {
         assert(containers_.contains(T::StaticClass()));
 
-        containers_.at(T::StaticClass())->ForEach(
-            [&in_predicate](WObjClass* ptr_) {
-                in_predicate(
-                    static_cast<T*>(ptr_)
-                    );
-            }
-            );
+        ForEach(T::StaticClass(), in_predicate);
+
+        db_.at(T::StaticClass())->ForEach(
+            [&in_predicate](WObject* ptr_) -> void {
+                in_predicate(static_cast<T*>(ptr_));
+            });
     }
 
     void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
         assert(containers_.contains(in_class));
     
-        containers_.at(in_class)->ForEach(in_predicate);
+        db_.at(in_class)->ForEach(
+            [&in_predicate](WObject* ptr_) -> void {
+                in_predicate(static_cast<WObjClass*>(ptr_));
+            });
     }
 
-    // TODO: ForEachWId could be a faster iterator?
-    //  useful for objects already in graphics memory.
-
-    bool Contains(const WClass * in_class, WIdClass in_id) const {
-        return containers_.contains(in_class) && containers_.at(in_class)->Contains(in_id);
+    template<typename T>
+    bool Contains(const WIdClass & in_id) const {
+        return db_.contains(T::StaticClass()) &&
+            db_.at(T::StaticClass())->Contains(in_id.GetId());
     }
 
-    bool Contains(const WClass * in_class) const {
-        return containers_.contains(in_class);
+    bool Contains(const WClass * in_class, const WIdClass & in_id) const {
+        return db_.contains(in_class) && db_.at(in_class)->Contains(in_id.GetId());
+    }
+
+    bool ContainsClass(const WClass * in_class) const {
+        return db_.contains(in_class);
     }
 
     /**
@@ -198,8 +206,8 @@ public:
      */
     ClassIterator Classes() const {
         return ClassIterator(
-            containers_.cbegin(),
-            containers_.cend(),
+            db_.cbegin(),
+            db_.cend(),
             [](ClassIterator::IterType & _iter, const size_t & _n) -> const WClass *const {
                 return (*_iter).first;
             }
@@ -213,10 +221,14 @@ public:
         initial_memory_size_ = in_ammount;
     }
 
-    std::vector<WId> Indexes(const WClass * in_class) const {
+    std::vector<WIdClass> Indexes(const WClass * in_class) const {
         assert(containers_.contains(in_class));
-    
-        return containers_.at(in_class)->Indexes();
+        std::vector<WIdClass> r;
+        r.reserve(db_.at(in_class)->Count());
+        for (auto & idx : db_.at(in_class)->Indexed()) {
+            r.push_back(idx.GetId());
+        }
+        return r;
     }
 
     WNODISCARD size_t InitialMemorySize() const {
@@ -225,32 +237,32 @@ public:
 
     WNODISCARD size_t Count(const WClass * in_class) const {
         assert(containers_.contains(in_class));
-        return containers_.at(in_class)->Count();
+        return db_.at(in_class)->Count();
     }
 
 private:
 
     void CopyContainersFrom(const WObjectDb & other) {
-        containers_.clear();
-        for (auto & p : other.containers_) {
-            containers_.insert(
+        db_.clear();
+        for (auto & p : other.db_) {
+            db_.insert(
                 {p.first, p.second->Clone()}
                 );
         }
     }
 
     void EnsureClassStorage(const WClass * in_class) {
-        if (!containers_.contains(in_class)) {
-            containers_[in_class] =
+        if (!db_.contains(in_class)) {
+            db_[in_class] =
                 in_class->CreateObjectDatabase();
             
-            containers_[in_class]->Reserve(
+            db_[in_class]->Reserve(
                 initial_memory_size_
                 );
         }
     }
 
-    ContainersType containers_;
+    DbType db_;
 
     size_t initial_memory_size_;
 

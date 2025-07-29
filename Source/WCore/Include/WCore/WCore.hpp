@@ -116,8 +116,9 @@ private:
 };
 
 using WId = _WId<std::size_t>;
-using WComponentId = _WId<std::uint8_t>;
+using WComponentTypeId = _WId<std::uint8_t>;
 using WEntityId = _WId<std::uint32_t>;
+using WEntityComponentId = _WId<std::size_t>;  // combine entity with component type id;
 using WAssetId = _WId<std::size_t>;
 
 namespace std

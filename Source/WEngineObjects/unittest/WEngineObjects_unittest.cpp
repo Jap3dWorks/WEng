@@ -10,7 +10,7 @@
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
-#include "WEngineObjects/WActor.hpp"
+#include "WEngineObjects/WEntity.hpp"
 #include "WLog.hpp"
 
 #include <vector>
@@ -55,7 +55,7 @@ bool WClass_Derived_Test() {
     const WClass * cls1 = WObject::StaticClass();
     const WClass * cls2 = WObject::StaticClass();
 
-    const WClass * cls3 = WActor::StaticClass();
+    const WClass * cls3 = WEntity::StaticClass();
 
     WFLOG("WObject is base of WObject: {}", cls1->IsBaseOf(cls2));
 
@@ -98,10 +98,10 @@ bool WObjectDb_WClass_Test() {
     WObjectDb man;
 
     WFLOG("Create a1");
-    TWRef<WActor> a1 = man.Get<WActor>(man.Create<WActor>("/Content/a1.a1"));
+    TWRef<WEntity> a1 = man.Get<WEntity>(man.Create<WEntity>("/Content/a1.a1"));
     WFLOG("Create a2");
-    TWRef<WObject> a2 = man.Get(WActor::StaticClass(),
-                                man.Create(WActor::StaticClass(),
+    TWRef<WObject> a2 = man.Get(WEntity::StaticClass(),
+                                man.Create(WEntity::StaticClass(),
                                            "/Content/a2.a2"));
 
     WFLOG("{} is a {}", a1->Name(), a1->Class()->Name());
@@ -109,15 +109,15 @@ bool WObjectDb_WClass_Test() {
 
     WFLOG("PRINT ACTORS TEMPLATE:");
 
-    man.ForEach<WActor>([](WActor* in){ WLOG("{}", in->Name());});
+    man.ForEach<WEntity>([](WEntity* in){ WLOG("{}", in->Name());});
 
     WFLOG("PRINT ACTORS WCLASS:");
 
-    man.ForEach(WActor::StaticClass(), [](WObject* in){ WLOG("{}", in->Class()->Name());});
+    man.ForEach(WEntity::StaticClass(), [](WObject* in){ WLOG("{}", in->Class()->Name());});
 
     WFLOG("End");
 
-    return a2->Class()->Name() == "WActor";
+    return a2->Class()->Name() == "WEntity";
 }
 
 TEST_CASE("WEngineObjects") {
