@@ -48,10 +48,12 @@ public:
             );
 
         return std::make_unique<TObjectDataBase<T,
-                                                WObject,
-                                                WId,
+                                                WObject, // <- template
+                                                WId,     // <- template
                                                 TWAllocator<T>>>(a);
     }
+
+    
 
     constexpr const WClass * BaseClass() const override {
         return BaseClassConstexpr();
@@ -80,5 +82,7 @@ public:
 
         return result;
     }
+
+protected:
 
 };

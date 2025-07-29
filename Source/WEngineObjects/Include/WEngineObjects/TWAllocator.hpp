@@ -4,8 +4,10 @@
 #include <type_traits>
 #include "WCore/TFunction.hpp"
 
+class BWAllocator {};
+
 template<typename T>
-class TWAllocator {
+class TWAllocator : public BWAllocator {
 public:
     
     using value_type = T;
@@ -92,3 +94,29 @@ constexpr bool operator==( const TWAllocator<T1>& lhs, const TWAllocator<T2>& rh
 {
     return std::is_same_v<T1, T2>;
 }
+
+
+// class WObjAllocator {
+
+// public:
+
+//     // constexpr pointer allocate(std::size_t n) {
+//     //     pointer p = new T[n];
+        
+//     //     allocate_fn_(pptr_, pn_, p, n);
+
+//     //     pptr_=p;
+//     //     pn_=n;
+
+//     //     return p;
+//     // }
+
+//     // constexpr void deallocate (pointer p, std::size_t n) {
+//     //     deallocate_fn_(p, n);
+//     //     delete[] p;
+//     // }
+
+// private:
+
+//     std::unique_ptr<BWAllocator> alloc_;
+// };

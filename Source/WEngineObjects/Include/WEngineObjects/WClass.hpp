@@ -9,6 +9,10 @@
 #include <unordered_set>
 
 class WObject;
+class WEntity;
+class WAsset;
+class WLevel;
+class WComponent;
 
 class WENGINEOBJECTS_API WClass
 {
@@ -51,6 +55,15 @@ public:
 public:
 
     virtual std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() const =0;
+
+    template<typename WBase, typename WIdClass>
+    std::unique_ptr<IObjectDataBase<WBase,WIdClass>> CC () const {
+        // return data_base_builder<WBase, WIdClass>();
+
+        // BDBBuilder<WBase, WIdClass> * b;
+        // return b->Create();
+        
+    }
 
     virtual constexpr const WClass * BaseClass() const=0;
 
@@ -101,6 +114,8 @@ public:
 
 protected:
 
+    virtual BBdr * CreateBd();
+
 private:
 
     const char * name_;
@@ -120,3 +135,87 @@ namespace std
     };
 }
 
+
+struct BBdr {
+    virtual std::unique_ptr<void*> CreateRaw()=0;
+
+
+    template<typename Base, typename I>
+    std::unique_ptr<IObjectDataBase<Base, I>> Create() {
+        
+    }
+
+};
+
+
+
+template<typename T>
+struct BDBBuilder : BBdr {
+
+    
+
+    template<typename WBase, typename WIdClass>
+    std::unique_ptr<IObjectDataBase<WBase, WIdClass>> _CreateObjectDb() {
+
+        TWAllocator<T> a;
+        a.SetAllocateFn(
+            []
+            (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
+                if (_pptr) {
+                    for(size_t i=0; i<_pn; i++) {
+                        if (!BWRef::IsInstanced(_pptr + i)) {
+                            continue;
+                        }
+                        
+                        for (auto & ref : BWRef::Instances(_pptr + i)) {
+                            if (ref == nullptr) continue;
+                            
+                            ref->BSet(_nptr + i);
+                        }
+                    }
+                }
+            }
+            );
+
+        return std::make_unique<TObjectDataBase<T,
+                                                WBase,
+                                                WIdClass,
+                                                TWAllocator<T>>>(a);
+    }
+};
+
+template<typename T, typename WBase, typename WIdClass>
+struct WDBBuilder : public BDBBuilder<WBase, WIdClass> {
+
+    std::unique_ptr<void*> CreateRaw() {
+        return CreateObjectDb();
+    }
+
+    std::unique_ptr<IObjectDataBase<WBase, WIdClass>> CreateObjectDb() override {
+        TWAllocator<T> a;
+        a.SetAllocateFn(
+            []
+            (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
+                if (_pptr) {
+                    for(size_t i=0; i<_pn; i++) {
+                        if (!BWRef::IsInstanced(_pptr + i)) {
+                            continue;
+                        }
+                        
+                        for (auto & ref : BWRef::Instances(_pptr + i)) {
+                            if (ref == nullptr) continue;
+                            
+                            ref->BSet(_nptr + i);
+                        }
+                    }
+                }
+            }
+            );
+
+        return std::make_unique<TObjectDataBase<T,
+                                                WBase,
+                                                WIdClass,
+                                                TWAllocator<T>>>(a);
+    }
+
+};
