@@ -37,7 +37,7 @@ public:
 
     using DbType =
         std::unordered_map<const WClass *,
-                           std::unique_ptr<IObjectDataBase<WObjClass, WId>>>;
+                           std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
 
     using ClassIterator = TIterator<const WClass *,
         typename DbType::const_iterator,
@@ -254,7 +254,7 @@ private:
     void EnsureClassStorage(const WClass * in_class) {
         if (!db_.contains(in_class)) {
             db_[in_class] =
-                in_class->CreateObjectDatabase();
+                in_class->DbBuilder().Create<WObjClass, WIdClass>();
             
             db_[in_class]->Reserve(
                 initial_memory_size_

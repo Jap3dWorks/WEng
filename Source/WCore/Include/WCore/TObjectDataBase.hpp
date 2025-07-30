@@ -7,7 +7,7 @@
 
 #include <memory>
 
-template<typename T=void, typename WIdClass=WId>
+template<typename P=void, typename WIdClass=WId>
 class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
@@ -18,16 +18,16 @@ public:
     virtual WIdClass Create() = 0;
     /** Insert at WId  */
     virtual void Insert(WIdClass)=0;
-    virtual void Insert(WIdClass, T* &)=0;
+    virtual void Insert(WIdClass, P* &)=0;
     virtual void Remove(WIdClass) =0;
     virtual void Clear() = 0;
-    virtual void Get(WIdClass, T* &) = 0;
-    virtual void Get(WIdClass, const T* &) const = 0;
+    virtual void Get(WIdClass, P* &) = 0;
+    virtual void Get(WIdClass, const P* &) const = 0;
     virtual size_t Count() const = 0;
     virtual bool Contains(WIdClass in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
-    virtual void ForEach(TFunction<void(T*)> in_function)=0;
+    virtual void ForEach(TFunction<void(P*)> in_function)=0;
     
 };
 
@@ -37,6 +37,7 @@ public:
  * Object in the containe can be accesed by WId.
  * You can specify a create_fn to create objects inside the container.
  * And a destroy_fn called when remove objects in the container.
+ * T* is casteable into P*.
  */
 template<typename T, typename P=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
 class TObjectDataBase : public IObjectDataBase<P, WIdClass> {
