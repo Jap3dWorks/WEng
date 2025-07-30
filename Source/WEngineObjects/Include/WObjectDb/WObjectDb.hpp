@@ -5,10 +5,10 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WEngineObjects/WObject.hpp"
 #include "WEngineObjects/TWRef.hpp"
+#include "WCore/WConcepts.hpp"
 
 #include <algorithm>
 #include <memory>
-#include <type_traits>
 #include <unordered_map>
 #include <memory>
 #include <concepts>
@@ -18,19 +18,12 @@
 #define WOBJECTMANAGER_INITIAL_MEMORY 1024
 #endif
 
-template<typename T>
-concept has_wid = requires(T a) { a.WID(); };
-
-template<typename T>
-concept wobject_derived = std::is_base_of_v<WObject, T> && has_wid<T>;
-
-
 /**
  * @brief This class is a container for all WObjectContainer.
  * the manager will be the responsible of creation and storage of all WObject types.
  * Also will assign an unique id to each WObject.
  */
-template<wobject_derived WObjClass, typename WIdClass=WId>
+template<CWObjectDerived WObjClass, typename WIdClass=WId>
 class WENGINEOBJECTS_API WObjectDb {
 
 public:
@@ -88,7 +81,7 @@ public:
      * Assigned WId is unique by class type.
      */
     template<std::derived_from<WObjClass> T>
-    WIdClass Create(const char * in_fullname) {
+    WIdClass Create() {
         return Create(T::StaticClass());
     }
 
@@ -99,9 +92,7 @@ public:
     WIdClass Create(const WClass * in_class) {
         EnsureClassStorage(in_class);
     
-        WId id = db_[in_class]->Create();
-
-        return id.GetId();
+        return db_[in_class]->Create();
         
         // WObject * obj;
         // db_[in_class]->Get(id, obj);
@@ -117,16 +108,15 @@ public:
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If your replace an existing WId for the indicated class behaviour is undeffined.
      */
-    WIdClass Insert(const WClass * in_class,
-                    const WIdClass& in_id,
-                    const char * in_fullname) {
+    void Insert(const WClass * in_class,
+                const WIdClass& in_id) {
         EnsureClassStorage(in_class);
 
         assert(!containers_[in_class]->Contains(in_id));
 
-        db_[in_class]->Insert(in_id.GetId());
+        db_[in_class]->Insert(in_id);
 
-        return in_id;
+        // return in_id;
 
         // WObject * obj;
         // db_[in_class]->Get(in_id, obj);
@@ -142,21 +132,18 @@ public:
      * If you replace an existing WId for the indicated class behaviour is undeffined.
      */
     template<std::derived_from<WObjClass> T>
-    WIdClass Insert(const WIdClass in_id,
-                    const char * in_fullname) {
-        return Insert(T::StaticClass(),
-                      in_id,
-                      in_fullname);
+    void Insert(const WIdClass in_id) {
+        Insert(T::StaticClass(), in_id);
     }
 
-    template <std::derived_from<WObjClass> T>
-    TWRef<T> GetRef(WId in_id) const {
-        return GetRaw<T>(in_id);
-    }
+    // template <std::derived_from<WObjClass> T>
+    // TWRef<T> GetRef(WId in_id) const {
+    //     return GetRaw<T>(in_id);
+    // }
 
     WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {
         WObjClass * result;
-        db_.at(in_class)->Get(in_id.GetId(), result);
+        db_.at(in_class)->Get(in_id, result);
 
         return result;
     }
@@ -170,21 +157,26 @@ public:
     void ForEach(TFunction<void(T*)> in_predicate) const {
         assert(containers_.contains(T::StaticClass()));
 
-        ForEach(T::StaticClass(), in_predicate);
+        ForEach(T::StaticClass(),
+                [&in_predicate](WObjClass* _ptr) {
+                    in_predicate(static_cast<T*>(_ptr));
+                });
 
-        db_.at(T::StaticClass())->ForEach(
-            [&in_predicate](WObject* ptr_) -> void {
-                in_predicate(static_cast<T*>(ptr_));
-            });
+        // db_.at(T::StaticClass())->ForEach(
+        //     [&in_predicate](WObject* ptr_) -> void {
+        //         in_predicate(static_cast<T*>(ptr_));
+        //     });
     }
 
     void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
         assert(containers_.contains(in_class));
-    
-        db_.at(in_class)->ForEach(
-            [&in_predicate](WObject* ptr_) -> void {
-                in_predicate(static_cast<WObjClass*>(ptr_));
-            });
+
+        db_.at(in_class)->ForEach(in_predicate);
+
+        // db_.at(in_class)->ForEach(
+        //     [&in_predicate](WObject* ptr_) -> void {
+        //         in_predicate(static_cast<WObjClass*>(ptr_));
+        //     });
     }
 
     template<typename T>
@@ -223,12 +215,14 @@ public:
 
     std::vector<WIdClass> Indexes(const WClass * in_class) const {
         assert(containers_.contains(in_class));
-        std::vector<WIdClass> r;
-        r.reserve(db_.at(in_class)->Count());
-        for (auto & idx : db_.at(in_class)->Indexed()) {
-            r.push_back(idx.GetId());
-        }
-        return r;
+        return db_.at(in_class)->Indexes();
+        
+        // std::vector<WIdClass> r;
+        // r.reserve(db_.at(in_class)->Count());
+        // for (auto & idx : db_.at(in_class)->Indexed()) {
+        //     r.push_back(idx.GetId());
+        // }
+        // return r;
     }
 
     WNODISCARD size_t InitialMemorySize() const {

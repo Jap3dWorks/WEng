@@ -17,6 +17,7 @@ class WCORE_API WAsset : public WObject, public ISerializable
 public:
 
     void Serialize(const std::string & in_path) override;
+
     void Deserialize(const std::string & in_path) override;
 
     constexpr WAssetId WID() const noexcept {
@@ -28,8 +29,20 @@ public:
         wid_ = in_id;
     }
 
+    const char * Name() const noexcept {
+        return name_;
+    }
+
+    void Name(const char * in_name) noexcept {
+        std::strcpy(name_, in_name);
+    }
+
+private:
+
+    char name_[WOBJECT_NAME_SIZE];
+
     WAssetId wid_;
-    
+
 };
 
 

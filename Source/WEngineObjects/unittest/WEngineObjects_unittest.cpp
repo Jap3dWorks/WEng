@@ -1,4 +1,5 @@
 #include "WAssets/WTextureAsset.hpp"
+#include "WCore/WCore.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
 #define CATCH_CONFIG_MAIN
 
@@ -65,15 +66,16 @@ bool WClass_Derived_Test() {
 }
 
 bool WObjectDb_TWRef_Test() {
-    WFLOG("START")
-    WObjectDb man;
+    WFLOG("START");
+    WObjectDb<WAsset, WAssetId> man;
 
     man.InitialMemorySize(1);
 
-    TWRef<WStaticMeshAsset> a = man.Get<WStaticMeshAsset>(man.Create<WStaticMeshAsset>("a"));
-    TWRef<WTextureAsset> t = man.Get<WTextureAsset>(man.Create<WTextureAsset>("t"));
-    
+    TWRef<WStaticMeshAsset> a = man.Get<WStaticMeshAsset>(man.Create<WStaticMeshAsset>());
+    TWRef<WTextureAsset> t = man.Get<WTextureAsset>(man.Create<WTextureAsset>());
+
     a->Name("a");
+    t->Name("t");
 
     WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
     WFLOG("Name: {}", a->Name().c_str());
@@ -81,7 +83,7 @@ bool WObjectDb_TWRef_Test() {
     void* ptr = a.BPtr();
 
     for (size_t i=0; i<10; i++) {
-        auto z = man.Create<WStaticMeshAsset>("z");
+        auto z = man.Create<WStaticMeshAsset>();
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
@@ -95,27 +97,14 @@ bool WObjectDb_TWRef_Test() {
 bool WObjectDb_WClass_Test() {
     WFLOG("Start");
     
-    WObjectDb man;
+    WObjectDb<WEntity, WEntityId> man;
 
     WFLOG("Create a1");
-    TWRef<WEntity> a1 = man.Get<WEntity>(man.Create<WEntity>("/Content/a1.a1"));
+    TWRef<WEntity> a1 = man.Get<WEntity>(man.Create<WEntity>());
+    
     WFLOG("Create a2");
     TWRef<WObject> a2 = man.Get(WEntity::StaticClass(),
-                                man.Create(WEntity::StaticClass(),
-                                           "/Content/a2.a2"));
-
-    WFLOG("{} is a {}", a1->Name(), a1->Class()->Name());
-    WFLOG("{} is a {}", a2->Name(), a2->Class()->Name());
-
-    WFLOG("PRINT ACTORS TEMPLATE:");
-
-    man.ForEach<WEntity>([](WEntity* in){ WLOG("{}", in->Name());});
-
-    WFLOG("PRINT ACTORS WCLASS:");
-
-    man.ForEach(WEntity::StaticClass(), [](WObject* in){ WLOG("{}", in->Class()->Name());});
-
-    WFLOG("End");
+                                man.Create(WEntity::StaticClass()));
 
     return a2->Class()->Name() == "WEntity";
 }

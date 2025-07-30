@@ -58,22 +58,23 @@ public:
 
     template<std::derived_from<WAsset> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {
-        object_manager_.ForEach<T>([&in_predicate](WObject* in_object) {
-            in_predicate(static_cast<T*>(in_object));
+        object_manager_.ForEach<T>(
+            [&in_predicate](WAsset* in_asset) {
+                in_predicate(static_cast<T*>(in_asset));
         });
     }
 
-    template<std::derived_from<WObject> T>
-    WId Create(const char * in_fullname) {
+    template<std::derived_from<WAsset> T>
+    WAssetId Create(const char * in_fullname) {
         return Create(T::StaticClass(), in_fullname);
     }
 
-    WId Create(const WClass * in_class,
-               const char * in_fullname) {
-        WId id = id_pool_.Generate();
+    WAssetId Create(const WClass * in_class,
+                    const char * in_fullname) {
+        WAssetId id = id_pool_.Generate();
         id_class_[id] = in_class;
     
-        object_manager_.Insert(in_class, id, in_fullname);
+        object_manager_.Insert(in_class, id);
 
         return id;
     }
@@ -97,8 +98,8 @@ private:
 
     WAssetDbType object_manager_;
 
-    WIdPool id_pool_;
+    WIdPool<WAssetId> id_pool_;
 
-    std::unordered_map<WId, const WClass *> id_class_;
+    std::unordered_map<WAssetId, const WClass *> id_class_;
 
 };

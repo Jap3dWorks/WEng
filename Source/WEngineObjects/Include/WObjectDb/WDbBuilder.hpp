@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WEngineObjects/TWRef.hpp"
@@ -58,10 +59,15 @@ public:
 
     template<typename T>
     WDbBuilder(ParamType<T>) {
-        RegisterBuilder<T, WAsset, WAssetId>();
-        RegisterBuilder<T, WEntity, WEntityId>();
-        RegisterBuilder<T, WComponent, WEntityId>();
-        
+        if constexpr (std::is_convertible_v<T*,WAsset*>) {
+            RegisterBuilder<T, WAsset, WAssetId>();
+        }
+        if constexpr (std::is_convertible_v<T*,WEntity*>) {
+            RegisterBuilder<T, WEntity, WEntityId>();
+        }
+        if constexpr(std::is_convertible_v<T*, WComponent*>) {
+            RegisterBuilder<T, WComponent, WEntityId>();
+        }
     }
 
     template<typename B, typename I>
@@ -71,27 +77,22 @@ public:
         return CastDb<B,I>(std::move(erased));
     }
 
-    template<typename T, typename B, typename I>
+    template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
-        // T should be a derived class of B
-        if constexpr (std::is_convertible_v<T*,B*>) {
-
-            if (!register_.contains(typeid(std::pair<B,I>))) {
-                register_[typeid(std::pair<B,I>)] = []() -> std::unique_ptr<void*> {
-                    return CreateObjectDb<T,B,I>();
-                };
-            }
-
-            WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name())
-
-                assert(false);            
+        if (!register_.contains(typeid(std::pair<B,I>))) {
+            register_[typeid(std::pair<B,I>)] = []() -> std::unique_ptr<void*> {
+                return CreateObjectDb<T,B,I>();
+            };
         }
 
+        WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name())
+
+            assert(false);            
     }
 
 private:
 
-    template<typename T, typename B, typename I>
+    template<typename T, CConvertibleTo<T> B, typename I>
     static inline DbPtr<B,I> CreateObjectDb() {
         TWAllocator<T> a;
         a.SetAllocateFn(

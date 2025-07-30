@@ -4,8 +4,10 @@
 #include "WCore/WIdPool.hpp"
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
+#include "WCore/WConcepts.hpp"
 
 #include <memory>
+#include <concepts>
 
 template<typename P=void, typename WIdClass=WId>
 class IObjectDataBase {
@@ -37,9 +39,8 @@ public:
  * Object in the containe can be accesed by WId.
  * You can specify a create_fn to create objects inside the container.
  * And a destroy_fn called when remove objects in the container.
- * T* is casteable into P*.
  */
-template<typename T, typename P=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
+template<typename T, CConvertibleTo<T> P=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
 class TObjectDataBase : public IObjectDataBase<P, WIdClass> {
 public:
 

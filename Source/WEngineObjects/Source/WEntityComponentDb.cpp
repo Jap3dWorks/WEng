@@ -1,4 +1,5 @@
 #include "WObjectDb/WEntityComponentDb.hpp"
+#include "WCore/WCore.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
@@ -8,35 +9,31 @@ WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const std::s
 
     auto id = CreateEntityId(in_class);
 
-    entity_db_.Create(
+    entity_db_.Insert(
         in_class,
-        id,
-        in_name.c_str()
+        id
         );
+
+    WEntity* entity = entity_db_.Get(in_class, id);
+    entity->WID(id);
+    entity->Name(in_name.c_str());
 
     return id;
 
 }
 
-WComponentTypeId WEntityComponentDb::CreateComponent(const WEntityId & in_entity_id,
-                                                 const WClass * in_class,
-                                                 const std::string & in_name) {
+void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
+                                         const WEntityId & in_entity_id) {
     assert(WComponent::StaticClass()->IsBaseOf(in_class));
     assert(actor_manager_.Contains(id_actorclass_[in_actor_id], in_actor_id));
 
-    UpdateComponentMetadata(in_class, in_entity_id);
+    UpdateComponentMetadata(in_component_class, in_entity_id);
 
     // TODO resolve component id
 
-    
+    component_db_.Insert(in_component_class, in_entity_id);
 
-    WComponentTypeId r;
-    
-    component_db_.Create(in_class,
-                         r,
-                         in_name.c_str());
-
-    return r;
+    // return r;
 }
 
 WEntityId WEntityComponentDb::CreateEntityId(const WClass * in_class) {
@@ -56,4 +53,12 @@ void WEntityComponentDb::UpdateComponentMetadata(const WClass * in_component_cla
     }
     
     entity_components_[in_id].insert(in_component_class);
+
+    // Update component class id
+    if (!componentclass_id_.contains(in_component_class)) {
+        WComponentTypeId id = component_class_id_pool_.Generate();
+        componentclass_id_[in_component_class] = id;
+        id_componentclass_[id] = in_component_class;
+    }
 }
+

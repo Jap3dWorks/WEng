@@ -2,6 +2,7 @@
 #include <print>
 #include <memory>
 #include <vector>
+#include <concepts>
 
 struct B {
     virtual ~B() {
@@ -35,6 +36,13 @@ struct ImporterKey {
     // static inline constexpr const void * v=Value();
 };
 
+template<typename To, typename From>
+concept CConvertibleTo = std::is_convertible_v<From*, To*>;
+
+template<typename T, CConvertibleTo<T> P>
+struct TT {};
+
+
 template<typename T>
 inline constexpr RetType KK = ImporterKey<T>::Value();
 
@@ -54,5 +62,12 @@ int main(int argc, char* argv[])
     // p = std::make_unique<char>('j');
 
     const size_t & _v = cv[1];
+
+    uint8_t a;
+    uint8_t* i = &a;
+    void* kk = i;
+
+    
+    
 }
 

@@ -133,3 +133,25 @@ namespace std
     };
 }
 
+namespace WIdUtils {
+
+    inline void FromEntityComponentId(const WEntityComponentId & in_src,
+                                      WEntityId & out_dst1,
+                                      WComponentTypeId & out_dst2) {
+        std::size_t value = in_src.GetId();
+        out_dst2 = value;
+        value >>= 8;
+        out_dst2 = value;
+    }
+
+    inline WEntityComponentId ToEntityComponentId(const WEntityId & in_src1,
+                                                  const WComponentTypeId & in_src2) {
+        size_t v=0;
+        v |= in_src1.GetId();
+        v <<= 8;
+        v |= in_src2.GetId();
+
+        return v;
+    }
+
+}

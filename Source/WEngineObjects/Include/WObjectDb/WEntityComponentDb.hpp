@@ -18,7 +18,16 @@ public:
 
     using WComponentDbType = WObjectDb<WComponent, WEntityId>;
 
-    WEntityId CreateEntity(const WClass * in_class, const std::string& in_name) ;
+    
+
+public:
+
+    template<std::derived_from<WEntity> T>
+    WEntityId CreateEntity(const std::string & in_name) {
+        return CreateEntity(T::StaticClass(), in_name);
+    }
+
+    WEntityId CreateEntity(const WClass * in_class, const std::string & in_name);
 
     TWRef<WEntity> GetEntityRef(const WEntityId & in_id) const {
         return GetEntity(in_id);
@@ -69,6 +78,15 @@ public:
         return component_db_.Get(in_class, in_component_id);
     }
 
+    WComponent * GetComponent(const WEntityComponentId & in_entity_component_id) const {
+        WEntityId eid;
+        WComponentTypeId cid;
+    
+        WIdUtils::FromEntityComponentId(in_entity_component_id, eid, cid);
+
+        return GetComponent(id_componentclass_.at(cid), eid);
+    }
+
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const {
         for(const WClass * c : component_db_.Classes()) {
@@ -103,9 +121,10 @@ private:
 
     // Track which components has each entity
     std::unordered_map<WEntityId, std::unordered_set<const WClass *>> entity_components_;
-  
-    std::unordered_map<const WClass *, WComponentTypeId> componentclass_id;
-    
+
+    // Each component class has a unique 8 bit id
+    std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_;
+    std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;
     WIdPool<WComponentTypeId> component_class_id_pool_;
 
     

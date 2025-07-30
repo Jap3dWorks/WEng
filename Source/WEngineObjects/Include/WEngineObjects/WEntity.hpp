@@ -4,7 +4,9 @@
 
 #include "WEngineObjects/WLevelObject.hpp"
 
+#include "WEngineObjects/WObjectMacros.hpp"
 #include "WEntity.WEngine.hpp"
+#include <cstring>
 
 class ILevel;
 
@@ -29,9 +31,20 @@ public:
         wid_ = in_id;
     }
 
-    WEntityId wid_;
+    const char * Name() const {
+        return name_;
+    }
+
+    void Name(const char * in_name) {
+        std::strcpy(name_, in_name);
+    }
 
 private:
+
+    char name_[WOBJECT_NAME_SIZE];
+
+    WEntityId wid_;
+
 
 };
 
