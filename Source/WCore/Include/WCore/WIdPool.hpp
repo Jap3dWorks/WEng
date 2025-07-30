@@ -72,7 +72,7 @@ public:
 
     void Release(T wid)
     {
-        assert(wid.GetId() < last_id_ || reserved_.contains(wid.GetId()));
+        assert(wid.GetId() < last_id_.GetId() || reserved_.contains(wid));
 
         if (reserved_.contains(wid)) {
             reserved_.erase(wid);

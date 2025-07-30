@@ -26,38 +26,20 @@ public:
 public:
 
     WDbBuilder DbBuilder() const override {
-        return db_builder_(WDbBuilder::ParamType<T>{});
+        WDbBuilder r;
+
+        if constexpr (std::is_convertible_v<T*,WAsset*>) {
+            r.RegisterBuilder<T, WAsset, WAssetId>();
+        }
+        if constexpr (std::is_convertible_v<T*,WEntity*>) {
+            r.RegisterBuilder<T, WEntity, WEntityId>();
+        }
+        if constexpr(std::is_convertible_v<T*, WComponent*>) {
+            r.RegisterBuilder<T, WComponent, WEntityId>();
+        }
+
+        return r;
     }
-
-    // std::unique_ptr<IObjectDataBase<WObject, WId>> CreateObjectDatabase() const override {
-    //     TWAllocator<T> a;
-
-    //     a.SetAllocateFn(
-    //         []
-    //         (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
-    //             if (_pptr) {
-    //                 for(size_t i=0; i<_pn; i++) {
-    //                     if (!BWRef::IsInstanced(_pptr + i)) {
-    //                         continue;
-    //                     }
-                        
-    //                     for (auto & ref : BWRef::Instances(_pptr + i)) {
-    //                         if (ref == nullptr) continue;
-                            
-    //                         ref->BSet(_nptr + i);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         );
-
-    //     return std::make_unique<TObjectDataBase<T,
-    //                                             WObject, // <- template
-    //                                             WId,     // <- template
-    //                                             TWAllocator<T>>>(a);
-    // }
-
-    
 
     constexpr const WClass * BaseClass() const override {
         return BaseClassConstexpr();

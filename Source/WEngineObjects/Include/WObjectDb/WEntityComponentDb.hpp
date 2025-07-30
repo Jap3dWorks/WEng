@@ -18,8 +18,6 @@ public:
 
     using WComponentDbType = WObjectDb<WComponent, WEntityId>;
 
-    
-
 public:
 
     template<std::derived_from<WEntity> T>
@@ -73,7 +71,8 @@ public:
         return GetComponent(in_class, in_component_id);
     }
 
-    WComponent * GetComponent(const WClass * in_class, const WEntityId & in_component_id) const {
+    WComponent * GetComponent(const WClass * in_class,
+                              const WEntityId & in_component_id) const {
         assert(component_manager_.Contains(in_class, in_component_id));
         return component_db_.Get(in_class, in_component_id);
     }
@@ -126,7 +125,5 @@ private:
     std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_;
     std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;
     WIdPool<WComponentTypeId> component_class_id_pool_;
-
-    
 
 };

@@ -1,21 +1,14 @@
 #pragma once
 
 #include "WCore/WConcepts.hpp"
-#include "WCore/WCore.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/TWAllocator.hpp"
 #include "WLog.hpp"
 
-#include <type_traits>
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
-
-class WClass;
-class WEntity;
-class WComponent;
-class WAsset;
 
 struct WDbBuilder {
 
@@ -25,7 +18,12 @@ public:
     using DbType = IObjectDataBase<B,I>;
 
     template<typename B, typename I>
-    using DbPtr = std::unique_ptr<DbType<B,I>>;
+    using DbRawPtr = DbType<B,I>*;
+
+    using VoidPtr = void*;
+
+    template<typename B, typename I>
+    using RegKey = std::pair<B,I>;
 
     template<typename T>
     struct ParamType{
@@ -57,44 +55,32 @@ public:
         return *this;
     }
 
-    template<typename T>
-    WDbBuilder(ParamType<T>) {
-        if constexpr (std::is_convertible_v<T*,WAsset*>) {
-            RegisterBuilder<T, WAsset, WAssetId>();
-        }
-        if constexpr (std::is_convertible_v<T*,WEntity*>) {
-            RegisterBuilder<T, WEntity, WEntityId>();
-        }
-        if constexpr(std::is_convertible_v<T*, WComponent*>) {
-            RegisterBuilder<T, WComponent, WEntityId>();
-        }
-    }
-
     template<typename B, typename I>
-    DbPtr<B,I> Create() const {
-        auto erased = CreateDb(typeid(std::pair<B,I>));
+    std::unique_ptr<DbType<B,I>> Create() const {
+        VoidPtr type_erased = CreateDb(typeid(RegKey<B,I>));
         
-        return CastDb<B,I>(std::move(erased));
+        return CastDb<B,I>(type_erased);
     }
 
     template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
-        if (!register_.contains(typeid(std::pair<B,I>))) {
-            register_[typeid(std::pair<B,I>)] = []() -> std::unique_ptr<void*> {
+        if (!register_.contains(typeid(RegKey<B,I>))) {
+            register_[typeid(RegKey<B,I>)] = []() -> VoidPtr {
                 return CreateObjectDb<T,B,I>();
             };
         }
 
-        WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name())
+        WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name());
 
-            assert(false);            
+        // assert(false);            
     }
 
 private:
 
     template<typename T, CConvertibleTo<T> B, typename I>
-    static inline DbPtr<B,I> CreateObjectDb() {
+    static inline VoidPtr CreateObjectDb() {
         TWAllocator<T> a;
+        
         a.SetAllocateFn(
             []
             (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
@@ -114,23 +100,23 @@ private:
             }
             );
 
-        return std::make_unique<TObjectDataBase<T,
-                                                B,
-                                                I,
-                                                TWAllocator<T>>>(a);
+        return  new TObjectDataBase<T,
+                                    B,
+                                    I,
+                                    TWAllocator<T>>(a);
     }
 
-    std::unique_ptr<void*> CreateDb(std::type_index typeindex) const {
-        assert(regiter_.contains(typeindex));
+    VoidPtr CreateDb(std::type_index typeindex) const {
+        assert(register_.contains(typeindex));
         
         return register_.at(typeindex)();
     }
 
     template<typename B, typename I>
-    DbPtr<B,I> CastDb(DbPtr<void, void> && in_cast) {
-        return DbPtr<B,I>(static_cast<DbType<B,I>*>(in_cast.release()));
+    DbRawPtr<B,I> CastDb(VoidPtr in_cast) {
+        return static_cast<DbRawPtr<B,I>>(in_cast);
     }
 
-    std::unordered_map<std::type_index, TFunction< std::unique_ptr<void*>() >> register_;
+    std::unordered_map<std::type_index, TFunction< VoidPtr() >> register_;
 
 };

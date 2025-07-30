@@ -16,9 +16,9 @@ public:
 
     virtual std::unique_ptr<IObjectDataBase> Clone() const=0;
     // virtual 
-    /** Create and assign an WId */
+    /** Create and assign an WIdClass */
     virtual WIdClass Create() = 0;
-    /** Insert at WId  */
+    /** Insert at WIdClass */
     virtual void Insert(WIdClass)=0;
     virtual void Insert(WIdClass, P* &)=0;
     virtual void Remove(WIdClass) =0;
@@ -44,8 +44,8 @@ template<typename T, CConvertibleTo<T> P=void, typename WIdClass=WId, typename A
 class TObjectDataBase : public IObjectDataBase<P, WIdClass> {
 public:
 
-    using Super = IObjectDataBase<P>;
-    using Type = TObjectDataBase<T, P, Allocator>;
+    using Super = IObjectDataBase<P, WIdClass>;
+    using Type = TObjectDataBase<T, P, WIdClass, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
     using ConstIterIndexType = TIterator<WIdClass,
                                          typename ObjectsType::ConstIndexIterator,
@@ -139,7 +139,7 @@ public:
         return std::make_unique<Type>(*this);
     }
 
-    WId Create(const CreateFn & in_predicate) {
+    WIdClass Create(const CreateFn & in_predicate) {
         WIdClass oid = id_pool_.Generate();
         objects_.Insert(oid, in_predicate(oid));
 
@@ -150,7 +150,7 @@ public:
      * @brief Create an object in the container and return the assigned id.
      * create_fn is used to create the object.
      */
-    WId Create() override {
+    WIdClass Create() override {
         WIdClass oid = id_pool_.Generate();
         objects_.Insert(oid, create_fn_(oid));
 
