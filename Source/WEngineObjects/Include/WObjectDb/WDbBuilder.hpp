@@ -65,9 +65,13 @@ public:
     template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
         if (!register_.contains(typeid(RegKey<B,I>))) {
-            register_[typeid(RegKey<B,I>)] = []() -> VoidPtr {
-                return CreateObjectDb<T,B,I>();
-            };
+            
+            // register_[typeid(RegKey<B,I>)] = []() -> VoidPtr {
+            //     return CreateObjectDb<T,B,I>();
+            // };
+
+            register_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
+            
         }
 
         WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name());

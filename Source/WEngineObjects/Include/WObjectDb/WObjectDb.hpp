@@ -123,7 +123,6 @@ public:
 
         // obj->WID(in_id);
         // obj->Name(in_fullname);
-
     }
 
     /**
