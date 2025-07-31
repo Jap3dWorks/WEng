@@ -269,7 +269,7 @@ using TFnLmbd2 = TFnLmbd<2, T(Args...)>;
 template<typename T, typename ... Args>
 using TFnLmbd4 = TFnLmbd<4, T(Args...)>;
 
-/** @brief 8Bytes lambda size */
+/** @brief 8Bytes lambda size, Also valid for function pointers. */
 template<typename T, typename ... Args>
 using TFnLmbd8 = TFnLmbd<8, T(Args...)>;
 
@@ -287,7 +287,7 @@ using TFnLmbd64 = TFnLmbd<64, T(Args...)>;
 
 
 /**
- * @brief Optimized for function pointers.
+ * @brief Optimized for function pointers. Only valid for function ptrs.
  */
 template<typename T>
 struct TFnPtr;
