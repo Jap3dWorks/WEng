@@ -12,7 +12,7 @@ template<typename T>
 struct TFunction;
 
 /**
- * @brief General use function wrapper
+ * @brief General use function wrapper. Contains a virtual call.
  */
 template<typename Ret, typename... Args>
 struct TFunction<Ret(Args...)> {
@@ -28,11 +28,10 @@ private:
     // Concrete wrapper for callable objects
     template<typename F>
     struct Callable : CallableBase {
-        using f_type = F;
 
-        F func;
+        Callable(const F& f) : func(f) {}
 
-        Callable(F&& f) : func(std::forward<F>(f)) {}
+        Callable(F && f ) : func(std::move(f)) {}
 
         virtual ~Callable()=default;
 
@@ -59,6 +58,9 @@ private:
         std::unique_ptr<CallableBase> Clone() override {
             return std::make_unique<Callable<F>>(*this);
         }
+        using f_type = F;
+
+        F func;
 
     };
 
@@ -67,7 +69,9 @@ private:
 public:
 
     // // Constructor from function pointer
-    // TFunction(Ret(*f)(Args...)) : callable(std::make_unique<Callable<decltype(f)>>(f)) {}
+    TFunction(Ret(*f)(Args...)) :
+        callable(std::make_unique<Callable<Ret(*)(Args...)>>(f))
+        {}
 
     TFunction(const TFunction & other) :
         callable(other.callable->Clone())
