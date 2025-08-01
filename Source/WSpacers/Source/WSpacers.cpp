@@ -165,12 +165,14 @@ int main(int argc, char** argv)
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
-        engine.Render()->RenderResources()->RegisterTexture(texture_asset);
+        // TODO use levels
+
+        // engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
+        // engine.Render()->RenderResources()->RegisterTexture(texture_asset);
 
         // Load Resources into Graphics Memory
-        engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
-        engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
+        // engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
+        // engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
 
         engine.Render()->CreatePipelineBinding(
             pipeline_wid,
