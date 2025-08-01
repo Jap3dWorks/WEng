@@ -34,18 +34,16 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
 
-    void DeleteRenderPipeline(const WId & in_id) override { /* TODO */ }
+    void DeleteRenderPipeline(const WAssetId & in_id) override;
 
     void CreatePipelineBinding(
         const WId & component_id,
         const WId & pipeline_id,
         const WId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
-        // const std::vector<WId> & in_textures,
-        // const std::vector<uint32_t> & in_textures_bindings
         ) override ;
 
-    void DeletePipelineBinding(const WEntityComponentId & in_id) override { /* TODO */ }
+    void DeletePipelineBinding(const WEntityComponentId & in_id) override;
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {

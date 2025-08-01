@@ -92,6 +92,7 @@ namespace WRenderLevelLib {
                 //     in_component->StaticMeshAsset(),
                 //     param->RenderPipelineParameters()
                 //     );
+                
             });
     }
 

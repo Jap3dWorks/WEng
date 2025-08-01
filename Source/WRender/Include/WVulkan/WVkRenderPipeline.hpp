@@ -19,14 +19,14 @@ class WRENDER_API WVkRenderPipelinesManager
 
 public:
 
-    using WIdType = WEntityComponentId;
+    // using WIdType = WEntityComponentId;
 
-    using WVkRenderPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WIdType>;
-    using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WIdType>;
-    using WVkDesSetDb = TObjectDataBase<WVkDescriptorSetInfo, void, WIdType>;
-    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WIdType>;
+    using WVkRenderPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WAssetId>;
+    using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WAssetId>;
+    using WVkDesSetDb = TObjectDataBase<WVkDescriptorSetInfo, void, WEntityComponentId>;
+    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
 
-    WVkRenderPipelinesManager() noexcept {}
+    WVkRenderPipelinesManager() noexcept = default;
 
     virtual ~WVkRenderPipelinesManager();
 
@@ -52,34 +52,40 @@ public:
         ) noexcept;
 
     void CreateRenderPipeline(
-        const WIdType & in_id,
+        const WAssetId & in_id,
         const WRenderPipelineStruct & pstruct
         );
 
-    WIdType CreateBinding(
-        const WIdType & component_id,
-        const WIdType & in_pipeline_id,
-        const WIdType & in_mesh_asset_id,
+    void DeleteRenderPipeline(
+        const WAssetId & in_id
+        );
+
+    WEntityComponentId CreateBinding(
+        const WEntityComponentId & component_id,
+        const WAssetId & in_pipeline_id,
+        const WAssetId & in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
         std::vector<uint16_t> in_textures_bindings
         ) noexcept;
 
-    WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(WIdType in_id) const {
+    void DeleteBinding(const WEntityComponentId & in_id);
+
+    WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(const WAssetId & in_id) const {
         assert(pipelines_.Contains(in_id));
         return pipelines_.Get(in_id);
     }
     
-    WNODISCARD const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(WIdType in_id) const {
+    WNODISCARD const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(const WAssetId & in_id) const {
         assert(descriptor_set_layouts_.Contains(in_id));
         return descriptor_set_layouts_.Get(in_id);
     }
     
-    WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(WIdType in_id) const {
+    WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(const WEntityComponentId & in_id) const {
         assert(descriptor_sets_.Contains(in_id));
         return descriptor_sets_.Get(in_id);
     }
     
-    WNODISCARD const WVkPipelineBindingInfo & Binding(WIdType in_id) const {
+    WNODISCARD const WVkPipelineBindingInfo & Binding(const WEntityComponentId & in_id) const {
         assert(bindings_.Contains(in_id));
         return bindings_.Get(in_id);
     }
@@ -92,22 +98,29 @@ public:
 
     void constexpr Height(uint32_t in_height) noexcept { height_ = in_height; }
 
-    void ForEachPipeline(EPipelineType in_type, TFunction<void(WIdType)> in_predicate);
-    void ForEachPipeline(EPipelineType in_type, TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
-    void ForEachBinding(WIdType in_pipeline_id, TFunction<void(WIdType)> in_predicate);
-    void ForEachBinding(WIdType in_pipeline_id, TFunction<void(WVkPipelineBindingInfo)> in_predicate);
+    void ForEachPipeline(EPipelineType in_type,
+                         TFunction<void(const WAssetId &)> in_predicate);
+    
+    void ForEachPipeline(EPipelineType in_type,
+                         TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
+    
+    void ForEachBinding(const WAssetId & in_pipeline_id,
+                        TFunction<void(const WEntityComponentId &)> in_predicate);
+    
+    void ForEachBinding(const WAssetId & in_pipeline_id,
+                        TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
-    TIteratorPtr<WIdType> IteratePipelines(EPipelineType in_pipeline_type) {
+    TIteratorPtr<WAssetId> IteratePipelines(EPipelineType in_pipeline_type) {
         return {
-            &(*stage_pipelines_[in_pipeline_type].begin()),
-            &(*stage_pipelines_[in_pipeline_type].end())
+            &(*ptype_pipelines_[in_pipeline_type].begin()),
+            &(*ptype_pipelines_[in_pipeline_type].end())
         };
     }
 
-    TIteratorPtr<WIdType> IterateBindings(WIdType in_pipeline_id) {
+    TIteratorPtr<WEntityComponentId> IterateBindings(const WAssetId & in_pipeline_id) {
         return {
-            &(*pipeline_bindings_[in_pipeline_id].begin()),
-            &(*pipeline_bindings_[in_pipeline_id].end())
+            &(*pipeline_pbindings_[in_pipeline_id].begin()),
+            &(*pipeline_pbindings_[in_pipeline_id].end())
         };
     }
 
@@ -123,14 +136,11 @@ public:
 
 private:
 
-    // WIdType CreateDescriptorSetLayout();
+    void CreateDescriptorSetLayout(const WAssetId & in_id);
 
-    void CreateDescriptorSetLayout(const WIdType & in_id);
-
-    WIdType CreateDescriptorSet(WIdType in_descriptor_set_layout_id);
+    WEntityComponentId CreateDescriptorSet(const WEntityComponentId & in_descriptor_set_layout_id);
 
     void InitializeClearLambdas();
-
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};
@@ -138,10 +148,10 @@ private:
     WVkPipelineBindingDb bindings_{};
 
     /** Relation between each pipeline and its bindings*/
-    std::unordered_map<WIdType, std::vector<WIdType>> pipeline_bindings_{};
+    std::unordered_map<WAssetId, TSparseSet<WEntityComponentId>> pipeline_pbindings_{};
 
-    /** Pipelines by grouped by PipelineType*/
-    std::unordered_map<EPipelineType, std::vector<WIdType>> stage_pipelines_{};
+    /** Pipelines grouped by PipelineType*/
+    std::unordered_map<EPipelineType, TSparseSet<WAssetId>> ptype_pipelines_{};
 
     uint32_t width_{0};
     uint32_t height_{0};

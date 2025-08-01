@@ -283,6 +283,12 @@ void WRender::CreateRenderPipeline(
         );
 }
 
+void WRender::DeleteRenderPipeline(const WAssetId & in_id) {
+    pipelines_manager_.DeleteRenderPipeline(
+        in_id
+        );
+}
+
 void WRender::RecreateSwapChain() {
     WFLOG("RECREATE SWAP CHAIN!");
     
@@ -369,6 +375,10 @@ void WRender::CreatePipelineBinding(
         tinfo,
         tbinding
         );
+}
+
+void WRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
+    pipelines_manager_.DeleteBinding(in_id);
 }
 
 void WRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index)
