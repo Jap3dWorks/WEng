@@ -3,7 +3,7 @@
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
-WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const std::string & in_name) {
+WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const char * in_name) {
     assert(in_class == WEntity::StaticClass() ||
            WEntity::StaticClass()->IsBaseOf(in_class));
 
@@ -15,8 +15,9 @@ WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const std::s
         );
 
     WEntity* entity = entity_db_.Get(in_class, id);
+
     entity->WID(id);
-    entity->Name(in_name.c_str());
+    entity->Name(in_name);
 
     return id;
 
@@ -24,8 +25,8 @@ WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const std::s
 
 void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
                                          const WEntityId & in_entity_id) {
-    assert(WComponent::StaticClass()->IsBaseOf(in_class));
-    assert(actor_manager_.Contains(id_actorclass_[in_actor_id], in_actor_id));
+    assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
+    assert(entity_db_.Contains(id_entityclass_[in_entity_id], in_entity_id));
 
     UpdateComponentMetadata(in_component_class, in_entity_id);
 

@@ -19,14 +19,14 @@ public:
     /** Create and assign an WIdClass */
     virtual WIdClass Create() = 0;
     /** Insert at WIdClass */
-    virtual void Insert(WIdClass)=0;
-    virtual void Insert(WIdClass, P* &)=0;
-    virtual void Remove(WIdClass) =0;
+    virtual void Insert(const WIdClass &)=0;
+    virtual void Insert(const WIdClass &, P* &)=0;
+    virtual void Remove(const WIdClass &) =0;
     virtual void Clear() = 0;
-    virtual void Get(WIdClass, P* &) = 0;
-    virtual void Get(WIdClass, const P* &) const = 0;
+    virtual void Get(const WIdClass &, P* &) = 0;
+    virtual void Get(const WIdClass &, const P* &) const = 0;
     virtual size_t Count() const = 0;
-    virtual bool Contains(WIdClass in_id) const = 0;
+    virtual bool Contains(const WIdClass & in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
     virtual void ForEach(TFunction<void(P*)> in_function)=0;
@@ -58,7 +58,7 @@ public:
 public:
 
     constexpr TObjectDataBase() noexcept :
-        create_fn_([](WIdClass) -> T {return T{};}),
+        create_fn_([](const WIdClass &) -> T {return T{};}),
         destroy_fn_([](T&)->void {}),
         id_pool_(),
         objects_()
@@ -67,7 +67,7 @@ public:
     constexpr TObjectDataBase(
         const Allocator & in_allocator
         ) :
-        create_fn_([](WIdClass) -> T { return T{}; }),
+        create_fn_([](const WIdClass &) -> T { return T{}; }),
         destroy_fn_([](T&) -> void {}),
         id_pool_(),
         objects_(in_allocator)
@@ -141,7 +141,7 @@ public:
 
     WIdClass Create(const CreateFn & in_predicate) {
         WIdClass oid = id_pool_.Generate();
-        objects_.Insert(oid, in_predicate(oid));
+        objects_.Insert(oid.GetId(), in_predicate(oid));
 
         return oid;
     }
@@ -152,36 +152,36 @@ public:
      */
     WIdClass Create() override {
         WIdClass oid = id_pool_.Generate();
-        objects_.Insert(oid, create_fn_(oid));
+        objects_.Insert(oid.GetId(), create_fn_(oid));
 
         return oid;
     }
 
-    void Insert(WIdClass in_id) override {
+    void Insert(const WIdClass & in_id) override {
         id_pool_.Reserve(in_id);
-        objects_.Insert(in_id, create_fn_(in_id));
+        objects_.Insert(in_id.GetId(), create_fn_(in_id));
     }
 
-    void Insert(WIdClass in_id, P* & in_value) override {
+    void Insert(const WIdClass & in_id, P* & in_value) override {
         id_pool_.Reserve(in_id);
-        objects_.Insert(in_id, *static_cast<T*>(in_value));
+        objects_.Insert(in_id.GetId(), *static_cast<T*>(in_value));
     }
 
-    void Insert(WIdClass in_id, const CreateFn & in_predicate) {
+    void Insert(const WIdClass & in_id, const CreateFn & in_predicate) {
         id_pool_.Reserve(in_id);
-        objects_.Insert(in_id, in_predicate(in_id));
+        objects_.Insert(in_id.GetId(), in_predicate(in_id));
     }
 
-    void Remove(WIdClass in_id, const DestroyFn & in_destroy_fn) {
-        in_destroy_fn(objects_.Get(in_id));
+    void Remove(const WIdClass & in_id, const DestroyFn & in_destroy_fn) {
+        in_destroy_fn(objects_.Get(in_id.GetId()));
         id_pool_.Release(in_id);
-        objects_.Delete(in_id);
+        objects_.Delete(in_id.GetId());
     }
 
-    void Remove(WIdClass in_id) override final {
-        destroy_fn_(objects_.Get(in_id));
+    void Remove(const WIdClass & in_id) override final {
+        destroy_fn_(objects_.Get(in_id.GetId()));
         id_pool_.Release(in_id);
-        objects_.Delete(in_id);
+        objects_.Delete(in_id.GetId());
     }
 
     void Clear(const DestroyFn & in_destroy_fn) {
@@ -202,28 +202,28 @@ public:
         objects_.Clear();
     }
 
-    T & Get(WIdClass in_id) {
-        return objects_.Get(in_id);
+    T & Get(const WIdClass & in_id) {
+        return objects_.Get(in_id.GetId());
     }
 
-    const T & Get(WIdClass in_id) const {
-        return objects_.Get(in_id);
+    const T & Get(const WIdClass & in_id) const {
+        return objects_.Get(in_id.GetId());
     }
 
-    void Get(WIdClass in_id, P* & out_value) override final {
-        out_value = &objects_.Get(in_id);
+    void Get(const WIdClass & in_id, P* & out_value) override final {
+        out_value = &objects_.Get(in_id.GetId());
     }
 
-    void Get(WIdClass in_id, const P* & out_value) const override final {
-        out_value = &objects_.Get(in_id);
+    void Get(const WIdClass & in_id, const P* & out_value) const override final {
+        out_value = &objects_.Get(in_id.GetId());
     }
 
     size_t Count() const override final {
         return objects_.Count();
     }
 
-    bool Contains(WIdClass in_id) const override final {
-        return objects_.Contains(in_id);
+    bool Contains(const WIdClass & in_id) const override final {
+        return objects_.Contains(in_id.GetId());
     }
 
     void SetCreateFn(const CreateFn & in_create_fn) {

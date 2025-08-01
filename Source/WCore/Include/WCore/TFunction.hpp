@@ -64,63 +64,66 @@ private:
 
     };
 
-    std::unique_ptr<CallableBase> callable;
-
 public:
 
-    // // Constructor from function pointer
-    TFunction(Ret(*f)(Args...)) :
-        callable(std::make_unique<Callable<Ret(*)(Args...)>>(f))
-        {}
+    constexpr TFunction()=default;
+
+    constexpr virtual ~TFunction()=default;
 
     TFunction(const TFunction & other) :
-        callable(other.callable->Clone())
+        callable_(other.callable_->Clone())
     {}
 
-    TFunction(TFunction & other) :
-        callable(other.callable->Clone())
-        {}
-
     constexpr TFunction(TFunction && other) noexcept :
-        callable(std::move(other.callable)) {
-        other.callable = nullptr;
+        callable_(std::move(other.callable_)) {
+        other.callable_ = nullptr;
     }
 
-    // Constructor from any callable (lambda, functor, etc.)
+    /** @brief Constructor from function pointer */
+    TFunction(Ret(*f)(Args...)) :
+        callable_(std::make_unique<Callable<Ret(*)(Args...)>>(f))
+        {}
+
+    /** @brief Constructor from any callable (lambda, functor, etc.) */
     template<typename F>
     TFunction(F && f) :
-    callable(std::make_unique<Callable<std::decay_t<F>>>(std::forward<F>(f))) {}
+    callable_(std::make_unique< Callable<std::decay_t<F>> >(std::forward<F>(f))) {}
 
     TFunction & operator=(const TFunction & other) {
         if (this != &other) {
-            callable = other.callable->Clone();
+            callable_ = other.callable_->Clone();
         }
         return *this;
     }
 
     TFunction & operator=(TFunction && other) {
         if (this != &other) {
-            callable = std::move(other.callable);            
-            other.callable = nullptr;
+            callable_ = std::move(other.callable_);            
+            other.callable_ = nullptr;
         }
         return *this;
     }
 
     Ret operator()(Args... args) const {
-        if (!callable) {
+        if (!callable_) {
             throw std::bad_function_call();
         }
-        return callable->Invoke(std::forward<Args>(args)...);
+        return callable_->Invoke(std::forward<Args>(args)...);
     }
 
-    /**
-     * Empty state check
-     */
-    explicit operator bool() const noexcept {
-        return static_cast<bool>(callable);
+    bool IsValid() const {
+        return static_cast<bool>(callable_);
     }
+
+    bool IsEmpty() const {
+        return !IsValid();
+    }
+
+private:
+
+    std::unique_ptr<CallableBase> callable_;
+
 };
-
 
 template<std::size_t B, typename T>
 struct TFnLmbd;
@@ -130,7 +133,8 @@ struct TFnLmbd;
  */
 template<std::size_t B, typename R, typename ...Args>
 struct TFnLmbd<B, R(Args...)> {
-
+public:
+    
     template<typename T>
     static constexpr bool is_callable_v = requires (T && t, Args && ... args) {
         { std::forward<T>(t)(std::forward<Args>(args)...) } -> std::convertible_to<R>;
@@ -143,7 +147,6 @@ struct TFnLmbd<B, R(Args...)> {
     using ManageDstry = void(*)(const void*);
     using ManageCpy = void(*)(void* _dst,void* _src);
     using ManageMove = void(*)(void* _dst, void* _src);
-
 
     template<typename T>
     struct FnLmbdMan {
@@ -253,6 +256,17 @@ struct TFnLmbd<B, R(Args...)> {
         return Invoke(std::forward<Args>(args)...);
     }
 
+    bool IsEmpty() const {
+        return !IsValid();
+    }
+
+    bool IsValid() const {
+        return static_cast<bool>(managefn_);
+    }
+
+private:
+
+
     constexpr R Invoke(Args && ... args) const {
         return (*static_cast<ManageFn>(managefn_)) (bf_, std::forward<Args>(args)...);
     }
@@ -290,19 +304,20 @@ template<typename T, typename ... Args>
 using TFnLmbd64 = TFnLmbd<64, T(Args...)>;
 
 
-/**
- * @brief Optimized for function pointers. Only valid for function ptrs.
- */
 template<typename T>
 struct TFnPtr;
 
+/**
+ * @brief Optimized for function pointers. Only valid for function ptrs.
+ */
 template<typename Ret, typename ...Args>
 struct TFnPtr<Ret(Args...)> {
 
-    constexpr TFnPtr() : fn_(nullptr) {}
+    constexpr TFnPtr() = default;
+
+    constexpr virtual ~TFnPtr() = default;
 
     constexpr TFnPtr(Ret(*in_fn)(Args...)) : fn_(in_fn) {}
-
 
     constexpr TFnPtr(const TFnPtr & other) : fn_(other.fn_) {}
 
@@ -330,8 +345,12 @@ struct TFnPtr<Ret(Args...)> {
         return fn_(args...);
     }
 
-    constexpr explicit operator bool() const noexcept {
+    bool IsValid() const {
         return static_cast<bool>(fn_);
+    }
+
+    bool IsEmpty() const {
+        return !IsValid();
     }
 
 private:

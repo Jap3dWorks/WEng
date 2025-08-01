@@ -11,8 +11,6 @@
 
 #include <memory>
 
-class WObjectDb;
-
 class WENGINE_API WEngine
 {
 
@@ -34,9 +32,9 @@ public:
 
     void run();
 
-    void StartupLevel(const WId & in_id) noexcept;
+    void StartupLevel(const WLevelId & in_id) noexcept;
 
-    void LoadLevel(const WId& in_level);
+    void LoadLevel(const WLevelId & in_level);
 
     WImporterRegister & ImportersRegister() noexcept;
 
@@ -49,13 +47,13 @@ private:
     void InitializeLevel(WLevel * in_level);
 
     struct LevelInfo {
-        WId current_level{0};
+        WLevelId current_level{0};
         bool loaded{false};
         WLevel level{};
     } level_info_;
 
     struct StartupInfo {
-        WId startup_level{0};
+        WLevelId startup_level{0};
     } startup_info_;
 
     std::unique_ptr<IRender> render_;

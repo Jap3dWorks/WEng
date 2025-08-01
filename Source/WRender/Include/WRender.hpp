@@ -28,9 +28,13 @@ public:
 
     void Draw() override ;
 
+    void Destroy() override;
+
     void CreateRenderPipeline(
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
+
+    void DeleteRenderPipeline(const WId & in_id) override { /* TODO */ }
 
     void CreatePipelineBinding(
         const WId & component_id,
@@ -41,7 +45,7 @@ public:
         // const std::vector<uint32_t> & in_textures_bindings
         ) override ;
 
-    void Destroy() override;
+    void DeletePipelineBinding(const WEntityComponentId & in_id) override { /* TODO */ }
 
     WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
     {

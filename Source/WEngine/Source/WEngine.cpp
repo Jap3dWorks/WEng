@@ -70,13 +70,13 @@ void WEngine::run()
             level_info_.level.ForEachComponent(
                 WComponent::StaticClass(),
                 [&engine_cycle_data](WComponent * in_component) {
-                    in_component->OnUpdate(
-                        engine_cycle_data
-                        );
+                    // in_component->OnUpdate(
+                    //     engine_cycle_data
+                    //     );
                 });
 
             // Update Actors
-            level_info_.level.ForEachActor(
+            level_info_.level.ForEachEntity(
                 WEntity::StaticClass(),
                 [&engine_cycle_data](WEntity * in_actor) {
                     in_actor->OnUpdate(
@@ -92,7 +92,7 @@ void WEngine::run()
     Render()->WaitIdle();
 }
 
-void WEngine::LoadLevel(const WId & in_level) {
+void WEngine::LoadLevel(const WLevelId & in_level) {
     if (level_info_.current_level &&
         level_info_.loaded) {
 
@@ -128,7 +128,7 @@ void WEngine::LoadLevel(const WId & in_level) {
     WFLOG("NOT IMPLEMENTED!");
 }
 
-void WEngine::StartupLevel(const WId& in_id) noexcept {
+void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
     startup_info_.startup_level = in_id;
 }
 

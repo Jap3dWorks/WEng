@@ -13,7 +13,7 @@ concept CHasWid = requires(T a) { a.WID(); };
 class WObject;
 
 template<typename T>
-concept CWObjectDerived = std::is_base_of_v<WObject, T> && CHasWid<T>;
+concept CWObjectDerived = std::is_base_of_v<WObject, T>;
 
 template<typename T, typename R, typename... Args>
 concept CObjCallable = requires(T t, Args... args) {

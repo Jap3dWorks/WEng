@@ -120,13 +120,14 @@ using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
 using WEntityComponentId = _WId<std::size_t>;  // combine entity with component type id;
 using WAssetId = _WId<std::size_t>;
+using WLevelId = _WId<std::uint32_t>;
 
 namespace std
 {
     template <typename T>
     struct hash<_WId<T>>
     {
-        std::size_t operator()(const WId & in_wid) const
+        std::size_t operator()(const _WId<T> & in_wid) const
         {
             return std::hash<T>{}(in_wid.GetId());
         }

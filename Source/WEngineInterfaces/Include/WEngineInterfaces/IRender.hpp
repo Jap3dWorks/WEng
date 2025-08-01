@@ -55,12 +55,12 @@ public:
     /**
      * @brief Delete the created render pipeline and its binidngs with WId in_id.
      */
-    virtual void DeletePipeline(const WId & in_id)=0;
+    virtual void DeleteRenderPipeline(const WId & in_id)=0;
 
     /**
      * @brief Delete the create render pipeline binding.
      */
-    virtual void DeletePipelineBinding(const WId & in_id)=0;
+    virtual void DeletePipelineBinding(const WEntityComponentId & in_id)=0;
 
     // Resources Section
     // -----------------

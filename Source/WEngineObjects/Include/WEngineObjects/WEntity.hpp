@@ -1,21 +1,20 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-
-#include "WEngineObjects/WLevelObject.hpp"
-
 #include "WEngineObjects/WObjectMacros.hpp"
-#include "WEntity.WEngine.hpp"
+#include "WEngineObjects/WEngineCycleData.hpp"
+#include "WEngineObjects/WObject.hpp"
+
 #include <cstring>
 
-class ILevel;
+#include "WEntity.WEngine.hpp"
 
 /**
  * @brief Base class for all actors in the engine. 
  * Entities are composed by components in the level.
 */
 WCLASS()
-class WCORE_API WEntity : public WLevelObject
+class WCORE_API WEntity : public WObject
 {
 
     WOBJECT_BODY(WEntity)
@@ -39,12 +38,17 @@ public:
         std::strcpy(name_, in_name);
     }
 
+    virtual void OnUpdate(const WEngineCycleData & in_cycle_data) {}
+
+    virtual void OnInit(const WEngineCycleData & in_cycle_data) {}
+
+    virtual void OnClose(const WEngineCycleData & in_cycle_data) {}
+
 private:
 
     char name_[WOBJECT_NAME_SIZE];
 
     WEntityId wid_;
-
 
 };
 

@@ -9,7 +9,7 @@
 #endif
 
 #define _WCLASS_ WEntity
-#define _PWCLASS_ WLevelObject
+#define _PWCLASS_ WObject
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

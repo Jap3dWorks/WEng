@@ -127,7 +127,7 @@ std::vector<WId> WImportObj::Import(
             );
 
         TWRef<WStaticMeshAsset> static_mesh =
-            static_cast<WStaticMeshAsset*>(in_asset_manager.Get(id).Ptr());
+            static_cast<WStaticMeshAsset*>(in_asset_manager.Get(id));
 
         static_mesh->SetMesh(std::move(meshes[i]));
 
@@ -199,7 +199,7 @@ std::vector<WId> WImportTexture::Import(
         WStringUtils::AssetPath(asset_directory, file_path, "texture").c_str()
         );
 
-    static_cast<WTextureAsset*>(in_asset_manager.Get(id).Ptr())->
+    static_cast<WTextureAsset*>(in_asset_manager.Get(id))->
         SetTexture(std::move(texture_struct));
 
     return { id };

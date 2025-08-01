@@ -13,9 +13,9 @@ class WLevel;
 class WLEVEL_API WLevelRegister {
 public:
 
-    using WLevelIdPool = WIdPool<WAssetId>;
+    using WLevelIdPool = WIdPool<WLevelId>;
 
-    using WLevelDb = TObjectDataBase<WLevel, void, WAssetId>;
+    using WLevelDb = TObjectDataBase<WLevel, void, WLevelId>;
 
     WLevelRegister();
 
@@ -29,11 +29,11 @@ public:
 
     WLevelRegister& operator=(WLevelRegister && other);
 
-    WAssetId Create();
+    WLevelId Create();
 
-    TOptionalRef<WLevel> Get(const WAssetId & in_id);
+    TOptionalRef<WLevel> Get(const WLevelId & in_id);
 
-    WLevel GetCopy(const WAssetId & in_id) const;
+    WLevel GetCopy(const WLevelId & in_id) const;
 
 private:
     

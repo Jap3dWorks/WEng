@@ -112,7 +112,7 @@ public:
                 const WIdClass& in_id) {
         EnsureClassStorage(in_class);
 
-        assert(!containers_[in_class]->Contains(in_id));
+        assert(!db_[in_class]->Contains(in_id));
 
         db_[in_class]->Insert(in_id);
 
@@ -154,7 +154,7 @@ public:
 
     template<std::derived_from<WObjClass> T>
     void ForEach(TFunction<void(T*)> in_predicate) const {
-        assert(containers_.contains(T::StaticClass()));
+        assert(db_.contains(T::StaticClass()));
 
         ForEach(T::StaticClass(),
                 [&in_predicate](WObjClass* _ptr) {
@@ -168,7 +168,7 @@ public:
     }
 
     void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
-        assert(containers_.contains(in_class));
+        assert(db_.contains(in_class));
 
         db_.at(in_class)->ForEach(in_predicate);
 
@@ -213,7 +213,7 @@ public:
     }
 
     std::vector<WIdClass> Indexes(const WClass * in_class) const {
-        assert(containers_.contains(in_class));
+        assert(db_.contains(in_class));
         return db_.at(in_class)->Indexes();
         
         // std::vector<WIdClass> r;
@@ -229,7 +229,7 @@ public:
     }
 
     WNODISCARD size_t Count(const WClass * in_class) const {
-        assert(containers_.contains(in_class));
+        assert(db_.contains(in_class));
         return db_.at(in_class)->Count();
     }
 

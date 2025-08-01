@@ -59,13 +59,13 @@ public:
 
     template<typename T>
     void Register() {
-        assert(!reg_.contains(ImporterKey<T>::Value()));
+        assert(!reg_.contains( TClassKey_v<T> ));
         reg_.insert({TClassKey_v<T>, std::make_unique<T>()});
     }
 
     template<typename T>
     T GetImporter() const {
-        assert(reg_.contains(ImporterKey<T>));
+        assert(reg_.contains( TClassKey_v<T> ));
 
         return *static_cast<T*>(reg_.at(TClassKey_v<T>).get());
     }

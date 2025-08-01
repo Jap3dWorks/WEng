@@ -40,9 +40,6 @@ namespace WRenderLevelLib {
 
                 pipeline_parameters.Insert(in_component->RenderPipelineParametersAsset().GetId(),
                                            in_component->RenderPipelineParametersAsset());
-
-                
-
             }
             );
 
@@ -87,12 +84,14 @@ namespace WRenderLevelLib {
                     in_asset_db.Get(in_component->RenderPipelineParametersAsset())
                     );
 
-                in_render->CreatePipelineBinding(
-                    in_component->WID(),
-                    in_component->RenderPipelineAsset(),
-                    in_component->StaticMeshAsset(),
-                    param->RenderPipelineParameters()
-                    );
+                // TODO Create pipeline bindings
+
+                // in_render->CreatePipelineBinding(
+                //     in_component->WID(),
+                //     in_component->RenderPipelineAsset(),
+                //     in_component->StaticMeshAsset(),
+                //     param->RenderPipelineParameters()
+                //     );
             });
     }
 
@@ -147,7 +146,8 @@ namespace WRenderLevelLib {
                         );
                 }
 
-                in_render->DeletePipelineBinding(_component->WID());
+                // TODO Delte pipeline bindings (use WEntityComponentId)
+                // in_render->DeletePipelineBinding(_component->WID());
             }
             );
         
@@ -160,7 +160,7 @@ namespace WRenderLevelLib {
         }
 
         for(auto & id : render_pipelines) {
-            in_render->DeletePipeline(id);
+            in_render->DeleteRenderPipeline(id);
         }
 
         // auto pipeline_parameters = static_cast<WRenderPipelineParametersAsset*>(

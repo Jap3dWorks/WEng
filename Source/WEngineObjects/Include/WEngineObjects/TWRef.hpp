@@ -215,6 +215,14 @@ public:
         return static_cast<const T*>(BPtr());
     }
 
+    T & Get() {
+        return *Ptr();
+    }
+
+    const T & Get() const {
+        return *Ptr();
+    }
+
     T * operator->() 
     {
         return static_cast<T*>(BPtr());

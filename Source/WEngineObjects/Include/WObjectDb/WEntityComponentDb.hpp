@@ -21,18 +21,18 @@ public:
 public:
 
     template<std::derived_from<WEntity> T>
-    WEntityId CreateEntity(const std::string & in_name) {
+    WEntityId CreateEntity(const char * in_name) {
         return CreateEntity(T::StaticClass(), in_name);
     }
 
-    WEntityId CreateEntity(const WClass * in_class, const std::string & in_name);
+    WEntityId CreateEntity(const WClass * in_class, const char * in_name);
 
     TWRef<WEntity> GetEntityRef(const WEntityId & in_id) const {
         return GetEntity(in_id);
     }
 
     WEntity * GetEntity(const WEntityId & in_id) const {
-        assert(id_actorclass_.contains(in_id));
+        assert(id_entityclass_.contains(in_id));
 
         return entity_db_.Get(id_entityclass_.at(in_id), in_id);
     }
@@ -73,7 +73,7 @@ public:
 
     WComponent * GetComponent(const WClass * in_class,
                               const WEntityId & in_component_id) const {
-        assert(component_manager_.Contains(in_class, in_component_id));
+        assert(component_db_.Contains(in_class, in_component_id));
         return component_db_.Get(in_class, in_component_id);
     }
 
@@ -84,6 +84,11 @@ public:
         WIdUtils::FromEntityComponentId(in_entity_component_id, eid, cid);
 
         return GetComponent(id_componentclass_.at(cid), eid);
+    }
+
+    WEntityComponentId EntityComponentId(const WEntityId & in_id, const WClass * in_class) const {
+        assert(componentclass_id_.contains(in_class));
+        return WIdUtils::ToEntityComponentId(in_id, componentclass_id_.at(in_class));
     }
 
     void ForEachComponent(const WClass * in_class,

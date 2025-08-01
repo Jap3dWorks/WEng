@@ -13,7 +13,7 @@
 struct WDbBuilder {
 
 public:
-    
+
     template<typename B, typename I>
     using DbType = IObjectDataBase<B,I>;
 
@@ -24,6 +24,8 @@ public:
 
     template<typename B, typename I>
     using RegKey = std::pair<B,I>;
+
+    using Register = std::unordered_map<std::type_index, TFnPtr< VoidPtr() >>;
 
     template<typename T>
     struct ParamType{
@@ -59,17 +61,13 @@ public:
     std::unique_ptr<DbType<B,I>> Create() const {
         VoidPtr type_erased = CreateDb(typeid(RegKey<B,I>));
         
-        return CastDb<B,I>(type_erased);
+        return std::unique_ptr<DbType<B,I>>(CastDb<B,I>(type_erased));
     }
 
     template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
         if (!register_.contains(typeid(RegKey<B,I>))) {
             
-            // register_[typeid(RegKey<B,I>)] = []() -> VoidPtr {
-            //     return CreateObjectDb<T,B,I>();
-            // };
-
             register_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
             
         }
@@ -117,10 +115,10 @@ private:
     }
 
     template<typename B, typename I>
-    DbRawPtr<B,I> CastDb(VoidPtr in_cast) {
+    DbRawPtr<B,I> CastDb(VoidPtr in_cast) const {
         return static_cast<DbRawPtr<B,I>>(in_cast);
     }
 
-    std::unordered_map<std::type_index, TFunction< VoidPtr() >> register_;
+    Register register_;
 
 };

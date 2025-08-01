@@ -78,7 +78,7 @@ bool WObjectDb_TWRef_Test() {
     t->Name("t");
 
     WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
-    WFLOG("Name: {}", a->Name().c_str());
+    WFLOG("Name: {}", a->Name());
 
     void* ptr = a.BPtr();
 
@@ -87,7 +87,7 @@ bool WObjectDb_TWRef_Test() {
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
-    WFLOG("Name: {}", a->Name().c_str());
+    WFLOG("Name: {}", a->Name());
 
     WFLOG("END")
 

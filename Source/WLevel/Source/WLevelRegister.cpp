@@ -4,10 +4,12 @@
 #include <cassert>
 
 WLevelRegister::WLevelRegister() :
-    levels_([](const WId& id){
-        WLevel lvl("WLevel", id);
-        return lvl;},
-        [](WLevel&){}) {}
+    levels_(
+        [](const WLevelId& id){
+            WLevel lvl("WLevel", id);
+            return lvl;},
+        [](WLevel&){}
+        ) {}
 
 WLevelRegister::WLevelRegister(const WLevelRegister & other) :
     levels_(other.levels_) {}
@@ -37,15 +39,15 @@ WLevelRegister& WLevelRegister::operator=(WLevelRegister && other){
     return *this;
 }
 
-WId WLevelRegister::Create() {
+WLevelId WLevelRegister::Create() {
     return levels_.Create();
 }
 
-TOptionalRef<WLevel> WLevelRegister::Get(const WId & in_id) {
-    assert(levels_.contains(in_id));
+TOptionalRef<WLevel> WLevelRegister::Get(const WLevelId & in_id) {
+    assert(levels_.Contains(in_id));
     return levels_.Get(in_id);
 }
 
-WLevel WLevelRegister::GetCopy(const WId & in_id) const {
+WLevel WLevelRegister::GetCopy(const WLevelId & in_id) const {
     return levels_.Get(in_id);
 }

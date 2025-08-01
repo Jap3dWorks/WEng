@@ -5,6 +5,7 @@
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WComponent.hpp"
+#include "WEngineObjects/WObjectMacros.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
 class WLEVEL_API WLevel {
@@ -16,10 +17,10 @@ public:
 
     WLevel();
 
-    WLevel(const char* in_name, const WId & in_id);
+    WLevel(const char* in_name, const WLevelId & in_id);
 
     WLevel(const char* in_name,
-           const WId & in_id,
+           const WLevelId & in_id,
            const InitFn & in_init_fn,
            const UpdateFn & in_update_fn,
            const CloseFn & in_close_fn);
@@ -42,30 +43,26 @@ public:
 
     void Close(const WEngineCycleData & in_cycle_data) ;
 
-    WId CreateActor(const WClass * in_class) ;
+    WEntityId CreateEntity(const WClass * in_class) ;
 
-    TWRef<WEntity> GetActor(const WId & in_id) const ;
+    WEntity * GetEntity(const WEntityId & in_id) const ;
 
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
      */
-    void ForEachActor(const WClass * in_class,
-                      TFunction<void(WEntity*)> in_predicate) const ;
+    void ForEachEntity(const WClass * in_class,
+                       TFunction<void(WEntity*)> in_predicate) const ;
 
-    WId CreateComponent(const WId & in_actor_id,
-                        const WClass * in_class) ;
+    WEntityComponentId CreateComponent(const WEntityId & in_entity_id,
+                                       const WClass * in_class) ;
 
-    TWRef<WComponent> GetComponent(const WClass * in_class,
-                                   const WId & in_component_id) const ;
+    WComponent * GetComponent(const WClass * in_class,
+                              const WEntityId & in_component_id) const ;
 
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const ;
 
-    std::string Name() const ;
-
-    WId WID() const ;
-
-    void WID(const WId & in_id) ;
+    const char * Name() const ;
 
     void SetInitFn(const InitFn & in_fn) {
         init_fn_ = in_fn;
@@ -92,19 +89,23 @@ public:
     }
 
     const WEntityComponentDb & ActorComponentDb() const {
-        return actor_component_db_;
+        return entity_component_db_;
     }
+
+    WLevelId WID() const ;
+
+    void WID(const WLevelId & in_id) ;
 
 private:
 
     std::string ActorPath(const WClass* in_class) const;
 
-    std::string ComponentPath(const WId & in_actor,
+    std::string ComponentPath(const WEntityId & in_entity_id,
                               const WClass * in_class) const;
 
-    const char * name_;
+    char name_[WOBJECT_NAME_SIZE];
 
-    WEntityComponentDb actor_component_db_;
+    WEntityComponentDb entity_component_db_;
 
     InitFn init_fn_;
 
@@ -112,6 +113,6 @@ private:
 
     CloseFn close_fn_;
 
-    WId wid_;
+    WLevelId wid_;
 
 };

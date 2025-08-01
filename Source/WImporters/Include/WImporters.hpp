@@ -5,7 +5,6 @@
 
 #include <vector>
 
-class WObjectDb;
 class WAssetDb;
 
 class WIMPORTERS_API WImporter {
