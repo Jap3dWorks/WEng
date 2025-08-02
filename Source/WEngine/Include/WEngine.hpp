@@ -32,6 +32,10 @@ public:
 
     void run();
 
+    WLevelRegister & LevelRegister() noexcept { return level_register_; }
+
+    const WLevelRegister & LevelRegister() const noexcept { return level_register_; }
+
     void StartupLevel(const WLevelId & in_id) noexcept;
 
     void LoadLevel(const WLevelId & in_level);

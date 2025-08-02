@@ -10,6 +10,7 @@
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
+#include "WAssets/WRenderPipelineAsset.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -156,6 +157,7 @@ int main(int argc, char** argv)
 
         WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;
+        WRenderPipelineAsset * pipeline_asset;
 
         if (!LoadAssets(engine, static_mesh, texture_asset))
         {
@@ -165,7 +167,8 @@ int main(int argc, char** argv)
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        // TODO use levels
+        // TODO Create levels
+        // engine.
 
         // engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
         // engine.Render()->RenderResources()->RegisterTexture(texture_asset);
