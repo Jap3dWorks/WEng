@@ -37,9 +37,9 @@ public:
     void DeleteRenderPipeline(const WAssetId & in_id) override;
 
     void CreatePipelineBinding(
-        const WId & component_id,
-        const WId & pipeline_id,
-        const WId & in_mesh_id,
+        const WEntityComponentId & component_id,
+        const WAssetId & pipeline_id,
+        const WAssetId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
         ) override ;
 
@@ -113,7 +113,9 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index);
+    void RecordRenderCommandBuffer(WId in_pipeline_id,
+                                   uint32_t in_frame_index,
+                                   uint32_t in_image_index);
 
     WVkRenderResources render_resources_{};
 

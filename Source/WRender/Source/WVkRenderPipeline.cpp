@@ -165,7 +165,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
     std::vector<uint16_t> in_textures_bindings
     ) noexcept
 {
-    assert(pipeline_bindings_.contains(in_pipeline_id));
+    assert(pipeline_pbindings_.contains(in_pipeline_id));
 
     WVkRenderPipelineInfo pipeline_info = RenderPipelineInfo(in_pipeline_id);
 

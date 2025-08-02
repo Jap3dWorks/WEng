@@ -34,7 +34,8 @@ void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
 
     component_db_.Insert(in_component_class, in_entity_id);
 
-    // return r;
+    WComponent * component = component_db_.Get(in_component_class, in_entity_id);
+    component->EntityId(in_entity_id);
 }
 
 WEntityId WEntityComponentDb::CreateEntityId(const WClass * in_class) {

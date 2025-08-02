@@ -10,6 +10,7 @@
 #include "WObjectDb/WAssetDb.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
+#include "WComponents/WTransformComponent.hpp"
 #include "WLog.hpp"
 
 #include "WRenderLevelLib.hpp"
@@ -64,18 +65,22 @@ void WEngine::run()
             
             level_info_.level.Init(engine_cycle_data);
             level_info_.loaded = true;
+
+            // TODO update static transforms WStaticTransformComponent
         }
         else {
-            // Update Components
-            level_info_.level.ForEachComponent(
-                WComponent::StaticClass(),
-                [&engine_cycle_data](WComponent * in_component) {
-                    // in_component->OnUpdate(
-                    //     engine_cycle_data
-                    //     );
+            // Update transform Components
+            level_info_.level.ForEachComponent<WTransformComponent>(
+                [&engine_cycle_data, this](WTransformComponent * in_component) {
+                    WEntityComponentId ecid = level_info_.level.ActorComponentDb().EntityComponentId(
+                        in_component->EntityId(),
+                        in_component->Class()
+                        );
+                    // TODO, Render()->UpdateUbo(in_component, in_component);
+
                 });
 
-            // Update Actors
+            // Update Entities
             level_info_.level.ForEachEntity(
                 WEntity::StaticClass(),
                 [&engine_cycle_data](WEntity * in_actor) {

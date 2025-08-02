@@ -41,9 +41,9 @@ public:
      * Pipeline binding shares the same WId than the component.
      */
     virtual void CreatePipelineBinding(
-        const WId & component_id,
-        const WId & pipeline_id,
-        const WId & in_mesh_id,
+        const WEntityComponentId & component_id,
+        const WAssetId & pipeline_id,
+        const WAssetId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
         )=0;
 
@@ -55,7 +55,7 @@ public:
     /**
      * @brief Delete the created render pipeline and its binidngs with WId in_id.
      */
-    virtual void DeleteRenderPipeline(const WId & in_id)=0;
+    virtual void DeleteRenderPipeline(const WAssetId & in_id)=0;
 
     /**
      * @brief Delete the create render pipeline binding.
@@ -70,22 +70,22 @@ public:
      */
     virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
 
-    virtual void UnregisterTexture(const WId & in_id)=0;
+    virtual void UnregisterTexture(const WAssetId & in_id)=0;
 
     /**
      * @brief Load the registered texture asset with id in_id.
      */
-    virtual void LoadTexture(const WId & in_id)=0;
+    virtual void LoadTexture(const WAssetId & in_id)=0;
 
-    virtual void UnloadTexture(const WId & in_id)=0;
+    virtual void UnloadTexture(const WAssetId & in_id)=0;
 
     virtual void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset)=0;
 
-    virtual void UnregisterStaticMesh(const WId & in_id)=0;
+    virtual void UnregisterStaticMesh(const WAssetId & in_id)=0;
 
-    virtual void LoadStaticMesh(const WId & in_id)=0;
+    virtual void LoadStaticMesh(const WAssetId & in_id)=0;
 
-    virtual void UnloadStaticMesh(const WId & in_id)=0;
+    virtual void UnloadStaticMesh(const WAssetId & in_id)=0;
 
     /**
      * @brief Unload all render resources.

@@ -6,7 +6,7 @@
 #include "WTransformComponent.WEngine.hpp"
 
 
-class WENGINEOBJECTS_API WTransformComponent : WComponent {
+class WENGINEOBJECTS_API WTransformComponent : public WComponent {
     WOBJECT_BODY(WTransformComponent)
         
 public:

@@ -14,7 +14,7 @@ namespace WRenderLevelLib {
 
     inline void InitializeResources(
         IRender * in_render,
-        const WEntityComponentDb & in_actor_component_db,
+        const WEntityComponentDb & in_entity_component_db,
         const WAssetDb & in_asset_db
         ) {
 
@@ -27,7 +27,7 @@ namespace WRenderLevelLib {
         TSparseSet<WId> pipeline_parameters;
         pipeline_parameters.Reserve(64);
         
-        in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
+        in_entity_component_db.ForEachComponent<WStaticMeshComponent>(
             [&static_meshes,
              &render_pipelines,
              &pipeline_parameters](WStaticMeshComponent * in_component) {
@@ -76,33 +76,33 @@ namespace WRenderLevelLib {
         }
 
         // Pipeline Bindings
-        in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
+        in_entity_component_db.ForEachComponent<WStaticMeshComponent>(
             [&in_render,
-             &in_asset_db]
+             &in_asset_db,
+             &in_entity_component_db]
             (WStaticMeshComponent* in_component) {
                 auto param =static_cast<WRenderPipelineParametersAsset*> (
                     in_asset_db.Get(in_component->RenderPipelineParametersAsset())
                     );
 
-                // TODO Create pipeline bindings
-
-                // in_render->CreatePipelineBinding(
-                //     in_component->WID(),
-                //     in_component->RenderPipelineAsset(),
-                //     in_component->StaticMeshAsset(),
-                //     param->RenderPipelineParameters()
-                //     );
+                in_render->CreatePipelineBinding(
+                    in_entity_component_db.EntityComponentId(
+                        in_component->EntityId(),
+                        in_component->Class()
+                        ),
+                    in_component->RenderPipelineAsset(),
+                    in_component->StaticMeshAsset(),
+                    param->RenderPipelineParameters()
+                    );
                 
             });
     }
 
     inline void ReleaseRenderResources(
         IRender * in_render,
-        const WEntityComponentDb & in_actor_component_db,
+        const WEntityComponentDb & in_emtity_component_db,
         const WAssetDb & in_asset_db
         ) {
-
-        // TODO Release Render Resources from components.
 
         TSparseSet<WId> static_meshes;
         static_meshes.Reserve(64);
@@ -110,15 +110,17 @@ namespace WRenderLevelLib {
         texture_assets.Reserve(64);
         TSparseSet<WId> render_pipelines;
         render_pipelines.Reserve(64);
-        TSparseSet<WId> pipeline_bindings;
-        pipeline_bindings.Reserve(64);
+        // TSparseSet<WId> pipeline_bindings;
+        // pipeline_bindings.Reserve(64);
         
-        in_actor_component_db.ForEachComponent<WStaticMeshComponent>(
+        in_emtity_component_db.ForEachComponent<WStaticMeshComponent>(
             [&in_render,
              &in_asset_db,
              &static_meshes,
              &texture_assets,
-             &render_pipelines](WStaticMeshComponent * _component) {
+             &render_pipelines /* ,
+             &pipeline_bindings
+             */ ](WStaticMeshComponent * _component) {
                 static_meshes.Insert(
                     _component->StaticMeshAsset().GetId(),
                     _component->StaticMeshAsset()
@@ -146,9 +148,6 @@ namespace WRenderLevelLib {
                         t_id
                         );
                 }
-
-                // TODO Delte pipeline bindings (use WEntityComponentId)
-                // in_render->DeletePipelineBinding(_component->WID());
             }
             );
         
@@ -161,33 +160,8 @@ namespace WRenderLevelLib {
         }
 
         for(auto & id : render_pipelines) {
+            // Removes Render Pipelines and Pipeline Bindings
             in_render->DeleteRenderPipeline(id);
         }
-
-        // auto pipeline_parameters = static_cast<WRenderPipelineParametersAsset*>(
-        //     in_asset_db.Get(
-        //         in_component->RenderPipelineParametersAsset()
-        //         ));
-
-        // uint8_t textures_count = pipeline_parameters
-        //     ->RenderPipelineParameters()
-        //     .texture_assets_count;
-
-        // for(uint8_t i=0; i < textures_count; i++) {
-        //     WId t_id = pipeline_parameters
-        //         ->RenderPipelineParameters()
-        //         .texture_assets[i].value;
-                    
-        //     texture_assets.Insert(
-        //         t_id.GetId(),
-        //         t_id
-        //         );
-
-        // render_pipelines.Reserve(64);
-
-        // in_level.
-
-
     }
-
 }

@@ -40,9 +40,9 @@ public:
 public:
 
     constexpr WObjectDb() :
-        db_(),
-        initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
-        {}
+    db_(),
+    initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
+    {}
     
     virtual ~WObjectDb() = default;
 
@@ -62,7 +62,6 @@ public:
             initial_memory_size_ = other.initial_memory_size_;
             CopyContainersFrom(other);
         }
-
         return *this;
     }
 
@@ -91,16 +90,7 @@ public:
      */
     WIdClass Create(const WClass * in_class) {
         EnsureClassStorage(in_class);
-    
         return db_[in_class]->Create();
-        
-        // WObject * obj;
-        // db_[in_class]->Get(id, obj);
-
-        // obj->WID(id);
-        // obj->Name(in_fullname);
-
-        // return id;
     }
 
     /**
@@ -115,14 +105,6 @@ public:
         assert(!db_[in_class]->Contains(in_id));
 
         db_[in_class]->Insert(in_id);
-
-        // return in_id;
-
-        // WObject * obj;
-        // db_[in_class]->Get(in_id, obj);
-
-        // obj->WID(in_id);
-        // obj->Name(in_fullname);
     }
 
     /**
@@ -134,11 +116,6 @@ public:
     void Insert(const WIdClass in_id) {
         Insert(T::StaticClass(), in_id);
     }
-
-    // template <std::derived_from<WObjClass> T>
-    // TWRef<T> GetRef(WId in_id) const {
-    //     return GetRaw<T>(in_id);
-    // }
 
     WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {
         WObjClass * result;
@@ -160,22 +137,26 @@ public:
                 [&in_predicate](WObjClass* _ptr) {
                     in_predicate(static_cast<T*>(_ptr));
                 });
-
-        // db_.at(T::StaticClass())->ForEach(
-        //     [&in_predicate](WObject* ptr_) -> void {
-        //         in_predicate(static_cast<T*>(ptr_));
-        //     });
     }
 
     void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
         assert(db_.contains(in_class));
 
         db_.at(in_class)->ForEach(in_predicate);
+    }
 
-        // db_.at(in_class)->ForEach(
-        //     [&in_predicate](WObject* ptr_) -> void {
-        //         in_predicate(static_cast<WObjClass*>(ptr_));
-        //     });
+    void ForEach(const WClass * in_class,
+                 const TFunction<void(const WIdClass &, WObjClass *)> & in_predicate) const {
+        for (auto & idx : db_.at(in_class).Indexes()) {
+            in_predicate(idx, Get(in_class, idx));
+        }
+    }
+
+    template<std::derived_from<WObjClass> T>
+    void ForEach(const TFunction<void(const WIdClass &, T *)> & in_predicate) const {
+        for (auto & idx : db_.at(T::StaticClass()).Indexed()) {
+            in_predicate(idx, Get<T>(idx));
+        }
     }
 
     template<typename T>
@@ -215,13 +196,6 @@ public:
     std::vector<WIdClass> Indexes(const WClass * in_class) const {
         assert(db_.contains(in_class));
         return db_.at(in_class)->Indexes();
-        
-        // std::vector<WIdClass> r;
-        // r.reserve(db_.at(in_class)->Count());
-        // for (auto & idx : db_.at(in_class)->Indexed()) {
-        //     r.push_back(idx.GetId());
-        // }
-        // return r;
     }
 
     WNODISCARD size_t InitialMemorySize() const {

@@ -339,22 +339,13 @@ void WRender::RecreateSwapChain() {
     pipelines_manager_.Height(height);
 }
 
-// TRef<IRenderResources> WRender::RenderResources() {
-//     return render_resources_.get();
-// }
- 
 void WRender::CreatePipelineBinding(
-    const WId & component_id,
-    const WId & pipeline_id,
-    const WId & in_mesh_id,
+    const WEntityComponentId & component_id,
+    const WAssetId & pipeline_id,
+    const WAssetId & in_mesh_id,
     const WRenderPipelineParametersStruct & in_parameters
-    // const std::vector<WId> & in_textures,
-    // const std::vector<uint32_t> & in_textures_bindings
     )
 {
-    // WVkRenderResources * resources =
-    //     static_cast<WVkRenderResources*>(render_resources_.get());
-
     std::vector<WVkTextureInfo> tinfo{
         in_parameters.texture_assets_count
     };

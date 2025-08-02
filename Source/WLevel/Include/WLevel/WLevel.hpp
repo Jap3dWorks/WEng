@@ -62,6 +62,11 @@ public:
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const ;
 
+    template<std::derived_from<WComponent> T>
+    void ForEachComponent(TFunction<void(T*)> in_predicate) const {
+        entity_component_db_.ForEachComponent<T>(in_predicate);
+    }
+
     const char * Name() const ;
 
     void SetInitFn(const InitFn & in_fn) {
