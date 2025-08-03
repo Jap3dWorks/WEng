@@ -56,13 +56,13 @@ struct TRPParameter {
     T value;
 };
 
-using WRPFloatParameterList = std::array<TRPParameter<float>, 8>;
-using WRPWIdParameterList = std::array<TRPParameter<WId>, 8>;
+using WRPParameterList_Float = std::array<TRPParameter<float>, 8>;
+using WRPParameterList_WAssetId = std::array<TRPParameter<WAssetId>, 8>;
 
 struct WRenderPipelineParametersStruct {
-    WRPFloatParameterList float_parameters{};
+    WRPParameterList_Float float_parameters{};
     uint8_t float_parameters_count{0};
-    WRPWIdParameterList texture_assets{};
+    WRPParameterList_WAssetId texture_assets{};
     uint8_t texture_assets_count{0};
 };
 

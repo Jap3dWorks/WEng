@@ -131,15 +131,43 @@ bool LoadAssets(WEngine & engine,
     out_static_model = static_cast<WStaticMeshAsset*>(geo_asset.Ptr());
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset.Ptr());
 
+    WAssetId pipelineid = engine.AssetManager()
+        .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
+
+    out_pipeline_asset = static_cast<WRenderPipelineAsset*>(
+        engine.AssetManager().Get(pipelineid)
+        );
+
+    out_pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
+
+    out_pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[0].file,
+                "/Content/Shaders/Spacers_ShaderBase.vert");
+
+    out_pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
+                "/Content/Shaders/Spacers_ShaderBase.frag");
+
+    WAssetId paramid = engine.AssetManager()
+        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
+
+    out_param_asset = static_cast<WRenderPipelineParametersAsset*>(
+        engine.AssetManager().Get(paramid)
+        );
+
+    out_param_asset->RenderPipelineParameters().texture_assets[0].value = tex_asset->WID();
+    out_param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
+    out_param_asset->RenderPipelineParameters().texture_assets_count = 1;
+
     return true;
 }
 
-void SetupLevel(WEngine & in_engine,
+bool SetupLevel(WEngine & in_engine,
                 const WAssetId & in_smid,
                 const WAssetId & in_pipelineid,
                 const WAssetId & in_paramsid
 ) {
-    // TODO Create levels
+
     WLevelId levelid = in_engine.LevelRegister().Create();
 
     TOptionalRef<WLevel> level = in_engine.LevelRegister().Get(levelid);
@@ -149,10 +177,15 @@ void SetupLevel(WEngine & in_engine,
     level->CreateComponent<WTransformComponent>(eid);
 
     WEntityComponentId smid = level->CreateComponent<WStaticMeshComponent>(eid);
-    WStaticMeshComponent  * smcomponent = level->GetComponent<WStaticMeshComponent>(eid);
+    WStaticMeshComponent * smcomponent = level->GetComponent<WStaticMeshComponent>(eid);
+    
     smcomponent->StaticMeshAsset(in_smid);
     smcomponent->RenderPipelineAsset(in_pipelineid);
     smcomponent->RenderPipelineParametersAsset(in_paramsid);
+
+    in_engine.StartupLevel(levelid);
+
+    return true;
 
 }
 
@@ -163,26 +196,6 @@ int main(int argc, char** argv)
     try
     {
         WEngine engine = WEngine::DefaultCreate();
-
-        WId pipeline_wid = engine.AssetManager().Create(
-            WRenderPipelineAsset::StaticClass(),
-            "/Content/RenderPipeline/RPip.RPip");
-
-        TWRef<WRenderPipelineAsset> render_pipeline =
-            static_cast<WRenderPipelineAsset*>(
-                engine.AssetManager().Get(pipeline_wid)
-                );
-
-        render_pipeline->RenderPipeline().type = EPipelineType::Graphics;
-        render_pipeline->RenderPipeline().shaders[0].type=EShaderType::Vertex;
-        std::strcpy(render_pipeline->RenderPipeline().shaders[0].file,
-                    "/Content/Shaders/Spacers_ShaderBase.vert");
-
-        render_pipeline->RenderPipeline().shaders[1].type=EShaderType::Fragment;
-        std::strcpy(render_pipeline->RenderPipeline().shaders[1].file,
-                    "/Content/Shaders/Spacers_ShaderBase.frag");
-
-        engine.Render()->CreateRenderPipeline(render_pipeline.Ptr());
 
         WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;

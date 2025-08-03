@@ -45,7 +45,7 @@ public:
 
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity() {
-        return CreateEntity(T::StaticCast());
+        return CreateEntity(T::StaticClass());
     }
 
     WEntityId CreateEntity(const WClass * in_class) ;
