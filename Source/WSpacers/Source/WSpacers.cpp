@@ -84,7 +84,7 @@ bool LoadAssets(WEngine & engine,
     WImportObj obj_importer =
         engine.ImportersRegister().GetImporter<WImportObj>();
 
-    std::vector<WId> geo_ids =
+    std::vector<WAssetId> geo_ids =
         obj_importer.Import(
             engine.AssetManager(),
             "Content/Assets/Models/viking_room.obj", 
@@ -97,18 +97,12 @@ bool LoadAssets(WEngine & engine,
         return false;
     }
 
-    TWRef<WAsset> geo_asset = engine.AssetManager().Get(geo_ids[0]);
-
-    if (geo_asset->Class() != WStaticMeshAsset::StaticClass())
-    {
-        std::cout << "geo_asset is not a static model!" << std::endl;
-        return false;
-    }
+    out_static_model = engine.AssetManager().Get<WStaticMeshAsset>(geo_ids[0]);
 
     WImportTexture texture_importer =
         engine.ImportersRegister().GetImporter<WImportTexture>();
 
-    std::vector<WId> tex_ids = texture_importer.Import(
+    std::vector<WAssetId> tex_ids = texture_importer.Import(
         engine.AssetManager(),
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
@@ -120,23 +114,15 @@ bool LoadAssets(WEngine & engine,
         return false;
     }
 
-    TWRef<WAsset> tex_asset = engine.AssetManager().Get(tex_ids[0]);
+    out_texture_asset = engine.AssetManager().Get<WTextureAsset>(tex_ids[0]);
 
-    if (tex_asset->Class() != WTextureAsset::StaticClass())
-    {
-        std::cout << "tex_asset is not a texture!" << std::endl;
-        return false;
-    }
-
-    out_static_model = static_cast<WStaticMeshAsset*>(geo_asset.Ptr());
-    out_texture_asset = static_cast<WTextureAsset*>(tex_asset.Ptr());
+    // Create Render Pipeline Asset
 
     WAssetId pipelineid = engine.AssetManager()
         .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
 
-    out_pipeline_asset = static_cast<WRenderPipelineAsset*>(
-        engine.AssetManager().Get(pipelineid)
-        );
+    out_pipeline_asset = engine.AssetManager()
+        .Get<WRenderPipelineAsset>(pipelineid);
 
     out_pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
@@ -148,6 +134,8 @@ bool LoadAssets(WEngine & engine,
     std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag");
 
+    // Create Pipeline Parameter Asset
+
     WAssetId paramid = engine.AssetManager()
         .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
 
@@ -155,7 +143,7 @@ bool LoadAssets(WEngine & engine,
         engine.AssetManager().Get(paramid)
         );
 
-    out_param_asset->RenderPipelineParameters().texture_assets[0].value = tex_asset->WID();
+    out_param_asset->RenderPipelineParameters().texture_assets[0].value = out_texture_asset->WID();
     out_param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
     out_param_asset->RenderPipelineParameters().texture_assets_count = 1;
 
@@ -166,18 +154,17 @@ bool SetupLevel(WEngine & in_engine,
                 const WAssetId & in_smid,
                 const WAssetId & in_pipelineid,
                 const WAssetId & in_paramsid
-) {
+    ) {
 
     WLevelId levelid = in_engine.LevelRegister().Create();
 
-    TOptionalRef<WLevel> level = in_engine.LevelRegister().Get(levelid);
+    WLevel & level = in_engine.LevelRegister().Get(levelid);
 
-    WEntityId eid = level->CreateEntity<WEntity>();
+    WEntityId eid = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(eid);
+    WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 
-    level->CreateComponent<WTransformComponent>(eid);
-
-    WEntityComponentId smid = level->CreateComponent<WStaticMeshComponent>(eid);
-    WStaticMeshComponent * smcomponent = level->GetComponent<WStaticMeshComponent>(eid);
+    WStaticMeshComponent * smcomponent = level.GetComponent<WStaticMeshComponent>(eid);
     
     smcomponent->StaticMeshAsset(in_smid);
     smcomponent->RenderPipelineAsset(in_pipelineid);
@@ -191,7 +178,6 @@ bool SetupLevel(WEngine & in_engine,
 
 int main(int argc, char** argv)
 {
-    bool as_plane=false;
     
     try
     {
@@ -217,8 +203,7 @@ int main(int argc, char** argv)
         SetupLevel(engine,
                    static_mesh->WID(),
                    pipeline_asset->WID(),
-                   param_asset->WID()
-            );
+                   param_asset->WID());
 
         run(engine);
 

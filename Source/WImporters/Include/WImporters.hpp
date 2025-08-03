@@ -30,7 +30,7 @@ public:
      * @param file_path The file path to import
      * @param asset_directory, Engine based directory path to import to, Should start with /Content.
     */
-    virtual std::vector<WId> Import(
+    virtual std::vector<WAssetId> Import(
         WAssetDb & in_asset_manager,
         const char* file_path,
         const char* asset_directory) = 0;
@@ -72,7 +72,7 @@ public:
 
 public:
 
-    std::vector<WId> Import(
+    std::vector<WAssetId> Import(
         WAssetDb & in_asset_manager,
         const char * file_path,
         const char * asset_directory) override;
@@ -107,7 +107,7 @@ public:
 
 public:
     
-    std::vector<WId> Import(
+    std::vector<WAssetId> Import(
         WAssetDb & in_asset_manager,
         const char * file_path,
         const char * asset_directory) override;

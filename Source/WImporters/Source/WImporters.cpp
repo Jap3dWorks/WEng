@@ -51,7 +51,7 @@ WImporter & WImporter::operator=(WImporter && other) noexcept
 
 WImportObj::WImportObj() noexcept {}
 
-std::vector<WId> WImportObj::Import(
+std::vector<WAssetId> WImportObj::Import(
     WAssetDb & in_asset_manager,
     const char* file_path,
     const char* asset_directory)
@@ -118,10 +118,10 @@ std::vector<WId> WImportObj::Import(
 
     std::vector<TWRef<WAsset>> imported_assets(shapes.size());
 
-    std::vector<WId> result(shapes.size());
+    std::vector<WAssetId> result(shapes.size());
 
     for (uint32_t i=0; i < meshes.size(); i++) {
-        WId id = in_asset_manager.Create(
+        WAssetId id = in_asset_manager.Create(
             WStaticMeshAsset::StaticClass(),
             "StaticMesh"
             );
@@ -142,7 +142,7 @@ std::vector<WId> WImportObj::Import(
 
 WImportTexture::WImportTexture() noexcept {}
 
-std::vector<WId> WImportTexture::Import(
+std::vector<WAssetId> WImportTexture::Import(
     WAssetDb & in_asset_manager,
     const char* file_path,
     const char* asset_directory)
@@ -195,7 +195,7 @@ std::vector<WId> WImportTexture::Import(
 
     stbi_image_free(Pixels);
 
-    WId id = in_asset_manager.Create<WTextureAsset>(
+    WAssetId id = in_asset_manager.Create<WTextureAsset>(
         WStringUtils::AssetPath(asset_directory, file_path, "texture").c_str()
         );
 

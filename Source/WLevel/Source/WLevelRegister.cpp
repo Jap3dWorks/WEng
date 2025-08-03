@@ -38,16 +38,3 @@ WLevelRegister& WLevelRegister::operator=(WLevelRegister && other){
 
     return *this;
 }
-
-WLevelId WLevelRegister::Create() {
-    return levels_.Create();
-}
-
-TOptionalRef<WLevel> WLevelRegister::Get(const WLevelId & in_id) {
-    assert(levels_.Contains(in_id));
-    return levels_.Get(in_id);
-}
-
-WLevel WLevelRegister::GetCopy(const WLevelId & in_id) const {
-    return levels_.Get(in_id);
-}

@@ -5,6 +5,7 @@
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 
+#include <concepts>
 #include <unordered_map>
 
 class WAsset;
@@ -79,17 +80,22 @@ public:
         return id;
     }
 
-    WAsset * Get(const WId & in_id) const {
+    template<std::derived_from<WAsset> T>
+    T * Get(const WAssetId & in_id) const {
+        assert(id_class_.contains(in_id));
+
+        return static_cast<T*>(object_manager_.Get(
+                                   id_class_.at(in_id),
+                                   in_id));
+    }
+
+    WAsset * Get(const WAssetId & in_id) const {
         assert(id_class_.contains(in_id));
         return object_manager_.Get(id_class_.at(in_id), in_id);
     }
 
-    TWRef<WAsset> GetRef(const WId & in_id) const {
+    TWRef<WAsset> GetRef(const WAssetId & in_id) const {
         return Get(in_id);
-    }
-
-    WAssetDbType & ObjectManager() noexcept {
-        return object_manager_;
     }
 
 private:

@@ -4,8 +4,7 @@
 #include "WCore/TOptionalRef.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TObjectDataBase.hpp"
-
-class WLevel;
+#include "WLevel/WLevel.hpp"
 
 /**
  * @brief Register Open and Close Levels.
@@ -29,11 +28,21 @@ public:
 
     WLevelRegister& operator=(WLevelRegister && other);
 
-    WLevelId Create();
+    WLevelId Create() {
+        return levels_.Create();
+    }
 
-    TOptionalRef<WLevel> Get(const WLevelId & in_id);
+    bool Contains(const WLevelId & in_id) const {
+        return levels_.Contains(in_id);
+    }
 
-    WLevel GetCopy(const WLevelId & in_id) const;
+    WLevel & Get(const WLevelId & in_id) {
+        return levels_.Get(in_id);
+    }
+
+    WLevel GetCopy(const WLevelId & in_id) const {
+        return levels_.Get(in_id);
+    }
 
 private:
     

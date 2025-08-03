@@ -40,6 +40,8 @@ public:
 
     void LoadLevel(const WLevelId & in_level);
 
+    void UnloadLevel();
+
     WImporterRegister & ImportersRegister() noexcept;
 
     TRef<IRender> Render() noexcept;

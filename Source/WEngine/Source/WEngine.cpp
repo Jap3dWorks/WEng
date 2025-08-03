@@ -59,14 +59,9 @@ void WEngine::run()
 
         if (!level_info_.loaded) {
 
-            level_info_.level = level_register_.GetCopy(
-                level_info_.current_level
-                );
-            
-            level_info_.level.Init(engine_cycle_data);
-            level_info_.loaded = true;
+            UnloadLevel();
+            LoadLevel(level_info_.current_level);
 
-            // TODO update static transforms WStaticTransformComponent
         }
         else {
             // Update transform Components
@@ -78,49 +73,35 @@ void WEngine::run()
                             in_component->EntityId(),
                             in_component->Class()
                             );
-                    // TODO, Render()->UpdateUbo(in_component, in_component);
+                    
+                    // TODO, Render()->UpdateUbo(ecid, in_component);
 
                 });
 
             // Update Entities
-            level_info_.level.ForEachEntity(
-                WEntity::StaticClass(),
-                [&engine_cycle_data](WEntity * in_actor) {
-                    in_actor->OnUpdate(
-                        engine_cycle_data
-                        );
-                });
+            // level_info_.level.ForEachEntity(
+            //     WEntity::StaticClass(),
+            //     [&engine_cycle_data](WEntity * in_actor) {
+            //         in_actor->OnUpdate(
+            //             engine_cycle_data
+            //             );
+            //     });
 
             // draw
             Render()->Draw();
         }
     }
 
+    UnloadLevel();
+
     Render()->WaitIdle();
 }
 
 void WEngine::LoadLevel(const WLevelId & in_level) {
-    if (level_info_.current_level &&
-        level_info_.loaded) {
-
-        WRenderLevelLib::ReleaseRenderResources(
-            render_.get(),
-            level_info_.level.EntityComponentDb(),
-            asset_manager_
-            );
-    }
-
     level_info_.loaded = false;
+    level_info_.current_level = in_level;
 
-    TOptionalRef<WLevel> level = level_register_.Get(in_level);
-
-    if (level.IsEmpty()) {
-        WFLOG("[RENDER] Level {} do not exists!", in_level.GetId());
-        return;
-    }
-
-    // Copy registered level
-    level_info_.level = *level;
+    level_info_.level = level_register_.GetCopy(in_level);
 
     // Initialize new level
     WRenderLevelLib::InitializeResources(
@@ -129,10 +110,21 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
         asset_manager_
         );
 
-    level_info_.current_level = in_level;
     level_info_.loaded = true;
 
-    WFLOG("NOT IMPLEMENTED!");
+    // TODO update static transforms WStaticTransformComponent
+}
+
+void WEngine::UnloadLevel() {
+    if (level_info_.loaded) {
+        WRenderLevelLib::ReleaseRenderResources(
+            render_.get(),
+            level_info_.level.EntityComponentDb(),
+            asset_manager_
+            );
+    }
+
+    level_info_.loaded = false;
 }
 
 void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
