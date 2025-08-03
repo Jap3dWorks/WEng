@@ -43,6 +43,11 @@ public:
 
     void Close(const WEngineCycleData & in_cycle_data) ;
 
+    template<std::derived_from<WEntity> T>
+    WEntityId CreateEntity() {
+        return CreateEntity(T::StaticCast());
+    }
+
     WEntityId CreateEntity(const WClass * in_class) ;
 
     WEntity * GetEntity(const WEntityId & in_id) const ;
@@ -53,11 +58,28 @@ public:
     void ForEachEntity(const WClass * in_class,
                        TFunction<void(WEntity*)> in_predicate) const ;
 
+    template<std::derived_from<WComponent> T>
+    WEntityComponentId CreateComponent(const WEntityId & in_entity_id) {
+        return CreateComponent(in_entity_id, T::StaticClass());
+    }
+
     WEntityComponentId CreateComponent(const WEntityId & in_entity_id,
                                        const WClass * in_class) ;
 
+    template<std::derived_from<WComponent> T>
+    T * GetComponent(const WEntityId & in_entity_id) const {
+        return entity_component_db_.GetComponent<T>(in_entity_id);
+    }
+
     WComponent * GetComponent(const WClass * in_class,
-                              const WEntityId & in_component_id) const ;
+                              const WEntityId & in_component_id) const {
+        return entity_component_db_.GetComponent(in_class,
+                                                 in_component_id);
+    }
+
+    WComponent * GetComponent(const WEntityComponentId & in_component_id) const {
+        return entity_component_db_.GetComponent(in_component_id);
+    }
 
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const ;
@@ -93,7 +115,7 @@ public:
         close_fn_ = std::move(in_fn);
     }
 
-    const WEntityComponentDb & ActorComponentDb() const {
+    const WEntityComponentDb & EntityComponentDb() const {
         return entity_component_db_;
     }
 
@@ -103,7 +125,7 @@ public:
 
 private:
 
-    std::string ActorPath(const WClass* in_class) const;
+    std::string WEntityPath(const WClass* in_class) const;
 
     std::string ComponentPath(const WEntityId & in_entity_id,
                               const WClass * in_class) const;

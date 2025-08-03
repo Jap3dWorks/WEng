@@ -71,10 +71,15 @@ public:
         return GetComponent(in_class, in_component_id);
     }
 
+    template<std::derived_from<WComponent> T>
+    WComponent * GetComponent(const WEntityId & in_entity_id) const {
+        return component_db_.Get<T>(in_entity_id);
+    }
+
     WComponent * GetComponent(const WClass * in_class,
-                              const WEntityId & in_component_id) const {
+                              const WEntityId & in_entity_id) const {
         assert(component_db_.Contains(in_class, in_component_id));
-        return component_db_.Get(in_class, in_component_id);
+        return component_db_.Get(in_class, in_entity_id);
     }
 
     WComponent * GetComponent(const WEntityComponentId & in_entity_component_id) const {

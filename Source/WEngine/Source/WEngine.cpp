@@ -72,7 +72,7 @@ void WEngine::run()
             // Update transform Components
             level_info_.level.ForEachComponent<WTransformComponent>(
                 [&engine_cycle_data, this](WTransformComponent * in_component) {
-                    WEntityComponentId ecid = level_info_.level.ActorComponentDb().EntityComponentId(
+                    WEntityComponentId ecid = level_info_.level.WEntityComponentDb().EntityComponentId(
                         in_component->EntityId(),
                         in_component->Class()
                         );
@@ -103,7 +103,7 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
 
         WRenderLevelLib::ReleaseRenderResources(
             render_.get(),
-            level_info_.level.ActorComponentDb(),
+            level_info_.level.WEntityComponentDb(),
             asset_manager_
             );
     }
@@ -123,7 +123,7 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
     // Initialize new level
     WRenderLevelLib::InitializeResources(
         render_.get(),
-        level_info_.level.ActorComponentDb(),
+        level_info_.level.WEntityComponentDb(),
         asset_manager_
         );
 

@@ -1,5 +1,6 @@
 #include "WSpacers.hpp"
 
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
@@ -11,6 +12,8 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
+#include "WComponents/WTransformComponent.hpp"
+#include "WComponents/WStaticMeshComponent.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -71,7 +74,12 @@ WModelStruct MeshPlane()
     return model;
 }
 
-bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTextureAsset *& out_texture_asset)
+bool LoadAssets(WEngine & engine,
+                WStaticMeshAsset *& out_static_model,
+                WTextureAsset *& out_texture_asset,
+                WRenderPipelineAsset *& out_pipeline_asset,
+                WRenderPipelineParametersAsset *& out_param_asset
+    )
 {
     WImportObj obj_importer =
         engine.ImportersRegister().GetImporter<WImportObj>();
@@ -104,7 +112,7 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
         engine.AssetManager(),
         "Content/Assets/Textures/viking_room.png", 
         "/Content/Assets/viking_texture.viking_texture"
-    );
+        );
 
     if (tex_ids.size() < 1)
     {
@@ -124,6 +132,27 @@ bool LoadAssets(WEngine & engine, WStaticMeshAsset *& out_static_model, WTexture
     out_texture_asset = static_cast<WTextureAsset*>(tex_asset.Ptr());
 
     return true;
+}
+
+void SetupLevel(WEngine & in_engine,
+                const WAssetId & in_smid,
+                const WAssetId & in_pipelineid,
+                const WAssetId & in_paramsid
+) {
+    // TODO Create levels
+    WLevelId levelid = in_engine.LevelRegister().Create();
+
+    TOptionalRef<WLevel> level = in_engine.LevelRegister().Get(levelid);
+
+    WEntityId eid = level->CreateEntity<WEntity>();
+
+    level->CreateComponent<WTransformComponent>(eid);
+
+    WEntityComponentId smid = level->CreateComponent<WStaticMeshComponent>(eid);
+    WStaticMeshComponent  * smcomponent = level->GetComponent<WStaticMeshComponent>(eid);
+    smcomponent->StaticMeshAsset(in_smid);
+    smcomponent->RenderPipelineAsset(in_pipelineid);
+    smcomponent->RenderPipelineParametersAsset(in_paramsid);
 
 }
 
@@ -158,8 +187,13 @@ int main(int argc, char** argv)
         WStaticMeshAsset * static_mesh;
         WTextureAsset * texture_asset;
         WRenderPipelineAsset * pipeline_asset;
+        WRenderPipelineParametersAsset * param_asset;
 
-        if (!LoadAssets(engine, static_mesh, texture_asset))
+        if (!LoadAssets(engine,
+                        static_mesh,
+                        texture_asset,
+                        pipeline_asset,
+                        param_asset))
         {
             return 1;
         }
@@ -167,24 +201,11 @@ int main(int argc, char** argv)
         const WTextureStruct & texture_data =
             texture_asset->GetTexture();
 
-        // TODO Create levels
-        // engine.
-
-        // engine.Render()->RenderResources()->RegisterStaticMesh(static_mesh);
-        // engine.Render()->RenderResources()->RegisterTexture(texture_asset);
-
-        // Load Resources into Graphics Memory
-        // engine.Render()->RenderResources()->LoadStaticMesh(static_mesh->WID());
-        // engine.Render()->RenderResources()->LoadTexture(texture_asset->WID());
-
-        engine.Render()->CreatePipelineBinding(
-            pipeline_wid,
-            static_mesh->WID(),
-            {texture_asset->WID()},
-            {1}
+        SetupLevel(engine,
+                   static_mesh->WID(),
+                   pipeline_asset->WID(),
+                   param_asset->WID()
             );
-
-        WLOG("Bind Pipeline: {:d}", pipeline_wid.GetId());
 
         run(engine);
 

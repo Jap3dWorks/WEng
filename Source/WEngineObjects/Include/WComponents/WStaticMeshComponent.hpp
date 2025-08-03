@@ -15,7 +15,7 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 
 public:
 
-    WId StaticMeshAsset() noexcept {
+    WAssetId StaticMeshAsset() noexcept {
         return static_mesh_asset_id_;
     }
 
@@ -23,7 +23,11 @@ public:
         static_mesh_asset_id_ = static_mesh_asset.WID();
     }
 
-    WId RenderPipelineAsset() noexcept {
+    void StaticMeshAsset(const WAssetId & in_asset_id) noexcept {
+        static_mesh_asset_id_ = in_asset_id;
+    }
+
+    WAssetId RenderPipelineAsset() noexcept {
         return render_pipeline_asset_id_;
     }
     
@@ -31,7 +35,11 @@ public:
         render_pipeline_asset_id_ = render_pipeline_asset.WID();
     }
 
-    WId RenderPipelineParametersAsset() noexcept {
+    void RenderPipelineAsset(const WAssetId & in_asset_id) noexcept {
+        render_pipeline_asset_id_ = in_asset_id;
+    }
+
+    WAssetId RenderPipelineParametersAsset() noexcept {
         return render_pipeline_parameters_asset_id_;
     }
 
@@ -41,13 +49,17 @@ public:
         render_pipeline_parameters_asset_id_ = render_pipeline_parameters_asset.WID();
     }
 
+    void RenderPipelineParametersAsset(const WAssetId & in_asset_id) noexcept {
+        render_pipeline_parameters_asset_id_ = in_asset_id;
+    }
+
 private:
 
-    WId static_mesh_asset_id_;
+    WAssetId static_mesh_asset_id_;
 
-    WId render_pipeline_asset_id_{};
+    WAssetId render_pipeline_asset_id_{};
 
-    WId render_pipeline_parameters_asset_id_{};
+    WAssetId render_pipeline_parameters_asset_id_{};
   
 };
 

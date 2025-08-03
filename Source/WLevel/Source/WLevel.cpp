@@ -98,7 +98,7 @@ void WLevel::Close(const WEngineCycleData & in_cycle_data) {
 }
 
 WEntityId WLevel::CreateEntity(const WClass * in_class) {
-    std::string actor_path = ActorPath(in_class);
+    std::string actor_path = WEntityPath(in_class);
 
     WEntityId id = entity_component_db_.CreateEntity(in_class, actor_path.c_str());
 
@@ -123,13 +123,6 @@ WEntityComponentId WLevel::CreateComponent(const WEntityId & in_actor_id,
     
     return entity_component_db_.EntityComponentId(in_actor_id, in_class);
 }
-
-WComponent * WLevel::GetComponent(const WClass * in_class,
-                                  const WEntityId & in_component_id) const {
-    return entity_component_db_.GetComponent(in_class,
-                                             in_component_id);
-}
-
 void WLevel::ForEachComponent(const WClass * in_class,
                               TFunction<void(WComponent*)> in_predicate) const {
     entity_component_db_.ForEachComponent(in_class, in_predicate);
@@ -147,7 +140,7 @@ void WLevel::WID(const WLevelId & in_id) {
     wid_ = in_id;
 }
 
-std::string WLevel::ActorPath(const WClass * in_class) const {
+std::string WLevel::WEntityPath(const WClass * in_class) const {
     assert(in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class));
 
     return std::string(Name()) + ":" + in_class->Name() + "_" +
