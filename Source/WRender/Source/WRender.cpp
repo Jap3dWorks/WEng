@@ -144,7 +144,9 @@ void WRender::Initialize()
         device_info_
         );
 
-    render_command_buffer_ = render_command_pool_.CreateCommandBuffer();
+    render_command_buffer_ =
+        render_command_pool_.
+        CreateCommandBuffer();
 
     WVulkan::Create(
         image_available_semaphore_,
@@ -224,8 +226,10 @@ void WRender::Draw()
         submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submit_info.pNext = nullptr;
 
-        VkSemaphore wait_semaphores[] = { image_available_semaphore_.semaphores[frame_index] };
-        VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        VkSemaphore wait_semaphores[] =
+            { image_available_semaphore_.semaphores[frame_index] };
+        VkPipelineStageFlags wait_stages[] =
+            { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
         submit_info.waitSemaphoreCount = 1;
         submit_info.pWaitSemaphores = wait_semaphores;
@@ -245,7 +249,6 @@ void WRender::Draw()
         {
             throw std::runtime_error("Failed to submit draw command buffer");
         }
-        
     }
 
     WFLOG("Signal Semaphores: {:d}", (size_t)signal_semaphores[0]);

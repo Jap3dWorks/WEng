@@ -164,7 +164,8 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WTransformComponent>(eid);
     WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 
-    WStaticMeshComponent * smcomponent = level.GetComponent<WStaticMeshComponent>(eid);
+    WStaticMeshComponent * smcomponent =
+        level.GetComponent<WStaticMeshComponent>(eid);
     
     smcomponent->StaticMeshAsset(in_smid);
     smcomponent->RenderPipelineAsset(in_pipelineid);

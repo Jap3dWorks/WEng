@@ -332,11 +332,12 @@ void WVkRenderPipelinesManager::Clear()
     descriptor_sets_.Clear();
     if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
     {
-        // Also destroys descriptor sets
         WVulkan::Destroy(descriptor_pool_info_, device_info_);
         descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
     }
-    WVulkan::Create(descriptor_pool_info_, device_info_);
+    if (device_info_.vk_device != VK_NULL_HANDLE) {
+        WVulkan::Create(descriptor_pool_info_, device_info_);
+    }
 
     descriptor_set_layouts_.Clear();
 }

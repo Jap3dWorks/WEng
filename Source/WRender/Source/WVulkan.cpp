@@ -1027,8 +1027,8 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WVkDescriptorPoolInfo &out_descriptor_pool_info,
-    const WVkDeviceInfo &device)
+    WVkDescriptorPoolInfo & out_descriptor_pool_info,
+    const WVkDeviceInfo & device)
 {
     // if (out_descriptor_pool_info.pool_sizes.empty())
     // {

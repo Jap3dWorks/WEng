@@ -20,6 +20,20 @@ public:
 
 public:
 
+    constexpr WEntityComponentDb() noexcept = default;
+
+    virtual ~WEntityComponentDb() = default;
+
+    WEntityComponentDb(const WEntityComponentDb & other) = default;
+    
+    WEntityComponentDb(WEntityComponentDb && other) noexcept = default;
+
+    WEntityComponentDb & operator=(const WEntityComponentDb & other) = default;
+
+    WEntityComponentDb & operator=(WEntityComponentDb && other) noexcept = default;
+
+public:
+
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity(const char * in_name) {
         return CreateEntity(T::StaticClass(), in_name);

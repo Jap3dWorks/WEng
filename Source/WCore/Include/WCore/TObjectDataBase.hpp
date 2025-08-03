@@ -136,7 +136,7 @@ public:
     }
 
     virtual std::unique_ptr<Super> Clone() const override {
-        return std::make_unique<Type>(*this);
+        return std::make_unique<TObjectDataBase>(*this);
     }
 
     WIdClass Create(const CreateFn & in_predicate) {

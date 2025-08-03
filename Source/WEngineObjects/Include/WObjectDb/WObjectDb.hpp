@@ -203,7 +203,8 @@ public:
     }
 
     WNODISCARD size_t Count(const WClass * in_class) const {
-        assert(db_.contains(in_class));
+        if (!db_.contains(in_class)) return 0;
+        
         return db_.at(in_class)->Count();
     }
 
