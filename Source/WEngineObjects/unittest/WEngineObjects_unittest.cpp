@@ -1,4 +1,5 @@
 #include "WAssets/WTextureAsset.hpp"
+#include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
 #define CATCH_CONFIG_MAIN
@@ -12,6 +13,11 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WEngineObjects/WEntity.hpp"
+#include "WObjectDb/WEntityComponentDb.hpp"
+#include "WComponents/WStaticMeshComponent.hpp"
+#include "WComponents/WTransformComponent.hpp"
+#include "WComponents/WCameraComponent.hpp"
+
 #include "WLog.hpp"
 
 #include <vector>
@@ -109,6 +115,64 @@ bool WObjectDb_WClass_Test() {
     return a2->Class()->Name() == "WEntity";
 }
 
+bool WEntityComponentDb_Test() {
+
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> smdb =
+        WStaticMeshComponent::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, WEntityId>();
+
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> tdb =
+        WTransformComponent::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, WEntityId>();
+
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> cdb =
+        WCameraComponent::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, WEntityId>();
+
+    smdb->Create();
+    smdb->Create();
+    smdb->Create();
+
+    tdb->Create();
+    tdb->Create();
+    tdb->Create();
+
+    // cdb->Create();
+    // cdb->Create();
+    // cdb->Create();
+
+    auto cp = smdb->Clone();
+    smdb->ForEach([](WComponent * _cmp) {
+        WFLOG("PRINT Orig MSTaticMeshComponent");
+    });
+    cp->ForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned MStaticMeshComponent");
+    });
+
+    tdb->ForEach([](WComponent * _cmp) {
+        WFLOG("Print Orig MTansformsComponent");
+    });
+    auto cp2 = tdb->Clone();
+    // tdb
+    
+    auto cp3 = cdb->Clone();
+
+    // WEntityComponentDb db;
+
+    // WEntityId eid = db.CreateEntity<WEntity>("E1");
+
+    // // db.CreateComponent<WTransformComponent>(eid);
+    // // db.CreateComponent<WCameraComponent>(eid);
+    // db.CreateComponent<WStaticMeshComponent>(eid);
+
+    // WEntityComponentDb other = db;
+    
+    return true;
+}
+
 TEST_CASE("WEngineObjects") {
     SECTION("TWAllocator") {
         CHECK(TWAllocator_in_vector());
@@ -119,6 +183,9 @@ TEST_CASE("WEngineObjects") {
     SECTION("WObjectDb") {
         CHECK(WObjectDb_TWRef_Test());
         CHECK(WObjectDb_WClass_Test());
+    }
+    SECTION("WEntityComponentDb") {
+        CHECK(WEntityComponentDb_Test());
     }
 }
 

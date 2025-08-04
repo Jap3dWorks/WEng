@@ -39,9 +39,9 @@ public:
 
 private:
 
-    char name_[WOBJECT_NAME_SIZE];
+    char name_[WOBJECT_NAME_SIZE]{};
 
-    WAssetId wid_;
+    WAssetId wid_{};
 
 };
 

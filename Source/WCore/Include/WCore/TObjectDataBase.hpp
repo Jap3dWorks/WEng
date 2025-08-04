@@ -102,7 +102,8 @@ public:
         create_fn_(other.create_fn_),
         destroy_fn_(other.destroy_fn_),
         id_pool_(other.id_pool_),
-        objects_(other.objects_) {}
+        objects_(other.objects_)
+        {}
 
     constexpr TObjectDataBase(TObjectDataBase && other) noexcept :
         create_fn_(std::move(other.create_fn_)),

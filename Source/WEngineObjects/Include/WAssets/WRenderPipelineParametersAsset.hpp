@@ -19,7 +19,7 @@ public:
 
 private:
 
-    WRenderPipelineParametersStruct pipeline_parameters_;
+    WRenderPipelineParametersStruct pipeline_parameters_{};
 
 };
 

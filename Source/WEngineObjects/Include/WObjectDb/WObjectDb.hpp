@@ -6,6 +6,7 @@
 #include "WEngineObjects/WObject.hpp"
 #include "WEngineObjects/TWRef.hpp"
 #include "WCore/WConcepts.hpp"
+#include "WLog.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -46,7 +47,7 @@ public:
     
     virtual ~WObjectDb() = default;
 
-    WObjectDb(const WObjectDb& other) :
+    WObjectDb(const WObjectDb & other) :
     db_(),
     initial_memory_size_(other.initial_memory_size_) {
         CopyContainersFrom(other);
@@ -57,7 +58,7 @@ public:
     initial_memory_size_(std::move(other.initial_memory_size_))
     {}
     
-    constexpr WObjectDb & operator=(const WObjectDb& other) {
+    constexpr WObjectDb & operator=(const WObjectDb & other) {
         if (this != &other) {
             initial_memory_size_ = other.initial_memory_size_;
             CopyContainersFrom(other);
@@ -213,8 +214,10 @@ private:
     void CopyContainersFrom(const WObjectDb & other) {
         db_.clear();
         for (auto & p : other.db_) {
+            WFLOG("Copy Container of Class {}", p.first->Name());
+            WFLOG("  Count: {}" , p.second->Count());
             db_.insert(
-                {p.first, p.second->Clone()}
+                { p.first, p.second->Clone() }
                 );
         }
     }

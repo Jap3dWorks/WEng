@@ -32,7 +32,7 @@ public:
     TWAllocator(const TWAllocator & other) :
         allocate_fn_(other.allocate_fn_),
         deallocate_fn_(other.deallocate_fn_),
-        pptr_(other.pptr_)
+        pptr_(nullptr)  // TODO: Check
         {}
 
     TWAllocator(TWAllocator && other) noexcept :
@@ -96,27 +96,3 @@ constexpr bool operator==( const TWAllocator<T1>& lhs, const TWAllocator<T2>& rh
 }
 
 
-// class WObjAllocator {
-
-// public:
-
-//     // constexpr pointer allocate(std::size_t n) {
-//     //     pointer p = new T[n];
-        
-//     //     allocate_fn_(pptr_, pn_, p, n);
-
-//     //     pptr_=p;
-//     //     pn_=n;
-
-//     //     return p;
-//     // }
-
-//     // constexpr void deallocate (pointer p, std::size_t n) {
-//     //     deallocate_fn_(p, n);
-//     //     delete[] p;
-//     // }
-
-// private:
-
-//     std::unique_ptr<BWAllocator> alloc_;
-// };

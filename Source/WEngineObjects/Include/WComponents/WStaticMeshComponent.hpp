@@ -55,7 +55,7 @@ public:
 
 private:
 
-    WAssetId static_mesh_asset_id_;
+    WAssetId static_mesh_asset_id_{};
 
     WAssetId render_pipeline_asset_id_{};
 

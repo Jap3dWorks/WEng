@@ -132,7 +132,7 @@ private:
 
     WEntityId CreateEntityId(const WClass * in_class);
 
-    void UpdateComponentMetadata(const WClass * in_component_class, const WEntityId& in_Id);
+    void UpdateComponentMetadata(const WClass * in_component_class, const WEntityId & in_Id);
 
     WEntityDbType entity_db_;
 

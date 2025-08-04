@@ -66,4 +66,46 @@ install(
     DESTINATION lib/cmake/WCore
 )
 
+# Unittest
+# --------
 
+if (DEFINED WUNITTEST OR DEFINED ENV{WUNITTEST})
+
+    message("BUILD WCore unittests.")
+
+    find_package(Catch2 2 REQUIRED)
+
+    add_executable(
+        WCore_unittest
+        unittest/WCore_unittest.cpp
+    )
+
+    target_include_directories(
+        WCore_unittest
+        PUBLIC
+            Inlcude
+            PublicGenerated
+        PRIVATE
+            Source
+            PrivateGenerated
+            Catch2:Catch2
+        )
+
+    target_link_libraries(
+        WCore_unittest
+        PRIVATE
+            Catch2::Catch2
+            WCore::WCore
+        )
+
+    install(
+        TARGETS
+        WCore_unittest
+        RUNTIME DESTINATION bin
+    )
+
+else()
+
+    message("Exclude WCore unittests build.")
+
+endif()

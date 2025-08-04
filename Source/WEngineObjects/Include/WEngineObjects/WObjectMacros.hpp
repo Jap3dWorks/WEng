@@ -15,6 +15,10 @@ class WClass;
 #define _WOBJECT_ORIGINAL_BODY_(_WCLASS)                            \
     public :                                                        \
     constexpr _WCLASS() noexcept = default;                         \
+    constexpr _WCLASS(const _WCLASS &) = default;                   \
+    constexpr _WCLASS(_WCLASS &&) noexcept=default;                 \
+    _WCLASS & operator=(const _WCLASS &) = default;                 \
+    _WCLASS & operator=(_WCLASS &&) = default;                      \
     virtual ~_WCLASS() = default;                                   \
     static inline constexpr const WClass * StaticClass() noexcept { \
         return &TSingleton<WClass, WClass__ ## _WCLASS>::value;     \
@@ -27,6 +31,10 @@ class WClass;
 #define _WOBJECT_BODY_(_WCLASS)                                     \
     public:                                                         \
     constexpr _WCLASS() noexcept = default;                         \
+    constexpr _WCLASS(const _WCLASS &) = default;                   \
+    constexpr _WCLASS(_WCLASS &&) noexcept=default;                 \
+    _WCLASS & operator=(const _WCLASS &) = default;                 \
+    _WCLASS & operator=(_WCLASS &&) = default;                      \
     ~_WCLASS() override = default;                                  \
     static inline constexpr const WClass * StaticClass() noexcept { \
         return &TSingleton<WClass, WClass__ ## _WCLASS>::value;     \

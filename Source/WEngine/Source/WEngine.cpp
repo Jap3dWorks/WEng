@@ -49,7 +49,6 @@ void WEngine::run()
     
     level_info_.current_level = startup_info_.startup_level;
     level_info_.loaded = false;
-    level_info_.level = level_register_.GetCopy(level_info_.current_level);
 
     // TODO Window out of WRender
     while(!glfwWindowShouldClose(Render()->Window())) {
@@ -101,7 +100,7 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
     level_info_.loaded = false;
     level_info_.current_level = in_level;
 
-    level_info_.level = level_register_.GetCopy(in_level);
+    level_info_.level = level_register_.Get(in_level);
 
     // Initialize new level
     WRenderLevelLib::InitializeResources(

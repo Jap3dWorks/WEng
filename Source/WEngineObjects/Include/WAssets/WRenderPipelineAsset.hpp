@@ -18,6 +18,6 @@ public:
 
 private:
 
-    WRenderPipelineStruct pipeline_;
+    WRenderPipelineStruct pipeline_{};
 
 };

@@ -49,18 +49,22 @@ public:
         {}
 
     constexpr TSparseSet & operator=(const TSparseSet & other) {
-        index_pos_ = other.index_pos_;
-        pos_index_ = other.pos_index_;
-        compact_ = other.compact_;
-        
+        if (this != &other) {
+            index_pos_ = other.index_pos_;
+            pos_index_ = other.pos_index_;
+            compact_ = other.compact_;
+        }
+
         return *this;
     }
     
     constexpr TSparseSet & operator=(TSparseSet && other) noexcept {
-        index_pos_ = std::move(other.index_pos_);
-        pos_index_ = std::move(other.pos_index_);
-        compact_ = std::move(other.compact_);
-        
+        if (this != &other) {
+            index_pos_ = std::move(other.index_pos_);
+            pos_index_ = std::move(other.pos_index_);
+            compact_ = std::move(other.compact_);
+        }
+
         return *this;
     }
     
@@ -75,10 +79,12 @@ public:
     }
 
     T & Get(size_t in_index) {
+        assert(index_pos_.contains(in_index));
         return compact_[index_pos_[in_index]];
     }
 
     const T & Get(size_t in_index) const {
+        assert(index_pos_.contains(in_index));
         return compact_[index_pos_.at(in_index)];
     }
 
@@ -160,3 +166,5 @@ private:
     std::vector<T, Allocator> compact_;
 
 };
+
+

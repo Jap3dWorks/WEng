@@ -30,8 +30,6 @@ void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
 
     UpdateComponentMetadata(in_component_class, in_entity_id);
 
-    // TODO resolve component id
-
     component_db_.Insert(in_component_class, in_entity_id);
 
     WComponent * component = component_db_.Get(in_component_class, in_entity_id);

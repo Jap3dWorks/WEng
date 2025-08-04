@@ -59,9 +59,10 @@ public:
 
     template<typename B, typename I>
     std::unique_ptr<DbType<B,I>> Create() const {
-        VoidPtr type_erased = CreateDb(typeid(RegKey<B,I>));
-        
-        return std::unique_ptr<DbType<B,I>>(CastDb<B,I>(type_erased));
+        return std::unique_ptr<DbType<B,I>>(
+            CastDb<B,I>(
+                CreateDb(typeid(RegKey<B,I>)))
+            );
     }
 
     template<typename T, CConvertibleTo<T> B, typename I>

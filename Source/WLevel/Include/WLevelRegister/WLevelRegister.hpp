@@ -14,7 +14,7 @@ public:
 
     using WLevelIdPool = WIdPool<WLevelId>;
 
-    using WLevelDb = TObjectDataBase<WLevel, void, WLevelId>;
+    using WLevelDb = TObjectDataBase<WLevel, WLevel, WLevelId>;
 
     WLevelRegister();
 
@@ -40,7 +40,7 @@ public:
         return levels_.Get(in_id);
     }
 
-    WLevel GetCopy(const WLevelId & in_id) const {
+    const WLevel & Get(const WLevelId & in_id) const {
         return levels_.Get(in_id);
     }
 

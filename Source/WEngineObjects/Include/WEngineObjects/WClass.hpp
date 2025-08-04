@@ -59,7 +59,6 @@ public:
 
 public:
 
-    // virtual std::unique_ptr<IObjectDataBase<WObject>> CreateObjectDatabase() const =0;
     virtual WDbBuilder DbBuilder() const=0;
     
     virtual constexpr const WClass * BaseClass() const=0;

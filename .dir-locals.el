@@ -46,5 +46,15 @@
                           :name "LLDB::Run"
                           :env '()))
 
+                   (dap-register-debug-template
+                    "[LLDB][unittest] WCore"
+                    (list :type "lldb-vscode"
+                          :cwd "${workspaceFolder}/Install/Linux_x86_64_Debug_Standalone"
+                          :request "launch"
+                          :program "bin/WCore_unittest" 
+                          :name "LLDB::Run"
+                          :env '()))
+
+
 		           )))))
 
