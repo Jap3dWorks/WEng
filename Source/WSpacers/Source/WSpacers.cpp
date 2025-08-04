@@ -162,6 +162,7 @@ bool SetupLevel(WEngine & in_engine,
 
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
+
     WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 
     WStaticMeshComponent * smcomponent =

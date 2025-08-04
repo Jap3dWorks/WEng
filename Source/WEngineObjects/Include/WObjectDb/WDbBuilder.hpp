@@ -3,7 +3,7 @@
 #include "WCore/WConcepts.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WEngineObjects/TWRef.hpp"
-#include "WEngineObjects/TWAllocator.hpp"
+#include "WCore/TWAllocator.hpp"
 #include "WLog.hpp"
 
 #include <memory>

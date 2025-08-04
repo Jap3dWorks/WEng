@@ -69,8 +69,6 @@ public:
     }
     
     void Insert(size_t in_index, const T& in_value) {
-        assert(!index_pos_.contains(in_index));
-        
         size_t pos = compact_.size();
         compact_.push_back(in_value);
 

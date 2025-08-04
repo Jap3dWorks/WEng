@@ -18,60 +18,75 @@ namespace WRenderLevelLib {
         const WAssetDb & in_asset_db
         ) {
 
-        TSparseSet<WId> static_meshes;
+        TSparseSet<WAssetId> static_meshes;
         static_meshes.Reserve(64);
-        TSparseSet<WId> texture_assets;
+        TSparseSet<WAssetId> texture_assets;
         texture_assets.Reserve(64);
-        TSparseSet<WId> render_pipelines;
+        TSparseSet<WAssetId> render_pipelines;
         render_pipelines.Reserve(64);
-        TSparseSet<WId> pipeline_parameters;
+        TSparseSet<WAssetId> pipeline_parameters;
         pipeline_parameters.Reserve(64);
         
         in_entity_component_db.ForEachComponent<WStaticMeshComponent>(
             [&static_meshes,
              &render_pipelines,
              &pipeline_parameters](WStaticMeshComponent * in_component) {
+                WAssetId aux = in_component->StaticMeshAsset();
+                if(aux.IsValid()) {
+                    static_meshes.Insert(aux.GetId(), aux);
+                }
+                else {
+                    WFLOG_Warning("Invalid WStaticMeshAsset in WStaticMeshComponent with id {}.",
+                                  in_component->EntityId().GetId());
+                }
 
-                static_meshes.Insert(in_component->StaticMeshAsset().GetId(),
-                                     in_component->StaticMeshAsset());
+                aux = in_component->RenderPipelineAsset();
+                if(aux.IsValid()) {
+                    render_pipelines.Insert(aux.GetId(), aux);
+                }
+                else {
+                    WFLOG_Warning("Invalid WRenderPipelineAsset in WStaticMeshComponent with id {}.",
+                                  in_component->EntityId().GetId());
+                }
 
-                render_pipelines.Insert(in_component->RenderPipelineAsset().GetId(),
-                                        in_component->RenderPipelineAsset());
-
-                pipeline_parameters.Insert(in_component->RenderPipelineParametersAsset().GetId(),
-                                           in_component->RenderPipelineParametersAsset());
+                aux = in_component->RenderPipelineParametersAsset();
+                if(aux.IsValid()) {
+                    pipeline_parameters.Insert(aux.GetId(), aux);
+                }
+                else {
+                    WFLOG_Warning("Invalid WRenderPipelineParametersAsset in WStaticMeshComponent with id {}.",
+                                  in_component->EntityId().GetId());
+                }
             }
             );
 
-        for (const WId & id : pipeline_parameters) {
+        for (const WAssetId & id : pipeline_parameters) {
 
-            auto * pparam = static_cast<WRenderPipelineParametersAsset*>(
-                in_asset_db.Get(id)
-                );
-            
-            for(auto & tparam : pparam->RenderPipelineParameters().texture_assets) {
-                texture_assets.Insert(tparam.value.GetId(),
-                                      tparam.value);
+            auto pparam = in_asset_db.Get<WRenderPipelineParametersAsset>(id);
+
+            for(uint32_t i=0; i<pparam->RenderPipelineParameters().texture_assets_count; i++) {
+                WAssetId tid = pparam->RenderPipelineParameters().texture_assets[i].value;
+                texture_assets.Insert(tid.GetId(), tid);
             }
         }
 
         // Register Meshes
-        for (const WId & id : static_meshes) {
-            auto * static_mesh = static_cast<WStaticMeshAsset*>(in_asset_db.Get(id));
+        for (const WAssetId & id : static_meshes) {
+            auto static_mesh = in_asset_db.Get<WStaticMeshAsset>(id);
             in_render->RegisterStaticMesh(*static_mesh);
-            in_render->LoadStaticMesh(static_mesh->WID());
+            in_render->LoadStaticMesh(id);
         }
 
         // Register Textures
-        for (const WId & id : texture_assets) {
-            auto * texture_asset = static_cast<WTextureAsset*>(in_asset_db.Get(id));
+        for (const WAssetId & id : texture_assets) {
+            auto texture_asset = in_asset_db.Get<WTextureAsset>(id);
             in_render->RegisterTexture(*texture_asset);
-            in_render->LoadTexture(texture_asset->WID());
+            in_render->LoadTexture(id);
         }
 
         // Initialize Render
-        for (const WId & id : render_pipelines) {
-            auto * render_pipeline = static_cast<WRenderPipelineAsset*>(in_asset_db.Get(id));
+        for (const WAssetId & id : render_pipelines) {
+            auto render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
             in_render->CreateRenderPipeline(render_pipeline);
         }
 

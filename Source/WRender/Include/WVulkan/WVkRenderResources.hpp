@@ -37,33 +37,40 @@ public:
 
     void RegisterTexture(WTextureAsset & in_texture_struct);
 
-    void UnregisterTexture(const WId & in_id);
+    void UnregisterTexture(const WAssetId & in_id);
 
-    void LoadTexture(const WId & in_id);
+    void LoadTexture(const WAssetId & in_id);
 
-    void UnloadTexture(const WId & in_id);
+    void UnloadTexture(const WAssetId & in_id);
 
-    const WVkTextureInfo & TextureInfo(const WId & in_id) const;
+    const WVkTextureInfo & TextureInfo(const WAssetId & in_id) const;
 
     // Static Mesh
 
     void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) ;
 
-    void UnregisterStaticMesh(const WId & in_id);
+    void UnregisterStaticMesh(const WAssetId & in_id);
 
-    void LoadStaticMesh(const WId & in_id);
+    void LoadStaticMesh(const WAssetId & in_id);
 
-    void UnloadStaticMesh(const WId & in_id);
+    void UnloadStaticMesh(const WAssetId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(const WId & in_id) const;
+    const WVkMeshInfo & StaticMeshInfo(const WAssetId & in_id) const;
 
     void Clear();
 
 private:
 
+    void InitializeTextureFunctions();
+
+    void InitializeStaticMeshFunctions();
+
     WVkAssetCollection<WVkTextureInfo, WTextureAsset> texture_collection_;
 
     WVkAssetCollection<WVkMeshInfo, WStaticMeshAsset> static_mesh_collection_;
 
+    WVkDeviceInfo device_info_;
+    WVkCommandPoolInfo command_pool_info_;
+    
 };
 

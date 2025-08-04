@@ -81,15 +81,15 @@ public:
         render_resources_.RegisterTexture(in_texture_asset);
     }
 
-    void UnregisterTexture(const WId & in_id) override {
+    void UnregisterTexture(const WAssetId & in_id) override {
         render_resources_.UnregisterTexture(in_id);
     }
 
-    void LoadTexture(const WId & in_id) override {
+    void LoadTexture(const WAssetId & in_id) override {
         render_resources_.LoadTexture(in_id);
     }
 
-    void UnloadTexture(const WId & in_id) override {
+    void UnloadTexture(const WAssetId & in_id) override {
         render_resources_.UnloadTexture(in_id);
     }
 
@@ -97,15 +97,15 @@ public:
         render_resources_.RegisterStaticMesh(in_static_mesh_asset);
     }
 
-    void UnregisterStaticMesh(const WId & in_id) override {
+    void UnregisterStaticMesh(const WAssetId & in_id) override {
         render_resources_.UnregisterStaticMesh(in_id);
     }
 
-    void LoadStaticMesh(const WId & in_id) override {
+    void LoadStaticMesh(const WAssetId & in_id) override {
         render_resources_.LoadStaticMesh(in_id);
     }
 
-    void UnloadStaticMesh(const WId & in_id) override {
+    void UnloadStaticMesh(const WAssetId & in_id) override {
         render_resources_.UnloadStaticMesh(in_id);
     }
 
@@ -113,7 +113,7 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordRenderCommandBuffer(WId in_pipeline_id,
+    void RecordRenderCommandBuffer(WAssetId in_pipeline_id,
                                    uint32_t in_frame_index,
                                    uint32_t in_image_index);
 

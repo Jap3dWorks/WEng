@@ -17,14 +17,19 @@ class WRENDER_API WVkAssetCollection
 {
 public:
 
+    using CreateFn = TFunction<D(const WAssetId & id)>;
+    using ClearFn = TFunction<void(D&)>;
+
+public:
+
     using WVkAssetDb = TObjectDataBase<D, void, WAssetId>;
 
     constexpr WVkAssetCollection() noexcept :
     assets_(), data_() {}
 
     constexpr WVkAssetCollection(
-        TFunction<D(const WAssetId & id)> in_create_fn,
-        TFunction<void(D&)> in_clear_fn) :
+        CreateFn in_create_fn,
+        ClearFn in_clear_fn) :
     data_(in_create_fn, in_clear_fn) {}
 
     virtual ~WVkAssetCollection() { Clear(); }
@@ -56,6 +61,14 @@ public:
         }
 
         return *this;
+    }
+
+    void SetCreateFn(const CreateFn & in_fn) {
+        data_.SetCreateFn(in_fn);
+    }
+
+    void SetClearFn(const ClearFn & in_fn) {
+        data_.SetDestroyFn(in_fn);
     }
 
     /** Assign a WAssetId to identify the asset */
@@ -98,11 +111,11 @@ public:
     }
 
     bool Contains(const WAssetId & in_id) const noexcept {
-        // return data_.contains(in_id);
         return data_.Contains(in_id);
     }
 
     const A & GetAsset(const WAssetId & in_id) const {
+        assert(assets_.contains(in_id));
         return assets_.at(in_id).Get();
     }
 

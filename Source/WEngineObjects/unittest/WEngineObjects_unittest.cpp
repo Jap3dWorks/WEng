@@ -8,7 +8,7 @@
 
 #include "WCore/TRef.hpp"
 #include "WCore/TFunction.hpp"
-#include "WEngineObjects/TWAllocator.hpp"
+#include "WCore/TWAllocator.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
@@ -140,35 +140,49 @@ bool WEntityComponentDb_Test() {
     tdb->Create();
     tdb->Create();
 
-    // cdb->Create();
-    // cdb->Create();
-    // cdb->Create();
+    cdb->Create();
+    cdb->Create();
+    cdb->Create();
 
     auto cp = smdb->Clone();
     smdb->ForEach([](WComponent * _cmp) {
-        WFLOG("PRINT Orig MSTaticMeshComponent");
+        WFLOG("PRINT Orig MStaticMeshComponent.");
     });
     cp->ForEach([](WComponent * _cmp) {
-        WFLOG("Print Cloned MStaticMeshComponent");
+        WFLOG("Print Cloned MStaticMeshComponent.");
     });
+
+    if (smdb->Count() != cp->Count()) return false;
 
     tdb->ForEach([](WComponent * _cmp) {
-        WFLOG("Print Orig MTansformsComponent");
+        WFLOG("Print Orig MTansformsComponent.");
     });
     auto cp2 = tdb->Clone();
-    // tdb
+    cp2->ForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned MTransformComponent.");
+    });
     
+    if (tdb->Count() != cp2->Count()) return false;
+
     auto cp3 = cdb->Clone();
+    cdb->ForEach([](WComponent * _cmp) {
+        WFLOG("Print Orig WCameraComponent");
+    });
+    cp3->ForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned WCameraComponent");
+    });
 
-    // WEntityComponentDb db;
+    if (cdb->Count() != cp3->Count()) return false;
 
-    // WEntityId eid = db.CreateEntity<WEntity>("E1");
+    WEntityComponentDb db;
 
-    // // db.CreateComponent<WTransformComponent>(eid);
-    // // db.CreateComponent<WCameraComponent>(eid);
-    // db.CreateComponent<WStaticMeshComponent>(eid);
+    WEntityId eid = db.CreateEntity<WEntity>("E1");
 
-    // WEntityComponentDb other = db;
+    db.CreateComponent<WTransformComponent>(eid);
+    db.CreateComponent<WCameraComponent>(eid);
+    db.CreateComponent<WStaticMeshComponent>(eid);
+
+    WEntityComponentDb other = db;
     
     return true;
 }

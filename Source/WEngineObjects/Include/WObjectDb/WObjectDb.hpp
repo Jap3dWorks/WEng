@@ -214,8 +214,6 @@ private:
     void CopyContainersFrom(const WObjectDb & other) {
         db_.clear();
         for (auto & p : other.db_) {
-            WFLOG("Copy Container of Class {}", p.first->Name());
-            WFLOG("  Count: {}" , p.second->Count());
             db_.insert(
                 { p.first, p.second->Clone() }
                 );

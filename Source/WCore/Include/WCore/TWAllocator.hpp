@@ -4,10 +4,8 @@
 #include <type_traits>
 #include "WCore/TFunction.hpp"
 
-class BWAllocator {};
-
 template<typename T>
-class TWAllocator : public BWAllocator {
+class TWAllocator {
 public:
     
     using value_type = T;
@@ -32,7 +30,7 @@ public:
     TWAllocator(const TWAllocator & other) :
         allocate_fn_(other.allocate_fn_),
         deallocate_fn_(other.deallocate_fn_),
-        pptr_(nullptr)  // TODO: Check
+        pptr_(nullptr)  // Do not copy the previous pointer.
         {}
 
     TWAllocator(TWAllocator && other) noexcept :
