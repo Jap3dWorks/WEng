@@ -18,7 +18,7 @@
 
 WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
 {
-    Clear();
+    Destroy();
 }
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
@@ -33,6 +33,7 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
 {
     WVulkan::Create(descriptor_pool_info_, device_info_);
     InitializeClearLambdas();
+    InitializeGlobalGraphicsDescriptorSets();
 }
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
@@ -179,7 +180,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
     WVkDescriptorSetInfo ds = DescriptorSet(dset_id);
 
     // Lambda ensures NRVO and avoids moves
-    // Create Descriptor binding objects with default values
+    //  Create Descriptor binding objects with default values
     auto f = [this, &ds] () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
 
@@ -337,6 +338,14 @@ void WVkRenderPipelinesManager::Clear()
     }
     if (device_info_.vk_device != VK_NULL_HANDLE) {
         WVulkan::Create(descriptor_pool_info_, device_info_);
+        
+        // Reinitialize Global Graphic Descset
+        WVulkan::Create(
+            global_graphics_descsets_.descset_info_,
+            device_info_,
+            global_graphics_descsets_.descset_layout_info_,
+            descriptor_pool_info_
+            );
     }
 
     descriptor_set_layouts_.Clear();
@@ -354,7 +363,9 @@ void WVkRenderPipelinesManager::Destroy() {
         WVulkan::Destroy(descriptor_pool_info_, device_info_);
         descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
     }
-    
+
+    ClearGlobalGraphDescriptorSets();
+
     descriptor_set_layouts_.Clear();
 
     device_info_ = {};
@@ -368,7 +379,7 @@ void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId 
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
-    WVulkan::AddDSLDefaultGraphicBindings(descriptor_set_layout_info);
+    WVulkan::AddDSL_DefaultGraphicBindings(descriptor_set_layout_info);
 
     descriptor_set_layouts_.Insert(
         in_id,
@@ -440,5 +451,39 @@ void WVkRenderPipelinesManager::InitializeClearLambdas() {
             di_
             );
     });
+}
+
+void WVkRenderPipelinesManager::InitializeGlobalGraphicsDescriptorSets() {
+
+    WVulkan::AddDSL_DefaultGlobalGraphicBindings(
+        global_graphics_descsets_.descset_layout_info_
+        );
+
+    WVulkan::Create(
+        global_graphics_descsets_.descset_layout_info_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        global_graphics_descsets_.descset_info_,
+        device_info_,
+        global_graphics_descsets_.descset_layout_info_,
+        descriptor_pool_info_
+        );
+}
+
+void WVkRenderPipelinesManager::ClearGlobalGraphDescriptorSets() {
+    
+    if (global_graphics_descsets_
+        .descset_layout_info_
+        .descriptor_set_layout)
+    {
+        WVulkan::Destroy(
+            global_graphics_descsets_.descset_layout_info_,
+            device_info_
+            );
+    }
+
+    global_graphics_descsets_ = GlobalGraphicsDescriptors();
 }
 

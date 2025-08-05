@@ -141,13 +141,17 @@ private:
     WEntityComponentId CreateDescriptorSet(const WAssetId & in_descriptor_set_layout_id);
 
     void InitializeClearLambdas();
+
+    void InitializeGlobalGraphicsDescriptorSets();
+
+    void ClearGlobalGraphDescriptorSets();
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};
     WVkDesSetDb descriptor_sets_{};
     WVkPipelineBindingDb bindings_{};
 
-    /** Relation between each pipeline and its bindings*/
+    /** Relation between each pipeline and its bindings */
     std::unordered_map<WAssetId, TSparseSet<WEntityComponentId>> pipeline_pbindings_{};
 
     /** Pipelines grouped by PipelineType*/
@@ -157,6 +161,15 @@ private:
     uint32_t height_{0};
 
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
+
+    /**
+     * @Brief Graphics pipelines global descriptors sets for camera and lights.
+     */
+    struct GlobalGraphicsDescriptors {
+        WVkDescriptorSetLayoutInfo descset_layout_info_{};
+        WVkDescriptorSetInfo descset_info_{};        
+    } global_graphics_descsets_;
+
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};

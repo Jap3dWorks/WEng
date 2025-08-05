@@ -302,12 +302,12 @@ namespace WVulkan
     /**
      * @brief Adds the Camera and lightings UBOs (std140, set=0)
      */
-    void AddDSLDefaultGlobalBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
+    void AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     /**
      * @brief Adds common graphic pipeline bindings, should be used in set=1
      */
-    void AddDSLDefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
+    void AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,

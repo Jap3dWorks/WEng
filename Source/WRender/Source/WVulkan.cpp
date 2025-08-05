@@ -1371,7 +1371,7 @@ void WVulkan::Destroy(
 // Descriptor Set Layout
 // ---------------------
 
-void WVulkan::AddDSLDefaultGlobalBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout) {
+void WVulkan::AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout) {
     // TODO Add Camera UBO set 0 binding 0
     VkDescriptorSetLayoutBinding camera_binding{};
     camera_binding.binding=0;
@@ -1387,7 +1387,7 @@ void WVulkan::AddDSLDefaultGlobalBindings(WVkDescriptorSetLayoutInfo & out_descr
     };
 }
 
-void WVulkan::AddDSLDefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
+void WVulkan::AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
 {
     // Model UBO
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
