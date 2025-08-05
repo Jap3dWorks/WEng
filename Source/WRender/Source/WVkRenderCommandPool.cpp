@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRenderCommandPool.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 

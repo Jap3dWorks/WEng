@@ -2,7 +2,9 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WComponent.hpp"
-// #include "WStructs/WLinearAlgebraStructs.hpp"
+#include "WStructs/WComponentStructs.hpp"
+
+#include <glm/glm.hpp>
 
 #include "WCameraComponent.WEngine.hpp"
 
@@ -12,17 +14,12 @@ class WENGINEOBJECTS_API WCameraComponent : public WComponent {
         
 public:
 
-    // void Transform(const WTransformStruct & in_transform) {
-    //     transform_ = in_transform;
-    // }
+    WCameraStruct & CameraStruct() { return camera_struct_; };
 
-    // WTransformStruct & Transform() { return transform_; }
-
-    // const WTransformStruct & Transform() const { return transform_; }
+    const WCameraStruct & CameraStruct() const { return camera_struct_; }
 
 private:
+
+    WCameraStruct camera_struct_;
     
-    // Transform data
-    // WTransformStruct transform_{};
-  
 };

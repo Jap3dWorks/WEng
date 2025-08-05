@@ -80,6 +80,14 @@ struct WVkCommandPoolInfo
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
+/** Camera info */
+struct WVkCameraInfo{
+    VkBuffer ubo_buffer{VK_NULL_HANDLE};
+    VkDeviceMemory ubo_memory{VK_NULL_HANDLE};
+    uint32_t set{0};
+    uint32_t binding{0};
+};
+
 struct WVkTextureInfo
 {
     WId id{0};

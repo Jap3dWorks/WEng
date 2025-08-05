@@ -1,13 +1,12 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 
-#include "WEngineInterfaces/IRenderResources.hpp"
 #include "WVulkan/WVkAssetCollection.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 
 /**
  * @brief Manage the lifetime of render resources like geometries or textures.

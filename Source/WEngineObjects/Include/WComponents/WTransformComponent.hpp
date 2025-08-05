@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WEngineObjects/WComponent.hpp"
-#include "WStructs/WLinearAlgebraStructs.hpp"
+#include "WStructs/WComponentStructs.hpp"
 
 #include "WTransformComponent.WEngine.hpp"
 

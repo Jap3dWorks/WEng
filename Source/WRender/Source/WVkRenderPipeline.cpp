@@ -2,9 +2,9 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WLog.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -93,7 +93,7 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     render_pipeline_info.type = pstruct.type;
 
     std::vector<WVkShaderStageInfo> shaders;
-    shaders.reserve(pstruct.shaders.size());
+    shaders.reserve(pstruct.shaders_count);
 
     for (uint8_t i=0; i < pstruct.shaders_count; i++) {
         shaders.push_back(
@@ -106,7 +106,7 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     }
     
     // use asset pipeline id too.
-    CreateDescriptorSetLayout(in_id);
+    CreateGraphicDescriptorSetLayout(in_id);
 
     pipelines_.Insert(
         in_id,
@@ -364,7 +364,7 @@ void WVkRenderPipelinesManager::Destroy() {
     height_=0;
 }
 
-void WVkRenderPipelinesManager::CreateDescriptorSetLayout(const WAssetId & in_id) {
+void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId & in_id) {
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
@@ -385,10 +385,9 @@ void WVkRenderPipelinesManager::CreateDescriptorSetLayout(const WAssetId & in_id
 }
 
 WEntityComponentId WVkRenderPipelinesManager::CreateDescriptorSet(
-    const WEntityComponentId & in_descriptor_set_layout_id
+    const WAssetId & in_descriptor_set_layout_id
     )
 {
-    // TODO One descriptor layout by render pipline?
     auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
     WVkDescriptorSetInfo descriptor_set_info;
 

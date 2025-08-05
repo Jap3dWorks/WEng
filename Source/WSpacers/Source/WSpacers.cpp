@@ -134,6 +134,8 @@ bool LoadAssets(WEngine & engine,
     std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag");
 
+    out_pipeline_asset->RenderPipeline().shaders_count = 2;
+
     // Create Pipeline Parameter Asset
 
     WAssetId paramid = engine.AssetManager()

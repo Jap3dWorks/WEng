@@ -3,11 +3,14 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WStructs/WRenderStructs.hpp"
-#include "WEngineInterfaces/IRenderResources.hpp"
 
 #include <vector>
 
 class WRenderPipelineAsset;
+class WTextureAsset;
+class WStaticMeshAsset;
+struct WTransformStruct;
+struct WCameraStruct;
 
 struct GLFWwindow;
 
@@ -86,6 +89,11 @@ public:
     virtual void LoadStaticMesh(const WAssetId & in_id)=0;
 
     virtual void UnloadStaticMesh(const WAssetId & in_id)=0;
+
+    virtual void UpdateCamera(
+        const WCameraStruct & camera_struct,
+        const WTransformStruct & transform_struct
+        )=0;
 
     /**
      * @brief Unload all render resources.

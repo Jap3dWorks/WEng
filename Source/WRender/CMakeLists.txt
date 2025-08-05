@@ -2,7 +2,7 @@ add_library(
     WRender 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WRender.cpp
+        Source/WVkRender.cpp
         Source/WVkRenderPipeline.cpp
         Source/WVulkan.cpp
 	    Source/WVkRenderCommandPool.cpp

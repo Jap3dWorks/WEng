@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -11,18 +11,16 @@
 
 #include <cstddef>
 
-// class IRenderResources;
-
 /**
  * @brief Default Rendere class
 */
-class WRENDER_API WRender : public IRender
+class WRENDER_API WVkRender : public IRender
 {
 public:
 
-    WRender();
+    WVkRender();
 
-    ~WRender() override;
+    ~WVkRender() override;
 
     void Initialize();
 
@@ -109,6 +107,11 @@ public:
         render_resources_.UnloadStaticMesh(in_id);
     }
 
+    void UpdateCamera(
+        const WCameraStruct & camera_struct,
+        const WTransformStruct & transform_struct
+        ) override;
+
 private:
 
     void RecreateSwapChain();
@@ -136,6 +139,8 @@ private:
     WVkSemaphoreInfo image_available_semaphore_;
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo flight_fence_;
+
+    WVkCameraInfo camera_info_;
 
     uint32_t frame_index {0};
 

@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 /**
- * Uniform buffer data structure
+ * Uniform buffer data structure, TODO, only transform
 */
 struct WVkUBOStruct
 {
@@ -65,4 +65,19 @@ struct WRenderPipelineParametersStruct {
     WRPParameterList_WAssetId texture_assets{};
     uint8_t texture_assets_count{0};
 };
+
+/**
+ * @brief Camera Data to be used in the shader.
+ */
+struct WRenderCameraStruct {
+    glm::mat4 proj{};
+    glm::mat4 view{1};
+    glm::vec3 pos{1};
+    glm::vec3 rot{0};  // pitch, yaw, roll
+    glm::vec3 scale{1};
+    float angle_of_view{54.f};
+    float near_clipping{0.01f};
+    float far_clipping{100.f};
+};
+
 

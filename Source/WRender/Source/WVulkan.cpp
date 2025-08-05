@@ -12,7 +12,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -1371,9 +1371,25 @@ void WVulkan::Destroy(
 // Descriptor Set Layout
 // ---------------------
 
+void WVulkan::AddDSLDefaultGlobalBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout) {
+    // TODO Add Camera UBO set 0 binding 0
+    VkDescriptorSetLayoutBinding camera_binding{};
+    camera_binding.binding=0;
+    camera_binding.descriptorCount = 1;
+    camera_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    camera_binding.pImmutableSamplers = nullptr;
+    camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    // TODO lights here as another ubo
+
+    out_descriptor_set_layout.bindings = {
+        camera_binding
+    };
+}
+
 void WVulkan::AddDSLDefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout)
 {
-    // Ubo existence
+    // Model UBO
     VkDescriptorSetLayoutBinding ubo_layout_binding{};
     ubo_layout_binding.binding = 0;
     ubo_layout_binding.descriptorCount = 1;

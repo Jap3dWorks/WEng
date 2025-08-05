@@ -31,7 +31,7 @@ namespace WRenderLevelLib {
             [&static_meshes,
              &render_pipelines,
              &pipeline_parameters](WStaticMeshComponent * in_component) {
-                WAssetId aux = in_component->StaticMeshAsset();
+                WAssetId aux = in_component->StaticMeshStruct().static_mesh_asset;
                 if(aux.IsValid()) {
                     static_meshes.Insert(aux.GetId(), aux);
                 }
@@ -40,7 +40,7 @@ namespace WRenderLevelLib {
                                   in_component->EntityId().GetId());
                 }
 
-                aux = in_component->RenderPipelineAsset();
+                aux = in_component->StaticMeshStruct().render_pipeline_asset;
                 if(aux.IsValid()) {
                     render_pipelines.Insert(aux.GetId(), aux);
                 }
@@ -49,7 +49,7 @@ namespace WRenderLevelLib {
                                   in_component->EntityId().GetId());
                 }
 
-                aux = in_component->RenderPipelineParametersAsset();
+                aux = in_component->StaticMeshStruct().render_pipeline_parameters_asset;
                 if(aux.IsValid()) {
                     pipeline_parameters.Insert(aux.GetId(), aux);
                 }
@@ -84,7 +84,7 @@ namespace WRenderLevelLib {
             in_render->LoadTexture(id);
         }
 
-        // Initialize Render
+        // Initialize Render Pipelines
         for (const WAssetId & id : render_pipelines) {
             auto render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
             in_render->CreateRenderPipeline(render_pipeline);
@@ -97,7 +97,9 @@ namespace WRenderLevelLib {
              &in_entity_component_db]
             (WStaticMeshComponent* in_component) {
                 auto param =static_cast<WRenderPipelineParametersAsset*> (
-                    in_asset_db.Get(in_component->RenderPipelineParametersAsset())
+                    in_asset_db.Get(
+                        in_component->StaticMeshStruct().render_pipeline_parameters_asset
+                        )
                     );
 
                 in_render->CreatePipelineBinding(
@@ -105,8 +107,8 @@ namespace WRenderLevelLib {
                         in_component->EntityId(),
                         in_component->Class()
                         ),
-                    in_component->RenderPipelineAsset(),
-                    in_component->StaticMeshAsset(),
+                    in_component->StaticMeshStruct().render_pipeline_asset,
+                    in_component->StaticMeshStruct().static_mesh_asset,
                     param->RenderPipelineParameters()
                     );
                 
@@ -137,19 +139,19 @@ namespace WRenderLevelLib {
              &pipeline_bindings
              */ ](WStaticMeshComponent * _component) {
                 static_meshes.Insert(
-                    _component->StaticMeshAsset().GetId(),
-                    _component->StaticMeshAsset()
+                    _component->StaticMeshStruct().static_mesh_asset.GetId(),
+                    _component->StaticMeshStruct().static_mesh_asset
                     );
 
                 render_pipelines.Insert(
-                    _component->RenderPipelineAsset().GetId(),
-                    _component->RenderPipelineAsset()
+                    _component->StaticMeshStruct().render_pipeline_asset.GetId(),
+                    _component->StaticMeshStruct().render_pipeline_asset
                     );
 
                 auto pipeline_parameters =
                     static_cast<WRenderPipelineParametersAsset*>(
                         in_asset_db.Get(
-                            _component->RenderPipelineParametersAsset()
+                            _component->StaticMeshStruct().render_pipeline_parameters_asset
                             ));
 
                 auto & parameters_struct = pipeline_parameters

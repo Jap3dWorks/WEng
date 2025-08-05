@@ -1,6 +1,25 @@
 #version 450
 
-layout(binding = 0) uniform SUniformBufferObject
+layout(std140, binding=0) uniform Camera {
+
+  mat4 proj;
+  mat4 view;
+  float px;
+  float py;
+  float pz;
+  float pitch;
+  float yaw;
+  float roll;
+  float sx;
+  float sy;
+  float sz;
+  float angle_of_view;
+  float near_clipping;
+  float far_clipping;
+
+} camera;
+
+layout(binding = 1) uniform SUniformBufferObject
 {
     mat4 model;
     mat4 view;

@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRenderResources.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vector>
 

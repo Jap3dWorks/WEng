@@ -5,7 +5,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
-#include "WVulkan/WVkRenderCore.hpp"
+#include "WVulkan/WVkRenderStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include <vector>
 #include <unordered_map>
@@ -53,7 +53,7 @@ public:
 
     void CreateRenderPipeline(
         const WAssetId & in_id,
-        const WRenderPipelineStruct & pstruct
+        const WRenderPipelineStruct & pstruct  // TODO Camera UBO
         );
 
     void DeleteRenderPipeline(
@@ -136,9 +136,9 @@ public:
 
 private:
 
-    void CreateDescriptorSetLayout(const WAssetId & in_id);
+    void CreateGraphicDescriptorSetLayout(const WAssetId & in_id);
 
-    WEntityComponentId CreateDescriptorSet(const WEntityComponentId & in_descriptor_set_layout_id);
+    WEntityComponentId CreateDescriptorSet(const WAssetId & in_descriptor_set_layout_id);
 
     void InitializeClearLambdas();
     
