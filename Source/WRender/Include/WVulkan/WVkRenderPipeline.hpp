@@ -46,8 +46,9 @@ class WRENDER_API WVkRenderPipelinesManager
      * @Brief Graphics pipelines global descriptors sets for camera and lights.
      */
     struct GlobalGraphicsDescriptors {
-        WVkDescriptorSetLayoutInfo descset_layout_info_{};
-        WVkDescriptorSetInfo descset_info_{};
+        WVkDescriptorPoolInfo descriptor_pool_info{};
+        WVkDescriptorSetLayoutInfo descset_layout_info{};
+        WVkDescriptorSetInfo descset_info{};
         WVkUBOInfo camera_ubo{};
     };
 
@@ -176,13 +177,17 @@ private:
 
     WEntityComponentId CreateDescriptorSet(const WAssetId & in_descriptor_set_layout_id);
 
-    void InitializeClearLambdas();
+    void Initialize_ClearLambdas();
 
-    void InitializeGlobal_Graphics_DescriptorSetLayouts();
+    void Initialize_GlobalGraphicDescriptors();
 
-    void InitializeGlobal_Graphics_DescriptorSet();
+    // void Initialize_GlobalGraphics_DescriptorSet();
 
-    void ClearGlobal_Graphics_DescriptorSetLayouts();
+    // void Initialize_GlobalGraphics_UboBuffers();
+
+    // void Initialize_GlobalGraphics_WriteDS();
+
+    void Destroy_GlobalGraphics();
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};

@@ -253,6 +253,11 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
+    void Destroy(
+        WVkUBOInfo & out_ubo_info,
+        const WVkDeviceInfo & in_device_info
+        );
+
     // // Record Commands
     // // ---------------
 

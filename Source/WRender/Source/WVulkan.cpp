@@ -1370,6 +1370,33 @@ void WVulkan::Destroy(
     vkFreeMemory(in_device_info.vk_device, out_mesh_info.vertex_buffer_memory, nullptr);
 }
 
+void WVulkan::Destroy(
+    WVkUBOInfo & out_ubo_info,
+    const WVkDeviceInfo & in_device_info
+    ) {
+
+    if (out_ubo_info.mapped_data) {
+        vkUnmapMemory(in_device_info.vk_device, out_ubo_info.uniform_buffer_memory);
+        out_ubo_info.mapped_data = nullptr;
+    }
+    
+    vkDestroyBuffer(
+        in_device_info.vk_device,
+        out_ubo_info.uniform_buffer,
+        nullptr
+        );
+
+    vkFreeMemory(
+        in_device_info.vk_device,
+        out_ubo_info.uniform_buffer_memory,
+        nullptr
+        );
+
+    out_ubo_info.uniform_buffer = VK_NULL_HANDLE;
+    out_ubo_info.uniform_buffer_memory = VK_NULL_HANDLE;
+    out_ubo_info.range = 0;
+}
+
 // Descriptor Set Layout
 // ---------------------
 
