@@ -30,6 +30,8 @@ public:
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
     virtual void ForEach(TFunction<void(P*)> in_function)=0;
+
+    virtual void ForEach(TFunction<void(const WIdClass & _id, P* _value)>)=0;
     
 };
 
@@ -263,6 +265,14 @@ public:
     void ForEach(TFunction<void(P*)> in_function) override {
         for (auto& v : objects_) {
             in_function(static_cast<P*>(&v));
+        }
+    }
+
+    void ForEach(TFunction<void(const WIdClass & _id, P* _value)> in_predicate) override {
+        std::size_t i=0;
+        for (auto& v : objects_) {
+            in_predicate(objects_.IndexAt(i++),
+                         static_cast<P*>(&v));
         }
     }
 

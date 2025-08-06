@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
+#include "TFunction.hpp"
 
 #include <memory>
 #include <unordered_map>
@@ -135,6 +136,13 @@ public:
         return compact_.cend();
     }
 
+    void ForEach(TFunction<void(std::size_t, T&)> in_predicate) {
+        std::size_t i=0;
+        for(auto & v: *this) {
+            in_predicate(pos_index_.at(i++), v);
+        }
+    }
+
     IndexIterator IterIndexes() {
         return IndexIterator(
             index_pos_.begin(),
@@ -153,6 +161,10 @@ public:
                 return (*_iter).first;
             }
             );
+    }
+
+    std::size_t IndexAt(std::size_t in_pos) const {
+        return pos_index_.at(in_pos);
     }
 
 private:
