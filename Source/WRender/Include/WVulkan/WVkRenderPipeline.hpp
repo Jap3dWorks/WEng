@@ -13,13 +13,45 @@
 
 /**
  * @brief A render pipeline is a collection of shaders and render states.
-*/
+ */
 class WRENDER_API WVkRenderPipelinesManager
 {
+    struct WVkDescriptorSetUBOBinding {
+        uint32_t binding{0};
+        WVkUBOInfo ubo_info{};
+        VkDescriptorBufferInfo buffer_info{};
+    };
+
+    struct WVkDescriptorSetTextureBinding {
+        uint32_t binding{0};
+        VkDescriptorImageInfo image_info{};
+    };
+
+    /**
+     * @brief Render Pipeline Bindings data
+     */
+    struct WVkPipelineBindingInfo
+    {
+        WId wid{0};  // WEntityId
+
+        WId render_pipeline_id{0};
+        WId descriptor_set_id {0};
+        WId mesh_asset_id{0};
+
+        std::vector<WVkDescriptorSetTextureBinding> textures{};
+        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
+    };
+
+    /**
+     * @Brief Graphics pipelines global descriptors sets for camera and lights.
+     */
+    struct GlobalGraphicsDescriptors {
+        WVkDescriptorSetLayoutInfo descset_layout_info_{};
+        WVkDescriptorSetInfo descset_info_{};
+        WVkUBOInfo camera_ubo{};
+    };
 
 public:
-
-    // using WIdType = WEntityComponentId;
 
     using WVkRenderPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WAssetId>;
     using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WAssetId>;
@@ -124,6 +156,10 @@ public:
         };
     }
 
+    void UpdateGlobalGraphicsDescriptor(
+        const WUBOCameraStruct & camera_struct
+        ) ;
+
     /**
      * @brief Remove current active pipelines and bindings, resulting instance can be used.
      */
@@ -142,9 +178,11 @@ private:
 
     void InitializeClearLambdas();
 
-    void InitializeGlobalGraphicsDescriptorSets();
+    void InitializeGlobal_Graphics_DescriptorSetLayouts();
 
-    void ClearGlobalGraphDescriptorSets();
+    void InitializeGlobal_Graphics_DescriptorSet();
+
+    void ClearGlobal_Graphics_DescriptorSetLayouts();
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};
@@ -162,14 +200,7 @@ private:
 
     WVkDescriptorPoolInfo descriptor_pool_info_ {};
 
-    /**
-     * @Brief Graphics pipelines global descriptors sets for camera and lights.
-     */
-    struct GlobalGraphicsDescriptors {
-        WVkDescriptorSetLayoutInfo descset_layout_info_{};
-        WVkDescriptorSetInfo descset_info_{};        
-    } global_graphics_descsets_;
-
+    GlobalGraphicsDescriptors global_graphics_descsets_{};
 
     WVkDeviceInfo device_info_ {};
     WVkRenderPassInfo render_pass_info_ {};

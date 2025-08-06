@@ -1002,27 +1002,29 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WVkUniformBufferObjectInfo &out_uniform_buffer_object_info,
+    WVkUBOInfo &out_ubo_info,
     const WVkDeviceInfo &device)
 {
-    VkDeviceSize buffer_size = sizeof(WVkUBOStruct);
+    // Create Buffer
     CreateVkBuffer(
-        out_uniform_buffer_object_info.uniform_buffer,
-        out_uniform_buffer_object_info.uniform_buffer_memory,
+        out_ubo_info.uniform_buffer,
+        out_ubo_info.uniform_buffer_memory,
         device.vk_device,
         device.vk_physical_device,
-        buffer_size,
+        out_ubo_info.range,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
+    // TODO: Check if to do this only when update (Map -> Copy -> Unmap)
+    
     vkMapMemory(
         device.vk_device,
-        out_uniform_buffer_object_info.uniform_buffer_memory,
+        out_ubo_info.uniform_buffer_memory,
         0,
-        buffer_size,
+        out_ubo_info.range,
         0,
-        &out_uniform_buffer_object_info.mapped_data
+        &out_ubo_info.mapped_data
         );
 }
 

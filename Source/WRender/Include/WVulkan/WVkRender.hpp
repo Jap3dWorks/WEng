@@ -140,8 +140,6 @@ private:
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo flight_fence_;
 
-    WVkCameraInfo camera_info_;
-
     uint32_t frame_index {0};
 
     bool frame_buffer_resized {false};

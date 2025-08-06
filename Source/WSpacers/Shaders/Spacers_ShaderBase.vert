@@ -19,11 +19,8 @@ layout(std140, binding=0) uniform Camera {
 
 } camera;
 
-layout(binding = 1) uniform SUniformBufferObject
-{
+layout(set=1, binding=0) uniform SUniformBufferObject {
     mat4 model;
-    mat4 view;
-    mat4 proj;
 } ubo;
 
 layout(location = 0) in vec3 InPosition;

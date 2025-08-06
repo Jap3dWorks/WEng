@@ -1,4 +1,5 @@
 #include "WVulkan/WVkRenderPipeline.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
@@ -33,7 +34,8 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
 {
     WVulkan::Create(descriptor_pool_info_, device_info_);
     InitializeClearLambdas();
-    InitializeGlobalGraphicsDescriptorSets();
+    InitializeGlobal_Graphics_DescriptorSetLayouts();
+    InitializeGlobal_Graphics_DescriptorSet();
 }
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
@@ -182,49 +184,44 @@ WId WVkRenderPipelinesManager::CreateBinding(
     // Lambda ensures NRVO and avoids moves
     //  Create Descriptor binding objects with default values
     auto f = [this, &ds] () {
-        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> b;
+        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> bindings;
 
         std::array<VkWriteDescriptorSet, ds.descriptor_sets.size()> write_ds;
 
-        for(uint32_t i = 0; i < b.size(); i++) {
+        for(uint32_t i = 0; i < bindings.size(); i++) {
             
-            b[i].binding = 0;
-            
-            WVulkan::Create(b[i].uniform_buffer_info, device_info_);
+            bindings[i].binding = 0;
+            bindings[i].ubo_info.range = sizeof(WUBOModelStruct);
 
-            WVulkan::UpdateUniformBuffer(
-                b[i].uniform_buffer_info,
+            WVulkan::Create(bindings[i].ubo_info, device_info_);
+
+            WVulkan::UpdateUBOModel(
+                bindings[i].ubo_info,
+                // Initial Position
                 glm::rotate(
                     glm::mat4(1.f),
                     glm::radians(90.f),
                     glm::vec3(0.f, 0.f, 1.f)
-                    ),
-                glm::lookAt(
-                    glm::vec3(-2.f, 2.f, 2.f),
-                    glm::vec3(0.f, 0.f, 0.f),
-                    glm::vec3(0.f, 0.f, 1.f)
-                    ),
-                glm::perspective(
-                    glm::radians(45.f),
-                    (float) width_ / (float) height_,
-                    1.f, 10.f
-                    )
-                );
-            
+                    ));
+
+            bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
+            bindings[i].buffer_info.offset = 0;
+            bindings[i].buffer_info.range = bindings[i].ubo_info.range;
+
             WVulkan::UpdateWriteDescriptorSet_UBO(
                 write_ds[i],
-                b[i],
+                bindings[i].binding,
+                bindings[i].buffer_info,
                 ds.descriptor_sets[i]
                 );
-            
         }
-        
-        WVulkan::UpdateDescriptorSets<write_ds.size()>(
+
+        WVulkan::UpdateDescriptorSets(
             write_ds,
             device_info_
             );
 
-        return b;
+        return bindings;
     };
 
     auto t = [this,
@@ -236,13 +233,16 @@ WId WVkRenderPipelinesManager::CreateBinding(
         
         for (uint32_t i=0; i<ds.descriptor_sets.size(); i++) {
             for (uint32_t j = 0; j<tx.size(); j++) {
+
+                tx[j].image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 tx[j].binding = in_textures_bindings[j];
-                tx[j].image_view = in_textures[j].image_view;
-                tx[j].sampler = in_textures[j].sampler;
+                tx[j].image_info.imageView = in_textures[j].image_view;
+                tx[j].image_info.sampler = in_textures[j].sampler;
 
                 WVulkan::UpdateWriteDescriptorSet_Texture(
                     write_ds[(i * tx.size()) + j],
-                    tx[j],
+                    tx[j].binding,
+                    tx[j].image_info,
                     ds.descriptor_sets[i]
                     );
             }
@@ -271,7 +271,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
                     dset_id,
                     in_mesh_asset_id,
                     t(),  // Create Texture descriptor sets
-                    f()   // Create Ubo descriptor sets
+                    f()   // Create Ubo Model descriptor sets
                 };
             }
         );
@@ -328,7 +328,7 @@ void WVkRenderPipelinesManager::Clear()
     bindings_.Clear();
     pipelines_.Clear();
 
-    // Recreate the descriptor pool recreates the descriptor sets
+    // Recreate the descriptor pool
     
     descriptor_sets_.Clear();
     if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
@@ -340,12 +340,7 @@ void WVkRenderPipelinesManager::Clear()
         WVulkan::Create(descriptor_pool_info_, device_info_);
         
         // Reinitialize Global Graphic Descset
-        WVulkan::Create(
-            global_graphics_descsets_.descset_info_,
-            device_info_,
-            global_graphics_descsets_.descset_layout_info_,
-            descriptor_pool_info_
-            );
+        InitializeGlobal_Graphics_DescriptorSet();
     }
 
     descriptor_set_layouts_.Clear();
@@ -364,7 +359,7 @@ void WVkRenderPipelinesManager::Destroy() {
         descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
     }
 
-    ClearGlobalGraphDescriptorSets();
+    ClearGlobal_Graphics_DescriptorSetLayouts();
 
     descriptor_set_layouts_.Clear();
 
@@ -453,7 +448,7 @@ void WVkRenderPipelinesManager::InitializeClearLambdas() {
     });
 }
 
-void WVkRenderPipelinesManager::InitializeGlobalGraphicsDescriptorSets() {
+void WVkRenderPipelinesManager::InitializeGlobal_Graphics_DescriptorSetLayouts() {
 
     WVulkan::AddDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info_
@@ -464,15 +459,46 @@ void WVkRenderPipelinesManager::InitializeGlobalGraphicsDescriptorSets() {
         device_info_
         );
 
+}
+
+void WVkRenderPipelinesManager::InitializeGlobal_Graphics_DescriptorSet() {
     WVulkan::Create(
         global_graphics_descsets_.descset_info_,
         device_info_,
         global_graphics_descsets_.descset_layout_info_,
         descriptor_pool_info_
         );
+
+    global_graphics_descsets_.camera_ubo.range = sizeof(WUBOCameraStruct);
+
+    WVulkan::Create(
+        global_graphics_descsets_.camera_ubo,
+        device_info_
+        );
+
+    std::array<VkWriteDescriptorSet, 1> ws;  // TODO frames in flight
+
+    VkDescriptorBufferInfo buffer_info{};
+
+    buffer_info.buffer = global_graphics_descsets_.camera_ubo.uniform_buffer;
+    buffer_info.offset = 0;
+    buffer_info.range = global_graphics_descsets_.camera_ubo.range;
+
+    WVulkan::UpdateWriteDescriptorSet_UBO(
+        ws[0],
+        0,
+        buffer_info,
+        global_graphics_descsets_.descset_info_.descriptor_sets[0]
+        );
+
+    WVulkan::UpdateDescriptorSets(
+        ws,
+        device_info_
+        );
+
 }
 
-void WVkRenderPipelinesManager::ClearGlobalGraphDescriptorSets() {
+void WVkRenderPipelinesManager::ClearGlobal_Graphics_DescriptorSetLayouts() {
     
     if (global_graphics_descsets_
         .descset_layout_info_
@@ -484,6 +510,57 @@ void WVkRenderPipelinesManager::ClearGlobalGraphDescriptorSets() {
             );
     }
 
+    // TODO Clear UBO buffers
+
     global_graphics_descsets_ = GlobalGraphicsDescriptors();
 }
 
+void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptor(
+    const WUBOCameraStruct & camera_struct
+    ) {
+
+    // ,
+    // glm::lookAt(
+    //     glm::vec3(-2.f, 2.f, 2.f),
+    //     glm::vec3(0.f, 0.f, 0.f),
+    //     glm::vec3(0.f, 0.f, 1.f)
+    //     ),
+    // glm::perspective(
+    //     glm::radians(45.f),
+    //     (float) width_ / (float) height_,
+    //     1.f, 10.f
+    //     )
+    // );
+
+    // WVulkan::UpdateUBOModel(
+    //     global_graphics_descsets_.ubo,
+        
+    //     // Initial Position
+    //     // glm::rotate(
+    //     //     glm::mat4(1.f),
+    //     //     glm::radians(90.f),
+    //     //     glm::vec3(0.f, 0.f, 1.f)
+    //     //     )
+    //     );
+
+    memcpy(global_graphics_descsets_.camera_ubo.mapped_data,
+           &camera_struct,
+           sizeof(WUBOCameraStruct)
+        );
+    
+
+    // VkWriteDescriptorSet write_ds;
+    // WVulkan::UpdateWriteDescriptorSet_UBO(
+    //     write_ds,
+    //     bindings[i],
+    //     ds.descriptor_sets[i]
+    //     );
+
+
+    // WVulkan::UpdateDescriptorSets(
+    //     write_ds,
+    //     device_info_
+    //     );
+
+    
+}

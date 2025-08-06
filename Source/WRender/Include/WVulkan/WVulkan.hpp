@@ -102,7 +102,7 @@ namespace WVulkan
     );
 
     void Create(
-        WVkUniformBufferObjectInfo & out_uniform_buffer_info,
+        WVkUBOInfo & out_uniform_buffer_info,
         const WVkDeviceInfo & device
     );
 
@@ -124,7 +124,7 @@ namespace WVulkan
     struct WVkWriteDescriptorSetUBOStruct
     {
         uint32_t binding;
-        WVkUniformBufferObjectInfo uniform_buffer_info;
+        WVkUBOInfo uniform_buffer_info;
         VkDescriptorSet descriptor_set;
 
         VkDescriptorBufferInfo buffer_info{};
@@ -311,41 +311,35 @@ namespace WVulkan
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,
-        WVkDescriptorSetUBOBinding & out_ubo_binding,
+        const uint32_t & in_binding,
+        const VkDescriptorBufferInfo & in_buffer_info,
         const VkDescriptorSet & dst_set
         )
     {
-        out_ubo_binding.buffer_info.buffer = out_ubo_binding.uniform_buffer_info.uniform_buffer;
-        out_ubo_binding.buffer_info.offset = 0;
-        out_ubo_binding.buffer_info.range = sizeof(WVkUBOStruct);
-
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = out_ubo_binding.binding;
+        out_write_descriptor_set.dstBinding = in_binding;
         out_write_descriptor_set.dstSet = dst_set;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pBufferInfo = &out_ubo_binding.buffer_info;
+        out_write_descriptor_set.pBufferInfo = &in_buffer_info;
         out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
     constexpr void UpdateWriteDescriptorSet_Texture(
         VkWriteDescriptorSet & out_write_descriptor_set,
-        WVkDescriptorSetTextureBinding & out_texture_binding,
+        const uint32_t & in_binding,
+        const VkDescriptorImageInfo & in_image_info,
         const VkDescriptorSet & dst_set
         )
     {
-        out_texture_binding.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        out_texture_binding.image_info.imageView = out_texture_binding.image_view;
-        out_texture_binding.image_info.sampler = out_texture_binding.sampler;
-        
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = out_texture_binding.binding;
+        out_write_descriptor_set.dstBinding = in_binding;
         out_write_descriptor_set.dstSet = dst_set;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pImageInfo = &out_texture_binding.image_info;
+        out_write_descriptor_set.pImageInfo = &in_image_info;
     }
 
     // /**
@@ -417,7 +411,7 @@ namespace WVulkan
         const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info
         ) {
-        WFLOG("N = {:d}", N);
+
         vkUpdateDescriptorSets(
             in_device_info.vk_device,
             static_cast<uint32_t>(N),
@@ -428,22 +422,26 @@ namespace WVulkan
 
     }
 
-    inline bool UpdateUniformBuffer(
-        WVkUniformBufferObjectInfo & uniform_buffer_object_info_,
-        const glm::mat4 & model,
-        const glm::mat4 & view,
-        const glm::mat4 & proj
+    inline bool UpdateUBOModel(
+        WVkUBOInfo & uniform_buffer_object_info_,
+        const glm::mat4 & model // ,
+        // const glm::mat4 & view,
+        // const glm::mat4 & proj
         )
     {
-        WVkUBOStruct ubo{};
+        WUBOModelStruct ubo{};
 
         ubo.model = model;
-        ubo.view = view;
-        ubo.proj = proj;
+        
+        // ubo.view = view;
+        // ubo.proj = proj;
 
-        ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
+        // ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
 
-        memcpy(uniform_buffer_object_info_.mapped_data, &ubo, sizeof(WVkUBOStruct));
+        memcpy(uniform_buffer_object_info_.mapped_data,
+               &ubo,
+               sizeof(WUBOModelStruct)
+            );
 
         return true;
     }

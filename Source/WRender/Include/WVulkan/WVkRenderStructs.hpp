@@ -80,14 +80,6 @@ struct WVkCommandPoolInfo
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
-/** Camera info */
-struct WVkCameraInfo{
-    VkBuffer ubo_buffer{VK_NULL_HANDLE};
-    VkDeviceMemory ubo_memory{VK_NULL_HANDLE};
-    uint32_t set{0};
-    uint32_t binding{0};
-};
-
 struct WVkTextureInfo
 {
     WId id{0};
@@ -187,45 +179,17 @@ struct WVkMeshInfo
 };
 
 /**
- * single vulkan uniform buffer object, 
- * Create a vector of these for multiple frames in flight
+ * @brief Single vulkan uniform buffer object, 
+ * Create a vector of these for multiple frames in flight.
 */
-struct WVkUniformBufferObjectInfo
+struct WVkUBOInfo
 {
     WId wid{0};
     
     VkBuffer uniform_buffer{VK_NULL_HANDLE};
     VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
     void * mapped_data{nullptr};
-};
-
-struct WVkDescriptorSetTextureBinding {
-    uint32_t binding{0};
-
-    VkDescriptorImageInfo image_info{};
-    VkImageView image_view{VK_NULL_HANDLE};
-    VkSampler sampler{VK_NULL_HANDLE};
-};
-
-struct WVkDescriptorSetUBOBinding {
-    uint32_t binding{0};
-    WVkUniformBufferObjectInfo uniform_buffer_info{};
-    VkDescriptorBufferInfo buffer_info{};
-};
-
-/**
- * @brief Render Pipeline Bindings data
- */
-struct WVkPipelineBindingInfo
-{
-    WId wid{0};  // WEntity id
-
-    WId render_pipeline_id{0};
-    WId descriptor_set_id {0};
-    WId mesh_asset_id{0};
-
-    std::vector<WVkDescriptorSetTextureBinding> textures{};
-    std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
+    VkDeviceSize range{1};
 };
 
 struct WVkRenderPipelineInfo
