@@ -1,4 +1,5 @@
 #include "WVulkan/WVkRender.hpp"
+#include "CameraLib.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -48,8 +49,7 @@ WVkRender::WVkRender() :
     pipelines_manager_(),
     image_available_semaphore_(),
     render_finished_semaphore_(),
-    flight_fence_(),
-    camera_info_()
+    flight_fence_()
 {
     Initialize();
 }
@@ -171,16 +171,6 @@ void WVkRender::Initialize()
         render_command_pool_.CommandPoolInfo()
         );
 
-    // Create Camera UBO
-    WVulkan::CreateVkBuffer(
-        camera_info_.ubo_buffer,
-        camera_info_.ubo_memory,
-        device_info_.vk_device,
-        device_info_.vk_physical_device,
-        sizeof(WRenderCameraStruct),
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-        );
 }
 
 void WVkRender::Draw()
@@ -546,17 +536,11 @@ void WVkRender::UpdateCamera(
     const WTransformStruct & transform_struct
     ) {
 
-    WRenderCameraStruct render_camera_struct;
+    WUBOCameraStruct camera_ubo = CameraLib::UBOCameraStruct(
+        camera_struct, transform_struct, (float)window_info_.width / (float) window_info_.height
+        );
 
-    // Update Camera Ubo
-    // TODO UpdateCameraUbo()
-    void* data;
-    vkMapMemory(device_info_.vk_device, camera_info_.ubo_memory, 0, sizeof(WRenderCameraStruct), 0, &data);
-    memcpy(data, &render_camera_struct, sizeof(WRenderCameraStruct));
-    vkUnmapMemory(device_info_.vk_device, camera_info_.ubo_memory);
-
-    // descriptor set binding
-    
+    pipelines_manager_.UpdateGlobalGraphicsDescriptor(camera_ubo);
 }
 
 void WVkRender::Destroy() {
