@@ -16,9 +16,37 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 
 public:
 
-    WStaticMeshStruct & StaticMeshStruct() { return static_mesh_struct_; }
+    void StaticMeshAsset(const WAssetId & in_id) {
+        static_mesh_struct_.static_mesh_asset = in_id;
+    }
 
-    const WStaticMeshStruct & StaticMeshStruct() const { return static_mesh_struct_; }
+    WAssetId StaticMeshAsset() const {
+        return static_mesh_struct_.static_mesh_asset;
+    }
+
+    void RenderPipelineAsset(const WAssetId & in_id) {
+        static_mesh_struct_.render_pipeline_asset = in_id;
+    }
+
+    WAssetId RenderPipelineAsset() const {
+        return static_mesh_struct_.render_pipeline_asset;
+    }
+
+    void RenderPipelineParametersAsset(const WAssetId & in_id) {
+        static_mesh_struct_.render_pipeline_parameters_asset = in_id;
+    }
+
+    WAssetId RenderPipelineParametersAsset() const {
+        return static_mesh_struct_.render_pipeline_parameters_asset;
+    }
+
+    WStaticMeshStruct & StaticMeshStruct() {
+        return static_mesh_struct_;
+    }
+
+    const WStaticMeshStruct & StaticMeshStruct() const {
+        return static_mesh_struct_;
+    }
 
 private:
 

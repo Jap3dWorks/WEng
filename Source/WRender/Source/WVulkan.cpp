@@ -662,8 +662,8 @@ void WVulkan::Create(
 void WVulkan::Create(
     WVkRenderPipelineInfo & out_pipeline_info,
     const WVkDeviceInfo & in_device,
-    const WVkDescriptorSetLayoutInfo & in_descriptor_set_layout_info,
     const WVkRenderPassInfo & in_render_pass_info,
+    const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
     const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
     )
 {
@@ -673,7 +673,6 @@ void WVulkan::Create(
         );
 
     std::vector<VkShaderModule> shader_modules(in_shader_stage_infos.size(), VK_NULL_HANDLE);
-    // VkShaderModule vk_shader_module{VK_NULL_HANDLE};
 
     const WVkShaderStageInfo * vertex_shader_stage = nullptr;
 
@@ -775,10 +774,17 @@ void WVulkan::Create(
     DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
     DynamicState.pDynamicStates = DynamicStates.data();
 
+    std::vector<VkDescriptorSetLayout> slayouts;
+    slayouts.resize(in_descriptor_set_layout_infos.size());
+    for(auto & v : in_descriptor_set_layout_infos) {
+        slayouts.push_back(v.descriptor_set_layout);
+    }
+
+    // TODO add global graphic layout (Camera lights)
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = 1;
-    pipeline_layout_info.pSetLayouts = &in_descriptor_set_layout_info.descriptor_set_layout;
+    pipeline_layout_info.setLayoutCount = in_descriptor_set_layout_infos.size();
+    pipeline_layout_info.pSetLayouts = slayouts.data();
 
     if (vkCreatePipelineLayout(
             in_device.vk_device,
@@ -1002,7 +1008,7 @@ void WVulkan::Create(
 }
 
 void WVulkan::Create(
-    WVkUBOInfo &out_ubo_info,
+    WVkUBOInfo & out_ubo_info,
     const WVkDeviceInfo &device)
 {
     // Create Buffer

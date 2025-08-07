@@ -5,6 +5,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include <vector>
@@ -17,7 +18,7 @@
 class WRENDER_API WVkRenderPipelinesManager
 {
     struct WVkDescriptorSetUBOBinding {
-        uint32_t binding{0};
+        uint32_t binding{0}; // TODO ubo out
         WVkUBOInfo ubo_info{};
         VkDescriptorBufferInfo buffer_info{};
     };
@@ -46,10 +47,10 @@ class WRENDER_API WVkRenderPipelinesManager
      * @Brief Graphics pipelines global descriptors sets for camera and lights.
      */
     struct GlobalGraphicsDescriptors {
-        WVkDescriptorPoolInfo descriptor_pool_info{};
+        WVkDescriptorPoolInfo descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
         WVkDescriptorSetInfo descset_info{};
-        WVkUBOInfo camera_ubo{};
+        std::array<WVkUBOInfo, WENG_MAX_FRAMES_IN_FLIGHT> camera_ubo{};
     };
 
 public:
@@ -157,9 +158,14 @@ public:
         };
     }
 
-    void UpdateGlobalGraphicsDescriptor(
-        const WUBOCameraStruct & camera_struct
+    void UpdateGlobalGraphicsDescriptorSet(
+        const WUBOCameraStruct & in_camera_struct,
+        uint32_t in_frame_index
         ) ;
+
+    const WVkDescriptorSetInfo & GlobalGraphicDescriptorSet() const {
+        return global_graphics_descsets_.descset_info;
+    }
 
     /**
      * @brief Remove current active pipelines and bindings, resulting instance can be used.
@@ -180,12 +186,6 @@ private:
     void Initialize_ClearLambdas();
 
     void Initialize_GlobalGraphicDescriptors();
-
-    // void Initialize_GlobalGraphics_DescriptorSet();
-
-    // void Initialize_GlobalGraphics_UboBuffers();
-
-    // void Initialize_GlobalGraphics_WriteDS();
 
     void Destroy_GlobalGraphics();
     

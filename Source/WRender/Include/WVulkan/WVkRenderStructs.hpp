@@ -162,7 +162,6 @@ struct WVkDescriptorPoolInfo
 */
 struct WVkDescriptorSetInfo
 {
-    WId wid{0};
     // The len of this vector is the number of frames in flight
     std::array<VkDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };

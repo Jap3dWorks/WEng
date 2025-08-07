@@ -32,7 +32,7 @@ layout(location = 1) out vec2 FragTexCoord;
 
 void main()
 {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(InPosition, 1.0);
+    gl_Position = camera.proj * camera.view * ubo.model * vec4(InPosition, 1.0);
 
     FragColor = vec3(1.f, 1.f, 1.f);
     FragTexCoord = InTexCoord;

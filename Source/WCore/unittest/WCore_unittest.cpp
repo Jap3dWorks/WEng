@@ -28,7 +28,7 @@ bool TObjectDataBase_Test() {
 
     std::unique_ptr<IObjectDataBase<B,WId>>od3 = od.Clone();
 
-    od3->ForEach([](B * b) {
+    od3->ForEach([](B * b) -> void {
         std::print("Print od3 Item\n.");
     });
 

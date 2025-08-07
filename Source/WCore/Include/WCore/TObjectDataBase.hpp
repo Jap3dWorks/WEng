@@ -9,7 +9,7 @@
 #include <memory>
 #include <concepts>
 
-template<typename P=void, typename WIdClass=WId>
+template<typename B=void, typename WIdClass=WId>
 class IObjectDataBase {
 public:
     virtual ~IObjectDataBase()=default;
@@ -20,18 +20,18 @@ public:
     virtual WIdClass Create() = 0;
     /** Insert at WIdClass */
     virtual void Insert(const WIdClass &)=0;
-    virtual void Insert(const WIdClass &, P* &)=0;
+    virtual void Insert(const WIdClass &, B* &)=0;
     virtual void Remove(const WIdClass &) =0;
     virtual void Clear() = 0;
-    virtual void Get(const WIdClass &, P* &) = 0;
-    virtual void Get(const WIdClass &, const P* &) const = 0;
+    virtual void Get(const WIdClass &, B* &) = 0;
+    virtual void Get(const WIdClass &, const B* &) const = 0;
     virtual size_t Count() const = 0;
     virtual bool Contains(const WIdClass & in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
-    virtual void ForEach(TFunction<void(P*)> in_function)=0;
-
-    virtual void ForEach(TFunction<void(const WIdClass & _id, P* _value)>)=0;
+    
+    virtual void ForEach(TFunction<void(B*)> in_function)=0;
+    virtual void ForEachId(TFunction<void(const WIdClass & _id, B * _value)>) =0;
     
 };
 
@@ -42,12 +42,12 @@ public:
  * You can specify a create_fn to create objects inside the container.
  * And a destroy_fn called when remove objects in the container.
  */
-template<typename T, CConvertibleTo<T> P=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
-class TObjectDataBase : public IObjectDataBase<P, WIdClass> {
+template<typename T, CConvertibleTo<T> B=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
+class TObjectDataBase : public IObjectDataBase<B, WIdClass> {
 public:
 
-    using Super = IObjectDataBase<P, WIdClass>;
-    using Type = TObjectDataBase<T, P, WIdClass, Allocator>;
+    using Super = IObjectDataBase<B, WIdClass>;
+    using Type = TObjectDataBase<T, B, WIdClass, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
     using ConstIterIndexType = TIterator<WIdClass,
                                          typename ObjectsType::ConstIndexIterator,
@@ -165,7 +165,7 @@ public:
         objects_.Insert(in_id.GetId(), create_fn_(in_id));
     }
 
-    void Insert(const WIdClass & in_id, P* & in_value) override {
+    void Insert(const WIdClass & in_id, B* & in_value) override {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id.GetId(), *static_cast<T*>(in_value));
     }
@@ -213,11 +213,11 @@ public:
         return objects_.Get(in_id.GetId());
     }
 
-    void Get(const WIdClass & in_id, P* & out_value) override final {
+    void Get(const WIdClass & in_id, B* & out_value) override final {
         out_value = &objects_.Get(in_id.GetId());
     }
 
-    void Get(const WIdClass & in_id, const P* & out_value) const override final {
+    void Get(const WIdClass & in_id, const B* & out_value) const override final {
         out_value = &objects_.Get(in_id.GetId());
     }
 
@@ -262,17 +262,17 @@ public:
         return result;
     }
 
-    void ForEach(TFunction<void(P*)> in_function) override {
+    void ForEach(TFunction<void(B*)> in_function) override {
         for (auto& v : objects_) {
-            in_function(static_cast<P*>(&v));
+            in_function(static_cast<B*>(&v));
         }
     }
 
-    void ForEach(TFunction<void(const WIdClass & _id, P* _value)> in_predicate) override {
+    void ForEachId(TFunction<void(const WIdClass & _id, B* _value)> in_predicate) override {
         std::size_t i=0;
         for (auto& v : objects_) {
             in_predicate(objects_.IndexAt(i++),
-                         static_cast<P*>(&v));
+                         static_cast<B*>(&v));
         }
     }
 

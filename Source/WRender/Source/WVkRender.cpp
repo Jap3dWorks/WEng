@@ -378,7 +378,11 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
     pipelines_manager_.DeleteBinding(in_id);
 }
 
-void WVkRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_index, uint32_t in_image_index)
+void WVkRender::RecordRenderCommandBuffer(
+    WId in_pipeline_id,
+    uint32_t in_frame_index,
+    uint32_t in_image_index
+    )
 {
     const WVkRenderPipelineInfo & render_pipeline =
         pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
@@ -495,13 +499,18 @@ void WVkRender::RecordRenderCommandBuffer(WId in_pipeline_id, uint32_t in_frame_
             VK_INDEX_TYPE_UINT32
             );
 
+        std::array<VkDescriptorSet, 2> descsets =
+            { descriptor.descriptor_sets[in_frame_index],
+              pipelines_manager_.GlobalGraphicDescriptorSet().descriptor_sets[in_frame_index]
+            };
+        
         vkCmdBindDescriptorSets(
             render_command_buffer_.command_buffers[in_frame_index],
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             render_pipeline.pipeline_layout,
             0,
-            1,
-            &descriptor.descriptor_sets[in_frame_index],
+            descsets.size(),
+            descsets.data(),
             0,
             nullptr
             );
@@ -537,10 +546,12 @@ void WVkRender::UpdateCamera(
     ) {
 
     WUBOCameraStruct camera_ubo = CameraLib::UBOCameraStruct(
-        camera_struct, transform_struct, (float)window_info_.width / (float) window_info_.height
+        camera_struct,
+        transform_struct,
+        (float) window_info_.width / (float) window_info_.height
         );
 
-    pipelines_manager_.UpdateGlobalGraphicsDescriptor(camera_ubo);
+    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(camera_ubo, frame_index);
 }
 
 void WVkRender::Destroy() {

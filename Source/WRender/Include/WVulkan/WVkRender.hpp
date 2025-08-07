@@ -24,7 +24,7 @@ public:
 
     void Initialize();
 
-    void Draw() override ;
+    void Draw() override;
 
     void Destroy() override;
 
@@ -39,7 +39,7 @@ public:
         const WAssetId & pipeline_id,
         const WAssetId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
-        ) override ;
+        ) override;
 
     void DeletePipelineBinding(const WEntityComponentId & in_id) override;
 
