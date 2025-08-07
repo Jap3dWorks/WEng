@@ -11,6 +11,7 @@
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
+#include "WComponents/WCameraComponent.hpp"
 #include "WLog.hpp"
 
 #include "WRenderLevelLib.hpp"
@@ -63,6 +64,21 @@ void WEngine::run()
 
         }
         else {
+            // Update Render Camera
+            level_info_.level.ForEachComponent<WCameraComponent> (
+                [&engine_cycle_data, this] (WCameraComponent * cam) {
+                    
+                    WTransformComponent * ts = level_info_.level.GetComponent<WTransformComponent>(
+                        cam->EntityId()
+                        );
+
+                    Render()->UpdateCamera(
+                        cam->CameraStruct(),
+                        ts->TransformStruct()
+                        );
+                }
+                );
+
             // Update transform Components
             level_info_.level.ForEachComponent<WTransformComponent>(
                 [&engine_cycle_data, this](WTransformComponent * in_component) {
@@ -74,6 +90,7 @@ void WEngine::run()
                             );
                     
                     // TODO, Render()->UpdateUbo(ecid, in_component);
+                    
 
                 });
 

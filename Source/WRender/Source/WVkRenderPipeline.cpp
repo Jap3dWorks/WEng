@@ -32,10 +32,10 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     width_(in_width),
     height_(in_height)
 {
-    WVulkan::Create(descriptor_pool_info_, device_info_);
-    
-    Initialize_ClearLambdas();
     Initialize_GlobalGraphicDescriptors();
+
+    WVulkan::Create(descriptor_pool_info_, device_info_);
+    Initialize_ClearLambdas();
 }
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
@@ -48,6 +48,7 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     pipeline_pbindings_(std::move(other.pipeline_pbindings_)),
     ptype_pipelines_(std::move(other.ptype_pipelines_)),
     descriptor_pool_info_(std::move(other.descriptor_pool_info_)),
+    global_graphics_descsets_(std::move(other.global_graphics_descsets_)),
     device_info_(std::move(other.device_info_)),
     render_pass_info_(std::move(other.render_pass_info_)),
     width_(std::move(other.width_)),
@@ -56,6 +57,7 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     other.device_info_ = {};
     other.render_pass_info_ = {};
     other.descriptor_pool_info_ = {};
+    other.global_graphics_descsets_ = {};
 }
 
 WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
@@ -66,6 +68,8 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
         device_info_ = std::move(other.device_info_);
         render_pass_info_ = std::move(other.render_pass_info_);
         descriptor_pool_info_ = std::move(other.descriptor_pool_info_);
+
+        global_graphics_descsets_ = std::move(other.global_graphics_descsets_);
 
         pipelines_ = std::move(other.pipelines_);
         descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
@@ -81,6 +85,7 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
         other.device_info_ = {};
         other.render_pass_info_ = {};
         other.descriptor_pool_info_ = {};
+        other.global_graphics_descsets_ = {};
     }
 
     return *this;

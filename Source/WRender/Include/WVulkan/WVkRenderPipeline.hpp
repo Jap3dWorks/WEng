@@ -18,7 +18,7 @@
 class WRENDER_API WVkRenderPipelinesManager
 {
     struct WVkDescriptorSetUBOBinding {
-        uint32_t binding{0}; // TODO ubo out
+        uint32_t binding{0}; // TODO binding to PipelineBindingInfo
         WVkUBOInfo ubo_info{};
         VkDescriptorBufferInfo buffer_info{};
     };

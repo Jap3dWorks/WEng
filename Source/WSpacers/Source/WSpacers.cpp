@@ -14,6 +14,7 @@
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
+#include "WComponents/WCameraComponent.hpp"
 
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
@@ -161,6 +162,17 @@ bool SetupLevel(WEngine & in_engine,
     WLevelId levelid = in_engine.LevelRegister().Create();
 
     WLevel & level = in_engine.LevelRegister().Get(levelid);
+
+    // Camera
+
+    WEntityId cid = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(cid);
+    level.CreateComponent<WCameraComponent>(cid);
+
+    WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    cts.position = {0, 20, 20};
+
+    // Model
 
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);

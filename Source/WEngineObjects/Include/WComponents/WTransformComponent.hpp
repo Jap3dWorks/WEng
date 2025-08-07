@@ -11,13 +11,13 @@ class WENGINEOBJECTS_API WTransformComponent : public WComponent {
         
 public:
 
-    void Transform(const WTransformStruct & in_transform) {
+    void TransformStruct(const WTransformStruct & in_transform) {
         transform_ = in_transform;
     }
 
-    WTransformStruct & Transform() { return transform_; }
+    WTransformStruct & TransformStruct() { return transform_; }
 
-    const WTransformStruct & Transform() const { return transform_; }
+    const WTransformStruct & TransformStruct() const { return transform_; }
 
 private:
     

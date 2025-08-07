@@ -780,10 +780,9 @@ void WVulkan::Create(
         slayouts.push_back(v.descriptor_set_layout);
     }
 
-    // TODO add global graphic layout (Camera lights)
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = in_descriptor_set_layout_infos.size();
+    pipeline_layout_info.setLayoutCount = slayouts.size();
     pipeline_layout_info.pSetLayouts = slayouts.data();
 
     if (vkCreatePipelineLayout(
