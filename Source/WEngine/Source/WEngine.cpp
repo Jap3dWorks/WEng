@@ -58,10 +58,8 @@ void WEngine::run()
         WEngineCycleData engine_cycle_data;
 
         if (!level_info_.loaded) {
-
             UnloadLevel();
             LoadLevel(level_info_.current_level);
-
         }
         else {
             // Update Render Camera
@@ -93,15 +91,6 @@ void WEngine::run()
                     
 
                 });
-
-            // Update Entities
-            // level_info_.level.ForEachEntity(
-            //     WEntity::StaticClass(),
-            //     [&engine_cycle_data](WEntity * in_actor) {
-            //         in_actor->OnUpdate(
-            //             engine_cycle_data
-            //             );
-            //     });
 
             // draw
             Render()->Draw();

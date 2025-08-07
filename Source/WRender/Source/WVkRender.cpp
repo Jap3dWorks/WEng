@@ -467,8 +467,6 @@ void WVkRender::RecordRenderCommandBuffer(
     for (auto & bid : pipelines_manager_.IterateBindings(in_pipeline_id))
     {
 
-        // TODO Update Descriptor Actor UBO data
-
         auto& binding = pipelines_manager_.Binding(bid);
 
         const WVkDescriptorSetInfo & descriptor =
@@ -500,8 +498,9 @@ void WVkRender::RecordRenderCommandBuffer(
             );
 
         std::array<VkDescriptorSet, 2> descsets =
-            { descriptor.descriptor_sets[in_frame_index],
-              pipelines_manager_.GlobalGraphicDescriptorSet().descriptor_sets[in_frame_index]
+            {
+                pipelines_manager_.GlobalGraphicDescriptorSet().descriptor_sets[in_frame_index],
+                descriptor.descriptor_sets[in_frame_index]
             };
         
         vkCmdBindDescriptorSets(
@@ -509,7 +508,7 @@ void WVkRender::RecordRenderCommandBuffer(
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             render_pipeline.pipeline_layout,
             0,
-            descsets.size(),
+            static_cast<std::uint32_t>(descsets.size()),
             descsets.data(),
             0,
             nullptr

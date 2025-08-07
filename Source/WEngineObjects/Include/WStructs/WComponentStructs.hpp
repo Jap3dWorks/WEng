@@ -13,7 +13,7 @@ public:
 
 struct WCameraStruct
 {
-    glm::vec3 point;
+    glm::vec3 point{0};
     float angle_of_view{45.f};
     float near_clipping{0.01f};
     float far_clipping{100.f};

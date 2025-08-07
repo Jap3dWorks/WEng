@@ -1406,13 +1406,13 @@ void WVulkan::Destroy(
 // ---------------------
 
 void WVulkan::AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout) {
-    // TODO Add Camera UBO set 0 binding 0
+
     VkDescriptorSetLayoutBinding camera_binding{};
     camera_binding.binding=0;
     camera_binding.descriptorCount = 1;
     camera_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     camera_binding.pImmutableSamplers = nullptr;
-    camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
     // TODO lights here as another ubo
 
@@ -1433,16 +1433,16 @@ void WVulkan::AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_des
 
     
     // A texture in the fragment shader
-    VkDescriptorSetLayoutBinding sampler_layout_biding{};
-    sampler_layout_biding.binding = 1;
-    sampler_layout_biding.descriptorCount = 1;
-    sampler_layout_biding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    sampler_layout_biding.pImmutableSamplers = nullptr;
-    sampler_layout_biding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutBinding sampler_layout_binding{};
+    sampler_layout_binding.binding = 1;
+    sampler_layout_binding.descriptorCount = 1;
+    sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    sampler_layout_binding.pImmutableSamplers = nullptr;
+    sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     out_descriptor_set_layout.bindings = {
         ubo_layout_binding,
-        sampler_layout_biding
+        sampler_layout_binding
     };
 }
 
