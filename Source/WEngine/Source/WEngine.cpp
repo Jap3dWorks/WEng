@@ -41,15 +41,7 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
     asset_manager_()
 {}
 
-WEngine::WEngine()=default;
-
 WEngine::~WEngine()=default;
-// {
-//     WFLOG("Desroy WEngine");
-    
-//     render_->Destroy();
-//     render_ = nullptr;
-// }
 
 WEngine::WEngine(WEngine && other) noexcept=default;
 

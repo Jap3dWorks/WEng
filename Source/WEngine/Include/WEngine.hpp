@@ -16,8 +16,6 @@ class WENGINE_API WEngine
 
 public:
 
-    WEngine();
-
     WEngine(std::unique_ptr<IRender> && in_render);
 
     virtual ~WEngine();
@@ -26,7 +24,7 @@ public:
 
     WEngine(WEngine && other) noexcept;
 
-    WEngine & operator=(const WEngine & other) noexcept = delete;
+    WEngine & operator=(const WEngine & other) = delete;
 
     WEngine & operator=(WEngine && other) noexcept;
 

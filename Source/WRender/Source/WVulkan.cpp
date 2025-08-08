@@ -2001,8 +2001,6 @@ void WVulkan::CopyVkBuffer(
     const VkDeviceSize & size
     )
 {
-    WFLOG("Copy Vk Buffer - src: {}, dst: {}", (size_t)src_buffer, (size_t)dst_buffer);
-    
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;

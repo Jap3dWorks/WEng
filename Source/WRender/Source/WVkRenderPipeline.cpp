@@ -154,6 +154,7 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
     )
 {
     // Remove bindings
+    // TODO check errors at close
     for (auto & bid : pipeline_pbindings_[in_id]) {
         bindings_.Remove(bid) ;
         descriptor_sets_.Remove(bid);
@@ -404,6 +405,7 @@ WEntityComponentId WVkRenderPipelinesManager::CreateDescriptorSet(
     auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
     WVkDescriptorSetInfo descriptor_set_info;
 
+    // TODO entity_component_id
     return descriptor_sets_.Create(
         [this,
          &descriptor_set_info,

@@ -50,14 +50,9 @@ public:
     }
 
     constexpr pointer allocate(std::size_t n) {
-        // WFLOG("Allocate Memory: {}", n);
-        // WFLOG("Prev Ptr: {}, Prev Size: {}", pptr_, pn_);
-        
         pointer p = new T[n];
         
         allocate_fn_(pptr_, pn_, p, n);
-
-        // WFLOG("Store new prev data, Ptr: {}, N: {}", p, n);
 
         pptr_=p;
         pn_=n;
@@ -66,8 +61,6 @@ public:
     }
 
     constexpr void deallocate (pointer p, std::size_t n) {
-        // WFLOG("Deallocating Memory:{}, {}", p, n);
-        
         deallocate_fn_(p, n);
         delete[] p;
     }

@@ -92,63 +92,63 @@ bool LoadAssets(WEngine & engine,
             "/Content/Assets/viking_room.viking_room"
             );
 
-    // if (geo_ids.size() < 1)
-    // {
-    //     std::cout << "Failed to import geo_asset!" << std::endl;
-    //     return false;
-    // }
+    if (geo_ids.size() < 1)
+    {
+        std::cout << "Failed to import geo_asset!" << std::endl;
+        return false;
+    }
 
-    // out_static_model = engine.AssetManager().Get<WStaticMeshAsset>(geo_ids[0]);
+    out_static_model = engine.AssetManager().Get<WStaticMeshAsset>(geo_ids[0]);
 
-    // WImportTexture texture_importer =
-    //     engine.ImportersRegister().GetImporter<WImportTexture>();
+    WImportTexture texture_importer =
+        engine.ImportersRegister().GetImporter<WImportTexture>();
 
-    // std::vector<WAssetId> tex_ids = texture_importer.Import(
-    //     engine.AssetManager(),
-    //     "Content/Assets/Textures/viking_room.png", 
-    //     "/Content/Assets/viking_texture.viking_texture"
-    //     );
+    std::vector<WAssetId> tex_ids = texture_importer.Import(
+        engine.AssetManager(),
+        "Content/Assets/Textures/viking_room.png", 
+        "/Content/Assets/viking_texture.viking_texture"
+        );
 
-    // if (tex_ids.size() < 1)
-    // {
-    //     std::cout << "Failed to import tex_asset!" << std::endl;
-    //     return false;
-    // }
+    if (tex_ids.size() < 1)
+    {
+        std::cout << "Failed to import tex_asset!" << std::endl;
+        return false;
+    }
 
-    // out_texture_asset = engine.AssetManager().Get<WTextureAsset>(tex_ids[0]);
+    out_texture_asset = engine.AssetManager().Get<WTextureAsset>(tex_ids[0]);
 
-    // // Create Render Pipeline Asset
+    // Create Render Pipeline Asset
 
-    // WAssetId pipelineid = engine.AssetManager()
-    //     .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
+    WAssetId pipelineid = engine.AssetManager()
+        .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
 
-    // out_pipeline_asset = engine.AssetManager()
-    //     .Get<WRenderPipelineAsset>(pipelineid);
+    out_pipeline_asset = engine.AssetManager()
+        .Get<WRenderPipelineAsset>(pipelineid);
 
-    // out_pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
+    out_pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
-    // out_pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
-    // std::strcpy(out_pipeline_asset->RenderPipeline().shaders[0].file,
-    //             "/Content/Shaders/Spacers_ShaderBase.vert");
+    out_pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[0].file,
+                "/Content/Shaders/Spacers_ShaderBase.vert");
 
-    // out_pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
-    // std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
-    //             "/Content/Shaders/Spacers_ShaderBase.frag");
+    out_pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
+                "/Content/Shaders/Spacers_ShaderBase.frag");
 
-    // out_pipeline_asset->RenderPipeline().shaders_count = 2;
+    out_pipeline_asset->RenderPipeline().shaders_count = 2;
 
-    // // Create Pipeline Parameter Asset
+    // Create Pipeline Parameter Asset
 
-    // WAssetId paramid = engine.AssetManager()
-    //     .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
+    WAssetId paramid = engine.AssetManager()
+        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
 
-    // out_param_asset = static_cast<WRenderPipelineParametersAsset*>(
-    //     engine.AssetManager().Get(paramid)
-    //     );
+    out_param_asset = static_cast<WRenderPipelineParametersAsset*>(
+        engine.AssetManager().Get(paramid)
+        );
 
-    // out_param_asset->RenderPipelineParameters().texture_assets[0].value = out_texture_asset->WID();
-    // out_param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
-    // out_param_asset->RenderPipelineParameters().texture_assets_count = 1;
+    out_param_asset->RenderPipelineParameters().texture_assets[0].value = out_texture_asset->WID();
+    out_param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
+    out_param_asset->RenderPipelineParameters().texture_assets_count = 1;
 
     return true;
 }
@@ -205,24 +205,28 @@ int main(int argc, char** argv)
         WRenderPipelineAsset * pipeline_asset;
         WRenderPipelineParametersAsset * param_asset;
 
-        // if (!LoadAssets(engine,
-        //                 static_mesh,
-        //                 texture_asset,
-        //                 pipeline_asset,
-        //                 param_asset))
-        // {
-        //     return 1;
-        // }
+        if (!LoadAssets(engine,
+                        static_mesh,
+                        texture_asset,
+                        pipeline_asset,
+                        param_asset))
+        {
+            return 1;
+        }
 	        
-        // const WTextureStruct & texture_data =
-        //     texture_asset->GetTexture();
+        const WTextureStruct & texture_data =
+            texture_asset->GetTexture();
 
-        // SetupLevel(engine,
-        //            static_mesh->WID(),
-        //            pipeline_asset->WID(),
-        //            param_asset->WID());
+        SetupLevel(engine,
+                   static_mesh->WID(),
+                   pipeline_asset->WID(),
+                   param_asset->WID());
 
-        // run(engine);
+        WFLOG("Initialize While Loop");
+
+        run(engine);
+
+        WFLOG("Clossing app ...");
 
     }
     catch(const std::exception& e)

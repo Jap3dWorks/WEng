@@ -70,21 +70,13 @@ void WVkRender::WaitIdle() const
 
 void WVkRender::Initialize()
 {
-    WFLOG("Initialize WVkRender ...");
-    
-    WFLOG("Initialize Window");
-    
     window_info_.user_pointer = this;
     window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
-    WFLOG("Create Window");
-
     WVulkan::Create(
         window_info_
         );
-
-    WFLOG("Create Vulkan Instance");
 
     // Create Vulkan Instance
     WVulkan::Create(
@@ -92,15 +84,11 @@ void WVkRender::Initialize()
         debug_info_
         );
 
-    WFLOG("Create Surface Info");
-
     WVulkan::Create(
         surface_info_,
         instance_info_, 
         window_info_
         );
-
-    WFLOG("Create Vulkan Device");
 
     // Create Vulkan Device
     WVulkan::Create(
@@ -109,8 +97,6 @@ void WVkRender::Initialize()
         surface_info_,
         debug_info_
         );
-
-    WFLOG("Create Swap Chain");
 
     // Create Vulkan Swap Chain
     WVulkan::Create(
@@ -122,15 +108,11 @@ void WVkRender::Initialize()
         debug_info_
         );
 
-    WFLOG("Create Swap Chain Image Views");
-
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(
         swap_chain_info_,
         device_info_
         );
-
-    WFLOG("Create Render Pass");
 
     // Create Vulkan Render Pass
     WVulkan::Create(
@@ -139,8 +121,6 @@ void WVkRender::Initialize()
         device_info_
         );
 
-    WFLOG("Create Render Pipeline Manager");
-
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
@@ -148,29 +128,21 @@ void WVkRender::Initialize()
         window_info_.height
         );
 
-    WFLOG("Create Render Command Pool");
-
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
         device_info_,
         surface_info_
         );
 
-    WFLOG("Create Swap Chain Color Resources");
-
     WVulkan::CreateSCColorResources(
         swap_chain_info_,
         device_info_
         );
 
-    WFLOG("Create Swap Chain Depth Resources");
-
     WVulkan::CreateSCDepthResources(
         swap_chain_info_,
         device_info_
         );
-
-    WFLOG("Create Swap Chain Frame Buffers");
 
     WVulkan::CreateSCFramebuffers(
         swap_chain_info_,
@@ -178,27 +150,19 @@ void WVkRender::Initialize()
         device_info_
         );
 
-    WFLOG("Create Render Command Buffer");
-
     render_command_buffer_ =
         render_command_pool_.
         CreateCommandBuffer();
-
-    WFLOG("Create image avaiable semaphore");
 
     WVulkan::Create(
         image_available_semaphore_,
         device_info_
         );
 
-    WFLOG("Create Render Finished Semaphore");
-
     WVulkan::Create(
         render_finished_semaphore_,
         device_info_
         );
-
-    WFLOG("Create Render Fences");
 
     WVulkan::Create(
         flight_fence_,
@@ -214,8 +178,6 @@ void WVkRender::Initialize()
 
 void WVkRender::Draw()
 {
-
-    WFLOG("Drawing...");
 
     vkWaitForFences(
         device_info_.vk_device,
@@ -293,8 +255,6 @@ void WVkRender::Draw()
         }
     }
 
-    WFLOG("Signal Semaphores: {:d}", (size_t)signal_semaphores[0]);
-
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
@@ -307,7 +267,6 @@ void WVkRender::Draw()
     present_info.pResults = nullptr;
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
-    WFLOG("QueuePresentKHR Result: {:d}", (size_t)result);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized_) {
         frame_buffer_resized_ = false;
