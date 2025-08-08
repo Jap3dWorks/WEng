@@ -76,6 +76,9 @@ void WEngine::run()
                             cam->EntityId()
                             );
 
+                    ts->TransformStruct().position.x =
+                        ts->TransformStruct().position.x + .0001f;
+
                     Render()->UpdateCamera(
                         cam->CameraStruct(),
                         ts->TransformStruct()

@@ -184,8 +184,11 @@ private:
 
     void CreateGraphicDescriptorSetLayout(const WAssetId & in_id);
 
-    WEntityComponentId CreateDescriptorSet(const WAssetId & in_descriptor_set_layout_id);
-
+    void CreateDescriptorSet(
+        const WAssetId & in_descriptor_set_layout_id,
+        const WEntityComponentId & entity_component_id
+        );
+    
     void Initialize_ClearLambdas();
 
     void Initialize_GlobalGraphicDescriptors();

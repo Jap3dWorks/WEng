@@ -20,8 +20,8 @@ namespace CameraLib {
             in_camera.far_clipping
             );
         ubo_camera.view = glm::lookAt(
-            glm::vec3(-2.f, 2.f, 2.f),
-            glm::vec3(0.f, 0.f, 0.f),
+            in_transform.position,
+            in_camera.point,
             glm::vec3(0.f, 0.f, 1.f)
             );
 

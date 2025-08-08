@@ -1022,7 +1022,6 @@ void WVulkan::Create(
         );
 
     // TODO: Check if to do this only when update (Map -> Copy -> Unmap)
-    
     vkMapMemory(
         device.vk_device,
         out_ubo_info.uniform_buffer_memory,
@@ -1031,6 +1030,12 @@ void WVulkan::Create(
         0,
         &out_ubo_info.mapped_data
         );
+
+    // vkUnmapMemory(
+    //     device.vk_device,
+    //     out_ubo_info.uniform_buffer_memory
+    //     );
+
 }
 
 void WVulkan::Create(

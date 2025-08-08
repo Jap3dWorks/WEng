@@ -170,7 +170,7 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraComponent>(cid);
 
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
-    cts.position = {0, 20, 20};
+    cts.position = {0, 2.f, 2.f};
 
     // Model
 

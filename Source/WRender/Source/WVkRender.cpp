@@ -548,7 +548,10 @@ void WVkRender::UpdateCamera(
         (float) window_info_.width / (float) window_info_.height
         );
 
-    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(camera_ubo, frame_index_);
+    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(
+        camera_ubo,
+        frame_index_
+        );
 }
 
 void WVkRender::Destroy() {

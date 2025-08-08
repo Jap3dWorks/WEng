@@ -154,7 +154,7 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
     )
 {
     // Remove bindings
-    // TODO check errors at close
+    //  TODO check errors at close
     for (auto & bid : pipeline_pbindings_[in_id]) {
         bindings_.Remove(bid) ;
         descriptor_sets_.Remove(bid);
@@ -184,13 +184,14 @@ WId WVkRenderPipelinesManager::CreateBinding(
     WVkRenderPipelineInfo pipeline_info = RenderPipelineInfo(in_pipeline_id);
 
     // Create a Descriptor set by binding,
-    //  so each binding can use a different ubo buffer (each actor has a different transform).
+    //  So each binding can use a different ubo buffer (each actor has a different transform).
 
-    WId dset_id = CreateDescriptorSet(
-        pipeline_info.descriptor_set_layout_id
+    CreateDescriptorSet(
+        pipeline_info.descriptor_set_layout_id,
+        component_id
         );
 
-    WVkDescriptorSetInfo ds = DescriptorSet(dset_id);
+    WVkDescriptorSetInfo ds = DescriptorSet(component_id);
 
     // Lambda ensures NRVO and avoids moves
     //  Create Descriptor binding objects with default values
@@ -271,7 +272,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
         component_id,
         [&in_pipeline_id,
          &in_mesh_asset_id,
-         &dset_id,
+         &component_id,
          &t,
          &f]
         (const WId & in_id) -> WVkPipelineBindingInfo
@@ -279,7 +280,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
                 return {
                     in_id,
                     in_pipeline_id,
-                    dset_id,
+                    component_id,
                     in_mesh_asset_id,
                     t(),  // Create Texture descriptor sets
                     f()   // Create Ubo Model descriptor sets
@@ -398,15 +399,17 @@ void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId 
     });
 }
 
-WEntityComponentId WVkRenderPipelinesManager::CreateDescriptorSet(
-    const WAssetId & in_descriptor_set_layout_id
+void WVkRenderPipelinesManager::CreateDescriptorSet(
+    const WAssetId & in_descriptor_set_layout_id,
+    const WEntityComponentId & entity_component_id
     )
 {
     auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
     WVkDescriptorSetInfo descriptor_set_info;
 
     // TODO entity_component_id
-    return descriptor_sets_.Create(
+    descriptor_sets_.Insert(
+        entity_component_id,
         [this,
          &descriptor_set_info,
          &d_set_layout]
@@ -537,6 +540,9 @@ void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
+
+    WFLOG("Update Graphics DSet");
+
     memcpy(
         global_graphics_descsets_.camera_ubo[in_frame_index].mapped_data,
         &camera_struct,
