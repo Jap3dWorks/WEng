@@ -16,7 +16,7 @@ class WENGINE_API WEngine
 
 public:
 
-    WEngine()=default;
+    WEngine();
 
     WEngine(std::unique_ptr<IRender> && in_render);
 
@@ -24,11 +24,11 @@ public:
 
     WEngine(const WEngine & other) = delete;
 
-    WEngine(WEngine && other) noexcept = default;
+    WEngine(WEngine && other) noexcept;
 
     WEngine & operator=(const WEngine & other) noexcept = delete;
 
-    WEngine & operator=(WEngine && other) = default;
+    WEngine & operator=(WEngine && other) noexcept;
 
     static WEngine DefaultCreate();
 

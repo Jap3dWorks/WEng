@@ -54,13 +54,14 @@ WVkRender::WVkRender() :
     frame_index_(0),
     frame_buffer_resized_(false)
 {
-    Initialize();
+    // Initialize();
 }
 
 WVkRender::~WVkRender()
 {
-    WFLOG("Destroy WRender");
-    Destroy();
+    if (device_info_.vk_device) {
+        Destroy();
+    }
 }
 
 void WVkRender::WaitIdle() const
@@ -70,6 +71,8 @@ void WVkRender::WaitIdle() const
 
 void WVkRender::Initialize()
 {
+    WFLOG("Initialize WVkRender ...");
+    
     WFLOG("Initialize Window");
     
     window_info_.user_pointer = this;
@@ -591,6 +594,9 @@ void WVkRender::UpdateCamera(
 }
 
 void WVkRender::Destroy() {
+
+    WFLOG("Destroy WVkRender...");
+
     WFLOG("Destroy Render Pipelines Manager");
     pipelines_manager_.Destroy();
 

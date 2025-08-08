@@ -19,6 +19,8 @@ public:
 
     virtual ~IRender()=default;
 
+    virtual void Initialize()=0;
+
     virtual void Draw()=0;
 
     virtual void Destroy()=0;

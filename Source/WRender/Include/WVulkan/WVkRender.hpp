@@ -22,7 +22,7 @@ public:
 
     ~WVkRender() override;
 
-    void Initialize();
+    void Initialize() override;
 
     void Draw() override;
 

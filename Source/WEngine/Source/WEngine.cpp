@@ -28,6 +28,8 @@ WEngine WEngine::DefaultCreate()
 
     WEngine result(std::make_unique<WVkRender>());
 
+    result.Render()->Initialize();
+
     result.ImportersRegister().Register<WImportObj>();
     result.ImportersRegister().Register<WImportTexture>();
 
@@ -41,13 +43,19 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
     asset_manager_()
 {}
 
-WEngine::~WEngine()
-{
-    WFLOG("Desroy WEngine");
+WEngine::WEngine()=default;
+
+WEngine::~WEngine()=default;
+// {
+//     WFLOG("Desroy WEngine");
     
-    render_->Destroy();
-    render_ = nullptr;
-}
+//     render_->Destroy();
+//     render_ = nullptr;
+// }
+
+WEngine::WEngine(WEngine && other) noexcept=default;
+
+WEngine & WEngine::operator=(WEngine && other) noexcept=default;
 
 void WEngine::run()
 {

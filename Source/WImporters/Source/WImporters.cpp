@@ -56,6 +56,8 @@ std::vector<WAssetId> WImportObj::Import(
     const char* file_path,
     const char* asset_directory)
 {
+    WFLOG("Import Obj: \"{}\" to: \"{}\"", file_path, asset_directory);
+    
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -116,17 +118,17 @@ std::vector<WAssetId> WImportObj::Import(
         }
     }
 
-    std::vector<TWRef<WAsset>> imported_assets(shapes.size());
-
     std::vector<WAssetId> result(shapes.size());
 
     for (uint32_t i=0; i < meshes.size(); i++) {
+        WFLOG("Create Static Mesh Asset {}", i);
+        
         WAssetId id = in_asset_manager.Create(
             WStaticMeshAsset::StaticClass(),
             "StaticMesh"
             );
 
-        TWRef<WStaticMeshAsset> static_mesh =
+        WStaticMeshAsset* static_mesh =
             static_cast<WStaticMeshAsset*>(in_asset_manager.Get(id));
 
         static_mesh->SetMesh(std::move(meshes[i]));

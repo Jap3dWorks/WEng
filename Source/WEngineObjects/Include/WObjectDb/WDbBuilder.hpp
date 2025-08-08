@@ -67,14 +67,15 @@ public:
 
     template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
-        if (!register_.contains(typeid(RegKey<B,I>))) {
-            
-            register_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
-            
+        
+        WFLOG("Registering Types {}, {}", typeid(B).name(), typeid(I).name());
+
+        if (register_.contains(typeid(RegKey<B,I>))) {
+            WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name());
+            return;
         }
 
-        WFLOG("Types already registered! {}, {}", typeid(B).name(), typeid(I).name());
-
+        register_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
         // assert(false);            
     }
 
