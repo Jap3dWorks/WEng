@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRender.hpp"
-#include "CameraLib.hpp"
+#include "WCameraLib.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -33,7 +33,7 @@
 void WVkRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
 {
     auto app = reinterpret_cast<WVkRender*>(glfwGetWindowUserPointer(in_window));
-    app->frame_buffer_resized = true;
+    app->frame_buffer_resized_ = true;
 }
 
 WVkRender::WVkRender() :
@@ -42,6 +42,7 @@ WVkRender::WVkRender() :
     surface_info_(),
     device_info_(),
     debug_info_(),
+    render_resources_(),
     swap_chain_info_(),
     render_pass_info_(),
     render_command_pool_(),
@@ -49,7 +50,9 @@ WVkRender::WVkRender() :
     pipelines_manager_(),
     image_available_semaphore_(),
     render_finished_semaphore_(),
-    flight_fence_()
+    flight_fence_(),
+    frame_index_(0),
+    frame_buffer_resized_(false)
 {
     Initialize();
 }
@@ -67,13 +70,19 @@ void WVkRender::WaitIdle() const
 
 void WVkRender::Initialize()
 {
+    WFLOG("Initialize Window");
+    
     window_info_.user_pointer = this;
-    window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
+    window_info_.framebuffer_size_callback = &FrameBufferSizeCallback;
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
+
+    WFLOG("Create Window");
 
     WVulkan::Create(
         window_info_
         );
+
+    WFLOG("Create Vulkan Instance");
 
     // Create Vulkan Instance
     WVulkan::Create(
@@ -81,11 +90,15 @@ void WVkRender::Initialize()
         debug_info_
         );
 
+    WFLOG("Create Surface Info");
+
     WVulkan::Create(
         surface_info_,
         instance_info_, 
         window_info_
         );
+
+    WFLOG("Create Vulkan Device");
 
     // Create Vulkan Device
     WVulkan::Create(
@@ -94,6 +107,8 @@ void WVkRender::Initialize()
         surface_info_,
         debug_info_
         );
+
+    WFLOG("Create Swap Chain");
 
     // Create Vulkan Swap Chain
     WVulkan::Create(
@@ -105,11 +120,15 @@ void WVkRender::Initialize()
         debug_info_
         );
 
+    WFLOG("Create Swap Chain Image Views");
+
     // Create Vulkan Image Views
     WVulkan::CreateSCImageViews(
         swap_chain_info_,
         device_info_
         );
+
+    WFLOG("Create Render Pass");
 
     // Create Vulkan Render Pass
     WVulkan::Create(
@@ -118,6 +137,8 @@ void WVkRender::Initialize()
         device_info_
         );
 
+    WFLOG("Create Render Pipeline Manager");
+
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
@@ -125,21 +146,29 @@ void WVkRender::Initialize()
         window_info_.height
         );
 
+    WFLOG("Create Render Command Pool");
+
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
         device_info_,
         surface_info_
         );
 
+    WFLOG("Create Swap Chain Color Resources");
+
     WVulkan::CreateSCColorResources(
         swap_chain_info_,
         device_info_
         );
 
+    WFLOG("Create Swap Chain Depth Resources");
+
     WVulkan::CreateSCDepthResources(
         swap_chain_info_,
         device_info_
         );
+
+    WFLOG("Create Swap Chain Frame Buffers");
 
     WVulkan::CreateSCFramebuffers(
         swap_chain_info_,
@@ -147,19 +176,27 @@ void WVkRender::Initialize()
         device_info_
         );
 
+    WFLOG("Create Render Command Buffer");
+
     render_command_buffer_ =
         render_command_pool_.
         CreateCommandBuffer();
+
+    WFLOG("Create image avaiable semaphore");
 
     WVulkan::Create(
         image_available_semaphore_,
         device_info_
         );
 
+    WFLOG("Create Render Finished Semaphore");
+
     WVulkan::Create(
         render_finished_semaphore_,
         device_info_
         );
+
+    WFLOG("Create Render Fences");
 
     WVulkan::Create(
         flight_fence_,
@@ -181,7 +218,7 @@ void WVkRender::Draw()
     vkWaitForFences(
         device_info_.vk_device,
         1,
-        &flight_fence_.fences[frame_index],
+        &flight_fence_.fences[frame_index_],
         VK_TRUE,
         UINT64_MAX
         );
@@ -192,7 +229,7 @@ void WVkRender::Draw()
         device_info_.vk_device,
         swap_chain_info_.swap_chain,
         UINT64_MAX,
-        image_available_semaphore_.semaphores[frame_index],
+        image_available_semaphore_.semaphores[frame_index_],
         VK_NULL_HANDLE,
         &image_index
         );
@@ -208,20 +245,20 @@ void WVkRender::Draw()
     vkResetFences(
         device_info_.vk_device,
         1,
-        &flight_fence_.fences[frame_index]
+        &flight_fence_.fences[frame_index_]
         );
 
     VkSemaphore signal_semaphores[] = {
-        render_finished_semaphore_.semaphores[frame_index]
+        render_finished_semaphore_.semaphores[frame_index_]
     };
 
     for(auto pit : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
 
-        vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index], 0);
+        vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index_], 0);
 
         RecordRenderCommandBuffer(
             pit,
-            frame_index,
+            frame_index_,
             image_index
             );
 
@@ -230,7 +267,7 @@ void WVkRender::Draw()
         submit_info.pNext = nullptr;
 
         VkSemaphore wait_semaphores[] =
-            { image_available_semaphore_.semaphores[frame_index] };
+            { image_available_semaphore_.semaphores[frame_index_] };
         VkPipelineStageFlags wait_stages[] =
             { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
@@ -239,7 +276,7 @@ void WVkRender::Draw()
         submit_info.pWaitDstStageMask = wait_stages;
 
         submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index];
+        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index_];
 
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores = signal_semaphores;
@@ -248,7 +285,7 @@ void WVkRender::Draw()
                 device_info_.vk_graphics_queue,
                 1,
                 &submit_info,
-                flight_fence_.fences[frame_index]) != VK_SUCCESS)
+                flight_fence_.fences[frame_index_]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to submit draw command buffer");
         }
@@ -270,14 +307,14 @@ void WVkRender::Draw()
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
     WFLOG("QueuePresentKHR Result: {:d}", (size_t)result);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized) {
-        frame_buffer_resized = false;
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized_) {
+        frame_buffer_resized_ = false;
         RecreateSwapChain();
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    frame_index = (frame_index + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
+    frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
 void WVkRender::CreateRenderPipeline(
@@ -550,30 +587,43 @@ void WVkRender::UpdateCamera(
         (float) window_info_.width / (float) window_info_.height
         );
 
-    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(camera_ubo, frame_index);
+    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(camera_ubo, frame_index_);
 }
 
 void WVkRender::Destroy() {
+    WFLOG("Destroy Render Pipelines Manager");
     pipelines_manager_.Destroy();
+
+    WFLOG("Destroy Fences and Semaphores");
 
     WVulkan::Destroy(image_available_semaphore_, device_info_);
 
     WVulkan::Destroy(render_finished_semaphore_, device_info_);
 
     WVulkan::Destroy(flight_fence_, device_info_);
-    
+
+    WFLOG("Destroy Render Pass Info");
+
     // Destroy Vulkan Render Pass
     WVulkan::Destroy(render_pass_info_, device_info_);
 
+    WFLOG("Destroy Swap Chain Info");
+
     // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    WFLOG("Destroy Render Command Pool");
 
     render_command_pool_.Clear();
     render_command_pool_ = {};
     
     render_command_buffer_ = {};
 
+    WFLOG("Destroy Render Resources");
+
     render_resources_.Clear();
+
+    WFLOG("Destroy Vulkan Device");
 
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);

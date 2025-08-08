@@ -32,7 +32,10 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     width_(in_width),
     height_(in_height)
 {
+    WFLOG("Initialize Global Graphic Descriptors.");
     Initialize_GlobalGraphicDescriptors();
+
+    WFLOG("Initialize Descriptor Pool");
 
     WVulkan::Create(descriptor_pool_info_, device_info_);
     Initialize_ClearLambdas();

@@ -192,8 +192,12 @@ bool SetupLevel(WEngine & in_engine,
 
 }
 
+#include <memory>
+#include "WVulkan/WVkRender.hpp"
+
 int main(int argc, char** argv)
 {
+    WFLOG("Initialize WSpacers App.");
     
     try
     {
@@ -226,7 +230,7 @@ int main(int argc, char** argv)
     }
     catch(const std::exception& e)
     {
-        WLOG("[ERROR] {}", e.what());
+        WFLOG("[ERROR] {}", e.what());
 
         return 1;
     }

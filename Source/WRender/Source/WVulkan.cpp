@@ -775,7 +775,7 @@ void WVulkan::Create(
     DynamicState.pDynamicStates = DynamicStates.data();
 
     std::vector<VkDescriptorSetLayout> slayouts;
-    slayouts.resize(in_descriptor_set_layout_infos.size());
+    slayouts.reserve(in_descriptor_set_layout_infos.size());
     for(auto & v : in_descriptor_set_layout_infos) {
         slayouts.push_back(v.descriptor_set_layout);
     }
@@ -1196,7 +1196,6 @@ void WVulkan::Destroy(WVkDeviceInfo &device_info)
 
 void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-    WFLOG("Destroy Swap Chain and Image Views");
     vkDestroyImageView(device_info.vk_device, swap_chain_info.color_image_view, nullptr);
     vkDestroyImage(device_info.vk_device, swap_chain_info.color_image, nullptr);
     vkFreeMemory(device_info.vk_device, swap_chain_info.color_image_memory, nullptr);

@@ -24,6 +24,8 @@
 
 WEngine WEngine::DefaultCreate()
 {
+    std::unique_ptr<IRender> rndrptr = std::make_unique<WVkRender>();
+
     WEngine result(std::make_unique<WVkRender>());
 
     result.ImportersRegister().Register<WImportObj>();
@@ -41,6 +43,9 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
 
 WEngine::~WEngine()
 {
+    WFLOG("Desroy WEngine");
+    
+    render_->Destroy();
     render_ = nullptr;
 }
 
@@ -58,17 +63,20 @@ void WEngine::run()
         WEngineCycleData engine_cycle_data;
 
         if (!level_info_.loaded) {
+            Render()->WaitIdle();
             UnloadLevel();
             LoadLevel(level_info_.current_level);
         }
-        else {
+        else
+        {
             // Update Render Camera
             level_info_.level.ForEachComponent<WCameraComponent> (
                 [&engine_cycle_data, this] (WCameraComponent * cam) {
                     
-                    WTransformComponent * ts = level_info_.level.GetComponent<WTransformComponent>(
-                        cam->EntityId()
-                        );
+                    WTransformComponent * ts =
+                        level_info_.level.GetComponent<WTransformComponent>(
+                            cam->EntityId()
+                            );
 
                     Render()->UpdateCamera(
                         cam->CameraStruct(),
@@ -88,7 +96,6 @@ void WEngine::run()
                             );
                     
                     // TODO, Render()->UpdateUbo(ecid, in_component);
-                    
 
                 });
 
@@ -96,10 +103,9 @@ void WEngine::run()
             Render()->Draw();
         }
     }
-
-    UnloadLevel();
-
+    
     Render()->WaitIdle();
+    UnloadLevel();
 }
 
 void WEngine::LoadLevel(const WLevelId & in_level) {
@@ -122,7 +128,6 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
 
 void WEngine::UnloadLevel() {
     if (level_info_.loaded) {
-        
         WRenderLevelLib::ReleaseRenderResources(
             render_.get(),
             level_info_.level.EntityComponentDb(),

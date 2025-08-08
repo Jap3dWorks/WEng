@@ -1,37 +1,35 @@
-add_executable(WSpacers Source/WSpacers.cpp)
+add_executable(
+    WSpacers
+    Source/WSpacers.cpp
+    CompileGenerated/CompileGenerated.cpp
+)
 
 target_include_directories(
     WSpacers 
     PRIVATE 
-        Include
-        WCore::WCore
-        WEngine::WEngine
-        WRender::WRender
-        WLevel::WLevel
-        WImporters::WImporters
-        WEngineObjects::WEngineObjects
-        WEngineInterfaces::WEngineInterfaces
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PublicGenerated>
     PRIVATE 
-        PrivateGenerated
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Source>
 )
 
 target_link_libraries(
     WSpacers
     PUBLIC
     PRIVATE
-        glfw
+        WCore::WCore
         WEngineObjects::WEngineObjects
         WEngineInterfaces::WEngineInterfaces
-        WCore::WCore
         WRender::WRender
         WImporters::WImporters
         WEngine::WEngine
         WLevel::WLevel
+        
 )
 
 install(
-    TARGETS
-        WSpacers
+    TARGETS WSpacers
     RUNTIME DESTINATION bin
 )
 install(

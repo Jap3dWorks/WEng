@@ -120,13 +120,13 @@ private:
                                    uint32_t in_frame_index,
                                    uint32_t in_image_index);
 
-    WVkRenderResources render_resources_{};
-
     WVkInstanceInfo instance_info_;
     WVkWindowInfo window_info_;
     WVkSurfaceInfo surface_info_;
     WVkDeviceInfo device_info_;
     WVkRenderDebugInfo debug_info_;
+
+    WVkRenderResources render_resources_;
 
     WVkSwapChainInfo swap_chain_info_;
     WVkRenderPassInfo render_pass_info_;
@@ -140,9 +140,8 @@ private:
     WVkSemaphoreInfo render_finished_semaphore_;
     WVkFenceInfo flight_fence_;
 
-    uint32_t frame_index {0};
-
-    bool frame_buffer_resized {false};
+    uint32_t frame_index_ {0};
+    bool frame_buffer_resized_ {false};
 
 };
 

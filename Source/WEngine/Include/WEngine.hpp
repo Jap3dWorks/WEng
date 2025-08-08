@@ -16,15 +16,17 @@ class WENGINE_API WEngine
 
 public:
 
+    WEngine()=default;
+
     WEngine(std::unique_ptr<IRender> && in_render);
 
     virtual ~WEngine();
 
     WEngine(const WEngine & other) = delete;
 
-    WEngine(WEngine && other) = default;
+    WEngine(WEngine && other) noexcept = default;
 
-    WEngine & operator=(const WEngine & other) = delete;
+    WEngine & operator=(const WEngine & other) noexcept = delete;
 
     WEngine & operator=(WEngine && other) = default;
 

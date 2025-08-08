@@ -4,7 +4,7 @@
                    (define-key global-map (kbd "C-c = c")
                                (lambda ()
                                  (interactive)
-                                 (ja-execute-shell-script (concat (project-root (project-current)) "Scripts/cmd-compile.sh" ))))
+                                 (compile (concat (project-root (project-current)) "Scripts/cmd-compile.sh" ))))
 
 
                    (define-key global-map (kbd "C-c = d")
@@ -17,7 +17,7 @@
                    (define-key global-map (kbd "C-c = r")
                                (lambda ()
                                  (interactive)
-                                 (compile (concat (project-root (project-current)) "Scripts/cmd-launch-spacers.sh"))))
+                                 (ja-execute-shell-script (concat (project-root (project-current)) "Scripts/cmd-launch-spacers.sh"))))
 
                    (setenv "LD_LIBRARY_PATH" "lib")
 

@@ -24,6 +24,8 @@ namespace CameraLib {
             glm::vec3(0.f, 0.f, 0.f),
             glm::vec3(0.f, 0.f, 1.f)
             );
+
+        ubo_camera.proj[1][1] *= -1;
         
         return ubo_camera;
     }
