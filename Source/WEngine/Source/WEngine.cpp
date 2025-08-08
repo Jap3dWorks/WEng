@@ -24,8 +24,6 @@
 
 WEngine WEngine::DefaultCreate()
 {
-    std::unique_ptr<IRender> rndrptr = std::make_unique<WVkRender>();
-
     WEngine result(std::make_unique<WVkRender>());
 
     result.Render()->Initialize();

@@ -54,7 +54,6 @@ WVkRender::WVkRender() :
     frame_index_(0),
     frame_buffer_resized_(false)
 {
-    // Initialize();
 }
 
 WVkRender::~WVkRender()
@@ -76,7 +75,7 @@ void WVkRender::Initialize()
     WFLOG("Initialize Window");
     
     window_info_.user_pointer = this;
-    window_info_.framebuffer_size_callback = &FrameBufferSizeCallback;
+    window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
     WFLOG("Create Window");

@@ -76,6 +76,7 @@ public:
         id_class_[id] = in_class;
     
         object_manager_.Insert(in_class, id);
+        object_manager_.Get(in_class, id)->WID(id);
 
         return id;
     }

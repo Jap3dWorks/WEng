@@ -192,9 +192,6 @@ bool SetupLevel(WEngine & in_engine,
 
 }
 
-#include <memory>
-#include "WVulkan/WVkRender.hpp"
-
 int main(int argc, char** argv)
 {
     WFLOG("Initialize WSpacers App.");
@@ -208,14 +205,14 @@ int main(int argc, char** argv)
         WRenderPipelineAsset * pipeline_asset;
         WRenderPipelineParametersAsset * param_asset;
 
-        if (!LoadAssets(engine,
-                        static_mesh,
-                        texture_asset,
-                        pipeline_asset,
-                        param_asset))
-        {
-            return 1;
-        }
+        // if (!LoadAssets(engine,
+        //                 static_mesh,
+        //                 texture_asset,
+        //                 pipeline_asset,
+        //                 param_asset))
+        // {
+        //     return 1;
+        // }
 	        
         // const WTextureStruct & texture_data =
         //     texture_asset->GetTexture();

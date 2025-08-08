@@ -222,9 +222,14 @@ private:
 
     void EnsureClassStorage(const WClass * in_class) {
         if (!db_.contains(in_class)) {
+            
+            WFLOG("Create {} Object Storage", in_class->Name());
+            
             db_[in_class] =
                 in_class->DbBuilder().Create<WObjClass, WIdClass>();
-            
+
+            WFLOG("Reserve Memory: {}", initial_memory_size_);
+
             db_[in_class]->Reserve(
                 initial_memory_size_
                 );

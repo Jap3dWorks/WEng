@@ -1,8 +1,8 @@
 #pragma once
 
-// #include <memory>
 #include <type_traits>
 #include "WCore/TFunction.hpp"
+#include "WLog.hpp"
 
 template<typename T>
 class TWAllocator {
@@ -24,21 +24,25 @@ public:
     constexpr TWAllocator() noexcept :
         allocate_fn_([](pointer, std::size_t, pointer, std::size_t){}),
         deallocate_fn_([](pointer, std::size_t){}),
-        pptr_(nullptr)
+        pptr_(nullptr),
+        pn_{0}
         {}
 
-    TWAllocator(const TWAllocator & other) :
+    constexpr TWAllocator(const TWAllocator & other) :
         allocate_fn_(other.allocate_fn_),
         deallocate_fn_(other.deallocate_fn_),
-        pptr_(nullptr)  // Do not copy the previous pointer.
+        pptr_(nullptr),
+        pn_(0)
         {}
 
-    TWAllocator(TWAllocator && other) noexcept :
+    constexpr TWAllocator(TWAllocator && other) noexcept :
         allocate_fn_(std::move(other.allocate_fn_)),
         deallocate_fn_(std::move(other.deallocate_fn_)),
-        pptr_(std::move(other))
+        pptr_(std::move(other.pptr_)),
+        pn_(std::move(other.pn_))
         {
             other.pptr_ = nullptr;
+            other.pn_=0;
         }
 
     constexpr ~TWAllocator() {
@@ -46,9 +50,14 @@ public:
     }
 
     constexpr pointer allocate(std::size_t n) {
+        // WFLOG("Allocate Memory: {}", n);
+        // WFLOG("Prev Ptr: {}, Prev Size: {}", pptr_, pn_);
+        
         pointer p = new T[n];
         
         allocate_fn_(pptr_, pn_, p, n);
+
+        // WFLOG("Store new prev data, Ptr: {}, N: {}", p, n);
 
         pptr_=p;
         pn_=n;
@@ -57,6 +66,8 @@ public:
     }
 
     constexpr void deallocate (pointer p, std::size_t n) {
+        // WFLOG("Deallocating Memory:{}, {}", p, n);
+        
         deallocate_fn_(p, n);
         delete[] p;
     }
