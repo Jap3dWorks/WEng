@@ -1,5 +1,6 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
+#include "WCore/TWAllocator.hpp"
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
@@ -16,8 +17,38 @@ struct B{};
 
 struct A : public B {};
 
-bool TObjectDataBase_Test() {
+bool TWAllocator_1_Test() {
+    WFLOG("--Init Test--");
 
+    struct A {
+        A(std::size_t in_a) : a(in_a) {}
+
+       ~A() { WFLOG("Destroy A \"{}\"!", a); }
+
+        A(const A&)=default;
+        A(A&&)=default;
+        A & operator=(const A&)=default;
+        A & operator=(A &&)=default;
+    private:
+        std::size_t a;
+    };
+
+    std::vector<A, TWAllocator<A>> va;
+
+    for (std::uint32_t i=0; i<8; i++) {
+        va.push_back(A(i));
+    }
+
+    va.clear();
+
+    va={};
+    
+    return true;
+}
+
+bool TObjectDataBase_Test() {
+    WFLOG("--Init Test--");
+    
     TObjectDataBase<A, B, WId> od;
 
     od.Insert(1);
@@ -29,7 +60,7 @@ bool TObjectDataBase_Test() {
     std::unique_ptr<IObjectDataBase<B,WId>>od3 = od.Clone();
 
     od3->ForEach([](B * b) -> void {
-        std::print("Print od3 Item\n.");
+        WFLOG("Print od3 Item.");
     });
 
     return od3->Count() == od.Count() && od.Count() == od2.Count();
@@ -37,6 +68,9 @@ bool TObjectDataBase_Test() {
 }
 
 TEST_CASE("WCore") {
+    SECTION("TWAllocator") {
+        CHECK(TWAllocator_1_Test());
+    }
     SECTION("TObjectDataBase") {
         CHECK(TObjectDataBase_Test());
     }

@@ -85,14 +85,29 @@ private:
             (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
                 if (_pptr) {
                     for(size_t i=0; i<_pn; i++) {
-                        if (!BWRef::IsInstanced(_pptr + i)) {
-                            continue;
-                        }
+                        if (!BWRef::IsInstanced(_pptr + i)) continue;
                         
                         for (auto & ref : BWRef::Instances(_pptr + i)) {
                             if (ref == nullptr) continue;
                             
                             ref->BSet(_nptr + i);
+                        }
+                    }
+                }
+            }
+            );
+
+        a.SetDeallocateFn(
+            []
+            (T * _ptr, std::size_t _n) {
+                if (_ptr) {
+                    for(std::size_t i=0; i<_n; i++) {
+                        if (!BWRef::IsInstanced(_ptr + i)) continue;
+
+                        for (auto & ref : BWRef::Instances(_ptr + i)) {
+                            if (ref == nullptr) continue;
+
+                            ref->BSet(_ptr + i);
                         }
                     }
                 }

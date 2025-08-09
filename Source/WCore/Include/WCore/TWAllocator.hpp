@@ -47,11 +47,14 @@ public:
 
     constexpr ~TWAllocator() {
         pptr_ = nullptr;
+        pn_=0;
     }
 
     constexpr pointer allocate(std::size_t n) {
-        pointer p = new T[n];
+        static_assert(sizeof(T) != 0, "cannot allocate incomplete types");
         
+        pointer p = static_cast<pointer>(::operator new[](n * sizeof(T)));
+
         allocate_fn_(pptr_, pn_, p, n);
 
         pptr_=p;
@@ -61,8 +64,11 @@ public:
     }
 
     constexpr void deallocate (pointer p, std::size_t n) {
+        if (!p) return;
+        
         deallocate_fn_(p, n);
-        delete[] p;
+
+        ::operator delete[](p);
     }
 
     void SetAllocateFn(const AllocateFunction & in_fn) {
