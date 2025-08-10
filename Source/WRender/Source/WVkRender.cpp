@@ -1,3 +1,6 @@
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "WVulkan/WVkRender.hpp"
 #include "WCameraLib.hpp"
 #include "WCore/WCore.hpp"
@@ -16,8 +19,6 @@
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #include <array>
 
@@ -30,15 +31,15 @@
 // WRender
 // -------
 
-void WVkRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
-{
-    auto app = reinterpret_cast<WVkRender*>(glfwGetWindowUserPointer(in_window));
-    app->frame_buffer_resized_ = true;
-}
+// void WVkRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
+// {
+//     auto app = reinterpret_cast<WVkRender*>(glfwGetWindowUserPointer(in_window));
+//     app->frame_buffer_resized_ = true;
+// }
 
 WVkRender::WVkRender() :
     instance_info_(),
-    window_info_(),
+    window_(),
     surface_info_(),
     device_info_(),
     debug_info_(),
@@ -51,9 +52,13 @@ WVkRender::WVkRender() :
     image_available_semaphore_(),
     render_finished_semaphore_(),
     flight_fence_(),
-    frame_index_(0),
-    frame_buffer_resized_(false)
+    frame_index_(0) // ,
+    // frame_buffer_resized_(false)
 {
+}
+
+WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
+    Window(in_window);
 }
 
 WVkRender::~WVkRender()
@@ -68,15 +73,25 @@ void WVkRender::WaitIdle() const
     vkDeviceWaitIdle(device_info_.vk_device);
 }
 
+void WVkRender::Window(GLFWwindow * in_window) {
+    window_.window = in_window;
+    std::int32_t width, height;
+    
+    glfwGetFramebufferSize(window_.window, &width, &height);
+
+    window_.width = static_cast<std::uint32_t>(width);
+    window_.height = static_cast<std::uint32_t>(height);
+}
+
 void WVkRender::Initialize()
 {
-    window_info_.user_pointer = this;
-    window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
+    // window_info_.user_pointer = this;
+    // window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
-    WVulkan::Create(
-        window_info_
-        );
+    // WVulkan::Create(
+    //     window_info_
+    //     );
 
     // Create Vulkan Instance
     WVulkan::Create(
@@ -84,10 +99,11 @@ void WVkRender::Initialize()
         debug_info_
         );
 
+    // Create Vulkan Window Surface
     WVulkan::Create(
         surface_info_,
         instance_info_, 
-        window_info_
+        window_.window
         );
 
     // Create Vulkan Device
@@ -103,7 +119,8 @@ void WVkRender::Initialize()
         swap_chain_info_,
         device_info_,
         surface_info_,
-        window_info_,
+        window_.width,
+        window_.height,
         render_pass_info_,
         debug_info_
         );
@@ -124,8 +141,8 @@ void WVkRender::Initialize()
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
         render_pass_info_,
-        window_info_.width,
-        window_info_.height
+        window_.width,
+        window_.height
         );
 
     render_command_pool_ = WVkRenderCommandPool( 
@@ -268,8 +285,7 @@ void WVkRender::Draw()
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frame_buffer_resized_) {
-        frame_buffer_resized_ = false;
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         RecreateSwapChain();
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("Failed to present swap chain image!");
@@ -293,55 +309,6 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
         );
 }
 
-void WVkRender::RecreateSwapChain() {
-    WFLOG("RECREATE SWAP CHAIN!");
-    
-    int width=0, height=0;
-    glfwGetFramebufferSize(window_info_.window, &width, &height);
-
-    while(width ==0 || height == 0) {
-        glfwGetFramebufferSize(window_info_.window, &width, &height);
-        glfwWaitEvents();
-    }
-
-    window_info_.width = width;
-    window_info_.height = height;
-
-    WaitIdle();
-
-    WVulkan::Destroy(
-        swap_chain_info_,
-        device_info_
-        );
-
-    WVulkan::Destroy(
-        render_pass_info_,
-        device_info_
-        );
-
-    WVulkan::Create(
-        swap_chain_info_,
-        device_info_,
-        surface_info_,
-        window_info_,
-        render_pass_info_,
-        debug_info_
-        );
-
-    WVulkan::CreateSCImageViews(
-        swap_chain_info_,
-        device_info_
-        );
-
-    WVulkan::Create(
-        render_pass_info_,
-        swap_chain_info_,
-        device_info_
-        );
-
-    pipelines_manager_.Width(width);
-    pipelines_manager_.Height(height);
-}
 
 void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
@@ -374,6 +341,140 @@ void WVkRender::CreatePipelineBinding(
 
 void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
     pipelines_manager_.DeleteBinding(in_id);
+}
+
+void WVkRender::ClearPipelines() {
+    pipelines_manager_.Clear();
+}
+
+void WVkRender::UnloadAllResources() {
+    render_resources_.Clear();
+}
+
+void WVkRender::UpdateCamera(
+    const WCameraStruct & camera_struct,
+    const WTransformStruct & transform_struct
+    ) {
+
+    WUBOCameraStruct camera_ubo = CameraLib::UBOCameraStruct(
+        camera_struct,
+        transform_struct,
+        (float) window_.width / (float) window_.height
+        );
+
+    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(
+        camera_ubo,
+        frame_index_
+        );
+}
+
+void WVkRender::Destroy() {
+
+    WFLOG("Destroy WVkRender...");
+
+    WFLOG("Destroy Render Pipelines Manager");
+    pipelines_manager_.Destroy();
+
+    WFLOG("Destroy Fences and Semaphores");
+
+    WVulkan::Destroy(image_available_semaphore_, device_info_);
+
+    WVulkan::Destroy(render_finished_semaphore_, device_info_);
+
+    WVulkan::Destroy(flight_fence_, device_info_);
+
+    WFLOG("Destroy Render Pass Info");
+
+    // Destroy Vulkan Render Pass
+    WVulkan::Destroy(render_pass_info_, device_info_);
+
+    WFLOG("Destroy Swap Chain Info");
+
+    // Destroy Swap Chain and Image Views
+    WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    WFLOG("Destroy Render Command Pool");
+
+    render_command_pool_.Clear();
+    render_command_pool_ = {};
+    
+    render_command_buffer_ = {};
+
+    WFLOG("Destroy Render Resources");
+
+    render_resources_.Clear();
+
+    WFLOG("Destroy Vulkan Device");
+
+    // Destroy Vulkan Device
+    WVulkan::Destroy(device_info_);
+
+    // Destroy Vulkan Surface
+    WVulkan::Destroy(surface_info_, instance_info_);
+
+    // Destroy Vulkan Instance
+    WVulkan::Destroy(instance_info_);
+
+    // Destroy Window
+    // WVulkan::Destroy(window_info_);    
+}
+
+void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {
+    window_.width = in_width;
+    window_.height = in_height;
+
+    RecreateSwapChain();
+    
+    pipelines_manager_.Width(window_.width);
+    pipelines_manager_.Height(window_.height);
+}
+
+void WVkRender::RecreateSwapChain() {
+    WFLOG("RECREATE SWAP CHAIN!");
+    
+    // int width=0, height=0;
+    // glfwGetFramebufferSize(window_info_.window, &width, &height);
+
+    // while(width ==0 || height == 0) {
+    //     glfwGetFramebufferSize(window_info_.window, &width, &height);
+    //     glfwWaitEvents();
+    // }
+
+    // window_info_.width = width;
+    // window_info_.height = height;
+
+    WaitIdle();
+
+    WVulkan::Destroy(
+        swap_chain_info_,
+        device_info_
+        );
+
+    WVulkan::Destroy(
+        render_pass_info_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        swap_chain_info_,
+        device_info_,
+        surface_info_,
+        window_.width,
+        window_.height,
+        render_pass_info_,
+        debug_info_
+        );
+
+    WVulkan::CreateSCImageViews(
+        swap_chain_info_,
+        device_info_
+        );
+
+    WVulkan::Create(
+        render_pass_info_,
+        swap_chain_info_,
+        device_info_
+        );
 }
 
 void WVkRender::RecordRenderCommandBuffer(
@@ -528,80 +629,3 @@ void WVkRender::RecordRenderCommandBuffer(
         throw std::runtime_error("Failed to record command buffer!");
     }
 }
-
-void WVkRender::ClearPipelines() {
-    pipelines_manager_.Clear();
-}
-
-void WVkRender::UnloadAllResources() {
-    render_resources_.Clear();
-}
-
-void WVkRender::UpdateCamera(
-    const WCameraStruct & camera_struct,
-    const WTransformStruct & transform_struct
-    ) {
-
-    WUBOCameraStruct camera_ubo = CameraLib::UBOCameraStruct(
-        camera_struct,
-        transform_struct,
-        (float) window_info_.width / (float) window_info_.height
-        );
-
-    pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(
-        camera_ubo,
-        frame_index_
-        );
-}
-
-void WVkRender::Destroy() {
-
-    WFLOG("Destroy WVkRender...");
-
-    WFLOG("Destroy Render Pipelines Manager");
-    pipelines_manager_.Destroy();
-
-    WFLOG("Destroy Fences and Semaphores");
-
-    WVulkan::Destroy(image_available_semaphore_, device_info_);
-
-    WVulkan::Destroy(render_finished_semaphore_, device_info_);
-
-    WVulkan::Destroy(flight_fence_, device_info_);
-
-    WFLOG("Destroy Render Pass Info");
-
-    // Destroy Vulkan Render Pass
-    WVulkan::Destroy(render_pass_info_, device_info_);
-
-    WFLOG("Destroy Swap Chain Info");
-
-    // Destroy Swap Chain and Image Views
-    WVulkan::Destroy(swap_chain_info_, device_info_);
-
-    WFLOG("Destroy Render Command Pool");
-
-    render_command_pool_.Clear();
-    render_command_pool_ = {};
-    
-    render_command_buffer_ = {};
-
-    WFLOG("Destroy Render Resources");
-
-    render_resources_.Clear();
-
-    WFLOG("Destroy Vulkan Device");
-
-    // Destroy Vulkan Device
-    WVulkan::Destroy(device_info_);
-
-    // Destroy Vulkan Surface
-    WVulkan::Destroy(surface_info_, instance_info_);
-
-    // Destroy Vulkan Instance
-    WVulkan::Destroy(instance_info_);
-
-    // Destroy Window
-    WVulkan::Destroy(window_info_);    
-}
-

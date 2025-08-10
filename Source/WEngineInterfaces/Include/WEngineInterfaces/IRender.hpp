@@ -27,8 +27,6 @@ public:
 
     virtual void WaitIdle() const=0;
 
-    virtual GLFWwindow * Window() const=0;
-
     // Pipeline Section
     // ----------------
 
@@ -101,5 +99,12 @@ public:
      * @brief Unload all render resources.
      */
     virtual void UnloadAllResources() = 0;
+
+    /**
+     * Returns current render window.
+     */
+    virtual void Window(GLFWwindow * in_window);
+
+    virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height);
 
 };

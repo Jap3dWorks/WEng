@@ -86,12 +86,12 @@ void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugIn
     }
 }
 
-void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, WVkWindowInfo & window)
+void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, GLFWwindow * in_window)
 {
     VkResult result =
         glfwCreateWindowSurface(
             instance_info.instance,
-            window.window,
+            in_window,
             nullptr,
             & surface.surface
             );
@@ -102,35 +102,12 @@ void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, 
     }
 }
 
-void WVulkan::Create(WVkWindowInfo &out_window_info)
-{
-    glfwInit();
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-    out_window_info.window = glfwCreateWindow(
-        out_window_info.width,
-        out_window_info.height,
-        out_window_info.title.c_str(),
-        nullptr,
-        nullptr
-        );
-
-    glfwSetWindowUserPointer(out_window_info.window, out_window_info.user_pointer);
-
-    if (out_window_info.framebuffer_size_callback)
-    {
-        glfwSetFramebufferSizeCallback(
-            out_window_info.window,
-            out_window_info.framebuffer_size_callback);
-    }
-}
-
 void WVulkan::Create(
     WVkSwapChainInfo & out_swap_chain_info,
     const WVkDeviceInfo & device_info,
     const WVkSurfaceInfo & surface_info,
-    const WVkWindowInfo & window_info,
+    const std::uint32_t & in_width,
+    const std::uint32_t & in_height,
     const WVkRenderPassInfo & render_pass_info,
     const WVkRenderDebugInfo & debug_info
     )
@@ -142,7 +119,9 @@ void WVulkan::Create(
 
     VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
     VkPresentModeKHR present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes);
-    VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities, window_info.window);
+    VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities,
+                                         in_width,
+                                         in_height);
 
     uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
     if (swap_chain_support.capabilities.maxImageCount > 0 &&
@@ -1235,13 +1214,6 @@ void WVulkan::Destroy(WVkRenderPassInfo &render_pass_info, const WVkDeviceInfo &
     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
 }
 
-void WVulkan::Destroy(WVkWindowInfo &window_info)
-{
-    WFLOG("Destroy Window Info.");
-    glfwDestroyWindow(window_info.window);
-    glfwTerminate();
-}
-
 void WVulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
     const WVkDeviceInfo & device
@@ -1630,7 +1602,9 @@ VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeK
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities, GLFWwindow * in_window)
+VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities,
+                                     const std::uint32_t & in_width,
+                                     const std::uint32_t & in_height)
 {
     if (in_capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
@@ -1638,12 +1612,9 @@ VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabil
     }
     else
     {
-        int width, height;
-        glfwGetFramebufferSize(in_window, &width, &height);
-        
         VkExtent2D actual_extent = {
-            static_cast<uint32_t>(width),
-            static_cast<uint32_t>(height)
+            in_width,
+            in_height
         };
 
         actual_extent.width = std::clamp(

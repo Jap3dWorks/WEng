@@ -11,6 +11,8 @@
 
 #include <cstddef>
 
+struct GLFWwindow;
+
 /**
  * @brief Default Rendere class
 */
@@ -19,6 +21,8 @@ class WRENDER_API WVkRender : public IRender
 public:
 
     WVkRender();
+
+    WVkRender(GLFWwindow * in_window);
 
     ~WVkRender() override;
 
@@ -50,14 +54,16 @@ public:
 
     void WaitIdle() const override;
 
-    WNODISCARD GLFWwindow * Window() const noexcept override {
-        return window_info_.window;
-    }
+    void Window(GLFWwindow * in_window) override;
 
-    static void FrameBufferSizeCallback(GLFWwindow*, int, int);
+    // WNODISCARD GLFWwindow * Window() const noexcept override {
+    //     return window_info_.window;
+    // }
 
-    WNODISCARD const WVkWindowInfo & WindowInfo() const noexcept
-    { return window_info_; }
+    // static void FrameBufferSizeCallback(GLFWwindow*, int, int);
+
+    // WNODISCARD const WWindowInfo & WindowInfo() const noexcept
+    // { return window_info_; }
 
     WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
     { return device_info_; }
@@ -112,6 +118,8 @@ public:
         const WTransformStruct & transform_struct
         ) override;
 
+    void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) override;
+
 private:
 
     void RecreateSwapChain();
@@ -121,7 +129,13 @@ private:
                                    uint32_t in_image_index);
 
     WVkInstanceInfo instance_info_;
-    WVkWindowInfo window_info_;
+    
+    struct WVkRenderWindow {
+        GLFWwindow * window{nullptr};
+        std::uint32_t width{800};  // TODO size struct
+        std::uint32_t height{600};
+    } window_;
+
     WVkSurfaceInfo surface_info_;
     WVkDeviceInfo device_info_;
     WVkRenderDebugInfo debug_info_;
@@ -141,7 +155,7 @@ private:
     WVkFenceInfo flight_fence_;
 
     uint32_t frame_index_;
-    bool frame_buffer_resized_;
+    // bool frame_buffer_resized_;
 
 };
 

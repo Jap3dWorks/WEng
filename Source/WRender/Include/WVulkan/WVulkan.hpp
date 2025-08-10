@@ -13,6 +13,7 @@
 
 struct WTextureStruct;
 struct WMeshStruct;
+struct GLFWwindow;
 
 namespace WVulkan
 {
@@ -27,7 +28,7 @@ namespace WVulkan
     /**
      * Creates a Vulkan Surface.
     */
-    void Create(WVkSurfaceInfo & surface_info, WVkInstanceInfo & instance, WVkWindowInfo & window);
+    void Create(WVkSurfaceInfo & surface_info, WVkInstanceInfo & instance, GLFWwindow * window);
 
     /**
      * Creates a Vulkan Device.
@@ -41,7 +42,8 @@ namespace WVulkan
         WVkSwapChainInfo & out_swap_chain, 
         const WVkDeviceInfo &device_info, 
         const WVkSurfaceInfo &surface_info, 
-        const WVkWindowInfo &window_info, 
+        const std::uint32_t & in_width,
+        const std::uint32_t & in_height,
         const WVkRenderPassInfo &render_pass_info, 
         const WVkRenderDebugInfo &debug_info
         );
@@ -59,11 +61,6 @@ namespace WVulkan
         const WVkDeviceInfo & device_info,
         const WVkSurfaceInfo & surface_info
 	);
-
-    /**
-     * @brief: Creates a GLFW Window.
-    */
-    void Create(WVkWindowInfo &info);
 
     VkShaderModule CreateShaderModule(
         const WVkShaderStageInfo & in_shader_info,
@@ -210,8 +207,6 @@ namespace WVulkan
     void DestroyImageView(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info);
 
     void Destroy(WVkRenderPassInfo & render_pass_info, const WVkDeviceInfo & device_info);
-
-    void Destroy(WVkWindowInfo &window_info);
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
@@ -484,7 +479,11 @@ namespace WVulkan
 
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes);
 
-    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow* window);
+    VkExtent2D ChooseSwapExtent(
+        const VkSurfaceCapabilitiesKHR &capabilities,
+        const std::uint32_t & in_width,
+        const std::uint32_t & in_height
+        );
 
     /**
      * Return a list of required vulkan instance extensions.

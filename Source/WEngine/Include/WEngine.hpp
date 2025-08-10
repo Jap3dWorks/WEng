@@ -8,6 +8,7 @@
 #include "WImporterRegister.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectDb/WAssetDb.hpp"
+#include "WStructs/WEngineStructs.hpp"
 
 #include <memory>
 
@@ -48,7 +49,17 @@ public:
 
     WAssetDb & AssetManager() noexcept;
 
+    bool Initialize();
+
+    void Destroy();
+
 private:
+
+    static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
+
+    bool InitializeWindow();
+
+    void DestroyWindow();
 
     void InitializeLevel(WLevel * in_level);
 
@@ -62,6 +73,8 @@ private:
         WLevelId startup_level{0};
     } startup_info_;
 
+    WWindowInfo window_;
+
     std::unique_ptr<IRender> render_;
 
     WImporterRegister importers_register_;
@@ -70,7 +83,7 @@ private:
 
     WAssetDb asset_manager_;
 
-    bool close{false};
+    bool close_{false};
 
 };
 

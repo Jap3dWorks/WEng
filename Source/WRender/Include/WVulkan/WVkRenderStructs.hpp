@@ -13,8 +13,11 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+// #ifndef GLFW_INCLUDE_VULKAN
+// #define GLFW_INCLUDE_VULKAN
+// #endif
+
+// #include <GLFW/glfw3.h>
 
 struct WVkDeviceInfo{
     WId wid{0};
@@ -32,31 +35,13 @@ struct WVkDeviceInfo{
     VkDevice vk_device {VK_NULL_HANDLE};
 };
 
-struct WVkWindowInfo
-{
-    WId wid{0};
-
-    std::string title {"WEngine"};
-    uint32_t width {800};
-    uint32_t height {600};
-
-    GLFWframebuffersizefun framebuffer_size_callback {nullptr};
-    void * user_pointer {nullptr};
-    GLFWwindow * window {nullptr};
-
-};
-
 struct WVkInstanceInfo
 {
-    WId wid{0};
-
     VkInstance instance {nullptr};
 };
 
 struct WVkSurfaceInfo
 {
-    WId wid{0};
-
     VkSurfaceKHR surface{nullptr};
 };
 

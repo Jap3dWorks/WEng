@@ -16,8 +16,8 @@
 
 #include "WRenderLevelLib.hpp"
 
-#ifndef GLFW_INCLUDE_VULKAN
-#define GLFW_INCLUDE_VULKAN
+#ifndef GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE
 #endif
 
 #include <GLFW/glfw3.h>
@@ -26,7 +26,7 @@ WEngine WEngine::DefaultCreate()
 {
     WEngine result(std::make_unique<WVkRender>());
 
-    result.Render()->Initialize();
+    result.Initialize();
 
     result.ImportersRegister().Register<WImportObj>();
     result.ImportersRegister().Register<WImportTexture>();
@@ -43,9 +43,58 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
 
 WEngine::~WEngine()=default;
 
-WEngine::WEngine(WEngine && other) noexcept=default;
+WEngine::WEngine(WEngine && other) noexcept :
+    level_info_(std::move(other.level_info_)),
+    startup_info_(std::move(other.startup_info_)),
+    window_(std::move(other.window_)),
+    render_(std::move(other.render_)),
+    importers_register_(std::move(other.importers_register_)),
+    level_register_(std::move(other.level_register_)),
+    asset_manager_(std::move(other.asset_manager_)),
+    close_(std::move(other.close_))
+{
+    if (other.window_.window) {
+        glfwSetWindowUserPointer(window_.window, this);
+    }
 
-WEngine & WEngine::operator=(WEngine && other) noexcept=default;
+    other.window_ = {};
+}
+
+WEngine & WEngine::operator=(WEngine && other) noexcept {
+    if (this != &other) {
+        level_info_ = std::move(other.level_info_);
+        startup_info_ = std::move(other.startup_info_);
+        window_ = std::move(other.window_);
+        render_ = std::move(other.render_);
+        importers_register_ = std::move(other.importers_register_);
+        level_register_ = std::move(other.level_register_);
+        asset_manager_ = std::move(other.asset_manager_);
+        close_ = std::move(other.close_);
+
+        if (other.window_.window) {
+            glfwSetWindowUserPointer(window_.window, this);
+        }
+
+        other.window_ = {};
+
+    }
+
+    return *this;
+}
+
+bool WEngine::Initialize() {
+    
+    InitializeWindow();
+    render_->Window(window_.window);
+    render_->Initialize();
+
+    return true;
+}
+
+void WEngine::Destroy() {
+    
+    DestroyWindow();
+}
 
 void WEngine::run()
 {
@@ -54,8 +103,7 @@ void WEngine::run()
     level_info_.current_level = startup_info_.startup_level;
     level_info_.loaded = false;
 
-    // TODO Window out of WRender
-    while(!glfwWindowShouldClose(Render()->Window())) {
+    while(!glfwWindowShouldClose(window_.window)) {
         glfwPollEvents();
         
         WEngineCycleData engine_cycle_data;
@@ -155,5 +203,44 @@ TRef<IRender> WEngine::Render() noexcept
 
 WAssetDb & WEngine::AssetManager() noexcept {
     return asset_manager_;
+}
+
+void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int in_height)
+{
+    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
+
+    app->window_.width = in_width;
+    app->window_.height = in_height;
+
+    app->render_->Rescale(
+        static_cast<std::uint32_t>(in_width),
+        static_cast<std::uint32_t>(in_height)
+        );
+}
+
+bool WEngine::InitializeWindow() {
+    glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+    window_.window = glfwCreateWindow(
+        800,
+        600,
+        "WEngine Title",
+        nullptr,
+        nullptr
+        );
+
+    glfwSetWindowUserPointer(window_.window, this); // Be careful with move
+
+    glfwSetFramebufferSizeCallback(
+        window_.window,
+        &FrameBufferSizeCallback
+        );
+}
+
+void WEngine::DestroyWindow() {
+    glfwDestroyWindow(window_.window);
+    glfwTerminate();
 }
 

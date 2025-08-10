@@ -228,6 +228,8 @@ int main(int argc, char** argv)
 
         WFLOG("Clossing app ...");
 
+        engine.Destroy();
+
     }
     catch(const std::exception& e)
     {
