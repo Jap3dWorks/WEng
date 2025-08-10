@@ -83,7 +83,6 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
 }
 
 bool WEngine::Initialize() {
-    
     InitializeWindow();
     render_->Window(window_.window);
     render_->Initialize();
@@ -92,7 +91,7 @@ bool WEngine::Initialize() {
 }
 
 void WEngine::Destroy() {
-    
+    render_->Destroy();
     DestroyWindow();
 }
 
@@ -102,6 +101,8 @@ void WEngine::run()
     
     level_info_.current_level = startup_info_.startup_level;
     level_info_.loaded = false;
+
+    // TODO Create WSystem to process the components
 
     while(!glfwWindowShouldClose(window_.window)) {
         glfwPollEvents();
@@ -142,6 +143,7 @@ void WEngine::run()
                         .EntityComponentId(
                             in_component->EntityId(),
                             in_component->Class()
+
                             );
                     
                     // TODO, Render()->UpdateUbo(ecid, in_component);

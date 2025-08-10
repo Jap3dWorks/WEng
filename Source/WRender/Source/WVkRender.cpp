@@ -23,19 +23,13 @@
 #include <array>
 
 #ifdef NDEBUG
-    #define _ENABLE_VALIDATON_LAYERS false
+    #define _ENABLE_VALIDATON_LAYERS true
 #else
     #define _ENABLE_VALIDATON_LAYERS true
 #endif
 
-// WRender
+// WVkRender
 // -------
-
-// void WVkRender::FrameBufferSizeCallback(GLFWwindow* in_window, int, int)
-// {
-//     auto app = reinterpret_cast<WVkRender*>(glfwGetWindowUserPointer(in_window));
-//     app->frame_buffer_resized_ = true;
-// }
 
 WVkRender::WVkRender() :
     instance_info_(),
@@ -432,17 +426,6 @@ void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in
 void WVkRender::RecreateSwapChain() {
     WFLOG("RECREATE SWAP CHAIN!");
     
-    // int width=0, height=0;
-    // glfwGetFramebufferSize(window_info_.window, &width, &height);
-
-    // while(width ==0 || height == 0) {
-    //     glfwGetFramebufferSize(window_info_.window, &width, &height);
-    //     glfwWaitEvents();
-    // }
-
-    // window_info_.width = width;
-    // window_info_.height = height;
-
     WaitIdle();
 
     WVulkan::Destroy(
