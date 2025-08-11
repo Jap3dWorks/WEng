@@ -1170,18 +1170,21 @@ void WVulkan::Destroy(WVkInstanceInfo &instance_info)
 {
     WFLOG("Destroy Vulkan Instance.");
     vkDestroyInstance(instance_info.instance, nullptr);
+    instance_info = {};
 }
 
 void WVulkan::Destroy(WVkSurfaceInfo &surface_info, const WVkInstanceInfo &instance_info)
 {
     WFLOG("Destroy Vulkan Surface.");
     vkDestroySurfaceKHR(instance_info.instance, surface_info.surface, nullptr);
+    surface_info={};
 }
 
 void WVulkan::Destroy(WVkDeviceInfo &device_info)
 {
     WFLOG("Destroy Vulkan Device.");
     vkDestroyDevice(device_info.vk_device, nullptr);
+    device_info = {};
 }
 
 void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
@@ -1205,6 +1208,8 @@ void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &de
     }
 
     vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
+    
+    swap_chain_info = {};
 }
 
 void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
@@ -1215,9 +1220,10 @@ void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDevic
     }
 }
 
-void WVulkan::Destroy(WVkRenderPassInfo &render_pass_info, const WVkDeviceInfo &device_info)
+void WVulkan::Destroy(WVkRenderPassInfo & render_pass_info, const WVkDeviceInfo &device_info)
 {
     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
+    render_pass_info = {};
 }
 
 void WVulkan::Destroy(

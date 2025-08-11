@@ -82,13 +82,7 @@ void WVkRender::Window(GLFWwindow * in_window) {
 
 void WVkRender::Initialize()
 {
-    // window_info_.user_pointer = this;
-    // window_info_.framebuffer_size_callback = FrameBufferSizeCallback;
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
-
-    // WVulkan::Create(
-    //     window_info_
-    //     );
 
     // Create Vulkan Instance
     WVulkan::Create(
@@ -411,9 +405,6 @@ void WVkRender::Destroy() {
 
     // Destroy Vulkan Instance
     WVulkan::Destroy(instance_info_);
-
-    // Destroy Window
-    // WVulkan::Destroy(window_info_);    
 }
 
 void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {

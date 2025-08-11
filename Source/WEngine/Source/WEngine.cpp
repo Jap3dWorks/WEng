@@ -19,7 +19,6 @@
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
 #endif
-
 #include <GLFW/glfw3.h>
 
 WEngine WEngine::DefaultCreate()
@@ -53,7 +52,7 @@ WEngine::WEngine(WEngine && other) noexcept :
     asset_manager_(std::move(other.asset_manager_)),
     close_(std::move(other.close_))
 {
-    if (other.window_.window) {
+    if (window_.window) {
         glfwSetWindowUserPointer(window_.window, this);
     }
 
@@ -71,7 +70,7 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
         asset_manager_ = std::move(other.asset_manager_);
         close_ = std::move(other.close_);
 
-        if (other.window_.window) {
+        if (window_.window) {
             glfwSetWindowUserPointer(window_.window, this);
         }
 
