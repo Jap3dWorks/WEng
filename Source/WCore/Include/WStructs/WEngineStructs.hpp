@@ -10,7 +10,7 @@
 
 #include <GLFW/glfw3.h>
 
-struct WWindowInfo
+struct WWindowStruct
 {
 
     std::string title {"WEngine"};
@@ -25,42 +25,16 @@ struct WWindowInfo
 };
 
 enum class EInputs {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    o,
-    P,
-    Q,
-    R,
-    S,
-    T,
-    U,
-    V,
-    W,
-    X,
-    Y,
-    Z,
-    k0,
-    k1,
-    k2,
-    k3,
-    k4,
-    k5,
-    k6,
-    k7,
-    k8,
-    k9,
+    A, B, C, D,
+    E, F, G, H,
+    I, J, K, L,
+    M, N, O, P,
+    Q, R, S, T,
+    U, V, W, X,
+    Y, Z,
+    k0, k1, k2, k3,
+    k4, k5, k6, k7,
+    k8, k9,
     MouseMove,
     MouseK0,
     MouseK1,
@@ -71,3 +45,12 @@ enum class EInputs {
     Space,
     Tab
 };
+
+struct WInputMapStruct {
+    std::unordered_map<EInputs, WAssetId> Map{};  
+};
+
+struct WActionStruct {
+    char name[32];
+};
+

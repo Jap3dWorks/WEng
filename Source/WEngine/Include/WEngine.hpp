@@ -77,7 +77,7 @@ private:
         WLevelId startup_level{0};
     } startup_info_;
 
-    WWindowInfo window_;
+    WWindowStruct window_;
 
     std::unique_ptr<IRender> render_;
 

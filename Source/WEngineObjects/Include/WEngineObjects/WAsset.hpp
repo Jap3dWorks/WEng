@@ -12,6 +12,7 @@
 WCLASS()
 class WCORE_API WAsset : public WObject, public ISerializable
 {
+    
     WOBJECT_BODY(WAsset)
 
 public:
