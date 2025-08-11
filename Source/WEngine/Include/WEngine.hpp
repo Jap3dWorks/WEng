@@ -55,13 +55,17 @@ public:
 
 private:
 
-    static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
-
     bool InitializeWindow();
 
     void DestroyWindow();
 
     void InitializeLevel(WLevel * in_level);
+
+    static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
+
+    static void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
+
+    
 
     struct LevelInfo {
         WLevelId current_level{0};

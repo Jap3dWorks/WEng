@@ -83,6 +83,7 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
 
 bool WEngine::Initialize() {
     InitializeWindow();
+
     render_->Window(window_.window);
     render_->Initialize();
 
@@ -206,19 +207,6 @@ WAssetDb & WEngine::AssetManager() noexcept {
     return asset_manager_;
 }
 
-void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int in_height)
-{
-    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
-
-    app->window_.width = in_width;
-    app->window_.height = in_height;
-
-    app->render_->Rescale(
-        static_cast<std::uint32_t>(in_width),
-        static_cast<std::uint32_t>(in_height)
-        );
-}
-
 bool WEngine::InitializeWindow() {
     glfwInit();
 
@@ -238,7 +226,19 @@ bool WEngine::InitializeWindow() {
         window_.window,
         &FrameBufferSizeCallback
         );
-    
+
+    glfwSetKeyCallback(
+        window_.window,
+        &KeyCallback
+        );
+    // glfwSetInputCallba
+
+    if (glfwRawMouseMotionSupported())
+        glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    // glfwSetCallback
+
+    // glfwSetCursorPosCallback(window_.window, );
+
     return true;
 }
 
@@ -247,3 +247,20 @@ void WEngine::DestroyWindow() {
     glfwTerminate();
 }
 
+void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int in_height)
+{
+    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
+
+    app->window_.width = in_width;
+    app->window_.height = in_height;
+
+    app->render_->Rescale(
+        static_cast<std::uint32_t>(in_width),
+        static_cast<std::uint32_t>(in_height)
+        );
+}
+
+void WEngine::KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
+{
+    
+}
