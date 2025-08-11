@@ -32,11 +32,11 @@ public:
 
     void Destroy() override;
 
+    void WaitIdle() const override;
+
     void CreateRenderPipeline(
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
-
-    void DeleteRenderPipeline(const WAssetId & in_id) override;
 
     void CreatePipelineBinding(
         const WEntityComponentId & component_id,
@@ -45,41 +45,9 @@ public:
         const WRenderPipelineParametersStruct & in_parameters
         ) override;
 
+    void DeleteRenderPipeline(const WAssetId & in_id) override;
+
     void DeletePipelineBinding(const WEntityComponentId & in_id) override;
-
-    WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
-    {
-        return pipelines_manager_;
-    }
-
-    void WaitIdle() const override;
-
-    void Window(GLFWwindow * in_window) override;
-
-    // WNODISCARD GLFWwindow * Window() const noexcept override {
-    //     return window_info_.window;
-    // }
-
-    // static void FrameBufferSizeCallback(GLFWwindow*, int, int);
-
-    // WNODISCARD const WWindowInfo & WindowInfo() const noexcept
-    // { return window_info_; }
-
-    WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
-    { return device_info_; }
-
-    WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
-    { return swap_chain_info_; }
-
-    WNODISCARD const size_t FramesInFlight() const noexcept
-    { return WENG_MAX_FRAMES_IN_FLIGHT; }
-
-    WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
-    { return render_command_pool_; }
-
-    void ClearPipelines() override;
-
-    void UnloadAllResources() override;
 
     void RegisterTexture(WTextureAsset & in_texture_asset) override {
         render_resources_.RegisterTexture(in_texture_asset);
@@ -118,7 +86,31 @@ public:
         const WTransformStruct & transform_struct
         ) override;
 
-    void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) override;
+    void UnloadAllResources() override;
+
+    void Window(GLFWwindow * in_window) override;
+
+    void Rescale(const std::uint32_t & in_width,
+                 const std::uint32_t & in_height) override;
+
+    WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
+    {
+        return pipelines_manager_;
+    }
+
+    WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
+    { return device_info_; }
+
+    WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
+    { return swap_chain_info_; }
+
+    WNODISCARD const size_t FramesInFlight() const noexcept
+    { return WENG_MAX_FRAMES_IN_FLIGHT; }
+
+    WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
+    { return render_command_pool_; }
+
+    void ClearPipelines() override;
 
 private:
 

@@ -233,12 +233,14 @@ bool WEngine::InitializeWindow() {
         nullptr
         );
 
-    glfwSetWindowUserPointer(window_.window, this); // Be careful with move
+    glfwSetWindowUserPointer(window_.window, this);
 
     glfwSetFramebufferSizeCallback(
         window_.window,
         &FrameBufferSizeCallback
         );
+    
+    return true;
 }
 
 void WEngine::DestroyWindow() {

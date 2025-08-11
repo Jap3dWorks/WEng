@@ -103,8 +103,8 @@ public:
     /**
      * Returns current render window.
      */
-    virtual void Window(GLFWwindow * in_window);
+    virtual void Window(GLFWwindow * in_window)=0;
 
-    virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height);
+    virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
 
 };

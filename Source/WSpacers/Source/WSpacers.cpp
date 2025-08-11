@@ -16,11 +16,11 @@
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
 
-#ifndef GLFW_INCLUDE_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif
+// #ifndef GLFW_INCLUDE_VULKAN
+// #define GLFW_INCLUDE_VULKAN
+// #endif
 
-#include <GLFW/glfw3.h>
+// #include <GLFW/glfw3.h>
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>

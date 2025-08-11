@@ -35,11 +35,11 @@ void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugIn
 
     VkApplicationInfo app_info{};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pApplicationName = "WEngine"; //
+    app_info.pApplicationName = "WEngine";
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.pEngineName = "WEngine";
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    app_info.apiVersion = VK_API_VERSION_1_2;
+    app_info.apiVersion = VK_API_VERSION_1_3;
 
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -47,19 +47,23 @@ void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugIn
     create_info.pNext = VK_NULL_HANDLE;
 
     auto extensions = GetRequiredExtensions(debug_info.enable_validation_layers);
-    create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    
+    create_info.enabledExtensionCount = static_cast<std::uint32_t>(extensions.size());
     create_info.ppEnabledExtensionNames = extensions.data();
 
     VkDebugUtilsMessengerCreateInfoEXT debug_create_info;
+    debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    
     if (debug_info.enable_validation_layers)
     {
         create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
         create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
 
-        debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+
         debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+
         debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
                                         VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                                         VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
@@ -69,11 +73,13 @@ void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugIn
         }
         else
         {
-            debug_create_info.pfnUserCallback = DebugCallback;
+            debug_create_info.pfnUserCallback = &DebugCallback;
         }
 
         debug_create_info.flags = 0;
-        create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debug_create_info;
+        debug_create_info.pNext = VK_NULL_HANDLE;
+
+        create_info.pNext = &debug_create_info;
     }
     else
     {

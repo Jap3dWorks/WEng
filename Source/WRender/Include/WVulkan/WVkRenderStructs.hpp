@@ -13,12 +13,6 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
-// #ifndef GLFW_INCLUDE_VULKAN
-// #define GLFW_INCLUDE_VULKAN
-// #endif
-
-// #include <GLFW/glfw3.h>
-
 struct WVkDeviceInfo{
     WId wid{0};
 
