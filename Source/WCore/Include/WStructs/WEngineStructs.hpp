@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 
 #include <string>
+#include <glm/glm.hpp>
 
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
@@ -54,8 +55,15 @@ enum class EInputs {
     Tab
 };
 
+struct WInputValuesStruct {
+    EInputs input{};
+    float presure{};
+    glm::vec2 direction{};
+};
+
 struct WInputMapStruct {
-    std::unordered_map<EInputs, WAssetId> Map{};  
+    // EInput ActionsAssets
+    std::unordered_map<EInputs, std::vector<WAssetId>> map{};  
 };
 
 struct WActionStruct {

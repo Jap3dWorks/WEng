@@ -280,28 +280,28 @@ private:
 };
 
 /** @breif 2Bytes lambda size */
-template<typename T, typename ... Args>
-using TFnLmbd2 = TFnLmbd<2, T(Args...)>;
+template<typename R, typename ... Args>
+using TFnLmbd2 = TFnLmbd<2, R(Args...)>;
 
 /** @brief 4Bytes lambda size */
-template<typename T, typename ... Args>
-using TFnLmbd4 = TFnLmbd<4, T(Args...)>;
+template<typename R, typename ... Args>
+using TFnLmbd4 = TFnLmbd<4, R(Args...)>;
 
 /** @brief 8Bytes lambda size, Also valid for function pointers. */
-template<typename T, typename ... Args>
-using TFnLmbd8 = TFnLmbd<8, T(Args...)>;
+template<typename R, typename ... Args>
+using TFnLmbd8 = TFnLmbd<8, R(Args...)>;
 
 /** @brief 16Bytes lambda size */
-template<typename T, typename ... Args>
-using TFnLmbd16 = TFnLmbd<16, T(Args...)>;
+template<typename R, typename ... Args>
+using TFnLmbd16 = TFnLmbd<16, R(Args...)>;
 
 /** @brief 32Bytes lambda size */
-template<typename T, typename ...Args>
-using TFnLmbd32 = TFnLmbd<32, T( Args...)>;
+template<typename R, typename ...Args>
+using TFnLmbd32 = TFnLmbd<32, R( Args...)>;
 
 /** @brief 64bytes lambda size */
-template<typename T, typename ... Args>
-using TFnLmbd64 = TFnLmbd<64, T(Args...)>;
+template<typename R, typename ... Args>
+using TFnLmbd64 = TFnLmbd<64, R(Args...)>;
 
 
 template<typename T>

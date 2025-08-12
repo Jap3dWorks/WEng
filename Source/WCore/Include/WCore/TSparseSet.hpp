@@ -25,6 +25,10 @@ public:
                                          IndexPosType::const_iterator,
                                          const size_t &>;
 
+    using Iterator = std::vector<T, Allocator>::iterator;
+
+    using ConstIterator = std::vector<T,Allocator>::const_iterator;
+
 public:
 
     constexpr TSparseSet() noexcept = default;
@@ -120,19 +124,19 @@ public:
         return index_pos_.contains(in_index);
     }
 
-    constexpr std::vector<T, Allocator>::iterator begin() noexcept {
+    constexpr Iterator begin() noexcept {
         return compact_.begin();
     }
 
-    constexpr std::vector<T, Allocator>::iterator end() noexcept {
+    constexpr Iterator end() noexcept {
         return compact_.end();
     }
 
-    constexpr std::vector<T, Allocator>::const_iterator cbegin() const {
+    constexpr ConstIterator cbegin() const noexcept {
         return compact_.cbegin();
     }
 
-    constexpr std::vector<T, Allocator>::const_iterator cend() const {
+    constexpr ConstIterator cend() const noexcept {
         return compact_.cend();
     }
 

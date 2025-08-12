@@ -18,9 +18,10 @@ public:
     // virtual 
     /** Create and assign an WIdClass */
     virtual WIdClass Create() = 0;
-    /** Insert at WIdClass */
-    virtual void Insert(const WIdClass &)=0;
-    virtual void Insert(const WIdClass &, B* &)=0;
+    /** Create at WIdClass */
+    virtual void CreateAt(const WIdClass &)=0;
+    /** Insert At WIdClass */
+    virtual void InsertAt(const WIdClass &, B* &)=0;
     virtual void Remove(const WIdClass &) =0;
     virtual void Clear() = 0;
     virtual void Get(const WIdClass &, B* &) = 0;
@@ -160,19 +161,33 @@ public:
         return oid;
     }
 
-    void Insert(const WIdClass & in_id) override {
+    void CreateAt(const WIdClass & in_id) override {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id.GetId(), create_fn_(in_id));
     }
 
-    void Insert(const WIdClass & in_id, B* & in_value) override {
-        id_pool_.Reserve(in_id);
-        objects_.Insert(in_id.GetId(), *static_cast<T*>(in_value));
-    }
-
-    void Insert(const WIdClass & in_id, const CreateFn & in_predicate) {
+    void CreateAt(const WIdClass & in_id, const CreateFn & in_predicate) {
         id_pool_.Reserve(in_id);
         objects_.Insert(in_id.GetId(), in_predicate(in_id));
+    }
+
+    WIdClass Insert(const T & in_value) {
+        WIdClass oid = id_pool_.Generate();
+        objects_.Insert(oid.GetId(), in_value);
+        
+        return oid;
+    }
+
+    WIdClass Insert(T && in_value) {
+        WIdClass oid = id_pool_.Generate();
+        objects_.Insert(oid.GetId(), std::move(in_value));
+
+        return oid;
+    }
+
+    void InsertAt(const WIdClass & in_id, B* & in_value) override {
+        id_pool_.Reserve(in_id);
+        objects_.Insert(in_id.GetId(), *static_cast<T*>(in_value));
     }
 
     void Remove(const WIdClass & in_id, const DestroyFn & in_destroy_fn) {
@@ -260,6 +275,22 @@ public:
         }
 
         return result;
+    }
+
+    constexpr ObjectsType::Iterator begin() noexcept {
+        return objects_.begin();
+    }
+
+    constexpr ObjectsType::Iterator end() noexcept {
+        return objects_.end();
+    }
+
+    constexpr ObjectsType::ConstIterator cbegin() const noexcept {
+        return objects_.cbegin();
+    }
+
+    constexpr ObjectsType::ConstIterator cend() const noexcept {
+        return objects_.cend();
     }
 
     void ForEach(TFunction<void(B*)> in_function) override {

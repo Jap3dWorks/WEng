@@ -122,6 +122,9 @@ using WEntityComponentId = _WId<std::size_t>;  // combine entity with component 
 using WAssetId = _WId<std::size_t>;
 using WLevelId = _WId<std::uint32_t>;
 
+using WEventId = _WId<std::uint32_t>;
+
+
 namespace std
 {
     template <typename T>

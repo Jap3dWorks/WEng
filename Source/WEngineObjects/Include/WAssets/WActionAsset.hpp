@@ -12,8 +12,12 @@ class WENGINEOBJECTS_API WActionAsset : public WAsset {
 
     WOBJECT_BODY(WActionAsset)
 
+    WActionStruct & ActionStruct() {
+        return action_struct_;
+    }
+
 public:
 
-    WActionStruct action_struct{};
+    WActionStruct action_struct_{};
 
 };
