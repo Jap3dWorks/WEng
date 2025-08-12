@@ -5,12 +5,12 @@
 #include "WStructs/WEngineStructs.hpp"
 #include <unordered_map>
 
-#include "WKeyMappingAsset.WEngine.hpp"
+#include "WInputMappingAsset.WEngine.hpp"
 
 WCLASS()
-class WENGINEOBJECTS_API WKeyMappingAsset : public WAsset {
+class WENGINEOBJECTS_API WInputMappingAsset : public WAsset {
 
-    WOBJECT_BODY(WKeyMappingAsset)
+    WOBJECT_BODY(WInputMappingAsset)
 
 public:
 

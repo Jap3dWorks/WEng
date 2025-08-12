@@ -8,7 +8,7 @@
 #undef _PWCLASS_
 #endif
 
-#define _WCLASS_ WKeyMappingAsset
+#define _WCLASS_ WInputMappingAsset
 #define _PWCLASS_ WAsset
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"

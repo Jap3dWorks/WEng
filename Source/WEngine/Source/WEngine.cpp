@@ -107,7 +107,7 @@ void WEngine::run()
     while(!glfwWindowShouldClose(window_.window)) {
         glfwPollEvents();
         
-        WEngineCycleData engine_cycle_data;
+        WEngineCycleStruct engine_cycle;
 
         if (!level_info_.loaded) {
             Render()->WaitIdle();
@@ -118,7 +118,7 @@ void WEngine::run()
         {
             // Update Render Camera
             level_info_.level.ForEachComponent<WCameraComponent> (
-                [&engine_cycle_data, this] (WCameraComponent * cam) {
+                [&engine_cycle, this] (WCameraComponent * cam) {
                     
                     WTransformComponent * ts =
                         level_info_.level.GetComponent<WTransformComponent>(
@@ -137,7 +137,7 @@ void WEngine::run()
 
             // Update transform Components
             level_info_.level.ForEachComponent<WTransformComponent>(
-                [&engine_cycle_data, this](WTransformComponent * in_component) {
+                [&engine_cycle, this](WTransformComponent * in_component) {
                     WEntityComponentId ecid = level_info_.level
                         .EntityComponentDb()
                         .EntityComponentId(

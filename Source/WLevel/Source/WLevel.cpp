@@ -8,18 +8,18 @@ WLevel::WLevel() :
     name_("InvalidLevel"),
     wid_(0),
     entity_component_db_(),
-    init_fn_([](WLevel*, const WEngineCycleData&){}),
-    update_fn_([](WLevel*, const WEngineCycleData&){}),
-    close_fn_([](WLevel*, const WEngineCycleData&){})
+    init_fn_([](WLevel*, const WEngineCycleStruct&){}),
+    update_fn_([](WLevel*, const WEngineCycleStruct&){}),
+    close_fn_([](WLevel*, const WEngineCycleStruct&){})
 {}
 
 WLevel::WLevel(const char * in_name,
                const WLevelId & in_id) :
     wid_(in_id),
     entity_component_db_(),
-    init_fn_([](WLevel*, const WEngineCycleData &){}),
-    update_fn_([](WLevel*, const WEngineCycleData &){}),
-    close_fn_([](WLevel*, const WEngineCycleData &){})
+    init_fn_([](WLevel*, const WEngineCycleStruct &){}),
+    update_fn_([](WLevel*, const WEngineCycleStruct &){}),
+    close_fn_([](WLevel*, const WEngineCycleStruct &){})
 {
     std::strcpy(name_, in_name);
 }
@@ -85,15 +85,15 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-void WLevel::Init(const WEngineCycleData & in_cycle_data) {
+void WLevel::Init(const WEngineCycleStruct & in_cycle_data) {
     init_fn_(this, in_cycle_data);
 }
 
-void WLevel::Update(const WEngineCycleData & in_cycle_data) {
+void WLevel::Update(const WEngineCycleStruct & in_cycle_data) {
     update_fn_(this, in_cycle_data);
 }
 
-void WLevel::Close(const WEngineCycleData & in_cycle_data) {
+void WLevel::Close(const WEngineCycleStruct & in_cycle_data) {
     close_fn_(this, in_cycle_data);
 }
 

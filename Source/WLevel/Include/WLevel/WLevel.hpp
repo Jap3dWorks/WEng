@@ -11,9 +11,9 @@
 class WLEVEL_API WLevel {
 public:
 
-    using InitFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
-    using UpdateFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
-    using CloseFn = TFunction<void(WLevel*, const WEngineCycleData&)>;
+    using InitFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
+    using UpdateFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
+    using CloseFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
 
     WLevel();
 
@@ -37,11 +37,11 @@ public:
 
 public:    
 
-    void Init(const WEngineCycleData & in_cycle_data) ;
+    void Init(const WEngineCycleStruct & in_cycle_data) ;
 
-    void Update(const WEngineCycleData & in_cycle_data) ;
+    void Update(const WEngineCycleStruct & in_cycle_data) ;
 
-    void Close(const WEngineCycleData & in_cycle_data) ;
+    void Close(const WEngineCycleStruct & in_cycle_data) ;
 
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity() {

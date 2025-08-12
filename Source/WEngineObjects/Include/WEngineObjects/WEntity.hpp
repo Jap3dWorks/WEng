@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
-#include "WEngineObjects/WEngineCycleData.hpp"
+#include "WStructs/WEngineStructs.hpp"
 #include "WEngineObjects/WObject.hpp"
 
 #include <cstring>
@@ -38,11 +38,11 @@ public:
         std::strcpy(name_, in_name);
     }
 
-    virtual void OnUpdate(const WEngineCycleData & in_cycle_data) {}
+    virtual void OnUpdate(const WEngineCycleStruct & in_cycle_data) {}
 
-    virtual void OnInit(const WEngineCycleData & in_cycle_data) {}
+    virtual void OnInit(const WEngineCycleStruct & in_cycle_data) {}
 
-    virtual void OnClose(const WEngineCycleData & in_cycle_data) {}
+    virtual void OnClose(const WEngineCycleStruct & in_cycle_data) {}
 
 private:
 

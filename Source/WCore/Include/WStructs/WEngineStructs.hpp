@@ -10,6 +10,14 @@
 
 #include <GLFW/glfw3.h>
 
+class WLevel;
+
+struct WEngineCycleStruct {
+    float DeltaTime{999};
+    float TotalTime{0};
+    WLevel * level{nullptr};  
+};
+
 struct WWindowStruct
 {
 
@@ -52,5 +60,10 @@ struct WInputMapStruct {
 
 struct WActionStruct {
     char name[32];
+};
+
+struct WActionDataStruct {
+    WAssetId input_map_asset;
+    WAssetId action_asset;
 };
 
