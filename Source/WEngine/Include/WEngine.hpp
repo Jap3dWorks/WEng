@@ -33,17 +33,35 @@ public:
 
     void run();
 
-    WLevelRegister & LevelRegister() noexcept { return level_register_; }
-
-    const WLevelRegister & LevelRegister() const noexcept { return level_register_; }
-
     void StartupLevel(const WLevelId & in_id) noexcept;
 
     void LoadLevel(const WLevelId & in_level);
 
     void UnloadLevel();
 
-    WImporterRegister & ImportersRegister() noexcept;
+    WLevelRegister & LevelRegister() noexcept {
+        return level_register_;
+    }
+
+    const WLevelRegister & LevelRegister() const noexcept {
+        return level_register_;
+    }
+
+    WImporterRegister & ImportersRegister() noexcept {
+        return importers_register_;
+    }
+
+    const WImporterRegister & ImportersRegister() const noexcept {
+        return importers_register_;
+    }
+
+    WInputMappingRegister & InputMappingRegister() noexcept {
+        return input_mapping_register_;
+    }
+
+    const WInputMappingRegister & InputMappingRegister() const noexcept {
+        return input_mapping_register_;
+    }
 
     TRef<IRender> Render() noexcept;
 

@@ -1,5 +1,6 @@
 #include "WSpacers.hpp"
 
+#include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WEngine.hpp"
 #include "WLog.hpp"
@@ -9,18 +10,14 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
+#include "WStructs/WComponentStructs.hpp"
+#include "WStructs/WEngineStructs.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
-
-// #ifndef GLFW_INCLUDE_VULKAN
-// #define GLFW_INCLUDE_VULKAN
-// #endif
-
-// #include <GLFW/glfw3.h>
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>
@@ -153,6 +150,38 @@ bool LoadAssets(WEngine & engine,
     return true;
 }
 
+bool InputAssets(WEngine & in_engine) {
+    WAssetId cameramapping = in_engine.AssetManager().Create<WInputMappingAsset>(
+        "/Content/Input/CameraMapping.CameraMapping"
+        );
+
+    WAssetId frontaction = in_engine.AssetManager().Create<WActionAsset>(
+        "/Content/Input/FrontAction.FrontAction"
+        );
+
+    WAssetId backaction = in_engine.AssetManager().Create<WActionAsset>(
+        "/Content/Input/BackAction.BackAction"
+        );
+
+    WAssetId leftaction = in_engine.AssetManager().Create<WActionAsset>(
+        "/Content/Input/LeftAction.LeftAction"
+        );
+
+    WAssetId rightaction = in_engine.AssetManager().Create<WActionAsset>(
+        "/Content/Input/RightAction.RightAction"
+        );
+
+    WInputMapStruct & input_map = in_engine.AssetManager()
+        .Get<WInputMappingAsset>(cameramapping)->InputMap();
+
+    input_map.map[{EInputKey::Key_W, EInputMode::Repeat}] = {frontaction};
+    input_map.map[{EInputKey::Key_S, EInputMode::Repeat}] = {backaction};
+    input_map.map[{EInputKey::Key_A, EInputMode::Repeat}] = {leftaction};
+    input_map.map[{EInputKey::Key_D, EInputMode::Repeat}] = {rightaction};
+
+    return true;
+}
+
 bool SetupLevel(WEngine & in_engine,
                 const WAssetId & in_smid,
                 const WAssetId & in_pipelineid,
@@ -187,6 +216,88 @@ bool SetupLevel(WEngine & in_engine,
     smcomponent->RenderPipelineParametersAsset(in_paramsid);
 
     in_engine.StartupLevel(levelid);
+
+    // Initialize Lvl Function
+
+    level.SetInitFn([cid](const WEngineCycleStruct & _cycle){
+        
+        WAssetId mapping, frontaction, backaction, leftaction, rightaction;
+        
+        _cycle.engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
+            mapping = a->WID();
+        });
+
+        // TODO Get assets by Name
+        _cycle.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
+                                                             &backaction,
+                                                             &leftaction,
+                                                             &rightaction] (WActionAsset * a) {
+            std::string name(a->Name());
+            
+            if(name.contains("front")) {
+                frontaction = a->WID();
+            }
+            else if(name.contains("back")) {
+                backaction = a->WID();
+            }
+            else if (name.contains("left")) {
+                leftaction = a->WID();
+            }
+            else if(name.contains("right")) {
+                rightaction = a->WID();
+            }
+        });
+
+        _cycle.engine->InputMappingRegister().PutInputMapping(mapping);
+
+        _cycle.engine->InputMappingRegister().BindAction(
+            frontaction,
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+                
+                WTransformStruct & transform =
+                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+                // TODO: Get Direction.
+                transform.position[0] = transform.position[0] + 0.1;
+            }
+            );
+
+        _cycle.engine->InputMappingRegister().BindAction(
+            backaction,
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+                
+                WTransformStruct & transform =
+                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+                // TODO: Get Direction.
+                transform.position[0] = transform.position[0] - 0.1;
+            }
+            );
+
+        _cycle.engine->InputMappingRegister().BindAction(
+            leftaction,
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+                
+                WTransformStruct & transform =
+                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+                // TODO: Get Direction.
+                transform.position[0] = transform.position[1] + 0.1;
+            }
+            );
+
+        _cycle.engine->InputMappingRegister().BindAction(
+            frontaction,
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+                
+                WTransformStruct & transform =
+                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+                // TODO: Get Direction.
+                transform.position[0] = transform.position[1] - 0.1;
+            }
+            );
+    });
 
     return true;
 

@@ -13,7 +13,7 @@
 class WENGINE_API WInputMappingRegister {
 private:
 
-    using EventType = TEvent<const WInputValuesStruct &, const WActionStruct &>;
+using EventType = TEvent<const WInputValuesStruct &, const WActionStruct &, const WEngineCycleStruct &>;
 
     using MappingAssetsSTackType = TStack<WAssetId>;
 
@@ -33,7 +33,7 @@ public:
 
     WInputMappingRegister & operator=(WInputMappingRegister &&)=default;
 
-    void Emit(const WInputValuesStruct & input, const WAssetDb & asset_db) {
+    void Emit(const WInputValuesStruct & input, const WAssetDb & asset_db, const WEngineCycleStruct & cycle) {
         for (auto & mid : mapping_assets_stack_) {
             
             const WInputMapStruct & inputmap =
@@ -43,11 +43,12 @@ public:
                 for(const auto &aid : inputmap.map.at(input.input)) {
                     action_events_[aid].Emit(
                         input,
-                        asset_db.Get<WActionAsset>(aid)->ActionStruct()
+                        asset_db.Get<WActionAsset>(aid)->ActionStruct(),
+                        cycle
                         );
                 }
 
-                // Resolve with the first detected input asset.
+                // Resolved with the first detected input asset.
                 return;
                 
             }

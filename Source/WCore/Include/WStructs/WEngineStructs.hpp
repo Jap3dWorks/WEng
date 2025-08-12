@@ -12,11 +12,13 @@
 #include <GLFW/glfw3.h>
 
 class WLevel;
+class WEngine;
 
 struct WEngineCycleStruct {
     float DeltaTime{999};
     float TotalTime{0};
-    WLevel * level{nullptr};  
+    WLevel * level{nullptr};
+    WEngine * engine{nullptr};
 };
 
 struct WWindowStruct

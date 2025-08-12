@@ -5,6 +5,7 @@
 
 #include "WImporters.hpp"
 #include "WImporterRegister.hpp"
+#include "WStructs/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectDb/WAssetDb.hpp"
@@ -12,6 +13,7 @@
 #include "WEngineObjects/WComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
+#include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 
 #include "WRenderLevelLib.hpp"
@@ -199,11 +201,6 @@ void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
     startup_info_.startup_level = in_id;
 }
 
-WImporterRegister & WEngine::ImportersRegister() noexcept
-{
-    return importers_register_;
-}
-
 TRef<IRender> WEngine::Render() noexcept
 {
     return render_.get();
@@ -237,11 +234,9 @@ bool WEngine::InitializeWindow() {
         window_.window,
         &KeyCallback
         );
-    // glfwSetInputCallba
 
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    // glfwSetCallback
 
     // glfwSetCursorPosCallback(window_.window, );
 
@@ -270,6 +265,13 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
 {
     auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
 
-    
+    WInputMode imd = WInputLib::ToWInputMode(key, mods);
 
+    WInputValuesStruct ival = {imd, 1.f, {0,0}};
+
+    // TODO: Store last cycle presed keys?
+    
+    // TODO: Also pass EngineData (delta time).
+    // TODO: Pass CycleData
+    app->input_mapping_register_.Emit(ival, app->asset_manager_, {});
 }

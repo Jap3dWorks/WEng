@@ -11,9 +11,9 @@
 class WLEVEL_API WLevel {
 public:
 
-    using InitFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
-    using UpdateFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
-    using CloseFn = TFunction<void(WLevel*, const WEngineCycleStruct&)>;
+    using InitFn = TFunction<void(const WEngineCycleStruct&)>;
+    using UpdateFn = TFunction<void(const WEngineCycleStruct&)>;
+    using CloseFn = TFunction<void(const WEngineCycleStruct&)>;
 
     WLevel();
 
