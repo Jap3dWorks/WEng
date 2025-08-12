@@ -12,7 +12,7 @@
 template<typename ... Args>
 struct TEvent {
 
-private:
+public:
     
     using FnType = TFnLmbd16<void, Args...>;
 

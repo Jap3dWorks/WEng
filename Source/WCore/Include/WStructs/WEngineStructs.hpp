@@ -33,37 +33,67 @@ struct WWindowStruct
 
 };
 
-enum class EInputs {
-    A, B, C, D,
-    E, F, G, H,
-    I, J, K, L,
-    M, N, O, P,
-    Q, R, S, T,
-    U, V, W, X,
-    Y, Z,
-    k0, k1, k2, k3,
-    k4, k5, k6, k7,
-    k8, k9,
-    MouseMove,
-    MouseK0,
-    MouseK1,
-    MouseK2,
-    Ctrl,
-    Shift,
-    Alt,
-    Space,
-    Tab
+enum class EInputKey : std::uint8_t{
+    None,
+    Key_A, Key_B, Key_C, Key_D,
+    Key_E, Key_F, Key_G, Key_H,
+    Key_I, Key_J, Key_K, Key_L,
+    Key_M, Key_N, Key_O, Key_P,
+    Key_Q, Key_R, Key_S, Key_T,
+    Key_U, Key_V, Key_W, Key_X,
+    Key_Y, Key_Z,
+    Key_0, Key_1, Key_2, Key_3,
+    Key_4, Key_5, Key_6, Key_7,
+    Key_8, Key_9,
+    Mouse_Move,
+    Mouse_Scroll,
+    Mouse_Key_0,
+    Mouse_Key_1,
+    Mouse_Key_2,
+    Key_Ctrl,
+    Key_Shift,
+    Key_Alt,
+    Key_Space,
+    Key_Tab
 };
 
+enum class EInputMode : std::uint8_t {
+    None,
+    Press,
+    Release,
+    Repeat
+};
+
+struct WInputMode {
+    EInputKey input;
+    EInputMode mode;
+};
+
+namespace std {
+    template<>
+    struct hash<WInputMode>
+    {
+        std::size_t operator()(const WInputMode & input) const {
+            std::size_t r=0;
+
+            r |= static_cast<std::uint8_t>(input.input);
+            r <<= 8;
+            r |= static_cast<std::uint8_t>(input.mode);
+
+            return r;
+        }
+    };
+}
+
 struct WInputValuesStruct {
-    EInputs input{};
+    WInputMode input{};
     float presure{};
     glm::vec2 direction{};
 };
 
 struct WInputMapStruct {
     // EInput ActionsAssets
-    std::unordered_map<EInputs, std::vector<WAssetId>> map{};  
+    std::unordered_map<WInputMode, std::vector<WAssetId>> map{};  
 };
 
 struct WActionStruct {

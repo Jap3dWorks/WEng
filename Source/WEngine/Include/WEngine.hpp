@@ -2,13 +2,13 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WImporterRegister.hpp"
 #include "WLevelRegister/WLevelRegister.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WStructs/WEngineStructs.hpp"
+#include "WInput/WInputMappingRegister.hpp"
 
 #include <memory>
 
@@ -65,8 +65,6 @@ private:
 
     static void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 
-    
-
     struct LevelInfo {
         WLevelId current_level{0};
         bool loaded{false};
@@ -76,6 +74,10 @@ private:
     struct StartupInfo {
         WLevelId startup_level{0};
     } startup_info_;
+
+    struct EngineStatus {
+        bool close{false};
+    }engine_status_;
 
     WWindowStruct window_;
 
@@ -87,7 +89,7 @@ private:
 
     WAssetDb asset_manager_;
 
-    bool close_{false};
+    WInputMappingRegister input_mapping_register_;
 
 };
 

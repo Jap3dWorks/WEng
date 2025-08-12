@@ -6,33 +6,42 @@
 #include "WStructs/WEngineStructs.hpp"
 #include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WActionAsset.hpp"
+#include "WCore/TStack.hpp"
 
 #include <unordered_map>
-#include <vector>
 
 class WENGINE_API WInputMappingRegister {
 private:
 
     using EventType = TEvent<const WInputValuesStruct &, const WActionStruct &>;
 
-    using MappingAssetsQueueType = std::vector<WAssetId>;
+    using MappingAssetsSTackType = TStack<WAssetId>;
 
     using ActionEventsType = std::unordered_map<WAssetId, EventType>;
 
 public:
 
+    constexpr WInputMappingRegister() noexcept = default;
+
+    constexpr virtual ~WInputMappingRegister() noexcept = default;
+
+    constexpr WInputMappingRegister(const WInputMappingRegister &) noexcept=default;
+
+    constexpr WInputMappingRegister(WInputMappingRegister &&) noexcept=default;
+
+    WInputMappingRegister & operator=(const WInputMappingRegister &)=default;
+
+    WInputMappingRegister & operator=(WInputMappingRegister &&)=default;
+
     void Emit(const WInputValuesStruct & input, const WAssetDb & asset_db) {
-        // Iterate in reverse order (queue).
-        for (auto ma_it = mapping_assets_queue.rbegin();
-             ma_it != mapping_assets_queue.rend();
-             ma_it++) {
+        for (auto & mid : mapping_assets_stack_) {
             
             const WInputMapStruct & inputmap =
-                asset_db.Get<WInputMappingAsset>(*ma_it)->InputMap();
+                asset_db.Get<WInputMappingAsset>(mid)->InputMap();
 
             if (inputmap.map.contains(input.input)) {
                 for(const auto &aid : inputmap.map.at(input.input)) {
-                    action_events[aid].Emit(
+                    action_events_[aid].Emit(
                         input,
                         asset_db.Get<WActionAsset>(aid)->ActionStruct()
                         );
@@ -45,35 +54,52 @@ public:
         }
     }
 
-    void Put(const WInputMappingAsset & in_asset) {
-        mapping_assets_queue.push_back(in_asset.WID());
+    WEventId BindAction(const WAssetId & in_action, EventType::FnType && in_fn) {
+        if (!action_events_.contains(in_action)) {
+            action_events_[in_action]={};
+        }
+
+        return action_events_[in_action].Subscribe(std::move(in_fn));
     }
 
-    const WAssetId & Top() const {
-        return mapping_assets_queue.back();
+    void ClearAction(const WAssetId & in_action) {
+        action_events_[in_action].Clear();
     }
 
-    void Pop() {
-        mapping_assets_queue.resize(
-            mapping_assets_queue.size() - 1
-            );
+    void UnbindAction(const WAssetId & in_action, const WEventId & in_event) {
+        action_events_[in_action].Unsubscribe(in_event);
     }
 
-    // TODO
-    bool Contains() {
-        return false;
+    void PutInputMapping(const WAssetId & in_asset) {
+        mapping_assets_stack_.Put(in_asset);
     }
 
-    /** 0 higgest priority */
-    std::uint32_t PriorityValue(const WAssetId & in_value) {
-        return 999999;
+    const WAssetId & TopInputMapping() const {
+        return mapping_assets_stack_.Top();
     }
-    
+
+    void PopInputMapping() {
+        mapping_assets_stack_.Pop();
+    }
+
+    bool ContainsInputMapping(const WAssetId & in_id) {
+        return mapping_assets_stack_.Contains(in_id);
+    }
+
+    /**
+     * @Brief returns InputMapping priority value, 0 higgest priority.
+     */
+    std::size_t PriorityInputMapping(const WAssetId & in_value) {
+        return mapping_assets_stack_.Position(in_value);
+    }
+
+    void ClearInputMapping() {
+        mapping_assets_stack_.Clear();
+    }
 
 private:
 
-    // TODO TQueue
-    MappingAssetsQueueType mapping_assets_queue{};
-    ActionEventsType action_events{};
+    MappingAssetsSTackType mapping_assets_stack_;
+    ActionEventsType action_events_;
     
 };

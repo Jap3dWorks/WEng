@@ -34,10 +34,15 @@ WEngine WEngine::DefaultCreate()
 }
 
 WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
+    level_info_(),
+    startup_info_(),
+    engine_status_(),
+    window_(),
     render_(std::move(in_render)),
     importers_register_(),
     level_register_(),
-    asset_manager_()
+    asset_manager_(),
+    input_mapping_register_()
 {}
 
 WEngine::~WEngine()=default;
@@ -45,12 +50,13 @@ WEngine::~WEngine()=default;
 WEngine::WEngine(WEngine && other) noexcept :
     level_info_(std::move(other.level_info_)),
     startup_info_(std::move(other.startup_info_)),
+    engine_status_(std::move(other.engine_status_)),
     window_(std::move(other.window_)),
     render_(std::move(other.render_)),
     importers_register_(std::move(other.importers_register_)),
     level_register_(std::move(other.level_register_)),
     asset_manager_(std::move(other.asset_manager_)),
-    close_(std::move(other.close_))
+    input_mapping_register_(std::move(other.input_mapping_register_))
 {
     if (window_.window) {
         glfwSetWindowUserPointer(window_.window, this);
@@ -63,19 +69,19 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
     if (this != &other) {
         level_info_ = std::move(other.level_info_);
         startup_info_ = std::move(other.startup_info_);
+        engine_status_ = std::move(other.engine_status_);
         window_ = std::move(other.window_);
         render_ = std::move(other.render_);
         importers_register_ = std::move(other.importers_register_);
         level_register_ = std::move(other.level_register_);
         asset_manager_ = std::move(other.asset_manager_);
-        close_ = std::move(other.close_);
+        input_mapping_register_ = std::move(other.input_mapping_register_);
 
         if (window_.window) {
             glfwSetWindowUserPointer(window_.window, this);
         }
 
         other.window_ = {};
-
     }
 
     return *this;
@@ -260,7 +266,10 @@ void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int i
         );
 }
 
-void WEngine::KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
+void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int action, int mods)
 {
+    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
+
     
+
 }
