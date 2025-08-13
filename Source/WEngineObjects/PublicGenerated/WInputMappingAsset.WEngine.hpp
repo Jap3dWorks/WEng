@@ -4,7 +4,7 @@
 #undef _WCLASS_
 #endif
 
-#ifdef _PWClASS_
+#ifdef _PWCLASS_
 #undef _PWCLASS_
 #endif
 

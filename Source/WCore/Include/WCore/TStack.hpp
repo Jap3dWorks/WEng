@@ -41,9 +41,11 @@ public:
         return data_.back();
     }
 
-     T Pop() const {
+     T Pop() {
+         assert(data_.size() > 0);
+         
          T r = data_.back();
-         data_.resize(data_.size()-1);
+         data_.resize(data_.size()-1, 0);
          return r;
     }
 

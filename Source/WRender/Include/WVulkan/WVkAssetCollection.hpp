@@ -88,7 +88,7 @@ public:
     /** put the data in the graphical memory */
     void LoadAsset(const WAssetId & in_id) {
         assert(assets_.contains(in_id));
-        data_.Insert(in_id);
+        data_.CreateAt(in_id);
     }
 
     void LoadAsset(const A & in_asset) {

@@ -166,7 +166,7 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
 
     for(auto & p : ptype_pipelines_) {
         if (p.second.Contains(in_id.GetId())) {
-            p.second.Delete(in_id.GetId());
+            p.second.Remove(in_id.GetId());
         }
     }
 }
@@ -300,7 +300,7 @@ void WVkRenderPipelinesManager::DeleteBinding(const WEntityComponentId & in_id) 
 
     for(auto & p : pipeline_pbindings_) {
         if (p.second.Contains(in_id.GetId())) {
-            p.second.Delete(in_id.GetId());            
+            p.second.Remove(in_id.GetId());            
         }
     }
 }

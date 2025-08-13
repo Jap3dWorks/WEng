@@ -10,10 +10,12 @@
 
 #include <unordered_map>
 
+class WEngine;
+
 class WENGINE_API WInputMappingRegister {
 private:
 
-using EventType = TEvent<const WInputValuesStruct &, const WActionStruct &, const WEngineCycleStruct &>;
+    using EventType = TEvent<const WInputValuesStruct &, const WActionStruct &, WEngine *>;
 
     using MappingAssetsSTackType = TStack<WAssetId>;
 
@@ -33,27 +35,7 @@ public:
 
     WInputMappingRegister & operator=(WInputMappingRegister &&)=default;
 
-    void Emit(const WInputValuesStruct & input, const WAssetDb & asset_db, const WEngineCycleStruct & cycle) {
-        for (auto & mid : mapping_assets_stack_) {
-            
-            const WInputMapStruct & inputmap =
-                asset_db.Get<WInputMappingAsset>(mid)->InputMap();
-
-            if (inputmap.map.contains(input.input)) {
-                for(const auto &aid : inputmap.map.at(input.input)) {
-                    action_events_[aid].Emit(
-                        input,
-                        asset_db.Get<WActionAsset>(aid)->ActionStruct(),
-                        cycle
-                        );
-                }
-
-                // Resolved with the first detected input asset.
-                return;
-                
-            }
-        }
-    }
+    void Emit(const WInputValuesStruct & in_input, WEngine * in_engine);
 
     WEventId BindAction(const WAssetId & in_action, EventType::FnType && in_fn) {
         if (!action_events_.contains(in_action)) {

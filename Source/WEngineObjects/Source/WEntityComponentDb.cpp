@@ -9,7 +9,7 @@ WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const char *
 
     auto id = CreateEntityId(in_class);
 
-    entity_db_.Insert(
+    entity_db_.CreateAt(
         in_class,
         id
         );
@@ -30,7 +30,7 @@ void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
 
     UpdateComponentMetadata(in_component_class, in_entity_id);
 
-    component_db_.Insert(in_component_class, in_entity_id);
+    component_db_.CreateAt(in_component_class, in_entity_id);
 
     WComponent * component = component_db_.Get(in_component_class, in_entity_id);
     component->EntityId(in_entity_id);

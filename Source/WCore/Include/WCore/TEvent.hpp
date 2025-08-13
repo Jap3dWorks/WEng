@@ -2,8 +2,8 @@
 
 #include "WCore/TFunction.hpp"
 #include "WCore/WCore.hpp"
-#include "TObjectDataBase.hpp"
-#include "WCore/WConcepts.hpp"
+#include "WCore/TSparseSet.hpp"
+#include "WCore/WIdPool.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -30,22 +30,26 @@ public:
 
     TEvent & operator=(TEvent && other)=default;
 
-    bool Emit(Args && ... args) {
+    bool Emit(Args ... args) {
         for(auto & fn : subscribers_) {
-            fn(std::forward<Args>(args)...);
+            fn(args...);
         }
     }
 
     WEventId Subscribe(const FnType & in_fn) {
-        return subscribers_.Create(in_fn);
+        WEventId id = id_pool_.Generate();
+        subscribers_.Insert(id.GetId(), in_fn);
+        return id;
     }
 
     WEventId Subscribe(FnType && in_fn) {
-        return subscribers_.Create(std::move(in_fn));
+        WEventId id = id_pool_.Generate();
+        subscribers_.Insert(id.GetId(), std::move(in_fn));
+        return id;
     }
 
     void Unsubscribe(const WEventId & in_id) {
-        subscribers_.Remove(in_id);
+        subscribers_.Remove(in_id.GetId());
     }
 
     void Clear() {
@@ -54,6 +58,12 @@ public:
 
 private:
 
-    TObjectDataBase<FnType, void, WEventId> subscribers_{};
+    // TODO SparseSet and WIDPool;
+
+    TSparseSet<FnType> subscribers_{};
+
+    WIdPool<WEventId> id_pool_{};
+
+    // TObjectDataBase<FnType, FnType, WEventId> subscribers_{};
 
 };

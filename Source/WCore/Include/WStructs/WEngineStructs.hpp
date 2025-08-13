@@ -15,10 +15,9 @@ class WLevel;
 class WEngine;
 
 struct WEngineCycleStruct {
-    float DeltaTime{999};
-    float TotalTime{0};
-    WLevel * level{nullptr};
-    WEngine * engine{nullptr};
+    double DeltaTime{0.0166};
+    double TotalTime{0};
+    std::uint32_t fps{60};
 };
 
 struct WWindowStruct

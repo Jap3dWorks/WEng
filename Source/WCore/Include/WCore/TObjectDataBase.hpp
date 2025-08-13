@@ -193,13 +193,13 @@ public:
     void Remove(const WIdClass & in_id, const DestroyFn & in_destroy_fn) {
         in_destroy_fn(objects_.Get(in_id.GetId()));
         id_pool_.Release(in_id);
-        objects_.Delete(in_id.GetId());
+        objects_.Remove(in_id.GetId());
     }
 
     void Remove(const WIdClass & in_id) override final {
         destroy_fn_(objects_.Get(in_id.GetId()));
         id_pool_.Release(in_id);
-        objects_.Delete(in_id.GetId());
+        objects_.Remove(in_id.GetId());
     }
 
     void Clear(const DestroyFn & in_destroy_fn) {

@@ -8,12 +8,14 @@
 #include "WEngineObjects/WObjectMacros.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
+class WEngine;
+
 class WLEVEL_API WLevel {
 public:
 
-    using InitFn = TFunction<void(const WEngineCycleStruct&)>;
-    using UpdateFn = TFunction<void(const WEngineCycleStruct&)>;
-    using CloseFn = TFunction<void(const WEngineCycleStruct&)>;
+    using InitFn = TFunction<void(WLevel*, WEngine*)>;
+    using UpdateFn = TFunction<void(WLevel*, WEngine*)>;
+    using CloseFn = TFunction<void(WLevel*, WEngine*)>;
 
     WLevel();
 
@@ -37,11 +39,11 @@ public:
 
 public:    
 
-    void Init(const WEngineCycleStruct & in_cycle_data) ;
+    void Init(WEngine *) ;
 
-    void Update(const WEngineCycleStruct & in_cycle_data) ;
+    void Update(WEngine * in_engine) ;
 
-    void Close(const WEngineCycleStruct & in_cycle_data) ;
+    void Close(WEngine * in_engine) ;
 
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity() {

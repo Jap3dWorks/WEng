@@ -73,9 +73,17 @@ public:
         return *this;
     }
     
-    void Insert(size_t in_index, const T& in_value) {
+    void Insert(const size_t & in_index, const T& in_value) {
         size_t pos = compact_.size();
         compact_.push_back(in_value);
+
+        index_pos_[in_index] = pos;
+        pos_index_[pos] = in_index;
+    }
+
+    void Insert(const size_t & in_index, T && in_value) {
+        size_t pos = compact_.size();
+        compact_.push_back(std::move(in_value));
 
         index_pos_[in_index] = pos;
         pos_index_[pos] = in_index;
@@ -95,7 +103,7 @@ public:
         return compact_.size();
     }
 
-    void Delete(size_t in_index) {
+    void Remove(size_t in_index) {
         size_t pos = index_pos_[in_index];
         size_t last = compact_.size() - 1;
 

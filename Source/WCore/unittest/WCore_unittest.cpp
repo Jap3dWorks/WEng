@@ -51,9 +51,9 @@ bool TObjectDataBase_Test() {
     
     TObjectDataBase<A, B, WId> od;
 
-    od.Insert(1);
-    od.Insert(2);
-    od.Insert(3);
+    od.CreateAt(1);
+    od.CreateAt(2);
+    od.CreateAt(3);
 
     TObjectDataBase<A, B, WId> od2 = od;
 

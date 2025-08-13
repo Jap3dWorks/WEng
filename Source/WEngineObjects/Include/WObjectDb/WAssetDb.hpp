@@ -75,7 +75,7 @@ public:
         WAssetId id = id_pool_.Generate();
         id_class_[id] = in_class;
     
-        object_manager_.Insert(in_class, id);
+        object_manager_.CreateAt(in_class, id);
         object_manager_.Get(in_class, id)->WID(id);
 
         return id;

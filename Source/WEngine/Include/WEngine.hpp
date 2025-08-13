@@ -14,6 +14,13 @@
 
 class WENGINE_API WEngine
 {
+private:
+
+    struct LevelInfoStruct {
+        WLevelId current_level{0};
+        bool loaded{false};
+        WLevel level{};
+    };
 
 public:
 
@@ -39,6 +46,10 @@ public:
 
     void UnloadLevel();
 
+    const LevelInfoStruct & LevelInfo() const noexcept {
+        return level_info_;
+    }
+
     WLevelRegister & LevelRegister() noexcept {
         return level_register_;
     }
@@ -63,6 +74,10 @@ public:
         return input_mapping_register_;
     }
 
+    const WEngineCycleStruct & EngineCycle() const noexcept {
+        return engine_cycle_;
+    }
+
     TRef<IRender> Render() noexcept;
 
     WAssetDb & AssetManager() noexcept;
@@ -79,15 +94,13 @@ private:
 
     void InitializeLevel(WLevel * in_level);
 
+    void UpdateEngineCycleStruct();
+
     static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
 
     static void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 
-    struct LevelInfo {
-        WLevelId current_level{0};
-        bool loaded{false};
-        WLevel level{};
-    } level_info_;
+    LevelInfoStruct level_info_;
 
     struct StartupInfo {
         WLevelId startup_level{0};
@@ -99,13 +112,15 @@ private:
 
     WWindowStruct window_;
 
+    WEngineCycleStruct engine_cycle_;
+
     std::unique_ptr<IRender> render_;
 
     WImporterRegister importers_register_;
 
     WLevelRegister level_register_;
 
-    WAssetDb asset_manager_;
+    WAssetDb asset_db_;
 
     WInputMappingRegister input_mapping_register_;
 

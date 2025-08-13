@@ -99,13 +99,13 @@ public:
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If your replace an existing WId for the indicated class behaviour is undeffined.
      */
-    void Insert(const WClass * in_class,
+    void CreateAt(const WClass * in_class,
                 const WIdClass& in_id) {
         EnsureClassStorage(in_class);
 
         assert(!db_[in_class]->Contains(in_id));
 
-        db_[in_class]->Insert(in_id);
+        db_[in_class]->CreateAt(in_id);
     }
 
     /**
@@ -115,7 +115,7 @@ public:
      */
     template<std::derived_from<WObjClass> T>
     void Insert(const WIdClass in_id) {
-        Insert(T::StaticClass(), in_id);
+        CreateAt(T::StaticClass(), in_id);
     }
 
     WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {

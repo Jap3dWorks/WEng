@@ -219,16 +219,16 @@ bool SetupLevel(WEngine & in_engine,
 
     // Initialize Lvl Function
 
-    level.SetInitFn([cid](const WEngineCycleStruct & _cycle){
+    level.SetInitFn([cid](WLevel * _level, WEngine * _engine){
         
         WAssetId mapping, frontaction, backaction, leftaction, rightaction;
         
-        _cycle.engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
+        _engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
             mapping = a->WID();
         });
 
         // TODO Get assets by Name
-        _cycle.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
+        _engine->AssetManager().ForEach<WActionAsset>([&frontaction,
                                                              &backaction,
                                                              &leftaction,
                                                              &rightaction] (WActionAsset * a) {
@@ -248,50 +248,50 @@ bool SetupLevel(WEngine & in_engine,
             }
         });
 
-        _cycle.engine->InputMappingRegister().PutInputMapping(mapping);
+        _engine->InputMappingRegister().PutInputMapping(mapping);
 
-        _cycle.engine->InputMappingRegister().BindAction(
+        _engine->InputMappingRegister().BindAction(
             frontaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
                 WTransformStruct & transform =
-                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[0] + 0.1;
             }
             );
 
-        _cycle.engine->InputMappingRegister().BindAction(
+        _engine->InputMappingRegister().BindAction(
             backaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
                 WTransformStruct & transform =
-                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[0] - 0.1;
             }
             );
 
-        _cycle.engine->InputMappingRegister().BindAction(
+        _engine->InputMappingRegister().BindAction(
             leftaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
                 WTransformStruct & transform =
-                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[1] + 0.1;
             }
             );
 
-        _cycle.engine->InputMappingRegister().BindAction(
+        _engine->InputMappingRegister().BindAction(
             frontaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, const WEngineCycleStruct & _c) {
+            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
                 WTransformStruct & transform =
-                    _c.level->GetComponent<WTransformComponent>(cid)->TransformStruct();
+                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[1] - 0.1;

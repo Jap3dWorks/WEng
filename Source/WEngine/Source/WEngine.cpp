@@ -43,7 +43,7 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
     render_(std::move(in_render)),
     importers_register_(),
     level_register_(),
-    asset_manager_(),
+    asset_db_(),
     input_mapping_register_()
 {}
 
@@ -57,7 +57,7 @@ WEngine::WEngine(WEngine && other) noexcept :
     render_(std::move(other.render_)),
     importers_register_(std::move(other.importers_register_)),
     level_register_(std::move(other.level_register_)),
-    asset_manager_(std::move(other.asset_manager_)),
+    asset_db_(std::move(other.asset_db_)),
     input_mapping_register_(std::move(other.input_mapping_register_))
 {
     if (window_.window) {
@@ -76,7 +76,7 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
         render_ = std::move(other.render_);
         importers_register_ = std::move(other.importers_register_);
         level_register_ = std::move(other.level_register_);
-        asset_manager_ = std::move(other.asset_manager_);
+        asset_db_ = std::move(other.asset_db_);
         input_mapping_register_ = std::move(other.input_mapping_register_);
 
         if (window_.window) {
@@ -110,13 +110,13 @@ void WEngine::run()
     level_info_.current_level = startup_info_.startup_level;
     level_info_.loaded = false;
 
-    // TODO Create WSystem to process the components
+    // TODO Create WSystem to process the components (local WSystems, global WSystems (engine)).
 
     while(!glfwWindowShouldClose(window_.window)) {
+        UpdateEngineCycleStruct();
+        
         glfwPollEvents();
         
-        WEngineCycleStruct engine_cycle;
-
         if (!level_info_.loaded) {
             Render()->WaitIdle();
             UnloadLevel();
@@ -126,15 +126,15 @@ void WEngine::run()
         {
             // Update Render Camera
             level_info_.level.ForEachComponent<WCameraComponent> (
-                [&engine_cycle, this] (WCameraComponent * cam) {
+                [this] (WCameraComponent * cam) {
                     
                     WTransformComponent * ts =
                         level_info_.level.GetComponent<WTransformComponent>(
                             cam->EntityId()
                             );
 
-                    ts->TransformStruct().position.x =
-                        ts->TransformStruct().position.x + .0001f;
+                    // ts->TransformStruct().position.x =
+                    //     ts->TransformStruct().position.x + .0001f;
 
                     Render()->UpdateCamera(
                         cam->CameraStruct(),
@@ -145,7 +145,7 @@ void WEngine::run()
 
             // Update transform Components
             level_info_.level.ForEachComponent<WTransformComponent>(
-                [&engine_cycle, this](WTransformComponent * in_component) {
+                [this](WTransformComponent * in_component) {
                     WEntityComponentId ecid = level_info_.level
                         .EntityComponentDb()
                         .EntityComponentId(
@@ -177,12 +177,15 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
     WRenderLevelLib::InitializeResources(
         render_.get(),
         level_info_.level.EntityComponentDb(),
-        asset_manager_
+        asset_db_
         );
 
     level_info_.loaded = true;
 
+    level_info_.level.Init(this);
+
     // TODO update static transforms WStaticTransformComponent
+    
 }
 
 void WEngine::UnloadLevel() {
@@ -190,7 +193,7 @@ void WEngine::UnloadLevel() {
         WRenderLevelLib::ReleaseRenderResources(
             render_.get(),
             level_info_.level.EntityComponentDb(),
-            asset_manager_
+            asset_db_
             );
     }
 
@@ -207,7 +210,7 @@ TRef<IRender> WEngine::Render() noexcept
 }
 
 WAssetDb & WEngine::AssetManager() noexcept {
-    return asset_manager_;
+    return asset_db_;
 }
 
 bool WEngine::InitializeWindow() {
@@ -248,6 +251,14 @@ void WEngine::DestroyWindow() {
     glfwTerminate();
 }
 
+void WEngine::UpdateEngineCycleStruct() {
+    double seconds = glfwGetTime();
+
+    engine_cycle_.DeltaTime = seconds = engine_cycle_.TotalTime;
+    engine_cycle_.TotalTime = seconds;
+    engine_cycle_.fps = 1 / engine_cycle_.DeltaTime;
+}
+
 void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int in_height)
 {
     auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
@@ -273,5 +284,5 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
     
     // TODO: Also pass EngineData (delta time).
     // TODO: Pass CycleData
-    app->input_mapping_register_.Emit(ival, app->asset_manager_, {});
+    app->input_mapping_register_.Emit(ival, app);
 }
