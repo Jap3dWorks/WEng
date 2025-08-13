@@ -30,10 +30,15 @@ public:
 
     TEvent & operator=(TEvent && other)=default;
 
-    bool Emit(Args ... args) {
-        for(auto & fn : subscribers_) {
-            fn(args...);
+    // TODO FArgs
+
+    template<typename ... FArgs>
+    bool Emit(FArgs && ... args) {
+        for(const auto & fn : subscribers_) {
+            fn(std::forward<FArgs>(args)...);
         }
+        
+        return true;
     }
 
     WEventId Subscribe(const FnType & in_fn) {

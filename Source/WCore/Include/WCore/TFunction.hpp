@@ -104,11 +104,12 @@ public:
         return *this;
     }
 
-    Ret operator()(Args... args) const {
+    template<typename ... FArgs>
+    Ret operator()(FArgs && ... args) const {
         if (!callable_) {
             throw std::bad_function_call();
         }
-        return callable_->Invoke(std::forward<Args>(args)...);
+        return callable_->Invoke(std::forward<FArgs>(args)...);
     }
 
     bool IsValid() const {
@@ -143,17 +144,15 @@ public:
     template<typename T>
     static constexpr bool in_size_v = sizeof(T) <= B;
 
-    using ManageFn = R(*)(const void*, Args && ...);
+    using ManageFn = R(*)(const void*, Args ...);
     using ManageDstry = void(*)(const void*);
     using ManageCpy = void(*)(void* _dst,void* _src);
     using ManageMove = void(*)(void* _dst, void* _src);
 
     template<typename T>
     struct FnLmbdMan {
-        static constexpr R managefn(const void* ptr, Args && ... args) {
-            return (*(std::launder(reinterpret_cast<const T*>(ptr))))(
-                std::forward<Args>(args)...
-                );
+        static constexpr R managefn(const void* ptr, Args ... args) {
+            return (*(std::launder(reinterpret_cast<const T*>(ptr))))(std::forward<Args>(args) ...);
         }
 
         static constexpr void managedstry(const void* ptr) {
@@ -161,13 +160,13 @@ public:
         }
 
         static void managecpy(void* dst, void * src) {
-            (*std::launder(reinterpret_cast<T*>(dst))) = (*std::launder(reinterpret_cast<T*>(src)));
+            new (dst) T(*std::launder(reinterpret_cast<const T*>(src)));
         }
 
         static void managemove(void* dst, void * src) {
-            (*std::launder(reinterpret_cast<T*>(dst))) = std::move(
-                (*std::launder(reinterpret_cast<T*>(src)))
-                );
+            new (dst) T(std::move(*std::launder(reinterpret_cast<const T*>(src))));
+
+            std::launder(reinterpret_cast<T*>(src))->~T();
         }
     };
 
@@ -252,8 +251,9 @@ public:
         }
     }
 
-    constexpr R operator()(Args && ... args) const {
-        return Invoke(std::forward<Args>(args)...);
+    template<typename ... FArgs>
+    constexpr R operator()(FArgs && ... args) const {
+        return (*static_cast<ManageFn>(managefn_)) (bf_, std::forward<FArgs>(args) ...);
     }
 
     bool IsEmpty() const {
@@ -265,11 +265,6 @@ public:
     }
 
 private:
-
-
-    constexpr R Invoke(Args && ... args) const {
-        return (*static_cast<ManageFn>(managefn_)) (bf_, std::forward<Args>(args)...);
-    }
 
     ManageFn managefn_;
     ManageDstry managedstry_;
@@ -338,11 +333,13 @@ struct TFnPtr<Ret(Args...)> {
         return *this;
     }
 
-    Ret operator()(Args... args) const {
+    template<typename ... FArgs>
+    Ret operator()(FArgs && ... args) const {
         if (!fn_) {
             throw std::bad_function_call();
         }
-        return fn_(args...);
+        
+        return fn_(std::forward<FArgs>(args)...);
     }
 
     bool IsValid() const {

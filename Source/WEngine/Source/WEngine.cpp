@@ -276,8 +276,11 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
 {
     auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
 
-    WInputMode imd = WInputLib::ToWInputMode(key, mods);
+    WInputMode imd = WInputLib::ToWInputMode(key, action);
 
+    WFLOG("Key Callback {}, {}, {}, {}",
+          key, scancode, action, mods);
+    
     WInputValuesStruct ival = {imd, 1.f, {0,0}};
 
     // TODO: Store last cycle presed keys?

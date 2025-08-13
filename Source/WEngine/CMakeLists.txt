@@ -3,6 +3,7 @@ add_library(
     SHARED
         CompileGenerated/CompileGenerated.cpp
         Source/WEngine.cpp
+        Source/WInputMappingRegister.cpp
 )
 
 target_include_directories(

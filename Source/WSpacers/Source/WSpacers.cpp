@@ -174,9 +174,13 @@ bool InputAssets(WEngine & in_engine) {
     WInputMapStruct & input_map = in_engine.AssetManager()
         .Get<WInputMappingAsset>(cameramapping)->InputMap();
 
+    input_map.map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
     input_map.map[{EInputKey::Key_W, EInputMode::Repeat}] = {frontaction};
+    input_map.map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
     input_map.map[{EInputKey::Key_S, EInputMode::Repeat}] = {backaction};
+    input_map.map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
     input_map.map[{EInputKey::Key_A, EInputMode::Repeat}] = {leftaction};
+    input_map.map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
     input_map.map[{EInputKey::Key_D, EInputMode::Repeat}] = {rightaction};
 
     return true;
@@ -229,21 +233,21 @@ bool SetupLevel(WEngine & in_engine,
 
         // TODO Get assets by Name
         _engine->AssetManager().ForEach<WActionAsset>([&frontaction,
-                                                             &backaction,
-                                                             &leftaction,
-                                                             &rightaction] (WActionAsset * a) {
+                                                       &backaction,
+                                                       &leftaction,
+                                                       &rightaction] (WActionAsset * a) {
             std::string name(a->Name());
             
-            if(name.contains("front")) {
+            if(name.contains("Front")) {
                 frontaction = a->WID();
             }
-            else if(name.contains("back")) {
+            else if(name.contains("Back")) {
                 backaction = a->WID();
             }
-            else if (name.contains("left")) {
+            else if (name.contains("Left")) {
                 leftaction = a->WID();
             }
-            else if(name.contains("right")) {
+            else if(name.contains("Right")) {
                 rightaction = a->WID();
             }
         });
@@ -259,6 +263,8 @@ bool SetupLevel(WEngine & in_engine,
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[0] + 0.1;
+
+                WLOG("[InputMapping] InputMapping Trigger!");
             }
             );
 
@@ -271,6 +277,7 @@ bool SetupLevel(WEngine & in_engine,
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[0] - 0.1;
+                WLOG("[InputMapping] InputMapping Trigger!");
             }
             );
 
@@ -283,6 +290,7 @@ bool SetupLevel(WEngine & in_engine,
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[1] + 0.1;
+                WLOG("[InputMapping] InputMapping Trigger!");
             }
             );
 
@@ -295,6 +303,7 @@ bool SetupLevel(WEngine & in_engine,
 
                 // TODO: Get Direction.
                 transform.position[0] = transform.position[1] - 0.1;
+                WLOG("[InputMapping] InputMapping Trigger!");
             }
             );
     });
@@ -324,10 +333,9 @@ int main(int argc, char** argv)
         {
             return 1;
         }
-	        
-        const WTextureStruct & texture_data =
-            texture_asset->GetTexture();
 
+        InputAssets(engine);
+       
         SetupLevel(engine,
                    static_mesh->WID(),
                    pipeline_asset->WID(),

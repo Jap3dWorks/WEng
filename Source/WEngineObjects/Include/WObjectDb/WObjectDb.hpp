@@ -130,34 +130,34 @@ public:
         return static_cast<T*>(Get(T::StaticClass(), in_id));
     }
 
-    template<std::derived_from<WObjClass> T>
-    void ForEach(TFunction<void(T*)> in_predicate) const {
-        assert(db_.contains(T::StaticClass()));
-
-        ForEach(T::StaticClass(),
-                [&in_predicate](WObjClass* _ptr) {
-                    in_predicate(static_cast<T*>(_ptr));
-                });
+    void ForEachIdValue(const WClass * in_class,
+                        const TFunction<void(const WIdClass &, WObjClass *)> & in_predicate) const {
+        db_.at(in_class)->ForEachIdValue(in_predicate);
     }
 
-    void ForEach(const WClass * in_class, TFunction<void(WObjClass*)> in_predicate) const {
+    template<std::derived_from<WObjClass> T>
+    void ForEachIdValue(const TFunction<void(const WIdClass &, T *)> & in_predicate) const {
+        db_.at(T::StaticClass())->ForEachIdValue(
+            [&in_predicate](const WIdClass & _wid, WObjClass * _ptr) {
+                in_predicate(_wid, static_cast<T*>(_ptr));
+            }
+            );
+    }
+
+    void ForEach(const WClass * in_class, const TFunction<void(WObjClass*)> & in_predicate) const {
         assert(db_.contains(in_class));
 
         db_.at(in_class)->ForEach(in_predicate);
     }
 
-    void ForEach(const WClass * in_class,
-                 const TFunction<void(const WIdClass &, WObjClass *)> & in_predicate) const {
-        for (auto & idx : db_.at(in_class).Indexes()) {
-            in_predicate(idx, Get(in_class, idx));
-        }
-    }
-
     template<std::derived_from<WObjClass> T>
-    void ForEach(const TFunction<void(const WIdClass &, T *)> & in_predicate) const {
-        for (auto & idx : db_.at(T::StaticClass()).Indexed()) {
-            in_predicate(idx, Get<T>(idx));
-        }
+    void ForEach(const TFunction<void(T*)> & in_predicate) const {
+        assert(db_.contains(T::StaticClass()));
+
+        db_.at(T::StaticClass())->ForEach(
+            [&in_predicate](WObjClass * _ptr) {
+                in_predicate(static_cast<T*>(_ptr));
+            } );
     }
 
     template<typename T>

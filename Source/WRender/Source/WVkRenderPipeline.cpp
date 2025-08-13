@@ -540,8 +540,6 @@ void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
     uint32_t in_frame_index
     ) {
 
-    WFLOG("Update Graphics DSet");
-
     memcpy(
         global_graphics_descsets_.camera_ubo[in_frame_index].mapped_data,
         &camera_struct,

@@ -70,6 +70,10 @@ struct WInputMode {
     EInputMode mode;
 };
 
+constexpr bool operator==(const WInputMode & a, const WInputMode & b) {
+    return a.input == b.input && a.mode == b.mode;
+}
+
 namespace std {
     template<>
     struct hash<WInputMode>

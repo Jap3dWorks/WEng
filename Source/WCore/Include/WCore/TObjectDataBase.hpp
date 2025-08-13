@@ -32,7 +32,7 @@ public:
     virtual std::vector<WIdClass> Indexes() = 0;
     
     virtual void ForEach(TFunction<void(B*)> in_function)=0;
-    virtual void ForEachId(TFunction<void(const WIdClass & _id, B * _value)>) =0;
+    virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>) =0;
     
 };
 
@@ -299,7 +299,7 @@ public:
         }
     }
 
-    void ForEachId(TFunction<void(const WIdClass & _id, B* _value)> in_predicate) override {
+    void ForEachIdValue(TFunction<void(const WIdClass & _id, B* _value)> in_predicate) override {
         std::size_t i=0;
         for (auto& v : objects_) {
             in_predicate(objects_.IndexAt(i++),

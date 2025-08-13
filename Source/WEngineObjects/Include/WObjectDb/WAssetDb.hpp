@@ -76,7 +76,9 @@ public:
         id_class_[id] = in_class;
     
         object_manager_.CreateAt(in_class, id);
+        
         object_manager_.Get(in_class, id)->WID(id);
+        object_manager_.Get(in_class, id)->Name(in_fullname);
 
         return id;
     }

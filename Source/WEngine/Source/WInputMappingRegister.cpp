@@ -1,4 +1,3 @@
-#pragma once
 #include "WEngine.hpp"
 
 void WInputMappingRegister::Emit(const WInputValuesStruct & in_input, WEngine * in_engine) 
