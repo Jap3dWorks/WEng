@@ -41,9 +41,14 @@ public:
 
     WEntityId CreateEntity(const WClass * in_class, const char * in_name);
 
-    TWRef<WEntity> GetEntityRef(const WEntityId & in_id) const {
-        return GetEntity(in_id);
+    template<std::derived_from<WEntity> T>
+    void InsertEntity(const WEntityId & in_id, const char * in_name) {
+        InsertEntity(T::StaticClass(), in_id, in_name);
     }
+
+    void InsertEntity(const WClass * in_class,
+                      const WEntityId & in_id,
+                      const char * in_name);
 
     WEntity * GetEntity(const WEntityId & in_id) const {
         assert(id_entityclass_.contains(in_id));
@@ -97,18 +102,24 @@ public:
     }
 
     WComponent * GetComponent(const WEntityComponentId & in_entity_component_id) const {
+        WLevelId lid;
         WEntityId eid;
         WComponentTypeId cid;
     
-        WIdUtils::FromEntityComponentId(in_entity_component_id, eid, cid);
+        WIdUtils::FromEntityComponentId(in_entity_component_id, lid, eid, cid);
 
         return GetComponent(id_componentclass_.at(cid), eid);
     }
 
-    WEntityComponentId EntityComponentId(const WEntityId & in_id, const WClass * in_class) const {
+    WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
+                                         const WEntityId & in_id,
+                                         const WClass * in_class) const {
         assert(componentclass_id_.contains(in_class));
-        return WIdUtils::ToEntityComponentId(in_id,
-                                             componentclass_id_.at(in_class));
+        
+        return WIdUtils::ToEntityComponentId(
+            in_lvlid,
+            in_id,
+            componentclass_id_.at(in_class));
     }
 
     void ForEachComponent(const WClass * in_class,
@@ -133,6 +144,8 @@ private:
     WEntityId CreateEntityId(const WClass * in_class);
 
     void UpdateComponentMetadata(const WClass * in_component_class, const WEntityId & in_Id);
+
+    void UpdateEntityData(const WClass * in_entity_class, const WEntityId & in_id, const char * in_name);
 
     WEntityDbType entity_db_;
 

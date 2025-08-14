@@ -108,6 +108,15 @@ public:
         db_[in_class]->CreateAt(in_id);
     }
 
+    template<std::derived_from<WObjClass> T>
+    void CreateAt(const WIdClass & in_id) {
+        EnsureClassStorage(T::StaticClass());
+        
+        assert(!db_[T::StaticClass()]->Contains(in_id));
+
+        db_[T::StaticClass()]->CreateAt(in_id);
+    }
+
     /**
      * @brief Create a new object of type T at the specified in_id.
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).

@@ -144,11 +144,13 @@ void WEngine::run()
                 );
 
             // Update transform Components
+            // TODO move this functionality to level.
             level_info_.level.ForEachComponent<WTransformComponent>(
                 [this](WTransformComponent * in_component) {
                     WEntityComponentId ecid = level_info_.level
                         .EntityComponentDb()
                         .EntityComponentId(
+                            level_info_.level.WID(),  // TODO Move to Level
                             in_component->EntityId(),
                             in_component->Class()
 
@@ -176,7 +178,8 @@ void WEngine::LoadLevel(const WLevelId & in_level) {
     // Initialize new level
     WRenderLevelLib::InitializeResources(
         render_.get(),
-        level_info_.level.EntityComponentDb(),
+        &level_info_.level,
+        // level_info_.level.EntityComponentDb(),
         asset_db_
         );
 
@@ -192,7 +195,7 @@ void WEngine::UnloadLevel() {
     if (level_info_.loaded) {
         WRenderLevelLib::ReleaseRenderResources(
             render_.get(),
-            level_info_.level.EntityComponentDb(),
+            &level_info_.level,
             asset_db_
             );
     }

@@ -9,12 +9,13 @@
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WLevel/WLevel.hpp"
 
 namespace WRenderLevelLib {
 
     inline void InitializeResources(
         IRender * in_render,
-        const WEntityComponentDb & in_entity_component_db,
+        WLevel * in_level,
         const WAssetDb & in_asset_db
         ) {
 
@@ -26,8 +27,9 @@ namespace WRenderLevelLib {
         render_pipelines.Reserve(64);
         TSparseSet<WAssetId> pipeline_parameters;
         pipeline_parameters.Reserve(64);
-        
-        in_entity_component_db.ForEachComponent<WStaticMeshComponent>(
+
+        // TODO WLevel interface to access entity and components
+        in_level->EntityComponentDb().ForEachComponent<WStaticMeshComponent>(
             [&static_meshes,
              &render_pipelines,
              &pipeline_parameters](WStaticMeshComponent * in_component) {
@@ -91,10 +93,10 @@ namespace WRenderLevelLib {
         }
 
         // Pipeline Bindings
-        in_entity_component_db.ForEachComponent<WStaticMeshComponent>(
+        in_level->EntityComponentDb().ForEachComponent<WStaticMeshComponent>(
             [&in_render,
              &in_asset_db,
-             &in_entity_component_db]
+             &in_level]
             (WStaticMeshComponent* in_component) {
                 auto param =static_cast<WRenderPipelineParametersAsset*> (
                     in_asset_db.Get(
@@ -103,7 +105,8 @@ namespace WRenderLevelLib {
                     );
 
                 in_render->CreatePipelineBinding(
-                    in_entity_component_db.EntityComponentId(
+                    in_level->EntityComponentDb().EntityComponentId(
+                        in_level->WID(),
                         in_component->EntityId(),
                         in_component->Class()
                         ),
@@ -111,13 +114,12 @@ namespace WRenderLevelLib {
                     in_component->StaticMeshStruct().static_mesh_asset,
                     param->RenderPipelineParameters()
                     );
-                
             });
     }
 
     inline void ReleaseRenderResources(
         IRender * in_render,
-        const WEntityComponentDb & in_emtity_component_db,
+        WLevel * in_level,
         const WAssetDb & in_asset_db
         ) {
 
@@ -130,7 +132,7 @@ namespace WRenderLevelLib {
         // TSparseSet<WId> pipeline_bindings;
         // pipeline_bindings.Reserve(64);
         
-        in_emtity_component_db.ForEachComponent<WStaticMeshComponent>(
+        in_level->EntityComponentDb().ForEachComponent<WStaticMeshComponent>(
             [&in_render,
              &in_asset_db,
              &static_meshes,

@@ -11,7 +11,12 @@ WLevel::WLevel() :
     init_fn_([](WLevel*, WEngine*){}),
     update_fn_([](WLevel*, WEngine*){}),
     close_fn_([](WLevel*, WEngine*){})
-{}
+{
+    entity_component_db_.InsertEntity<WEntity>(
+        WEntityId{1},
+        "LevelEntity"
+        );
+}
 
 WLevel::WLevel(const char * in_name,
                const WLevelId & in_id) :
@@ -22,6 +27,11 @@ WLevel::WLevel(const char * in_name,
     close_fn_([](WLevel*, WEngine*){})
 {
     std::strcpy(name_, in_name);
+
+    entity_component_db_.InsertEntity<WEntity>(
+        WEntityId{1},
+        "LevelEntity"
+        );
 }
 
 WLevel::WLevel(const char * in_name,
@@ -36,6 +46,11 @@ WLevel::WLevel(const char * in_name,
     close_fn_(in_close_fn)
 {
     std::strcpy(name_, in_name);
+
+    entity_component_db_.InsertEntity<WEntity>(
+        WEntityId{1},
+        "LevelEntity"
+        );
 }
 
 WLevel::WLevel(const WLevel& other) :
@@ -121,7 +136,7 @@ WEntityComponentId WLevel::CreateComponent(const WEntityId & in_actor_id,
 
     entity_component_db_.CreateComponent(in_class, in_actor_id);
     
-    return entity_component_db_.EntityComponentId(in_actor_id, in_class);
+    return entity_component_db_.EntityComponentId(WID(), in_actor_id, in_class);
 }
 void WLevel::ForEachComponent(const WClass * in_class,
                               TFunction<void(WComponent*)> in_predicate) const {

@@ -10,6 +10,10 @@
 
 class WEngine;
 
+/**
+ * @brief WLevel stores all current entities and components.
+ * WEntityId 1 is reserved to store Level components.
+ */
 class WLEVEL_API WLevel {
 public:
 
@@ -117,6 +121,7 @@ public:
         close_fn_ = std::move(in_fn);
     }
 
+    // TODO Remove this, use WLevel Public methods.
     const WEntityComponentDb & EntityComponentDb() const {
         return entity_component_db_;
     }
@@ -134,6 +139,7 @@ private:
 
     char name_[WOBJECT_NAME_SIZE];
 
+    // WEntityId 1 is reserved for Level Components.
     WEntityComponentDb entity_component_db_;
 
     InitFn init_fn_;

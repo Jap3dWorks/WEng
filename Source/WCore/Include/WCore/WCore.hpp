@@ -120,10 +120,11 @@ using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
 using WEntityComponentId = _WId<std::size_t>;  // combine entity with component type id;
 using WAssetId = _WId<std::size_t>;
-using WLevelId = _WId<std::uint32_t>;
+using WLevelId = _WId<std::uint16_t>;
 
 using WEventId = _WId<std::uint32_t>;
 
+using WSystemId = _WId<std::uint32_t>;
 
 namespace std
 {
@@ -140,20 +141,28 @@ namespace std
 namespace WIdUtils {
 
     inline void FromEntityComponentId(const WEntityComponentId & in_src,
-                                      WEntityId & out_dst1,
-                                      WComponentTypeId & out_dst2) {
+                                      WLevelId & out_dst1,
+                                      WEntityId & out_dst2,
+                                      WComponentTypeId & out_dst3) {
         std::size_t value = in_src.GetId();
+        
+        out_dst3 = value;
+        value >>= sizeof(WComponentTypeId);
         out_dst2 = value;
-        value >>= 8;
-        out_dst2 = value;
+        value >>= sizeof(WEntityId);
+        out_dst1 = value;
     }
 
-    inline WEntityComponentId ToEntityComponentId(const WEntityId & in_src1,
-                                                  const WComponentTypeId & in_src2) {
+    inline WEntityComponentId ToEntityComponentId(const WLevelId & in_src1,
+                                                  const WEntityId & in_src2,
+                                                  const WComponentTypeId & in_src3) {
         size_t v=0;
+
         v |= in_src1.GetId();
-        v <<= 8;
+        v <<= sizeof(WEntityId);
         v |= in_src2.GetId();
+        v <<= sizeof(WComponentTypeId);
+        v |= in_src3.GetId();
 
         return v;
     }

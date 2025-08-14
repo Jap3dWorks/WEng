@@ -14,13 +14,16 @@ WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const char *
         id
         );
 
-    WEntity* entity = entity_db_.Get(in_class, id);
-
-    entity->WID(id);
-    entity->Name(in_name);
+    UpdateEntityData(in_class, id, in_name);
 
     return id;
+}
 
+void WEntityComponentDb::InsertEntity(const WClass * in_class,
+                                      const WEntityId & in_id,
+                                      const char * in_name) {
+    entity_db_.CreateAt(in_class, in_id);
+    UpdateEntityData(in_class, in_id, in_name);
 }
 
 void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
@@ -62,3 +65,13 @@ void WEntityComponentDb::UpdateComponentMetadata(const WClass * in_component_cla
     }
 }
 
+void WEntityComponentDb::UpdateEntityData(const WClass * in_entity_class,
+                                          const WEntityId & in_id,
+                                          const char * in_name) {
+
+    WEntity* entity = entity_db_.Get(in_entity_class, in_id);
+
+    entity->WID(in_id);
+    entity->Name(in_name);
+    
+}
