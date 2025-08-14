@@ -52,11 +52,11 @@ public:
     }
 
     WLevelDb & LevelRegister() noexcept {
-        return level_register_;
+        return level_db_;
     }
 
     const WLevelDb & LevelRegister() const noexcept {
-        return level_register_;
+        return level_db_;
     }
 
     WImporterRegister & ImportersRegister() noexcept {
@@ -121,7 +121,7 @@ private:
 
     WSystemDb system_db_;
 
-    WLevelDb level_register_;
+    WLevelDb level_db_;
 
     WInputMappingRegister input_mapping_register_;
 

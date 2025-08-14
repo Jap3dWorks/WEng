@@ -86,27 +86,51 @@ void WSystemDb::Clear() {
 
 }
 
-void WSystemDb::RunPresystems(WEngine * in_engine) const {
+void WSystemDb::RunInitSystems(WEngine * in_engine) const {
+    for(auto & fn : init_systems_) {
+        fn(in_engine);
+    }
+}
+
+void WSystemDb::RunPreSystems(WEngine * in_engine) const {
 
     for (auto & fn : pre_systems_) {
         fn(in_engine);
     }
 }
 
-void WSystemDb::RunPostsystems(WEngine * in_engine) const {
+void WSystemDb::RunPostSystems(WEngine * in_engine) const {
     for (auto & fn : post_systems_) {
         fn(in_engine);
     }
 }
 
-void WSystemDb::RunLocalPresystems(WLevel * in_level, WEngine * in_engine) const {
+void WSystemDb::RunEndSystems(WEngine * in_engine) const {
+    for (auto & fn : end_systems_) {
+        fn(in_engine);
+    }
+}
+
+void WSystemDb::RunInitLevelSystems(WLevel * in_level, WEngine * in_engine) const {
+    for (auto & fn : init_level_systems_.at(in_level->WID())) {
+        fn(in_level, in_engine);
+    }
+}
+
+void WSystemDb::RunPreLevelSystems(WLevel * in_level, WEngine * in_engine) const {
     for(auto & fn : pre_level_systems_.at(in_level->WID())) {
         fn(in_level, in_engine);
     }
 }
 
-void WSystemDb::RunLocalPostsystems(WLevel * in_level, WEngine * in_engine) const {
+void WSystemDb::RunPostLevelSystems(WLevel * in_level, WEngine * in_engine) const {
     for (auto & fn : post_level_systems_.at(in_level->WID())) {
+        fn(in_level, in_engine);
+    }
+}
+
+void WSystemDb::RunEndLevelSystems(WLevel * in_level, WEngine * in_engine) const {
+    for (auto & fn : end_level_systems_.at(in_level->WID())) {
         fn(in_level, in_engine);
     }
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "WCore/WCore.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TSparseSet.hpp"
@@ -49,19 +50,28 @@ public:
 
     WSystemId AddEndLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fb);
 
-    // 
 
     void RemoveSystem(const WSystemId & in_id);
 
     void Clear();
 
-    void RunPresystems(WEngine * in_engine) const;
+    // Run Systems
 
-    void RunPostsystems(WEngine * in_engine) const;
+    void RunInitSystems(WEngine * in_engine) const;
 
-    void RunLocalPresystems(WLevel * in_level, WEngine * in_engine) const;
+    void RunPreSystems(WEngine * in_engine) const;
 
-    void RunLocalPostsystems(WLevel * in_level, WEngine * in_engine) const;
+    void RunPostSystems(WEngine * in_engine) const;
+
+    void RunEndSystems(WEngine * in_engine) const;
+
+    void RunInitLevelSystems(WLevel * in_level, WEngine * in_engine) const;
+
+    void RunPreLevelSystems(WLevel * in_level, WEngine * in_engine) const;
+
+    void RunPostLevelSystems(WLevel * in_level, WEngine * in_engine) const;
+
+    void RunEndLevelSystems(WLevel * in_level, WEngine * in_engine) const;
 
 private:
 
