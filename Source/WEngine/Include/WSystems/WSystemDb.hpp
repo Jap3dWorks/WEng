@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TSparseSet.hpp"
-#include "WSystems/WSystem.hpp"
+#include "WSystems/WSystems.hpp"
 
 #include <unordered_map>
 
@@ -13,8 +13,8 @@
 class WENGINE_API WSystemDb {
 private:
 
-    using Systems = TSparseSet<WSystem::WSystemFn>;
-    using LevelSystems = std::unordered_map<WLevelId, TSparseSet<WSystem::WLevelSystemFn>>;
+    using Systems = TSparseSet<WSystems::WSystemFn>;
+    using LevelSystems = std::unordered_map<WLevelId, TSparseSet<WSystems::WLevelSystemFn>>;
 
 public:
 
@@ -32,23 +32,23 @@ public:
 
     // Systems
 
-    WSystemId AddInitSystem(const WSystem::WSystemFn & in_fn);
+    WSystemId AddInitSystem(const WSystems::WSystemFn & in_fn);
 
-    WSystemId AddPreSystem(const WSystem::WSystemFn & in_fn);
+    WSystemId AddPreSystem(const WSystems::WSystemFn & in_fn);
 
-    WSystemId AddPostSystem(const WSystem::WSystemFn & in_fn);
+    WSystemId AddPostSystem(const WSystems::WSystemFn & in_fn);
 
-    WSystemId AddEndSystem(const WSystem::WSystemFn & in_fn);
+    WSystemId AddEndSystem(const WSystems::WSystemFn & in_fn);
 
     // Level Systems
 
-    WSystemId AddInitLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+    WSystemId AddInitLevelSystem(const WLevelId & in_level_id, const WSystems::WLevelSystemFn & in_fn);
 
-    WSystemId AddPreLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+    WSystemId AddPreLevelSystem(const WLevelId & in_level_id, const WSystems::WLevelSystemFn & in_fn);
 
-    WSystemId AddPostLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+    WSystemId AddPostLevelSystem(const WLevelId & in_level_id, const WSystems::WLevelSystemFn & in_fn);
 
-    WSystemId AddEndLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fb);
+    WSystemId AddEndLevelSystem(const WLevelId & in_level_id, const WSystems::WLevelSystemFn & in_fb);
 
 
     void RemoveSystem(const WSystemId & in_id);
@@ -88,12 +88,12 @@ private:
 
     WSystemId AddSystem(Systems & out_system,
                         const ESystemLocation & in_location,
-                        const WSystem::WSystemFn & in_system);
+                        const WSystems::WSystemFn & in_system);
 
     WSystemId AddLevelSystem(LevelSystems & out_system,
                              const ESystemLocation & in_location,
                              const WLevelId & in_level_id,
-                             const WSystem::WLevelSystemFn & in_system);
+                             const WSystems::WLevelSystemFn & in_system);
 
     Systems init_systems_;
     Systems pre_systems_;

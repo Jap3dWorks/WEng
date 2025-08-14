@@ -2,39 +2,39 @@
 #include "WCore/WCore.hpp"
 #include "WLevel/WLevel.hpp"
 
-WSystemId WSystemDb::AddInitSystem(const WSystem::WSystemFn & in_system) {
+WSystemId WSystemDb::AddInitSystem(const WSystems::WSystemFn & in_system) {
     return AddSystem(init_systems_, ESystemLocation::INIT, in_system);
 }
 
-WSystemId WSystemDb::AddPreSystem(const WSystem::WSystemFn & in_system) {
+WSystemId WSystemDb::AddPreSystem(const WSystems::WSystemFn & in_system) {
     return AddSystem(pre_systems_, ESystemLocation::INIT, in_system);
 }
 
-WSystemId WSystemDb::AddPostSystem(const WSystem::WSystemFn & in_system) {
+WSystemId WSystemDb::AddPostSystem(const WSystems::WSystemFn & in_system) {
     return AddSystem(post_systems_, ESystemLocation::POST, in_system);
 }
 
-WSystemId WSystemDb::AddEndSystem(const WSystem::WSystemFn & in_system) {
+WSystemId WSystemDb::AddEndSystem(const WSystems::WSystemFn & in_system) {
     return AddSystem(end_systems_, ESystemLocation::END, in_system);
 }
 
 WSystemId WSystemDb::AddInitLevelSystem(const WLevelId & in_level_id,
-                                        const WSystem::WLevelSystemFn & in_system) {
+                                        const WSystems::WLevelSystemFn & in_system) {
     return AddLevelSystem(init_level_systems_, ESystemLocation::LEVEL_PRE, in_level_id, in_system);
 }
 
 WSystemId WSystemDb::AddPreLevelSystem(const WLevelId & in_level_id,
-                                       const WSystem::WLevelSystemFn & in_system) {
+                                       const WSystems::WLevelSystemFn & in_system) {
     return AddLevelSystem(pre_level_systems_, ESystemLocation::LEVEL_PRE, in_level_id, in_system);
 }
 
 WSystemId WSystemDb::AddPostLevelSystem(const WLevelId & in_level_id,
-                                        const WSystem::WLevelSystemFn & in_system) {
+                                        const WSystems::WLevelSystemFn & in_system) {
     return AddLevelSystem(post_level_systems_, ESystemLocation::LEVEL_POST, in_level_id, in_system);
 }
 
 WSystemId WSystemDb::AddEndLevelSystem(const WLevelId & in_level_id,
-                                       const WSystem::WLevelSystemFn & in_system) {
+                                       const WSystems::WLevelSystemFn & in_system) {
     return AddLevelSystem(end_level_systems_, ESystemLocation::LEVEL_END, in_level_id, in_system);
 }
 
@@ -137,7 +137,7 @@ void WSystemDb::RunEndLevelSystems(WLevel * in_level, WEngine * in_engine) const
 
 WSystemId WSystemDb::AddSystem(Systems & out_system,
                                const ESystemLocation & in_location,
-                               const WSystem::WSystemFn & in_system) {
+                               const WSystems::WSystemFn & in_system) {
     WSystemId sid = id_pool_.Generate();
 
     out_system.Insert(sid.GetId(), in_system);
@@ -149,7 +149,7 @@ WSystemId WSystemDb::AddSystem(Systems & out_system,
 WSystemId WSystemDb::AddLevelSystem(LevelSystems & out_system,
                                     const ESystemLocation & in_location,
                                     const WLevelId & in_level_id,
-                                    const WSystem::WLevelSystemFn & in_system) {
+                                    const WSystems::WLevelSystemFn & in_system) {
     WSystemId sid = id_pool_.Generate();
 
     out_system[in_level_id].Insert(in_level_id.GetId(), in_system);

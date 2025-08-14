@@ -5,6 +5,7 @@ add_library(
         Source/WEngine.cpp
         Source/WInputMappingRegister.cpp
         Source/WSystemDb.cpp
+        Source/WSystemRegister.cpp
 )
 
 target_include_directories(
