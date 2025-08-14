@@ -1,9 +1,9 @@
-#include "WLevelRegister/WLevelRegister.hpp"
+#include "WLevel/WLevelDb.hpp"
 #include "WLevel/WLevel.hpp"
 
 #include <cassert>
 
-WLevelRegister::WLevelRegister() :
+WLevelDb::WLevelDb() :
     levels_(
         [](const WLevelId& id){
             WLevel lvl("WLevel", id);
@@ -11,14 +11,14 @@ WLevelRegister::WLevelRegister() :
         [](WLevel&){}
         ) {}
 
-WLevelRegister::WLevelRegister(const WLevelRegister & other) :
+WLevelDb::WLevelDb(const WLevelDb & other) :
     levels_(other.levels_) {}
 
-WLevelRegister::WLevelRegister(WLevelRegister && other) :
+WLevelDb::WLevelDb(WLevelDb && other) :
     levels_(std::move(other.levels_)),
     id_pool_(std::move(other.id_pool_)) {}
 
-WLevelRegister& WLevelRegister::operator=(const WLevelRegister & other) {
+WLevelDb& WLevelDb::operator=(const WLevelDb & other) {
     if (this != &other) {
         levels_.Clear();
         levels_ = other.levels_;
@@ -28,7 +28,7 @@ WLevelRegister& WLevelRegister::operator=(const WLevelRegister & other) {
     return *this;
 }
 
-WLevelRegister& WLevelRegister::operator=(WLevelRegister && other){
+WLevelDb& WLevelDb::operator=(WLevelDb && other){
     if (this != &other) {
         levels_.Clear();
         

@@ -14,8 +14,8 @@ class WEngine;
 
 namespace WSystem {
 
-    using WLocalSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
-    using WGlobalSystemFn = TFnPtr<bool(WEngine*)>;
+    using WLevelSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
+    using WSystemFn = TFnPtr<bool(WEngine*)>;
 
     bool UpdateRenderTransformSystem(WLevel* in_level, WEngine* in_engine);
 

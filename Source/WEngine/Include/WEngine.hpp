@@ -5,10 +5,11 @@
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WImporterRegister.hpp"
-#include "WLevelRegister/WLevelRegister.hpp"
+#include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WStructs/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
+#include "WSystems/WSystemDb.hpp"
 
 #include <memory>
 
@@ -50,11 +51,11 @@ public:
         return level_info_;
     }
 
-    WLevelRegister & LevelRegister() noexcept {
+    WLevelDb & LevelRegister() noexcept {
         return level_register_;
     }
 
-    const WLevelRegister & LevelRegister() const noexcept {
+    const WLevelDb & LevelRegister() const noexcept {
         return level_register_;
     }
 
@@ -116,13 +117,16 @@ private:
 
     std::unique_ptr<IRender> render_;
 
-    WImporterRegister importers_register_;
-
-    WLevelRegister level_register_;
-
     WAssetDb asset_db_;
 
+    WSystemDb system_db_;
+
+    WLevelDb level_register_;
+
     WInputMappingRegister input_mapping_register_;
+
+    WImporterRegister importers_register_;
+
 
 };
 

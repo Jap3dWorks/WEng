@@ -7,26 +7,28 @@
 #include "WLevel/WLevel.hpp"
 
 /**
- * @brief Register Open and Close Levels.
+ * @brief Levels Db
  */
-class WLEVEL_API WLevelRegister {
+class WLEVEL_API WLevelDb {
 public:
 
     using WLevelIdPool = WIdPool<WLevelId>;
 
-    using WLevelDb = TObjectDataBase<WLevel, WLevel, WLevelId>;
+    using WLevelDbType = TObjectDataBase<WLevel, WLevel, WLevelId>;
 
-    WLevelRegister();
+public:
 
-    virtual ~WLevelRegister() = default;
+    WLevelDb();
 
-    WLevelRegister(const WLevelRegister & other);
+    virtual ~WLevelDb() = default;
 
-    WLevelRegister(WLevelRegister && other);
+    WLevelDb(const WLevelDb & other);
 
-    WLevelRegister& operator=(const WLevelRegister & other);
+    WLevelDb(WLevelDb && other);
 
-    WLevelRegister& operator=(WLevelRegister && other);
+    WLevelDb& operator=(const WLevelDb & other);
+
+    WLevelDb& operator=(WLevelDb && other);
 
     WLevelId Create() {
         return levels_.Create();
@@ -48,7 +50,7 @@ private:
     
     WLevelIdPool id_pool_;
 
-    WLevelDb levels_;
+    WLevelDbType levels_;
 
 };
 

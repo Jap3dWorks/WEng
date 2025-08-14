@@ -2,41 +2,102 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WIdPool.hpp"
 #include "WCore/TSparseSet.hpp"
-#include "WSystem.hpp"
+#include "WSystems/WSystem.hpp"
 
-#include <vector>
 #include <unordered_map>
 
+/**
+ * @brief Active in use systems.
+ */
 class WENGINE_API WSystemDb {
 private:
 
-    using GlobalSystems = TSparseSet<WSystem::WGlobalSystemFn>;
-    using LocalSystems = std::unordered_map<WLevelId, TSparseSet<WSystem::WLocalSystemFn>>;
+    using Systems = TSparseSet<WSystem::WSystemFn>;
+    using LevelSystems = std::unordered_map<WLevelId, TSparseSet<WSystem::WLevelSystemFn>>;
 
 public:
 
-    void AddGlobalPresystem(WSystem::WGlobalSystemFn);
+    WSystemDb() noexcept =default;
 
-    void AddGlobalPostsystem(WSystem::WGlobalSystemFn);
+    ~WSystemDb()=default;
 
-    void AddLocalPresystem(const WLevelId &, WSystem::WLocalSystemFn);
+    WSystemDb(const WSystemDb & other) = default;
 
-    void AddGlobalPresystem(const WLevelId &, WSystem::WLocalSystemFn);
+    WSystemDb(WSystemDb && other) noexcept = default;
 
-    void RunPresystems(WEngine * in_engine);
+    WSystemDb & operator=(const WSystemDb & other) = default;
 
-    void RunPostsystems(WEngine * in_engine);
+    WSystemDb & operator=(WSystemDb && other) noexcept = default;
 
-    void RunLocalPresystems(WLevel * in_level, WEngine * in_engine);
+    // Systems
 
-    void RunLocalPostsystems(WLevel * in_level, WEngine * in_engine);
+    WSystemId AddInitSystem(const WSystem::WSystemFn & in_fn);
+
+    WSystemId AddPreSystem(const WSystem::WSystemFn & in_fn);
+
+    WSystemId AddPostSystem(const WSystem::WSystemFn & in_fn);
+
+    WSystemId AddEndSystem(const WSystem::WSystemFn & in_fn);
+
+    // Level Systems
+
+    WSystemId AddInitLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+
+    WSystemId AddPreLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+
+    WSystemId AddPostLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fn);
+
+    WSystemId AddEndLevelSystem(const WLevelId & in_level_id, const WSystem::WLevelSystemFn & in_fb);
+
+    // 
+
+    void RemoveSystem(const WSystemId & in_id);
+
+    void Clear();
+
+    void RunPresystems(WEngine * in_engine) const;
+
+    void RunPostsystems(WEngine * in_engine) const;
+
+    void RunLocalPresystems(WLevel * in_level, WEngine * in_engine) const;
+
+    void RunLocalPostsystems(WLevel * in_level, WEngine * in_engine) const;
 
 private:
 
-    GlobalSystems global_presystems_;
-    GlobalSystems global_postsystems_;
+    enum class ESystemLocation : std::uint8_t {
+        INIT,
+        PRE,
+        POST,
+        END,
+        LEVEL_INIT,
+        LEVEL_PRE,
+        LEVEL_POST,
+        LEVEL_END
+    };
 
-    LocalSystems local_presystems_;
-    LocalSystems local_postsystems_;
+    WSystemId AddSystem(Systems & out_system,
+                        const ESystemLocation & in_location,
+                        const WSystem::WSystemFn & in_system);
+
+    WSystemId AddLevelSystem(LevelSystems & out_system,
+                             const ESystemLocation & in_location,
+                             const WLevelId & in_level_id,
+                             const WSystem::WLevelSystemFn & in_system);
+
+    Systems init_systems_;
+    Systems pre_systems_;
+    Systems post_systems_;
+    Systems end_systems_;
+
+    LevelSystems init_level_systems_;
+    LevelSystems pre_level_systems_;
+    LevelSystems post_level_systems_;
+    LevelSystems end_level_systems_;
+
+    WIdPool<WSystemId> id_pool_;
+
+    std::unordered_map<WSystemId, ESystemLocation> systemid_location_;
+    std::unordered_map<WSystemId, WLevelId> systemid_levelid_;
 
 };

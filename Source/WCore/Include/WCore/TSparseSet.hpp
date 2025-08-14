@@ -140,6 +140,14 @@ public:
         return compact_.end();
     }
 
+    constexpr ConstIterator begin() const noexcept {
+        return compact_.begin();
+    }
+
+    constexpr ConstIterator end() const noexcept {
+        return compact_.end();
+    }
+
     constexpr ConstIterator cbegin() const noexcept {
         return compact_.cbegin();
     }
