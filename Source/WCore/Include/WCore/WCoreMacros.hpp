@@ -25,3 +25,6 @@
     #undef HOT
     #define HOT inline
 #endif
+
+#define WNSPCE()
+

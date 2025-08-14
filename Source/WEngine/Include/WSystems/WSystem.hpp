@@ -1,23 +1,24 @@
 #pragma once
+
+#include "WCore/WCore.hpp"
 #include "WCore/TFunction.hpp"
+#include "WSystems/WSystemMacros.hpp"
 
 class WLevel;
 class WEngine;
+class WSystemRegistry;
 
-#ifndef LOCAL_WSYSTEM
-#define LOCAL_WSYSTEM
-#endif
-
-#ifndef GLOBAL_WSYSTEM
-#define GLOBAL_WSYSTEM
-#endif
-
+WNSPCE()
 namespace WSystem {
 
     using WLevelSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
     using WSystemFn = TFnPtr<bool(WEngine*)>;
 
-    bool UpdateRenderTransformSystem(WLevel* in_level, WEngine* in_engine);
+    DECLARE_LEVEL_WSYSTEM(UpdateRenderTransformSystem)
+
+    
+
+    // bool UpdateRenderTransformSystem(WLevel* in_level, WEngine* in_engine);
 
 }
 
