@@ -33,7 +33,7 @@ class WEngine;
 
 #define END_DEFINE_WSYSTEM() }
 
-#define START_DEFINE_WSYSTEMS_REG(_MODULE, _NAME) void _MODULE ## _ ## _NAME ## _REG (WSystemRegsiter & in_register) {
+#define START_DEFINE_WSYSTEMS_REG(_MODULE, _NAME) void WSystems:: _MODULE ## _ ## _NAME ## _REG (WSystemRegister & in_register) {
 
 #define END_DEFINE_WSYSTEMS_REG() }
 

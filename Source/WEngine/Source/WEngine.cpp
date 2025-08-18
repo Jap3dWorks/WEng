@@ -110,6 +110,13 @@ void WEngine::run()
     level_info_.current_level = startup_info_.startup_level;
     level_info_.loaded = false;
 
+    // Load initial Level
+    
+    LoadLevel(level_info_.current_level);
+    level_info_.level.Init(this);
+    system_db_.RunInitSystems(this);
+    system_db_.RunInitLevelSystems(&level_info_.level, this);
+
     // TODO Create WSystem to process the components (local WSystems, global WSystems (engine)).
 
     while(!glfwWindowShouldClose(window_.window)) {
@@ -119,6 +126,8 @@ void WEngine::run()
         
         if (!level_info_.loaded) {
             // TODO run End Systems
+            system_db_.RunEndSystems(this);
+            system_db_.RunEndLevelSystems(&level_info_.level, this);
 
             Render()->WaitIdle();
             UnloadLevel();
