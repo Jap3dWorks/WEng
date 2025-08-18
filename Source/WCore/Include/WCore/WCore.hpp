@@ -124,7 +124,9 @@ using WLevelId = _WId<std::uint16_t>;
 
 using WEventId = _WId<std::uint32_t>;
 
-using WSystemId = _WId<std::uint32_t>;
+using WSystemId = _WId<std::uint16_t>;
+
+using WLevelSystemId = _WId<std::uint32_t>;
 
 namespace std
 {
@@ -146,11 +148,19 @@ namespace WIdUtils {
                                       WComponentTypeId & out_dst3) {
         std::size_t value = in_src.GetId();
         
-        out_dst3 = value;
+        std::uint16_t lvlid=0;
+        std::uint32_t entid=0;
+        std::uint8_t cclassid=0;
+
+        cclassid |= value;
         value >>= sizeof(WComponentTypeId);
-        out_dst2 = value;
+        entid |= value;
         value >>= sizeof(WEntityId);
-        out_dst1 = value;
+        lvlid |= value;
+
+        out_dst1 = lvlid;
+        out_dst2 = entid;
+        out_dst3 = cclassid;
     }
 
     inline WEntityComponentId ToEntityComponentId(const WLevelId & in_src1,
@@ -163,6 +173,31 @@ namespace WIdUtils {
         v |= in_src2.GetId();
         v <<= sizeof(WComponentTypeId);
         v |= in_src3.GetId();
+
+        return v;
+    }
+
+    inline void FromLevelSystemId(const WLevelSystemId & in_src,
+                                  WLevelId & out_dst1,
+                                  WSystemId & out_dst2) {
+        std::uint32_t v = in_src.GetId();
+        std::uint16_t lvlid = 0;
+        std::uint16_t sysid = 0;
+
+        sysid |= v;
+        v >>= sizeof(WSystemId);
+        lvlid |= v;
+
+        out_dst1 = lvlid;
+        out_dst2 = sysid;
+    }
+
+    inline WLevelSystemId ToLevelSystemId(const WLevelId & in_level_id,
+                                          const WSystemId & in_system_id) {
+        std::uint32_t v=0;
+        v |= in_level_id.GetId();
+        v <<= sizeof(WSystemId);
+        v |= in_system_id.GetId();
 
         return v;
     }

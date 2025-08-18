@@ -32,6 +32,11 @@ WEngine WEngine::DefaultCreate()
     result.ImportersRegister().Register<WImportObj>();
     result.ImportersRegister().Register<WImportTexture>();
 
+    // Register Wengine systems
+    WSystems::WENGINE_WSYSTEMS_REG(result.systems_reg_);
+
+    // TODO Plugins Modules Loading
+
     return result;
 }
 
@@ -40,11 +45,14 @@ WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
     startup_info_(),
     engine_status_(),
     window_(),
+    engine_cycle_(),
     render_(std::move(in_render)),
-    importers_register_(),
-    level_db_(),
     asset_db_(),
-    input_mapping_register_()
+    level_db_(),
+    systems_reg_(),
+    systems_runner_(),
+    input_mapping_register_(),
+    importers_register_()    
 {}
 
 WEngine::~WEngine()=default;
@@ -54,11 +62,14 @@ WEngine::WEngine(WEngine && other) noexcept :
     startup_info_(std::move(other.startup_info_)),
     engine_status_(std::move(other.engine_status_)),
     window_(std::move(other.window_)),
+    engine_cycle_(std::move(other.engine_cycle_)),
     render_(std::move(other.render_)),
-    importers_register_(std::move(other.importers_register_)),
-    level_db_(std::move(other.level_db_)),
     asset_db_(std::move(other.asset_db_)),
-    input_mapping_register_(std::move(other.input_mapping_register_))
+    level_db_(std::move(other.level_db_)),
+    systems_reg_(std::move(other.systems_reg_)),
+    systems_runner_(std::move(other.systems_runner_)),
+    input_mapping_register_(std::move(other.input_mapping_register_)),
+    importers_register_(std::move(other.importers_register_))
 {
     if (window_.window) {
         glfwSetWindowUserPointer(window_.window, this);
@@ -74,10 +85,12 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
         engine_status_ = std::move(other.engine_status_);
         window_ = std::move(other.window_);
         render_ = std::move(other.render_);
-        importers_register_ = std::move(other.importers_register_);
-        level_db_ = std::move(other.level_db_);
         asset_db_ = std::move(other.asset_db_);
+        level_db_ = std::move(other.level_db_);
+        systems_reg_ = std::move(other.systems_reg_);
+        systems_runner_ = std::move(other.systems_runner_);
         input_mapping_register_ = std::move(other.input_mapping_register_);
+        importers_register_ = std::move(other.importers_register_);
 
         if (window_.window) {
             glfwSetWindowUserPointer(window_.window, this);
@@ -114,8 +127,7 @@ void WEngine::run()
     
     LoadLevel(level_info_.current_level);
     level_info_.level.Init(this);
-    system_db_.RunInitSystems(this);
-    system_db_.RunInitLevelSystems(&level_info_.level, this);
+    systems_runner_.RunInitSystems({this, &level_info_.level});
 
     // TODO Create WSystem to process the components (local WSystems, global WSystems (engine)).
 
@@ -126,8 +138,7 @@ void WEngine::run()
         
         if (!level_info_.loaded) {
             // TODO run End Systems
-            system_db_.RunEndSystems(this);
-            system_db_.RunEndLevelSystems(&level_info_.level, this);
+            systems_runner_.RunEndSystems({this, &level_info_.level});
 
             Render()->WaitIdle();
             UnloadLevel();
@@ -137,16 +148,13 @@ void WEngine::run()
 
             // TODO update static transforms WStaticTransformComponent
 
-            system_db_.RunInitSystems(this);
-            system_db_.RunInitLevelSystems(&level_info_.level, this);
+            systems_runner_.RunInitSystems({this, &level_info_.level});
         }
         else
         {
-            system_db_.RunPreSystems(this);
-            system_db_.RunPreLevelSystems(&level_info_.level, this);
+            systems_runner_.RunPreSystems({this, &level_info_.level});
 
-            system_db_.RunPostSystems(this);
-            system_db_.RunPostLevelSystems(&level_info_.level, this);
+            systems_runner_.RunPostSystems({this, &level_info_.level});
 
             // // Update Render Camera
             // level_info_.level.ForEachComponent<WCameraComponent> (

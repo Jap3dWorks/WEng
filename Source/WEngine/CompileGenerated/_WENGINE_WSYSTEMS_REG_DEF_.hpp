@@ -4,7 +4,7 @@
 // include headers
 #include "WSystems/WSystemMacros.hpp"
 #include "WSystems/WSystems.hpp"
-#include "WSystems/WSystemRegister.hpp"
+#include "WSystems/WSystemsRegister.hpp"
 
 // Start Register Generation
 START_DEFINE_WSYSTEMS_REG(WENGINE, WSYSTEMS)

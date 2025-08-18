@@ -4,8 +4,13 @@
 #include "WCore/TFunction.hpp"
 #include "WSystems/WSystemMacros.hpp"
 
-using WLevelSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
-using WSystemFn = TFnPtr<bool(WEngine*)>;
+struct WSystemParameters {
+    WEngine * engine;
+    WLevel * level;
+};
+
+// using WLevelSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
+using WSystemFn = TFnPtr<bool(const WSystemParameters &)>;
 
 START_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 

@@ -9,7 +9,8 @@
 #include "WObjectDb/WAssetDb.hpp"
 #include "WStructs/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
-#include "WSystems/WSystemDb.hpp"
+#include "WSystems/WSystemsRegister.hpp"
+#include "WSystems/WSystemsRunner.hpp"
 
 #include <memory>
 
@@ -118,15 +119,14 @@ private:
     std::unique_ptr<IRender> render_;
 
     WAssetDb asset_db_;
-
-    WSystemDb system_db_;
-
     WLevelDb level_db_;
+
+    WSystemsRegister systems_reg_;
+    WSystemsRunner systems_runner_;
 
     WInputMappingRegister input_mapping_register_;
 
     WImporterRegister importers_register_;
-
 
 };
 

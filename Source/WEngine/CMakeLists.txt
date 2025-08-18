@@ -4,8 +4,8 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
         Source/WEngine.cpp
         Source/WInputMappingRegister.cpp
-        Source/WSystemDb.cpp
-        Source/WSystemRegister.cpp
+        Source/WSystemsRunner.cpp
+        Source/WSystemsRegister.cpp
 )
 
 target_include_directories(
