@@ -141,6 +141,7 @@ void WEngine::run()
             systems_runner_.RunEndSystems({this, &level_info_.level});
 
             Render()->WaitIdle();
+            
             UnloadLevel();
             LoadLevel(level_info_.current_level);
 

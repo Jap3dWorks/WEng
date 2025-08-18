@@ -14,7 +14,9 @@ using WSystemFn = TFnPtr<bool(const WSystemParameters &)>;
 
 START_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 
-    WENGINE_API DECLARE_LEVEL_WSYSTEM(UpdateRenderTransformSystem)
+    DECLARE_WSYSTEM(WENGINE_API, System_UpdateRenderTransform)
+
+    DECLARE_WSYSTEM(WENGINE_API, System_UpdateRenderCamera)
 
     // bool UpdateRenderTransformSystem(WLevel* in_level, WEngine* in_engine);
 
