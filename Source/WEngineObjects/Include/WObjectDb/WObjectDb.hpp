@@ -129,7 +129,7 @@ public:
 
     WObjClass * GetFirst(const WClass * in_class, WIdClass & out_id) const {
         WObjClass * result;
-        db_.at(in_class).GetFirst(result, out_id);
+        db_.at(in_class)->GetFirst(result, out_id);
         
         return result;
     }

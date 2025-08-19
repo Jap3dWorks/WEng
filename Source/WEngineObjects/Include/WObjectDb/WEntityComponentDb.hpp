@@ -132,7 +132,7 @@ public:
     WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
                                          const WEntityId & in_id,
                                          const WClass * in_component_class) const {
-        assert(componentclass_id_.contains(in_class));
+        assert(componentclass_id_.contains(in_component_class));
         
         return WIdUtils::ToEntityComponentId(
             in_lvlid,

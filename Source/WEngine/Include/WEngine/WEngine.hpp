@@ -79,6 +79,14 @@ public:
         return engine_cycle_;
     }
 
+    WLevelSystemId AddInitSystem(const WLevelId & in_level_id, const char * in_system_name);
+
+    WLevelSystemId AddPreSystem(const WLevelId & in_level_id, const char * in_system_name);
+
+    WLevelSystemId AddPostSystem(const WLevelId & in_level_id, const char * in_system_name);
+
+    WLevelSystemId AddEndSystem(const WLevelId & in_level_id, const char * in_system_name);
+
     TRef<IRender> Render() noexcept;
 
     WAssetDb & AssetManager() noexcept;

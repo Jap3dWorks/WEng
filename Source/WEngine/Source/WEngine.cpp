@@ -34,31 +34,16 @@ WEngine WEngine::DefaultCreate()
     result.ImportersRegister().Register<WImportTexture>();
 
     // Register Wengine systems
+    
     WSystems::WENGINE_WSYSTEMS_REG(result.systems_reg_);
 
-    WSystemId sid = result.systems_reg_.GetId("System_InitRenderLevelResources");
-    result.systems_runner_.AddInitSystem(
-        0, sid, result.systems_reg_.Get(sid)
-        );
+    result.AddInitSystem(0, "System_InitRenderLevelResources");
 
-    sid = result.systems_reg_.GetId(
-        "System_PostUpdateRenderTransform"
-        );
-    result.systems_runner_.AddPostSystem(
-        0, sid, result.systems_reg_.Get(sid)
-        );
+    result.AddPreSystem(0, "System_PostUpdateRenderTransform");
 
-    sid = result.systems_reg_.GetId(
-        "System_PostUpdateRenderCamera"
-        );
-    result.systems_runner_.AddPostSystem(
-        0, sid, result.systems_reg_.Get(sid)
-        );
+    result.AddPostSystem(0, "System_PostUpdateRenderCamera");
 
-    sid = result.systems_reg_.GetId("System_EndRenderLevelResources");
-    result.systems_runner_.AddEndSystem(
-        0, sid, result.systems_reg_.Get(sid)
-        );
+    result.AddEndSystem(0, "System_EndRenderLevelResources");
 
     // TODO Plugins Modules Loading
 
@@ -199,8 +184,6 @@ void WEngine::LoadLevel(WLevel & in_level) {
         level_info_.level.WID(),
         {this, &level_info_.level}
         );
-
-    // level_info_.level.Init(this);
 }
 
 void WEngine::UnloadLevel(WLevel & in_level) {
@@ -214,6 +197,34 @@ void WEngine::UnloadLevel(WLevel & in_level) {
 
 void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
     startup_info_.startup_level = in_id;
+}
+
+WLevelSystemId WEngine::AddInitSystem(const WLevelId & in_level_id, const char * in_system_name) {
+    WSystemId wsid = systems_reg_.GetId(in_system_name);
+    return systems_runner_.AddInitSystem(
+        in_level_id, wsid, systems_reg_.Get(wsid)
+        );
+}
+
+WLevelSystemId WEngine::AddPreSystem(const WLevelId & in_level_id, const char * in_system_name) {
+    WSystemId wsid = systems_reg_.GetId(in_system_name);
+    return systems_runner_.AddPreSystem(
+        in_level_id, wsid, systems_reg_.Get(wsid)
+        );
+}
+
+WLevelSystemId WEngine::AddPostSystem(const WLevelId & in_level_id, const char * in_system_name) {
+    WSystemId wsid = systems_reg_.GetId(in_system_name);
+    return systems_runner_.AddPostSystem(
+        in_level_id, wsid, systems_reg_.Get(wsid)
+        );
+}
+
+WLevelSystemId WEngine::AddEndSystem(const WLevelId & in_level_id, const char * in_system_name) {
+    WSystemId wsid = systems_reg_.GetId(in_system_name);
+    return systems_runner_.AddEndSystem(
+        in_level_id, wsid, systems_reg_.Get(wsid)
+        );
 }
 
 TRef<IRender> WEngine::Render() noexcept
@@ -298,6 +309,6 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
     // TODO: Store last cycle presed keys?
     
     // TODO: Also pass EngineData (delta time).
-    // TODO: Pass CycleData
+    // TODO: Pass CycleData.
     app->input_mapping_register_.Emit(ival, app);
 }

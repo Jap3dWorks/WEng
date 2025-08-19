@@ -244,12 +244,12 @@ public:
 
     void GetFirst(B* & out_first, WIdClass & out_id) override {
         out_id = objects_.IndexInPos(0);
-        out_first = &(objects_.Get(out_id));
+        out_first = &(objects_.Get(out_id.GetId()));
     }
     
     void GetFirst(const B*& out_first, WIdClass & out_id) const override {
         out_id = objects_.IndexInPos(0);
-        out_first = &(objects_.Get(out_id));
+        out_first = &(objects_.Get(out_id.GetId()));
     }
 
     size_t Count() const override final {
