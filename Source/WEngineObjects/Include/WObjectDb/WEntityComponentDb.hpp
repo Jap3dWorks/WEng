@@ -56,6 +56,15 @@ public:
         return entity_db_.Get(id_entityclass_.at(in_id), in_id);
     }
 
+    WEntity * GetFirstEntity(const WClass * in_class, WEntityId & in_id) const {
+        return entity_db_.GetFirst(in_class, in_id);
+    }
+
+    template<std::derived_from<WEntity> T>
+    T * GetFirstEntity(WEntityId & in_id) const {
+        return entity_db_.GetFirst<T>(in_id);
+    }
+
     /**
      * @brief Run in_predicate for each in_class entity (derived from in_class).
      */
@@ -111,15 +120,24 @@ public:
         return GetComponent(id_componentclass_.at(cid), eid);
     }
 
+    WComponent * GetFirstComponent(const WClass * in_class, WEntityId & out_id) const {
+        return component_db_.GetFirst(in_class, out_id);
+    }
+
+    template<std::derived_from<WComponent> T>
+    T * GetFirstComponent(WEntityId & out_id) const {
+        return component_db_.GetFirst<T>(out_id);
+    }
+
     WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
                                          const WEntityId & in_id,
-                                         const WClass * in_class) const {
+                                         const WClass * in_component_class) const {
         assert(componentclass_id_.contains(in_class));
         
         return WIdUtils::ToEntityComponentId(
             in_lvlid,
             in_id,
-            componentclass_id_.at(in_class));
+            componentclass_id_.at(in_component_class));
     }
 
     void ForEachComponent(const WClass * in_class,

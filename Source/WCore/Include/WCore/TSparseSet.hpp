@@ -99,6 +99,10 @@ public:
         return compact_[index_pos_.at(in_index)];
     }
 
+    std::size_t IndexInPos(std::size_t in_pos) const {
+        return pos_index_.at(in_pos);
+    }
+
     constexpr size_t Count() const noexcept {
         return compact_.size();
     }

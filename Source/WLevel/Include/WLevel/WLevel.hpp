@@ -77,6 +77,15 @@ public:
         return entity_component_db_.GetComponent(in_component_id);
     }
 
+    template<std::derived_from<WComponent> T>
+    T * GetFirstComponent(WEntityId & out_id) const {
+        return entity_component_db_.GetFirstComponent<T>(out_id);
+    }
+
+    WComponent * GetFirstComponent(const WClass * in_class, WEntityId & out_id) const {
+        return entity_component_db_.GetFirstComponent(in_class, out_id);
+    }
+
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const ;
 

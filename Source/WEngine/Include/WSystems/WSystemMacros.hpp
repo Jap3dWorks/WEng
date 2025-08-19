@@ -21,7 +21,7 @@ class WEngine;
             }                                                       \
     bool WSystems:: _FN(const WSystemParameters & parameters) {
 
-#define END_DEFINE_WSYSTEM() }
+#define END_DEFINE_WSYSTEM() return true; }
 
 #define START_DEFINE_WSYSTEMS_REG(_MODULE, _NAME) void WSystems:: _MODULE ## _ ## _NAME ## _REG (WSystemsRegister & in_register) {
 

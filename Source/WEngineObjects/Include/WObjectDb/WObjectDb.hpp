@@ -127,6 +127,18 @@ public:
         return static_cast<T*>(Get(T::StaticClass(), in_id));
     }
 
+    WObjClass * GetFirst(const WClass * in_class, WIdClass & out_id) const {
+        WObjClass * result;
+        db_.at(in_class).GetFirst(result, out_id);
+        
+        return result;
+    }
+
+    template<std::derived_from<WObjClass> T>
+    T * GetFirst(WIdClass & out_id) const {
+        return static_cast<T*>(GetFirst(T::StaticClass(), out_id));
+    }
+
     void ForEachIdValue(const WClass * in_class,
                         const TFunction<void(const WIdClass &, WObjClass *)> & in_predicate) const {
         db_.at(in_class)->ForEachIdValue(in_predicate);

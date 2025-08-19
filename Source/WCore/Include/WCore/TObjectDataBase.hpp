@@ -26,11 +26,17 @@ public:
     virtual void Clear() = 0;
     virtual void Get(const WIdClass &, B* &) = 0;
     virtual void Get(const WIdClass &, const B* &) const = 0;
+
+    virtual void GetFirst(B* &, WIdClass &) = 0;
+    virtual void GetFirst(const B*&, WIdClass &) const =0;
+    
     virtual size_t Count() const = 0;
     virtual bool Contains(const WIdClass & in_id) const = 0;
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
-    
+
+    // TODO can I implement here an iterator?
+
     virtual void ForEach(TFunction<void(B*)> in_function)=0;
     virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>) =0;
     
@@ -234,6 +240,16 @@ public:
 
     void Get(const WIdClass & in_id, const B* & out_value) const override final {
         out_value = &objects_.Get(in_id.GetId());
+    }
+
+    void GetFirst(B* & out_first, WIdClass & out_id) override {
+        out_id = objects_.IndexInPos(0);
+        out_first = &(objects_.Get(out_id));
+    }
+    
+    void GetFirst(const B*& out_first, WIdClass & out_id) const override {
+        out_id = objects_.IndexInPos(0);
+        out_first = &(objects_.Get(out_id));
     }
 
     size_t Count() const override final {

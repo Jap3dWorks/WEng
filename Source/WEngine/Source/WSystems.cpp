@@ -9,7 +9,6 @@
 
 START_DEFINE_WSYSTEM(System_PostUpdateRenderTransform)
     parameters;
-    return true;
 END_DEFINE_WSYSTEM()
 
 
@@ -27,7 +26,7 @@ START_DEFINE_WSYSTEM(System_PostUpdateRenderCamera)
                 ts->TransformStruct()
                 );
         });
-    return true;
+
 END_DEFINE_WSYSTEM()
 
 
@@ -37,7 +36,7 @@ START_DEFINE_WSYSTEM(System_InitRenderLevelResources)
         parameters.level,
         parameters.engine->AssetManager()
         );
-    return true;
+
 END_DEFINE_WSYSTEM()
 
 
@@ -47,5 +46,94 @@ START_DEFINE_WSYSTEM(System_EndRenderLevelResources)
         parameters.level,
         parameters.engine->AssetManager()
         );
-    return true;
+
+END_DEFINE_WSYSTEM()
+
+
+START_DEFINE_WSYSTEM(System_InitCameraInput)
+    WAssetId mapping, frontaction, backaction, leftaction, rightaction;
+
+    WEntityId cid;
+    WCameraComponent * camcomponent = parameters.level->GetFirstComponent<WCameraComponent>(cid);
+
+    parameters.engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
+        mapping = a->WID();
+    });
+
+    // TODO Get assets by Name
+    parameters.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
+                                                             &backaction,
+                                                             &leftaction,
+                                                             &rightaction] (WActionAsset * a) {
+        std::string name(a->Name());
+
+        if(name.contains("Front")) {
+            frontaction = a->WID();
+        }
+        else if(name.contains("Back")) {
+            backaction = a->WID();
+        }
+        else if (name.contains("Left")) {
+            leftaction = a->WID();
+        }
+        else if(name.contains("Right")) {
+            rightaction = a->WID();
+        }
+    });
+
+    parameters.engine->InputMappingRegister().PutInputMapping(mapping);
+
+    parameters.engine->InputMappingRegister().BindAction(
+        frontaction,
+        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+
+            WTransformStruct & transform =
+                _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+            // TODO: Get Direction.
+            transform.position[0] = transform.position[0] + 0.1;
+
+            WLOG("[InputMapping] InputMapping Trigger!");
+        }
+        );
+
+    parameters.engine->InputMappingRegister().BindAction(
+        backaction,
+        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+
+            WTransformStruct & transform =
+                _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+            // TODO: Get Direction.
+            transform.position[0] = transform.position[0] - 0.1;
+            WLOG("[InputMapping] InputMapping Trigger!");
+        }
+        );
+
+    parameters.engine->InputMappingRegister().BindAction(
+        leftaction,
+        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+
+            WTransformStruct & transform =
+                _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+            // TODO: Get Direction.
+            transform.position[0] = transform.position[1] + 0.1;
+            WLOG("[InputMapping] InputMapping Trigger!");
+        }
+        );
+
+    parameters.engine->InputMappingRegister().BindAction(
+        frontaction,
+        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+
+            WTransformStruct & transform =
+                _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+
+            // TODO: Get Direction.
+            transform.position[0] = transform.position[1] - 0.1;
+            WLOG("[InputMapping] InputMapping Trigger!");
+        }
+        );
+
 END_DEFINE_WSYSTEM()
