@@ -77,6 +77,8 @@ void WSystemsRunner::Clear() {
 
 void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
+    if(!init_systems_.contains(in_level_id)) return;
+
     for(auto & fn : init_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
@@ -84,6 +86,8 @@ void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
 
 void WSystemsRunner::RunPreSystems(const WLevelId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
+    if (!pre_systems_.contains(in_level_id)) return;
+
     for (auto & fn : pre_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
@@ -91,6 +95,8 @@ void WSystemsRunner::RunPreSystems(const WLevelId & in_level_id,
 
 void WSystemsRunner::RunPostSystems(const WLevelId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
+    if (!post_systems_.contains(in_level_id)) return;
+
     for (auto & fn : post_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
@@ -98,16 +104,18 @@ void WSystemsRunner::RunPostSystems(const WLevelId & in_level_id,
 
 void WSystemsRunner::RunEndSystems(const WLevelId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
+    if (!end_systems_.contains(in_level_id)) return;
+
     for (auto & fn : end_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
 }
 
 WLevelSystemId WSystemsRunner::AddSystem(Systems & out_system,
-                                    const ESystemLocation & in_location,
-                                    const WLevelId & in_level_id,
-                                    const WSystemId & in_system_id,
-                                    const WSystemFn & in_system) {
+                                         const ESystemLocation & in_location,
+                                         const WLevelId & in_level_id,
+                                         const WSystemId & in_system_id,
+                                         const WSystemFn & in_system) {
     
     WLevelSystemId lvlsysid = WIdUtils::ToLevelSystemId(in_level_id,
                                                      in_system_id);

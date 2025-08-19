@@ -200,7 +200,7 @@ void WEngine::LoadLevel(WLevel & in_level) {
         {this, &level_info_.level}
         );
 
-    level_info_.level.Init(this);
+    // level_info_.level.Init(this);
 }
 
 void WEngine::UnloadLevel(WLevel & in_level) {

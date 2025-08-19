@@ -7,13 +7,10 @@
 WLevel::WLevel() :
     name_("InvalidLevel"),
     wid_(0),
-    entity_component_db_(),
-    init_fn_([](WLevel*, WEngine*){}),
-    update_fn_([](WLevel*, WEngine*){}),
-    close_fn_([](WLevel*, WEngine*){})
+    entity_component_db_()
 {
     entity_component_db_.InsertEntity<WEntity>(
-        WEntityId{1},
+        WEntityId{0},
         "LevelEntity"
         );
 }
@@ -21,54 +18,26 @@ WLevel::WLevel() :
 WLevel::WLevel(const char * in_name,
                const WLevelId & in_id) :
     wid_(in_id),
-    entity_component_db_(),
-    init_fn_([](WLevel*, WEngine*){}),
-    update_fn_([](WLevel*, WEngine*){}),
-    close_fn_([](WLevel*, WEngine*){})
+    entity_component_db_()
 {
     std::strcpy(name_, in_name);
 
     entity_component_db_.InsertEntity<WEntity>(
-        WEntityId{1},
-        "LevelEntity"
-        );
-}
-
-WLevel::WLevel(const char * in_name,
-               const WLevelId & in_id,
-               const InitFn & in_init_fn,
-               const UpdateFn & in_update_fn,
-               const CloseFn & in_close_fn) :
-    wid_(in_id),
-    entity_component_db_(),
-    init_fn_(in_init_fn),
-    update_fn_(in_update_fn),
-    close_fn_(in_close_fn)
-{
-    std::strcpy(name_, in_name);
-
-    entity_component_db_.InsertEntity<WEntity>(
-        WEntityId{1},
+        WEntityId{0},
         "LevelEntity"
         );
 }
 
 WLevel::WLevel(const WLevel& other) :
     wid_(other.wid_),
-    entity_component_db_(other.entity_component_db_),
-    init_fn_(other.init_fn_),
-    update_fn_(other.update_fn_),
-    close_fn_(other.close_fn_)
+    entity_component_db_(other.entity_component_db_)
 {
     std::strcpy(name_, other.name_);
 }
 
 WLevel::WLevel(WLevel && other) :
     wid_(std::move(other.wid_)),
-    entity_component_db_(std::move(other.entity_component_db_)),
-    init_fn_(std::move(other.init_fn_)),
-    update_fn_(std::move(other.update_fn_)),
-    close_fn_(std::move(other.close_fn_))
+    entity_component_db_(std::move(other.entity_component_db_))
 {
     std::strcpy(name_, other.name_);
 }
@@ -78,9 +47,6 @@ WLevel & WLevel::operator=(const WLevel& other) {
         std::strcpy(name_, other.name_);
         wid_ = other.wid_;
         entity_component_db_ = other.entity_component_db_;
-        init_fn_ = other.init_fn_;
-        update_fn_ = other.update_fn_;
-        close_fn_ = other.close_fn_;
     }
     return *this;
 }
@@ -90,9 +56,6 @@ WLevel & WLevel::operator=(WLevel && other) {
         std::strcpy(name_, other.name_);
         wid_ = std::move(other.wid_);
         entity_component_db_ = std::move(other.entity_component_db_);
-        init_fn_ = std::move(other.init_fn_);
-        update_fn_ = std::move(other.update_fn_);
-        close_fn_ = std::move(other.close_fn_);
 
         // other.name_=nullptr;
     }
@@ -100,22 +63,12 @@ WLevel & WLevel::operator=(WLevel && other) {
     return *this;
 }
 
-void WLevel::Init(WEngine * in_engine) {
-    init_fn_(this, in_engine);
-}
-
-void WLevel::Update(WEngine * in_engine) {
-    update_fn_(this, in_engine);
-}
-
-void WLevel::Close(WEngine * in_engine) {
-    close_fn_(this, in_engine);
-}
-
 WEntityId WLevel::CreateEntity(const WClass * in_class) {
     std::string actor_path = WEntityPath(in_class);
 
-    WEntityId id = entity_component_db_.CreateEntity(in_class, actor_path.c_str());
+    WEntityId id = entity_component_db_
+        .CreateEntity(in_class,
+                      actor_path.c_str());
 
     return id;
 }

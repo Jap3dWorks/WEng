@@ -4,16 +4,13 @@
 #include "WEngineObjects/WComponent.hpp"
 
 WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const char * in_name) {
-    assert(in_class == WEntity::StaticClass() ||
-           WEntity::StaticClass()->IsBaseOf(in_class));
+    assert(
+        in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class)
+        );
 
     auto id = CreateEntityId(in_class);
 
-    entity_db_.CreateAt(
-        in_class,
-        id
-        );
-
+    entity_db_.CreateAt(in_class, id);
     UpdateEntityData(in_class, id, in_name);
 
     return id;
@@ -24,6 +21,7 @@ void WEntityComponentDb::InsertEntity(const WClass * in_class,
                                       const char * in_name) {
     entity_db_.CreateAt(in_class, in_id);
     UpdateEntityData(in_class, in_id, in_name);
+    entity_id_pool_.Reserve(in_id);
 }
 
 void WEntityComponentDb::CreateComponent(const WClass * in_component_class,

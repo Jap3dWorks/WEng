@@ -20,9 +20,7 @@
 #endif
 
 /**
- * @brief This class is a container for all WObjectContainer.
- * the manager will be the responsible of creation and storage of all WObject types.
- * Also will assign an unique id to each WObject.
+ * @brief This class is a container for WObjects and derived types.
  */
 template<CWObjectDerived WObjClass, typename WIdClass=WId>
 class WENGINEOBJECTS_API WObjectDb {
@@ -100,7 +98,7 @@ public:
      * If your replace an existing WId for the indicated class behaviour is undeffined.
      */
     void CreateAt(const WClass * in_class,
-                const WIdClass& in_id) {
+                  const WIdClass& in_id) {
         EnsureClassStorage(in_class);
 
         assert(!db_[in_class]->Contains(in_id));
@@ -115,16 +113,6 @@ public:
         assert(!db_[T::StaticClass()]->Contains(in_id));
 
         db_[T::StaticClass()]->CreateAt(in_id);
-    }
-
-    /**
-     * @brief Create a new object of type T at the specified in_id.
-     * Asserts that the WId doesn't exists for the indicated class already (only in debug).
-     * If you replace an existing WId for the indicated class behaviour is undeffined.
-     */
-    template<std::derived_from<WObjClass> T>
-    void Insert(const WIdClass in_id) {
-        CreateAt(T::StaticClass(), in_id);
     }
 
     WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {

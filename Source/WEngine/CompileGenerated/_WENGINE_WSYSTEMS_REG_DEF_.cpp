@@ -9,12 +9,12 @@
 // Start WSystems Register Generation
 START_DEFINE_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_PostUpdateRenderTransform)
+    CALL_WSYSTEM_REGISTER(System_PostUpdateRenderTransform)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_PostUpdateRenderCamera)
+    CALL_WSYSTEM_REGISTER(System_PostUpdateRenderCamera)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_InitRenderLevelResources)
+    CALL_WSYSTEM_REGISTER(System_InitRenderLevelResources)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_EndRenderLevelResources)
+    CALL_WSYSTEM_REGISTER(System_EndRenderLevelResources)
 
 END_DEFINE_WSYSTEMS_REG()

@@ -223,90 +223,90 @@ bool SetupLevel(WEngine & in_engine,
 
     // Initialize Lvl Function
 
-    level.SetInitFn([cid](WLevel * _level, WEngine * _engine){
+    // level.SetInitFn([cid](WLevel * _level, WEngine * _engine){
         
-        WAssetId mapping, frontaction, backaction, leftaction, rightaction;
+    //     WAssetId mapping, frontaction, backaction, leftaction, rightaction;
         
-        _engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
-            mapping = a->WID();
-        });
+    //     _engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
+    //         mapping = a->WID();
+    //     });
 
-        // TODO Get assets by Name
-        _engine->AssetManager().ForEach<WActionAsset>([&frontaction,
-                                                       &backaction,
-                                                       &leftaction,
-                                                       &rightaction] (WActionAsset * a) {
-            std::string name(a->Name());
+    //     // TODO Get assets by Name
+    //     _engine->AssetManager().ForEach<WActionAsset>([&frontaction,
+    //                                                    &backaction,
+    //                                                    &leftaction,
+    //                                                    &rightaction] (WActionAsset * a) {
+    //         std::string name(a->Name());
             
-            if(name.contains("Front")) {
-                frontaction = a->WID();
-            }
-            else if(name.contains("Back")) {
-                backaction = a->WID();
-            }
-            else if (name.contains("Left")) {
-                leftaction = a->WID();
-            }
-            else if(name.contains("Right")) {
-                rightaction = a->WID();
-            }
-        });
+    //         if(name.contains("Front")) {
+    //             frontaction = a->WID();
+    //         }
+    //         else if(name.contains("Back")) {
+    //             backaction = a->WID();
+    //         }
+    //         else if (name.contains("Left")) {
+    //             leftaction = a->WID();
+    //         }
+    //         else if(name.contains("Right")) {
+    //             rightaction = a->WID();
+    //         }
+    //     });
 
-        _engine->InputMappingRegister().PutInputMapping(mapping);
+    //     _engine->InputMappingRegister().PutInputMapping(mapping);
 
-        _engine->InputMappingRegister().BindAction(
-            frontaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+    //     _engine->InputMappingRegister().BindAction(
+    //         frontaction,
+    //         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
-                WTransformStruct & transform =
-                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    //             WTransformStruct & transform =
+    //                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-                // TODO: Get Direction.
-                transform.position[0] = transform.position[0] + 0.1;
+    //             // TODO: Get Direction.
+    //             transform.position[0] = transform.position[0] + 0.1;
 
-                WLOG("[InputMapping] InputMapping Trigger!");
-            }
-            );
+    //             WLOG("[InputMapping] InputMapping Trigger!");
+    //         }
+    //         );
 
-        _engine->InputMappingRegister().BindAction(
-            backaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+    //     _engine->InputMappingRegister().BindAction(
+    //         backaction,
+    //         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
-                WTransformStruct & transform =
-                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    //             WTransformStruct & transform =
+    //                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-                // TODO: Get Direction.
-                transform.position[0] = transform.position[0] - 0.1;
-                WLOG("[InputMapping] InputMapping Trigger!");
-            }
-            );
+    //             // TODO: Get Direction.
+    //             transform.position[0] = transform.position[0] - 0.1;
+    //             WLOG("[InputMapping] InputMapping Trigger!");
+    //         }
+    //         );
 
-        _engine->InputMappingRegister().BindAction(
-            leftaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+    //     _engine->InputMappingRegister().BindAction(
+    //         leftaction,
+    //         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
-                WTransformStruct & transform =
-                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    //             WTransformStruct & transform =
+    //                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-                // TODO: Get Direction.
-                transform.position[0] = transform.position[1] + 0.1;
-                WLOG("[InputMapping] InputMapping Trigger!");
-            }
-            );
+    //             // TODO: Get Direction.
+    //             transform.position[0] = transform.position[1] + 0.1;
+    //             WLOG("[InputMapping] InputMapping Trigger!");
+    //         }
+    //         );
 
-        _engine->InputMappingRegister().BindAction(
-            frontaction,
-            [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+    //     _engine->InputMappingRegister().BindAction(
+    //         frontaction,
+    //         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
                 
-                WTransformStruct & transform =
-                    _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    //             WTransformStruct & transform =
+    //                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-                // TODO: Get Direction.
-                transform.position[0] = transform.position[1] - 0.1;
-                WLOG("[InputMapping] InputMapping Trigger!");
-            }
-            );
-    });
+    //             // TODO: Get Direction.
+    //             transform.position[0] = transform.position[1] - 0.1;
+    //             WLOG("[InputMapping] InputMapping Trigger!");
+    //         }
+    //         );
+    // });
 
     return true;
 
@@ -353,8 +353,8 @@ int main(int argc, char** argv)
     catch(const std::exception& e)
     {
         WFLOG("[ERROR] {}", e.what());
-
-        return 1;
+        throw;
+        // return 1;
     }
 
     WFLOG("WSpacers App Ends");

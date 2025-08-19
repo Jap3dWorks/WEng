@@ -17,19 +17,9 @@ class WEngine;
 class WLEVEL_API WLevel {
 public:
 
-    using InitFn = TFunction<void(WLevel*, WEngine*)>;
-    using UpdateFn = TFunction<void(WLevel*, WEngine*)>;
-    using CloseFn = TFunction<void(WLevel*, WEngine*)>;
-
     WLevel();
 
     WLevel(const char* in_name, const WLevelId & in_id);
-
-    WLevel(const char* in_name,
-           const WLevelId & in_id,
-           const InitFn & in_init_fn,
-           const UpdateFn & in_update_fn,
-           const CloseFn & in_close_fn);
     
     virtual ~WLevel() = default;
 
@@ -97,30 +87,6 @@ public:
 
     const char * Name() const ;
 
-    void SetInitFn(const InitFn & in_fn) {
-        init_fn_ = in_fn;
-    }
-    
-    void SetInitFn(InitFn && in_fn) {
-        init_fn_ = std::move(in_fn);
-    }
-
-    void SetUpdateFn(const UpdateFn & in_fn) {
-        update_fn_ = in_fn;
-    }
-
-    void SetUpdateFn(UpdateFn && in_fn) {
-        update_fn_ = std::move(in_fn);
-    }
-
-    void SetCloseFn(const CloseFn & in_fn) {
-        close_fn_ = in_fn;
-    }
-
-    void SetCloseFn(CloseFn && in_fn) {
-        close_fn_ = std::move(in_fn);
-    }
-
     // TODO Remove this, use WLevel Public methods.
     const WEntityComponentDb & EntityComponentDb() const {
         return entity_component_db_;
@@ -139,14 +105,8 @@ private:
 
     char name_[WOBJECT_NAME_SIZE];
 
-    // WEntityId 1 is reserved for Level Components.
+    // WEntityId 0 is reserved for Level Components.
     WEntityComponentDb entity_component_db_;
-
-    InitFn init_fn_;
-
-    UpdateFn update_fn_;
-
-    CloseFn close_fn_;
 
     WLevelId wid_;
 
