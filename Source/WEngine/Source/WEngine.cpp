@@ -1,5 +1,6 @@
-#include "WEngine.hpp"
+#include "WEngine/WEngine.hpp"
 
+#include "WCore/WCore.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
 
@@ -16,7 +17,7 @@
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 
-#include "WRenderLevelLib.hpp"
+#include "WUtils/WRenderLevelUtils.hpp"
 
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
@@ -34,6 +35,30 @@ WEngine WEngine::DefaultCreate()
 
     // Register Wengine systems
     WSystems::WENGINE_WSYSTEMS_REG(result.systems_reg_);
+
+    WSystemId sid = result.systems_reg_.GetId("System_InitRenderLevelResources");
+    result.systems_runner_.AddInitSystem(
+        0, sid, result.systems_reg_.Get(sid)
+        );
+
+    sid = result.systems_reg_.GetId(
+        "System_PostUpdateRenderTransform"
+        );
+    result.systems_runner_.AddPostSystem(
+        0, sid, result.systems_reg_.Get(sid)
+        );
+
+    sid = result.systems_reg_.GetId(
+        "System_PostUpdateRenderCamera"
+        );
+    result.systems_runner_.AddPostSystem(
+        0, sid, result.systems_reg_.Get(sid)
+        );
+
+    sid = result.systems_reg_.GetId("System_EndRenderLevelResources");
+    result.systems_runner_.AddEndSystem(
+        0, sid, result.systems_reg_.Get(sid)
+        );
 
     // TODO Plugins Modules Loading
 
@@ -121,98 +146,70 @@ void WEngine::run()
     assert(startup_info_.startup_level);
     
     level_info_.current_level = startup_info_.startup_level;
-    level_info_.loaded = false;
+    level_info_.level = level_db_.Get(level_info_.current_level);
+    LoadLevel(level_info_.level);
 
-    // Load initial Level
-    
-    LoadLevel(level_info_.current_level);
-    level_info_.level.Init(this);
-    systems_runner_.RunInitSystems({this, &level_info_.level});
-
-    // TODO Create WSystem to process the components (local WSystems, global WSystems (engine)).
+    level_info_.loaded = true;
 
     while(!glfwWindowShouldClose(window_.window)) {
         UpdateEngineCycleStruct();
-        
         glfwPollEvents();
         
         if (!level_info_.loaded) {
-            // TODO run End Systems
-            systems_runner_.RunEndSystems({this, &level_info_.level});
+            UnloadLevel(level_info_.level);
 
             Render()->WaitIdle();
-            
-            UnloadLevel();
-            LoadLevel(level_info_.current_level);
 
-            level_info_.level.Init(this);
+            level_info_.level = level_db_.Get(level_info_.current_level);
+            LoadLevel(level_info_.level);
 
-            // TODO update static transforms WStaticTransformComponent
-
-            systems_runner_.RunInitSystems({this, &level_info_.level});
+            level_info_.loaded = true;
         }
         else
         {
-            systems_runner_.RunPreSystems({this, &level_info_.level});
+            systems_runner_.RunPreSystems(0, {this, &level_info_.level});
+            systems_runner_.RunPreSystems(level_info_.level.WID(),
+                                          {this, &level_info_.level});
 
-            systems_runner_.RunPostSystems({this, &level_info_.level});
+            systems_runner_.RunPostSystems(0, {this, &level_info_.level});
+            systems_runner_.RunPostSystems(level_info_.level.WID(),
+                                           {this, &level_info_.level});
 
-            // // Update Render Camera
-            // level_info_.level.ForEachComponent<WCameraComponent> (
-            //     [this] (WCameraComponent * cam) {
-                    
-            //         WTransformComponent * ts =
-            //             level_info_.level.GetComponent<WTransformComponent>(
-            //                 cam->EntityId()
-            //                 );
-
-            //         // ts->TransformStruct().position.x =
-            //         //     ts->TransformStruct().position.x + .0001f;
-
-            //         Render()->UpdateCamera(
-            //             cam->CameraStruct(),
-            //             ts->TransformStruct()
-            //             );
-            //     }
-            //     );
-
-            // draw
             Render()->Draw();
         }
     }
     
     Render()->WaitIdle();
-    UnloadLevel();
+    UnloadLevel(level_info_.level);
 }
 
-void WEngine::LoadLevel(const WLevelId & in_level) {
-    level_info_.loaded = false;
+void WEngine::MarkLoadLevel(const WLevelId & in_level) {
     level_info_.current_level = in_level;
+    level_info_.loaded = false;
+}
 
-    level_info_.level = level_db_.Get(in_level);
+void WEngine::LoadLevel(WLevel & in_level) {
+    // TODO: register level systems
 
-    // Initialize new level
-    WRenderLevelLib::InitializeResources(
-        render_.get(),
-        &level_info_.level,
-        // level_info_.level.EntityComponentDb(),
-        asset_db_
+    systems_runner_.RunInitSystems(
+        0, {this, &level_info_.level}
+        );
+    
+    systems_runner_.RunInitSystems(
+        level_info_.level.WID(),
+        {this, &level_info_.level}
         );
 
-    level_info_.loaded = true;
-
+    level_info_.level.Init(this);
 }
 
-void WEngine::UnloadLevel() {
-    if (level_info_.loaded) {
-        WRenderLevelLib::ReleaseRenderResources(
-            render_.get(),
-            &level_info_.level,
-            asset_db_
-            );
-    }
+void WEngine::UnloadLevel(WLevel & in_level) {
 
-    level_info_.loaded = false;
+    systems_runner_.RunEndSystems(0, {this, &in_level});
+    systems_runner_.RunEndSystems(in_level.WID(), {this, &in_level});
+
+    // TODO deregister level systems
+
 }
 
 void WEngine::StartupLevel(const WLevelId& in_id) noexcept {

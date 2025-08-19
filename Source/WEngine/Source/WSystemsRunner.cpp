@@ -75,26 +75,30 @@ void WSystemsRunner::Clear() {
     systemid_location_.clear();
 }
 
-void WSystemsRunner::RunInitSystems(const WSystemParameters & in_parameters) const {
-    for(auto & fn : init_systems_.at(in_parameters.level->WID())) {
+void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
+                                    const WSystemParameters & in_parameters) const {
+    for(auto & fn : init_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
 }
 
-void WSystemsRunner::RunPreSystems(const WSystemParameters & in_parameters) const {
-    for (auto & fn : pre_systems_.at(in_parameters.level->WID())) {
+void WSystemsRunner::RunPreSystems(const WLevelId & in_level_id,
+                                   const WSystemParameters & in_parameters) const {
+    for (auto & fn : pre_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
 }
 
-void WSystemsRunner::RunPostSystems(const WSystemParameters & in_parameters) const {
-    for (auto & fn : post_systems_.at(in_parameters.level->WID())) {
+void WSystemsRunner::RunPostSystems(const WLevelId & in_level_id,
+                                    const WSystemParameters & in_parameters) const {
+    for (auto & fn : post_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
 }
 
-void WSystemsRunner::RunEndSystems(const WSystemParameters & in_parameters) const {
-    for (auto & fn : end_systems_.at(in_parameters.level->WID())) {
+void WSystemsRunner::RunEndSystems(const WLevelId & in_level_id,
+                                   const WSystemParameters & in_parameters) const {
+    for (auto & fn : end_systems_.at(in_level_id)) {
         fn(in_parameters);
     }
 }

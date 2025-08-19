@@ -3,17 +3,18 @@
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WLevel/WLevel.hpp"
-#include "WEngine.hpp"
+#include "WUtils/WRenderLevelUtils.hpp"
+#include "WEngine/WEngine.hpp"
 
 
-START_DEFINE_WSYSTEM(System_UpdateRenderTransform)
+START_DEFINE_WSYSTEM(System_PostUpdateRenderTransform)
     parameters;
     return true;
 END_DEFINE_WSYSTEM()
 
 
-START_DEFINE_WSYSTEM(System_UpdateRenderCamera)
-    parameters.level->ForEachComponent<WCameraComponent> (
+START_DEFINE_WSYSTEM(System_PostUpdateRenderCamera)
+    parameters.engine->LevelInfo().level.ForEachComponent<WCameraComponent> (
         [&parameters] (WCameraComponent * cam) {
 
             WTransformComponent * ts =
@@ -21,14 +22,30 @@ START_DEFINE_WSYSTEM(System_UpdateRenderCamera)
                     cam->EntityId()
                     );
 
-            // ts->TransformStruct().position.x =
-            //     ts->TransformStruct().position.x + .0001f;
-
             parameters.engine->Render()->UpdateCamera(
                 cam->CameraStruct(),
                 ts->TransformStruct()
                 );
         });
+    return true;
+END_DEFINE_WSYSTEM()
 
+
+START_DEFINE_WSYSTEM(System_InitRenderLevelResources)
+    WRenderLevelUtils::InitializeResources(
+        parameters.engine->Render().Ptr(),
+        parameters.level,
+        parameters.engine->AssetManager()
+        );
+    return true;
+END_DEFINE_WSYSTEM()
+
+
+START_DEFINE_WSYSTEM(System_EndRenderLevelResources)
+    WRenderLevelUtils::ReleaseRenderResources(
+        parameters.engine->Render().Ptr(),
+        parameters.level,
+        parameters.engine->AssetManager()
+        );
     return true;
 END_DEFINE_WSYSTEM()

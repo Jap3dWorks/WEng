@@ -117,6 +117,14 @@ public:
         return *object_;
     }
 
+    constexpr T * Ptr() noexcept {
+        return object_;
+    }
+
+    constexpr const T * Ptr() const noexcept {
+        return object_;
+    }
+
 private:
     
     T * object_{nullptr};

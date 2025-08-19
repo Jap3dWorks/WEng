@@ -11,7 +11,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
 
-namespace WRenderLevelLib {
+namespace WRenderLevelUtils {
 
     inline void InitializeResources(
         IRender * in_render,

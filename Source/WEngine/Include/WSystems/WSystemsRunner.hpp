@@ -56,13 +56,13 @@ public:
 
     // Run Systems
 
-    void RunInitSystems(const WSystemParameters &) const;
+    void RunInitSystems(const WLevelId & levelid, const WSystemParameters &) const;
 
-    void RunPreSystems(const WSystemParameters &) const;
+    void RunPreSystems(const WLevelId & levelid, const WSystemParameters &) const;
 
-    void RunPostSystems(const WSystemParameters &) const;
+    void RunPostSystems(const WLevelId & levelid, const WSystemParameters &) const;
 
-    void RunEndSystems(const WSystemParameters &) const;
+    void RunEndSystems(const WLevelId & levelid, const WSystemParameters &) const;
 
 private:
 

@@ -2,7 +2,7 @@
 
 #include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WEngine.hpp"
+#include "WEngine/WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
 #include "WImporterRegister.hpp"
