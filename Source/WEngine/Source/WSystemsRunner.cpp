@@ -66,6 +66,13 @@ void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
     systemid_location_.extract(in_id);
 }
 
+void WSystemsRunner::RemoveSystems(const WLevelId & in_level_id) {
+    init_systems_.erase(in_level_id);
+    pre_systems_.erase(in_level_id);
+    post_systems_.erase(in_level_id);
+    end_systems_.erase(in_level_id);
+}
+
 void WSystemsRunner::Clear() {
     init_systems_.clear();
     pre_systems_.clear();

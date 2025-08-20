@@ -171,6 +171,10 @@ bool InputAssets(WEngine & in_engine) {
         "/Content/Input/RightAction.RightAction"
         );
 
+    WAssetId mousemovement = in_engine.AssetManager().Create<WActionAsset>(
+        "/Content/Input/MouseMovement.MouseMovement"
+        );
+
     WInputMapStruct & input_map = in_engine.AssetManager()
         .Get<WInputMappingAsset>(cameramapping)->InputMap();
 
@@ -182,6 +186,7 @@ bool InputAssets(WEngine & in_engine) {
     input_map.map[{EInputKey::Key_A, EInputMode::Repeat}] = {leftaction};
     input_map.map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
     input_map.map[{EInputKey::Key_D, EInputMode::Repeat}] = {rightaction};
+    input_map.map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
 
     return true;
 }
@@ -203,7 +208,7 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraComponent>(cid);
 
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
-    cts.position = {0, 2.f, 2.f};
+    cts.position = {0, 0.f, -.5f};
 
     // Model
 

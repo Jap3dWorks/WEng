@@ -103,7 +103,7 @@ namespace WInputLib {
         }
     }
 
-    constexpr WInputMode ToWInputMode(const std::int32_t & in_key, const std::int32_t & in_mode) {
+    constexpr WInput ToWInputMode(const std::int32_t & in_key, const std::int32_t & in_mode) {
         return {ToInputKey(in_key), ToInputMode(in_mode)};
     }
 

@@ -192,7 +192,7 @@ void WEngine::UnloadLevel(WLevel & in_level) {
     systems_runner_.RunEndSystems(in_level.WID(), {this, &in_level});
 
     // TODO deregister level systems
-
+    
 }
 
 void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
@@ -264,7 +264,10 @@ bool WEngine::InitializeWindow() {
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-    // glfwSetCursorPosCallback(window_.window, );
+    glfwSetInputMode(window_.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetCursorPosCallback(window_.window, CursorCallback);
 
     return true;
 }
@@ -299,16 +302,27 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
 {
     auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
 
-    WInputMode imd = WInputLib::ToWInputMode(key, action);
+    WInput imd = WInputLib::ToWInputMode(key, action);
 
     WFLOG("Key Callback {}, {}, {}, {}",
           key, scancode, action, mods);
     
     WInputValuesStruct ival = {imd, 1.f, {0,0}};
 
-    // TODO: Store last cycle presed keys?
-    
     // TODO: Also pass EngineData (delta time).
     // TODO: Pass CycleData.
+    app->input_mapping_register_.Emit(ival, app);
+}
+
+
+void WEngine::CursorCallback(GLFWwindow * in_window, double in_x, double in_y) {
+    auto app = reinterpret_cast<WEngine *>(glfwGetWindowUserPointer(in_window));
+
+    WInputValuesStruct ival {
+        {EInputKey::Mouse_Move, EInputMode::None},
+        0.f,
+        {in_x, in_y}
+    };
+
     app->input_mapping_register_.Emit(ival, app);
 }

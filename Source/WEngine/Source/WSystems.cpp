@@ -51,7 +51,7 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(System_InitCameraInput)
-    WAssetId mapping, frontaction, backaction, leftaction, rightaction;
+    WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
 
     WEntityId cid;
     WCameraComponent * camcomponent = parameters.level->GetFirstComponent<WCameraComponent>(cid);
@@ -60,11 +60,12 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
         mapping = a->WID();
     });
 
-    // TODO Get assets by Name
+    // TODO Get assets by Name, store in a GeneralTree?
     parameters.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
                                                              &backaction,
                                                              &leftaction,
-                                                             &rightaction] (WActionAsset * a) {
+                                                             &rightaction,
+                                                             &mousemovement] (WActionAsset * a) {
         std::string name(a->Name());
 
         if(name.contains("Front")) {
@@ -78,6 +79,9 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
         }
         else if(name.contains("Right")) {
             rightaction = a->WID();
+        }
+        else if(name.contains("MouseMovement")) {
+            mousemovement = a->WID();
         }
     });
 
@@ -133,6 +137,19 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
             // TODO: Get Direction.
             transform.position[0] = transform.position[1] - 0.1;
             WLOG("[InputMapping] InputMapping Trigger!");
+        }
+        );
+
+    parameters.engine->InputMappingRegister().BindAction(
+        mousemovement,
+        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+            WLOG("[InputMapping] Mouse Movement Trugger! {}, {}", _v.direction.x, _v.direction.y);
+            WTransformStruct & t = _e->LevelInfo()
+                .level.GetComponent<WTransformComponent>(cid)
+                ->TransformStruct();
+
+            t.rotation.x = _v.direction.y * 0.001;
+            t.rotation.y = _v.direction.x * 0.001;
         }
         );
 

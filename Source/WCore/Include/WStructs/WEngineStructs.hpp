@@ -65,20 +65,20 @@ enum class EInputMode : std::uint8_t {
     Repeat
 };
 
-struct WInputMode {
+struct WInput {
     EInputKey input;
     EInputMode mode;
 };
 
-constexpr bool operator==(const WInputMode & a, const WInputMode & b) {
+constexpr bool operator==(const WInput & a, const WInput & b) {
     return a.input == b.input && a.mode == b.mode;
 }
 
 namespace std {
     template<>
-    struct hash<WInputMode>
+    struct hash<WInput>
     {
-        std::size_t operator()(const WInputMode & input) const {
+        std::size_t operator()(const WInput & input) const {
             std::size_t r=0;
 
             r |= static_cast<std::uint8_t>(input.input);
@@ -91,14 +91,14 @@ namespace std {
 }
 
 struct WInputValuesStruct {
-    WInputMode input{};
+    WInput input{};
     float presure{};
     glm::vec2 direction{};
 };
 
 struct WInputMapStruct {
     // EInput ActionsAssets
-    std::unordered_map<WInputMode, std::vector<WAssetId>> map{};  
+    std::unordered_map<WInput, std::vector<WAssetId>> map{};  
 };
 
 struct WActionStruct {

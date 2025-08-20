@@ -52,6 +52,8 @@ public:
 
     void RemoveSystem(const WLevelSystemId & in_id);
 
+    void RemoveSystems(const WLevelId & in_level_id);
+
     void Clear();
 
     // Run Systems

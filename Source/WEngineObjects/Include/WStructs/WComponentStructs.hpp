@@ -3,12 +3,23 @@
 #include "WCore/WCore.hpp"
 #include <glm/glm.hpp>
 
+enum class ERotationOrder {
+    xyz,
+    xzy,
+    yxz,
+    yzx,
+    zxy,
+    zyx
+};
+
 struct WTransformStruct
 {
 public:
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
+
+    ERotationOrder rotation_order{ERotationOrder::zxy};
 };
 
 struct WCameraStruct

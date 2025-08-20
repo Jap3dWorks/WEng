@@ -107,7 +107,9 @@ private:
 
     static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
 
-    static void KeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
+    static void KeyCallback(GLFWwindow * in_window, int in_key, int in_scancode, int in_action, int in_mods);
+
+    static void CursorCallback(GLFWwindow * in_window, double in_x, double in_y);
 
     void LoadLevel(WLevel & in_level);
 
