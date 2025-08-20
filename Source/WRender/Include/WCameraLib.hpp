@@ -20,16 +20,8 @@ namespace CameraLib {
             in_camera.near_clipping,
             in_camera.far_clipping
             );
-
-        glm::mat4 m{1.0};
-
-        m = glm::rotate(m, in_transform.rotation.z, glm::vec3(0.0, 0.0, 1.0));
-        m = glm::rotate(m, in_transform.rotation.x, glm::vec3(1.0, 0.0, 0.0));
-        m = glm::rotate(m, in_transform.rotation.y, glm::vec3(0.0, 1.0, 0.0));
-
-        m = glm::translate(m, in_transform.position);
         
-        ubo_camera.view = m;
+        ubo_camera.view = in_transform.transform;
 
         // ubo_camera.view = glm::lookAt(
         //     in_transform.position,

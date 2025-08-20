@@ -4,6 +4,7 @@
 #include "WComponents/WTransformComponent.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WUtils/WRenderLevelUtils.hpp"
+#include "WUtils/WMathUtils.hpp"
 #include "WEngine/WEngine.hpp"
 
 
@@ -94,8 +95,10 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
             WTransformStruct & transform =
                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-            // TODO: Get Direction.
-            transform.position[0] = transform.position[0] + 0.1;
+            // glm::vec3 d = transform.transform[2];
+            // d *= 0.01;
+            transform.position += glm::vec3(0.0, 0.001, 0.0);
+            transform.transform[3] = {transform.position, 1};
 
             WLOG("[InputMapping] InputMapping Trigger!");
         }
@@ -108,8 +111,11 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
             WTransformStruct & transform =
                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-            // TODO: Get Direction.
-            transform.position[0] = transform.position[0] - 0.1;
+            glm::vec3 d = transform.transform[2];
+            d *= 0.01;
+            transform.position -= d;
+            transform.transform[3] = {transform.position, 1};
+
             WLOG("[InputMapping] InputMapping Trigger!");
         }
         );
@@ -121,21 +127,27 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
             WTransformStruct & transform =
                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-            // TODO: Get Direction.
-            transform.position[0] = transform.position[1] + 0.1;
+            glm::vec3 d = transform.transform[0];
+            d *= 0.01;
+            transform.position += d;
+            transform.transform[3] = {transform.position, 1};
+
             WLOG("[InputMapping] InputMapping Trigger!");
         }
         );
 
     parameters.engine->InputMappingRegister().BindAction(
-        frontaction,
+        rightaction,
         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
 
             WTransformStruct & transform =
                 _e->LevelInfo().level.GetComponent<WTransformComponent>(cid)->TransformStruct();
 
-            // TODO: Get Direction.
-            transform.position[0] = transform.position[1] - 0.1;
+            glm::vec3 d = transform.transform[0];
+            d *= 0.01;
+            transform.position -= d;
+            transform.transform[3] = {transform.position, 1};
+
             WLOG("[InputMapping] InputMapping Trigger!");
         }
         );
@@ -144,12 +156,15 @@ START_DEFINE_WSYSTEM(System_InitCameraInput)
         mousemovement,
         [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
             WLOG("[InputMapping] Mouse Movement Trugger! {}, {}", _v.direction.x, _v.direction.y);
+            
             WTransformStruct & t = _e->LevelInfo()
                 .level.GetComponent<WTransformComponent>(cid)
                 ->TransformStruct();
 
             t.rotation.x = _v.direction.y * 0.001;
             t.rotation.y = _v.direction.x * 0.001;
+
+            t.transform = WMathUtils::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
         }
         );
 

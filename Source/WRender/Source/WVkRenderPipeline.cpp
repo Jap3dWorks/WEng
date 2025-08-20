@@ -210,11 +210,8 @@ WId WVkRenderPipelinesManager::CreateBinding(
             WVulkan::UpdateUBOModel(
                 bindings[i].ubo_info,
                 // Initial Position
-                glm::rotate(
-                    glm::mat4(1.f),
-                    glm::radians(90.f),
-                    glm::vec3(0.f, 0.f, 1.f)
-                    ));
+                glm::mat4{1}
+                );
 
             bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
             bindings[i].buffer_info.offset = 0;

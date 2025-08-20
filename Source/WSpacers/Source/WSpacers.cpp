@@ -208,12 +208,14 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraComponent>(cid);
 
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
-    cts.position = {0, 0.f, -.5f};
+    cts.position = {0, 0.5f, 0.f};
 
     // Model
 
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
+    WTransformStruct ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
+    ts.rotation.x = -90;
 
     WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 

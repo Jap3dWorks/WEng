@@ -4,6 +4,8 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
 )
 
+find_package(glm REQUIRED)
+
 target_include_directories(
     WCore 
     PUBLIC 
@@ -13,6 +15,12 @@ target_include_directories(
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
+)
+
+target_link_libraries(
+    WCore
+    PRIVATE
+        glm::glm
 )
 
 add_library(WCore::WCore ALIAS WCore)

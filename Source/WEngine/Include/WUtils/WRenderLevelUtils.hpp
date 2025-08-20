@@ -114,6 +114,9 @@ namespace WRenderLevelUtils {
                     in_component->StaticMeshStruct().static_mesh_asset,
                     param->RenderPipelineParameters()
                     );
+
+                // TODO Update UBO
+                // in_render->UpdateUbo
             });
     }
 
