@@ -2,13 +2,14 @@
 
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
+#include "WUtils/WMathUtils.hpp"
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
-namespace CameraLib {
-    inline WUBOCameraStruct UBOCameraStruct(
+namespace WRenderUtils {
+    inline WUBOCameraStruct ToUBOCameraStruct(
         const WCameraStruct & in_camera,
         const WTransformStruct & in_transform,
         float in_aspect
@@ -20,8 +21,22 @@ namespace CameraLib {
             in_camera.near_clipping,
             in_camera.far_clipping
             );
-        
-        ubo_camera.view = in_transform.transform;
+
+        // glm::mat4 m = in_transform.transform;
+        // m[3] *= -1;
+
+        glm::mat4 m = WMathUtils::ToMat4(
+            -in_transform.position,
+            in_transform.rotation,
+            in_transform.rotation_order,
+            in_transform.scale
+            );
+
+        // ubo_camera.view = in_transform.transform;
+        // ubo_camera.view[3] *= -1;
+        // ubo_camera.view[3][3] = 1;
+
+        ubo_camera.view = m;
 
         // ubo_camera.view = glm::lookAt(
         //     in_transform.position,
@@ -34,7 +49,10 @@ namespace CameraLib {
         return ubo_camera;
     }
 
-    // inline void UpdateView(WRenderCameraStruct & out_camera_struct) {
-    // }
+    inline WUBOModelStruct ToUBOModelStruct(
+        const WTransformStruct & in_transform
+        ) {
+        return {in_transform.transform};
+    }
 
 }

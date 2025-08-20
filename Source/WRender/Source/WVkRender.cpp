@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "WVulkan/WVkRender.hpp"
-#include "WCameraLib.hpp"
+#include "WRenderUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -341,12 +341,12 @@ void WVkRender::UnloadAllResources() {
     render_resources_.Clear();
 }
 
-void WVkRender::UpdateCamera(
+void WVkRender::UpdateUboCamera(
     const WCameraStruct & camera_struct,
     const WTransformStruct & transform_struct
     ) {
 
-    WUBOCameraStruct camera_ubo = CameraLib::UBOCameraStruct(
+    WUBOCameraStruct camera_ubo = WRenderUtils::ToUBOCameraStruct(
         camera_struct,
         transform_struct,
         (float) window_.width / (float) window_.height
@@ -355,6 +355,31 @@ void WVkRender::UpdateCamera(
     pipelines_manager_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
         frame_index_
+        );
+}
+
+void WVkRender::UpdateUboModelDynamic(
+    const WEntityComponentId & in_component_id,
+    const WTransformStruct & in_transform_struct
+    ) {
+    WUBOModelStruct ubo_model = WRenderUtils::ToUBOModelStruct(
+        in_transform_struct
+        );
+    pipelines_manager_.UpdateModelDescriptorSet(
+        ubo_model, in_component_id, frame_index_
+        );
+                             
+}
+
+void WVkRender::UpdateUboModelStatic(
+    const WEntityComponentId & in_component_id,
+    const WTransformStruct & in_transform_struct
+    ) {
+    WUBOModelStruct ubo_model = WRenderUtils::ToUBOModelStruct(
+        in_transform_struct
+        );
+    pipelines_manager_.UpdateModelDescriptorSet(
+        ubo_model, in_component_id
         );
 }
 

@@ -214,8 +214,9 @@ bool SetupLevel(WEngine & in_engine,
 
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
-    WTransformStruct ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
-    ts.rotation.x = -90;
+    WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
+    // ts.position.z = -1.f;
+    ts.rotation.x = -3.1415*0.5;
 
     WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 

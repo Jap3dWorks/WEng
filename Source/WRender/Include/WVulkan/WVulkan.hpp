@@ -423,24 +423,27 @@ namespace WVulkan
 
     inline bool UpdateUBOModel(
         WVkUBOInfo & uniform_buffer_object_info_,
-        const glm::mat4 & model // ,
-        // const glm::mat4 & view,
-        // const glm::mat4 & proj
-        )
-    {
+        const glm::mat4 & model
+        ) {
         WUBOModelStruct ubo{};
 
         ubo.model = model;
         
-        // ubo.view = view;
-        // ubo.proj = proj;
-
-        // ubo.proj[1][1] *= -1;  // Fix OpenGL Y axis inversion
-
         memcpy(uniform_buffer_object_info_.mapped_data,
                &ubo,
                sizeof(WUBOModelStruct)
             );
+
+        return true;
+    }
+
+    inline bool UpdateUBOModel(
+        WVkUBOInfo & uniform_buffer_object_info_,
+        const WUBOModelStruct & in_ubo_model_struct
+        ) {
+        memcpy(uniform_buffer_object_info_.mapped_data,
+               &in_ubo_model_struct,
+               sizeof(WUBOModelStruct));
 
         return true;
     }

@@ -22,12 +22,11 @@ START_DEFINE_WSYSTEM(System_PostUpdateRenderCamera)
                     cam->EntityId()
                     );
 
-            parameters.engine->Render()->UpdateCamera(
+            parameters.engine->Render()->UpdateUboCamera(
                 cam->CameraStruct(),
                 ts->TransformStruct()
                 );
         });
-
 END_DEFINE_WSYSTEM()
 
 
@@ -37,7 +36,6 @@ START_DEFINE_WSYSTEM(System_InitRenderLevelResources)
         parameters.level,
         parameters.engine->AssetManager()
         );
-
 END_DEFINE_WSYSTEM()
 
 

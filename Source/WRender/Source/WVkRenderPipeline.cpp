@@ -536,10 +536,37 @@ void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
-
     memcpy(
         global_graphics_descsets_.camera_ubo[in_frame_index].mapped_data,
         &camera_struct,
         sizeof(WUBOCameraStruct)
         );
 }
+
+void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
+    const WUBOModelStruct & in_ubo_model_struct,
+    const WEntityComponentId & in_desc_set,
+    uint32_t in_frame_index
+    ) {
+    WVulkan::UpdateUBOModel(
+        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
+        // Initial Position
+        in_ubo_model_struct
+        );
+}
+
+void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
+    const WUBOModelStruct & in_ubo_model_struct,
+    const WEntityComponentId & in_desc_set
+    ) {
+    for(int i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
+        UpdateModelDescriptorSet(
+            in_ubo_model_struct,
+            in_desc_set,
+            i
+            );
+    }
+}
+
+
+

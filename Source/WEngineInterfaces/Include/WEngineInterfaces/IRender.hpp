@@ -90,9 +90,19 @@ public:
 
     virtual void UnloadStaticMesh(const WAssetId & in_id)=0;
 
-    virtual void UpdateCamera(
+    virtual void UpdateUboCamera(
         const WCameraStruct & camera_struct,
         const WTransformStruct & transform_struct
+        )=0;
+
+    virtual void UpdateUboModelDynamic(
+        const WEntityComponentId & in_component_id,
+        const WTransformStruct & in_transform_struct
+        )=0;
+
+    virtual void UpdateUboModelStatic(
+        const WEntityComponentId & in_component_id,
+        const WTransformStruct & in_transform_struct
         )=0;
 
     /**

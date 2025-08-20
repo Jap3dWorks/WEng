@@ -81,9 +81,21 @@ public:
         render_resources_.UnloadStaticMesh(in_id);
     }
 
-    void UpdateCamera(
+    void UpdateUboCamera(
         const WCameraStruct & camera_struct,
         const WTransformStruct & transform_struct
+        ) override;
+
+    /** only current frame index */
+    void UpdateUboModelDynamic(
+        const WEntityComponentId & in_component_id,
+        const WTransformStruct & in_transform_struct
+        ) override;
+
+    /** both frame index */
+    void UpdateUboModelStatic(
+        const WEntityComponentId & in_component_id,
+        const WTransformStruct & in_transform_struct
         ) override;
 
     void UnloadAllResources() override;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WComponents/WTransformComponent.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -10,6 +11,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
+#include "WUtils/WMathUtils.hpp"
 
 namespace WRenderLevelUtils {
 
@@ -104,19 +106,32 @@ namespace WRenderLevelUtils {
                         )
                     );
 
+                WEntityComponentId ecid = in_level->EntityComponentDb().EntityComponentId(
+                    in_level->WID(), in_component->EntityId(), in_component->Class()
+                    );
+
                 in_render->CreatePipelineBinding(
-                    in_level->EntityComponentDb().EntityComponentId(
-                        in_level->WID(),
-                        in_component->EntityId(),
-                        in_component->Class()
-                        ),
+                    ecid,
                     in_component->StaticMeshStruct().render_pipeline_asset,
                     in_component->StaticMeshStruct().static_mesh_asset,
                     param->RenderPipelineParameters()
                     );
 
-                // TODO Update UBO
-                // in_render->UpdateUbo
+                WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
+                    in_component->EntityId()
+                    )->TransformStruct();
+
+                tstruct.transform = WMathUtils::ToMat4(
+                    tstruct.position,
+                    tstruct.rotation,
+                    tstruct.rotation_order,
+                    tstruct.scale
+                    );
+
+                in_render->UpdateUboModelStatic(
+                    ecid,
+                    tstruct
+                    );
             });
     }
 
