@@ -37,13 +37,14 @@ WEngine WEngine::DefaultCreate()
     
     WSystems::WENGINE_WSYSTEMS_REG(result.systems_reg_);
 
-    result.AddInitSystem(0, "System_InitRenderLevelResources");
+    // This must be the first included system
+    result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
 
-    result.AddPreSystem(0, "System_PostUpdateRenderTransform");
+    result.AddInitSystem(0, "SystemInit_RenderLevelResources");
 
-    result.AddPostSystem(0, "System_PostUpdateRenderCamera");
+    result.AddPostSystem(0, "SystemPost_UpdateRenderCamera");
 
-    result.AddEndSystem(0, "System_EndRenderLevelResources");
+    result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
 
     // TODO Plugins Modules Loading
 
@@ -280,7 +281,7 @@ void WEngine::DestroyWindow() {
 void WEngine::UpdateEngineCycleStruct() {
     double seconds = glfwGetTime();
 
-    engine_cycle_.DeltaTime = seconds = engine_cycle_.TotalTime;
+    engine_cycle_.DeltaTime = seconds - engine_cycle_.TotalTime;
     engine_cycle_.TotalTime = seconds;
     engine_cycle_.fps = 1 / engine_cycle_.DeltaTime;
 }

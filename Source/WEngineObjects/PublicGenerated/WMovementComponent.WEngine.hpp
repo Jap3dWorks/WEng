@@ -8,8 +8,8 @@
 #undef _PWCLASS_
 #endif
 
-#define _WCLASS_ WActionAsset
-#define _PWCLASS_ WAsset
+#define _WCLASS_ WMovementComponent
+#define _PWCLASS_ WComponent
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

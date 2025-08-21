@@ -9,14 +9,18 @@
 // Start WSystems Register Generation
 START_DEFINE_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 
-    CALL_WSYSTEM_REGISTER(System_PostUpdateRenderTransform)
+    CALL_WSYSTEM_REGISTER(SystemInit_RenderLevelResources)
 
-    CALL_WSYSTEM_REGISTER(System_PostUpdateRenderCamera)
+    CALL_WSYSTEM_REGISTER(SystemInit_InitializeTransformsMatrix)
 
-    CALL_WSYSTEM_REGISTER(System_InitRenderLevelResources)
+    CALL_WSYSTEM_REGISTER(SystemInit_CameraInput)
 
-    CALL_WSYSTEM_REGISTER(System_EndRenderLevelResources)
+    CALL_WSYSTEM_REGISTER(SystemPre_UpdateMovement)
 
-    CALL_WSYSTEM_REGISTER(System_InitCameraInput)
+    CALL_WSYSTEM_REGISTER(SystemPre_CameraInputMovement)
+
+    CALL_WSYSTEM_REGISTER(SystemPost_UpdateRenderCamera)
+
+    CALL_WSYSTEM_REGISTER(SystemEnd_RenderLevelResources)
 
 END_DEFINE_WSYSTEMS_REG()

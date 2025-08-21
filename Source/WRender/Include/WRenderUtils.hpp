@@ -23,10 +23,10 @@ namespace WRenderUtils {
             in_camera.far_clipping
             );
 
-        glm::mat3 orient{in_transform.transform};
+        glm::mat3 orient{in_transform.transform_matrix};
         glm::mat4 o = glm::transpose(orient);
 
-        glm::vec3 translation{in_transform.transform[3]};
+        glm::vec3 translation{in_transform.transform_matrix[3]};
         glm::mat4 t = glm::translate(glm::mat4{1}, -translation);
 
         ubo_camera.view = o * t;
@@ -39,7 +39,7 @@ namespace WRenderUtils {
     inline WUBOModelStruct ToUBOModelStruct(
         const WTransformStruct & in_transform
         ) {
-        return {in_transform.transform};
+        return {in_transform.transform_matrix};
     }
 
 }

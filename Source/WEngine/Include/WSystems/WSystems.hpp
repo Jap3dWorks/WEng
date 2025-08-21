@@ -9,20 +9,23 @@ struct WSystemParameters {
     WLevel * level;
 };
 
-// using WLevelSystemFn = TFnPtr<bool(WLevel*, WEngine*)>;
 using WSystemFn = TFnPtr<bool(const WSystemParameters &)>;
 
 START_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_InitRenderLevelResources)
+    DECLARE_WSYSTEM(WENGINE_API, SystemInit_InitializeTransformsMatrix)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_InitCameraInput)
+    DECLARE_WSYSTEM(WENGINE_API, SystemInit_RenderLevelResources)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_PostUpdateRenderTransform)
+    DECLARE_WSYSTEM(WENGINE_API, SystemInit_CameraInput)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_PostUpdateRenderCamera)
+    DECLARE_WSYSTEM(WENGINE_API, SystemPre_UpdateMovement)
 
-    DECLARE_WSYSTEM(WENGINE_API, System_EndRenderLevelResources)
+    DECLARE_WSYSTEM(WENGINE_API, SystemPre_CameraInputMovement)
+
+    DECLARE_WSYSTEM(WENGINE_API, SystemPost_UpdateRenderCamera)
+
+    DECLARE_WSYSTEM(WENGINE_API, SystemEnd_RenderLevelResources)
 
 END_WSYSTEMS_REG()
 

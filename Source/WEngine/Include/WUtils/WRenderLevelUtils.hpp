@@ -100,14 +100,16 @@ namespace WRenderLevelUtils {
              &in_asset_db,
              &in_level]
             (WStaticMeshComponent* in_component) {
-                auto param =static_cast<WRenderPipelineParametersAsset*> (
+                auto param = static_cast<WRenderPipelineParametersAsset*> (
                     in_asset_db.Get(
                         in_component->StaticMeshStruct().render_pipeline_parameters_asset
                         )
                     );
 
                 WEntityComponentId ecid = in_level->EntityComponentDb().EntityComponentId(
-                    in_level->WID(), in_component->EntityId(), in_component->Class()
+                    in_level->WID(),
+                    in_component->EntityId(),
+                    in_component->Class()
                     );
 
                 in_render->CreatePipelineBinding(
@@ -120,13 +122,6 @@ namespace WRenderLevelUtils {
                 WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
                     in_component->EntityId()
                     )->TransformStruct();
-
-                tstruct.transform = WMathUtils::ToMat4(
-                    tstruct.position,
-                    tstruct.rotation,
-                    tstruct.rotation_order,
-                    tstruct.scale
-                    );
 
                 in_render->UpdateUboModelStatic(
                     ecid,

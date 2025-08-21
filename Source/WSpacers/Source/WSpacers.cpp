@@ -2,6 +2,8 @@
 
 #include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WComponents/WCameraInputComponent.hpp"
+#include "WComponents/WMovementComponent.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
@@ -18,6 +20,8 @@
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
+#include "WComponents/WCameraInputComponent.hpp"
+#include "WComponents/WMovementComponent.hpp"
 #include "WStructs/WMathStructs.hpp"
 
 #include <exception>
@@ -207,6 +211,8 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId cid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(cid);
     level.CreateComponent<WCameraComponent>(cid);
+    level.CreateComponent<WMovementComponent>(cid);
+    level.CreateComponent<WCameraInputComponent>(cid);
 
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
@@ -231,7 +237,9 @@ bool SetupLevel(WEngine & in_engine,
     smcomponent->RenderPipelineAsset(in_pipelineid);
     smcomponent->RenderPipelineParametersAsset(in_paramsid);
 
-    in_engine.AddInitSystem(levelid, "System_InitCameraInput");
+    in_engine.AddInitSystem(levelid, "SystemInit_CameraInput");
+    in_engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
+    in_engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
 
     in_engine.StartupLevel(levelid);
 

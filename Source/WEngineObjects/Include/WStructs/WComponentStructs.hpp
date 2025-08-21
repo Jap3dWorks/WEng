@@ -13,7 +13,7 @@ public:
     glm::vec3 scale{1.0, 1.0, 1.0};
     ERotationOrder rotation_order{ERotationOrder::zxy};
 
-    glm::mat4 transform{1.0};
+    glm::mat4 transform_matrix{1.0};
 };
 
 struct WCameraStruct
