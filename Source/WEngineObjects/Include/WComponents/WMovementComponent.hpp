@@ -52,6 +52,6 @@ private:
     glm::vec3 acceleration_{0};
     float max_acceleration_{30.f};
 
-    float drag_{0.5};
+    float drag_{2.5f};
 
 };

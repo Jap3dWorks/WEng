@@ -184,13 +184,13 @@ bool InputAssets(WEngine & in_engine) {
         .Get<WInputMappingAsset>(cameramapping)->InputMap();
 
     input_map.map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
-    input_map.map[{EInputKey::Key_W, EInputMode::Repeat}] = {frontaction};
+    input_map.map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};
     input_map.map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
-    input_map.map[{EInputKey::Key_S, EInputMode::Repeat}] = {backaction};
+    input_map.map[{EInputKey::Key_S, EInputMode::Release}] = {backaction};
     input_map.map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
-    input_map.map[{EInputKey::Key_A, EInputMode::Repeat}] = {leftaction};
+    input_map.map[{EInputKey::Key_A, EInputMode::Release}] = {leftaction};
     input_map.map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
-    input_map.map[{EInputKey::Key_D, EInputMode::Repeat}] = {rightaction};
+    input_map.map[{EInputKey::Key_D, EInputMode::Release}] = {rightaction};
     input_map.map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
 
     return true;

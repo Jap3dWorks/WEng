@@ -185,7 +185,7 @@ START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
 
             WFLOG("Acceleration Mag: {}", vmag);
 
-            glm::vec3 current_direction{0.001, 0.001, 0.001};
+            glm::vec3 current_direction{0.00001, 0.00001, 0.00001};
             if(vlength > 0.0000001) {
                 current_direction = glm::normalize(mc->Velocity());
             }
