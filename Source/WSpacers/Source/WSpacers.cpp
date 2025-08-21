@@ -18,6 +18,7 @@
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
+#include "WStructs/WMathStructs.hpp"
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>
@@ -208,15 +209,18 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraComponent>(cid);
 
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
-    cts.position = {0, 0.5f, 0.f};
+    cts.rotation = {0.0f, 0.0f, 0.0f};
+    cts.position = {0.0, 0.0f, .5f};
 
     // Model
 
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
     WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
-    // ts.position.z = -1.f;
-    ts.rotation.x = -3.1415*0.5;
+    ts.rotation_order = ERotationOrder::xzy;
+    ts.position.z = -2.0f;
+    ts.rotation.x = -3.1415 * 0.5;
+    ts.rotation.y = -3.1415 * 0.5 ;
 
     WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
 
