@@ -128,8 +128,8 @@ struct WVkDescriptorSetLayoutInfo
 */
 struct WVkDescriptorPoolInfo
 {
-    WId wid{0};
-    std::vector<VkDescriptorPoolSize> pool_sizes {};
+    // WId wid{0};
+    std::vector<VkDescriptorPoolSize> pool_sizes {};  // <- DEPRECATED
     VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
 };
 

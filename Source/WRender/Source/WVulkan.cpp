@@ -1034,9 +1034,11 @@ void WVulkan::Create(
 
     out_descriptor_pool_info.pool_sizes.resize(2);
     out_descriptor_pool_info.pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    out_descriptor_pool_info.pool_sizes[0].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
+    out_descriptor_pool_info.pool_sizes[0].descriptorCount =
+        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
     out_descriptor_pool_info.pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    out_descriptor_pool_info.pool_sizes[1].descriptorCount = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT);
+    out_descriptor_pool_info.pool_sizes[1].descriptorCount =
+        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1044,7 +1046,7 @@ void WVulkan::Create(
         out_descriptor_pool_info.pool_sizes.size()
         );
     pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
-    pool_info.maxSets = WENG_MAX_FRAMES_IN_FLIGHT;
+    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35);
 
     if (vkCreateDescriptorPool(
             device.vk_device,
@@ -1090,7 +1092,6 @@ void WVulkan::UpdateDescriptorSets(
     const WVkDeviceInfo & in_device_info
     )
 {
-    WFLOG("Update Descriptor Sets");
     vkUpdateDescriptorSets(
         in_device_info.vk_device,
         static_cast<uint32_t>(in_write_descriptor_sets.size()),
@@ -1268,6 +1269,7 @@ void WVulkan::Destroy(
         );
 }
 
+// DEPRECATED
 void WVulkan::Destroy(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const WVkDeviceInfo & in_device
@@ -1282,7 +1284,6 @@ void WVulkan::Destroy(
     out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
     out_descriptor_pool_info.pool_sizes.clear();
 }
-
 
 void WVulkan::Destroy(
     WVkCommandPoolInfo & out_command_pool,
@@ -1881,8 +1882,6 @@ void WVulkan::EndSingleTimeCommands(
     const VkQueue &graphics_queue,
     const VkCommandBuffer &command_buffer)
 {
-    WFLOG("End Single Time Commands from {}", (size_t)command_buffer);
-    
     vkEndCommandBuffer(command_buffer);
 
     VkSubmitInfo submit_info{};

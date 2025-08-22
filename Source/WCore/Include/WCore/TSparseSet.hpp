@@ -4,6 +4,7 @@
 #include "WCore/TIterator.hpp"
 #include "TFunction.hpp"
 
+#include <concepts>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -72,22 +73,50 @@ public:
 
         return *this;
     }
-    
-    void Insert(const size_t & in_index, const T& in_value) {
-        size_t pos = compact_.size();
-        compact_.push_back(in_value);
 
-        index_pos_[in_index] = pos;
-        pos_index_[pos] = in_index;
+    template<std::convertible_to<T> D>
+    void Insert(const size_t & in_index, D && in_value) {
+        if (Contains(in_index)) {
+            size_t pos = index_pos_[in_index];
+            compact_[pos]=std::forward<D>(in_value);
+        }
+        else {
+            size_t pos = compact_.size();
+            compact_.push_back(std::forward<D>(in_value));
+
+            index_pos_[in_index] = pos;
+            pos_index_[pos] = in_index;            
+        }
     }
 
-    void Insert(const size_t & in_index, T && in_value) {
-        size_t pos = compact_.size();
-        compact_.push_back(std::move(in_value));
+    // void Insert(const size_t & in_index, const T& in_value) {
+    //     if (Contains(in_index)) {
+    //         size_t pos = index_pos_[in_index];
+    //         compact_[pos]=in_value;
+    //     }
+    //     else {
+    //         size_t pos = compact_.size();
+    //         compact_.push_back(in_value);
 
-        index_pos_[in_index] = pos;
-        pos_index_[pos] = in_index;
-    }
+    //         index_pos_[in_index] = pos;
+    //         pos_index_[pos] = in_index;            
+    //     }
+    // }
+
+    // void Insert(const size_t & in_index, T && in_value) {
+    //     if (Contains(in_index)) {
+    //         size_t pos = index_pos_[in_index];
+    //         compact_[pos]=in_value;
+    //     }
+    //     else {
+    //         size_t pos = compact_.size();
+    //         compact_.push_back(std::move(in_value));
+
+    //         index_pos_[in_index] = pos;
+    //         pos_index_[pos] = in_index;            
+    //     }
+
+    // }
 
     T & Get(size_t in_index) {
         assert(index_pos_.contains(in_index));

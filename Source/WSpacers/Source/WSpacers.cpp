@@ -77,13 +77,16 @@ WModelStruct MeshPlane()
     return model;
 }
 
-bool LoadAssets(WEngine & engine,
-                WStaticMeshAsset *& out_static_model,
-                WTextureAsset *& out_texture_asset,
-                WRenderPipelineAsset *& out_pipeline_asset,
-                WRenderPipelineParametersAsset *& out_param_asset
-    )
+struct ModelAssets {
+    WAssetId static_mesh;
+    WAssetId pipeline_asset;
+    WAssetId param_asset;
+    WEntityId entity;
+};
+
+bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 {
+    // Import Viking Room
     WImportObj obj_importer =
         engine.ImportersRegister().GetImporter<WImportObj>();
 
@@ -94,13 +97,7 @@ bool LoadAssets(WEngine & engine,
             "/Content/Assets/viking_room.viking_room"
             );
 
-    if (geo_ids.size() < 1)
-    {
-        std::cout << "Failed to import geo_asset!" << std::endl;
-        return false;
-    }
-
-    out_static_model = engine.AssetManager().Get<WStaticMeshAsset>(geo_ids[0]);
+    out_model.static_mesh = geo_ids[0];
 
     WImportTexture texture_importer =
         engine.ImportersRegister().GetImporter<WImportTexture>();
@@ -111,46 +108,78 @@ bool LoadAssets(WEngine & engine,
         "/Content/Assets/viking_texture.viking_texture"
         );
 
-    if (tex_ids.size() < 1)
-    {
-        std::cout << "Failed to import tex_asset!" << std::endl;
-        return false;
-    }
-
-    out_texture_asset = engine.AssetManager().Get<WTextureAsset>(tex_ids[0]);
-
     // Create Render Pipeline Asset
 
     WAssetId pipelineid = engine.AssetManager()
         .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
 
-    out_pipeline_asset = engine.AssetManager()
+    out_model.pipeline_asset = pipelineid;
+
+    WRenderPipelineAsset * pipeline_asset = engine.AssetManager()
         .Get<WRenderPipelineAsset>(pipelineid);
 
-    out_pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
+    pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
-    out_pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
-    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[0].file,
+    pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
                 "/Content/Shaders/Spacers_ShaderBase.vert");
 
-    out_pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
-    std::strcpy(out_pipeline_asset->RenderPipeline().shaders[1].file,
+    pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag");
 
-    out_pipeline_asset->RenderPipeline().shaders_count = 2;
+    pipeline_asset->RenderPipeline().shaders_count = 2;
 
     // Create Pipeline Parameter Asset
 
     WAssetId paramid = engine.AssetManager()
         .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
 
-    out_param_asset = static_cast<WRenderPipelineParametersAsset*>(
-        engine.AssetManager().Get(paramid)
+    out_model.param_asset = paramid;
+
+    auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+
+    param_asset->RenderPipelineParameters().texture_assets[0].value = tex_ids[0];
+    param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
+    param_asset->RenderPipelineParameters().texture_assets_count = 1;
+
+    return true;
+}
+
+bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_render_pipeline) {
+    WImportObj obj_importer =
+        engine.ImportersRegister()
+        .GetImporter<WImportObj>();
+
+    std::vector<WAssetId> geo_ids =
+        obj_importer.Import(
+            engine.AssetManager(),
+            "Content/Assets/Models/monkey.obj", 
+            "/Content/Assets/monkey.monkey"   // TODO only directory
+            );
+
+    out_model.static_mesh = geo_ids[0];
+
+    WImportTexture tex_importer = engine.ImportersRegister()
+        .GetImporter<WImportTexture>();
+
+    std::vector<WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
+                        "Content/Assets/Textures/orange.png",
+                        "/Content/Assets/orange.orange"
         );
 
-    out_param_asset->RenderPipelineParameters().texture_assets[0].value = out_texture_asset->WID();
-    out_param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
-    out_param_asset->RenderPipelineParameters().texture_assets_count = 1;
+    out_model.pipeline_asset = in_render_pipeline;
+
+    WAssetId paramid = engine.AssetManager()
+        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamB.ParamB");
+
+    out_model.param_asset = paramid;
+
+    auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+
+    param_asset->RenderPipelineParameters().texture_assets[0].value = tex_ids[0];
+    param_asset->RenderPipelineParameters().texture_assets[0].binding=1;
+    param_asset->RenderPipelineParameters().texture_assets_count = 1;
 
     return true;
 }
@@ -197,14 +226,19 @@ bool InputAssets(WEngine & in_engine) {
 }
 
 bool SetupLevel(WEngine & in_engine,
-                const WAssetId & in_smid,
-                const WAssetId & in_pipelineid,
-                const WAssetId & in_paramsid
+                const ModelAssets & in_viking_room,
+                const ModelAssets & in_monkey
     ) {
 
     WLevelId levelid = in_engine.LevelRegister().Create();
 
     WLevel & level = in_engine.LevelRegister().Get(levelid);
+
+    in_engine.AddInitSystem(levelid, "SystemInit_CameraInput");
+    in_engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
+    in_engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
+
+    in_engine.StartupLevel(levelid);
 
     // Camera
 
@@ -218,8 +252,8 @@ bool SetupLevel(WEngine & in_engine,
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
 
-    // Model
-
+    // Models
+    // Viking Room
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
     WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
@@ -228,20 +262,30 @@ bool SetupLevel(WEngine & in_engine,
     ts.rotation.x = -3.1415 * 0.5;
     ts.rotation.y = -3.1415 * 0.5 ;
 
-    WEntityComponentId smid = level.CreateComponent<WStaticMeshComponent>(eid);
+    level.CreateComponent<WStaticMeshComponent>(eid);
 
     WStaticMeshComponent * smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
-    
-    smcomponent->StaticMeshAsset(in_smid);
-    smcomponent->RenderPipelineAsset(in_pipelineid);
-    smcomponent->RenderPipelineParametersAsset(in_paramsid);
+    smcomponent->StaticMeshAsset(in_viking_room.static_mesh);
+    smcomponent->RenderPipelineAsset(in_viking_room.pipeline_asset);
+    smcomponent->RenderPipelineParametersAsset(in_viking_room.param_asset);
 
-    in_engine.AddInitSystem(levelid, "SystemInit_CameraInput");
-    in_engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
-    in_engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
+    // Monkey
+    WEntityId monkeyid = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(monkeyid);
+    WTransformStruct & monkeyts = level.GetComponent<WTransformComponent>(monkeyid)->TransformStruct();
+    monkeyts.rotation_order = ERotationOrder::xzy;
+    monkeyts.position.z = -2.0;
+    monkeyts.position.y = 0.5;
+    monkeyts.scale *= 0.25;
 
-    in_engine.StartupLevel(levelid);
+    level.CreateComponent<WStaticMeshComponent>(monkeyid);
+
+    auto* monkeysm = level.GetComponent<WStaticMeshComponent>(monkeyid);
+
+    monkeysm->StaticMeshAsset(in_monkey.static_mesh);
+    monkeysm->RenderPipelineAsset(in_monkey.pipeline_asset);
+    monkeysm->RenderPipelineParametersAsset(in_monkey.param_asset);
 
     return true;
 
@@ -255,26 +299,18 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::DefaultCreate();
 
-        WStaticMeshAsset * static_mesh;
-        WTextureAsset * texture_asset;
-        WRenderPipelineAsset * pipeline_asset;
-        WRenderPipelineParametersAsset * param_asset;
+        ModelAssets viking_room;
+        ModelAssets monkey_1;
+        ModelAssets monkey_2;
 
-        if (!LoadAssets(engine,
-                        static_mesh,
-                        texture_asset,
-                        pipeline_asset,
-                        param_asset))
-        {
-            return 1;
-        }
+        LoadVikingRoom(engine, viking_room);
+        LoadMonkey(engine, monkey_1, viking_room.pipeline_asset);
 
         InputAssets(engine);
        
         SetupLevel(engine,
-                   static_mesh->WID(),
-                   pipeline_asset->WID(),
-                   param_asset->WID());
+                   viking_room,
+                   monkey_1);
 
         WFLOG("Initialize While Loop");
 

@@ -102,6 +102,7 @@ namespace WVulkan
         const WVkDeviceInfo & device
     );
 
+    // DEPRECATED
     void Create(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & device
@@ -217,6 +218,7 @@ namespace WVulkan
         const WVkDeviceInfo & device
         );
 
+    // DEPRECATED
     void Destroy(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & in_device

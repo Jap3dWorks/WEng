@@ -62,6 +62,9 @@ public:
     using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WAssetId>;
     using WVkDesSetDb = TObjectDataBase<WVkDescriptorSetInfo, void, WEntityComponentId>;
     using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
+    using WVkDescriptorPoolDb =
+        std::array<TObjectDataBase<WVkDescriptorPoolInfo, void, WAssetId>,
+        WENG_MAX_FRAMES_IN_FLIGHT>;
 
     WVkRenderPipelinesManager() noexcept = default;
 
@@ -88,9 +91,10 @@ public:
         WVkRenderPipelinesManager && other
         ) noexcept;
 
+    // Create Graphics Render Pipeline
     void CreateRenderPipeline(
         const WAssetId & in_id,
-        const WRenderPipelineStruct & pstruct  // TODO Camera UBO
+        const WRenderPipelineStruct & pstruct
         );
 
     void DeleteRenderPipeline(
@@ -117,10 +121,10 @@ public:
         return descriptor_set_layouts_.Get(in_id);
     }
     
-    WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(const WEntityComponentId & in_id) const {
-        assert(descriptor_sets_.Contains(in_id));
-        return descriptor_sets_.Get(in_id);
-    }
+    // WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(const WEntityComponentId & in_id) const {
+    //     assert(descriptor_sets_.Contains(in_id));
+    //     return descriptor_sets_.Get(in_id);
+    // }
     
     WNODISCARD const WVkPipelineBindingInfo & Binding(const WEntityComponentId & in_id) const {
         assert(bindings_.Contains(in_id));
@@ -195,10 +199,10 @@ private:
 
     void CreateGraphicDescriptorSetLayout(const WAssetId & in_id);
 
-    void CreateDescriptorSet(
-        const WAssetId & in_descriptor_set_layout_id,
-        const WEntityComponentId & entity_component_id
-        );
+    // void CreateDescriptorSet(
+    //     const WAssetId & in_descriptor_set_layout_id,
+    //     const WEntityComponentId & entity_component_id
+    //     );
     
     void Initialize_ClearLambdas();
 
@@ -208,8 +212,9 @@ private:
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};
-    WVkDesSetDb descriptor_sets_{};
+    // WVkDesSetDb descriptor_sets_{};
     WVkPipelineBindingDb bindings_{};
+    WVkDescriptorPoolDb descriptor_pools_{};
 
     /** Relation between each pipeline and its bindings */
     std::unordered_map<WAssetId, TSparseSet<WEntityComponentId>> pipeline_pbindings_{};
@@ -220,7 +225,8 @@ private:
     uint32_t width_{0};
     uint32_t height_{0};
 
-    WVkDescriptorPoolInfo descriptor_pool_info_ {};
+    // WVkDescriptorPoolInfo descriptor_pool_info_ {}; // <- DEPRECATED
+    // std::array<WVkDescriptorPoolDb, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_pools_{};
 
     GlobalGraphicsDescriptors global_graphics_descsets_{};
 

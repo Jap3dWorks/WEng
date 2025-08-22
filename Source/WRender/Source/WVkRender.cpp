@@ -569,6 +569,7 @@ void WVkRender::RecordRenderCommandBuffer(
 
         auto& binding = pipelines_manager_.Binding(bid);
 
+        // TODO Regenerate DescriptorSets
         const WVkDescriptorSetInfo & descriptor =
             pipelines_manager_.DescriptorSet(binding.descriptor_set_id);
 

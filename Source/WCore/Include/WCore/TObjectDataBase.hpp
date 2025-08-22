@@ -177,18 +177,18 @@ public:
         objects_.Insert(in_id.GetId(), in_predicate(in_id));
     }
 
-    WIdClass Insert(const T & in_value) {
+    template<typename D> requires std::is_same_v<std::remove_cvref_t<D>, T>
+    WIdClass Insert(T && in_value) {
         WIdClass oid = id_pool_.Generate();
-        objects_.Insert(oid.GetId(), in_value);
-        
+        objects_.Insert(oid.GetId(), std::forward(in_value));
+
         return oid;
     }
 
-    WIdClass Insert(T && in_value) {
-        WIdClass oid = id_pool_.Generate();
-        objects_.Insert(oid.GetId(), std::move(in_value));
-
-        return oid;
+    template<typename D> requires std::is_same_v<std::remove_cvref_t<D>, T>
+    void InsertAt(const WIdClass & in_id, D && in_value) {
+        id_pool_.Reserve(in_id);
+        objects_.Insert(in_id.GetId(), std::forward<D>(in_value));
     }
 
     void InsertAt(const WIdClass & in_id, B* & in_value) override {
