@@ -183,8 +183,6 @@ START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
             float vlength = glm::length(mc->Velocity());
             float vmag = std::min(vlength, mc->MaxVelocity());
 
-            WFLOG("Acceleration Mag: {}", vmag);
-
             glm::vec3 current_direction{0.00001, 0.00001, 0.00001};
             if(vlength > 0.0000001) {
                 current_direction = glm::normalize(mc->Velocity());

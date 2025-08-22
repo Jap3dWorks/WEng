@@ -305,16 +305,10 @@ void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int act
 
     WInput imd = WInputLib::ToWInputMode(key, action);
 
-    WFLOG("Key Callback {}, {}, {}, {}",
-          key, scancode, action, mods);
-    
     WInputValuesStruct ival = {imd, 1.f, {0,0}};
 
-    // TODO: Also pass EngineData (delta time).
-    // TODO: Pass CycleData.
     app->input_mapping_register_.Emit(ival, app);
 }
-
 
 void WEngine::CursorCallback(GLFWwindow * in_window, double in_x, double in_y) {
     auto app = reinterpret_cast<WEngine *>(glfwGetWindowUserPointer(in_window));
