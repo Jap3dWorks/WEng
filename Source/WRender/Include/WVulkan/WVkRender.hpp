@@ -10,6 +10,7 @@
 #include "WVulkan/WVkRenderResources.hpp"
 
 #include <cstddef>
+#include <vulkan/vulkan_core.h>
 
 struct GLFWwindow;
 
@@ -128,9 +129,12 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordRenderCommandBuffer(WAssetId in_pipeline_id,
-                                   uint32_t in_frame_index,
-                                   uint32_t in_image_index);
+    void RecordRenderCommandBuffer(const WAssetId & in_pipeline_id,
+                                   const std::uint32_t & in_frame_index,
+                                   const std::uint32_t & in_image_index);
+
+    VkDescriptorSet BindingDescriptors(const WAssetId & in_pipeline_id,
+                                       const std::uint32_t & in_frame_index);
 
     WVkInstanceInfo instance_info_;
     

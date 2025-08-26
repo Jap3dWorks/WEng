@@ -223,12 +223,13 @@ void WVkRender::Draw()
         render_finished_semaphore_.semaphores[frame_index_]
     };
 
-    for(auto pit : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
+    for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
 
         vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index_], 0);
-
+        pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
+        
         RecordRenderCommandBuffer(
-            pit,
+            pipeline_id,
             frame_index_,
             image_index
             );
@@ -478,10 +479,61 @@ void WVkRender::RecreateSwapChain() {
         );
 }
 
+VkDescriptorSet WVkRender::BindingDescriptors(const WAssetId & in_pipeline_id,
+                                              const std::uint32_t & in_frame_index) {
+
+    // auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
+    const WVkDescriptorSetLayoutInfo & desc_lay_info =
+        pipelines_manager_.DescriptorSetLayout(in_pipeline_id);
+
+    const WVkDescriptorPoolInfo & desc_pool_info =
+        pipelines_manager_.DescriptorPoolInfo(in_pipeline_id, in_frame_index);
+
+    WVkDescriptorSetInfo descriptor_set_info;
+
+    WVulkan::Create(descriptor_set_info,
+                    device_info_,
+                    desc_lay_info,
+                    desc_pool_info);
+    
+    auto & bndng_info = pipelines_manager_.Binding(in_pipeline_id);
+
+    // std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> ubo_writeds;
+
+    VkWriteDescriptorSet ubo_writedset;
+
+    WVulkan::UpdateWriteDescriptorSet_UBO(
+        ubo_writedset,
+        bndng_info.ubo[in_frame_index].binding,
+        bndng_info.ubo[in_frame_index].buffer_info,
+        descriptor_set_info.descriptor_set
+        );
+
+    // WVulkan::UpdateDescriptorSets()
+
+    for(auto & texbinding : bndng_info.textures) {
+        
+        // std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * WENG_MAX_FRAMES_IN_FLIGHT};
+
+        WVulkan::UpdateWriteDescriptorSet_Texture(
+            write_ds[(i * tx.size()) + j],
+            tx[j].binding,
+            tx[j].image_info,
+            ds.descriptor_sets[i]
+            );        
+    }
+
+    WVulkan::UpdateDescriptorSets(
+        {ubo_writedset, },
+        device_info_
+        );
+
+}
+
 void WVkRender::RecordRenderCommandBuffer(
-    WId in_pipeline_id,
-    uint32_t in_frame_index,
-    uint32_t in_image_index
+    const WAssetId & in_pipeline_id,
+    const std::uint32_t & in_frame_index,
+    const std::uint32_t & in_image_index
     )
 {
     const WVkRenderPipelineInfo & render_pipeline =
@@ -568,6 +620,14 @@ void WVkRender::RecordRenderCommandBuffer(
     {
 
         auto& binding = pipelines_manager_.Binding(bid);
+
+        binding.mesh_asset_id;
+
+        binding.render_pipeline_id;
+
+        binding.textures;
+
+        // Create descriptor
 
         // TODO Regenerate DescriptorSets
         const WVkDescriptorSetInfo & descriptor =

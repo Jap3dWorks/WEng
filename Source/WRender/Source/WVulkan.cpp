@@ -1075,13 +1075,16 @@ void WVulkan::Create(
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
-    alloc_info.descriptorSetCount = WENG_MAX_FRAMES_IN_FLIGHT;
+    alloc_info.descriptorSetCount = 1;
+    // alloc_info.descriptorSetCount = WENG_MAX_FRAMES_IN_FLIGHT;
     alloc_info.pSetLayouts = layouts.data();
 
     if (vkAllocateDescriptorSets(
             device.vk_device,
             &alloc_info,
-            out_descriptor_set_info.descriptor_sets.data()) != VK_SUCCESS)
+            &out_descriptor_set_info.descriptor_set
+            // out_descriptor_set_info.descriptor_sets.data()
+            ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }

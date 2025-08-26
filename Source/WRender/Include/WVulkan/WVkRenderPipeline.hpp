@@ -39,7 +39,6 @@ private:
         WId wid{0};  // WEntityId
 
         WId render_pipeline_id{0};
-        WId descriptor_set_id {0};
         WId mesh_asset_id{0};
 
         std::vector<WVkDescriptorSetTextureBinding> textures{};
@@ -101,6 +100,8 @@ public:
         const WAssetId & in_id
         );
 
+    void ResetDescriptorPool(const WAssetId & in_id, const std::uint32_t & in_frameindex);
+
     WEntityComponentId CreateBinding(
         const WEntityComponentId & component_id,
         const WAssetId & in_pipeline_id,
@@ -120,12 +121,12 @@ public:
         assert(descriptor_set_layouts_.Contains(in_id));
         return descriptor_set_layouts_.Get(in_id);
     }
-    
-    // WNODISCARD const WVkDescriptorSetInfo & DescriptorSet(const WEntityComponentId & in_id) const {
-    //     assert(descriptor_sets_.Contains(in_id));
-    //     return descriptor_sets_.Get(in_id);
-    // }
-    
+
+    WNODISCARD const WVkDescriptorPoolInfo & DescriptorPoolInfo(const WAssetId & in_id,
+                                                                const std::uint32_t & in_frameindex) const {
+        return descriptor_pools_.at(in_frameindex).Get(in_id);
+    }
+
     WNODISCARD const WVkPipelineBindingInfo & Binding(const WEntityComponentId & in_id) const {
         assert(bindings_.Contains(in_id));
         return bindings_.Get(in_id);
@@ -224,9 +225,6 @@ private:
 
     uint32_t width_{0};
     uint32_t height_{0};
-
-    // WVkDescriptorPoolInfo descriptor_pool_info_ {}; // <- DEPRECATED
-    // std::array<WVkDescriptorPoolDb, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_pools_{};
 
     GlobalGraphicsDescriptors global_graphics_descsets_{};
 

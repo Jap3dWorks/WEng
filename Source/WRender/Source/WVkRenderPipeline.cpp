@@ -136,11 +136,15 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
 
     for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         WVkDescriptorPoolInfo dpoolinfo{};
+
+        // Create a descriptor pool by frame index
         WDescPoolUtils::CreateGraphicsDescSetPool(
             dpoolinfo, device_info_
             );
+
         descriptor_pools_[i].InsertAt(
-            in_id, dpoolinfo);
+            in_id, dpoolinfo
+            );
     }
 
     pipeline_pbindings_[in_id] = {};
@@ -152,10 +156,8 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
     )
 {
     // Remove bindings
-    //  TODO check errors at close
     for (auto & bid : pipeline_pbindings_[in_id]) {
         bindings_.Remove(bid) ;
-        // descriptor_sets_.Remove(bid);
     }
 
     pipeline_pbindings_.erase(in_id);
@@ -168,8 +170,18 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
         }
     }
 
-    // TODO remove pipeline descriptor pool
-    
+    for (std::uint8_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
+        descriptor_pools_[i].Remove(in_id);
+    }
+}
+
+void WVkRenderPipelinesManager::ResetDescriptorPool(const WAssetId & in_pipeline_id,
+                                                    const std::uint32_t & in_frameindex) {
+    vkResetDescriptorPool(
+        device_info_.vk_device,
+        descriptor_pools_[in_frameindex].Get(in_pipeline_id).descriptor_pool,
+        0
+        );
 }
 
 WId WVkRenderPipelinesManager::CreateBinding(
@@ -184,22 +196,12 @@ WId WVkRenderPipelinesManager::CreateBinding(
 
     WVkRenderPipelineInfo pipeline_info = RenderPipelineInfo(in_pipeline_id);
 
-    // Create a Descriptor set by binding,
-    //  So each binding can use a different ubo buffer (each actor has a different transform).
-
-    // CreateDescriptorSet(
-    //     pipeline_info.descriptor_set_layout_id,
-    //     component_id
-    //     );
-
-    // WVkDescriptorSetInfo ds = DescriptorSet(component_id);
-
     // Lambda ensures NRVO and avoids moves
     //  Create Descriptor binding objects with default values
     auto f = [this] () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> bindings;
 
-        std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> write_ds;
+        // std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> write_ds;
 
         for(uint32_t i = 0; i < bindings.size(); i++) {
             
@@ -217,19 +219,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
             bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
             bindings[i].buffer_info.offset = 0;
             bindings[i].buffer_info.range = bindings[i].ubo_info.range;
-
-            // WVulkan::UpdateWriteDescriptorSet_UBO(
-            //     write_ds[i],
-            //     bindings[i].binding,
-            //     bindings[i].buffer_info,
-            //     ds.descriptor_sets[i]
-            //     );
         }
-
-        // WVulkan::UpdateDescriptorSets(
-        //     write_ds,
-        //     device_info_
-        //     );
 
         return bindings;
     };
@@ -238,7 +228,8 @@ WId WVkRenderPipelinesManager::CreateBinding(
               &in_textures,
               &in_textures_bindings] () {
         std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * WENG_MAX_FRAMES_IN_FLIGHT};
+        
+        // std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * WENG_MAX_FRAMES_IN_FLIGHT};
         
         for (uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
             for (uint32_t j = 0; j<tx.size(); j++) {
@@ -247,29 +238,18 @@ WId WVkRenderPipelinesManager::CreateBinding(
                 tx[j].binding = in_textures_bindings[j];
                 tx[j].image_info.imageView = in_textures[j].image_view;
                 tx[j].image_info.sampler = in_textures[j].sampler;
-
-                // WVulkan::UpdateWriteDescriptorSet_Texture(
-                //     write_ds[(i * tx.size()) + j],
-                //     tx[j].binding,
-                //     tx[j].image_info,
-                //     ds.descriptor_sets[i]
-                //     );
             }
         }
-
-        // WVulkan::UpdateDescriptorSets(
-        //     write_ds,
-        //     device_info_
-        //     );
-
         return tx;
     };
 
     bindings_.InsertAt(
         component_id,
-        WVkPipelineBindingInfo{component_id, in_pipeline_id,
-                               component_id, in_mesh_asset_id,
-                               t(), f()}
+        WVkPipelineBindingInfo{component_id,
+                               in_pipeline_id,
+                               in_mesh_asset_id,
+                               t(),
+                               f()}
         );
 
     pipeline_pbindings_[in_pipeline_id].Insert(component_id.GetId(), component_id);
@@ -280,7 +260,6 @@ WId WVkRenderPipelinesManager::CreateBinding(
 void WVkRenderPipelinesManager::DeleteBinding(const WEntityComponentId & in_id) {
 
     bindings_.Remove(in_id);
-    // descriptor_sets_.Remove(in_id);
 
     for(auto & p : pipeline_pbindings_) {
         if (p.second.Contains(in_id.GetId())) {
@@ -306,14 +285,16 @@ void WVkRenderPipelinesManager::ForEachPipeline(EPipelineType in_type,
 }
     
 void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
-                                               TFunction<void(const WEntityComponentId &)> in_predicate) {
+                                               TFunction<void(const WEntityComponentId &)> in_predicate)
+{
     for(auto & wid : pipeline_pbindings_[in_pipeline_id]) {
         in_predicate(wid);
     }
 }
     
 void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
-                                               TFunction<void(WVkPipelineBindingInfo)> in_predicate) {
+                                               TFunction<void(WVkPipelineBindingInfo)> in_predicate)
+{
     for (auto & wid : pipeline_pbindings_[in_pipeline_id]) {
         in_predicate(bindings_.Get(wid));
     }
@@ -322,41 +303,22 @@ void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
 void WVkRenderPipelinesManager::Clear()
 {
     bindings_.Clear();
-    pipelines_.Clear(); // TODO destroy DSPool for each pipeline
+    pipelines_.Clear();
 
     for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         descriptor_pools_[i].Clear();
     }
 
-    // // descriptor_sets_.Clear();
-    // if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
-    // {
-    //     WVulkan::Destroy(descriptor_pool_info_, device_info_);
-    //     descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
-    // }
-
     descriptor_set_layouts_.Clear();
-
-    // Recreate the descriptor pool
-    // if (device_info_.vk_device != VK_NULL_HANDLE) {
-    //     WVulkan::Create(descriptor_pool_info_, device_info_);
-    // }
 }
 
 void WVkRenderPipelinesManager::Destroy() {
     bindings_.Clear();
-    pipelines_.Clear();  // TODO destroy DSPool foreach pipeline
+    pipelines_.Clear();
 
     for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         descriptor_pools_[i].Clear();
     }
-
-    // // descriptor_sets_.Clear();
-    // if (descriptor_pool_info_.descriptor_pool != VK_NULL_HANDLE)
-    // {
-    //     WVulkan::Destroy(descriptor_pool_info_, device_info_);
-    //     descriptor_pool_info_.descriptor_pool = VK_NULL_HANDLE;
-    // }
 
     descriptor_set_layouts_.Clear();
 
@@ -388,21 +350,6 @@ void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId 
         return descriptor_set_layout_info;
     });
 }
-
-// void WVkRenderPipelinesManager::CreateDescriptorSet(
-//     const WAssetId & in_descriptor_set_layout_id,
-//     const WEntityComponentId & entity_component_id
-//     )
-// {
-//     // TODO allocate dset in render pass
-//     auto & d_set_layout = descriptor_set_layouts_.Get(in_descriptor_set_layout_id);
-//     WVkDescriptorSetInfo descriptor_set_info;
-
-//     WVulkan::Create(descriptor_set_info, device_info_, d_set_layout,
-//                     descriptor_pool_info_);
-
-//     descriptor_sets_.InsertAt(entity_component_id, descriptor_set_info);
-// }
 
 void WVkRenderPipelinesManager::Initialize_ClearLambdas() {
 

@@ -128,7 +128,6 @@ struct WVkDescriptorSetLayoutInfo
 */
 struct WVkDescriptorPoolInfo
 {
-    // WId wid{0};
     std::vector<VkDescriptorPoolSize> pool_sizes {};  // <- DEPRECATED
     VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
 };
@@ -142,7 +141,8 @@ struct WVkDescriptorPoolInfo
 struct WVkDescriptorSetInfo
 {
     // The len of this vector is the number of frames in flight
-    std::array<VkDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
+    VkDescriptorSet descriptor_set{VK_NULL_HANDLE};
+    // std::array<VkDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> descriptor_sets{VK_NULL_HANDLE};
 };
 
 struct WVkMeshInfo
