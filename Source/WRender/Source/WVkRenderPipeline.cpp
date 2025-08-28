@@ -396,12 +396,14 @@ void WVkRenderPipelinesManager::Initialize_GlobalGraphicDescriptors() {
         device_info_
         );
 
-    WVulkan::Create(
-        global_graphics_descsets_.descset_info,
-        device_info_,
-        global_graphics_descsets_.descset_layout_info,
-        global_graphics_descsets_.descpool_info
-        );
+    for (std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
+        WVulkan::Create(
+            global_graphics_descsets_.descset_info[i],
+            device_info_,
+            global_graphics_descsets_.descset_layout_info,
+            global_graphics_descsets_.descpool_info
+            );        
+    }
 
     std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> ws;
 
@@ -423,7 +425,7 @@ void WVkRenderPipelinesManager::Initialize_GlobalGraphicDescriptors() {
             ws[i],
             0,
             buffer_info,
-            global_graphics_descsets_.descset_info.descriptor_sets[i]
+            global_graphics_descsets_.descset_info[i].descriptor_set
             );
     }
 

@@ -341,6 +341,7 @@ namespace WVulkan
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         out_write_descriptor_set.descriptorCount = 1;
         out_write_descriptor_set.pImageInfo = &in_image_info;
+        out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
     // /**

@@ -1065,25 +1065,23 @@ void WVulkan::Create(
     const WVkDescriptorPoolInfo & descriptor_pool_info
     )
 {
-    std::array<VkDescriptorSetLayout, WENG_MAX_FRAMES_IN_FLIGHT> layouts;
+    // std::array<VkDescriptorSetLayout, WENG_MAX_FRAMES_IN_FLIGHT> layouts;
 
-    for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
-    }
+    // for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
+    // {
+    //     layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
+    // }
 
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
     alloc_info.descriptorSetCount = 1;
-    // alloc_info.descriptorSetCount = WENG_MAX_FRAMES_IN_FLIGHT;
-    alloc_info.pSetLayouts = layouts.data();
+    alloc_info.pSetLayouts = &descriptor_set_layout_info.descriptor_set_layout;
 
     if (vkAllocateDescriptorSets(
             device.vk_device,
             &alloc_info,
             &out_descriptor_set_info.descriptor_set
-            // out_descriptor_set_info.descriptor_sets.data()
             ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
@@ -1097,12 +1095,11 @@ void WVulkan::UpdateDescriptorSets(
 {
     vkUpdateDescriptorSets(
         in_device_info.vk_device,
-        static_cast<uint32_t>(in_write_descriptor_sets.size()),
+        static_cast<std::uint32_t>(in_write_descriptor_sets.size()),
         in_write_descriptor_sets.data(),
         0,
         nullptr
         );
-
 }
 
 void WVulkan::Create(

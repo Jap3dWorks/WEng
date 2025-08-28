@@ -51,7 +51,8 @@ private:
     struct GlobalGraphicsDescriptors {
         WVkDescriptorPoolInfo descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
-        WVkDescriptorSetInfo descset_info{};
+        
+        std::array<WVkDescriptorSetInfo, WENG_MAX_FRAMES_IN_FLIGHT> descset_info{};
         std::array<WVkUBOInfo, WENG_MAX_FRAMES_IN_FLIGHT> camera_ubo{};
     };
 
@@ -124,6 +125,7 @@ public:
 
     WNODISCARD const WVkDescriptorPoolInfo & DescriptorPoolInfo(const WAssetId & in_id,
                                                                 const std::uint32_t & in_frameindex) const {
+        assert(descriptor_pools_.at(in_frameindex).Contains(in_id));
         return descriptor_pools_.at(in_frameindex).Get(in_id);
     }
 
@@ -169,10 +171,13 @@ public:
     void UpdateGlobalGraphicsDescriptorSet(
         const WUBOCameraStruct & in_camera_struct,
         uint32_t in_frame_index
-        ) ;
+        );
 
-    const WVkDescriptorSetInfo & GlobalGraphicDescriptorSet() const {
-        return global_graphics_descsets_.descset_info;
+    const WVkDescriptorSetInfo & GlobalGraphicsDescriptorSet(
+        const std::uint32_t & in_frame_index
+        ) const
+    {
+        return global_graphics_descsets_.descset_info[in_frame_index];
     }
 
     void UpdateModelDescriptorSet(

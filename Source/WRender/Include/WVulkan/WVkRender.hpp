@@ -133,8 +133,8 @@ private:
                                    const std::uint32_t & in_frame_index,
                                    const std::uint32_t & in_image_index);
 
-    VkDescriptorSet BindingDescriptors(const WAssetId & in_pipeline_id,
-                                       const std::uint32_t & in_frame_index);
+    VkDescriptorSet BindingDescriptor(const WEntityComponentId & in_binding_id,
+                                      const std::uint32_t & in_frame_index);
 
     WVkInstanceInfo instance_info_;
     
