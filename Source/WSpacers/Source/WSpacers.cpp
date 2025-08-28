@@ -36,9 +36,9 @@ bool run(WEngine & engine)
     return true;
 }
 
-WModelStruct MeshPlane()
+WMeshsesStruct MeshPlane()
 {
-    WModelStruct model;
+    WMeshsesStruct model;
     WMeshStruct mesh;
 
     mesh.vertices.push_back({
@@ -72,7 +72,7 @@ WModelStruct MeshPlane()
     mesh.indices.push_back(1);
     mesh.indices.push_back(3);
 
-    model.meshes.push_back(mesh);
+    model.meshes[0] = mesh;
 
     return model;
 }
@@ -227,7 +227,7 @@ bool InputAssets(WEngine & in_engine) {
 
 bool SetupLevel(WEngine & in_engine,
                 const ModelAssets & in_viking_room,
-                const ModelAssets & in_monkey
+                const ModelAssets & in_monkey_dt
     ) {
 
     WLevelId levelid = in_engine.LevelRegister().Create();
@@ -257,7 +257,7 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
     WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
-    ts.rotation_order = ERotationOrder::xzy;
+    ts.rotation_order = ERotationOrder::zxy;
     ts.position.z = -2.0f;
     ts.rotation.x = -3.1415 * 0.5;
     ts.rotation.y = -3.1415 * 0.5 ;
@@ -270,22 +270,39 @@ bool SetupLevel(WEngine & in_engine,
     smcomponent->RenderPipelineAsset(in_viking_room.pipeline_asset);
     smcomponent->RenderPipelineParametersAsset(in_viking_room.param_asset);
 
-    // Monkey
-    WEntityId monkeyid = level.CreateEntity<WEntity>();
-    level.CreateComponent<WTransformComponent>(monkeyid);
-    WTransformStruct & monkeyts = level.GetComponent<WTransformComponent>(monkeyid)->TransformStruct();
-    monkeyts.rotation_order = ERotationOrder::xzy;
-    monkeyts.position.z = -2.0;
-    monkeyts.position.y = 0.5;
-    monkeyts.scale *= 0.25;
+    // Monkey 1
+    WEntityId monkey_id = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(monkey_id);
+    WTransformStruct & monkey_ts = level.GetComponent<WTransformComponent>(monkey_id)->TransformStruct();
+    monkey_ts.rotation_order = ERotationOrder::zxy;
+    monkey_ts.position.z = -2.0;
+    monkey_ts.position.y = 0.5;
+    monkey_ts.scale *= 0.15;
 
-    level.CreateComponent<WStaticMeshComponent>(monkeyid);
+    level.CreateComponent<WStaticMeshComponent>(monkey_id);
 
-    auto* monkeysm = level.GetComponent<WStaticMeshComponent>(monkeyid);
+    auto * monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
 
-    monkeysm->StaticMeshAsset(in_monkey.static_mesh);
-    monkeysm->RenderPipelineAsset(in_monkey.pipeline_asset);
-    monkeysm->RenderPipelineParametersAsset(in_monkey.param_asset);
+    monkeysm->StaticMeshAsset(in_monkey_dt.static_mesh);
+    monkeysm->RenderPipelineAsset(in_monkey_dt.pipeline_asset);
+    monkeysm->RenderPipelineParametersAsset(in_monkey_dt.param_asset);
+
+    // Monkey 2
+    WEntityId monkey2_id = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(monkey2_id);
+    WTransformStruct & monkey2_ts = level.GetComponent<WTransformComponent>(monkey2_id)->TransformStruct();
+    monkey2_ts.rotation_order = ERotationOrder::zxy;
+    monkey2_ts.position.z = -2.0;
+    monkey2_ts.position.y = 0.65;
+    monkey2_ts.position.x = 0.2;
+    monkey2_ts.scale *= 0.25;
+
+    level.CreateComponent<WStaticMeshComponent>(monkey2_id);
+    auto * monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
+
+    monkey2sm->StaticMeshAsset(in_monkey_dt.static_mesh);
+    monkey2sm->RenderPipelineAsset(in_monkey_dt.pipeline_asset);
+    monkey2sm->RenderPipelineParametersAsset(in_monkey_dt.param_asset);
 
     return true;
 

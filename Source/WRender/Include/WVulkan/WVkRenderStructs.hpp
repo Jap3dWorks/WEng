@@ -117,7 +117,7 @@ struct WVkSwapChainInfo
 
 struct WVkDescriptorSetLayoutInfo
 {
-    WId wid{0};
+    WAssetId wid{0};
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
     VkDescriptorSetLayout descriptor_set_layout{VK_NULL_HANDLE};
 };
@@ -172,7 +172,7 @@ struct WVkUBOInfo
 
 struct WVkRenderPipelineInfo
 {
-    WId wid;
+    WAssetId wid;
     EPipelineType type{EPipelineType::Graphics};
 
     uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
@@ -180,7 +180,7 @@ struct WVkRenderPipelineInfo
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
-    WId descriptor_set_layout_id{0};
+    WAssetId descriptor_set_layout_id{0};
 };
 
 /**

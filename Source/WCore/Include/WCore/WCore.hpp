@@ -7,6 +7,7 @@
 #include <functional>
 #include <string_view>
 #include <cstdint>
+#include <cassert>
 
 #include "WCore.WEngine.hpp"
 
@@ -116,11 +117,15 @@ private:
 };
 
 using WId = _WId<std::size_t>;
+
+using WLevelId = _WId<std::uint16_t>;
 using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
-using WEntityComponentId = _WId<std::size_t>;  // WLevelId | WEntityId | WComponentTypeId
-using WAssetId = _WId<std::size_t>;
-using WLevelId = _WId<std::uint16_t>;
+using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8]
+
+using WAssetId = _WId<std::uint32_t>;
+using WAssIdxId = _WId<std::uint8_t>;
+using WAssetIndexId = _WId<std::uint64_t>; // WAssetId[32] | Index[4] (StaticMesh with material ids)
 
 using WEventId = _WId<std::uint32_t>;
 
@@ -153,9 +158,9 @@ namespace WIdUtils {
         std::uint8_t cclassid=0;
 
         cclassid |= value;
-        value >>= sizeof(WComponentTypeId);
+        value >>= sizeof(WComponentTypeId) * 8;
         entid |= value;
-        value >>= sizeof(WEntityId);
+        value >>= sizeof(WEntityId) * 8;
         lvlid |= value;
 
         out_dst1 = lvlid;
@@ -169,9 +174,9 @@ namespace WIdUtils {
         size_t v=0;
 
         v |= in_src1.GetId();
-        v <<= sizeof(WEntityId);
+        v <<= sizeof(WEntityId) * 8;
         v |= in_src2.GetId();
-        v <<= sizeof(WComponentTypeId);
+        v <<= sizeof(WComponentTypeId) * 8;
         v |= in_src3.GetId();
 
         return v;
@@ -185,7 +190,7 @@ namespace WIdUtils {
         std::uint16_t sysid = 0;
 
         sysid |= v;
-        v >>= sizeof(WSystemId);
+        v >>= sizeof(WSystemId) * 8;
         lvlid |= v;
 
         out_dst1 = lvlid;
@@ -196,10 +201,49 @@ namespace WIdUtils {
                                           const WSystemId & in_system_id) {
         std::uint32_t v=0;
         v |= in_level_id.GetId();
-        v <<= sizeof(WSystemId);
+        v <<= sizeof(WSystemId) * 8;
         v |= in_system_id.GetId();
 
         return v;
+    }
+
+    inline void FromAssetIndexId(const WAssetIndexId & in_asset_index_id,
+                                 WAssetId & out_asset_id,
+                                 WAssIdxId & out_index) {
+        
+        std::uint64_t v = in_asset_index_id.GetId();
+
+        std::uint8_t aidval=0;
+        std::uint32_t assval=0;
+
+        std::uint8_t bitmask = 8 | 4 | 2 | 1;
+        
+        aidval |= (bitmask & v);
+        
+        v >>= 4;
+
+        assval |= v;
+
+        out_asset_id = assval;
+        out_index = aidval;
+    }
+
+    inline WAssetIndexId ToAssetIndexId(const WAssetId & in_asset_id,
+                                        const WAssIdxId & in_index) {
+
+        assert(in_index.GetId() < WENG_MAX_ASSET_IDS);
+
+        std::uint64_t result=0;
+        
+        result |= in_asset_id.GetId();
+        
+        result <<= 4;
+
+        std::uint8_t bitmask = 8 | 4 | 2 | 1;
+
+        result |= (bitmask & in_index.GetId());
+
+        return result;
     }
 
 }

@@ -136,11 +136,11 @@ namespace WRenderLevelUtils {
         const WAssetDb & in_asset_db
         ) {
 
-        TSparseSet<WId> static_meshes;
+        TSparseSet<WAssetId> static_meshes;
         static_meshes.Reserve(64);
-        TSparseSet<WId> texture_assets;
+        TSparseSet<WAssetId> texture_assets;
         texture_assets.Reserve(64);
-        TSparseSet<WId> render_pipelines;
+        TSparseSet<WAssetId> render_pipelines;
         render_pipelines.Reserve(64);
         // TSparseSet<WId> pipeline_bindings;
         // pipeline_bindings.Reserve(64);
@@ -173,7 +173,7 @@ namespace WRenderLevelUtils {
                     ->RenderPipelineParameters();
 
                 for(uint8_t i=0; i < parameters_struct.texture_assets_count; i++) {
-                    WId t_id = parameters_struct.texture_assets[i].value;
+                    WAssetId t_id = parameters_struct.texture_assets[i].value;
                     
                     texture_assets.Insert(
                         t_id.GetId(),

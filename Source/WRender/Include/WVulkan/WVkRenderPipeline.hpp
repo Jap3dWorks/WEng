@@ -38,8 +38,8 @@ private:
     {
         WId wid{0};  // WEntityId
 
-        WId render_pipeline_id{0};
-        WId mesh_asset_id{0};
+        WAssetId render_pipeline_id{0};
+        WAssetId mesh_asset_id{0}; // use WAssetIndexId
 
         std::vector<WVkDescriptorSetTextureBinding> textures{};
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};

@@ -46,7 +46,7 @@ public:
     virtual void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
-        const WAssetId & in_mesh_id,
+        const WAssetId & in_mesh_id, // TODO: WAssetIndexId
         const WRenderPipelineParametersStruct & in_parameters
         )=0;
 

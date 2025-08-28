@@ -28,3 +28,4 @@
 
 #define WNSPCE()
 
+#define WENG_MAX_ASSET_IDS 16

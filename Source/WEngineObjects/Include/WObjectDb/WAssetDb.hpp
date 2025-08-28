@@ -97,10 +97,6 @@ public:
         return object_manager_.Get(id_class_.at(in_id), in_id);
     }
 
-    TWRef<WAsset> GetRef(const WAssetId & in_id) const {
-        return Get(in_id);
-    }
-
 private:
 
     void InitializeIdPool();

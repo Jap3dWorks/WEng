@@ -344,65 +344,6 @@ namespace WVulkan
         out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
-    // /**
-    //  * @brief Update VkWriteDescriptorSet Stop condition
-    // */
-    // void UpdateWriteDescriptorSet();
-
-    // /**
-    //  * @brief Update a VkWriteDescriptorSet with a UBO struct.
-    // */
-    // template<typename ...Args>
-    // void UpdateWriteDescriptorSet(
-    //     VkWriteDescriptorSet & out_write_descriptor_set,
-    //     WVkWriteDescriptorSetUBOStruct & ubo_struct,
-    //     Args && ... args
-    // )
-    // {
-    //     ubo_struct.buffer_info.buffer = ubo_struct.uniform_buffer_info.uniform_buffer;
-    //     ubo_struct.buffer_info.offset = 0;
-    //     ubo_struct.buffer_info.range = sizeof(WVkUBOStruct);
-        
-    //     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    //     out_write_descriptor_set.dstSet = ubo_struct.descriptor_set;
-    //     out_write_descriptor_set.dstBinding = ubo_struct.binding;
-    //     out_write_descriptor_set.dstArrayElement = 0;
-    //     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    //     out_write_descriptor_set.descriptorCount = 1;
-    //     out_write_descriptor_set.pBufferInfo = &ubo_struct.buffer_info;
-
-    //     UpdateWriteDescriptorSet(
-    //         std::forward<Args>(args) ...
-    //     );
-    // }
-
-    // /**
-    //  * @brief Update a VkWriteDescriptorSet with a texture struct.
-    // */
-    // template<typename ...Args>
-    // void UpdateWriteDescriptorSet(
-    //     VkWriteDescriptorSet & out_write_descriptor_set,
-    //     WVkWriteDescriptorSetTextureStruct& texture_struct,
-    //     Args&&... args
-    // )
-    // {
-    //     texture_struct.image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    //     texture_struct.image_info.imageView = texture_struct.texture_info.image_view;
-    //     texture_struct.image_info.sampler = texture_struct.texture_info.sampler;
-
-    //     out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    //     out_write_descriptor_set.dstSet = texture_struct.descriptor_set;
-    //     out_write_descriptor_set.dstBinding = texture_struct.binding;
-    //     out_write_descriptor_set.dstArrayElement = 0;
-    //     out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    //     out_write_descriptor_set.descriptorCount = 1;
-    //     out_write_descriptor_set.pImageInfo = &texture_struct.image_info;
-
-    //     UpdateWriteDescriptorSet(
-    //         std::forward<Args>(args)...
-    //     );
-    // }
-
     void UpdateDescriptorSets(
         const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info

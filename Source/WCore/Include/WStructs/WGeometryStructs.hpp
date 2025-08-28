@@ -1,4 +1,5 @@
 #pragma once
+#include "WCore/WCore.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -38,7 +39,10 @@ struct WMeshStruct{
     std::vector<uint32_t> indices;
 };
 
-struct WModelStruct{
-    std::vector<WMeshStruct> meshes;
+// Meshes by Id, max 16
+struct WMeshsesStruct{
+    std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes;
 };
+
+
 
