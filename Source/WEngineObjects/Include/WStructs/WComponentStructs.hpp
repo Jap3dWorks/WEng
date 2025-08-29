@@ -1,7 +1,9 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WStructs/WMathStructs.hpp"
+#include <array>
 
 #include <glm/glm.hpp>
 
@@ -27,6 +29,8 @@ struct WCameraStruct
 struct WStaticMeshStruct
 {
     WAssetId static_mesh_asset{};
-    WAssetId render_pipeline_asset{};
-    WAssetId render_pipeline_parameters_asset{};
+    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_assets{};
+    // WAssetId render_pipeline_asset{};
+    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_params_assets{};
+    // WAssetId render_pipeline_parameters_asset{};
 };

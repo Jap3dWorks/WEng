@@ -40,9 +40,9 @@ struct WMeshStruct{
 };
 
 // Meshes by Id, max 16
-struct WMeshsesStruct{
-    std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes;
-};
+// struct WMeshsesStruct{
+//     std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes;
+// };
 
 
 

@@ -618,8 +618,6 @@ void WVkRender::RecordRenderCommandBuffer(
         // Create descriptor
         VkDescriptorSet descriptorset = BindingDescriptor(bid, frame_index_);
 
-        
-
         auto& mesh_info =
             render_resources_.StaticMeshInfo(
                 binding.mesh_asset_id

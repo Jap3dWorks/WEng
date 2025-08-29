@@ -2,6 +2,8 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
+#include "WStructs/WGeometryStructs.hpp"
+#include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
@@ -35,6 +37,7 @@ public:
 
     void WaitIdle() const override;
 
+    // TODO pipeline struct and WAssetId
     void CreateRenderPipeline(
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
@@ -43,7 +46,6 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        // const WAssetId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
         ) override;
 
@@ -51,35 +53,19 @@ public:
 
     void DeletePipelineBinding(const WEntityComponentId & in_id) override;
 
-    void RegisterTexture(WTextureAsset & in_texture_asset) override {
-        render_resources_.RegisterTexture(in_texture_asset);
-    }
-
-    void UnregisterTexture(const WAssetId & in_id) override {
-        render_resources_.UnregisterTexture(in_id);
-    }
-
-    void LoadTexture(const WAssetId & in_id) override {
-        render_resources_.LoadTexture(in_id);
+    void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) override {
+        render_resources_.LoadTexture(in_id, in_texture);
     }
 
     void UnloadTexture(const WAssetId & in_id) override {
         render_resources_.UnloadTexture(in_id);
     }
 
-    void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) override {
-        render_resources_.RegisterStaticMesh(in_static_mesh_asset);
+    void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) override {
+        render_resources_.LoadStaticMesh(in_id, in_mesh);
     }
 
-    void UnregisterStaticMesh(const WAssetId & in_id) override {
-        render_resources_.UnregisterStaticMesh(in_id);
-    }
-
-    void LoadStaticMesh(const WAssetId & in_id) override {
-        render_resources_.LoadStaticMesh(in_id);
-    }
-
-    void UnloadStaticMesh(const WAssetId & in_id) override {
+    void UnloadStaticMesh(const WAssetIndexId & in_id) override {
         render_resources_.UnloadStaticMesh(in_id);
     }
 

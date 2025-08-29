@@ -114,8 +114,9 @@ public:
         WLevelId lid;
         WEntityId eid;
         WComponentTypeId cid;
+        WAssIdxId idxid;
     
-        WIdUtils::FromEntityComponentId(in_entity_component_id, lid, eid, cid);
+        WIdUtils::FromEntityComponentId(in_entity_component_id, lid, eid, cid, idxid);
 
         return GetComponent(id_componentclass_.at(cid), eid);
     }
@@ -129,16 +130,16 @@ public:
         return component_db_.GetFirst<T>(out_id);
     }
 
-    WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
-                                         const WEntityId & in_id,
-                                         const WClass * in_component_class) const {
-        assert(componentclass_id_.contains(in_component_class));
+    // WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
+    //                                      const WEntityId & in_id,
+    //                                      const WClass * in_component_class) const {
+    //     assert(componentclass_id_.contains(in_component_class));
         
-        return WIdUtils::ToEntityComponentId(
-            in_lvlid,
-            in_id,
-            componentclass_id_.at(in_component_class));
-    }
+    //     return WIdUtils::ToEntityComponentId(
+    //         in_lvlid,
+    //         in_id,
+    //         componentclass_id_.at(in_component_class));
+    // }
 
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const {
@@ -155,6 +156,16 @@ public:
                          [&in_predicate](WComponent* in_component) {
                              in_predicate(static_cast<T*>(in_component));
                          });
+    }
+
+    template<std::derived_from<WComponent> T>
+    WComponentTypeId GetComponentTypeId() const {
+        return GetComponentTypeId(T::StaticClass());
+    }
+
+    WComponentTypeId GetComponentTypeId(const WClass * in_class) const {
+        assert(WComponent::StaticClass()->IsBaseOf(in_class));
+        return componentclass_id_.at(in_class);
     }
 
 private:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 #include "WAssets/WTextureAsset.hpp"
@@ -36,17 +37,16 @@ public:
 
     // Texture
 
-    // void RegisterTexture(WTextureAsset & in_texture_struct);
-
-    // void UnregisterTexture(const WAssetId & in_id);
-
     void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) {
         texture_collection_.LoadResource(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
             WVkTextureInfo result;
             WVulkan::Create(
-                result, in_texture, device_info_, command_pool_info_
+                result,
+                in_texture,
+                device_info_,
+                command_pool_info_
                 );
             return result;
         });
@@ -58,15 +58,26 @@ public:
 
     // Static Mesh
 
-    // void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) ;
+    void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) {
+        static_mesh_collection_.LoadResource(
+            in_id,
+            [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
+                WVkMeshInfo result;
+                WVulkan::Create(
+                    result,
+                    in_mesh,
+                    device_info_,
+                    command_pool_info_
+                    );
+                
+                return result;
+            }
+            );
+    }
 
-    // void UnregisterStaticMesh(const WAssetId & in_id);
+    void UnloadStaticMesh(const WAssetIndexId & in_id);
 
-    void LoadStaticMesh(const WAssetId & in_id);
-
-    void UnloadStaticMesh(const WAssetId & in_id);
-
-    const WVkMeshInfo & StaticMeshInfo(const WAssetId & in_id) const;
+    const WVkMeshInfo & StaticMeshInfo(const WAssetIndexId & in_id) const;
 
     void Clear();
 

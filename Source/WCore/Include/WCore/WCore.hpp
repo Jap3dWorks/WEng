@@ -129,7 +129,7 @@ using WId = _WId<std::size_t>;
 using WLevelId = _WId<std::uint16_t>;
 using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
-using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8]
+using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
 
 using WAssetId = _WId<std::uint32_t>;
 using WAssIdxId = _WId<std::uint8_t>;
@@ -158,13 +158,20 @@ namespace WIdUtils {
     inline void FromEntityComponentId(const WEntityComponentId & in_src,
                                       WLevelId & out_dst1,
                                       WEntityId & out_dst2,
-                                      WComponentTypeId & out_dst3) {
+                                      WComponentTypeId & out_dst3,
+                                      WAssIdxId & out_dst4
+        ) {
         std::size_t value = in_src.GetId();
         
         std::uint16_t lvlid=0;
         std::uint32_t entid=0;
         std::uint8_t cclassid=0;
 
+        std::uint8_t index=0;
+        std::uint8_t imask = 8 + 4 + 2 + 1;
+
+        index |= (imask & value);
+        value >>= 4;
         cclassid |= value;
         value >>= sizeof(WComponentTypeId) * 8;
         entid |= value;
@@ -174,11 +181,14 @@ namespace WIdUtils {
         out_dst1 = lvlid;
         out_dst2 = entid;
         out_dst3 = cclassid;
+        out_dst4 = index;
     }
 
     inline WEntityComponentId ToEntityComponentId(const WLevelId & in_src1,
                                                   const WEntityId & in_src2,
-                                                  const WComponentTypeId & in_src3) {
+                                                  const WComponentTypeId & in_src3,
+                                                  const WAssIdxId & in_src4
+        ) {
         size_t v=0;
 
         v |= in_src1.GetId();
@@ -186,6 +196,9 @@ namespace WIdUtils {
         v |= in_src2.GetId();
         v <<= sizeof(WComponentTypeId) * 8;
         v |= in_src3.GetId();
+        v <<= 4;
+        std::uint8_t imask = 8 + 4 + 2 + 1;
+        v |= (imask & in_src4.GetId());
 
         return v;
     }

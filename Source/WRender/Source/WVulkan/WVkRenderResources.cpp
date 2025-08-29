@@ -51,13 +51,13 @@ WVkRenderResources & WVkRenderResources::operator=(WVkRenderResources && other) 
     return *this;
 }
 
-void WVkRenderResources::RegisterTexture(WTextureAsset & in_texture_asset) {
-    return texture_collection_.RegisterResource(in_texture_asset);
-}
+// void WVkRenderResources::RegisterTexture(WTextureAsset & in_texture_asset) {
+//     return texture_collection_.RegisterResource(in_texture_asset);
+// }
 
-void WVkRenderResources::UnregisterTexture(const  WAssetId & in_id) {
-    texture_collection_.UnregisterResource(in_id);
-}
+// void WVkRenderResources::UnregisterTexture(const  WAssetId & in_id) {
+//     texture_collection_.UnregisterResource(in_id);
+// }
 
 void WVkRenderResources::UnloadTexture(const WAssetId & in_id) {
     texture_collection_.UnloadResource(in_id);
@@ -73,15 +73,15 @@ void WVkRenderResources::UnloadTexture(const WAssetId & in_id) {
 //     return static_mesh_collection_.RegisterAsset(in_static_mesh_asset);
 // }
 
-void WVkRenderResources::UnregisterStaticMesh(const WAssetId & in_id) {
-    static_mesh_collection_.UnregisterResource(in_id);
-}
+// void WVkRenderResources::UnregisterStaticMesh(const WAssetIndexId & in_id) {
+//     static_mesh_collection_.UnregisterResource(in_id);
+// }
 
-void WVkRenderResources::LoadStaticMesh(const WAssetId & in_id) {
-    static_mesh_collection_.LoadResource(in_id);
-}
+// void WVkRenderResources::LoadStaticMesh(const WAssetId & in_id) {
+//     static_mesh_collection_.LoadResource(in_id);
+// }
 
-void WVkRenderResources::UnloadStaticMesh(const WAssetId & in_id) {
+void WVkRenderResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
     static_mesh_collection_.UnloadResource(in_id);
 }
 
@@ -89,7 +89,7 @@ const WVkTextureInfo & WVkRenderResources::TextureInfo(const WAssetId & in_id) c
     return texture_collection_.GetData(in_id);
 }
 
-const WVkMeshInfo & WVkRenderResources::StaticMeshInfo(const WAssetId & in_id) const {
+const WVkMeshInfo & WVkRenderResources::StaticMeshInfo(const WAssetIndexId & in_id) const {
     return static_mesh_collection_.GetData(in_id);
 }
 

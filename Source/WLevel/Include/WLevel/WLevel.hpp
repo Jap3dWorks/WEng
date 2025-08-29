@@ -1,9 +1,10 @@
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
 #include "WEngineObjects/WEntity.hpp"
-#include "WEngineObjects/TWRef.hpp"
+// #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
@@ -94,16 +95,27 @@ public:
         entity_component_db_.ForEachComponent<T>(in_predicate);
     }
 
-    const char * Name() const ;
+    const char * Name() const;
 
-    // TODO Remove this, use WLevel Public methods.
-    const WEntityComponentDb & EntityComponentDb() const {
-        return entity_component_db_;
+    template<std::derived_from<WComponent> T>
+    WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
+                                            const WAssIdxId & in_index_id=0) const noexcept {
+        
+        return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
     }
 
-    WLevelId WID() const ;
+    WEntityComponentId GetEntityComponentId(const WClass * in_class,
+                                            const WEntityId & in_entity_id,
+                                            const WAssIdxId & in_index_id=0) const noexcept {
+        assert(WComponent::StaticClass()->IsBaseOf(in_class));
+        
+        WComponentTypeId cid = entity_component_db_.GetComponentTypeId(in_class);
+        return WIdUtils::ToEntityComponentId(WID(), in_entity_id, cid, in_index_id);
+    }
 
-    void WID(const WLevelId & in_id) ;
+    WLevelId WID() const;
+
+    void WID(const WLevelId & in_id);
 
 private:
 

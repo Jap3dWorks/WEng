@@ -17,40 +17,34 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 public:
 
     void StaticMeshAsset(const WAssetId & in_id) {
-        static_mesh_struct_.static_mesh_asset = in_id;
+        static_mesh_asset_ = in_id;
     }
 
-    WAssetId StaticMeshAsset() const {
-        return static_mesh_struct_.static_mesh_asset;
+    WAssetId GetStaticMeshAsset() const {
+        return static_mesh_asset_;
     }
 
-    void RenderPipelineAsset(const WAssetId & in_id) {
-        static_mesh_struct_.render_pipeline_asset = in_id;
+    void SetRenderPipelineAsset(const WAssetId & in_asset_id, const WAssIdxId & inid=0) {
+        render_pipeline_assets_[inid.GetId()] = in_asset_id;
     }
 
-    WAssetId RenderPipelineAsset() const {
-        return static_mesh_struct_.render_pipeline_asset;
+    WAssetId GetRenderPipelineAsset(const WAssIdxId & inid=0) const {
+        return render_pipeline_assets_[inid.GetId()];
     }
 
-    void RenderPipelineParametersAsset(const WAssetId & in_id) {
-        static_mesh_struct_.render_pipeline_parameters_asset = in_id;
+    void SetRenderPipelineParametersAsset(const WAssetId & in_asset_id, const WAssIdxId & inid=0) {
+        render_pipeline_params_assets_[inid.GetId()] = in_asset_id;
     }
 
-    WAssetId RenderPipelineParametersAsset() const {
-        return static_mesh_struct_.render_pipeline_parameters_asset;
-    }
-
-    WStaticMeshStruct & StaticMeshStruct() {
-        return static_mesh_struct_;
-    }
-
-    const WStaticMeshStruct & StaticMeshStruct() const {
-        return static_mesh_struct_;
+    WAssetId GetRenderPipelineParametersAsset(const WAssIdxId & in_id=0) const {
+        return render_pipeline_params_assets_[in_id.GetId()];
     }
 
 private:
 
-    WStaticMeshStruct static_mesh_struct_{};
+    WAssetId static_mesh_asset_{};
+    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_assets_{};
+    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_params_assets_{};
   
 };
 

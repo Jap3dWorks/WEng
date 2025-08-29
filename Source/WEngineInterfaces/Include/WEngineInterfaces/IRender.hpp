@@ -7,10 +7,13 @@
 #include <vector>
 
 class WRenderPipelineAsset;
-class WTextureAsset;
-class WStaticMeshAsset;
+// class WTextureAsset;
+// class WStaticMeshAsset;
+struct WTextureStruct;
+struct WMeshStruct;
 struct WTransformStruct;
 struct WCameraStruct;
+
 
 struct GLFWwindow;
 
@@ -47,8 +50,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        // const WAssetId & in_mesh_id, // TODO: WAssetIndexId
-        const WRenderPipelineParametersStruct & in_parameters
+        const WRenderPipelineParametersStruct & in_parameters  // TODO Check
         )=0;
 
     /**
@@ -72,24 +74,19 @@ public:
     /**
      * @brief Register a texture, later you can load it using the asset id.
      */
-    virtual void RegisterTexture(WTextureAsset & in_texture_asset)=0;
-
-    virtual void UnregisterTexture(const WAssetId & in_id)=0;
 
     /**
      * @brief Load the registered texture asset with id in_id.
      */
-    virtual void LoadTexture(const WAssetId & in_id)=0;
+    virtual void LoadTexture(const WAssetId & in_id,
+                             const WTextureStruct & in_texture)=0;
 
     virtual void UnloadTexture(const WAssetId & in_id)=0;
 
-    virtual void RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset)=0;
+    virtual void LoadStaticMesh(const WAssetIndexId & in_id,
+                                const WMeshStruct & in_mesh)=0;
 
-    virtual void UnregisterStaticMesh(const WAssetId & in_id)=0;
-
-    virtual void LoadStaticMesh(const WAssetId & in_id)=0;
-
-    virtual void UnloadStaticMesh(const WAssetId & in_id)=0;
+    virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
         const WCameraStruct & camera_struct,

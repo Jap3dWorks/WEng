@@ -27,7 +27,7 @@ public:
         return meshes_[in_index.GetId()];
     }
 
-    std::uint8_t MeshesCount() const {
+    std::uint8_t MeshCount() const {
         std::uint8_t r = 0;
         for(auto & v : meshes_) {
             if(!v.indices.empty()) {
