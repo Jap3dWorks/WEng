@@ -116,20 +116,15 @@ std::vector<WAssetId> WImportObj::Import(
         }
     }
 
-    std::vector<WAssetId> result(shapes.size());
+    std::vector<WAssetId> result {
+        in_asset_manager.Create<WStaticMeshAsset>("StaticMesh")
+    };
+    
+    WStaticMeshAsset * static_mesh =
+        in_asset_manager.Get<WStaticMeshAsset>(result[0]);
 
     for (uint32_t i=0; i < meshes.size(); i++) {
-        WAssetId id = in_asset_manager.Create(
-            WStaticMeshAsset::StaticClass(),
-            "StaticMesh"
-            );
-
-        WStaticMeshAsset* static_mesh =
-            static_cast<WStaticMeshAsset*>(in_asset_manager.Get(id));
-
-        static_mesh->SetMesh(std::move(meshes[i]));
-
-        result[i] = id;
+        static_mesh->SetMesh(std::move(meshes[i]), i);
     }
 
     return result;

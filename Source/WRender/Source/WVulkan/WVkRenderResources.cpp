@@ -1,4 +1,5 @@
 #include "WVulkan/WVkRenderResources.hpp"
+#include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vector>
@@ -51,35 +52,37 @@ WVkRenderResources & WVkRenderResources::operator=(WVkRenderResources && other) 
 }
 
 void WVkRenderResources::RegisterTexture(WTextureAsset & in_texture_asset) {
-    return texture_collection_.RegisterAsset(in_texture_asset);
+    return texture_collection_.RegisterResource(in_texture_asset);
 }
 
 void WVkRenderResources::UnregisterTexture(const  WAssetId & in_id) {
-    texture_collection_.UnregisterAsset(in_id);
-}
-
-void WVkRenderResources::LoadTexture(const WAssetId & in_id) {
-    texture_collection_.LoadAsset(in_id);
+    texture_collection_.UnregisterResource(in_id);
 }
 
 void WVkRenderResources::UnloadTexture(const WAssetId & in_id) {
-    texture_collection_.UnloadAsset(in_id);
+    texture_collection_.UnloadResource(in_id);
 }
 
-void WVkRenderResources::RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) {
-    return static_mesh_collection_.RegisterAsset(in_static_mesh_asset);
-}
+// void WVkRenderResources::RegisterStaticMesh(WStaticMeshAsset & in_static_mesh_asset) {
+
+//     for(std::uint8_t i=0; i<in_static_mesh_asset.MeshesCount(); i++) {
+//         WAssetIndexId id = WIdUtils::ToAssetIndexId(in_static_mesh_asset.WID(), i);
+//         // static_mesh_collection_.RegisterAsset() // Mesh, index;
+//     }
+    
+//     return static_mesh_collection_.RegisterAsset(in_static_mesh_asset);
+// }
 
 void WVkRenderResources::UnregisterStaticMesh(const WAssetId & in_id) {
-    static_mesh_collection_.UnregisterAsset(in_id);
+    static_mesh_collection_.UnregisterResource(in_id);
 }
 
 void WVkRenderResources::LoadStaticMesh(const WAssetId & in_id) {
-    static_mesh_collection_.LoadAsset(in_id);
+    static_mesh_collection_.LoadResource(in_id);
 }
 
 void WVkRenderResources::UnloadStaticMesh(const WAssetId & in_id) {
-    static_mesh_collection_.UnloadAsset(in_id);
+    static_mesh_collection_.UnloadResource(in_id);
 }
 
 const WVkTextureInfo & WVkRenderResources::TextureInfo(const WAssetId & in_id) const {
@@ -96,19 +99,19 @@ void WVkRenderResources::Clear() {
 }
 
 void WVkRenderResources::InitializeTextureFunctions() {
-    texture_collection_.SetCreateFn(
-        [this](const WAssetId & in_id) -> WVkTextureInfo {
-            WVkTextureInfo result;
-            WVulkan::Create(
-                result,
-                texture_collection_.GetAsset(in_id).GetTexture(),
-                device_info_,
-                command_pool_info_
-                );
+    // texture_collection_.SetCreateFn(
+    //     [this](const WAssetId & in_id) -> WVkTextureInfo {
+    //         WVkTextureInfo result;
+    //         WVulkan::Create(
+    //             result,
+    //             texture_collection_.GetResource(in_id).GetTexture(),
+    //             device_info_,
+    //             command_pool_info_
+    //             );
             
-            return result;
-        }
-        );
+    //         return result;
+    //     }
+    //     );
 
     texture_collection_.SetClearFn(
         [this](WVkTextureInfo & in_info) -> void {
@@ -121,17 +124,17 @@ void WVkRenderResources::InitializeTextureFunctions() {
 }
 
 void WVkRenderResources::InitializeStaticMeshFunctions() {
-    static_mesh_collection_.SetCreateFn(
-        [this] (const WAssetId & in_id) -> WVkMeshInfo {
-            WVkMeshInfo result;
-            WVulkan::Create(
-                result,
-                static_mesh_collection_.GetAsset(in_id).GetMesh(),
-                device_info_,
-                command_pool_info_
-                );
-            return result;
-        });
+    // static_mesh_collection_.SetCreateFn(
+    //     [this] (const WAssetId & in_id) -> WVkMeshInfo {
+    //         WVkMeshInfo result;
+    //         WVulkan::Create(
+    //             result,
+    //             static_mesh_collection_.GetResource(in_id).GetMesh(),
+    //             device_info_,
+    //             command_pool_info_
+    //             );
+    //         return result;
+    //     });
     
     static_mesh_collection_.SetClearFn(
         [this] (WVkMeshInfo & in_mesh_info) -> void {

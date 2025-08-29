@@ -42,7 +42,8 @@ public:
     void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
-        const WAssetId & in_mesh_id,
+        const WAssetIndexId & in_mesh_id,
+        // const WAssetId & in_mesh_id,
         const WRenderPipelineParametersStruct & in_parameters
         ) override;
 

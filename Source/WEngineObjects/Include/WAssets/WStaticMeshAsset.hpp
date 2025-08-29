@@ -1,8 +1,10 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
+#include <array>
 
 #include "WStaticMeshAsset.WEngine.hpp"
 
@@ -13,31 +15,34 @@ class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 
 public:
 
-    // DEPRECATED
-    constexpr void SetMesh(const WMeshStruct& in_mesh) noexcept {
-        mesh_ = in_mesh;
+    constexpr void SetMesh(const WMeshStruct & in_mesh, const WAssIdxId & in_id=0) {
+        meshes_[in_id.GetId()] = in_mesh;
     }
 
-    // DEPRECATED
-    constexpr void SetMesh(WMeshStruct && in_mesh) noexcept {
-        mesh_ = std::move(in_mesh);
+    constexpr void SetMesh(WMeshStruct && in_mesh, const WAssIdxId & in_id=0) noexcept {
+        meshes_[in_id.GetId()] = std::move(in_mesh);
     }
 
-    // DEPRECATED
-    WNODISCARD constexpr const WMeshStruct& GetMesh() const noexcept {
-        return mesh_;
+    constexpr const WMeshStruct & GetMesh(const WAssIdxId & in_index=0) const noexcept {
+        return meshes_[in_index.GetId()];
     }
 
-    constexpr void SetMesh(const WMeshStruct& in_mesh, const WAssIdxId & in_id);
-
-    constexpr const WMeshStruct & GetMesh(const WAssIdxId & in_index) const noexcept;
+    std::uint8_t MeshesCount() const {
+        std::uint8_t r = 0;
+        for(auto & v : meshes_) {
+            if(!v.indices.empty()) {
+                r++;
+            }
+            else {
+                return r;
+            }
+        }
+        return r;
+    }
 
 private:
     
-    // DEPRECATED
-    WMeshStruct mesh_{};
-    
-    WMeshsesStruct meshes_{};
+    std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes_{};
     
 };
 

@@ -8,6 +8,7 @@
 #include <string_view>
 #include <cstdint>
 #include <cassert>
+#include <type_traits>
 
 #include "WCore.WEngine.hpp"
 
@@ -17,6 +18,10 @@
 template<typename T>
 class WCORE_API _WId
 {
+public:
+
+    using IdType = T;
+
 public:
 
     constexpr _WId() noexcept :
@@ -115,6 +120,9 @@ private:
 
     T id_=0; 
 };
+
+template<typename T>
+concept CIsWId = std::is_same_v<T, _WId<typename T::IdType>>;
 
 using WId = _WId<std::size_t>;
 

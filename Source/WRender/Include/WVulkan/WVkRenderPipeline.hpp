@@ -21,7 +21,7 @@ class WRENDER_API WVkRenderPipelinesManager
 private:
 
     struct WVkDescriptorSetUBOBinding {
-        uint32_t binding{0}; // TODO binding to PipelineBindingInfo
+        uint32_t binding{0}; // TODO Move Binding to WVkPipelineBindingInfo
         WVkUBOInfo ubo_info{};
         VkDescriptorBufferInfo buffer_info{};
     };
@@ -36,10 +36,10 @@ private:
      */
     struct WVkPipelineBindingInfo
     {
-        WId wid{0};  // WEntityId
+        WId wid{0};  // TODO WEntityId
 
         WAssetId render_pipeline_id{0};
-        WAssetId mesh_asset_id{0}; // use WAssetIndexId
+        WAssetIndexId mesh_asset_id{0};
 
         std::vector<WVkDescriptorSetTextureBinding> textures{};
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
@@ -106,7 +106,7 @@ public:
     WEntityComponentId CreateBinding(
         const WEntityComponentId & component_id,
         const WAssetId & in_pipeline_id,
-        const WAssetId & in_mesh_asset_id,
+        const WAssetIndexId & in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
         std::vector<uint16_t> in_textures_bindings
         ) noexcept;

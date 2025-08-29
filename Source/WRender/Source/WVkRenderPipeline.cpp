@@ -187,7 +187,7 @@ void WVkRenderPipelinesManager::ResetDescriptorPool(const WAssetId & in_pipeline
 WId WVkRenderPipelinesManager::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
-    const WAssetId & in_mesh_asset_id,
+    const WAssetIndexId & in_mesh_asset_id,
     std::vector<WVkTextureInfo> in_textures,
     std::vector<uint16_t> in_textures_bindings
     ) noexcept
@@ -201,8 +201,6 @@ WId WVkRenderPipelinesManager::CreateBinding(
     auto f = [this] () {
         std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> bindings;
 
-        // std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> write_ds;
-
         for(uint32_t i = 0; i < bindings.size(); i++) {
             
             bindings[i].binding = 0;
@@ -210,11 +208,11 @@ WId WVkRenderPipelinesManager::CreateBinding(
 
             WVulkan::Create(bindings[i].ubo_info, device_info_);
 
-            WVulkan::UpdateUBOModel(
-                bindings[i].ubo_info,
-                // Initial Position
-                glm::mat4{1}
-                );
+            // Initial Value
+            // WVulkan::UpdateUBOModel(
+            //     bindings[i].ubo_info,
+            //     glm::mat4{1}
+            //     );
 
             bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
             bindings[i].buffer_info.offset = 0;
@@ -228,8 +226,6 @@ WId WVkRenderPipelinesManager::CreateBinding(
               &in_textures,
               &in_textures_bindings] () {
         std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        
-        // std::vector<VkWriteDescriptorSet> write_ds{in_textures.size() * WENG_MAX_FRAMES_IN_FLIGHT};
         
         for (uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
             for (uint32_t j = 0; j<tx.size(); j++) {

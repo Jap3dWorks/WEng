@@ -304,7 +304,8 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
 void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
-    const WAssetId & in_mesh_id,
+    const WAssetIndexId & in_mesh_id,
+    // const WAssetId & in_mesh_id,
     const WRenderPipelineParametersStruct & in_parameters
     )
 {
@@ -616,6 +617,8 @@ void WVkRender::RecordRenderCommandBuffer(
 
         // Create descriptor
         VkDescriptorSet descriptorset = BindingDescriptor(bid, frame_index_);
+
+        
 
         auto& mesh_info =
             render_resources_.StaticMeshInfo(

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
+#include "WVulkan/WVulkan.hpp"
 
-#include "WVulkan/WVkAssetCollection.hpp"
+#include "WVulkan/WVkResourceCollection.hpp"
 #include "WVulkan/WVkRenderStructs.hpp"
 
 /**
@@ -34,11 +36,21 @@ public:
 
     // Texture
 
-    void RegisterTexture(WTextureAsset & in_texture_struct);
+    // void RegisterTexture(WTextureAsset & in_texture_struct);
 
-    void UnregisterTexture(const WAssetId & in_id);
+    // void UnregisterTexture(const WAssetId & in_id);
 
-    void LoadTexture(const WAssetId & in_id);
+    void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) {
+        texture_collection_.LoadResource(
+            in_id,
+            [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
+            WVkTextureInfo result;
+            WVulkan::Create(
+                result, in_texture, device_info_, command_pool_info_
+                );
+            return result;
+        });
+    }
 
     void UnloadTexture(const WAssetId & in_id);
 
@@ -46,9 +58,9 @@ public:
 
     // Static Mesh
 
-    void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) ;
+    // void RegisterStaticMesh(WStaticMeshAsset & in_mesh_struct) ;
 
-    void UnregisterStaticMesh(const WAssetId & in_id);
+    // void UnregisterStaticMesh(const WAssetId & in_id);
 
     void LoadStaticMesh(const WAssetId & in_id);
 
@@ -64,9 +76,11 @@ private:
 
     void InitializeStaticMeshFunctions();
 
-    WVkAssetCollection<WVkTextureInfo, WTextureAsset> texture_collection_;
+    WVkResourceCollection<WVkTextureInfo, WAssetId> texture_collection_;
 
-    WVkAssetCollection<WVkMeshInfo, WStaticMeshAsset> static_mesh_collection_;
+    WVkResourceCollection<WVkMeshInfo, WAssetIndexId> static_mesh_collection_;
+
+    std::unordered_map<WAssetId, std::vector<WAssIdxId>> mesh_indexes_;
 
     WVkDeviceInfo device_info_;
     WVkCommandPoolInfo command_pool_info_;
