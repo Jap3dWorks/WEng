@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WConcepts.hpp"
+#include "WLog.hpp"
 
 #include <cstring>
 #include <functional>
@@ -146,7 +147,7 @@ public:
 
     using ManageFn = R(*)(const void*, Args ...);
     using ManageDstry = void(*)(const void*);
-    using ManageCpy = void(*)(void* _dst,void* _src);
+    using ManageCpy = void(*)(void* _dst,const void* _src);
     using ManageMove = void(*)(void* _dst, void* _src);
 
     template<typename T>
@@ -159,37 +160,25 @@ public:
             std::launder(reinterpret_cast<const T*>(ptr))->~T();
         }
 
-        static void managecpy(void* dst, void * src) {
+        static void managecpy(void* dst, const void * src) {
             new (dst) T(*std::launder(reinterpret_cast<const T*>(src)));
         }
 
         static void managemove(void* dst, void * src) {
             new (dst) T(std::move(*std::launder(reinterpret_cast<const T*>(src))));
-
-            std::launder(reinterpret_cast<T*>(src))->~T();
         }
     };
 
     constexpr TFnLmbd() noexcept = default;
 
     template<typename T> requires is_callable_v<T> && in_size_v<T>
-    constexpr TFnLmbd(const T & fn) :
-        managefn_(&FnLmbdMan<T>::managefn),
-        managedstry_(&FnLmbdMan<T>::managedstry),
-        managecpy_(&FnLmbdMan<T>::managecpy),
-        managemove_(&FnLmbdMan<T>::managemove)
-        {
-            new (bf_) T(fn);
-        }
-
-    template<typename T> requires is_callable_v<T> && in_size_v<T>
     constexpr TFnLmbd(T && fn) :
-        managefn_(&FnLmbdMan<T>::managefn),
-        managedstry_(&FnLmbdMan<T>::managedstry),
-        managecpy_(&FnLmbdMan<T>::managecpy),
-        managemove_(&FnLmbdMan<T>::managemove)
+        managefn_(&FnLmbdMan<std::decay_t<T>>::managefn),
+        managedstry_(&FnLmbdMan<std::decay_t<T>>::managedstry),
+        managecpy_(&FnLmbdMan<std::decay_t<T>>::managecpy),
+        managemove_(&FnLmbdMan<std::decay_t<T>>::managemove)
         {
-            new (bf_) T(std::move(fn));
+            new (bf_) std::decay_t<T>(std::forward<T>(fn));
         }
 
     constexpr TFnLmbd(const TFnLmbd & other) :
@@ -197,17 +186,20 @@ public:
         managedstry_(other.managedstry_),
         managecpy_(other.managecpy_),
         managemove_(other.managemove_)
-        {
-            managecpy_(bf_, other.bf_);
-        }
+        
+    {
+        managecpy_(bf_, other.bf_);
+    }
 
     constexpr TFnLmbd(TFnLmbd && other) noexcept :
-        managefn_(std::move(other.managefn_)),
-        managedstry_(std::move(other.managedstry_)),
-        managecpy_(std::move(other.managecpy_)),
-        managemove_(std::move(other.managemove_))
+        managefn_(other.managefn_),
+        managedstry_(other.managedstry_),
+        managecpy_(other.managecpy_),
+        managemove_(other.managemove_)
         {
             managemove_(bf_, other.bf_);
+            
+            other.managedstry_(other.bf_);
 
             other.managefn_=nullptr;
             other.managedstry_ = nullptr;
@@ -217,6 +209,10 @@ public:
 
     TFnLmbd & operator=(const TFnLmbd & other) {
         if(this != &other) {
+            if (managefn_) {
+                managedstry_(bf_);
+            }
+            
             managefn_ = other.managefn_;
             managedstry_ = other.managedstry_;
             managecpy_ = other.managecpy_;
@@ -224,17 +220,24 @@ public:
 
             managecpy_(bf_, other.bf_);
         }
+        
         return *this;
     }
 
     TFnLmbd & operator=(TFnLmbd && other) {
         if (this != &other) {
-            managefn_ = std::move(other.managefn_);
-            managedstry_ = std::move(other.managedstry_);
-            managecpy_ = std::move(other.managecpy_);
-            managemove_ = std::move(other.managemove_);
+
+            if (managefn_) {
+                managedstry_(bf_);
+            }
+
+            managefn_ = other.managefn_;
+            managedstry_ = other.managedstry_;
+            managecpy_ = other.managecpy_;
+            managemove_ = other.managemove_;
 
             managemove_(bf_, other.bf_);
+            other.managedstry_(other.bf_);
 
             other.managefn_=nullptr;
             other.managedstry_=nullptr;
@@ -266,10 +269,10 @@ public:
 
 private:
 
-    ManageFn managefn_;
-    ManageDstry managedstry_;
-    ManageCpy managecpy_;
-    ManageMove managemove_;
+    ManageFn managefn_{nullptr};
+    ManageDstry managedstry_{nullptr};
+    ManageCpy managecpy_{nullptr};
+    ManageMove managemove_{nullptr};
 
     alignas(std::max_align_t) uint8_t bf_[B];
 };
@@ -292,7 +295,7 @@ using TFnLmbd16 = TFnLmbd<16, R(Args...)>;
 
 /** @brief 32Bytes lambda size */
 template<typename R, typename ...Args>
-using TFnLmbd32 = TFnLmbd<32, R( Args...)>;
+using TFnLmbd32 = TFnLmbd<32, R(Args...)>;
 
 /** @brief 64bytes lambda size */
 template<typename R, typename ... Args>
