@@ -24,16 +24,16 @@ public:
         return static_mesh_asset_;
     }
 
-    void SetRenderPipelineAsset(const WAssetId & in_asset_id, const WAssIdxId & inid=0) {
-        render_pipeline_assets_[inid.GetId()] = in_asset_id;
+    void SetRenderPipelineAsset(const WAssetId & in_asset_id, const WAssIdxId & in_id=0) {
+        render_pipeline_assets_[in_id.GetId()] = in_asset_id;
     }
 
-    WAssetId GetRenderPipelineAsset(const WAssIdxId & inid=0) const {
-        return render_pipeline_assets_[inid.GetId()];
+    WAssetId GetRenderPipelineAsset(const WAssIdxId & in_id=0) const {
+        return render_pipeline_assets_[in_id.GetId()];
     }
 
-    void SetRenderPipelineParametersAsset(const WAssetId & in_asset_id, const WAssIdxId & inid=0) {
-        render_pipeline_params_assets_[inid.GetId()] = in_asset_id;
+    void SetRenderPipelineParametersAsset(const WAssetId & in_asset_id, const WAssIdxId & in_id=0) {
+        render_pipeline_params_assets_[in_id.GetId()] = in_asset_id;
     }
 
     WAssetId GetRenderPipelineParametersAsset(const WAssIdxId & in_id=0) const {

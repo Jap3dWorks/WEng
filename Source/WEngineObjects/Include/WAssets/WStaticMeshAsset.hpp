@@ -2,8 +2,11 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
+#include "WCore/WConcepts.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WStructs/WGeometryStructs.hpp"
+#include "WCore/TIterator.hpp"
+
 #include <array>
 
 #include "WStaticMeshAsset.WEngine.hpp"
@@ -12,6 +15,8 @@ WCLASS()
 class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 {
     WOBJECT_BODY(WStaticMeshAsset)
+
+    using WMeshArray = std::array<WMeshStruct, WENG_MAX_ASSET_IDS>;
 
 public:
 
@@ -40,8 +45,20 @@ public:
         return r;
     }
 
+    template<CCallable<void, WStaticMeshAsset *, const WAssIdxId &, WMeshStruct&> F>
+    void ForEachMesh(F && in_fn) {
+        for(std::uint32_t i=0; i<meshes_.size(); i++) {
+            WMeshStruct & m = meshes_[i];
+            if(m.indices.empty()) {
+                break;
+            }
+
+            in_fn(this, i, m);
+        };
+    }
+
 private:
-    
+
     std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes_{};
     
 };

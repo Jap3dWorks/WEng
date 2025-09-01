@@ -25,7 +25,7 @@ public:
 public:
 
     constexpr WVkResourceCollection() noexcept :
-    resources_(),
+    // resources_(),
     vulkan_data_()
     {}
 
@@ -35,18 +35,18 @@ public:
     virtual ~WVkResourceCollection() { Clear(); }
 
     WVkResourceCollection(const WVkResourceCollection & other) :
-    resources_(other.resources_),
+    // resources_(other.resources_),
     vulkan_data_(other.vulkan_data_)
     {}
 
     constexpr WVkResourceCollection(WVkResourceCollection && other) noexcept :
-    resources_(std::move(other.resources_)),
+    // resources_(std::move(other.resources_)),
     vulkan_data_(std::move(other.vulkan_data_))
     {}
 
     WVkResourceCollection & operator=(const WVkResourceCollection & other) {
         if (this != &other) {
-            resources_ = other.resources_;
+            // resources_ = other.resources_;
             vulkan_data_ = other.vulkan_data_;            
         }
 
@@ -55,7 +55,7 @@ public:
 
     constexpr WVkResourceCollection & operator=(WVkResourceCollection && other) noexcept {
         if (this != &other) {
-            resources_ = std::move(other.resources_);
+            // resources_ = std::move(other.resources_);
             vulkan_data_ = std::move(other.vulkan_data_);
         }
 
@@ -87,7 +87,7 @@ public:
 
     template<CCallable<D, const WIdType &> Fn>
     void LoadResource(const WIdType & in_id, const Fn & create_fn) {
-        assert(resources_.contains(in_id));
+        assert(!Contains(in_id));
         vulkan_data_.CreateAt(in_id, create_fn);
         // vulkan_data_.CreateAt(in_id);
     }
@@ -98,7 +98,7 @@ public:
 
     /** pop from graphical memory */
     void UnloadResource(const WIdType & in_id) {
-        assert(resources_.contains(in_id));
+        assert(Contains(in_id));
         vulkan_data_.Remove(in_id);
     }
 
@@ -107,7 +107,7 @@ public:
     // }
 
     const D & GetData(const WIdType & in_id) const noexcept {
-        assert(data_.Contains(in_id));
+        assert(vulkan_data_.Contains(in_id));
         return vulkan_data_.Get(in_id);
     }
 
@@ -121,7 +121,7 @@ public:
     // }
 
     void Clear() {
-        resources_.clear();
+        // resources_.clear();
         vulkan_data_.Clear();
     }
 
@@ -133,7 +133,7 @@ private:
     // std::unordered_map<WIdType, TWRef<A>> assets_;
     // std::unordered_map<WIdType, A*> resources_;
 
-    std::unordered_set<WIdType> resources_{};
+    // std::unordered_set<WIdType> resources_{};
 
     WVkAssetDb vulkan_data_;
 

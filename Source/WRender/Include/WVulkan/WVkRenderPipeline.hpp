@@ -155,17 +155,19 @@ public:
                         TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
     TIteratorPtr<WAssetId> IteratePipelines(EPipelineType in_pipeline_type) {
-        return {
+        
+        return WIteratorUtils::DefaultIteratorPtr<WAssetId>(
             &(*ptype_pipelines_[in_pipeline_type].begin()),
             &(*ptype_pipelines_[in_pipeline_type].end())
-        };
+            );
     }
 
     TIteratorPtr<WEntityComponentId> IterateBindings(const WAssetId & in_pipeline_id) {
-        return {
+
+        return WIteratorUtils::DefaultIteratorPtr<WEntityComponentId>(
             &(*pipeline_pbindings_[in_pipeline_id].begin()),
             &(*pipeline_pbindings_[in_pipeline_id].end())
-        };
+            );
     }
 
     void UpdateGlobalGraphicsDescriptorSet(

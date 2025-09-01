@@ -86,12 +86,15 @@ namespace WRenderLevelUtils {
         // Load Meshes
         for (const WAssetId & id : static_meshes) {
             auto static_mesh = in_asset_db.Get<WStaticMeshAsset>(id);
-            for(std::uint8_t i=0; i<static_mesh->MeshCount(); i++)
-            {
-                WAssetIndexId asset_index = WIdUtils::ToAssetIndexId(id, i);
-                in_render->LoadStaticMesh(asset_index,
-                                          static_mesh->GetMesh(i));
-            }
+            
+            static_mesh->ForEachMesh(
+                [&in_render](WStaticMeshAsset* _sma, const WAssIdxId & _id, WMeshStruct& _m) {
+                    WAssetIndexId asset_index = WIdUtils::ToAssetIndexId(
+                        _sma->WID(), _id
+                        );
+                    in_render->LoadStaticMesh(asset_index, _m);
+                }
+                );
         }
 
         // Load Textures
@@ -115,33 +118,40 @@ namespace WRenderLevelUtils {
                 const WAssetId & sm_id = in_component->GetStaticMeshAsset();
                 WStaticMeshAsset * sm_asset = in_asset_db.Get<WStaticMeshAsset>(sm_id);
 
-                for (std::uint8_t i=0; i<sm_asset->MeshCount(); i++) {
-                    auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(
-                        in_component->GetRenderPipelineParametersAsset(i)
-                        );
+                sm_asset->ForEachMesh(
+                    [&in_asset_db,
+                     &in_level,
+                     &in_render,
+                     &in_component](WStaticMeshAsset* _sma, const WAssIdxId & _id, WMeshStruct& _m) {
+                        auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(
+                            in_component->GetRenderPipelineParametersAsset(_id)
+                            );
 
-                    WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
-                        in_component->EntityId(), i
-                        );
+                        WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                            in_component->EntityId(), _id
+                            );
 
-                    WAssetIndexId assidx = WIdUtils::ToAssetIndexId(sm_id, i);
-                    in_render->CreatePipelineBinding(
-                        ecid,
-                        in_component->GetRenderPipelineAsset(i),
-                        assidx,
-                        param->RenderPipelineParameters()
-                        );
+                        WAssetIndexId assidx = WIdUtils::ToAssetIndexId(_sma->WID(), _id);
+                        in_render->CreatePipelineBinding(
+                            ecid,
+                            in_component->GetRenderPipelineAsset(_id),
+                            assidx,
+                            param->RenderPipelineParameters()
+                            );
 
-                    WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
-                        in_component->EntityId()
-                        )->TransformStruct();
+                        WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
+                            in_component->EntityId()
+                            )->TransformStruct();
 
-                    in_render->UpdateUboModelStatic(
-                        ecid,
-                        tstruct
-                        );
-                }
-            });
+                        in_render->UpdateUboModelStatic(
+                            ecid,
+                            tstruct
+                            );
+                    }
+                    );
+
+            }
+            );
     }
 
     inline void ReleaseRenderResources(
@@ -164,7 +174,7 @@ namespace WRenderLevelUtils {
              &texture_assets,
              &pipeline_bindings,
              &in_level
-             ](WStaticMeshComponent * _component) {
+                ](WStaticMeshComponent * _component) {
 
                 static_meshes.Insert(
                     _component->GetStaticMeshAsset().GetId(),
@@ -175,43 +185,52 @@ namespace WRenderLevelUtils {
                     _component->GetStaticMeshAsset()
                     );
 
-                for(std::size_t i=0; i < sm_asset->MeshCount(); i++) {
-                    
-                    auto pipeline_parameters =
-                        static_cast<WRenderPipelineParametersAsset*>(
-                            in_asset_db.Get(
-                                _component->GetRenderPipelineParametersAsset(i)
-                                ));
+                sm_asset->ForEachMesh(
+                    [&in_asset_db,
+                     &_component,
+                     &texture_assets,
+                     &in_level,
+                     &pipeline_bindings]
+                    (WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct& _m) {
 
-                    auto & parameters_struct = pipeline_parameters
-                        ->RenderPipelineParameters();
+                        auto pipeline_parameters =
+                            static_cast<WRenderPipelineParametersAsset*>(
+                                in_asset_db.Get(
+                                    _component->GetRenderPipelineParametersAsset(_id)
+                                    ));
 
-                    for(uint8_t i=0; i < parameters_struct.texture_assets_count; i++) {
-                        WAssetId t_id = parameters_struct.texture_assets[i].value;
+                        auto & parameters_struct = pipeline_parameters
+                            ->RenderPipelineParameters();
+
+                        for(uint8_t i=0; i < parameters_struct.texture_assets_count; i++) {
+                            WAssetId t_id = parameters_struct.texture_assets[i].value;
                     
-                        texture_assets.Insert(
-                            t_id.GetId(),
-                            t_id
+                            texture_assets.Insert(
+                                t_id.GetId(),
+                                t_id
+                                );
+                        }
+
+                        WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                            _component->EntityId(), _id
                             );
+
+                        pipeline_bindings.Insert(ecid.GetId(), ecid);
+
+                        
                     }
-
-                    WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
-                        _component->EntityId(), i
-                        );
-
-                    pipeline_bindings.Insert(ecid.GetId(), ecid);
-                }
+                    );
             }
             );
         
         for(auto & id : static_meshes) {
-            std::uint8_t count = in_asset_db.Get<WStaticMeshAsset>(id)->MeshCount();
-            
-            for(std::uint8_t i=0; i<count; i++) {
-                in_render->UnloadStaticMesh(
-                    WIdUtils::ToAssetIndexId(id, i)
-                    );
-            }
+            in_asset_db.Get<WStaticMeshAsset>(id)->ForEachMesh(
+                [&in_render](WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct & _m) {
+                    in_render->UnloadStaticMesh(
+                        WIdUtils::ToAssetIndexId(_sm->WID(), _id)
+                        );
+                }
+                );            
         }
 
         for(auto & id : texture_assets) {

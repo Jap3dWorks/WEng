@@ -104,12 +104,12 @@ public:
         return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
     }
 
-    WEntityComponentId GetEntityComponentId(const WClass * in_class,
+    WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
                                             const WEntityId & in_entity_id,
                                             const WAssIdxId & in_index_id=0) const noexcept {
-        assert(WComponent::StaticClass()->IsBaseOf(in_class));
+        assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
         
-        WComponentTypeId cid = entity_component_db_.GetComponentTypeId(in_class);
+        WComponentTypeId cid = entity_component_db_.GetComponentTypeId(in_component_class);
         return WIdUtils::ToEntityComponentId(WID(), in_entity_id, cid, in_index_id);
     }
 

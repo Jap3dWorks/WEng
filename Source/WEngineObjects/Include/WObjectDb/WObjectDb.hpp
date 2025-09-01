@@ -32,9 +32,12 @@ public:
                            std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
 
     using ClassIterator = TIterator<const WClass *,
-        typename DbType::const_iterator,
-        const WClass * const,
-        const WClass * const>;
+                                    typename DbType::const_iterator,
+                                    const WClass *,
+                                    const typename DbType::const_iterator&,
+                                    typename DbType::const_iterator&,
+                                    typename DbType::const_iterator&
+                                    >;
 
 public:
 
@@ -190,8 +193,14 @@ public:
         return ClassIterator(
             db_.cbegin(),
             db_.cend(),
-            [](ClassIterator::IterType & _iter, const size_t & _n) -> const WClass *const {
-                return (*_iter).first;
+            [](ClassIterator::FnValue_IterParamType _it, const std::int32_t & _i)
+            -> ClassIterator::RetValueType {
+                return (*_it).first;
+            },
+            [](ClassIterator::FnIncr_IterParamType _it, const std::int32_t & _i)
+            ->ClassIterator::FnIncr_RetType {
+                _it++;
+                return _it;
             }
             );
     }

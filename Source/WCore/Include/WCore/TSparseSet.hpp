@@ -17,14 +17,13 @@ public:
 
     using IndexPosType = std::unordered_map<size_t, size_t>;
 
-    using IndexIterator = TIterator<size_t,
-                                    IndexPosType::iterator,
-                                    const size_t &
-                                    >;
-
     using ConstIndexIterator = TIterator<size_t,
                                          IndexPosType::const_iterator,
-                                         const size_t &>;
+                                         const size_t &,
+                                         const IndexPosType::const_iterator&,
+                                         IndexPosType::const_iterator &,
+                                         IndexPosType::const_iterator &
+                                         >;
 
     using Iterator = std::vector<T, Allocator>::iterator;
 
@@ -196,22 +195,18 @@ public:
         }
     }
 
-    IndexIterator IterIndexes() {
-        return IndexIterator(
-            index_pos_.begin(),
-            index_pos_.end(),
-            [](IndexIterator::IterType & _iter, const size_t & _idx) -> const size_t & {
-                return (*_iter).first;
-            }
-            );
-    }
-
     ConstIndexIterator IterIndexes() const {
         return ConstIndexIterator(
             index_pos_.cbegin(),
             index_pos_.cend(),
-            [] (ConstIndexIterator::IterType & _iter, const size_t & _idx) -> const size_t & {
-                return (*_iter).first;
+            [] (ConstIndexIterator::FnValue_IterParamType _it, const std::int32_t & _i)
+            -> ConstIndexIterator::RetValueType {
+                return (*_it).first;
+            },
+            [](ConstIndexIterator::FnIncr_IterParamType _it, const std::int32_t & _i)
+            -> ConstIndexIterator::FnIncr_RetType {
+                _it++;
+                return _it;
             }
             );
     }

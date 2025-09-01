@@ -36,9 +36,8 @@ bool run(WEngine & engine)
     return true;
 }
 
-WMeshsesStruct MeshPlane()
+WMeshStruct MeshPlane()
 {
-    WMeshsesStruct model;
     WMeshStruct mesh;
 
     mesh.vertices.push_back({
@@ -72,9 +71,7 @@ WMeshsesStruct MeshPlane()
     mesh.indices.push_back(1);
     mesh.indices.push_back(3);
 
-    model.meshes[0] = mesh;
-
-    return model;
+    return mesh;
 }
 
 struct ModelAssets {
@@ -267,8 +264,8 @@ bool SetupLevel(WEngine & in_engine,
     WStaticMeshComponent * smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
     smcomponent->StaticMeshAsset(in_viking_room.static_mesh);
-    smcomponent->RenderPipelineAsset(in_viking_room.pipeline_asset);
-    smcomponent->RenderPipelineParametersAsset(in_viking_room.param_asset);
+    smcomponent->SetRenderPipelineAsset(in_viking_room.pipeline_asset);
+    smcomponent->SetRenderPipelineParametersAsset(in_viking_room.param_asset);
 
     // Monkey 1
     WEntityId monkey_id = level.CreateEntity<WEntity>();
@@ -284,8 +281,8 @@ bool SetupLevel(WEngine & in_engine,
     auto * monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
 
     monkeysm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkeysm->RenderPipelineAsset(in_monkey_dt.pipeline_asset);
-    monkeysm->RenderPipelineParametersAsset(in_monkey_dt.param_asset);
+    monkeysm->SetRenderPipelineAsset(in_monkey_dt.pipeline_asset);
+    monkeysm->SetRenderPipelineParametersAsset(in_monkey_dt.param_asset);
 
     // Monkey 2
     WEntityId monkey2_id = level.CreateEntity<WEntity>();
@@ -301,8 +298,8 @@ bool SetupLevel(WEngine & in_engine,
     auto * monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
 
     monkey2sm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkey2sm->RenderPipelineAsset(in_monkey_dt.pipeline_asset);
-    monkey2sm->RenderPipelineParametersAsset(in_monkey_dt.param_asset);
+    monkey2sm->SetRenderPipelineAsset(in_monkey_dt.pipeline_asset);
+    monkey2sm->SetRenderPipelineParametersAsset(in_monkey_dt.param_asset);
 
     return true;
 

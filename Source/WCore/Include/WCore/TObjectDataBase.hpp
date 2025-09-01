@@ -59,7 +59,9 @@ public:
     using ConstIterIndexType = TIterator<WIdClass,
                                          typename ObjectsType::ConstIndexIterator,
                                          WIdClass,
-                                         WIdClass>;
+                                         const typename ObjectsType::ConstIndexIterator&,
+                                         typename ObjectsType::ConstIndexIterator&,
+                                         typename ObjectsType::ConstIndexIterator&>;
 
     using CreateFn = TFunction<T(const WIdClass &)>;
     using DestroyFn = TFunction<void(T&)>;
@@ -276,8 +278,14 @@ public:
         return ConstIterIndexType(
             objects_.IterIndexes().begin(),
             objects_.IterIndexes().end(),
-            [](ConstIterIndexType::IterType & _itr, const size_t & _val) {
-                return *_itr;
+            [](ConstIterIndexType::FnValue_IterParamType _it, const std::int32_t & _id)
+            -> ConstIterIndexType::RetValueType {
+                return WIdClass(*_it);
+            },
+            [](ConstIterIndexType::FnIncr_IterParamType _it, const std::int32_t & _id)
+            -> ConstIterIndexType::FnIncr_RetType {
+                _it++;
+                return _it;
             }
             );
     }

@@ -1,4 +1,5 @@
 #include "WLevel/WLevel.hpp"
+#include "WCore/WCore.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
@@ -82,14 +83,15 @@ void WLevel::ForEachEntity(const WClass * in_class,
     entity_component_db_.ForEachEntity(in_class, in_predicate);
 }
 
-WEntityComponentId WLevel::CreateComponent(const WEntityId & in_actor_id,
+WEntityComponentId WLevel::CreateComponent(const WEntityId & in_entity_id,
                                            const WClass * in_class) {
 
-    std::string component_path=ComponentPath(in_actor_id, in_class);
+    std::string component_path=ComponentPath(in_entity_id, in_class);
 
-    entity_component_db_.CreateComponent(in_class, in_actor_id);
-    
-    return entity_component_db_.EntityComponentId(WID(), in_actor_id, in_class);
+    entity_component_db_.CreateComponent(in_class, in_entity_id);
+
+    // WEntityComponentId
+    return GetEntityComponentId(in_class, in_entity_id, 0);
 }
 void WLevel::ForEachComponent(const WClass * in_class,
                               TFunction<void(WComponent*)> in_predicate) const {
