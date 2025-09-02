@@ -31,12 +31,12 @@ public:
         std::unordered_map<const WClass *,
                            std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
 
+    template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,
                                     typename DbType::const_iterator,
                                     const WClass *,
-                                    const typename DbType::const_iterator&,
-                                    typename DbType::const_iterator&,
-                                    typename DbType::const_iterator&
+                                    ValueFn,
+                                    IncrFn
                                     >;
 
 public:
@@ -189,16 +189,14 @@ public:
     /**
      * @brief Returns present (or that have been present) classes in this object.
      */
-    ClassIterator Classes() const {
+    auto IterWClasses() const {
         return ClassIterator(
             db_.cbegin(),
             db_.cend(),
-            [](ClassIterator::FnValue_IterParamType _it, const std::int32_t & _i)
-            -> ClassIterator::RetValueType {
+            []( auto & _it, const std::int32_t & _i) -> const WClass * {
                 return (*_it).first;
             },
-            [](ClassIterator::FnIncr_IterParamType _it, const std::int32_t & _i)
-            ->ClassIterator::FnIncr_RetType {
+            [](auto & _it, const std::int32_t & _i) {
                 _it++;
                 return _it;
             }

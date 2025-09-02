@@ -132,21 +132,16 @@ private:
   
 };
 
+template<typename ValueType,
+         typename IterType,
+         typename RetValueType,
+         typename ValueFn,
+         typename IncrFn
+         >
+using TIterator = _TIterator<ValueType, IterType, RetValueType, ValueFn, IncrFn>;
+
 template<typename T, typename ValueFn, typename IncrFn>
 using TIteratorPtr = _TIterator<T, T*, T&, ValueFn, IncrFn>;
-
-template<typename _ValueType,
-         typename _IterType,
-         typename _RetValueType=_ValueType&,
-         typename _FnValue_IterParamType=const _IterType&,
-         typename _FnIncr_IterParamType=_IterType&,
-         typename _FnIncr_RetType=_IterType>
-using TIterator = _TIterator<_ValueType,
-                             _IterType,
-                             _RetValueType,
-                             TFnLmbd32<_RetValueType, _FnValue_IterParamType, const std::int32_t &>,
-                             TFnLmbd32<_FnIncr_RetType, _FnIncr_IterParamType, const std::int32_t &>                             
-                             >;
 
 namespace WIteratorUtils {
     
@@ -155,11 +150,11 @@ namespace WIteratorUtils {
                                    ValueType * in_end) {
         return TIteratorPtr(in_begin,
                             in_end,
-                            [](ValueType * _it, const std::int32_t & _i)
+                            [](ValueType * const& _it, const std::int32_t & _i)
                             -> ValueType & {
                                 return *(_it + _i);
                             },
-                            [](ValueType * _it, const std::int32_t & _i)
+                            [](ValueType * const& _it, const std::int32_t & _i)
                             -> ValueType * {
                                 return _it + _i;
                             }

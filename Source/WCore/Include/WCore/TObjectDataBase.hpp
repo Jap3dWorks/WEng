@@ -56,12 +56,13 @@ public:
     using Super = IObjectDataBase<B, WIdClass>;
     using Type = TObjectDataBase<T, B, WIdClass, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
-    using ConstIterIndexType = TIterator<WIdClass,
-                                         typename ObjectsType::ConstIndexIterator,
-                                         WIdClass,
-                                         const typename ObjectsType::ConstIndexIterator&,
-                                         typename ObjectsType::ConstIndexIterator&,
-                                         typename ObjectsType::ConstIndexIterator&>;
+
+    template<typename IndexIterator, typename ValueFn, typename IncrFn>
+    using ConstWIdIterator = TIterator<WIdClass,
+                                       IndexIterator,
+                                       WIdClass,
+                                       ValueFn,
+                                       IncrFn>;
 
     using CreateFn = TFunction<T(const WIdClass &)>;
     using DestroyFn = TFunction<void(T&)>;
@@ -274,16 +275,14 @@ public:
         objects_.Reserve(in_value);
     }
 
-    ConstIterIndexType IterIndexes() const {
-        return ConstIterIndexType(
+    auto IterIndexes() const {
+        return ConstWIdIterator(
             objects_.IterIndexes().begin(),
             objects_.IterIndexes().end(),
-            [](ConstIterIndexType::FnValue_IterParamType _it, const std::int32_t & _id)
-            -> ConstIterIndexType::RetValueType {
+            [](auto & _it, const std::int32_t & _id) -> WIdClass {
                 return WIdClass(*_it);
             },
-            [](ConstIterIndexType::FnIncr_IterParamType _it, const std::int32_t & _id)
-            -> ConstIterIndexType::FnIncr_RetType {
+            [](auto & _it, const std::int32_t & _id) {
                 _it++;
                 return _it;
             }

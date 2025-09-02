@@ -35,6 +35,7 @@ namespace WRenderLevelUtils {
              &render_pipelines,
              &pipeline_parameters,
              &in_asset_db](WStaticMeshComponent * in_component) {
+                
                 WAssetId smid = in_component->GetStaticMeshAsset();
                 
                 if(smid.IsValid()) {
@@ -49,27 +50,35 @@ namespace WRenderLevelUtils {
 
                 auto smasset = in_asset_db.Get<WStaticMeshAsset>(smid);
 
-                for(std::uint8_t i=0; i<smasset->MeshCount(); i++) {
+                smasset->ForEachMesh(
+                    [&in_component,
+                     &render_pipelines,
+                     &pipeline_parameters](WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct& _m) {
+                        WAssetId pipeid = in_component->GetRenderPipelineAsset(_id);
+                        
+                        if(pipeid.IsValid()) {
+                            render_pipelines.Insert(pipeid.GetId(), pipeid);
+                        }
+                        else {
+                            WFLOG_Warning(
+                                "Invalid WRenderPipelineAsset in WStaticMeshComponent with id {}.",
+                                in_component->EntityId().GetId()
+                                );
+                        }
 
-                    WAssetId piid = in_component->GetRenderPipelineAsset(i);
-                    if(piid.IsValid()) {
-                        render_pipelines.Insert(piid.GetId(), piid);
+                        WAssetId paramid = in_component->GetRenderPipelineParametersAsset();
+                        
+                        if(paramid.IsValid()) {
+                            pipeline_parameters.Insert(paramid.GetId(), paramid);
+                        }
+                        else {
+                            WFLOG_Warning(
+                                "Invalid WRenderPipelineParametersAsset in WStaticMeshComponent with id {}.",
+                                in_component->EntityId().GetId()
+                                );
+                        }
                     }
-                    else {
-                        WFLOG_Warning("Invalid WRenderPipelineAsset in WStaticMeshComponent with id {}.",
-                                      in_component->EntityId().GetId());
-                    }
-
-                    WAssetId paid = in_component->GetRenderPipelineParametersAsset();
-                    if(paid.IsValid()) {
-                        pipeline_parameters.Insert(paid.GetId(), paid);
-                    }
-                    else {
-                        WFLOG_Warning(
-                            "Invalid WRenderPipelineParametersAsset in WStaticMeshComponent with id {}.",
-                            in_component->EntityId().GetId());
-                    }
-                }
+                    );
             }
             );
 

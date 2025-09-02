@@ -17,13 +17,12 @@ public:
 
     using IndexPosType = std::unordered_map<size_t, size_t>;
 
+    template<typename ValueFn, typename IncrFn>
     using ConstIndexIterator = TIterator<size_t,
                                          IndexPosType::const_iterator,
                                          const size_t &,
-                                         const IndexPosType::const_iterator&,
-                                         IndexPosType::const_iterator &,
-                                         IndexPosType::const_iterator &
-                                         >;
+                                         ValueFn,
+                                         IncrFn>;
 
     using Iterator = std::vector<T, Allocator>::iterator;
 
@@ -195,16 +194,14 @@ public:
         }
     }
 
-    ConstIndexIterator IterIndexes() const {
+    auto IterIndexes() const {
         return ConstIndexIterator(
             index_pos_.cbegin(),
             index_pos_.cend(),
-            [] (ConstIndexIterator::FnValue_IterParamType _it, const std::int32_t & _i)
-            -> ConstIndexIterator::RetValueType {
+            [] (auto & _it, const std::int32_t & _i) -> const size_t & {
                 return (*_it).first;
             },
-            [](ConstIndexIterator::FnIncr_IterParamType _it, const std::int32_t & _i)
-            -> ConstIndexIterator::FnIncr_RetType {
+            [](auto & _it, const std::int32_t & _i) -> IndexPosType::const_iterator {
                 _it++;
                 return _it;
             }

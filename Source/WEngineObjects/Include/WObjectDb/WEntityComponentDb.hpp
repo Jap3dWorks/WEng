@@ -72,7 +72,7 @@ public:
                        TFunction<void(WEntity*)> in_predicate) const {
         assert(in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class));
     
-        for(const WClass * c : entity_db_.Classes()) {
+        for(const WClass * c : entity_db_.IterWClasses()) {
             if(in_class == c || in_class->IsBaseOf(c)) {
                 entity_db_.ForEach(c, in_predicate);
             }
@@ -143,7 +143,7 @@ public:
 
     void ForEachComponent(const WClass * in_class,
                           TFunction<void(WComponent*)> in_predicate) const {
-        for(const WClass * c : component_db_.Classes()) {
+        for(const WClass * c : component_db_.IterWClasses()) {
             if (c == in_class || in_class->IsBaseOf(c)) {
                 component_db_.ForEach(c, in_predicate);
             }

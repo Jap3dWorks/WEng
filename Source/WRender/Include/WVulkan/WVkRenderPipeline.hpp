@@ -154,7 +154,7 @@ public:
     void ForEachBinding(const WAssetId & in_pipeline_id,
                         TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
-    TIteratorPtr<WAssetId> IteratePipelines(EPipelineType in_pipeline_type) {
+    auto IteratePipelines(EPipelineType in_pipeline_type) {
         
         return WIteratorUtils::DefaultIteratorPtr<WAssetId>(
             &(*ptype_pipelines_[in_pipeline_type].begin()),
@@ -162,7 +162,7 @@ public:
             );
     }
 
-    TIteratorPtr<WEntityComponentId> IterateBindings(const WAssetId & in_pipeline_id) {
+    auto IterateBindings(const WAssetId & in_pipeline_id) {
 
         return WIteratorUtils::DefaultIteratorPtr<WEntityComponentId>(
             &(*pipeline_pbindings_[in_pipeline_id].begin()),
