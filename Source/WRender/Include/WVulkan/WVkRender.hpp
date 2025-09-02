@@ -137,8 +137,10 @@ private:
 
     WVkRenderResources render_resources_;
 
+    WVkRenderPassInfo offscreen_rpass_info_;
+    WVkRenderPassInfo postprocess_rpass_info_;
+
     WVkSwapChainInfo swap_chain_info_;
-    WVkRenderPassInfo render_pass_info_;
 
     WVkRenderCommandPool render_command_pool_;
     WVkCommandBufferInfo render_command_buffer_;

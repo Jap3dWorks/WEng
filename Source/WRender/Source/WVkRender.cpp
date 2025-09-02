@@ -41,7 +41,8 @@ WVkRender::WVkRender() :
     debug_info_(),
     render_resources_(),
     swap_chain_info_(),
-    render_pass_info_(),
+    offscreen_rpass_info_(),
+    postprocess_rpass_info_(),
     render_command_pool_(),
     render_command_buffer_(),
     pipelines_manager_(),
@@ -111,7 +112,7 @@ void WVkRender::Initialize()
         surface_info_,
         window_.width,
         window_.height,
-        render_pass_info_,
+        offscreen_rpass_info_,
         debug_info_
         );
 
@@ -122,15 +123,15 @@ void WVkRender::Initialize()
         );
 
     // Create Vulkan Render Pass
-    WVulkan::Create(
-        render_pass_info_,
+    WVulkan::CreateOffscreenRenderPass(
+        offscreen_rpass_info_,
         swap_chain_info_,
         device_info_
         );
 
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
-        render_pass_info_,
+        offscreen_rpass_info_,
         window_.width,
         window_.height
         );
@@ -153,7 +154,7 @@ void WVkRender::Initialize()
 
     WVulkan::CreateSCFramebuffers(
         swap_chain_info_,
-        render_pass_info_,
+        offscreen_rpass_info_,
         device_info_
         );
 
@@ -267,7 +268,6 @@ void WVkRender::Draw()
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = signal_semaphores;
-
     VkSwapchainKHR swap_chains[] = {swap_chain_info_.swap_chain};
     present_info.swapchainCount = 1;
     present_info.pSwapchains = swap_chains;
@@ -403,7 +403,7 @@ void WVkRender::Destroy() {
     WFLOG("Destroy Render Pass Info");
 
     // Destroy Vulkan Render Pass
-    WVulkan::Destroy(render_pass_info_, device_info_);
+    WVulkan::Destroy(offscreen_rpass_info_, device_info_);
 
     WFLOG("Destroy Swap Chain Info");
 
@@ -454,7 +454,7 @@ void WVkRender::RecreateSwapChain() {
         );
 
     WVulkan::Destroy(
-        render_pass_info_,
+        offscreen_rpass_info_,
         device_info_
         );
 
@@ -464,7 +464,7 @@ void WVkRender::RecreateSwapChain() {
         surface_info_,
         window_.width,
         window_.height,
-        render_pass_info_,
+        offscreen_rpass_info_,
         debug_info_
         );
 
@@ -473,8 +473,8 @@ void WVkRender::RecreateSwapChain() {
         device_info_
         );
 
-    WVulkan::Create(
-        render_pass_info_,
+    WVulkan::CreateOffscreenRenderPass(
+        offscreen_rpass_info_,
         swap_chain_info_,
         device_info_
         );
@@ -533,8 +533,6 @@ void WVkRender::RecordRenderCommandBuffer(
     const WVkRenderPipelineInfo & render_pipeline =
         pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
 
-    // Update pipeline descriptor data
-
     VkCommandBufferBeginInfo begin_info{};
     
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -550,7 +548,7 @@ void WVkRender::RecordRenderCommandBuffer(
 
     VkRenderPassBeginInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass =  render_pass_info_.render_pass;
+    render_pass_info.renderPass =  offscreen_rpass_info_.render_pass;
     render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
     render_pass_info.renderArea.offset = {0,0};
     render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;

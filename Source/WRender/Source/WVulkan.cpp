@@ -315,7 +315,7 @@ void WVulkan::CreateSCDepthResources(
 
 }
 
-void WVulkan::Create(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChainInfo &in_swap_chain_info, const WVkDeviceInfo &device_info)
+void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChainInfo &in_swap_chain_info, const WVkDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = in_swap_chain_info.swap_chain_image_format;
@@ -387,7 +387,10 @@ void WVulkan::Create(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChai
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(device_info.vk_device, &render_pass_info, nullptr, &out_render_pass_info.render_pass) != VK_SUCCESS)
+    if (vkCreateRenderPass(device_info.vk_device,
+                           &render_pass_info,
+                           nullptr,
+                           &out_render_pass_info.render_pass) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create render pass!");
     }
@@ -1032,20 +1035,21 @@ void WVulkan::Create(
     //     throw std::runtime_error("Descriptor pool sizes are empty!");
     // }
 
-    out_descriptor_pool_info.pool_sizes.resize(2);
-    out_descriptor_pool_info.pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    out_descriptor_pool_info.pool_sizes[0].descriptorCount =
+    std::array<VkDescriptorPoolSize,2> pool_sizes;
+    // out_descriptor_pool_info.pool_sizes.resize(2);
+    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_sizes[0].descriptorCount =
         static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
-    out_descriptor_pool_info.pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    out_descriptor_pool_info.pool_sizes[1].descriptorCount =
+    pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pool_sizes[1].descriptorCount =
         static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     pool_info.poolSizeCount = static_cast<uint32_t>(
-        out_descriptor_pool_info.pool_sizes.size()
+        pool_sizes.size()
         );
-    pool_info.pPoolSizes = out_descriptor_pool_info.pool_sizes.data();
+    pool_info.pPoolSizes = pool_sizes.data();
     pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35);
 
     if (vkCreateDescriptorPool(
@@ -1282,7 +1286,6 @@ void WVulkan::Destroy(
         );
 
     out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
-    out_descriptor_pool_info.pool_sizes.clear();
 }
 
 void WVulkan::Destroy(

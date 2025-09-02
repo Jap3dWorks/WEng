@@ -51,7 +51,7 @@ namespace WVulkan
     /**
      * @brief Creates a Vulkan Render Pass.
     */
-    void Create(WVkRenderPassInfo & render_pass, const WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo&);
+    void CreateOffscreenRenderPass(WVkRenderPassInfo & render_pass, const WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo&);
 
     /**
      * @brief Creates a Vulkan Command Pool.
