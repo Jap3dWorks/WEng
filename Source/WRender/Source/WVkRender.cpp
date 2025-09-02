@@ -117,12 +117,13 @@ void WVkRender::Initialize()
         );
 
     // Create Vulkan Image Views
-    WVulkan::CreateSCImageViews(
+    WVulkan::CreateSwapChainImageViews(
         swap_chain_info_,
         device_info_
         );
 
-    // Create Vulkan Render Pass
+    // Create Offscreen Render Pass
+    // TODO check
     WVulkan::CreateOffscreenRenderPass(
         offscreen_rpass_info_,
         swap_chain_info_,
@@ -142,17 +143,18 @@ void WVkRender::Initialize()
         surface_info_
         );
 
-    WVulkan::CreateSCColorResources(
+    WVulkan::CreateColorResource(
         swap_chain_info_,
         device_info_
         );
 
-    WVulkan::CreateSCDepthResources(
+    WVulkan::CreateDepthResource(
         swap_chain_info_,
         device_info_
         );
 
-    WVulkan::CreateSCFramebuffers(
+    // TODO no swap chain
+    WVulkan::CreateOffcreenRenderFrameBuffers(
         swap_chain_info_,
         offscreen_rpass_info_,
         device_info_
@@ -468,7 +470,7 @@ void WVkRender::RecreateSwapChain() {
         debug_info_
         );
 
-    WVulkan::CreateSCImageViews(
+    WVulkan::CreateSwapChainImageViews(
         swap_chain_info_,
         device_info_
         );

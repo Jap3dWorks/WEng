@@ -195,7 +195,8 @@ void WVulkan::Create(
 
 }
 
-void WVulkan::CreateSCImageViews(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info)
+void WVulkan::CreateSwapChainImageViews(WVkSwapChainInfo & swap_chain_info,
+                                        const WVkDeviceInfo & device_info)
 {
     swap_chain_info.swap_chain_image_views.resize(
         swap_chain_info.swap_chain_images.size()
@@ -213,10 +214,9 @@ void WVulkan::CreateSCImageViews(WVkSwapChainInfo & swap_chain_info, const WVkDe
     }
 }
 
-void WVulkan::CreateSCFramebuffers(
-    WVkSwapChainInfo & out_swap_chain_info,
-    const WVkRenderPassInfo & out_render_pass_info,
-    const WVkDeviceInfo & in_device_info)
+void WVulkan::CreateOffcreenRenderFrameBuffers(WVkSwapChainInfo & out_swap_chain_info,
+                                             const WVkRenderPassInfo & out_render_pass_info,
+                                             const WVkDeviceInfo & in_device_info)
 {
     out_swap_chain_info.swap_chain_framebuffers.resize(
         out_swap_chain_info.swap_chain_image_views.size()
@@ -252,51 +252,57 @@ void WVulkan::CreateSCFramebuffers(
 
 }
 
-void WVulkan::CreateSCColorResources(
-    WVkSwapChainInfo & out_swap_chain_info,
-    const WVkDeviceInfo & in_device_info
+void WVulkan::CreateColorResource(
+    VkImage & out_image,
+    VkDeviceMemory & out_memory,
+    VkImageView & out_image_view,
+    const VkFormat & in_color_format,
+    const WVkDeviceInfo & in_device_info,
+    const float & width,
+    const float & height
     )
 {
-    VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
+    // VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
 
     Create(
-        out_swap_chain_info.color_image,
-        out_swap_chain_info.color_image_memory,
+        out_image,
+        out_memory,
         in_device_info.vk_device,
         in_device_info.vk_physical_device,
-        out_swap_chain_info.swap_chain_extent.width,
-        out_swap_chain_info.swap_chain_extent.height,
+        width, height,
         1,
         in_device_info.msaa_samples,
-        ColorFormat,
+        in_color_format,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    out_swap_chain_info.color_image_view = CreateImageView(
-        out_swap_chain_info.color_image,
-        ColorFormat,
+    out_image_view = CreateImageView(
+        out_image,
+        in_color_format,
         VK_IMAGE_ASPECT_COLOR_BIT,
         1,
         in_device_info.vk_device
         );
 }
 
-void WVulkan::CreateSCDepthResources(
-    WVkSwapChainInfo & out_swap_chain_info,
-    const WVkDeviceInfo & in_device_info
+void WVulkan::CreateDepthResource(
+    VkImage & out_image,
+    VkDeviceMemory & out_memory,
+    VkImageView & out_image_view,
+    const WVkDeviceInfo & in_device_info,
+    const float & width, const float height
     )
 {
     VkFormat DepthFormat = FindDepthFormat(in_device_info.vk_physical_device);
 
     Create(
-        out_swap_chain_info.depth_image,
-        out_swap_chain_info.depth_image_memory,
+        out_image,
+        out_memory,
         in_device_info.vk_device,
         in_device_info.vk_physical_device,
-        out_swap_chain_info.swap_chain_extent.width,
-        out_swap_chain_info.swap_chain_extent.height,
+        width, height,
         1,
         in_device_info.msaa_samples,
         DepthFormat,
@@ -305,14 +311,13 @@ void WVulkan::CreateSCDepthResources(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    out_swap_chain_info.depth_image_view = CreateImageView(
-        out_swap_chain_info.depth_image, 
+    out_image_view = CreateImageView(
+        out_image,
         DepthFormat,
         VK_IMAGE_ASPECT_DEPTH_BIT,
         1,
         in_device_info.vk_device
-    );
-
+        );
 }
 
 void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChainInfo &in_swap_chain_info, const WVkDeviceInfo &device_info)

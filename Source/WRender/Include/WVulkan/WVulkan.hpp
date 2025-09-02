@@ -254,21 +254,24 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
-    // // Record Commands
-    // // ---------------
+    void CreateColorResource(
+        VkImage & out_image,
+        VkDeviceMemory & out_memory,
+        VkImageView & out_image_view,
+        const VkFormat & in_color_format,
+        const WVkDeviceInfo & in_device_info,
+        const float & width,
+        const float & height
+        );
 
-    // void RecordRenderCommandBuffer(
-    //     VkCommandBuffer in_commandbuffer,
-    //     const WVkRenderPassInfo & in_render_pass_info,
-    //     const WVkSwapChainInfo & in_swap_chain_info,
-    //     const WVkRenderPipelineInfo & in_render_pipeline_info,
-    //     const std::vector<WVkPipelineBindingInfo> & in_bindings,
-    //     uint32_t in_image_index = 0,
-    //     uint32_t in_framebuffer_index = 0
-    //     );
+    void CreateDepthResource(
+        VkImage & out_image,
+        VkDeviceMemory & out_memory,
+        VkImageView & out_image_view,
+        const WVkDeviceInfo & in_device_info,
+        const float & width, const float height
+        );
 
-    // Draw
-    // ----
 
     // Swap Chain
     // ----------
@@ -276,26 +279,26 @@ namespace WVulkan
     /**
      * @brief Creates Vulkan Image Views.
     */
-    void CreateSCImageViews(
+    void CreateSwapChainImageViews(
         WVkSwapChainInfo & out_swap_chain_info,
         const WVkDeviceInfo &in_device_info
         );
 
-    void CreateSCFramebuffers(
+    void CreateOffcreenRenderFrameBuffers(
         WVkSwapChainInfo & out_swap_chain_info,
         const WVkRenderPassInfo & out_render_pass_info,
         const WVkDeviceInfo & in_device_info
         );
 
-    void CreateSCColorResources(
-        WVkSwapChainInfo & out_swap_chain_info,
-        const WVkDeviceInfo & in_device_info
-        );
+    // void CreateColorResource(
+    //     WVkSwapChainInfo & out_swap_chain_info,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
 
-    void CreateSCDepthResources(
-        WVkSwapChainInfo & out_swap_chain_info,
-        const WVkDeviceInfo & in_device_info
-        );
+    // void CreateDepthResource(
+    //     WVkSwapChainInfo & out_swap_chain_info,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
 
     // Descriptor Set Layout
     // ---------------------
