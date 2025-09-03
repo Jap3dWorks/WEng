@@ -87,22 +87,31 @@ struct WVkShaderStageInfo
 
 };
 
-struct WVkRenderPassInfo
+struct WVkRenderTarget {
+    VkImage image{VK_NULL_HANDLE};
+    VkDeviceMemory memory{VK_NULL_HANDLE};
+    VkImageView view{VK_NULL_HANDLE};
+    VkFormat format{};
+    VkExtent2D extent{};
+};
+
+struct WVkOffscreenRenderStruct
 {
     VkRenderPass render_pass{nullptr};
+    VkFramebuffer framebuffer{nullptr};
+
+    WVkRenderTarget color{};
+    WVkRenderTarget depth{};
+    VkExtent2D extent{};
 };
 
-
-struct WVkRenderTarget {
-    VkImage color_image{VK_NULL_HANDLE};
-    VkDeviceMemory color_image_memory{VK_NULL_HANDLE};
-    VkImageView color_image_view{VK_NULL_HANDLE};    
-
-    VkImage depth_image{VK_NULL_HANDLE};
-    VkDeviceMemory depth_image_memory{VK_NULL_HANDLE};
-    VkImageView depth_image_view{VK_NULL_HANDLE};
+struct WVkPostprocessRenderStruct
+{
+    VkRenderPass render_pass{nullptr};
+    VkFramebuffer framebuffer{nullptr};
+    WVkRenderTarget color{};
+    VkExtent2D extent{};
 };
-
 
 struct WVkSwapChainInfo
 {
@@ -113,7 +122,9 @@ struct WVkSwapChainInfo
     std::vector<VkImage> swap_chain_images;
     std::vector<VkImageView> swap_chain_image_views;
     std::vector<VkFramebuffer> swap_chain_framebuffers{};
-    
+
+    std::uint32_t image_count{};
+
     // VkImage color_image{VK_NULL_HANDLE};
     // VkDeviceMemory color_image_memory{VK_NULL_HANDLE};
     // VkImageView color_image_view{VK_NULL_HANDLE};    

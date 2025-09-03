@@ -110,17 +110,17 @@ void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, 
 
 void WVulkan::Create(
     WVkSwapChainInfo & out_swap_chain_info,
-    const WVkDeviceInfo & device_info,
-    const WVkSurfaceInfo & surface_info,
+    const WVkDeviceInfo & in_device_info,
+    const WVkSurfaceInfo & in_surface_info,
     const std::uint32_t & in_width,
     const std::uint32_t & in_height,
-    const WVkRenderPassInfo & render_pass_info,
-    const WVkRenderDebugInfo & debug_info
+    const WVkOffscreenRenderStruct & in_render_pass_info,
+    const WVkRenderDebugInfo & in_debug_info
     )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
-        device_info.vk_physical_device,
-        surface_info.surface
+        in_device_info.vk_physical_device,
+        in_surface_info.surface
         );
 
     VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
@@ -130,6 +130,7 @@ void WVulkan::Create(
                                          in_height);
 
     uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
+    
     if (swap_chain_support.capabilities.maxImageCount > 0 &&
         image_count > swap_chain_support.capabilities.maxImageCount)
     {
@@ -138,7 +139,7 @@ void WVulkan::Create(
 
     VkSwapchainCreateInfoKHR create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    create_info.surface = surface_info.surface;
+    create_info.surface = in_surface_info.surface;
 
     create_info.minImageCount = image_count;
     create_info.imageFormat = surface_format.format;
@@ -148,7 +149,7 @@ void WVulkan::Create(
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
 
     QueueFamilyIndices indices =
-        FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+        FindQueueFamilies(in_device_info.vk_physical_device, in_surface_info.surface);
 
     uint32_t queue_family_indices[] = {
         indices.graphics_family.value(),
@@ -172,7 +173,7 @@ void WVulkan::Create(
     create_info.clipped = VK_TRUE;
 
     if (vkCreateSwapchainKHR(
-            device_info.vk_device,
+            in_device_info.vk_device,
             &create_info,
             nullptr,
             &out_swap_chain_info.swap_chain) != VK_SUCCESS)
@@ -181,10 +182,13 @@ void WVulkan::Create(
     }
 
     // Retrieve Swap Chain Images
-    vkGetSwapchainImagesKHR(device_info.vk_device, out_swap_chain_info.swap_chain, &image_count, nullptr);
+    vkGetSwapchainImagesKHR(in_device_info.vk_device,
+                            out_swap_chain_info.swap_chain,
+                            &image_count,
+                            nullptr);
     out_swap_chain_info.swap_chain_images.resize(image_count);
     vkGetSwapchainImagesKHR(
-        device_info.vk_device,
+        in_device_info.vk_device,
         out_swap_chain_info.swap_chain,
         &image_count,
         out_swap_chain_info.swap_chain_images.data());
@@ -192,31 +196,59 @@ void WVulkan::Create(
     // Save Swap Chain Image Format
     out_swap_chain_info.swap_chain_image_format = surface_format.format;
     out_swap_chain_info.swap_chain_extent = extent;
+    image_count=image_count;
+
+    // Swap chain image views
+    out_swap_chain_info.swap_chain_image_views.resize(
+        out_swap_chain_info.swap_chain_images.size()
+        );
+
+    for (size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
+    {
+        out_swap_chain_info.swap_chain_image_views[i] = CreateImageView(
+            out_swap_chain_info.swap_chain_images[i],
+            out_swap_chain_info.swap_chain_image_format,
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            1,
+            in_device_info.vk_device
+            );
+    }
 
 }
 
-void WVulkan::CreateSwapChainImageViews(WVkSwapChainInfo & swap_chain_info,
-                                        const WVkDeviceInfo & device_info)
-{
-    swap_chain_info.swap_chain_image_views.resize(
-        swap_chain_info.swap_chain_images.size()
-        );
+void CreateOffscreenFrameBuffer(
+    WVkOffscreenRenderStruct & out_offscreen_render_pass,
+    const WVkDeviceInfo & in_device_info
+    ) {
+    std::array<VkImageView, 2> attachments = {
+        out_offscreen_render_pass.color.view,
+        out_offscreen_render_pass.depth.view
+    };
 
-    for (size_t i = 0; i < swap_chain_info.swap_chain_images.size(); i++)
+    VkFramebufferCreateInfo framebufferinfo{};
+
+    framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferinfo.renderPass = out_offscreen_render_pass.render_pass;
+    framebufferinfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    framebufferinfo.pAttachments = attachments.data();
+    framebufferinfo.width = out_offscreen_render_pass.extent.width;
+    framebufferinfo.height = out_offscreen_render_pass.extent.height;
+    framebufferinfo.layers = 1;
+
+    if (vkCreateFramebuffer(
+        in_device_info.vk_device, 
+        &framebufferinfo, 
+        nullptr, 
+        &out_offscreen_render_pass.framebuffer) != VK_SUCCESS
+    )
     {
-        swap_chain_info.swap_chain_image_views[i] = CreateImageView(
-            swap_chain_info.swap_chain_images[i],
-            swap_chain_info.swap_chain_image_format,
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            1,
-            device_info.vk_device
-            );
+        throw std::runtime_error("Failed to create framebuffer!");
     }
 }
 
-void WVulkan::CreateOffcreenRenderFrameBuffers(WVkSwapChainInfo & out_swap_chain_info,
-                                             const WVkRenderPassInfo & out_render_pass_info,
-                                             const WVkDeviceInfo & in_device_info)
+void WVulkan::CreateOffcreenRenderFrameBuffers_swapchain(WVkSwapChainInfo & out_swap_chain_info,
+                                               const WVkOffscreenRenderStruct & out_render_pass_info,
+                                               const WVkDeviceInfo & in_device_info)
 {
     out_swap_chain_info.swap_chain_framebuffers.resize(
         out_swap_chain_info.swap_chain_image_views.size()
@@ -225,8 +257,8 @@ void WVulkan::CreateOffcreenRenderFrameBuffers(WVkSwapChainInfo & out_swap_chain
     for (size_t i=0; i < out_swap_chain_info.swap_chain_image_views.size(); i++)
     {
         std::array<VkImageView, 3> Attachments = {
-            out_swap_chain_info.color_image_view,
-            out_swap_chain_info.depth_image_view,
+            out_render_pass_info.color.view,
+            out_render_pass_info.depth.view,
             out_swap_chain_info.swap_chain_image_views[i]
         };
 
@@ -252,15 +284,12 @@ void WVulkan::CreateOffcreenRenderFrameBuffers(WVkSwapChainInfo & out_swap_chain
 
 }
 
-void WVulkan::CreateColorResource(
-    VkImage & out_image,
-    VkDeviceMemory & out_memory,
-    VkImageView & out_image_view,
-    const VkFormat & in_color_format,
-    const WVkDeviceInfo & in_device_info,
-    const float & width,
-    const float & height
-    )
+void WVulkan::CreateColorResource(VkImage & out_image,
+                                  VkDeviceMemory & out_memory,
+                                  VkImageView & out_image_view,
+                                  const VkFormat & in_color_format,
+                                  const WVkDeviceInfo & in_device_info,
+                                  const VkExtent2D & in_extent)
 {
     // VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
 
@@ -269,7 +298,7 @@ void WVulkan::CreateColorResource(
         out_memory,
         in_device_info.vk_device,
         in_device_info.vk_physical_device,
-        width, height,
+        in_extent.width, in_extent.height,
         1,
         in_device_info.msaa_samples,
         in_color_format,
@@ -292,7 +321,8 @@ void WVulkan::CreateDepthResource(
     VkDeviceMemory & out_memory,
     VkImageView & out_image_view,
     const WVkDeviceInfo & in_device_info,
-    const float & width, const float height
+    const VkExtent2D & in_extent // ,
+    // const float & width, const float height
     )
 {
     VkFormat DepthFormat = FindDepthFormat(in_device_info.vk_physical_device);
@@ -302,7 +332,7 @@ void WVulkan::CreateDepthResource(
         out_memory,
         in_device_info.vk_device,
         in_device_info.vk_physical_device,
-        width, height,
+        in_extent.width, in_extent.height,
         1,
         in_device_info.msaa_samples,
         DepthFormat,
@@ -320,10 +350,12 @@ void WVulkan::CreateDepthResource(
         );
 }
 
-void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info, const WVkSwapChainInfo &in_swap_chain_info, const WVkDeviceInfo &device_info)
+void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pass_info,
+                                        const VkFormat & in_swap_chain_image_format,
+                                        const WVkDeviceInfo &device_info)
 {
     VkAttachmentDescription color_attachment{};
-    color_attachment.format = in_swap_chain_info.swap_chain_image_format;
+    color_attachment.format = in_swap_chain_image_format;
     color_attachment.samples = device_info.msaa_samples;
     color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -342,15 +374,15 @@ void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info
     depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentDescription color_attachment_resolve{};
-    color_attachment_resolve.format = in_swap_chain_info.swap_chain_image_format;
-    color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    // VkAttachmentDescription color_attachment_resolve{};
+    // color_attachment_resolve.format = in_swap_chain_image_format;
+    // color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
+    // color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    // color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    // color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    // color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    // color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    // color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     VkAttachmentReference color_attachment_ref{};
     color_attachment_ref.attachment = 0;
@@ -360,27 +392,33 @@ void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info
     depth_attachment_ref.attachment = 1;
     depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentReference color_attachment_resolve_ref{};
-    color_attachment_resolve_ref.attachment = 2;
-    color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    // VkAttachmentReference color_attachment_resolve_ref{};
+    // color_attachment_resolve_ref.attachment = 2;
+    // color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
     subpass.pDepthStencilAttachment = &depth_attachment_ref;
-    subpass.pResolveAttachments = &color_attachment_resolve_ref;
+    // subpass.pResolveAttachments = &color_attachment_resolve_ref;
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    dependency.dstStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask =
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     std::array<VkAttachmentDescription, 3> Attachments = {
-        color_attachment, depth_attachment, color_attachment_resolve
+        color_attachment, depth_attachment // , color_attachment_resolve
     };
 
     VkRenderPassCreateInfo render_pass_info{};
@@ -397,8 +435,63 @@ void WVulkan::CreateOffscreenRenderPass(WVkRenderPassInfo & out_render_pass_info
                            nullptr,
                            &out_render_pass_info.render_pass) != VK_SUCCESS)
     {
-        throw std::runtime_error("Failed to create render pass!");
+        throw std::runtime_error("Failed to create offscreen render pass!");
     }
+}
+
+void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
+                                          const VkFormat & in_swap_chain_image_format,
+                                          const WVkDeviceInfo & in_device_info)
+{
+    VkAttachmentDescription color_attachment{};
+    color_attachment.format = in_swap_chain_image_format;
+    color_attachment.samples = in_device_info.msaa_samples;
+    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    color_attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference color_attachment_ref{};
+    color_attachment_ref.attachment=0;
+    color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment_ref;
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask =
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        // VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    render_pass_info.attachmentCount = 1;
+    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.pSubpasses = &subpass;
+    render_pass_info.dependencyCount = 1;
+    render_pass_info.pDependencies = &dependency;
+
+    if (vkCreateRenderPass(in_device_info.vk_device,
+                           &render_pass_info,
+                           nullptr,
+                           &out_render_pass.render_pass) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create postprocess render pass!");
+    }
+
 }
 
 void WVulkan::Create(
@@ -655,7 +748,7 @@ void WVulkan::Create(
 void WVulkan::Create(
     WVkRenderPipelineInfo & out_pipeline_info,
     const WVkDeviceInfo & in_device,
-    const WVkRenderPassInfo & in_render_pass_info,
+    const WVkOffscreenRenderStruct & in_render_pass_info,
     const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
     const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
     )
@@ -1230,7 +1323,7 @@ void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDevic
     }
 }
 
-void WVulkan::Destroy(WVkRenderPassInfo & render_pass_info, const WVkDeviceInfo &device_info)
+void WVulkan::Destroy(WVkOffscreenRenderStruct & render_pass_info, const WVkDeviceInfo &device_info)
 {
     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
     render_pass_info = {};

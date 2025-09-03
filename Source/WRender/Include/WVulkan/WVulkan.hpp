@@ -44,14 +44,21 @@ namespace WVulkan
         const WVkSurfaceInfo &surface_info, 
         const std::uint32_t & in_width,
         const std::uint32_t & in_height,
-        const WVkRenderPassInfo &render_pass_info, 
+        const WVkOffscreenRenderStruct &render_pass_info, 
         const WVkRenderDebugInfo &debug_info
         );
 
     /**
-     * @brief Creates a Vulkan Render Pass.
+     * @brief Creates offscreen Render Pass.
     */
-    void CreateOffscreenRenderPass(WVkRenderPassInfo & render_pass, const WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo&);
+    void CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pass,
+                                   const VkFormat & in_swap_chain_image_format,
+                                   const WVkDeviceInfo& in_device_info);
+
+    /** @brief Create Postprocess render pass. */
+    void CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
+                                     const VkFormat & in_swap_chain_image_format,
+                                     const WVkDeviceInfo & in_device_info);
 
     /**
      * @brief Creates a Vulkan Command Pool.
@@ -77,7 +84,7 @@ namespace WVulkan
     void Create(
         WVkRenderPipelineInfo & out_pipeline_info,
         const WVkDeviceInfo & device,
-        const WVkRenderPassInfo & render_pass_info,
+        const WVkOffscreenRenderStruct & render_pass_info,
         const std::vector<WVkDescriptorSetLayoutInfo> & descriptor_set_layout_infos,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         );
@@ -199,15 +206,19 @@ namespace WVulkan
 
     void Destroy(WVkInstanceInfo & instance_info);
 
-    void Destroy(WVkSurfaceInfo & surface_info, const WVkInstanceInfo & instance_info);
+    void Destroy(WVkSurfaceInfo & surface_info,
+                 const WVkInstanceInfo & instance_info);
 
     void Destroy(WVkDeviceInfo & device_info);
 
-    void Destroy(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info);
+    void Destroy(WVkSwapChainInfo & swap_chain_info,
+                 const WVkDeviceInfo & device_info);
 
-    void DestroyImageView(WVkSwapChainInfo & swap_chain_info, const WVkDeviceInfo & device_info);
+    void DestroyImageView(WVkSwapChainInfo & swap_chain_info,
+                          const WVkDeviceInfo & device_info);
 
-    void Destroy(WVkRenderPassInfo & render_pass_info, const WVkDeviceInfo & device_info);
+    void Destroy(WVkOffscreenRenderStruct & render_pass_info,
+                 const WVkDeviceInfo & device_info);
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
@@ -260,8 +271,7 @@ namespace WVulkan
         VkImageView & out_image_view,
         const VkFormat & in_color_format,
         const WVkDeviceInfo & in_device_info,
-        const float & width,
-        const float & height
+        const VkExtent2D & in_extent
         );
 
     void CreateDepthResource(
@@ -269,36 +279,20 @@ namespace WVulkan
         VkDeviceMemory & out_memory,
         VkImageView & out_image_view,
         const WVkDeviceInfo & in_device_info,
-        const float & width, const float height
+        const VkExtent2D & in_extent
         );
 
 
-    // Swap Chain
-    // ----------
-
-    /**
-     * @brief Creates Vulkan Image Views.
-    */
-    void CreateSwapChainImageViews(
-        WVkSwapChainInfo & out_swap_chain_info,
-        const WVkDeviceInfo &in_device_info
-        );
-
-    void CreateOffcreenRenderFrameBuffers(
-        WVkSwapChainInfo & out_swap_chain_info,
-        const WVkRenderPassInfo & out_render_pass_info,
+    void CreateOffscreenFrameBuffer(
+        WVkOffscreenRenderStruct & offscreen_render_pass,
         const WVkDeviceInfo & in_device_info
         );
 
-    // void CreateColorResource(
-    //     WVkSwapChainInfo & out_swap_chain_info,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
-
-    // void CreateDepthResource(
-    //     WVkSwapChainInfo & out_swap_chain_info,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
+    void CreateOffcreenRenderFrameBuffers_swapchain(
+        WVkSwapChainInfo & out_swap_chain_info,
+        const WVkOffscreenRenderStruct & out_render_pass_info,
+        const WVkDeviceInfo & in_device_info
+        );
 
     // Descriptor Set Layout
     // ---------------------

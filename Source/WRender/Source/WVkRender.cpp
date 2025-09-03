@@ -41,8 +41,8 @@ WVkRender::WVkRender() :
     debug_info_(),
     render_resources_(),
     swap_chain_info_(),
-    offscreen_rpass_info_(),
-    postprocess_rpass_info_(),
+    offscreen_render_(),
+    postprocess_render_(),
     render_command_pool_(),
     render_command_buffer_(),
     pipelines_manager_(),
@@ -112,27 +112,66 @@ void WVkRender::Initialize()
         surface_info_,
         window_.width,
         window_.height,
-        offscreen_rpass_info_,
+        offscreen_render_,
         debug_info_
         );
+    
+    // Offscreen Render Pass
+    // TODO: check frames in flight
 
-    // Create Vulkan Image Views
-    WVulkan::CreateSwapChainImageViews(
-        swap_chain_info_,
-        device_info_
-        );
-
-    // Create Offscreen Render Pass
-    // TODO check
+    offscreen_render_.extent = {window_.width, window_.height};
     WVulkan::CreateOffscreenRenderPass(
-        offscreen_rpass_info_,
-        swap_chain_info_,
+        offscreen_render_,
+        swap_chain_info_.swap_chain_image_format,
         device_info_
         );
+
+    offscreen_render_.color.extent = {window_.width, window_.height};
+    WVulkan::CreateColorResource(
+        offscreen_render_.color.image,
+        offscreen_render_.color.memory,
+        offscreen_render_.color.view,
+        swap_chain_info_.swap_chain_image_format,
+        device_info_,
+        offscreen_render_.color.extent
+        );
+
+    offscreen_render_.depth.extent = {window_.width, window_.height};
+    WVulkan::CreateDepthResource(
+        offscreen_render_.depth.image,
+        offscreen_render_.depth.memory,
+        offscreen_render_.depth.view,
+        device_info_,
+        offscreen_render_.depth.extent
+        );
+
+    WVulkan::CreateOffscreenFrameBuffer(
+        offscreen_render_,
+        device_info_
+        );
+
+    // Postprocess Render Pass
+    // TODO: frames in flight
+
+    postprocess_render_.extent = {window_.width, window_.height};
+    WVulkan::CreatePostprocessRenderPass(
+        postprocess_render_,
+        swap_chain_info_.swap_chain_image_format,
+        device_info_
+        );
+
+    // TODO no swap chain
+    // WVulkan::CreateOffcreenRenderFrameBuffers(
+    //     swap_chain_info_,
+    //     offscreen_renderpass_info_,
+    //     device_info_
+    //     );
+
+    // --
 
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
-        offscreen_rpass_info_,
+        offscreen_render_,
         window_.width,
         window_.height
         );
@@ -143,22 +182,7 @@ void WVkRender::Initialize()
         surface_info_
         );
 
-    WVulkan::CreateColorResource(
-        swap_chain_info_,
-        device_info_
-        );
-
-    WVulkan::CreateDepthResource(
-        swap_chain_info_,
-        device_info_
-        );
-
-    // TODO no swap chain
-    WVulkan::CreateOffcreenRenderFrameBuffers(
-        swap_chain_info_,
-        offscreen_rpass_info_,
-        device_info_
-        );
+    // Offscreen Render Pass
 
     render_command_buffer_ =
         render_command_pool_.
@@ -405,7 +429,7 @@ void WVkRender::Destroy() {
     WFLOG("Destroy Render Pass Info");
 
     // Destroy Vulkan Render Pass
-    WVulkan::Destroy(offscreen_rpass_info_, device_info_);
+    WVulkan::Destroy(offscreen_render_, device_info_);
 
     WFLOG("Destroy Swap Chain Info");
 
@@ -456,7 +480,7 @@ void WVkRender::RecreateSwapChain() {
         );
 
     WVulkan::Destroy(
-        offscreen_rpass_info_,
+        offscreen_render_,
         device_info_
         );
 
@@ -466,7 +490,7 @@ void WVkRender::RecreateSwapChain() {
         surface_info_,
         window_.width,
         window_.height,
-        offscreen_rpass_info_,
+        offscreen_render_,
         debug_info_
         );
 
@@ -476,7 +500,7 @@ void WVkRender::RecreateSwapChain() {
         );
 
     WVulkan::CreateOffscreenRenderPass(
-        offscreen_rpass_info_,
+        offscreen_render_,
         swap_chain_info_,
         device_info_
         );
@@ -550,7 +574,7 @@ void WVkRender::RecordRenderCommandBuffer(
 
     VkRenderPassBeginInfo render_pass_info{};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass =  offscreen_rpass_info_.render_pass;
+    render_pass_info.renderPass =  offscreen_render_.render_pass;
     render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
     render_pass_info.renderArea.offset = {0,0};
     render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;
