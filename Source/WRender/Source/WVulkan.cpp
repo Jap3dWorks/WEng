@@ -1,6 +1,8 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WLog.hpp"
+#include "WVulkan/WVulkanUtils.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <GLFW/glfw3.h>
 #include <array>
@@ -216,7 +218,7 @@ void WVulkan::Create(
 
 }
 
-void CreateOffscreenFrameBuffer(
+void WVulkan::CreateOffscreenFramebuffer(
     WVkOffscreenRenderStruct & out_offscreen_render_pass,
     const WVkDeviceInfo & in_device_info
     ) {
@@ -242,11 +244,37 @@ void CreateOffscreenFrameBuffer(
         &out_offscreen_render_pass.framebuffer) != VK_SUCCESS
     )
     {
-        throw std::runtime_error("Failed to create framebuffer!");
+        throw std::runtime_error("Failed to create offscreen framebuffer!");
     }
 }
 
-void WVulkan::CreateOffcreenRenderFrameBuffers_swapchain(WVkSwapChainInfo & out_swap_chain_info,
+void WVulkan::CreatePostprocessFramebuffer(
+    WVkPostprocessRenderStruct & out_postprocess_render,
+    const WVkDeviceInfo & in_device_info
+    ) {
+
+    VkFramebufferCreateInfo framebufferinfo{};
+
+    framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+    framebufferinfo.renderPass = out_postprocess_render.render_pass;
+    framebufferinfo.attachmentCount = 1;
+    framebufferinfo.pAttachments = &out_postprocess_render.color.view;
+    framebufferinfo.width = out_postprocess_render.extent.width;
+    framebufferinfo.height = out_postprocess_render.extent.height;
+    framebufferinfo.layers = 1;
+
+    if (vkCreateFramebuffer(
+            in_device_info.vk_device,
+            &framebufferinfo,
+            nullptr,
+            &out_postprocess_render.framebuffer
+            ) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create postprocess framebuffer!");
+    }
+}
+
+void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out_swap_chain_info,
                                                const WVkOffscreenRenderStruct & out_render_pass_info,
                                                const WVkDeviceInfo & in_device_info)
 {
@@ -403,40 +431,11 @@ void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pa
     subpass.pDepthStencilAttachment = &depth_attachment_ref;
     // subpass.pResolveAttachments = &color_attachment_resolve_ref;
 
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask =
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-    std::array<VkAttachmentDescription, 3> Attachments = {
-        color_attachment, depth_attachment // , color_attachment_resolve
-    };
-
-    VkRenderPassCreateInfo render_pass_info{};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_info.attachmentCount = static_cast<uint32_t>(Attachments.size());
-    render_pass_info.pAttachments = Attachments.data();
-    render_pass_info.subpassCount = 1;
-    render_pass_info.pSubpasses = &subpass;
-    render_pass_info.dependencyCount = 1;
-    render_pass_info.pDependencies = &dependency;
-
-    if (vkCreateRenderPass(device_info.vk_device,
-                           &render_pass_info,
-                           nullptr,
-                           &out_render_pass_info.render_pass) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create offscreen render pass!");
-    }
+    out_render_pass_info.render_pass = WVulkanUtils::CreateRenderPass<2>(
+        {color_attachment, depth_attachment},
+        subpass,
+        device_info.vk_device
+        );
 }
 
 void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
@@ -462,36 +461,11 @@ void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_rende
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
 
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask =
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        // VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-    VkRenderPassCreateInfo render_pass_info{};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_info.attachmentCount = 1;
-    render_pass_info.pAttachments = &color_attachment;
-    render_pass_info.pSubpasses = &subpass;
-    render_pass_info.dependencyCount = 1;
-    render_pass_info.pDependencies = &dependency;
-
-    if (vkCreateRenderPass(in_device_info.vk_device,
-                           &render_pass_info,
-                           nullptr,
-                           &out_render_pass.render_pass) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create postprocess render pass!");
-    }
-
+    out_render_pass.render_pass = WVulkanUtils::CreateRenderPass<1>(
+        {color_attachment},
+        subpass,
+        in_device_info.vk_device
+        );
 }
 
 void WVulkan::Create(

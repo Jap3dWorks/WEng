@@ -145,7 +145,7 @@ void WVkRender::Initialize()
         offscreen_render_.depth.extent
         );
 
-    WVulkan::CreateOffscreenFrameBuffer(
+    WVulkan::CreateOffscreenFramebuffer(
         offscreen_render_,
         device_info_
         );
@@ -157,6 +157,21 @@ void WVkRender::Initialize()
     WVulkan::CreatePostprocessRenderPass(
         postprocess_render_,
         swap_chain_info_.swap_chain_image_format,
+        device_info_
+        );
+
+    postprocess_render_.color.extent = {window_.width, window_.height};
+    WVulkan::CreateColorResource(
+        postprocess_render_.color.image,
+        postprocess_render_.color.memory,
+        postprocess_render_.color.view,
+        swap_chain_info_.swap_chain_image_format,
+        device_info_,
+        postprocess_render_.color.extent
+        );
+
+    WVulkan::CreatePostprocessFramebuffer(
+        postprocess_render_,
         device_info_
         );
 

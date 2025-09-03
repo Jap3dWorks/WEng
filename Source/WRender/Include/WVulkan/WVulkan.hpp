@@ -283,12 +283,18 @@ namespace WVulkan
         );
 
 
-    void CreateOffscreenFrameBuffer(
+    void CreateOffscreenFramebuffer(
         WVkOffscreenRenderStruct & offscreen_render_pass,
         const WVkDeviceInfo & in_device_info
         );
 
-    void CreateOffcreenRenderFrameBuffers_swapchain(
+    
+    void CreatePostprocessFramebuffer(
+        WVkPostprocessRenderStruct  & framebuffer_render_pass,
+        const WVkDeviceInfo & in_device_info
+        );
+
+    void CreateOffcreenRenderFrameBuffers_DEPRECATED(
         WVkSwapChainInfo & out_swap_chain_info,
         const WVkOffscreenRenderStruct & out_render_pass_info,
         const WVkDeviceInfo & in_device_info
@@ -389,7 +395,7 @@ namespace WVulkan
         return true;
     }
 
-    // Helper Functions
+    // Helper Functions TODO: move to WVulkanUtils
     // ----------------
 
     /**
