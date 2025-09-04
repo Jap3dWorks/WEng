@@ -116,12 +116,15 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordGraphicsRenderCommandBuffer(const WAssetId & in_pipeline_id,
-                                   const std::uint32_t & in_frame_index,
-                                   const std::uint32_t & in_image_index);
+    void RecordGraphicsRenderCommandBuffer(
+        const VkCommandBuffer & in_command_buffer,
+        const std::uint32_t & in_frame_index
+        );
 
-    VkDescriptorSet BindingDescriptor(const WEntityComponentId & in_binding_id,
-                                      const std::uint32_t & in_frame_index);
+    void RecordPostprocessRenderCommandBuffer(
+        const VkCommandBuffer & in_command_buffer,
+        const std::uint32_t & in_frame_index
+        );
 
     WVkInstanceInfo instance_info_;
     

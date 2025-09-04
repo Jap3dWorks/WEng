@@ -20,31 +20,6 @@ class WRENDER_API WVkRenderPipelinesManager
 
 private:
 
-    struct WVkDescriptorSetUBOBinding {
-        uint32_t binding{0}; // TODO Move Binding to WVkPipelineBindingInfo
-        WVkUBOInfo ubo_info{};
-        VkDescriptorBufferInfo buffer_info{};
-    };
-
-    struct WVkDescriptorSetTextureBinding {
-        uint32_t binding{0};
-        VkDescriptorImageInfo image_info{};
-    };
-
-    /**
-     * @brief Render Pipeline Bindings data
-     */
-    struct WVkPipelineBindingInfo
-    {
-        WId wid{0};  // TODO WEntityId
-
-        WAssetId render_pipeline_id{0};
-        WAssetIndexId mesh_asset_id{0};
-
-        std::vector<WVkDescriptorSetTextureBinding> textures{};
-        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
-    };
-
     /**
      * @Brief Graphics pipelines global descriptors sets for camera and lights.
      */

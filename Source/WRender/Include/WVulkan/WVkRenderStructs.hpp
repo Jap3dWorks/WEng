@@ -62,7 +62,7 @@ struct WVkCommandPoolInfo
 
 struct WVkTextureInfo
 {
-    WId id{0};
+    // WId id{0};
     
     VkImage image{VK_NULL_HANDLE};
     VkDeviceMemory image_memory{VK_NULL_HANDLE};
@@ -95,6 +95,8 @@ struct WVkRenderTarget {
     VkFormat format{};
     VkExtent2D extent{};
 };
+
+// Render Resources
 
 struct WVkOffscreenRenderStruct
 {
@@ -227,5 +229,32 @@ struct WVkFenceInfo
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
 
     VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
+};
+
+// Pipeline Bindings
+
+struct WVkDescriptorSetUBOBinding {
+    uint32_t binding{0};
+    WVkUBOInfo ubo_info{};
+    VkDescriptorBufferInfo buffer_info{};
+};
+
+struct WVkDescriptorSetTextureBinding {
+    uint32_t binding{0};
+    VkDescriptorImageInfo image_info{};
+};
+
+/**
+ * @brief Render Pipeline Bindings data
+ */
+struct WVkPipelineBindingInfo
+{
+    // WId wid{0};
+
+    WAssetId render_pipeline_id{0};
+    WAssetIndexId mesh_asset_id{0};
+
+    std::vector<WVkDescriptorSetTextureBinding> textures{};
+    std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
 };
 

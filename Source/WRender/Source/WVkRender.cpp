@@ -266,45 +266,55 @@ void WVkRender::Draw()
         render_finished_semaphore_.semaphores[frame_index_]
     };
 
-    for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
+    // Begin command buffer
 
-        vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index_], 0);
-        pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
-        
-        RecordGraphicsRenderCommandBuffer(
-            pipeline_id,
-            frame_index_,
-            image_index
-            );
+    WVkRenderUtils::BeginRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_]
+        );
 
-        VkSubmitInfo submit_info;
-        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submit_info.pNext = nullptr;
+    RecordGraphicsRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_);
 
-        VkSemaphore wait_semaphores[] =
-            { image_available_semaphore_.semaphores[frame_index_] };
-        VkPipelineStageFlags wait_stages[] =
-            { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    RecordPostprocessRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_
+        );
 
-        submit_info.waitSemaphoreCount = 1;
-        submit_info.pWaitSemaphores = wait_semaphores;
-        submit_info.pWaitDstStageMask = wait_stages;
+    // End Command buffer
 
-        submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index_];
+    WVkRenderUtils::EndRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_]
+        );
 
-        submit_info.signalSemaphoreCount = 1;
-        submit_info.pSignalSemaphores = signal_semaphores;
+    VkSubmitInfo submit_info;
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submit_info.pNext = nullptr;
 
-        if (vkQueueSubmit(
-                device_info_.vk_graphics_queue,
-                1,
-                &submit_info,
-                flight_fence_.fences[frame_index_]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to submit draw command buffer");
-        }
+    VkSemaphore wait_semaphores[] =
+        { image_available_semaphore_.semaphores[frame_index_] };
+    VkPipelineStageFlags wait_stages[] =
+        { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+    submit_info.waitSemaphoreCount = 1;
+    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitDstStageMask = wait_stages;
+
+    submit_info.commandBufferCount = 1;
+    submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index_];
+
+    submit_info.signalSemaphoreCount = 1;
+    submit_info.pSignalSemaphores = signal_semaphores;
+
+    if (vkQueueSubmit(
+            device_info_.vk_graphics_queue,
+            1,
+            &submit_info,
+            flight_fence_.fences[frame_index_]) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to submit draw command buffer");
     }
+    // }
 
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -510,256 +520,178 @@ void WVkRender::RecreateSwapChain() {
         debug_info_
         );
 
-    WVulkan::CreateSwapChainImageViews(
-        swap_chain_info_,
-        device_info_
-        );
+    // TODO Recreate Render resources with the new size
 
-    WVulkan::CreateOffscreenRenderPass(
-        offscreen_render_,
-        swap_chain_info_,
-        device_info_
-        );
+    // WVulkan::CreateSwapChainImageViews(
+    //     swap_chain_info_,
+    //     device_info_
+    //     );
+
+    // WVulkan::CreateOffscreenRenderPass(
+    //     offscreen_render_,
+    //     swap_chain_info_,
+    //     device_info_
+    //     );
 }
 
-VkDescriptorSet WVkRender::BindingDescriptor(const WEntityComponentId & in_binding_id,
-                                              const std::uint32_t & in_frame_index) {
-
-    auto & binding = pipelines_manager_.Binding(in_binding_id);
-    
-    const WVkDescriptorSetLayoutInfo & desc_lay_info =
-        pipelines_manager_.DescriptorSetLayout(binding.render_pipeline_id);
-
-    const WVkDescriptorPoolInfo & desc_pool_info =
-        pipelines_manager_.DescriptorPoolInfo(binding.render_pipeline_id, in_frame_index);
-
-    WVkDescriptorSetInfo descriptor_set_info;
-    WVulkan::Create(descriptor_set_info,
-                    device_info_,
-                    desc_lay_info,
-                    desc_pool_info);
-    
-    std::vector<VkWriteDescriptorSet> write_ds{binding.textures.size() + 1};
-
-    WVulkan::UpdateWriteDescriptorSet_UBO(
-        write_ds[0],
-        binding.ubo[in_frame_index].binding,
-        binding.ubo[in_frame_index].buffer_info,
-        descriptor_set_info.descriptor_set
-        );
-
-    for(std::uint32_t i=0; i<binding.textures.size(); i++) {
-        WVulkan::UpdateWriteDescriptorSet_Texture(
-            write_ds[i+1],
-            binding.textures[i].binding,
-            binding.textures[i].image_info,
-            descriptor_set_info.descriptor_set
-            );
-    }
-
-    WVulkan::UpdateDescriptorSets(
-        write_ds,
-        device_info_
-        );
-
-    return descriptor_set_info.descriptor_set;
-
-}
 
 void WVkRender::RecordGraphicsRenderCommandBuffer(
-    const WAssetId & in_pipeline_id,
-    const std::uint32_t & in_frame_index,
-    const std::uint32_t & in_image_index
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index
     )
 {
-    const WVkRenderPipelineInfo & render_pipeline =
-        pipelines_manager_.RenderPipelineInfo(in_pipeline_id);
-
-    VkCommandBufferBeginInfo begin_info{};
-    
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = 0;
-    begin_info.pInheritanceInfo = nullptr;
-
-    if (vkBeginCommandBuffer(
-            render_command_buffer_.command_buffers[in_frame_index],
-            &begin_info
-            ) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to begin recording command buffer!");
-    }
-
-    // image layouts
+    // Image Layouts
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
-        render_command_buffer_.command_buffers[in_frame_index],
+        in_command_buffer,
         offscreen_render_.color.image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         {},
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         );
 
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
-        render_command_buffer_.command_buffers[in_frame_index],
+        in_command_buffer,
         offscreen_render_.depth.image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         {},
         VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT
+        );
+
+    WVkRenderUtils::RndCmd_BeginOffscreenRendering(
+        in_command_buffer,
+        offscreen_render_.color.view,
+        offscreen_render_.depth.view,
+        offscreen_render_.extent
+        );
+
+    for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
+        
+        pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
+
+        const WVkRenderPipelineInfo & render_pipeline =
+            pipelines_manager_.RenderPipelineInfo(pipeline_id);
+
+        vkCmdBindPipeline(
+            render_command_buffer_.command_buffers[in_frame_index],
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            render_pipeline.pipeline
+            );
+
+        WVkRenderUtils::RndCmd_SetViewportAndScissor(
+            in_command_buffer,
+            offscreen_render_.extent
+            );
+
+        for (auto & bid : pipelines_manager_.IterateBindings(pipeline_id))
+        {
+
+            auto& binding = pipelines_manager_.Binding(bid);
+
+            // Create descriptor
+            VkDescriptorSet descriptorset = WVkRenderUtils::CreateGraphicsDescriptor(
+                device_info_.vk_device,
+                pipelines_manager_.DescriptorPoolInfo(pipeline_id, in_frame_index).descriptor_pool,
+                pipelines_manager_.DescriptorSetLayout(pipeline_id).descriptor_set_layout,
+                binding.ubo[in_frame_index],
+                binding.textures
+                );
+
+            auto& mesh_info =
+                render_resources_.StaticMeshInfo(
+                    binding.mesh_asset_id
+                    );
+
+            VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
+            VkDeviceSize offsets[] = {0};
+
+            vkCmdBindVertexBuffers(
+                render_command_buffer_.command_buffers[in_frame_index],
+                0,
+                1,
+                vertex_buffers,
+                offsets
+                );
+
+            vkCmdBindIndexBuffer(
+                render_command_buffer_.command_buffers[in_frame_index],
+                mesh_info.index_buffer,
+                0,
+                VK_INDEX_TYPE_UINT32
+                );
+
+            std::array<VkDescriptorSet, 2> descsets =
+                {
+                    pipelines_manager_.GlobalGraphicsDescriptorSet(frame_index_).descriptor_set,
+                    descriptorset
+                };
+
+            vkCmdBindDescriptorSets(in_command_buffer,
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    render_pipeline.pipeline_layout,
+                                    0,
+                                    static_cast<std::uint32_t>(descsets.size()),
+                                    descsets.data(),
+                                    0,
+                                    nullptr);
+
+            vkCmdDrawIndexed(in_command_buffer,
+                             mesh_info.index_count,
+                             1,
+                             0,
+                             0,
+                             0);
+        }
+    }
+    
+    vkCmdEndRendering(in_command_buffer);
+
+    // Transition to postprocess
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        offscreen_render_.color.image,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // for postprocess
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_ACCESS_SHADER_READ_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
         );
 
-    // VkRenderPassBeginInfo render_pass_info{};
-    // render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    // render_pass_info.renderPass =  offscreen_render_.render_pass;
-    // render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
-    // render_pass_info.renderArea.offset = {0,0};
-    // render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;
 
-    std::array<VkClearValue, 2> clear_colors;
+}
+
+void WVkRender::RecordPostprocessRenderCommandBuffer(
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index
+    )
+{
+    // Transition to postprocess
+
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        postprocess_render_.color.image,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        );
+
+
+    for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Postprocess)) {
+
+        // TODO Descriptor and prev texture binding
+        
+    }
+
+    // TODO at the end the default postprocess (writepixels to swap chain image)
+
     
-    float r = 0.5;
-    float g = 0.5;
-    float b = 0.5;
-
-    clear_colors[0].color = {{
-            r,
-            g,
-            b,
-            1.f}};
-
-    clear_colors[1].depthStencil = {1.f, 0};
-
-    // Color attachment
-    VkRenderingAttachmentInfo attachment_info;
-    attachment_info.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-    attachment_info.imageView = offscreen_render_.color.view;
-    attachment_info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    attachment_info.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachment_info.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachment_info.clearValue = clear_colors[0];
-
-    VkRenderingInfo rendering_info;
-    rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-    rendering_info.renderArea = {{0,0}, offscreen_render_.extent};
-    rendering_info.colorAttachmentCount = 1;
-    rendering_info.pColorAttachments = &attachment_info;
-
-    // TODO depth
-
-    vkCmdBeginRendering(
-        render_command_buffer_.command_buffers[in_frame_index],
-        &rendering_info
-        );
-
-    // render_pass_info.clearValueCount = clear_colors.size();
-    // render_pass_info.pClearValues = clear_colors.data();
-
-    // vkCmdBeginRenderPass(
-    //     render_command_buffer_.command_buffers[in_frame_index],
-    //     &render_pass_info,
-    //     VK_SUBPASS_CONTENTS_INLINE
-    //     );
-
-    vkCmdBindPipeline(
-        render_command_buffer_.command_buffers[in_frame_index],
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        render_pipeline.pipeline
-        );
-
-    VkViewport viewport{};
-    viewport.x = 0.f;
-    viewport.y = 0.f;
-    viewport.width = static_cast<float>(swap_chain_info_.swap_chain_extent.width);
-    viewport.height = static_cast<float>(swap_chain_info_.swap_chain_extent.height);
-    viewport.minDepth = 0.f;
-    viewport.maxDepth = 1.f;
-    vkCmdSetViewport(
-        // in_commandbuffer,
-        render_command_buffer_.command_buffers[in_frame_index],
-        0, 1,
-        &viewport
-        );
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = swap_chain_info_.swap_chain_extent;
-    vkCmdSetScissor(
-        // in_commandbuffer,
-        render_command_buffer_.command_buffers[in_frame_index],
-        0, 1,
-        &scissor
-        );
-
-    for (auto & bid : pipelines_manager_.IterateBindings(in_pipeline_id))
-    {
-
-        auto& binding = pipelines_manager_.Binding(bid);
-
-        // Create descriptor
-        VkDescriptorSet descriptorset = BindingDescriptor(bid, frame_index_);
-
-        auto& mesh_info =
-            render_resources_.StaticMeshInfo(
-                binding.mesh_asset_id
-                );
-
-        VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
-        VkDeviceSize offsets[] = {0};
-        
-        vkCmdBindVertexBuffers(
-            // in_commandbuffer,
-            render_command_buffer_.command_buffers[in_frame_index],
-            0,
-            1,
-            vertex_buffers,
-            offsets
-            );
-
-        vkCmdBindIndexBuffer(
-            // in_commandbuffer,
-            render_command_buffer_.command_buffers[in_frame_index],
-            mesh_info.index_buffer,
-            0,
-            VK_INDEX_TYPE_UINT32
-            );
-
-        std::array<VkDescriptorSet, 2> descsets =
-            {
-                pipelines_manager_.GlobalGraphicsDescriptorSet(frame_index_).descriptor_set,
-                descriptorset
-            };
-        
-        vkCmdBindDescriptorSets(
-            render_command_buffer_.command_buffers[in_frame_index],
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            render_pipeline.pipeline_layout,
-            0,
-            static_cast<std::uint32_t>(descsets.size()),
-            descsets.data(),
-            0,
-            nullptr
-            );
-
-        vkCmdDrawIndexed(
-            render_command_buffer_.command_buffers[in_frame_index],
-            mesh_info.index_count,
-            1,
-            0,
-            0,
-            0
-            );
-    }
-
-    vkCmdEndRendering(
-        render_command_buffer_.command_buffers[in_frame_index]
-        );
-
-    vkCmdEndRenderPass(render_command_buffer_.command_buffers[in_frame_index]);
-
-    if(vkEndCommandBuffer(render_command_buffer_.command_buffers[in_frame_index]) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to record command buffer!");
-    }
 }
