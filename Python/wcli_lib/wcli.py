@@ -156,18 +156,17 @@ class BuildCommand(CliCommand):
 
         cmd = [
             "cmake",
+            "-G", "Ninja",
             "-S", ".",
             "-B", build_path,
             "-DCMAKE_BUILD_TYPE=" + self.cmd_args.build_type,
             "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
             "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
-            "-DCMAKE_C_COMPILER=" + CliVars.C_COMPILER,
             "-DCMAKE_CXX_COMPILER=" + CliVars.CXX_COMPILER
         ]
 
         if self.cmd_args.build_type == CliVars.DEBUG_TYPE:
             cmd.append('-DCMAKE_CXX_FLAGS=-g -O0')
-            cmd.append('-DCMAKE_C_FLAGS=-g -O0')
 
         completed_process = subprocess.run(cmd, stderr=subprocess.STDOUT)
 

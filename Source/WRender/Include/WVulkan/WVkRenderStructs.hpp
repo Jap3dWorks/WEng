@@ -24,6 +24,7 @@ struct WVkDeviceInfo{
     };
 
     VkQueue vk_graphics_queue {VK_NULL_HANDLE};
+    // VkQueue vk_postprocess_queue {VK_NULL_HANDLE};
     VkQueue vk_present_queue {VK_NULL_HANDLE};
 
     VkDevice vk_device {VK_NULL_HANDLE};
@@ -97,8 +98,8 @@ struct WVkRenderTarget {
 
 struct WVkOffscreenRenderStruct
 {
-    VkRenderPass render_pass{nullptr};
-    VkFramebuffer framebuffer{nullptr};
+    // VkRenderPass render_pass{nullptr};
+    // VkFramebuffer framebuffer{nullptr};
 
     WVkRenderTarget color{};
     WVkRenderTarget depth{};
@@ -107,8 +108,9 @@ struct WVkOffscreenRenderStruct
 
 struct WVkPostprocessRenderStruct
 {
-    VkRenderPass render_pass{nullptr};
-    VkFramebuffer framebuffer{nullptr};
+    // VkRenderPass render_pass{nullptr};
+    // VkFramebuffer framebuffer{nullptr};
+    
     WVkRenderTarget color{};
     VkExtent2D extent{};
 };

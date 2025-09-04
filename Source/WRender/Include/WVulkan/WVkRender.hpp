@@ -116,7 +116,7 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordRenderCommandBuffer(const WAssetId & in_pipeline_id,
+    void RecordGraphicsRenderCommandBuffer(const WAssetId & in_pipeline_id,
                                    const std::uint32_t & in_frame_index,
                                    const std::uint32_t & in_image_index);
 

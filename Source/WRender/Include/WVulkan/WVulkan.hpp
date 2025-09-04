@@ -457,12 +457,11 @@ namespace WVulkan
 
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
 
-    void TransitionImageLayout(
+    void TransitionImageLayout1(
         const VkDevice & device, 
         const VkCommandPool & command_pool, 
         const VkQueue & graphics_queue, 
         const VkImage & image, 
-        const VkFormat & format, 
         const VkImageLayout & old_layout, 
         const VkImageLayout & new_layout, 
         const uint32_t & mip_levels

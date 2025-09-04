@@ -384,7 +384,8 @@ void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pa
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = in_swap_chain_image_format;
-    color_attachment.samples = device_info.msaa_samples;
+    // color_attachment.samples = device_info.msaa_samples;
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -394,7 +395,8 @@ void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pa
 
     VkAttachmentDescription depth_attachment{};
     depth_attachment.format = FindDepthFormat(device_info.vk_physical_device);
-    depth_attachment.samples = device_info.msaa_samples;
+    // depth_attachment.samples = device_info.msaa_samples;
+    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -431,11 +433,11 @@ void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pa
     subpass.pDepthStencilAttachment = &depth_attachment_ref;
     // subpass.pResolveAttachments = &color_attachment_resolve_ref;
 
-    out_render_pass_info.render_pass = WVulkanUtils::CreateRenderPass<2>(
-        {color_attachment, depth_attachment},
-        subpass,
-        device_info.vk_device
-        );
+    // out_render_pass_info.render_pass = WVulkanUtils::CreateRenderPass<2>(
+    //     {color_attachment, depth_attachment},
+    //     subpass,
+    //     device_info.vk_device
+    //     );
 }
 
 void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
@@ -444,7 +446,8 @@ void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_rende
 {
     VkAttachmentDescription color_attachment{};
     color_attachment.format = in_swap_chain_image_format;
-    color_attachment.samples = in_device_info.msaa_samples;
+    // color_attachment.samples = in_device_info.msaa_samples;
+    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -461,11 +464,11 @@ void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_rende
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
 
-    out_render_pass.render_pass = WVulkanUtils::CreateRenderPass<1>(
-        {color_attachment},
-        subpass,
-        in_device_info.vk_device
-        );
+    // out_render_pass.render_pass = WVulkanUtils::CreateRenderPass<1>(
+    //     {color_attachment},
+    //     subpass,
+    //     in_device_info.vk_device
+    //     );
 }
 
 void WVulkan::Create(
@@ -668,12 +671,11 @@ void WVulkan::Create(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    TransitionImageLayout(
+    TransitionImageLayout1(
         device_info.vk_device,
         command_pool_info.vk_command_pool,
         device_info.vk_graphics_queue,
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         out_texture_info.mip_levels
@@ -1855,12 +1857,11 @@ VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const EShaderType &type)
     }
 }
 
-void WVulkan::TransitionImageLayout(
+void WVulkan::TransitionImageLayout1(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
     const VkImage &image,
-    const VkFormat &format,
     const VkImageLayout &old_layout,
     const VkImageLayout &new_layout,
     const uint32_t &mip_levels
@@ -1868,7 +1869,7 @@ void WVulkan::TransitionImageLayout(
 {
     VkCommandBuffer command_buffer = BeginSingleTimeCommands(device, command_pool);
 
-    VkImageMemoryBarrier barrier{};
+    VkImageMemoryBarrier barrier{};  // old stype barrier
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = old_layout;
     barrier.newLayout = new_layout;

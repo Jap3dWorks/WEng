@@ -16,6 +16,7 @@
 #include "WVulkan/WVkRenderResources.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
+#include "WVulkan/WVkRenderUtils.hpp"
 #include "WLog.hpp"
 
 #include <cstdint>
@@ -120,11 +121,11 @@ void WVkRender::Initialize()
     // TODO: check frames in flight
 
     offscreen_render_.extent = {window_.width, window_.height};
-    WVulkan::CreateOffscreenRenderPass(
-        offscreen_render_,
-        swap_chain_info_.swap_chain_image_format,
-        device_info_
-        );
+    // WVulkan::CreateOffscreenRenderPass(
+    //     offscreen_render_,
+    //     swap_chain_info_.swap_chain_image_format,
+    //     device_info_
+    //     );
 
     offscreen_render_.color.extent = {window_.width, window_.height};
     WVulkan::CreateColorResource(
@@ -145,20 +146,20 @@ void WVkRender::Initialize()
         offscreen_render_.depth.extent
         );
 
-    WVulkan::CreateOffscreenFramebuffer(
-        offscreen_render_,
-        device_info_
-        );
+    // WVulkan::CreateOffscreenFramebuffer(
+    //     offscreen_render_,
+    //     device_info_
+    //     );
 
     // Postprocess Render Pass
     // TODO: frames in flight
 
     postprocess_render_.extent = {window_.width, window_.height};
-    WVulkan::CreatePostprocessRenderPass(
-        postprocess_render_,
-        swap_chain_info_.swap_chain_image_format,
-        device_info_
-        );
+    // WVulkan::CreatePostprocessRenderPass(
+    //     postprocess_render_,
+    //     swap_chain_info_.swap_chain_image_format,
+    //     device_info_
+    //     );
 
     postprocess_render_.color.extent = {window_.width, window_.height};
     WVulkan::CreateColorResource(
@@ -270,7 +271,7 @@ void WVkRender::Draw()
         vkResetCommandBuffer(render_command_buffer_.command_buffers[frame_index_], 0);
         pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
         
-        RecordRenderCommandBuffer(
+        RecordGraphicsRenderCommandBuffer(
             pipeline_id,
             frame_index_,
             image_index
@@ -565,7 +566,7 @@ VkDescriptorSet WVkRender::BindingDescriptor(const WEntityComponentId & in_bindi
 
 }
 
-void WVkRender::RecordRenderCommandBuffer(
+void WVkRender::RecordGraphicsRenderCommandBuffer(
     const WAssetId & in_pipeline_id,
     const std::uint32_t & in_frame_index,
     const std::uint32_t & in_image_index
@@ -587,12 +588,35 @@ void WVkRender::RecordRenderCommandBuffer(
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
-    VkRenderPassBeginInfo render_pass_info{};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass =  offscreen_render_.render_pass;
-    render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
-    render_pass_info.renderArea.offset = {0,0};
-    render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;
+    // image layouts
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        render_command_buffer_.command_buffers[in_frame_index],
+        offscreen_render_.color.image,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+        );
+
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        render_command_buffer_.command_buffers[in_frame_index],
+        offscreen_render_.depth.image,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+        );
+
+    // VkRenderPassBeginInfo render_pass_info{};
+    // render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    // render_pass_info.renderPass =  offscreen_render_.render_pass;
+    // render_pass_info.framebuffer = swap_chain_info_.swap_chain_framebuffers[in_image_index];
+    // render_pass_info.renderArea.offset = {0,0};
+    // render_pass_info.renderArea.extent = swap_chain_info_.swap_chain_extent;
 
     std::array<VkClearValue, 2> clear_colors;
     
@@ -608,18 +632,38 @@ void WVkRender::RecordRenderCommandBuffer(
 
     clear_colors[1].depthStencil = {1.f, 0};
 
-    render_pass_info.clearValueCount = clear_colors.size();
-    render_pass_info.pClearValues = clear_colors.data();
+    // Color attachment
+    VkRenderingAttachmentInfo attachment_info;
+    attachment_info.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    attachment_info.imageView = offscreen_render_.color.view;
+    attachment_info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    attachment_info.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachment_info.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment_info.clearValue = clear_colors[0];
 
-    vkCmdBeginRenderPass(
-        // in_commandbuffer,
+    VkRenderingInfo rendering_info;
+    rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    rendering_info.renderArea = {{0,0}, offscreen_render_.extent};
+    rendering_info.colorAttachmentCount = 1;
+    rendering_info.pColorAttachments = &attachment_info;
+
+    // TODO depth
+
+    vkCmdBeginRendering(
         render_command_buffer_.command_buffers[in_frame_index],
-        &render_pass_info,
-        VK_SUBPASS_CONTENTS_INLINE
+        &rendering_info
         );
 
+    // render_pass_info.clearValueCount = clear_colors.size();
+    // render_pass_info.pClearValues = clear_colors.data();
+
+    // vkCmdBeginRenderPass(
+    //     render_command_buffer_.command_buffers[in_frame_index],
+    //     &render_pass_info,
+    //     VK_SUBPASS_CONTENTS_INLINE
+    //     );
+
     vkCmdBindPipeline(
-        // in_commandbuffer,
         render_command_buffer_.command_buffers[in_frame_index],
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         render_pipeline.pipeline
@@ -708,6 +752,10 @@ void WVkRender::RecordRenderCommandBuffer(
             0
             );
     }
+
+    vkCmdEndRendering(
+        render_command_buffer_.command_buffers[in_frame_index]
+        );
 
     vkCmdEndRenderPass(render_command_buffer_.command_buffers[in_frame_index]);
 

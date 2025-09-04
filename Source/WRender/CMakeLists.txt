@@ -1,3 +1,4 @@
+
 add_library(
     WRender 
     SHARED 
@@ -23,10 +24,6 @@ target_include_directories(
     PRIVATE 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Source>
-        # ${STB_INCLUDE_DIRS} 
-        # ${GLM_INCLUDE_DIRS} 
-        # ${GLFW_INCLUDE_DIRS}
-        # ${VULKAN_INCLUDE_DIRS}
 )
 
 target_link_libraries(
