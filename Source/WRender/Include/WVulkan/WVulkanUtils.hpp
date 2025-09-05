@@ -64,6 +64,42 @@ namespace WVulkanUtils {
     }
 
     return result;
-}
+    }
+
+    inline VkShaderModule CreateShaderModule(
+        const VkDevice & in_device,
+        const std::uint32_t * in_code,
+        const std::size_t& in_code_size
+    )
+    {
+        VkShaderModule result;
+
+        VkShaderModuleCreateInfo shader_module_create_info{};
+        shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        shader_module_create_info.codeSize = in_code_size;
+        shader_module_create_info.pCode = in_code;
+
+        if (vkCreateShaderModule(
+                in_device, 
+                &shader_module_create_info, 
+                nullptr, 
+                &result
+                ) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create shader module!");
+        }
+
+        return result;
+    }
+
+    inline VkShaderModule CreateShaderModule(
+        const VkDevice & in_device,
+        const char * in_code,
+        const std::size_t& in_code_size
+        ) {
+        return CreateShaderModule(in_device,
+                                  reinterpret_cast<const std::uint32_t *>(in_code),
+                                  in_code_size);
+    }
 
 }

@@ -1,6 +1,6 @@
 #include "WVulkan/WVkRenderResources.hpp"
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vector>
 

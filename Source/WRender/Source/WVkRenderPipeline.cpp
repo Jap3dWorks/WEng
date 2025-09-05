@@ -3,9 +3,9 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
 #include "WVulkan/WDescriptorPoolUtils.hpp"
 

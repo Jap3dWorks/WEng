@@ -5,7 +5,7 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"

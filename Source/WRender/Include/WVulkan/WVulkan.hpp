@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WLog.hpp"
 
@@ -68,11 +68,6 @@ namespace WVulkan
         const WVkDeviceInfo & device_info,
         const WVkSurfaceInfo & surface_info
 	);
-
-    VkShaderModule CreateShaderModule(
-        const WVkShaderStageInfo & in_shader_info,
-        const WVkDeviceInfo & in_device
-    );
 
     void Create(
         WVkTextureInfo& out_texture_info, 

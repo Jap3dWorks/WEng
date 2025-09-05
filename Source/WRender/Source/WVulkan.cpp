@@ -1,6 +1,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WLog.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
+#include "WShaderUtils.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -14,7 +15,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -527,7 +528,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     }
 
     // Create Logical Device
-    
+
     QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
     std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
@@ -589,33 +590,6 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     }
     vkGetDeviceQueue(device_info.vk_device, indices.graphics_family.value(), 0, &device_info.vk_graphics_queue);
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
-}
-
-VkShaderModule WVulkan::CreateShaderModule(
-    const WVkShaderStageInfo & in_shader_info,
-    const WVkDeviceInfo & in_device
-    )
-{
-    VkShaderModule result;
-
-    VkShaderModuleCreateInfo shader_module_create_info{};
-    shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shader_module_create_info.codeSize = in_shader_info.code.size();
-    shader_module_create_info.pCode = reinterpret_cast<const uint32_t*>(
-        in_shader_info.code.data()
-    );
-
-    if (vkCreateShaderModule(
-        in_device.vk_device, 
-        &shader_module_create_info, 
-        nullptr, 
-        &result
-    ) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create shader module!");
-    }
-
-    return result;
 }
 
 void WVulkan::Create(
@@ -767,7 +741,9 @@ void WVulkan::Create(
             vertex_shader_stage = &in_shader_stage_infos[i];
         }
 
-        shader_modules[i] = CreateShaderModule(in_shader_stage_infos[i], in_device);
+        shader_modules[i] = WVulkanUtils::CreateShaderModule(in_device.vk_device,
+                                                             in_shader_stage_infos[i].code.data(),
+                                                             in_shader_stage_infos[i].code.size());
 
         shader_stages[i].module = shader_modules[i];
         shader_stages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
@@ -2141,42 +2117,8 @@ WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
 
     std::string file_path = in_shader_file_path;
 
-    std::regex extension_pattern("\\.spv$");
-    std::smatch extension_match;
+    result.code = WShaderUtils::ReadShader(file_path);
 
-    if (!std::regex_search(
-            file_path, 
-            extension_match, 
-            extension_pattern))
-    {
-        file_path += ".spv";
-
-        std::string cmd = std::string("glslc ") + in_shader_file_path + " -o " + file_path;
-
-        if(system(cmd.c_str()) != 0) {
-            throw std::runtime_error("FAIL while using glslc command!");
-        }
-    }
-
-    // std::ios::ate -> at the end of the file
-    // std::ios::binary -> as binary avoid text transformations
-    std::ifstream file(file_path, std::ios::ate | std::ios::binary);
-
-    if (!file.is_open())
-    {
-        throw std::runtime_error("FAIL while reading shader file!");
-    }
-
-    size_t file_size = (size_t) file.tellg();
-
-    result.code.resize(file_size);
-
-    file.seekg(0);
-
-    file.read(result.code.data(), file_size);
-
-    file.close();
-    
     result.entry_point = in_entry_point;
     result.type = in_shader_type;
 
@@ -2200,6 +2142,8 @@ WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
         result.attribute_descriptors[2].location = 2;
         result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
         result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
+
+        // TODO Normals
 
         // more vertex data bindings here
 

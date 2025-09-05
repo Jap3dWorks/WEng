@@ -6,7 +6,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include <vector>
 #include <unordered_map>

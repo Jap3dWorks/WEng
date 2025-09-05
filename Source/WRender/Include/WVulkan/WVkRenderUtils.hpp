@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 
 #include <vulkan/vulkan_core.h>

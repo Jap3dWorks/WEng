@@ -117,9 +117,10 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
+    // TODO Use spv shaders to avoid loading compilation.
     pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
-                "/Content/Shaders/Spacers_ShaderBase.vert");
+                "/Content/Shaders/Spacers_ShaderBase.vert"); 
 
     pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,

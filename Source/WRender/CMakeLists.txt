@@ -45,6 +45,15 @@ target_link_libraries(
 
 add_library(WRender::WRender ALIAS WRender)
 
+include(ShaderUtils)
+
+add_slang_shader_target(
+    WRender_AllShaders
+    SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+)
+
+add_dependencies(WRender WRender_AllShaders)
+
 install(
     TARGETS WRender
     EXPORT WRenderTargets

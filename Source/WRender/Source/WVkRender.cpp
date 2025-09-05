@@ -11,7 +11,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRenderPipeline.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
 #include "WStructs/WComponentStructs.hpp"

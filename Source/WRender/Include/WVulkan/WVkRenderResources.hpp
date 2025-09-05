@@ -3,13 +3,13 @@
 #include "WCore/WCore.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
 
 #include "WVulkan/WVkResourceCollection.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 
 /**
  * @brief Manage the lifetime of render resources like geometries or textures.

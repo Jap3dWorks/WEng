@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkRenderStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 
 namespace WDescPoolUtils {
     
