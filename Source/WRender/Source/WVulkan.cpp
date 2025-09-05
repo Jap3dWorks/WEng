@@ -188,28 +188,28 @@ void WVulkan::Create(
                             out_swap_chain_info.swap_chain,
                             &image_count,
                             nullptr);
-    out_swap_chain_info.swap_chain_images.resize(image_count);
+    out_swap_chain_info.images.resize(image_count);
     vkGetSwapchainImagesKHR(
         in_device_info.vk_device,
         out_swap_chain_info.swap_chain,
         &image_count,
-        out_swap_chain_info.swap_chain_images.data());
+        out_swap_chain_info.images.data());
 
     // Save Swap Chain Image Format
-    out_swap_chain_info.swap_chain_image_format = surface_format.format;
-    out_swap_chain_info.swap_chain_extent = extent;
+    out_swap_chain_info.format = surface_format.format;
+    out_swap_chain_info.extent = extent;
     image_count=image_count;
 
     // Swap chain image views
-    out_swap_chain_info.swap_chain_image_views.resize(
-        out_swap_chain_info.swap_chain_images.size()
+    out_swap_chain_info.views.resize(
+        out_swap_chain_info.images.size()
         );
 
-    for (size_t i = 0; i < out_swap_chain_info.swap_chain_images.size(); i++)
+    for (size_t i = 0; i < out_swap_chain_info.images.size(); i++)
     {
-        out_swap_chain_info.swap_chain_image_views[i] = CreateImageView(
-            out_swap_chain_info.swap_chain_images[i],
-            out_swap_chain_info.swap_chain_image_format,
+        out_swap_chain_info.views[i] = CreateImageView(
+            out_swap_chain_info.images[i],
+            out_swap_chain_info.format,
             VK_IMAGE_ASPECT_COLOR_BIT,
             1,
             in_device_info.vk_device
@@ -278,16 +278,16 @@ void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out
                                                const WVkOffscreenRenderStruct & out_render_pass_info,
                                                const WVkDeviceInfo & in_device_info)
 {
-    out_swap_chain_info.swap_chain_framebuffers.resize(
-        out_swap_chain_info.swap_chain_image_views.size()
+    out_swap_chain_info.framebuffers.resize(
+        out_swap_chain_info.views.size()
         );
 
-    for (size_t i=0; i < out_swap_chain_info.swap_chain_image_views.size(); i++)
+    for (size_t i=0; i < out_swap_chain_info.views.size(); i++)
     {
         std::array<VkImageView, 3> Attachments = {
             out_render_pass_info.color.view,
             out_render_pass_info.depth.view,
-            out_swap_chain_info.swap_chain_image_views[i]
+            out_swap_chain_info.views[i]
         };
 
         VkFramebufferCreateInfo FramebufferInfo{};
@@ -295,15 +295,15 @@ void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out
         FramebufferInfo.renderPass = out_render_pass_info.render_pass;
         FramebufferInfo.attachmentCount = static_cast<uint32_t>(Attachments.size());
         FramebufferInfo.pAttachments = Attachments.data();
-        FramebufferInfo.width = out_swap_chain_info.swap_chain_extent.width;
-        FramebufferInfo.height = out_swap_chain_info.swap_chain_extent.height;
+        FramebufferInfo.width = out_swap_chain_info.extent.width;
+        FramebufferInfo.height = out_swap_chain_info.extent.height;
         FramebufferInfo.layers = 1;
 
         if (vkCreateFramebuffer(
             in_device_info.vk_device, 
             &FramebufferInfo, 
             nullptr, 
-            &out_swap_chain_info.swap_chain_framebuffers[i]) != VK_SUCCESS
+            &out_swap_chain_info.framebuffers[i]) != VK_SUCCESS
         )
         {
             throw std::runtime_error("Failed to create framebuffer!");
@@ -501,6 +501,7 @@ void WVulkan::Create(
 void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info)
 {
     // Pick Physical Device
+    
     uint32_t device_count = 0;
     vkEnumeratePhysicalDevices(instance_info.instance, &device_count, nullptr);
     if (device_count == 0)
@@ -526,6 +527,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     }
 
     // Create Logical Device
+    
     QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
     std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
@@ -545,6 +547,20 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     device_features.samplerAnisotropy = VK_TRUE;
     device_features.sampleRateShading = VK_TRUE;
 
+    // dynamic rendering
+    
+    VkPhysicalDeviceFeatures2 vk2_features;
+    vk2_features.sType= VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+    VkPhysicalDeviceVulkan13Features vk13_features;
+    vk13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    vk13_features.dynamicRendering = VK_TRUE;
+
+    vk2_features.pNext = &vk13_features;
+    vk13_features.pNext = nullptr;
+
+    // Start device creation
+
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
@@ -555,7 +571,8 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
 
     create_info.enabledExtensionCount = static_cast<uint32_t>(device_info.device_extensions.size());
     create_info.ppEnabledExtensionNames = device_info.device_extensions.data();
-
+    create_info.pNext = &vk2_features;
+    
     if (debug_info.enable_validation_layers)
     {
         create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
@@ -724,7 +741,6 @@ void WVulkan::Create(
 void WVulkan::Create(
     WVkRenderPipelineInfo & out_pipeline_info,
     const WVkDeviceInfo & in_device,
-    const WVkOffscreenRenderStruct & in_render_pass_info,
     const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
     const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
     )
@@ -856,28 +872,43 @@ void WVulkan::Create(
         throw std::runtime_error("Failed to create pipeline layout!");
     }
 
-    VkGraphicsPipelineCreateInfo PipelineInfo{};
-    PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    PipelineInfo.stageCount = static_cast<uint32_t>(shader_stages.size());
-    PipelineInfo.pStages = shader_stages.data();
-    PipelineInfo.pVertexInputState = &vertex_input_info;
-    PipelineInfo.pInputAssemblyState = &InputAssembly;
-    PipelineInfo.pViewportState = &ViewportState;
-    PipelineInfo.pRasterizationState = &Rasterizer;
-    PipelineInfo.pMultisampleState = &Multisampling;
-    PipelineInfo.pDepthStencilState = &DepthStencil;
-    PipelineInfo.pColorBlendState = &ColorBlending;
-    PipelineInfo.pDynamicState = &DynamicState;
-    PipelineInfo.layout = out_pipeline_info.pipeline_layout; // CHECK
-    PipelineInfo.renderPass = in_render_pass_info.render_pass;
-    PipelineInfo.subpass = out_pipeline_info.subpass;
-    PipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+    VkGraphicsPipelineCreateInfo pipeline_info{};
+    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeline_info.stageCount = static_cast<uint32_t>(shader_stages.size());
+    pipeline_info.pStages = shader_stages.data();
+    pipeline_info.pVertexInputState = &vertex_input_info;
+    pipeline_info.pInputAssemblyState = &InputAssembly;
+    pipeline_info.pViewportState = &ViewportState;
+    pipeline_info.pRasterizationState = &Rasterizer;
+    pipeline_info.pMultisampleState = &Multisampling;
+    pipeline_info.pDepthStencilState = &DepthStencil;
+    pipeline_info.pColorBlendState = &ColorBlending;
+    pipeline_info.pDynamicState = &DynamicState;
+    pipeline_info.layout = out_pipeline_info.pipeline_layout;
+    
+    pipeline_info.renderPass = VK_NULL_HANDLE; // in_render_pass_info.render_pass;
+    pipeline_info.subpass = 0;                 // out_pipeline_info.subpass;
+    pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+
+    // Dynamic rendering info
+
+    VkFormat color_format = VK_FORMAT_R8G8B8A8_UNORM;
+    VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
+
+    VkPipelineRenderingCreateInfo rendering_info{};
+    rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    rendering_info.colorAttachmentCount = 1;
+    rendering_info.pColorAttachmentFormats = &color_format;
+    rendering_info.depthAttachmentFormat = depth_format;
+    rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+
+    pipeline_info.pNext = &rendering_info;
 
     if (vkCreateGraphicsPipelines(
             in_device.vk_device,
             VK_NULL_HANDLE,
             1,
-            &PipelineInfo,
+            &pipeline_info,
             nullptr,
             &out_pipeline_info.pipeline) != VK_SUCCESS)
     {
@@ -1276,12 +1307,12 @@ void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &de
     vkDestroyImage(device_info.vk_device, swap_chain_info.depth_image, nullptr);
     vkFreeMemory(device_info.vk_device, swap_chain_info.depth_image_memory, nullptr);
 
-    for (auto framebuffer : swap_chain_info.swap_chain_framebuffers)
+    for (auto framebuffer : swap_chain_info.framebuffers)
     {
         vkDestroyFramebuffer(device_info.vk_device, framebuffer, nullptr);
     }
 
-    for (auto image_view : swap_chain_info.swap_chain_image_views)
+    for (auto image_view : swap_chain_info.views)
     {
         vkDestroyImageView(device_info.vk_device, image_view, nullptr);
     }
@@ -1293,7 +1324,7 @@ void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &de
 
 void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-    for (auto image_view : swap_chain_info.swap_chain_image_views)
+    for (auto image_view : swap_chain_info.views)
     {
         vkDestroyImageView(device_info.vk_device, image_view, nullptr);
     }
@@ -1551,12 +1582,15 @@ std::vector<const char *> WVulkan::GetRequiredExtensions(bool enable_validation_
     const char ** glfw_extensions;
     glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
+    // iterator first last vector initialization
     std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
 
     if (enable_validation_layers)
     {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
+
+    // extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
     return extensions;
 }

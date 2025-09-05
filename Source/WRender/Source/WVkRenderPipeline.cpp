@@ -121,7 +121,6 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     WVulkan::Create(
         render_pipeline_info,
         device_info_,
-        render_pass_info_,
         {
             global_graphics_descsets_.descset_layout_info,
             d_set_layout

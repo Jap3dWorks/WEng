@@ -35,7 +35,8 @@ namespace WVkRenderUtils {
         depth_attachment.imageView = in_depth_view;
         depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // If later i need it, should change this (I think)
+         // If later i need it, should change depth storeOp (I think)
+        depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depth_attachment.clearValue = clear_values[1];
 
         VkRenderingInfo rendering_info;
@@ -45,6 +46,34 @@ namespace WVkRenderUtils {
         rendering_info.colorAttachmentCount = 1;
         rendering_info.pColorAttachments = &color_attachment;
         rendering_info.pDepthAttachment = &depth_attachment;
+
+        vkCmdBeginRendering(
+            in_command_buffer,
+            &rendering_info
+            );
+    }
+
+    inline void RndCmd_BeginPostprocessRendering(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImageView & in_color_view,
+        const VkExtent2D & in_extent
+        ) {
+
+        // Color Attachment
+        VkRenderingAttachmentInfo color_attachment;
+        color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachment.imageView = in_color_view;
+        color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachment.clearValue = {{0.5, 0.5, 0.5, 1.f}};
+
+        VkRenderingInfo rendering_info;
+        rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        rendering_info.renderArea = {{0,0}, in_extent};
+        rendering_info.layerCount = 1;
+        rendering_info.colorAttachmentCount = 1;
+        rendering_info.pColorAttachments = &color_attachment;
 
         vkCmdBeginRendering(
             in_command_buffer,
@@ -82,7 +111,6 @@ namespace WVkRenderUtils {
             &rendering_info
             );
     }
-
 
     inline void RndCmd_SetViewportAndScissor(
         const VkCommandBuffer & in_command_buffer,

@@ -182,11 +182,6 @@ private:
 
     void CreateGraphicDescriptorSetLayout(const WAssetId & in_id);
 
-    // void CreateDescriptorSet(
-    //     const WAssetId & in_descriptor_set_layout_id,
-    //     const WEntityComponentId & entity_component_id
-    //     );
-    
     void Initialize_ClearLambdas();
 
     void Initialize_GlobalGraphicDescriptors();
@@ -195,7 +190,6 @@ private:
     
     WVkRenderPipelineDb pipelines_{};
     WVkDescSetLayoutDb descriptor_set_layouts_{};
-    // WVkDesSetDb descriptor_sets_{};
     WVkPipelineBindingDb bindings_{};
     WVkDescriptorPoolDb descriptor_pools_{};
 
@@ -205,13 +199,14 @@ private:
     /** Pipelines grouped by PipelineType*/
     std::unordered_map<EPipelineType, TSparseSet<WAssetId>> ptype_pipelines_{};
 
-    uint32_t width_{0};
-    uint32_t height_{0};
-
+    /** Camera, lights, ... */
     GlobalGraphicsDescriptors global_graphics_descsets_{};
 
     WVkDeviceInfo device_info_ {};
     WVkOffscreenRenderStruct render_pass_info_ {};
+
+    uint32_t width_{0};
+    uint32_t height_{0};
 
 };
 

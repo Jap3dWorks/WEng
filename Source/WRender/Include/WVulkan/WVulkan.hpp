@@ -84,7 +84,6 @@ namespace WVulkan
     void Create(
         WVkRenderPipelineInfo & out_pipeline_info,
         const WVkDeviceInfo & device,
-        const WVkOffscreenRenderStruct & render_pass_info,
         const std::vector<WVkDescriptorSetLayoutInfo> & descriptor_set_layout_infos,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         );

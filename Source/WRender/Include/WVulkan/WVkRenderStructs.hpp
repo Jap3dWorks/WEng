@@ -119,13 +119,15 @@ struct WVkPostprocessRenderStruct
 
 struct WVkSwapChainInfo
 {
-    VkFormat swap_chain_image_format;
-    VkExtent2D swap_chain_extent;
+    VkFormat format;
+    VkExtent2D extent;
     VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
     
-    std::vector<VkImage> swap_chain_images;
-    std::vector<VkImageView> swap_chain_image_views;
-    std::vector<VkFramebuffer> swap_chain_framebuffers{};
+    std::vector<VkImage> images;
+    std::vector<VkImageView> views;
+    std::vector<VkDeviceMemory> memory;
+    
+    // std::vector<VkFramebuffer> framebuffers{};  // TODO not required
 
     std::uint32_t image_count{};
 
@@ -197,7 +199,7 @@ struct WVkRenderPipelineInfo
     WAssetId wid;
     EPipelineType type{EPipelineType::Graphics};
 
-    uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
+    // uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    

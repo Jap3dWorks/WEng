@@ -132,7 +132,7 @@ void WVkRender::Initialize()
         offscreen_render_.color.image,
         offscreen_render_.color.memory,
         offscreen_render_.color.view,
-        swap_chain_info_.swap_chain_image_format,
+        swap_chain_info_.format,
         device_info_,
         offscreen_render_.color.extent
         );
@@ -166,7 +166,7 @@ void WVkRender::Initialize()
         postprocess_render_.color.image,
         postprocess_render_.color.memory,
         postprocess_render_.color.view,
-        swap_chain_info_.swap_chain_image_format,
+        swap_chain_info_.format,
         device_info_,
         postprocess_render_.color.extent
         );
@@ -352,7 +352,6 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
         );
 }
 
-
 void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
@@ -534,7 +533,6 @@ void WVkRender::RecreateSwapChain() {
     //     );
 }
 
-
 void WVkRender::RecordGraphicsRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,
     const std::uint32_t & in_frame_index
@@ -662,8 +660,6 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
         );
-
-
 }
 
 void WVkRender::RecordPostprocessRenderCommandBuffer(
@@ -684,12 +680,47 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         );
 
-
     for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Postprocess)) {
-
         // TODO Descriptor and prev texture binding
-        
     }
+
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        swap_chain_info_.images[in_frame_index],
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        );
+
+    
+
+    WVkRenderUtils::RndCmd_BeginPostprocessRendering(
+        in_command_buffer,
+        swap_chain_info_.views[in_frame_index],
+        swap_chain_info_.extent
+        );
+    
+    // pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
+
+    // const WVkRenderPipelineInfo & render_pipeline =
+    //     pipelines_manager_.RenderPipelineInfo(pipeline_id);
+
+    // vkCmdBindPipeline(
+    //     render_command_buffer_.command_buffers[in_frame_index],
+    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //     render_pipeline.pipeline
+    //     );
+
+    WVkRenderUtils::RndCmd_SetViewportAndScissor(
+        in_command_buffer,
+        offscreen_render_.extent
+        );
+    
+
+    vkCmdEndRendering(in_command_buffer);
 
     // TODO at the end the default postprocess (writepixels to swap chain image)
 
