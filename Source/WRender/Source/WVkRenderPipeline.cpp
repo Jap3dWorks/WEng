@@ -25,7 +25,7 @@ WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
 
 WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     WVkDeviceInfo device,
-    WVkOffscreenRenderStruct render_pass_info,
+    // WVkOffscreenRenderStruct render_pass_info,
     uint32_t in_width,
     uint32_t in_height
 ) : device_info_(device),
