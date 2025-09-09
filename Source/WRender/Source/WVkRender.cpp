@@ -86,6 +86,11 @@ void WVkRender::Initialize()
 {
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
+    std::array<std::uint32_t,2> dimensions = {
+        window_.width,
+        window_.height
+    };
+
     // Create Vulkan Instance
     WVulkan::Create(
         instance_info_,
@@ -112,82 +117,37 @@ void WVkRender::Initialize()
         swap_chain_info_,
         device_info_,
         surface_info_,
-        window_.width,
-        window_.height,
-        offscreen_render_,
+        dimensions[0],
+        dimensions[1],
         debug_info_
         );
 
-    swap_chain_resources_.Initialize(device_info_.vk_device);
-
     // Offscreen Render Pass
-    // TODO: check frames in flight
 
-    offscreen_render_.extent = {window_.width, window_.height};
-
-    offscreen_render_.color.extent = {window_.width, window_.height};
-    WVulkan::CreateColorResource(
-        offscreen_render_.color.image,
-        offscreen_render_.color.memory,
-        offscreen_render_.color.view,
-        swap_chain_info_.format,
+    WVkRenderUtils::CreateOffscreenRender(
+        offscreen_render_,
         device_info_,
-        offscreen_render_.color.extent
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format
         );
-
-    offscreen_render_.depth.extent = {window_.width, window_.height};
-    WVulkan::CreateDepthResource(
-        offscreen_render_.depth.image,
-        offscreen_render_.depth.memory,
-        offscreen_render_.depth.view,
-        device_info_,
-        offscreen_render_.depth.extent
-        );
-
-    // WVulkan::CreateOffscreenFramebuffer(
-    //     offscreen_render_,
-    //     device_info_
-    //     );
-
+    
     // Postprocess Render Pass
-    // TODO: frames in flight
 
-    postprocess_render_.extent = {window_.width, window_.height};
-    // WVulkan::CreatePostprocessRenderPass(
-    //     postprocess_render_,
-    //     swap_chain_info_.swap_chain_image_format,
-    //     device_info_
-    //     );
-
-    postprocess_render_.color.extent = {window_.width, window_.height};
-    WVulkan::CreateColorResource(
-        postprocess_render_.color.image,
-        postprocess_render_.color.memory,
-        postprocess_render_.color.view,
-        swap_chain_info_.format,
-        device_info_,
-        postprocess_render_.color.extent
-        );
-
-    WVulkan::CreatePostprocessFramebuffer(
+    WVkRenderUtils::CreatePostprocessRender(
         postprocess_render_,
-        device_info_
+        device_info_,
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format
         );
-
-    // TODO no swap chain
-    // WVulkan::CreateOffcreenRenderFrameBuffers(
-    //     swap_chain_info_,
-    //     offscreen_renderpass_info_,
-    //     device_info_
-    //     );
 
     // --
 
     pipelines_manager_ = WVkRenderPipelinesManager(
         device_info_,
-        offscreen_render_,
-        window_.width,
-        window_.height
+        dimensions[0],
+        dimensions[1]
         );
 
     render_command_pool_ = WVkRenderCommandPool( 
@@ -218,6 +178,11 @@ void WVkRender::Initialize()
         );
 
     render_resources_ = WVkRenderResources(
+        device_info_,
+        render_command_pool_.CommandPoolInfo()
+        );
+
+    swap_chain_resources_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
@@ -300,7 +265,8 @@ void WVkRender::Draw()
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &render_command_buffer_.command_buffers[frame_index_];
+    submit_info.pCommandBuffers =
+        &render_command_buffer_.command_buffers[frame_index_];
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphores;
@@ -354,7 +320,6 @@ void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
     const WAssetIndexId & in_mesh_id,
-    // const WAssetId & in_mesh_id,
     const WRenderPipelineParametersStruct & in_parameters
     )
 {
@@ -419,7 +384,6 @@ void WVkRender::UpdateUboModelDynamic(
     pipelines_manager_.UpdateModelDescriptorSet(
         ubo_model, in_component_id, frame_index_
         );
-                             
 }
 
 void WVkRender::UpdateUboModelStatic(
@@ -449,10 +413,16 @@ void WVkRender::Destroy() {
 
     WVulkan::Destroy(flight_fence_, device_info_);
 
-    WFLOG("Destroy Render Pass Info");
+    // TODO destroy render targets
+    WVkRenderUtils::DestroyOffscreenRender(
+        offscreen_render_,
+        device_info_
+        );
 
-    // Destroy Vulkan Render Pass
-    WVulkan::Destroy(offscreen_render_, device_info_);
+    WVkRenderUtils::DestroyPostprocessRender(
+        postprocess_render_,
+        device_info_
+        );
 
     WFLOG("Destroy Swap Chain Info");
 
@@ -463,7 +433,6 @@ void WVkRender::Destroy() {
 
     render_command_pool_.Clear();
     render_command_pool_ = {};
-    
     render_command_buffer_ = {};
 
     WFLOG("Destroy Render Resources");
@@ -497,6 +466,14 @@ void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in
 
 void WVkRender::RecreateSwapChain() {
     WFLOG("RECREATE SWAP CHAIN!");
+
+    std::array<std::uint32_t,2> dimensions = {
+        window_.width,
+        window_.height
+    };
+
+    // TODO Recreate swapchain resources with the new size
+    // TODO check
     
     WaitIdle();
 
@@ -505,8 +482,13 @@ void WVkRender::RecreateSwapChain() {
         device_info_
         );
 
-    WVulkan::Destroy(
+    WVkRenderUtils::DestroyOffscreenRender(
         offscreen_render_,
+        device_info_
+        );
+
+    WVkRenderUtils::DestroyPostprocessRender(
+        postprocess_render_,
         device_info_
         );
 
@@ -514,24 +496,26 @@ void WVkRender::RecreateSwapChain() {
         swap_chain_info_,
         device_info_,
         surface_info_,
-        window_.width,
-        window_.height,
-        offscreen_render_,
+        dimensions[0],
+        dimensions[1],
         debug_info_
         );
 
-    // TODO Recreate Render resources with the new size
+    WVkRenderUtils::CreateOffscreenRender(
+        offscreen_render_,
+        device_info_,
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format
+        );
 
-    // WVulkan::CreateSwapChainImageViews(
-    //     swap_chain_info_,
-    //     device_info_
-    //     );
-
-    // WVulkan::CreateOffscreenRenderPass(
-    //     offscreen_render_,
-    //     swap_chain_info_,
-    //     device_info_
-    //     );
+    WVkRenderUtils::CreatePostprocessRender(
+        postprocess_render_,
+        device_info_,
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format
+        );
 }
 
 void WVkRender::RecordGraphicsRenderCommandBuffer(
@@ -542,7 +526,7 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
     // Image Layouts
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
-        offscreen_render_.color.image,
+        offscreen_render_[in_frame_index].color.image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         {},
@@ -553,7 +537,7 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
 
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
-        offscreen_render_.depth.image,
+        offscreen_render_[in_frame_index].depth.image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
         {},
@@ -564,9 +548,9 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
 
     WVkRenderUtils::RndCmd_BeginOffscreenRendering(
         in_command_buffer,
-        offscreen_render_.color.view,
-        offscreen_render_.depth.view,
-        offscreen_render_.extent
+        offscreen_render_[in_frame_index].color.view,
+        offscreen_render_[in_frame_index].depth.view,
+        offscreen_render_[in_frame_index].extent
         );
 
     for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Graphics)) {
@@ -584,7 +568,7 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
 
         WVkRenderUtils::RndCmd_SetViewportAndScissor(
             in_command_buffer,
-            offscreen_render_.extent
+            offscreen_render_[in_frame_index].extent
             );
 
         for (auto & bid : pipelines_manager_.IterateBindings(pipeline_id))
@@ -655,7 +639,7 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
     // Transition to postprocess
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
-        offscreen_render_.color.image,
+        offscreen_render_[in_frame_index].color.image,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // for postprocess
         VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -671,20 +655,9 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     const std::uint32_t & in_image_index
     )
 {
-    // Transition to postprocess
-
-    // WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
-    //     in_command_buffer,
-    //     postprocess_render_.color.image,
-    //     VK_IMAGE_LAYOUT_UNDEFINED,
-    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //     {},
-    //     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-    //     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-    //     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-    //     );
-
-    VkImageView input_image = offscreen_render_.color.view;
+    // first input
+    VkImageView input_view = offscreen_render_[in_frame_index].color.view;
+    
 
     for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Postprocess)) {
         // TODO postprocess rendering
@@ -724,7 +697,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     WVkRenderUtils::RndCmd_SetViewportAndScissor(
         in_command_buffer,
-        offscreen_render_.extent
+        offscreen_render_[in_frame_index].extent
         );
 
     WVkRenderUtils::RndCmd_SetViewportAndScissor(
@@ -736,26 +709,23 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         device_info_.vk_device,
         dspool,
         dslay,
-        input_image,
+        input_view,
         swap_chain_resources_.InputRenderSampler()
         );
 
     auto & render_plane = swap_chain_resources_.RenderPlane();
     VkDeviceSize offsets=0;
 
-    vkCmdBindVertexBuffers(
-        in_command_buffer,
-        0,
-        1,
-        &render_plane.index_buffer,
-        &offsets
-        );
+    vkCmdBindVertexBuffers(in_command_buffer,
+                           0,
+                           1,
+                           &render_plane.index_buffer,
+                           &offsets);
 
-    vkCmdBindIndexBuffer(
-        in_command_buffer,
-        render_plane.index_buffer,
-        0,
-        VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(in_command_buffer,
+                         render_plane.index_buffer,
+                         0,
+                         VK_INDEX_TYPE_UINT32);
 
     vkCmdBindDescriptorSets(in_command_buffer,
                             VK_PIPELINE_BIND_POINT_GRAPHICS,

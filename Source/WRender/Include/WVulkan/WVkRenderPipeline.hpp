@@ -47,7 +47,6 @@ public:
 
     WVkRenderPipelinesManager(
         WVkDeviceInfo device, 
-        WVkOffscreenRenderStruct render_pass_info,
         uint32_t in_width,
         uint32_t in_height
         );
@@ -203,7 +202,6 @@ private:
     GlobalGraphicsDescriptors global_graphics_descsets_{};
 
     WVkDeviceInfo device_info_ {};
-    WVkOffscreenRenderStruct render_pass_info_ {};
 
     uint32_t width_{0};
     uint32_t height_{0};

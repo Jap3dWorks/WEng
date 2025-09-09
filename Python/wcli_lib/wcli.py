@@ -170,26 +170,24 @@ class BuildCommand(CliCommand):
 
         completed_process = subprocess.run(cmd, stderr=subprocess.STDOUT)
 
-        return 0
-
         if completed_process.returncode != 0:
             return completed_process.returncode
 
         wlogger.info("Build %s" % build_path)
 
+        install_path = project_manager.ProjectPaths.get_install_path(
+            self.cmd_args.arch,
+            self.cmd_args.build_type
+        )
+
         cmd = [
-            "cmake", "--build", build_path
+            "cmake", "--build", build_path # , "--prefix", install_path, "-v"
         ]
 
         completed_process = subprocess.run(cmd, stderr=subprocess.STDOUT)
 
         if completed_process.returncode != 0:
             return completed_process.returncode
-
-        install_path = project_manager.ProjectPaths.get_install_path(
-            self.cmd_args.arch,
-            self.cmd_args.build_type
-        )
 
         wlogger.info("Install %s" % install_path)
         

@@ -29,14 +29,11 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     uint32_t in_width,
     uint32_t in_height
 ) : device_info_(device),
-    render_pass_info_(render_pass_info),
     width_(in_width),
     height_(in_height)
 {
     WFLOG("Initialize Global Graphic Descriptors.");
     Initialize_GlobalGraphicDescriptors();
-
-    // WVulkan::Create(descriptor_pool_info_, device_info_);
     Initialize_ClearLambdas();
 }
 
@@ -45,21 +42,16 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     ) noexcept :
     pipelines_(std::move(other.pipelines_)),
     descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
-    // descriptor_sets_(std::move(other.descriptor_sets_)),
     descriptor_pools_(std::move(other.descriptor_pools_)),
     bindings_(std::move(other.bindings_)),
     pipeline_pbindings_(std::move(other.pipeline_pbindings_)),
     ptype_pipelines_(std::move(other.ptype_pipelines_)),
-    // descriptor_pool_info_(std::move(other.descriptor_pool_info_)),
     global_graphics_descsets_(std::move(other.global_graphics_descsets_)),
     device_info_(std::move(other.device_info_)),
-    render_pass_info_(std::move(other.render_pass_info_)),
     width_(std::move(other.width_)),
     height_(std::move(other.height_))
 {
     other.device_info_ = {};
-    other.render_pass_info_ = {};
-    // other.descriptor_pool_info_ = {};
     other.global_graphics_descsets_ = {};
 }
 
@@ -69,7 +61,6 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
         Clear();
 
         device_info_ = std::move(other.device_info_);
-        render_pass_info_ = std::move(other.render_pass_info_);
         descriptor_pools_ = std::move(other.descriptor_pools_);
 
         global_graphics_descsets_ = std::move(other.global_graphics_descsets_);
@@ -85,7 +76,6 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
         height_ = std::move(other.height_);
 
         other.device_info_ = {};
-        other.render_pass_info_ = {};
         other.global_graphics_descsets_ = {};
     }
 
@@ -207,12 +197,6 @@ WId WVkRenderPipelinesManager::CreateBinding(
 
             WVulkan::Create(bindings[i].ubo_info, device_info_);
 
-            // Initial Value
-            // WVulkan::UpdateUBOModel(
-            //     bindings[i].ubo_info,
-            //     glm::mat4{1}
-            //     );
-
             bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
             bindings[i].buffer_info.offset = 0;
             bindings[i].buffer_info.range = bindings[i].ubo_info.range;
@@ -240,8 +224,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
 
     bindings_.InsertAt(
         component_id,
-        WVkPipelineBindingInfo{component_id,
-                               in_pipeline_id,
+        WVkPipelineBindingInfo{in_pipeline_id,
                                in_mesh_asset_id,
                                t(),
                                f()}
@@ -320,8 +303,7 @@ void WVkRenderPipelinesManager::Destroy() {
     Destroy_GlobalGraphics();
 
     device_info_ = {};
-    render_pass_info_ = {};
-
+ 
     width_=0;
     height_=0;
 }

@@ -13,7 +13,8 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
-struct WVkDeviceInfo{
+struct WVkDeviceInfo
+{
     WId wid{0};
 
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
@@ -24,9 +25,7 @@ struct WVkDeviceInfo{
     };
 
     VkQueue vk_graphics_queue {VK_NULL_HANDLE};
-    // VkQueue vk_postprocess_queue {VK_NULL_HANDLE};
     VkQueue vk_present_queue {VK_NULL_HANDLE};
-
     VkDevice vk_device {VK_NULL_HANDLE};
 };
 
@@ -42,7 +41,7 @@ struct WVkSurfaceInfo
 
 struct WVkRenderDebugInfo
 {
-    WId wid{0};
+    // WId wid{0};
     
     bool enable_validation_layers{false};
     std::vector<const char*> validation_layers{
@@ -55,15 +54,13 @@ struct WVkRenderDebugInfo
 
 struct WVkCommandPoolInfo
 {
-    WId wid{0};
+    // WId wid{0};
     
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
 struct WVkTextureInfo
 {
-    // WId id{0};
-    
     VkImage image{VK_NULL_HANDLE};
     VkDeviceMemory image_memory{VK_NULL_HANDLE};
     VkImageView image_view{VK_NULL_HANDLE};
@@ -77,7 +74,7 @@ struct WVkTextureInfo
  */
 struct WVkShaderStageInfo
 {
-    WId id{0};
+    // WId id{0};
 
     std::vector<char> code;
     EShaderType type;
@@ -100,9 +97,6 @@ struct WVkRenderTarget {
 
 struct WVkOffscreenRenderStruct
 {
-    // VkRenderPass render_pass{nullptr};
-    // VkFramebuffer framebuffer{nullptr};
-
     WVkRenderTarget color{};
     WVkRenderTarget depth{};
     VkExtent2D extent{};
@@ -110,9 +104,6 @@ struct WVkOffscreenRenderStruct
 
 struct WVkPostprocessRenderStruct
 {
-    // VkRenderPass render_pass{nullptr};
-    // VkFramebuffer framebuffer{nullptr};
-    
     WVkRenderTarget color{};
     VkExtent2D extent{};
 };
@@ -127,18 +118,7 @@ struct WVkSwapChainInfo
     std::vector<VkImageView> views;
     std::vector<VkDeviceMemory> memory;
     
-    // std::vector<VkFramebuffer> framebuffers{};  // TODO not required
-
     std::uint32_t image_count{};
-
-    // VkImage color_image{VK_NULL_HANDLE};
-    // VkDeviceMemory color_image_memory{VK_NULL_HANDLE};
-    // VkImageView color_image_view{VK_NULL_HANDLE};    
-
-    // VkImage depth_image{VK_NULL_HANDLE};
-    // VkDeviceMemory depth_image_memory{VK_NULL_HANDLE};
-    // VkImageView depth_image_view{VK_NULL_HANDLE};
-
 };
 
 struct WVkDescriptorSetLayoutInfo
@@ -184,7 +164,7 @@ struct WVkMeshInfo
 */
 struct WVkUBOInfo
 {
-    WId wid{0};
+    // WId wid{0};
     
     VkBuffer uniform_buffer{VK_NULL_HANDLE};
     VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
@@ -197,8 +177,6 @@ struct WVkRenderPipelineInfo
     WAssetId wid;
     EPipelineType type{EPipelineType::Graphics};
 
-    // uint32_t subpass{0}; // Index of the subpass where this pipeline will be used
-
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
@@ -210,21 +188,21 @@ struct WVkRenderPipelineInfo
  */
 struct WVkCommandBufferInfo
 {
-    WId wid;
+    // WId wid;
 
     std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
 struct WVkSemaphoreInfo
 {
-    WId wid;
+    // WId wid;
     
     std::array<VkSemaphore, WENG_MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
 };
 
 struct WVkFenceInfo
 {
-    WId wid;
+    // WId wid;
 
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
 

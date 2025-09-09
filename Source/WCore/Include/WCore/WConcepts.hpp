@@ -34,3 +34,8 @@ concept CCallable = CObjCallable<T, R, Args...>  ||
         { t(args...) } -> std::convertible_to<R>;
     };
 
+template<typename T, typename I>
+concept CIterable = requires (T t) {
+    {*t.begin()} -> std::assignable_from<I>;
+    {*t.end()} -> std::assignable_from<I>;
+};

@@ -2,11 +2,13 @@
 
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include "WCore/WConcepts.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan.h>
 #include <stdexcept>
 #include <vector>
+#include <concepts>
 
 namespace WVkRenderUtils {
 
@@ -309,6 +311,116 @@ namespace WVkRenderUtils {
             );
 
         return descriptor_set;
+    }
+
+    template<CIterable<WVkOffscreenRenderStruct> T>
+    inline void CreateOffscreenRender(const T & in_offscreen_structs,
+                                      const WVkDeviceInfo & in_device_info,
+                                      const std::uint8_t & in_width,
+                                      const std::uint8_t & in_height,
+                                      const VkFormat & in_format) {
+        for(auto& offrnd : in_offscreen_structs) {
+            
+            offrnd.extent = {in_width, in_height};
+            offrnd.color.extent = {in_width, in_height};
+            
+            WVulkan::CreateColorResource(
+                offrnd.color.image,
+                offrnd.color.memory,
+                offrnd.color.view,
+                in_format,
+                in_device_info,
+                offrnd.color.extent
+                );
+
+            offrnd.depth.extent = {in_width, in_height};
+            WVulkan::CreateDepthResource(
+                offrnd.depth.image,
+                offrnd.depth.memory,
+                offrnd.depth.view,
+                in_device_info,
+                offrnd.depth.extent
+                );
+        }
+    }
+
+    template<CIterable<WVkOffscreenRenderStruct> T>
+    void DestroyOffscreenRender(const T & in_offscreen_structs,
+                                const WVkDeviceInfo & in_device_info) {
+        
+        for(auto& offrnd : in_offscreen_structs) {
+            
+            vkDestroyImageView(in_device_info.vk_device,
+                               offrnd.color.view,
+                               nullptr);
+
+            vkDestroyImage(in_device_info.vk_device,
+                           offrnd.color.image,
+                           nullptr);
+
+            vkFreeMemory(in_device_info.vk_device,
+                         offrnd.color.memory,
+                         nullptr);
+
+            vkDestroyImageView(in_device_info.vk_device,
+                               offrnd.depth.view,
+                               nullptr);
+
+            vkDestroyImage(in_device_info.vk_device,
+                           offrnd.depth.image,
+                           nullptr);
+
+            vkFreeMemory(in_device_info.vk_device,
+                         offrnd.depth.memory,
+                         nullptr);
+
+        }
+    }
+
+    template<CIterable<WVkPostprocessRenderStruct> T>
+    void CreatePostprocessRender(const T & postprocess_structs,
+                                 const WVkDeviceInfo & in_device_info,
+                                 const std::uint8_t & in_width,
+                                 const std::uint8_t & in_height,
+                                 const VkFormat & in_format) {
+        for (auto & pstrnd : postprocess_structs) {
+            pstrnd.extent = {in_width, in_height};
+            pstrnd.color.extent = {in_width, in_height};
+
+            WVulkan::CreateColorResource(
+            pstrnd.color.image,
+            pstrnd.color.memory,
+            pstrnd.color.view,
+            in_format,
+            in_device_info,
+            pstrnd.color.extent
+            );
+            
+        }
+    }
+
+    template<CIterable<WVkPostprocessRenderStruct> T>
+    void DestroyPostprocessRender(const T & postprocess_render,
+                                  const WVkDeviceInfo & in_device_info) {
+        for (auto & pstrnd : postprocess_render) {
+            vkDestroyImageView(
+                in_device_info.vk_device,
+                pstrnd.color.view,
+                nullptr
+                );
+
+            vkDestroyImage(
+                in_device_info.vk_device,
+                pstrnd.color.image,
+                nullptr
+                );
+
+            vkFreeMemory(
+                in_device_info.vk_device,
+                pstrnd.color.memory,
+                nullptr
+                );
+        }
     }
 
 }

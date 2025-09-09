@@ -44,7 +44,6 @@ namespace WVulkan
         const WVkSurfaceInfo &surface_info, 
         const std::uint32_t & in_width,
         const std::uint32_t & in_height,
-        const WVkOffscreenRenderStruct &render_pass_info, 
         const WVkRenderDebugInfo &debug_info
         );
 
@@ -107,7 +106,6 @@ namespace WVulkan
         const WVkDeviceInfo & device
     );
 
-    // DEPRECATED
     void Create(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & device
@@ -117,7 +115,8 @@ namespace WVulkan
         WVkDescriptorSetInfo& out_descriptor_set_info,
         const WVkDeviceInfo &device,
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const WVkDescriptorPoolInfo& descriptor_pool_info // ,
+        const WVkDescriptorPoolInfo& descriptor_pool_info
+        // ,
         // const std::vector<VkWriteDescriptorSet>& write_descriptor_sets
     );
  
@@ -215,8 +214,8 @@ namespace WVulkan
     void DestroyImageView(WVkSwapChainInfo & swap_chain_info,
                           const WVkDeviceInfo & device_info);
 
-    void Destroy(WVkOffscreenRenderStruct & render_pass_info,
-                 const WVkDeviceInfo & device_info);
+    // void Destroy(WVkOffscreenRenderStruct & render_pass_info,
+    //              const WVkDeviceInfo & device_info);
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
@@ -227,7 +226,6 @@ namespace WVulkan
         const WVkDeviceInfo & device
         );
 
-    // DEPRECATED
     void Destroy(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & in_device
@@ -280,23 +278,21 @@ namespace WVulkan
         const VkExtent2D & in_extent
         );
 
-
-    void CreateOffscreenFramebuffer(
-        WVkOffscreenRenderStruct & offscreen_render_pass,
-        const WVkDeviceInfo & in_device_info
-        );
-
+    // void CreateOffscreenFramebuffer(
+    //     WVkOffscreenRenderStruct & offscreen_render_pass,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
     
-    void CreatePostprocessFramebuffer(
-        WVkPostprocessRenderStruct  & framebuffer_render_pass,
-        const WVkDeviceInfo & in_device_info
-        );
+    // void CreatePostprocessFramebuffer(
+    //     WVkPostprocessRenderStruct  & framebuffer_render_pass,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
 
-    void CreateOffcreenRenderFrameBuffers_DEPRECATED(
-        WVkSwapChainInfo & out_swap_chain_info,
-        const WVkOffscreenRenderStruct & out_render_pass_info,
-        const WVkDeviceInfo & in_device_info
-        );
+    // void CreateOffcreenRenderFrameBuffers_DEPRECATED(
+    //     WVkSwapChainInfo & out_swap_chain_info,
+    //     const WVkOffscreenRenderStruct & out_render_pass_info,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
 
     // Descriptor Set Layout
     // ---------------------
@@ -355,7 +351,6 @@ namespace WVulkan
         const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
         const WVkDeviceInfo & in_device_info
         ) {
-
         vkUpdateDescriptorSets(
             in_device_info.vk_device,
             static_cast<uint32_t>(N),
@@ -363,7 +358,6 @@ namespace WVulkan
             0,
             nullptr
             );
-
     }
 
     inline bool UpdateUBOModel(
@@ -376,8 +370,7 @@ namespace WVulkan
         
         memcpy(uniform_buffer_object_info_.mapped_data,
                &ubo,
-               sizeof(WUBOModelStruct)
-            );
+               sizeof(WUBOModelStruct));
 
         return true;
     }

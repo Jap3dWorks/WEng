@@ -117,7 +117,6 @@ void WVulkan::Create(
     const WVkSurfaceInfo & in_surface_info,
     const std::uint32_t & in_width,
     const std::uint32_t & in_height,
-    const WVkOffscreenRenderStruct & in_render_pass_info,
     const WVkRenderDebugInfo & in_debug_info
     )
 {
@@ -219,99 +218,99 @@ void WVulkan::Create(
 
 }
 
-void WVulkan::CreateOffscreenFramebuffer(
-    WVkOffscreenRenderStruct & out_offscreen_render_pass,
-    const WVkDeviceInfo & in_device_info
-    ) {
-    std::array<VkImageView, 2> attachments = {
-        out_offscreen_render_pass.color.view,
-        out_offscreen_render_pass.depth.view
-    };
+// void WVulkan::CreateOffscreenFramebuffer(
+//     WVkOffscreenRenderStruct & out_offscreen_render_pass,
+//     const WVkDeviceInfo & in_device_info
+//     ) {
+//     std::array<VkImageView, 2> attachments = {
+//         out_offscreen_render_pass.color.view,
+//         out_offscreen_render_pass.depth.view
+//     };
 
-    VkFramebufferCreateInfo framebufferinfo{};
+//     VkFramebufferCreateInfo framebufferinfo{};
 
-    framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferinfo.renderPass = out_offscreen_render_pass.render_pass;
-    framebufferinfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    framebufferinfo.pAttachments = attachments.data();
-    framebufferinfo.width = out_offscreen_render_pass.extent.width;
-    framebufferinfo.height = out_offscreen_render_pass.extent.height;
-    framebufferinfo.layers = 1;
+//     framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+//     framebufferinfo.renderPass = out_offscreen_render_pass.render_pass;
+//     framebufferinfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+//     framebufferinfo.pAttachments = attachments.data();
+//     framebufferinfo.width = out_offscreen_render_pass.extent.width;
+//     framebufferinfo.height = out_offscreen_render_pass.extent.height;
+//     framebufferinfo.layers = 1;
 
-    if (vkCreateFramebuffer(
-        in_device_info.vk_device, 
-        &framebufferinfo, 
-        nullptr, 
-        &out_offscreen_render_pass.framebuffer) != VK_SUCCESS
-    )
-    {
-        throw std::runtime_error("Failed to create offscreen framebuffer!");
-    }
-}
+//     if (vkCreateFramebuffer(
+//         in_device_info.vk_device, 
+//         &framebufferinfo, 
+//         nullptr, 
+//         &out_offscreen_render_pass.framebuffer) != VK_SUCCESS
+//     )
+//     {
+//         throw std::runtime_error("Failed to create offscreen framebuffer!");
+//     }
+// }
 
-void WVulkan::CreatePostprocessFramebuffer(
-    WVkPostprocessRenderStruct & out_postprocess_render,
-    const WVkDeviceInfo & in_device_info
-    ) {
+// void WVulkan::CreatePostprocessFramebuffer(
+//     WVkPostprocessRenderStruct & out_postprocess_render,
+//     const WVkDeviceInfo & in_device_info
+//     ) {
 
-    VkFramebufferCreateInfo framebufferinfo{};
+//     VkFramebufferCreateInfo framebufferinfo{};
 
-    framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+//     framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 
-    framebufferinfo.renderPass = out_postprocess_render.render_pass;
-    framebufferinfo.attachmentCount = 1;
-    framebufferinfo.pAttachments = &out_postprocess_render.color.view;
-    framebufferinfo.width = out_postprocess_render.extent.width;
-    framebufferinfo.height = out_postprocess_render.extent.height;
-    framebufferinfo.layers = 1;
+//     framebufferinfo.renderPass = out_postprocess_render.render_pass;
+//     framebufferinfo.attachmentCount = 1;
+//     framebufferinfo.pAttachments = &out_postprocess_render.color.view;
+//     framebufferinfo.width = out_postprocess_render.extent.width;
+//     framebufferinfo.height = out_postprocess_render.extent.height;
+//     framebufferinfo.layers = 1;
 
-    if (vkCreateFramebuffer(
-            in_device_info.vk_device,
-            &framebufferinfo,
-            nullptr,
-            &out_postprocess_render.framebuffer
-            ) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create postprocess framebuffer!");
-    }
-}
+//     if (vkCreateFramebuffer(
+//             in_device_info.vk_device,
+//             &framebufferinfo,
+//             nullptr,
+//             &out_postprocess_render.framebuffer
+//             ) != VK_SUCCESS) {
+//         throw std::runtime_error("Failed to create postprocess framebuffer!");
+//     }
+// }
 
-void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out_swap_chain_info,
-                                               const WVkOffscreenRenderStruct & out_render_pass_info,
-                                               const WVkDeviceInfo & in_device_info)
-{
-    out_swap_chain_info.framebuffers.resize(
-        out_swap_chain_info.views.size()
-        );
+// void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out_swap_chain_info,
+//                                                const WVkOffscreenRenderStruct & out_render_pass_info,
+//                                                const WVkDeviceInfo & in_device_info)
+// {
+//     out_swap_chain_info.framebuffers.resize(
+//         out_swap_chain_info.views.size()
+//         );
 
-    for (size_t i=0; i < out_swap_chain_info.views.size(); i++)
-    {
-        std::array<VkImageView, 3> Attachments = {
-            out_render_pass_info.color.view,
-            out_render_pass_info.depth.view,
-            out_swap_chain_info.views[i]
-        };
+//     for (size_t i=0; i < out_swap_chain_info.views.size(); i++)
+//     {
+//         std::array<VkImageView, 3> Attachments = {
+//             out_render_pass_info.color.view,
+//             out_render_pass_info.depth.view,
+//             out_swap_chain_info.views[i]
+//         };
 
-        VkFramebufferCreateInfo FramebufferInfo{};
-        FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        FramebufferInfo.renderPass = out_render_pass_info.render_pass;
-        FramebufferInfo.attachmentCount = static_cast<uint32_t>(Attachments.size());
-        FramebufferInfo.pAttachments = Attachments.data();
-        FramebufferInfo.width = out_swap_chain_info.extent.width;
-        FramebufferInfo.height = out_swap_chain_info.extent.height;
-        FramebufferInfo.layers = 1;
+//         VkFramebufferCreateInfo FramebufferInfo{};
+//         FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+//         FramebufferInfo.renderPass = out_render_pass_info.render_pass;
+//         FramebufferInfo.attachmentCount = static_cast<uint32_t>(Attachments.size());
+//         FramebufferInfo.pAttachments = Attachments.data();
+//         FramebufferInfo.width = out_swap_chain_info.extent.width;
+//         FramebufferInfo.height = out_swap_chain_info.extent.height;
+//         FramebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(
-            in_device_info.vk_device, 
-            &FramebufferInfo, 
-            nullptr, 
-            &out_swap_chain_info.framebuffers[i]) != VK_SUCCESS
-        )
-        {
-            throw std::runtime_error("Failed to create framebuffer!");
-        }
-    }
+//         if (vkCreateFramebuffer(
+//             in_device_info.vk_device, 
+//             &FramebufferInfo, 
+//             nullptr, 
+//             &out_swap_chain_info.framebuffers[i]) != VK_SUCCESS
+//         )
+//         {
+//             throw std::runtime_error("Failed to create framebuffer!");
+//         }
+//     }
 
-}
+// }
 
 void WVulkan::CreateColorResource(VkImage & out_image,
                                   VkDeviceMemory & out_memory,
@@ -1271,22 +1270,16 @@ void WVulkan::Destroy(WVkDeviceInfo &device_info)
 
 void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-    vkDestroyImageView(device_info.vk_device, swap_chain_info.color_image_view, nullptr);
-    vkDestroyImage(device_info.vk_device, swap_chain_info.color_image, nullptr);
-    vkFreeMemory(device_info.vk_device, swap_chain_info.color_image_memory, nullptr);
-
-    vkDestroyImageView(device_info.vk_device, swap_chain_info.depth_image_view, nullptr);
-    vkDestroyImage(device_info.vk_device, swap_chain_info.depth_image, nullptr);
-    vkFreeMemory(device_info.vk_device, swap_chain_info.depth_image_memory, nullptr);
-
-    for (auto framebuffer : swap_chain_info.framebuffers)
-    {
-        vkDestroyFramebuffer(device_info.vk_device, framebuffer, nullptr);
+    for(auto & img : swap_chain_info.images) {
+        vkDestroyImage(device_info.vk_device, img, nullptr);
     }
 
-    for (auto image_view : swap_chain_info.views)
-    {
-        vkDestroyImageView(device_info.vk_device, image_view, nullptr);
+    for (auto & view: swap_chain_info.views) {
+        vkDestroyImageView(device_info.vk_device, view, nullptr);
+    }
+
+    for (auto & mem : swap_chain_info.memory) {
+        vkFreeMemory(device_info.vk_device, mem, nullptr);
     }
 
     vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
@@ -1302,11 +1295,11 @@ void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDevic
     }
 }
 
-void WVulkan::Destroy(WVkOffscreenRenderStruct & render_pass_info, const WVkDeviceInfo &device_info)
-{
-    vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
-    render_pass_info = {};
-}
+// void WVulkan::Destroy(WVkOffscreenRenderStruct & render_pass_info, const WVkDeviceInfo &device_info)
+// {
+//     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
+//     render_pass_info = {};
+// }
 
 void WVulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
@@ -1350,7 +1343,6 @@ void WVulkan::Destroy(
         );
 }
 
-// DEPRECATED
 void WVulkan::Destroy(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const WVkDeviceInfo & in_device

@@ -35,7 +35,7 @@ public:
         descriptor_pool_(std::move(other.descriptor_pool_)),
         input_render_sampler_(std::move(other.input_render_sampler_))
         {
-            other.vk_device_ = VK_NULL_HANDLE;
+            other.vk_device_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descriptor_layout_ = VK_NULL_HANDLE;
@@ -59,7 +59,7 @@ public:
 
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
-            other.vk_device_ = VK_NULL_HANDLE;
+            other.vk_device_ = {};
             other.descriptor_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
@@ -73,9 +73,9 @@ public:
         return *this;
     }
 
-    void Initialize(const VkDevice & in_device, const VkCommandBuffer & in_command_buffer) {
+    void Initialize(const WVkDeviceInfo & in_device, const WVkCommandPoolInfo & in_command_pool) {
 
-        assert(vk_device_ == VK_NULL_HANDLE);
+        assert(vk_device_.vk_device == VK_NULL_HANDLE);
 
         vk_device_ = in_device;
 
@@ -87,13 +87,13 @@ public:
 
         InitializeInputRenderSampler();
 
-        InitializeRenderPlane(in_command_buffer);
+        InitializeRenderPlane(in_command_pool);
 
     }
 
     void Destroy() {
         
-        if (!vk_device_) {
+        if (!vk_device_.vk_device) {
             return;
         }
 
@@ -112,7 +112,7 @@ public:
         }
 
         if (pipeline_) {
-            vkDestroyPipeline(vk_device_,
+            vkDestroyPipeline(vk_device_.vk_device,
                               pipeline_,
                               nullptr);
         }
@@ -120,7 +120,7 @@ public:
         pipeline_=VK_NULL_HANDLE;
 
         if (pipeline_layout_) {
-            vkDestroyPipelineLayout(vk_device_,
+            vkDestroyPipelineLayout(vk_device_.vk_device,
                                     pipeline_layout_,
                                     nullptr);
         }
@@ -128,7 +128,7 @@ public:
         pipeline_layout_ = VK_NULL_HANDLE;
         
         if (descriptor_layout_) {
-            vkDestroyDescriptorSetLayout(vk_device_,
+            vkDestroyDescriptorSetLayout(vk_device_.vk_device,
                                          descriptor_layout_,
                                          nullptr);
         }
@@ -136,12 +136,14 @@ public:
         descriptor_layout_ = VK_NULL_HANDLE;
 
         if (input_render_sampler_) {
-            vkDestroySampler(vk_device_, input_render_sampler_, nullptr);
+            vkDestroySampler(vk_device_.vk_device,
+                             input_render_sampler_,
+                             nullptr);
         }
 
         input_render_sampler_=VK_NULL_HANDLE;
 
-        vk_device_ = VK_NULL_HANDLE;
+        vk_device_ = {};
         
     }
 
@@ -183,7 +185,7 @@ private:
         layout_info.bindingCount = 1;
         layout_info.pBindings=&sampler_binding;
 
-        if (vkCreateDescriptorSetLayout(vk_device_,
+        if (vkCreateDescriptorSetLayout(vk_device_.vk_device,
                                         &layout_info,
                                         nullptr,
                                         &descriptor_layout_)) {
@@ -197,7 +199,7 @@ private:
         std::vector<char> shadercode = WShaderUtils::ReadShader(shader_path);
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
-            vk_device_,
+            vk_device_.vk_device,
             shadercode.data(),
             shadercode.size()
             );
@@ -320,7 +322,7 @@ private:
         pipeline_layout_info.pSetLayouts = &descriptor_layout_; // slayouts.data();
 
         if (vkCreatePipelineLayout(
-                vk_device_,
+                vk_device_.vk_device,
                 &pipeline_layout_info,
                 nullptr,
                 &pipeline_layout_) != VK_SUCCESS)
@@ -361,7 +363,7 @@ private:
         pipeline_info.pNext = &rendering_info;
 
         if (vkCreateGraphicsPipelines(
-        vk_device_,
+        vk_device_.vk_device,
         VK_NULL_HANDLE,
         1,
         &pipeline_info,
@@ -371,7 +373,9 @@ private:
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
 
-        vkDestroyShaderModule(vk_device_, shader_module, nullptr);
+        vkDestroyShaderModule(vk_device_.vk_device,
+                              shader_module,
+                              nullptr);
     }
 
     void InitializeDescriptorPool() {
@@ -392,7 +396,7 @@ private:
         for (std::uint32_t i=0; i<FramesInFlight; i++) {
 
             if (vkCreateDescriptorPool(
-                    vk_device_,
+                    vk_device_.vk_device,
                     &pool_info,
                     nullptr,
                     &descriptor_pool_[i]
@@ -418,7 +422,7 @@ private:
         sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
         sampler_info.unnormalizedCoordinates = VK_FALSE;
 
-        if(vkCreateSampler(vk_device_,
+        if(vkCreateSampler(vk_device_.vk_device,
                            &sampler_info,
                            nullptr,
                            &input_render_sampler_) != VK_SUCCESS) {
@@ -441,7 +445,8 @@ private:
         };
     }
 
-    void InitializeRenderPlane(const VkCommandBuffer & in_command_buffer) {
+    void InitializeRenderPlane(const WVkCommandPoolInfo & in_command_pool) {
+
         WVulkan::CreateMeshBuffers(
             render_plane_,
             RenderPlaneVertex().data(),
@@ -450,8 +455,9 @@ private:
             sizeof(std::uint32_t) * 6,
             6,
             vk_device_,
-            in_command_buffer
+            in_command_pool
             );
+
     }
 
     VkPipeline pipeline_{VK_NULL_HANDLE};
@@ -467,6 +473,6 @@ private:
 
     const char * shader_path{"/Shaders/WRender_DrawInSwapChain.graphic.spv"};
 
-    VkDevice vk_device_;
+    WVkDeviceInfo vk_device_;
 
 };

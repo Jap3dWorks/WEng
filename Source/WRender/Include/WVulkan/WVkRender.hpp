@@ -142,9 +142,8 @@ private:
 
     WVkRenderResources render_resources_;
 
-    WVkOffscreenRenderStruct offscreen_render_;
-
-    WVkPostprocessRenderStruct postprocess_render_;
+    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_;
+    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_;
 
     WVkSwapChainInfo swap_chain_info_;
     WVkSwapChainResources<WENG_MAX_FRAMES_IN_FLIGHT> swap_chain_resources_;
