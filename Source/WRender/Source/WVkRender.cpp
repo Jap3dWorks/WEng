@@ -42,6 +42,7 @@ WVkRender::WVkRender() :
     debug_info_(),
     render_resources_(),
     swap_chain_info_(),
+    swap_chain_resources_(),
     offscreen_render_(),
     postprocess_render_(),
     render_command_pool_(),
@@ -116,16 +117,13 @@ void WVkRender::Initialize()
         offscreen_render_,
         debug_info_
         );
-    
+
+    swap_chain_resources_.Initialize(device_info_.vk_device);
+
     // Offscreen Render Pass
     // TODO: check frames in flight
 
     offscreen_render_.extent = {window_.width, window_.height};
-    // WVulkan::CreateOffscreenRenderPass(
-    //     offscreen_render_,
-    //     swap_chain_info_.swap_chain_image_format,
-    //     device_info_
-    //     );
 
     offscreen_render_.color.extent = {window_.width, window_.height};
     WVulkan::CreateColorResource(
@@ -278,7 +276,8 @@ void WVkRender::Draw()
 
     RecordPostprocessRenderCommandBuffer(
         render_command_buffer_.command_buffers[frame_index_],
-        frame_index_
+        frame_index_,
+        image_index
         );
 
     // End Command buffer
@@ -314,7 +313,6 @@ void WVkRender::Draw()
     {
         throw std::runtime_error("Failed to submit draw command buffer");
     }
-    // }
 
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -482,6 +480,9 @@ void WVkRender::Destroy() {
 
     // Destroy Vulkan Instance
     WVulkan::Destroy(instance_info_);
+
+    swap_chain_resources_.Destroy();
+
 }
 
 void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {
@@ -609,7 +610,8 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
             VkDeviceSize offsets[] = {0};
 
             vkCmdBindVertexBuffers(
-                render_command_buffer_.command_buffers[in_frame_index],
+                // render_command_buffer_.command_buffers[in_frame_index],
+                in_command_buffer,
                 0,
                 1,
                 vertex_buffers,
@@ -617,7 +619,8 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
                 );
 
             vkCmdBindIndexBuffer(
-                render_command_buffer_.command_buffers[in_frame_index],
+                // render_command_buffer_.command_buffers[in_frame_index],
+                in_command_buffer,
                 mesh_info.index_buffer,
                 0,
                 VK_INDEX_TYPE_UINT32
@@ -664,29 +667,35 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
 
 void WVkRender::RecordPostprocessRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index
+    const std::uint32_t & in_frame_index,
+    const std::uint32_t & in_image_index
     )
 {
     // Transition to postprocess
 
-    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
-        in_command_buffer,
-        postprocess_render_.color.image,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        {},
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        );
+    // WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+    //     in_command_buffer,
+    //     postprocess_render_.color.image,
+    //     VK_IMAGE_LAYOUT_UNDEFINED,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    //     {},
+    //     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+    //     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+    //     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+    //     );
+
+    VkImageView input_image = offscreen_render_.color.view;
 
     for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Postprocess)) {
-        // TODO Descriptor and prev texture binding
+        // TODO postprocess rendering
     }
 
+    VkImage swapchain_image = swap_chain_info_.images[in_image_index];
+
+    // swap chain image layout to render into
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
-        swap_chain_info_.images[in_frame_index],
+        swapchain_image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         {},
@@ -695,34 +704,84 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         );
 
-    
-
-    WVkRenderUtils::RndCmd_BeginPostprocessRendering(
+    WVkRenderUtils::RndCmd_BeginSwapchainRendering(
         in_command_buffer,
         swap_chain_info_.views[in_frame_index],
         swap_chain_info_.extent
         );
-    
-    // pipelines_manager_.ResetDescriptorPool(pipeline_id, frame_index_);
 
-    // const WVkRenderPipelineInfo & render_pipeline =
-    //     pipelines_manager_.RenderPipelineInfo(pipeline_id);
+    VkDescriptorPool dspool = swap_chain_resources_.DescriptorPool(in_frame_index);
+    vkResetDescriptorPool(device_info_.vk_device, dspool, 0);
 
-    // vkCmdBindPipeline(
-    //     render_command_buffer_.command_buffers[in_frame_index],
-    //     VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //     render_pipeline.pipeline
-    //     );
+    VkPipeline pipeline = swap_chain_resources_.Pipeline();
+    VkDescriptorSetLayout dslay = swap_chain_resources_.DescriptorSetLayout();
+
+    vkCmdBindPipeline(
+        in_command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline
+        );
 
     WVkRenderUtils::RndCmd_SetViewportAndScissor(
         in_command_buffer,
         offscreen_render_.extent
         );
-    
+
+    WVkRenderUtils::RndCmd_SetViewportAndScissor(
+        in_command_buffer,
+        swap_chain_info_.extent
+        );
+
+    VkDescriptorSet descriptor = WVkRenderUtils::CreateSwapChainDescriptor(
+        device_info_.vk_device,
+        dspool,
+        dslay,
+        input_image,
+        swap_chain_resources_.InputRenderSampler()
+        );
+
+    auto & render_plane = swap_chain_resources_.RenderPlane();
+    VkDeviceSize offsets=0;
+
+    vkCmdBindVertexBuffers(
+        in_command_buffer,
+        0,
+        1,
+        &render_plane.index_buffer,
+        &offsets
+        );
+
+    vkCmdBindIndexBuffer(
+        in_command_buffer,
+        render_plane.index_buffer,
+        0,
+        VK_INDEX_TYPE_UINT32);
+
+    vkCmdBindDescriptorSets(in_command_buffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            swap_chain_resources_.PipelineLayout(),
+                            0,
+                            1,
+                            &descriptor,
+                            0,
+                            nullptr);
+
+    vkCmdDrawIndexed(in_command_buffer,
+                     render_plane.index_count,
+                     1,
+                     0,0,0);
 
     vkCmdEndRendering(in_command_buffer);
 
-    // TODO at the end the default postprocess (writepixels to swap chain image)
-
-    
+    // Prepare swapchain images for present
+    WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        swapchain_image,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        {},
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+        );
 }

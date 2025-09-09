@@ -91,9 +91,13 @@ namespace WVulkan
     /**
      * @brief Create a vulkan  mesh
      */
-    void Create(
+    void CreateMeshBuffers(
         WVkMeshInfo & out_mesh_info,
-        const WMeshStruct & mesh_struct,
+        const void * vertex_buffer,
+        const std::uint32_t & vertes_buffer_size,
+        const void * index_buffer,
+        const std::uint32_t & index_buffer_size,
+        const std::uint32_t & index_count,
         const WVkDeviceInfo & device,
         const WVkCommandPoolInfo & command_pool_info
     );
@@ -471,15 +475,6 @@ namespace WVulkan
         const VkQueue & in_graphics_queue
         );
 
-    void CopyVkBuffer(
-        const VkDevice & device, 
-        const VkCommandPool & command_pool, 
-        const VkQueue & graphics_queue, 
-        const VkBuffer & src_buffer, 
-        const VkBuffer & dst_buffer, 
-        const VkDeviceSize & size
-    );
-    
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */

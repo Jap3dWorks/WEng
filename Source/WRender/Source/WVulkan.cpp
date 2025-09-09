@@ -982,9 +982,13 @@ void WVulkan::Create(
     vkBindImageMemory(device, out_image, out_image_memory, 0);
 }
 
-void WVulkan::Create(
+void WVulkan::CreateMeshBuffers(
     WVkMeshInfo & out_mesh_info,
-    const WMeshStruct & mesh_struct,
+    const void * vertex_buffer,
+    const std::uint32_t & vertex_buffer_size,
+    const void * index_buffer,
+    const std::uint32_t & index_buffer_size,
+    const std::uint32_t & index_count,
     const WVkDeviceInfo & device,
     const WVkCommandPoolInfo & command_pool_info
     )
@@ -994,8 +998,7 @@ void WVulkan::Create(
 
     // vertex buffer
 
-    VkDeviceSize buffer_size =
-        sizeof(decltype(mesh_struct.vertices)::value_type) * mesh_struct.vertices.size();
+    VkDeviceSize buffer_size = vertex_buffer_size;
 
     CreateVkBuffer(
         staging_buffer,
@@ -1007,9 +1010,9 @@ void WVulkan::Create(
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
-    void *data;
+    void * data;
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-    memcpy(data, mesh_struct.vertices.data(), static_cast<size_t>(buffer_size));
+    memcpy(data, vertex_buffer, static_cast<size_t>(buffer_size));
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
@@ -1022,7 +1025,7 @@ void WVulkan::Create(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    CopyVkBuffer(
+    WVulkanUtils::CopyVkBuffer(
         device.vk_device,
         command_pool_info.vk_command_pool,
         device.vk_graphics_queue,
@@ -1035,8 +1038,6 @@ void WVulkan::Create(
 
     // index buffer
 
-    buffer_size = sizeof(decltype(mesh_struct.indices)::value_type) * mesh_struct.indices.size();
-
     CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
@@ -1048,7 +1049,7 @@ void WVulkan::Create(
         );
 
     vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-    memcpy(data, mesh_struct.indices.data(), static_cast<size_t>(buffer_size));
+    memcpy(data, index_buffer, static_cast<size_t>(buffer_size));
     vkUnmapMemory(device.vk_device, staging_buffer_memory);
 
     CreateVkBuffer(
@@ -1061,7 +1062,7 @@ void WVulkan::Create(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    CopyVkBuffer(
+    WVulkanUtils::CopyVkBuffer(
         device.vk_device,
         command_pool_info.vk_command_pool,
         device.vk_graphics_queue,
@@ -1072,7 +1073,7 @@ void WVulkan::Create(
     vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
     vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
 
-    out_mesh_info.index_count = mesh_struct.indices.size();
+    out_mesh_info.index_count = index_count;
 }
 
 void WVulkan::Create(
@@ -1111,19 +1112,14 @@ void WVulkan::Create(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const WVkDeviceInfo & device)
 {
-    // if (out_descriptor_pool_info.pool_sizes.empty())
-    // {
-    //     throw std::runtime_error("Descriptor pool sizes are empty!");
-    // }
-
     std::array<VkDescriptorPoolSize,2> pool_sizes;
-    // out_descriptor_pool_info.pool_sizes.resize(2);
+
     pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount =
-        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
+        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
     pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[1].descriptorCount =
-        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;
+        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1131,7 +1127,7 @@ void WVulkan::Create(
         pool_sizes.size()
         );
     pool_info.pPoolSizes = pool_sizes.data();
-    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35);
+    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); //70 as max sets
 
     if (vkCreateDescriptorPool(
             device.vk_device,
@@ -2063,48 +2059,6 @@ void WVulkan::CopyBufferToImage(
         in_graphics_queue,
         command_buffer
         );
-}
-
-void WVulkan::CopyVkBuffer(
-    const VkDevice & device,
-    const VkCommandPool & command_pool,
-    const VkQueue & graphics_queue,
-    const VkBuffer & src_buffer,
-    const VkBuffer & dst_buffer,
-    const VkDeviceSize & size
-    )
-{
-    VkCommandBufferAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandPool = command_pool;
-    alloc_info.commandBufferCount = 1;
-    alloc_info.pNext = nullptr;
-
-    VkCommandBuffer command_buffer;
-    vkAllocateCommandBuffers(device, &alloc_info, &command_buffer);
-
-    VkCommandBufferBeginInfo begin_info{};
-    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(command_buffer, &begin_info);
-
-    VkBufferCopy copy_region{};
-    copy_region.size = size;
-    vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
-
-    vkEndCommandBuffer(command_buffer);
-
-    VkSubmitInfo submit_info{};
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &command_buffer;
-
-    vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphics_queue);
-
-    vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
 WVkShaderStageInfo WVulkan::CreateShaderStageInfo(

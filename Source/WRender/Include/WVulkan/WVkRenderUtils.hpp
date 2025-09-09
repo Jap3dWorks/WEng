@@ -81,7 +81,7 @@ namespace WVkRenderUtils {
             );
     }
 
-    inline void RndCmd_BeginOffscreenRendering(
+    inline void RndCmd_BeginSwapchainRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,
         const VkExtent2D & in_extent
@@ -214,7 +214,6 @@ namespace WVkRenderUtils {
         const VkDescriptorSetLayout & in_desc_lay,
         const WVkDescriptorSetUBOBinding & ubo_binding,
         const std::vector<WVkDescriptorSetTextureBinding> & in_textures_binding
-
         ) {
         
         VkDescriptorSet descriptor_set;
@@ -261,5 +260,56 @@ namespace WVkRenderUtils {
 
         return descriptor_set;
     }
+
+    inline VkDescriptorSet CreateSwapChainDescriptor(
+        const VkDevice & in_device,
+        const VkDescriptorPool & in_desc_pool,
+        const VkDescriptorSetLayout & in_desc_lay,
+        const VkImageView & in_render_image_view,
+        const VkSampler & in_render_sampler
+        ) {
+        VkDescriptorSet descriptor_set;
+
+        VkDescriptorSetAllocateInfo alloc_info{};
+        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        alloc_info.descriptorPool = in_desc_pool;
+        alloc_info.descriptorSetCount = 1;
+        alloc_info.pSetLayouts = &in_desc_lay;
+
+        if (vkAllocateDescriptorSets(
+                in_device,
+                &alloc_info,
+                &descriptor_set
+                ) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to allocate descriptor sets!");
+        }
+
+        std::array<VkWriteDescriptorSet, 1> write_ds;
+
+        VkDescriptorImageInfo image_info;
+        image_info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        image_info.imageView = in_render_image_view;
+        image_info.sampler = in_render_sampler;
+
+        write_ds[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write_ds[0].dstBinding = 0; // only 1 binding in this descriptor
+        write_ds[0].dstSet = descriptor_set;
+        write_ds[0].dstArrayElement=0;
+        write_ds[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write_ds[0].descriptorCount=1;
+        write_ds[0].pImageInfo = &image_info;
+        write_ds[0].pNext = VK_NULL_HANDLE;
+
+        vkUpdateDescriptorSets(
+            in_device,
+            static_cast<std::uint32_t>(write_ds.size()),
+            write_ds.data(),
+            0,
+            nullptr
+            );
+
+        return descriptor_set;
+    }
+
 }
 

@@ -10,6 +10,7 @@
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
+#include "WVkSwapChainResources.hpp"
 
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
@@ -123,11 +124,12 @@ private:
 
     void RecordPostprocessRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index
+        const std::uint32_t & in_frame_index,
+        const std::uint32_t & in_image_index
         );
 
     WVkInstanceInfo instance_info_;
-    
+
     struct WVkRenderWindow {
         GLFWwindow * window{nullptr};
         std::uint32_t width{800};  // TODO size struct
@@ -145,10 +147,11 @@ private:
     WVkPostprocessRenderStruct postprocess_render_;
 
     WVkSwapChainInfo swap_chain_info_;
+    WVkSwapChainResources<WENG_MAX_FRAMES_IN_FLIGHT> swap_chain_resources_;
 
     WVkRenderCommandPool render_command_pool_;
     WVkCommandBufferInfo render_command_buffer_;
-    
+
     WVkRenderPipelinesManager pipelines_manager_;
 
     WVkSemaphoreInfo image_available_semaphore_;

@@ -12,6 +12,8 @@
 int main(int argc, char* argv[])
 {
 
+    std::print("float size {}\n", sizeof(float));
+
     return 0;
 }
 

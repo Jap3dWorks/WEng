@@ -63,9 +63,13 @@ public:
             in_id,
             [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
-                WVulkan::Create(
+                WVulkan::CreateMeshBuffers(
                     result,
-                    in_mesh,
+                    in_mesh.vertices.data(),
+                    sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),
+                    in_mesh.indices.data(),
+                    sizeof(decltype(in_mesh.indices)::value_type) * in_mesh.indices.size(),
+                    in_mesh.indices.size(),
                     device_info_,
                     command_pool_info_
                     );

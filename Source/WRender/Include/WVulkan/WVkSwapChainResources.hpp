@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WCore/WStringUtils.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
+#include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WShaderUtils.hpp"
@@ -13,26 +15,162 @@
 
 #include <stdexcept>
 
-template<std::uint32_t ImagesInFlight>
+template<std::uint32_t FramesInFlight>
 class WVkSwapChainResources {
+    
+public:
+    
+    WVkSwapChainResources() noexcept = default;
+    virtual ~WVkSwapChainResources() {
+        Destroy();
+    }
 
-    WVkSwapChainResources();
+    WVkSwapChainResources(const WVkSwapChainResources & other) = delete;
 
-    void Initialize() {
+    WVkSwapChainResources(WVkSwapChainResources && other) noexcept :
+        vk_device_(std::move(other.vk_device_)),
+        pipeline_layout_(std::move(other.pipeline_layout_)),
+        pipeline_(std::move(other.pipeline_)),
+        descriptor_layout_(std::move(other.descriptor_layout_)),
+        descriptor_pool_(std::move(other.descriptor_pool_)),
+        input_render_sampler_(std::move(other.input_render_sampler_))
+        {
+            other.vk_device_ = VK_NULL_HANDLE;
+            
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+            other.descriptor_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
+            other.input_render_sampler_ = VK_NULL_HANDLE;
+
+            for(std::uint32_t i=0; i<FramesInFlight; i++) {
+                other.descriptor_pool_[i] = VK_NULL_HANDLE;
+            }
+        }
+
+    WVkSwapChainResources & operator=(const WVkSwapChainResources & other) = delete;
+
+    WVkSwapChainResources & operator=(WVkSwapChainResources && other) noexcept {
+        if (this != &other) {
+            vk_device_ = std::move(other.vk_device_);
+            descriptor_layout_ = std::move(other.descriptor_layout_);
+            pipeline_layout_ = std::move(other.pipeline_layout_);
+            pipeline_ = std::move(other.pipeline_);
+            input_render_sampler_ = std::move(other.input_render_sampler_);
+
+            descriptor_pool_ = std::move(other.descriptor_pool_);
+
+            other.vk_device_ = VK_NULL_HANDLE;
+            other.descriptor_layout_ = VK_NULL_HANDLE;
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
+            other.input_render_sampler_ = VK_NULL_HANDLE;
+
+            for(std::uint32_t i=0; i<FramesInFlight; i++) {
+                other.descriptor_pool_[i] = VK_NULL_HANDLE;
+            }
+        }
+
+        return *this;
+    }
+
+    void Initialize(const VkDevice & in_device, const VkCommandBuffer & in_command_buffer) {
+
+        assert(vk_device_ == VK_NULL_HANDLE);
+
+        vk_device_ = in_device;
 
         InitializeDescriptorLayout();
 
         InitializePipeline();
-        
+
+        InitializeDescriptorPool();
+
+        InitializeInputRenderSampler();
+
+        InitializeRenderPlane(in_command_buffer);
+
     }
 
     void Destroy() {
         
+        if (!vk_device_) {
+            return;
+        }
+
+        for (std::uint32_t i=0; i<FramesInFlight; i++) {
+            
+            if (descriptor_pool_[i]) {
+                vkDestroyDescriptorPool(
+                    vk_device_,
+                    descriptor_pool_[i],
+                    nullptr
+                    );
+            }
+            
+            descriptor_pool_[i] = VK_NULL_HANDLE;
+            
+        }
+
+        if (pipeline_) {
+            vkDestroyPipeline(vk_device_,
+                              pipeline_,
+                              nullptr);
+        }
+
+        pipeline_=VK_NULL_HANDLE;
+
+        if (pipeline_layout_) {
+            vkDestroyPipelineLayout(vk_device_,
+                                    pipeline_layout_,
+                                    nullptr);
+        }
+
+        pipeline_layout_ = VK_NULL_HANDLE;
+        
+        if (descriptor_layout_) {
+            vkDestroyDescriptorSetLayout(vk_device_,
+                                         descriptor_layout_,
+                                         nullptr);
+        }
+
+        descriptor_layout_ = VK_NULL_HANDLE;
+
+        if (input_render_sampler_) {
+            vkDestroySampler(vk_device_, input_render_sampler_, nullptr);
+        }
+
+        input_render_sampler_=VK_NULL_HANDLE;
+
+        vk_device_ = VK_NULL_HANDLE;
+        
+    }
+
+    const VkPipeline & Pipeline() const noexcept { return pipeline_; }
+
+    const VkPipelineLayout & PipelineLayout() const noexcept {
+        return pipeline_layout_;
+    }
+
+    const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
+        return descriptor_pool_[in_frame_index];
+    }
+
+    const VkDescriptorSetLayout & DescriptorSetLayout() const noexcept {
+        return descriptor_layout_;
+    }
+
+    const VkSampler & InputRenderSampler() const noexcept {
+        return input_render_sampler_;
+    }
+
+    const WVkMeshInfo & RenderPlane() const noexcept {
+        return render_plane_;
     }
 
 private:
 
     void InitializeDescriptorLayout() {
+        
         VkDescriptorSetLayoutBinding sampler_binding;
         sampler_binding.binding = 0;
         sampler_binding.descriptorCount = 1;
@@ -45,12 +183,10 @@ private:
         layout_info.bindingCount = 1;
         layout_info.pBindings=&sampler_binding;
 
-        if (vkCreateDescriptorSetLayout(
-                vk_device_,
-                &layout_info,
-                nullptr,
-                &descriptor_layout_
-                )) {
+        if (vkCreateDescriptorSetLayout(vk_device_,
+                                        &layout_info,
+                                        nullptr,
+                                        &descriptor_layout_)) {
             throw std::runtime_error("Failed to create Descriptor Set Layout!");
         }
 
@@ -224,18 +360,98 @@ private:
 
         pipeline_info.pNext = &rendering_info;
 
-            if (vkCreateGraphicsPipelines(
-            vk_device_,
-            VK_NULL_HANDLE,
-            1,
-            &pipeline_info,
-            nullptr,
-            &pipeline_) != VK_SUCCESS)
-            {
-                throw std::runtime_error("Failed to create graphics pipeline!");
-            }
+        if (vkCreateGraphicsPipelines(
+        vk_device_,
+        VK_NULL_HANDLE,
+        1,
+        &pipeline_info,
+        nullptr,
+        &pipeline_) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create graphics pipeline!");
+        }
 
-            vkDestroyShaderModule(vk_device_, shader_module, nullptr);
+        vkDestroyShaderModule(vk_device_, shader_module, nullptr);
+    }
+
+    void InitializeDescriptorPool() {
+        std::array<VkDescriptorPoolSize, 2> pool_sizes;
+        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        pool_sizes[0].descriptorCount = 1;
+        pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[1].descriptorCount = 1;
+
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.poolSizeCount = static_cast<std::uint32_t>(
+            pool_sizes.size()
+            );
+        pool_info.pPoolSizes = pool_sizes.data();
+        pool_info.maxSets = 2;
+
+        for (std::uint32_t i=0; i<FramesInFlight; i++) {
+
+            if (vkCreateDescriptorPool(
+                    vk_device_,
+                    &pool_info,
+                    nullptr,
+                    &descriptor_pool_[i]
+                    )) {
+                throw std::runtime_error("Failed to create descriptor pool!");
+            }
+        }
+    }
+
+    void InitializeInputRenderSampler() {
+        VkSamplerCreateInfo sampler_info;
+        sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        sampler_info.magFilter = VK_FILTER_LINEAR;
+        sampler_info.minFilter = VK_FILTER_LINEAR;
+        sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.anisotropyEnable = VK_FALSE;
+        sampler_info.maxAnisotropy = 0;
+        sampler_info.compareEnable = VK_FALSE;
+        sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+        sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+        sampler_info.unnormalizedCoordinates = VK_FALSE;
+
+        if(vkCreateSampler(vk_device_,
+                           &sampler_info,
+                           nullptr,
+                           &input_render_sampler_) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create sampler!");
+        }
+    }
+
+    std::array<float, 16> RenderPlaneVertex() noexcept {
+        return {
+            -1.f, -1.f, 0.f, 1.f,
+            1.f, -1.f, 1.f, 1.f,
+            1.f, 1.f, 1.f, 0.f,
+            -1.f, 1.f, 0.f, 0.f
+        };
+    }
+
+    std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
+        return {
+            2,1,0,0,3,2
+        };
+    }
+
+    void InitializeRenderPlane(const VkCommandBuffer & in_command_buffer) {
+        WVulkan::CreateMeshBuffers(
+            render_plane_,
+            RenderPlaneVertex().data(),
+            sizeof(float) * 16,
+            RenderPlaneIndexes().data(),
+            sizeof(std::uint32_t) * 6,
+            6,
+            vk_device_,
+            in_command_buffer
+            );
     }
 
     VkPipeline pipeline_{VK_NULL_HANDLE};
@@ -243,7 +459,11 @@ private:
 
     VkDescriptorSetLayout descriptor_layout_{VK_NULL_HANDLE};
 
-    std::array<VkDescriptorPool, ImagesInFlight> descriptor_pool_;
+    std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_;
+
+    VkSampler input_render_sampler_;
+
+    WVkMeshInfo render_plane_;
 
     const char * shader_path{"/Shaders/WRender_DrawInSwapChain.graphic.spv"};
 
