@@ -95,14 +95,14 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     for (uint8_t i=0; i < pipeline_struct.shaders_count; i++) {
         shaders.push_back(
             WVulkan::CreateShaderStageInfo(
-                WStringUtils::SystemPath(pipeline_struct.shaders[i].file).c_str(),
+                pipeline_struct.shaders[i].file,
                 "main",
                 pipeline_struct.shaders[i].type
                 )
             );
     }
     
-    // use asset pipeline id too.
+    // Use asset pipeline id too.
     CreateGraphicDescriptorSetLayout(in_id);
 
     auto& d_set_layout = descriptor_set_layouts_.Get(in_id);

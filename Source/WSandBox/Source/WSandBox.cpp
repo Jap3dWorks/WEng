@@ -7,21 +7,30 @@
 #include <cstdint>
 #include <concepts>
 #include <functional>
+#include <regex>
 
 #include <string>
 
 int main(int argc, char* argv[])
 {
 
-    std::string str="1jdkvuaaa";
+    std::string str="/mnt/data/Devs/WEng/WEng/Install/Content/Shaders/somthing.vert.graphics.glsl";
 
-    if (str.ends_with("a")) {
-        std::print("Very Ok!\n");
+    std::regex extension_pattern("(.*)(\\.[^\\.]+)$");
+    std::smatch extension_match;
+
+    if (!std::regex_search(
+            str,
+            extension_match,
+            extension_pattern
+            ))
+    {
+        return {};
     }
 
-    // std::print("float size {}\n", sizeof(float));
-
-    
+    for(auto& grp : extension_match) {
+        std::print("- grp : {}\n", grp.str());
+    }
 
     return 0;
 }

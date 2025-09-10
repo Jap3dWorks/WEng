@@ -2106,7 +2106,6 @@ WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
         result.binding_descriptors[0].binding = 0;
         result.binding_descriptors[0].stride = sizeof(WVertexStruct);
         result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
     }
 
     return result;

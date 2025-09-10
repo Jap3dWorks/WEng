@@ -14,6 +14,7 @@ namespace WShaderUtils {
         std::string systempath = WStringUtils::SystemPath(in_shader_path);
 
         std::string shadercompiled;
+        std::string extension;
 
         std::regex extension_pattern("(.*)(\\.[^\\.]+)$");
         std::smatch extension_match;
@@ -28,16 +29,32 @@ namespace WShaderUtils {
         }
 
         shadercompiled = extension_match[1].str() + ".spv";
+        extension = extension_match[2].str();
 
-        if (extension_match[1].str() == ".glsl" || extension_match[1].str() == ".hlsl") {
-            std::string cmd = std::string("glslc ") + systempath + ".spv" + " -o " + shadercompiled;
+        if (extension == ".glsl") {
+
+            std::string stage_flag="vert";
+            
+            if (systempath.contains(".frag.")) {
+                stage_flag = "frag";
+            }
+            else if(systempath.contains(".comp.")) {
+                stage_flag = "comp";
+            }
+
+            std::string cmd = std::string("glslc ") +
+                " -fshader-stage=" + stage_flag + " " +
+                systempath + " -o " + shadercompiled;
             
             if(system(cmd.c_str()) != 0) {
                 throw std::runtime_error("FAIL while using glslc command!");
             }
         }
-        else if (extension_match[1].str() == ".slang") {
-            // compile slang
+        else if (extension == ".hlsl") {
+            // TODO: compile hlsl
+        }
+        else if (extension == ".slang") {
+            // TODO: compile slang
         }
         
         // std::ios::ate -> at the end of the file

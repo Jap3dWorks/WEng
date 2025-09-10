@@ -117,14 +117,13 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
-    // TODO Use spv shaders to avoid loading compilation.
     pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
-                "/Content/Shaders/Spacers_ShaderBase.vert"); 
+                "/Content/Shaders/Spacers_ShaderBase.vert.graphics.glsl");
 
     pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
-                "/Content/Shaders/Spacers_ShaderBase.frag");
+                "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl");
 
     pipeline_asset->RenderPipeline().shaders_count = 2;
 
@@ -153,7 +152,7 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
         obj_importer.Import(
             engine.AssetManager(),
             "Content/Assets/Models/monkey.obj", 
-            "/Content/Assets/monkey.monkey"   // TODO only directory
+            "/Content/Assets/monkey.monkey"
             );
 
     out_model.static_mesh = geo_ids[0];
