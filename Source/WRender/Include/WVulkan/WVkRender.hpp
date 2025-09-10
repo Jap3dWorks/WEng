@@ -24,7 +24,11 @@ class WRENDER_API WVkRender : public IRender
 {
 public:
 
-    WVkRender();
+    WVkRender() noexcept;
+
+    WVkRender(WVkRender && other) noexcept;
+
+    WVkRender & operator=(WVkRender && other) noexcept;
 
     WVkRender(GLFWwindow * in_window);
 

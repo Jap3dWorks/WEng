@@ -321,7 +321,7 @@ void WVulkan::CreateColorResource(VkImage & out_image,
 {
     // VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
 
-    Create(
+    CreateImage(
         out_image,
         out_memory,
         in_device_info.vk_device,
@@ -355,7 +355,7 @@ void WVulkan::CreateDepthResource(
 {
     VkFormat DepthFormat = FindDepthFormat(in_device_info.vk_physical_device);
 
-    Create(
+    CreateImage(
         out_image,
         out_memory,
         in_device_info.vk_device,
@@ -508,6 +508,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     {
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
     }
+    
     std::vector<VkPhysicalDevice> devices(device_count);
     vkEnumeratePhysicalDevices(instance_info.instance, &device_count, devices.data());
 
@@ -515,6 +516,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     {
         if (IsDeviceSuitable(device, surface_info.surface, device_info.device_extensions))
         {
+            // TODO device checks
             device_info.vk_physical_device = device;
             device_info.msaa_samples = GetMaxUsableSampleCount(device);
             break;
@@ -543,21 +545,23 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
         queue_create_infos.push_back(queue_create_info);
     }
 
-    VkPhysicalDeviceFeatures device_features{};
-    device_features.samplerAnisotropy = VK_TRUE;
-    device_features.sampleRateShading = VK_TRUE;
-
-    // dynamic rendering
+    // device features
     
-    VkPhysicalDeviceFeatures2 vk2_features;
+    VkPhysicalDeviceFeatures2 vk2_features{};
     vk2_features.sType= VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    vk2_features.features.samplerAnisotropy = VK_TRUE;
 
-    VkPhysicalDeviceVulkan13Features vk13_features;
+    VkPhysicalDeviceVulkan13Features vk13_features{};
     vk13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
     vk13_features.dynamicRendering = VK_TRUE;
 
+    VkPhysicalDeviceExtendedDynamicStateFeaturesEXT vkext_features={};
+    vkext_features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+    vkext_features.extendedDynamicState = VK_TRUE;
+
+    vkext_features.pNext = nullptr;
+    vk13_features.pNext = &vkext_features;
     vk2_features.pNext = &vk13_features;
-    vk13_features.pNext = nullptr;
 
     // Start device creation
 
@@ -567,10 +571,12 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
     create_info.pQueueCreateInfos = queue_create_infos.data();
 
-    create_info.pEnabledFeatures = &device_features;
+    // create_info.pEnabledFeatures = &device_features;
+    create_info.pEnabledFeatures = nullptr;
 
     create_info.enabledExtensionCount = static_cast<uint32_t>(device_info.device_extensions.size());
     create_info.ppEnabledExtensionNames = device_info.device_extensions.data();
+    
     create_info.pNext = &vk2_features;
     
     if (debug_info.enable_validation_layers)
@@ -583,15 +589,18 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
         create_info.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(device_info.vk_physical_device, &create_info, nullptr, &device_info.vk_device) != VK_SUCCESS)
+    if (vkCreateDevice(
+            device_info.vk_physical_device, &create_info, nullptr, &device_info.vk_device
+            ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create logical device!");
     }
+    
     vkGetDeviceQueue(device_info.vk_device, indices.graphics_family.value(), 0, &device_info.vk_graphics_queue);
     vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
 }
 
-void WVulkan::Create(
+void WVulkan::CreateTexture(
     WVkTextureInfo &out_texture_info,
     const WTextureStruct &texture_struct,
     const WVkDeviceInfo &device_info,
@@ -646,7 +655,7 @@ void WVulkan::Create(
         );
     vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
 
-    Create(
+    CreateImage(
         out_texture_info.image,
         out_texture_info.image_memory,
         device_info.vk_device,
@@ -657,7 +666,7 @@ void WVulkan::Create(
         VK_SAMPLE_COUNT_1_BIT,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
@@ -927,7 +936,7 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(
+void WVulkan::CreateImage(
     VkImage &out_image,
     VkDeviceMemory &out_image_memory,
     const VkDevice &device,
@@ -1270,10 +1279,6 @@ void WVulkan::Destroy(WVkDeviceInfo &device_info)
 
 void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
 {
-    for(auto & img : swap_chain_info.images) {
-        vkDestroyImage(device_info.vk_device, img, nullptr);
-    }
-
     for (auto & view: swap_chain_info.views) {
         vkDestroyImageView(device_info.vk_device, view, nullptr);
     }
@@ -1569,11 +1574,14 @@ VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
     return VK_FALSE;
 }
 
-bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice &device, const VkSurfaceKHR &surface, const std::vector<const char *> &device_extensions)
+bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
+                               const VkSurfaceKHR & surface,
+                               const std::vector<const char *> & device_extensions)
 {
     QueueFamilyIndices indices = FindQueueFamilies(device, surface);
 
-    bool extensions_supported = CheckDeviceExtensionSupport(device, device_extensions);
+    bool extensions_supported = CheckDeviceExtensionSupport(device,
+                                                            device_extensions);
 
     bool swap_chain_adequate = false;
     if (extensions_supported)
@@ -1588,7 +1596,8 @@ bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice &device, const VkSurfaceKH
     return indices.IsComplete() && extensions_supported && swap_chain_adequate && supported_features.samplerAnisotropy;
 }
 
-bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice &device, const std::vector<const char *> &device_extensions)
+bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
+                                          const std::vector<const char *> & device_extensions)
 {
     uint32_t extension_count;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
@@ -2156,14 +2165,18 @@ void WVulkan::GenerateMipmaps(
 
     VkImageMemoryBarrier barrier={};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.image = in_image;
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = in_image;
     barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     barrier.subresourceRange.baseArrayLayer = 0;
     barrier.subresourceRange.layerCount = 1;
     barrier.subresourceRange.levelCount = 1;
-
+    
     int32_t mip_width = in_tex_width;
     int32_t mip_height = in_tex_height;
 
@@ -2179,7 +2192,7 @@ void WVulkan::GenerateMipmaps(
             command_buffer,
             VK_PIPELINE_STAGE_TRANSFER_BIT,
             VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0,
+            {},
             0, nullptr,
             0, nullptr,
             1, &barrier
@@ -2188,16 +2201,16 @@ void WVulkan::GenerateMipmaps(
         VkImageBlit blit{};
         blit.srcOffsets[0] = {0, 0, 0};
         blit.srcOffsets[1] = {mip_width, mip_height, 1};
-        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        blit.srcSubresource.mipLevel = i - 1;
-        blit.srcSubresource.baseArrayLayer = 0;
-        blit.srcSubresource.layerCount = 1;
         blit.dstOffsets[0] = {0,0,0};
         blit.dstOffsets[1] = {
             mip_width > 1 ? mip_width / 2 : 1,
             mip_height > 1 ? mip_height / 2 : 1,
             1
         };
+        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.mipLevel = i - 1;
+        blit.srcSubresource.baseArrayLayer = 0;
+        blit.srcSubresource.layerCount = 1;
         blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         blit.dstSubresource.mipLevel = i;
         blit.dstSubresource.baseArrayLayer = 0;
@@ -2234,11 +2247,13 @@ void WVulkan::GenerateMipmaps(
     barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
     vkCmdPipelineBarrier(
         command_buffer,
-        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0,
         0, nullptr,
         0, nullptr,
         1, &barrier

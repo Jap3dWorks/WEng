@@ -21,7 +21,8 @@ struct WVkDeviceInfo
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
 
     std::vector<const char*> device_extensions {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
     };
 
     VkQueue vk_graphics_queue {VK_NULL_HANDLE};

@@ -12,7 +12,6 @@ find_program(SLANGC_EXECUTABLE
     REQUIRED
 )
 
-# utils.cmake
 function(add_slang_shader_target TARGET)
     cmake_parse_arguments(
         PARSE_ARGV 1
@@ -23,11 +22,11 @@ function(add_slang_shader_target TARGET)
     )
 
     if(NOT ARG_OUTPUT_DIR)
-        set(ARG_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders")
+        set(ARG_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders")
     endif()
 
     if (NOT ARG_SHADERS_DIR)
-        set(ARG_SHADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Shaders")
+        set(ARG_SHADERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders")
     endif()
     
     message("Compile shaders from ${ARG_SHADERS_DIR}.")

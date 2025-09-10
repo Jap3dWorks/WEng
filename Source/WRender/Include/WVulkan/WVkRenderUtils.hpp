@@ -314,10 +314,10 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkOffscreenRenderStruct> T>
-    inline void CreateOffscreenRender(const T & in_offscreen_structs,
+    inline void CreateOffscreenRender(T & in_offscreen_structs,
                                       const WVkDeviceInfo & in_device_info,
-                                      const std::uint8_t & in_width,
-                                      const std::uint8_t & in_height,
+                                      const std::uint32_t & in_width,
+                                      const std::uint32_t & in_height,
                                       const VkFormat & in_format) {
         for(auto& offrnd : in_offscreen_structs) {
             
@@ -378,10 +378,10 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkPostprocessRenderStruct> T>
-    void CreatePostprocessRender(const T & postprocess_structs,
+    void CreatePostprocessRender(T & postprocess_structs,
                                  const WVkDeviceInfo & in_device_info,
-                                 const std::uint8_t & in_width,
-                                 const std::uint8_t & in_height,
+                                 const std::uint32_t & in_width,
+                                 const std::uint32_t & in_height,
                                  const VkFormat & in_format) {
         for (auto & pstrnd : postprocess_structs) {
             pstrnd.extent = {in_width, in_height};

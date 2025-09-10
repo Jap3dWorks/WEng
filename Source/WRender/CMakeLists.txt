@@ -49,9 +49,10 @@ include(ShaderUtils)
 
 add_slang_shader_target(
     WRender_AllShaders
-    SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
+    SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders
 )
 
+# compile shaders first
 add_dependencies(WRender WRender_AllShaders)
 
 install(
@@ -99,5 +100,12 @@ write_basic_package_version_file(
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/WRenderConfigVersion.cmake
     DESTINATION lib/cmake/WRender
+)
+
+install(
+    DIRECTORY
+      ${CMAKE_CURRENT_SOURCE_DIR}/Content
+    DESTINATION
+      .
 )
 

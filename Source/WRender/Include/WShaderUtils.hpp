@@ -27,7 +27,7 @@ namespace WShaderUtils {
             return {};
         }
 
-        shadercompiled = extension_match[0].str() + ".spv";
+        shadercompiled = extension_match[1].str() + ".spv";
 
         if (extension_match[1].str() == ".glsl" || extension_match[1].str() == ".hlsl") {
             std::string cmd = std::string("glslc ") + systempath + ".spv" + " -o " + shadercompiled;

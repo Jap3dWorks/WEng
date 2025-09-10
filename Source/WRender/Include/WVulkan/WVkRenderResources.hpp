@@ -41,15 +41,15 @@ public:
         texture_collection_.LoadResource(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
-            WVkTextureInfo result;
-            WVulkan::Create(
-                result,
-                in_texture,
-                device_info_,
-                command_pool_info_
-                );
-            return result;
-        });
+                WVkTextureInfo result;
+                WVulkan::CreateTexture(
+                    result,
+                    in_texture,
+                    device_info_,
+                    command_pool_info_
+                    );
+                return result;
+            });
     }
 
     void UnloadTexture(const WAssetId & in_id);

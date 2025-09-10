@@ -68,7 +68,7 @@ namespace WVulkan
         const WVkSurfaceInfo & surface_info
 	);
 
-    void Create(
+    void CreateTexture(
         WVkTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
         const WVkDeviceInfo& device_info,
@@ -149,7 +149,7 @@ namespace WVulkan
         const WVkCommandPoolInfo & command_pool_info
     );
 
-    void Create(
+    void CreateImage(
         VkImage& out_image,
         VkDeviceMemory& out_image_memory,
         const VkDevice& device, 

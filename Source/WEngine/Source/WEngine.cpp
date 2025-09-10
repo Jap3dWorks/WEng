@@ -87,6 +87,7 @@ WEngine::WEngine(WEngine && other) noexcept :
     }
 
     other.window_ = {};
+    other.render_ = nullptr;
 }
 
 WEngine & WEngine::operator=(WEngine && other) noexcept {
@@ -108,6 +109,7 @@ WEngine & WEngine::operator=(WEngine && other) noexcept {
         }
 
         other.window_ = {};
+        other.render_ = nullptr;
     }
 
     return *this;

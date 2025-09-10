@@ -32,10 +32,11 @@ install(
     TARGETS WSpacers
     RUNTIME DESTINATION bin
 )
+
 install(
     DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR}/Shaders
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets
+        ${CMAKE_CURRENT_SOURCE_DIR}/Content
     DESTINATION
-        Content
+        .
 )
+

@@ -28,14 +28,14 @@ public:
     WVkSwapChainResources(const WVkSwapChainResources & other) = delete;
 
     WVkSwapChainResources(WVkSwapChainResources && other) noexcept :
-        vk_device_(std::move(other.vk_device_)),
+        device_info_(std::move(other.device_info_)),
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
         descriptor_layout_(std::move(other.descriptor_layout_)),
         descriptor_pool_(std::move(other.descriptor_pool_)),
         input_render_sampler_(std::move(other.input_render_sampler_))
         {
-            other.vk_device_ = {};
+            other.device_info_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descriptor_layout_ = VK_NULL_HANDLE;
@@ -51,7 +51,7 @@ public:
 
     WVkSwapChainResources & operator=(WVkSwapChainResources && other) noexcept {
         if (this != &other) {
-            vk_device_ = std::move(other.vk_device_);
+            device_info_ = std::move(other.device_info_);
             descriptor_layout_ = std::move(other.descriptor_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             pipeline_ = std::move(other.pipeline_);
@@ -59,7 +59,7 @@ public:
 
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
-            other.vk_device_ = {};
+            other.device_info_ = {};
             other.descriptor_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
@@ -75,9 +75,9 @@ public:
 
     void Initialize(const WVkDeviceInfo & in_device, const WVkCommandPoolInfo & in_command_pool) {
 
-        assert(vk_device_.vk_device == VK_NULL_HANDLE);
+        assert(device_info_.vk_device == VK_NULL_HANDLE);
 
-        vk_device_ = in_device;
+        device_info_ = in_device;
 
         InitializeDescriptorLayout();
 
@@ -93,7 +93,7 @@ public:
 
     void Destroy() {
         
-        if (!vk_device_.vk_device) {
+        if (!device_info_.vk_device) {
             return;
         }
 
@@ -101,7 +101,7 @@ public:
             
             if (descriptor_pool_[i]) {
                 vkDestroyDescriptorPool(
-                    vk_device_,
+                    device_info_.vk_device,
                     descriptor_pool_[i],
                     nullptr
                     );
@@ -112,7 +112,7 @@ public:
         }
 
         if (pipeline_) {
-            vkDestroyPipeline(vk_device_.vk_device,
+            vkDestroyPipeline(device_info_.vk_device,
                               pipeline_,
                               nullptr);
         }
@@ -120,7 +120,7 @@ public:
         pipeline_=VK_NULL_HANDLE;
 
         if (pipeline_layout_) {
-            vkDestroyPipelineLayout(vk_device_.vk_device,
+            vkDestroyPipelineLayout(device_info_.vk_device,
                                     pipeline_layout_,
                                     nullptr);
         }
@@ -128,7 +128,7 @@ public:
         pipeline_layout_ = VK_NULL_HANDLE;
         
         if (descriptor_layout_) {
-            vkDestroyDescriptorSetLayout(vk_device_.vk_device,
+            vkDestroyDescriptorSetLayout(device_info_.vk_device,
                                          descriptor_layout_,
                                          nullptr);
         }
@@ -136,14 +136,14 @@ public:
         descriptor_layout_ = VK_NULL_HANDLE;
 
         if (input_render_sampler_) {
-            vkDestroySampler(vk_device_.vk_device,
+            vkDestroySampler(device_info_.vk_device,
                              input_render_sampler_,
                              nullptr);
         }
 
         input_render_sampler_=VK_NULL_HANDLE;
 
-        vk_device_ = {};
+        device_info_ = {};
         
     }
 
@@ -173,22 +173,22 @@ private:
 
     void InitializeDescriptorLayout() {
         
-        VkDescriptorSetLayoutBinding sampler_binding;
+        VkDescriptorSetLayoutBinding sampler_binding{};
         sampler_binding.binding = 0;
         sampler_binding.descriptorCount = 1;
         sampler_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         sampler_binding.pImmutableSamplers = nullptr;
         sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-        VkDescriptorSetLayoutCreateInfo layout_info;
+        VkDescriptorSetLayoutCreateInfo layout_info{};
         layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layout_info.bindingCount = 1;
         layout_info.pBindings=&sampler_binding;
 
-        if (vkCreateDescriptorSetLayout(vk_device_.vk_device,
+        if (vkCreateDescriptorSetLayout(device_info_.vk_device,
                                         &layout_info,
                                         nullptr,
-                                        &descriptor_layout_)) {
+                                        &descriptor_layout_) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create Descriptor Set Layout!");
         }
 
@@ -199,24 +199,23 @@ private:
         std::vector<char> shadercode = WShaderUtils::ReadShader(shader_path);
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
-            vk_device_.vk_device,
+            device_info_.vk_device,
             shadercode.data(),
             shadercode.size()
             );
 
-        //
         std::array<VkPipelineShaderStageCreateInfo,2> shader_stages;
-        // VkPipelineShaderStageCreateInfo vert_shader_stage;
-        
+
+        // VkShaderStageFlagBits
+        shader_stages[0] = VkPipelineShaderStageCreateInfo{};
         shader_stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shader_stages[0].pNext = nullptr;
         shader_stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
         shader_stages[0].pNext=VK_NULL_HANDLE;
         shader_stages[0].module=shader_module;
         shader_stages[0].pName="vsMain";
 
+        shader_stages[1] = VkPipelineShaderStageCreateInfo{};
         shader_stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shader_stages[1].pNext = nullptr;
         shader_stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         shader_stages[1].pNext = VK_NULL_HANDLE;
         shader_stages[1].module=shader_module;
@@ -233,12 +232,12 @@ private:
         attr_desc[1].format = VK_FORMAT_R32G32_SFLOAT;
         attr_desc[1].offset = sizeof(glm::vec3); // uv
 
-        VkVertexInputBindingDescription binding_desc;
+        VkVertexInputBindingDescription binding_desc{};
         binding_desc.binding=0;
         binding_desc.stride = sizeof(glm::vec3) + sizeof(glm::vec2);
         binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        VkPipelineVertexInputStateCreateInfo vertex_input_info;
+        VkPipelineVertexInputStateCreateInfo vertex_input_info{};
         vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertex_input_info.vertexBindingDescriptionCount=1;
         vertex_input_info.pVertexBindingDescriptions = &binding_desc;
@@ -247,12 +246,12 @@ private:
             );
         vertex_input_info.pVertexAttributeDescriptions=attr_desc.data();
 
-        VkPipelineInputAssemblyStateCreateInfo input_assembly;
+        VkPipelineInputAssemblyStateCreateInfo input_assembly{};
         input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
-        VkPipelineViewportStateCreateInfo viewport_state;
+        VkPipelineViewportStateCreateInfo viewport_state{};
         viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewport_state.viewportCount=1;
         viewport_state.scissorCount=1;
@@ -322,7 +321,7 @@ private:
         pipeline_layout_info.pSetLayouts = &descriptor_layout_; // slayouts.data();
 
         if (vkCreatePipelineLayout(
-                vk_device_.vk_device,
+                device_info_.vk_device,
                 &pipeline_layout_info,
                 nullptr,
                 &pipeline_layout_) != VK_SUCCESS)
@@ -358,12 +357,14 @@ private:
         rendering_info.colorAttachmentCount = 1;
         rendering_info.pColorAttachmentFormats = &color_format;
         rendering_info.depthAttachmentFormat = depth_format;
-        rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+        // rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+        rendering_info.pNext = VK_NULL_HANDLE;
+        // rendering_info.viewMaskp
 
         pipeline_info.pNext = &rendering_info;
 
         if (vkCreateGraphicsPipelines(
-        vk_device_.vk_device,
+        device_info_.vk_device,
         VK_NULL_HANDLE,
         1,
         &pipeline_info,
@@ -373,7 +374,7 @@ private:
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
 
-        vkDestroyShaderModule(vk_device_.vk_device,
+        vkDestroyShaderModule(device_info_.vk_device,
                               shader_module,
                               nullptr);
     }
@@ -396,7 +397,7 @@ private:
         for (std::uint32_t i=0; i<FramesInFlight; i++) {
 
             if (vkCreateDescriptorPool(
-                    vk_device_.vk_device,
+                    device_info_.vk_device,
                     &pool_info,
                     nullptr,
                     &descriptor_pool_[i]
@@ -407,7 +408,7 @@ private:
     }
 
     void InitializeInputRenderSampler() {
-        VkSamplerCreateInfo sampler_info;
+        VkSamplerCreateInfo sampler_info{};
         sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         sampler_info.magFilter = VK_FILTER_LINEAR;
         sampler_info.minFilter = VK_FILTER_LINEAR;
@@ -422,7 +423,7 @@ private:
         sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
         sampler_info.unnormalizedCoordinates = VK_FALSE;
 
-        if(vkCreateSampler(vk_device_.vk_device,
+        if(vkCreateSampler(device_info_.vk_device,
                            &sampler_info,
                            nullptr,
                            &input_render_sampler_) != VK_SUCCESS) {
@@ -454,7 +455,7 @@ private:
             RenderPlaneIndexes().data(),
             sizeof(std::uint32_t) * 6,
             6,
-            vk_device_,
+            device_info_,
             in_command_pool
             );
 
@@ -471,8 +472,8 @@ private:
 
     WVkMeshInfo render_plane_;
 
-    const char * shader_path{"/Shaders/WRender_DrawInSwapChain.graphic.spv"};
+    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.graphic.spv"};
 
-    WVkDeviceInfo vk_device_;
+    WVkDeviceInfo device_info_;
 
 };

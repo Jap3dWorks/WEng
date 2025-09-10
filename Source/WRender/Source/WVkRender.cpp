@@ -34,7 +34,7 @@
 // WVkRender
 // -------
 
-WVkRender::WVkRender() :
+WVkRender::WVkRender() noexcept :
     instance_info_(),
     window_(),
     surface_info_(),
@@ -51,9 +51,53 @@ WVkRender::WVkRender() :
     image_available_semaphore_(),
     render_finished_semaphore_(),
     flight_fence_(),
-    frame_index_(0) // ,
-    // frame_buffer_resized_(false)
+    frame_index_(0)
 {
+}
+
+WVkRender::WVkRender(WVkRender && other) noexcept :
+    instance_info_(std::move(other.instance_info_)),
+    window_(std::move(other.window_)),
+    surface_info_(std::move(other.surface_info_)),
+    device_info_(std::move(other.device_info_)),
+    debug_info_(std::move(other.debug_info_)),
+    render_resources_(std::move(other.render_resources_)),
+    swap_chain_info_(std::move(other.swap_chain_info_)),
+    swap_chain_resources_(std::move(other.swap_chain_resources_)),
+    offscreen_render_(std::move(other.offscreen_render_)),
+    postprocess_render_(std::move(other.postprocess_render_)),
+    render_command_pool_(std::move(other.render_command_pool_)),
+    render_command_buffer_(std::move(other.render_command_buffer_)),
+    pipelines_manager_(std::move(other.pipelines_manager_)),
+    image_available_semaphore_(std::move(other.image_available_semaphore_)),
+    render_finished_semaphore_(std::move(other.render_finished_semaphore_)),
+    flight_fence_(std::move(other.flight_fence_)),
+    frame_index_(std::move(other.frame_index_))
+{
+}
+
+WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
+    if (this != &other) {
+        instance_info_ = std::move(other.instance_info_);
+        window_ = std::move(other.window_);
+        surface_info_ = std::move(other.surface_info_);
+        device_info_ = std::move(other.device_info_);
+        debug_info_ = std::move(other.debug_info_);
+        render_resources_ = std::move(other.render_resources_);
+        swap_chain_info_ = std::move(other.swap_chain_info_);
+        swap_chain_resources_ = std::move(other.swap_chain_resources_);
+        offscreen_render_ = std::move(other.offscreen_render_);
+        postprocess_render_ = std::move(other.postprocess_render_);
+        render_command_pool_ = std::move(other.render_command_pool_);
+        render_command_buffer_ = std::move(other.render_command_buffer_);
+        pipelines_manager_ = std::move(other.pipelines_manager_);
+        image_available_semaphore_ = std::move(other.image_available_semaphore_);
+        render_finished_semaphore_ = std::move(other.render_finished_semaphore_);
+        flight_fence_ = std::move(other.flight_fence_);
+        frame_index_ = std::move(other.frame_index_);
+    }
+
+    return *this;
 }
 
 WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
