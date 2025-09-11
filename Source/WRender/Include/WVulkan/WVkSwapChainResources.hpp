@@ -231,11 +231,11 @@ private:
         attr_desc[1].binding=0;
         attr_desc[1].location=1;
         attr_desc[1].format = VK_FORMAT_R32G32_SFLOAT;
-        attr_desc[1].offset = sizeof(glm::vec3); // uv
+        attr_desc[1].offset = sizeof(float) * 2; // uv
 
         VkVertexInputBindingDescription binding_desc{};
         binding_desc.binding=0;
-        binding_desc.stride = sizeof(glm::vec3) + sizeof(glm::vec2);
+        binding_desc.stride = sizeof(float) * 2 + sizeof(float) * 2;
         binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info{};
@@ -434,10 +434,10 @@ private:
 
     std::array<float, 16> RenderPlaneVertex() noexcept {
         return {
-            -1.f, -1.f, 0.f, 1.f,
-            1.f, -1.f, 1.f, 1.f,
-            1.f, 1.f, 1.f, 0.f,
-            -1.f, 1.f, 0.f, 0.f
+            -1.f, -1.f, 0.f, 0.f,
+            1.f, -1.f, 1.f, 0.f,
+            1.f, 1.f, 1.f, 1.f,
+            -1.f, 1.f, 0.f, 1.f
         };
     }
 
