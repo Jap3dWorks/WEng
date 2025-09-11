@@ -95,7 +95,7 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     for (uint8_t i=0; i < pipeline_struct.shaders_count; i++) {
         shaders.push_back(
             WVulkan::CreateShaderStageInfo(
-                pipeline_struct.shaders[i].file,
+                WStringUtils::SystemPath(pipeline_struct.shaders[i].file).c_str(),
                 "main",
                 pipeline_struct.shaders[i].type
                 )

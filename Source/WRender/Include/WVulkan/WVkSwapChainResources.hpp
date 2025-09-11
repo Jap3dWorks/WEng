@@ -21,6 +21,7 @@ class WVkSwapChainResources {
 public:
     
     WVkSwapChainResources() noexcept = default;
+    
     virtual ~WVkSwapChainResources() {
         Destroy();
     }
@@ -98,7 +99,6 @@ public:
         }
 
         for (std::uint32_t i=0; i<FramesInFlight; i++) {
-            
             if (descriptor_pool_[i]) {
                 vkDestroyDescriptorPool(
                     device_info_.vk_device,
@@ -108,7 +108,6 @@ public:
             }
             
             descriptor_pool_[i] = VK_NULL_HANDLE;
-            
         }
 
         if (pipeline_) {
@@ -196,7 +195,9 @@ private:
 
     void InitializePipeline() {
         // shader modules
-        std::vector<char> shadercode = WShaderUtils::ReadShader(shader_path);
+        std::vector<char> shadercode = WShaderUtils::ReadShader(
+            WStringUtils::SystemPath(shader_path)
+            );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
             device_info_.vk_device,
@@ -349,7 +350,7 @@ private:
 
         // Dynamic rendering info
 
-        VkFormat color_format = VK_FORMAT_R8G8B8A8_UNORM;
+        VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB; // TODO: USE swap chain format
         VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
 
         VkPipelineRenderingCreateInfo rendering_info{};
@@ -466,14 +467,14 @@ private:
 
     VkDescriptorSetLayout descriptor_layout_{VK_NULL_HANDLE};
 
-    std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_;
+    std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
-    VkSampler input_render_sampler_;
+    VkSampler input_render_sampler_{VK_NULL_HANDLE};
 
-    WVkMeshInfo render_plane_;
+    WVkMeshInfo render_plane_{};
 
     const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.graphic.spv"};
 
-    WVkDeviceInfo device_info_;
+    WVkDeviceInfo device_info_{};
 
 };

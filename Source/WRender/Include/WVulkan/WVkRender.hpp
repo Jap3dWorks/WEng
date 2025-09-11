@@ -121,7 +121,7 @@ private:
 
     void RecreateSwapChain();
 
-    void RecordGraphicsRenderCommandBuffer(
+    void RecordOffscreenRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index
         );

@@ -18,12 +18,12 @@ namespace WVkRenderUtils {
         const VkImageView & in_depth_view,
         const VkExtent2D & in_extent
         ) {
-        std::array<VkClearValue, 2> clear_values;
+        std::array<VkClearValue, 2> clear_values{};
         clear_values[0].color={{0.5, 0.5, 0.5, 1.f}};
         clear_values[1].depthStencil = {1.f, 0};
 
         // Color Attachment
-        VkRenderingAttachmentInfo color_attachment;
+        VkRenderingAttachmentInfo color_attachment{};
         color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         color_attachment.imageView = in_color_view;
         color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -32,7 +32,7 @@ namespace WVkRenderUtils {
         color_attachment.clearValue = clear_values[0];
 
         // Depth Attachment
-        VkRenderingAttachmentInfo depth_attachment;
+        VkRenderingAttachmentInfo depth_attachment{};
         depth_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         depth_attachment.imageView = in_depth_view;
         depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -41,7 +41,7 @@ namespace WVkRenderUtils {
         depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depth_attachment.clearValue = clear_values[1];
 
-        VkRenderingInfo rendering_info;
+        VkRenderingInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
@@ -86,22 +86,24 @@ namespace WVkRenderUtils {
     inline void RndCmd_BeginSwapchainRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,
+        const VkImageView & in_resolve_view,
         const VkExtent2D & in_extent
         ) {
         std::array<VkClearValue,1> clear_values;
         clear_values[0] = {{0.5, 0.5, 0.5, 1.f}};
 
         // Color Attachment
-        VkRenderingAttachmentInfo color_attachment;
+        VkRenderingAttachmentInfo color_attachment{};
         color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        color_attachment.imageView = in_color_view;
+        color_attachment.imageView = in_color_view;  // input color?
         color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         color_attachment.clearValue = clear_values[0];
+        color_attachment.resolveImageView = in_resolve_view;
+        color_attachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        VkRenderingInfo rendering_info;
-        rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        VkRenderingInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
@@ -144,39 +146,44 @@ namespace WVkRenderUtils {
     inline void RndCmd_TransitionRenderImageLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_image,
-        const VkImageLayout & old_layout,
-        const VkImageLayout & new_layout,
-        const VkAccessFlags2 & srcAccessMask,
-        const VkAccessFlags2 & dstAccessMask,
-        const VkPipelineStageFlags2 & srcStageMask,
-        const VkPipelineStageFlags2 & dstStageMask
+        const VkImageLayout & in_old_layout,
+        const VkImageLayout & in_new_layout,
+        const VkAccessFlags2 & in_src_access_mask,
+        const VkAccessFlags2 & in_dst_access_mask,
+        const VkPipelineStageFlags2 & in_src_stage_mask,
+        const VkPipelineStageFlags2 & in_dst_stage_mask,
+        const VkImageAspectFlags & in_img_aspect=VK_IMAGE_ASPECT_COLOR_BIT
         ) {
-        VkImageMemoryBarrier2 barrier;
-        barrier.srcStageMask = srcStageMask;
-        barrier.srcAccessMask = srcAccessMask;
-        barrier.dstStageMask = dstStageMask;
-        barrier.dstAccessMask = dstAccessMask;
-        barrier.oldLayout = old_layout;
-        barrier.newLayout = new_layout;
+        
+        VkImageMemoryBarrier2 barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        barrier.srcStageMask = in_src_stage_mask;
+        barrier.srcAccessMask = in_src_access_mask;
+        barrier.dstStageMask = in_dst_stage_mask;
+        barrier.dstAccessMask = in_dst_access_mask;
+        barrier.oldLayout = in_old_layout;
+        barrier.newLayout = in_new_layout;
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = in_image;
         barrier.subresourceRange = {
-            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .aspectMask = in_img_aspect,
             .baseMipLevel = 0,
             .levelCount = 1,
             .baseArrayLayer = 0,
             .layerCount = 1
         };
 
-        VkDependencyInfo dependencyInfo;
-        dependencyInfo.dependencyFlags = {};
-        dependencyInfo.imageMemoryBarrierCount = 1;
-        dependencyInfo.pImageMemoryBarriers = &barrier;
+        VkDependencyInfo dependency_info{};
+        dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        dependency_info.dependencyFlags = {};
+        dependency_info.imageMemoryBarrierCount = 1;
+        dependency_info.pImageMemoryBarriers = &barrier;
+        dependency_info.pNext=VK_NULL_HANDLE;
 
         vkCmdPipelineBarrier2(
             in_command_buffer,
-            &dependencyInfo
+            &dependency_info
             );
     }
 
@@ -289,7 +296,8 @@ namespace WVkRenderUtils {
         std::array<VkWriteDescriptorSet, 1> write_ds;
 
         VkDescriptorImageInfo image_info;
-        image_info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // image_info.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         image_info.imageView = in_render_image_view;
         image_info.sampler = in_render_sampler;
 
@@ -324,7 +332,7 @@ namespace WVkRenderUtils {
             offrnd.extent = {in_width, in_height};
             offrnd.color.extent = {in_width, in_height};
             
-            WVulkan::CreateColorResource(
+            WVulkan::CreateRenderColorResource(
                 offrnd.color.image,
                 offrnd.color.memory,
                 offrnd.color.view,
@@ -334,7 +342,7 @@ namespace WVkRenderUtils {
                 );
 
             offrnd.depth.extent = {in_width, in_height};
-            WVulkan::CreateDepthResource(
+            WVulkan::CreateRenderDepthResource(
                 offrnd.depth.image,
                 offrnd.depth.memory,
                 offrnd.depth.view,
@@ -387,7 +395,7 @@ namespace WVkRenderUtils {
             pstrnd.extent = {in_width, in_height};
             pstrnd.color.extent = {in_width, in_height};
 
-            WVulkan::CreateColorResource(
+            WVulkan::CreateRenderColorResource(
             pstrnd.color.image,
             pstrnd.color.memory,
             pstrnd.color.view,

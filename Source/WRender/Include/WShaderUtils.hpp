@@ -11,7 +11,7 @@
 namespace WShaderUtils {
 
     inline std::vector<char> ReadShader(const std::string & in_shader_path) {
-        std::string systempath = WStringUtils::SystemPath(in_shader_path);
+        // std::string systempath = WStringUtils::SystemPath(in_shader_path);
 
         std::string shadercompiled;
         std::string extension;
@@ -20,7 +20,7 @@ namespace WShaderUtils {
         std::smatch extension_match;
 
         if (!std::regex_search(
-                systempath,
+                in_shader_path,
                 extension_match,
                 extension_pattern
                 ))
@@ -35,16 +35,16 @@ namespace WShaderUtils {
 
             std::string stage_flag="vert";
             
-            if (systempath.contains(".frag.")) {
+            if (in_shader_path.contains(".frag.")) {
                 stage_flag = "frag";
             }
-            else if(systempath.contains(".comp.")) {
+            else if(in_shader_path.contains(".comp.")) {
                 stage_flag = "comp";
             }
 
             std::string cmd = std::string("glslc ") +
                 " -fshader-stage=" + stage_flag + " " +
-                systempath + " -o " + shadercompiled;
+                in_shader_path + " -o " + shadercompiled;
             
             if(system(cmd.c_str()) != 0) {
                 throw std::runtime_error("FAIL while using glslc command!");

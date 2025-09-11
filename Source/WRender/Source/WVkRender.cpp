@@ -279,7 +279,7 @@ void WVkRender::Draw()
         render_command_buffer_.command_buffers[frame_index_]
         );
 
-    RecordGraphicsRenderCommandBuffer(
+    RecordOffscreenRenderCommandBuffer(
         render_command_buffer_.command_buffers[frame_index_],
         frame_index_);
 
@@ -328,6 +328,7 @@ void WVkRender::Draw()
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = signal_semaphores;
+    
     VkSwapchainKHR swap_chains[] = {swap_chain_info_.swap_chain};
     present_info.swapchainCount = 1;
     present_info.pSwapchains = swap_chains;
@@ -342,6 +343,8 @@ void WVkRender::Draw()
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
+    // TODO:
+    // semaphoreIndex = (semaphoreIndex + 1) % presentCompleteSemaphore.size();
     frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -473,6 +476,8 @@ void WVkRender::Destroy() {
     // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
+    swap_chain_resources_.Destroy();
+
     WFLOG("Destroy Render Command Pool");
 
     render_command_pool_.Clear();
@@ -493,8 +498,6 @@ void WVkRender::Destroy() {
 
     // Destroy Vulkan Instance
     WVulkan::Destroy(instance_info_);
-
-    swap_chain_resources_.Destroy();
 
 }
 
@@ -562,7 +565,7 @@ void WVkRender::RecreateSwapChain() {
         );
 }
 
-void WVkRender::RecordGraphicsRenderCommandBuffer(
+void WVkRender::RecordOffscreenRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,
     const std::uint32_t & in_frame_index
     )
@@ -587,7 +590,8 @@ void WVkRender::RecordGraphicsRenderCommandBuffer(
         {},
         VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        VK_IMAGE_ASPECT_DEPTH_BIT
         );
 
     WVkRenderUtils::RndCmd_BeginOffscreenRendering(
@@ -708,6 +712,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     }
 
     VkImage swapchain_image = swap_chain_info_.images[in_image_index];
+    VkImageView swapchain_imageview = swap_chain_info_.views[in_image_index];
 
     // swap chain image layout to render into
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
@@ -723,7 +728,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     WVkRenderUtils::RndCmd_BeginSwapchainRendering(
         in_command_buffer,
-        swap_chain_info_.views[in_frame_index],
+        swapchain_imageview,
+        swapchain_imageview,
         swap_chain_info_.extent
         );
 
@@ -763,7 +769,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     vkCmdBindVertexBuffers(in_command_buffer,
                            0,
                            1,
-                           &render_plane.index_buffer,
+                           &render_plane.vertex_buffer,
                            &offsets);
 
     vkCmdBindIndexBuffer(in_command_buffer,

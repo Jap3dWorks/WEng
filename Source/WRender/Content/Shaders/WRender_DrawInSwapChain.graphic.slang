@@ -25,7 +25,8 @@ uniform Sampler2D texture;
 [shader("fragment")]
 float4 fsMain(VSOutput vertIn) : SV_TARGET
 {
-   return texture.Sample(vertIn.fragTexCoord);
+    return float4(0.1, 0.0, 0.0, 1.0);
+    // return texture.Sample(vertIn.fragTexCoord);
 }
 
 

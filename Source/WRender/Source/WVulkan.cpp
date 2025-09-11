@@ -312,7 +312,7 @@ void WVulkan::Create(
 
 // }
 
-void WVulkan::CreateColorResource(VkImage & out_image,
+void WVulkan::CreateRenderColorResource(VkImage & out_image,
                                   VkDeviceMemory & out_memory,
                                   VkImageView & out_image_view,
                                   const VkFormat & in_color_format,
@@ -328,10 +328,13 @@ void WVulkan::CreateColorResource(VkImage & out_image,
         in_device_info.vk_physical_device,
         in_extent.width, in_extent.height,
         1,
-        in_device_info.msaa_samples,
+        VK_SAMPLE_COUNT_1_BIT, // in_device_info.msaa_samples,
         in_color_format,
         VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+          // VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
@@ -344,7 +347,7 @@ void WVulkan::CreateColorResource(VkImage & out_image,
         );
 }
 
-void WVulkan::CreateDepthResource(
+void WVulkan::CreateRenderDepthResource(
     VkImage & out_image,
     VkDeviceMemory & out_memory,
     VkImageView & out_image_view,
@@ -362,7 +365,7 @@ void WVulkan::CreateDepthResource(
         in_device_info.vk_physical_device,
         in_extent.width, in_extent.height,
         1,
-        in_device_info.msaa_samples,
+        VK_SAMPLE_COUNT_1_BIT, // in_device_info.msaa_samples,
         DepthFormat,
         VK_IMAGE_TILING_OPTIMAL, 
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -546,7 +549,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     }
 
     // device features
-    
+
     VkPhysicalDeviceFeatures2 vk2_features{};
     vk2_features.sType= VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     vk2_features.features.samplerAnisotropy = VK_TRUE;
@@ -554,6 +557,7 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     VkPhysicalDeviceVulkan13Features vk13_features{};
     vk13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
     vk13_features.dynamicRendering = VK_TRUE;
+    vk13_features.synchronization2 = VK_TRUE;
 
     VkPhysicalDeviceExtendedDynamicStateFeaturesEXT vkext_features={};
     vkext_features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
@@ -797,7 +801,7 @@ void WVulkan::Create(
     VkPipelineMultisampleStateCreateInfo Multisampling{};
     Multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     Multisampling.sampleShadingEnable = VK_FALSE;
-    Multisampling.rasterizationSamples = in_device.msaa_samples;
+    Multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT; //in_device.msaa_samples;
 
     VkPipelineDepthStencilStateCreateInfo DepthStencil{};
     DepthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -876,7 +880,7 @@ void WVulkan::Create(
 
     // Dynamic rendering info
 
-    VkFormat color_format = VK_FORMAT_R8G8B8A8_UNORM;
+    VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB;  // TODO: check format with image render format
     VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
 
     VkPipelineRenderingCreateInfo rendering_info{};
@@ -1066,7 +1070,9 @@ void WVulkan::CreateMeshBuffers(
         device.vk_device,
         device.vk_physical_device,
         buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT, // |
+          // VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
@@ -2063,8 +2069,8 @@ void WVulkan::CopyBufferToImage(
 }
 
 WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
-    const char* in_shader_file_path,
-    const char* in_entry_point,
+    const char * in_shader_file_path,
+    const char * in_entry_point,
     EShaderType in_shader_type
     )
 {

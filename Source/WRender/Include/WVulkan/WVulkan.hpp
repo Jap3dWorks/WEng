@@ -261,7 +261,7 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
-    void CreateColorResource(
+    void CreateRenderColorResource(
         VkImage & out_image,
         VkDeviceMemory & out_memory,
         VkImageView & out_image_view,
@@ -270,7 +270,7 @@ namespace WVulkan
         const VkExtent2D & in_extent
         );
 
-    void CreateDepthResource(
+    void CreateRenderDepthResource(
         VkImage & out_image,
         VkDeviceMemory & out_memory,
         VkImageView & out_image_view,

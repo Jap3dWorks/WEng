@@ -15,8 +15,6 @@
 
 struct WVkDeviceInfo
 {
-    WId wid{0};
-
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
 
