@@ -75,9 +75,9 @@ void WVkRenderResources::Clear() {
 void WVkRenderResources::InitializeTextureFunctions() {
 
     texture_collection_.SetClearFn(
-        [this](WVkTextureInfo & in_info) -> void {
+        [this](WVkTextureInfo & in_texture_info) -> void {
             WVulkan::Destroy(
-                in_info,
+                in_texture_info,
                 device_info_
                 );
         }

@@ -70,7 +70,6 @@ public:
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
             }
         }
-
         return *this;
     }
 
@@ -93,7 +92,6 @@ public:
     }
 
     void Destroy() {
-        
         if (!device_info_.vk_device) {
             return;
         }
@@ -142,8 +140,9 @@ public:
 
         input_render_sampler_=VK_NULL_HANDLE;
 
+        WVulkan::Destroy(render_plane_, device_info_);
+
         device_info_ = {};
-        
     }
 
     const VkPipeline & Pipeline() const noexcept { return pipeline_; }
@@ -276,9 +275,6 @@ private:
         DepthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         DepthStencil.depthTestEnable = VK_FALSE;
         DepthStencil.depthWriteEnable = VK_FALSE;
-        // DepthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-        // DepthStencil.depthBoundsTestEnable = VK_FALSE;
-        // DepthStencil.stencilTestEnable = VK_FALSE;
 
         VkPipelineColorBlendAttachmentState ColorBlendAttachment{};
         ColorBlendAttachment.colorWriteMask =
@@ -309,12 +305,6 @@ private:
         dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
         dynamic_state.pDynamicStates = dynamic_states.data();
-
-        // std::vector<VkDescriptorSetLayout> slayouts;
-        // slayouts.reserve(in_descriptor_set_layout_infos.size());
-        // for(auto & v : in_descriptor_set_layout_infos) {
-        //     slayouts.push_back(v.descriptor_set_layout);
-        // }
 
         VkPipelineLayoutCreateInfo pipeline_layout_info{};
         pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

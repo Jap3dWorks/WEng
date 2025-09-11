@@ -23,7 +23,7 @@ private:
     /**
      * @Brief Graphics pipelines global descriptors sets for camera and lights.
      */
-    struct GlobalGraphicsDescriptors {
+    struct GlobalGraphicsResources {
         WVkDescriptorPoolInfo descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
         
@@ -199,7 +199,7 @@ private:
     std::unordered_map<EPipelineType, TSparseSet<WAssetId>> ptype_pipelines_{};
 
     /** Camera, lights, ... */
-    GlobalGraphicsDescriptors global_graphics_descsets_{};
+    GlobalGraphicsResources global_graphics_descsets_{};
 
     WVkDeviceInfo device_info_ {};
 

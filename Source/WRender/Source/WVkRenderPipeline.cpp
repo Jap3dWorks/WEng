@@ -194,7 +194,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
             bindings[i].binding = 0;
             bindings[i].ubo_info.range = sizeof(WUBOModelStruct);
 
-            WVulkan::Create(bindings[i].ubo_info, device_info_);
+            WVulkan::CreateUBO(bindings[i].ubo_info, device_info_);
 
             bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
             bindings[i].buffer_info.offset = 0;
@@ -386,10 +386,10 @@ void WVkRenderPipelinesManager::Initialize_GlobalGraphicDescriptors() {
     for(uint32_t i=0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         global_graphics_descsets_.camera_ubo[i].range = sizeof(WUBOCameraStruct);
 
-        WVulkan::Create(
+        WVulkan::CreateUBO(
             global_graphics_descsets_.camera_ubo[i],
             device_info_
-            );    
+            );
 
         VkDescriptorBufferInfo buffer_info{};
 
@@ -437,17 +437,27 @@ void WVkRenderPipelinesManager::Destroy_GlobalGraphics() {
         }
     }
 
-    global_graphics_descsets_ = GlobalGraphicsDescriptors();
+    global_graphics_descsets_ = GlobalGraphicsResources();
 }
 
 void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
+    WVulkan::MapUBO(
+        global_graphics_descsets_.camera_ubo[in_frame_index],
+        device_info_
+        );
+    
     memcpy(
         global_graphics_descsets_.camera_ubo[in_frame_index].mapped_data,
         &camera_struct,
         sizeof(WUBOCameraStruct)
+        );
+    
+    WVulkan::UnmapUBO(
+        global_graphics_descsets_.camera_ubo[in_frame_index],
+        device_info_
         );
 }
 
@@ -456,10 +466,18 @@ void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
     const WEntityComponentId & in_desc_set,
     uint32_t in_frame_index
     ) {
+    WVulkan::MapUBO(
+        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
+        device_info_
+        );
     WVulkan::UpdateUBOModel(
         bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
         // Initial Position
         in_ubo_model_struct
+        );
+    WVulkan::UnmapUBO(
+        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
+        device_info_
         );
 }
 

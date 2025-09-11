@@ -460,7 +460,6 @@ void WVkRender::Destroy() {
 
     WVulkan::Destroy(flight_fence_, device_info_);
 
-    // TODO destroy render targets
     WVkRenderUtils::DestroyOffscreenRender(
         offscreen_render_,
         device_info_
