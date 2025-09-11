@@ -40,8 +40,6 @@ struct WVkSurfaceInfo
 
 struct WVkRenderDebugInfo
 {
-    // WId wid{0};
-    
     bool enable_validation_layers{false};
     std::vector<const char*> validation_layers{
         "VK_LAYER_KHRONOS_validation",
@@ -53,8 +51,6 @@ struct WVkRenderDebugInfo
 
 struct WVkCommandPoolInfo
 {
-    // WId wid{0};
-    
     VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
@@ -73,7 +69,6 @@ struct WVkTextureInfo
  */
 struct WVkShaderStageInfo
 {
-    // WId id{0};
 
     std::vector<char> code;
     EShaderType type;
@@ -163,8 +158,6 @@ struct WVkMeshInfo
 */
 struct WVkUBOInfo
 {
-    // WId wid{0};
-    
     VkBuffer uniform_buffer{VK_NULL_HANDLE};
     VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
     void * mapped_data{nullptr};
@@ -187,24 +180,17 @@ struct WVkRenderPipelineInfo
  */
 struct WVkCommandBufferInfo
 {
-    // WId wid;
-
     std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
 struct WVkSemaphoreInfo
 {
-    // WId wid;
-    
     std::array<VkSemaphore, WENG_MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
 };
 
 struct WVkFenceInfo
 {
-    // WId wid;
-
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
-
     VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
 };
 
@@ -226,8 +212,6 @@ struct WVkDescriptorSetTextureBinding {
  */
 struct WVkPipelineBindingInfo
 {
-    // WId wid{0};
-
     WAssetId render_pipeline_id{0};
     WAssetIndexId mesh_asset_id{0};
 

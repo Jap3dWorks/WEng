@@ -140,7 +140,8 @@ public:
 
         input_render_sampler_=VK_NULL_HANDLE;
 
-        WVulkan::Destroy(render_plane_, device_info_);
+        WVulkan::Destroy(render_plane_,
+                         device_info_);
 
         device_info_ = {};
     }

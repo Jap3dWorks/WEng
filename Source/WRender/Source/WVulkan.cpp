@@ -1208,10 +1208,10 @@ void WVulkan::UpdateDescriptorSets(
 }
 
 void WVulkan::Create(
-    WVkCommandBufferInfo& out_command_buffer_info,
-    const WVkDeviceInfo &device,
-    const WVkCommandPoolInfo &command_pool_info
-)
+    WVkCommandBufferInfo & out_command_buffer_info,
+    const WVkDeviceInfo & device,
+    const WVkCommandPoolInfo & command_pool_info
+    )
 {
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1232,10 +1232,10 @@ void WVulkan::Create(
 
 void WVulkan::Create(WVkSemaphoreInfo & out_semaphore_info, const WVkDeviceInfo & in_device_info)
 {
-    VkSemaphoreCreateInfo semaphore_create_info; 
+    VkSemaphoreCreateInfo semaphore_create_info{}; 
     semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     semaphore_create_info.pNext = VK_NULL_HANDLE;
-    // semaphore_create_info.flags = 0;
+    // semaphore_create_info.flags = {};
 
     for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
     {
@@ -1252,7 +1252,7 @@ void WVulkan::Create(WVkSemaphoreInfo & out_semaphore_info, const WVkDeviceInfo 
 
 void WVulkan::Create(WVkFenceInfo & out_fence_info, const WVkDeviceInfo & in_device_info)
 {
-    VkFenceCreateInfo fence_create_info;
+    VkFenceCreateInfo fence_create_info{};
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info.flags = out_fence_info.creation_flags;
     fence_create_info.pNext = VK_NULL_HANDLE;
@@ -1315,12 +1315,6 @@ void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDevic
         vkDestroyImageView(device_info.vk_device, image_view, nullptr);
     }
 }
-
-// void WVulkan::Destroy(WVkOffscreenRenderStruct & render_pass_info, const WVkDeviceInfo &device_info)
-// {
-//     vkDestroyRenderPass(device_info.vk_device, render_pass_info.render_pass, nullptr);
-//     render_pass_info = {};
-// }
 
 void WVulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
@@ -1537,7 +1531,6 @@ void WVulkan::AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_des
     ubo_layout_binding.pImmutableSamplers = nullptr;
     ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    
     // A texture in the fragment shader
     VkDescriptorSetLayoutBinding sampler_layout_binding{};
     sampler_layout_binding.binding = 1;

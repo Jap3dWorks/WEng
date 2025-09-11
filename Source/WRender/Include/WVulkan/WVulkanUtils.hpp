@@ -11,8 +11,7 @@ namespace WVulkanUtils {
     template<std::uint32_t N>
     VkRenderPass CreateRenderPass(const std::array<VkAttachmentDescription, N> & in_attachment_descriptors,
                                   const VkSubpassDescription & in_subpass_descriptor,
-                                  const VkDevice & in_device
-        )
+                                  const VkDevice & in_device)
     {
 
         std::array<VkSubpassDependency, 2> dependencies{};
@@ -53,17 +52,17 @@ namespace WVulkanUtils {
         render_pass_info.dependencyCount = static_cast<std::uint32_t>(dependencies.size());
         render_pass_info.pDependencies = dependencies.data();
 
-    VkRenderPass result;
+        VkRenderPass result;
 
-    if (vkCreateRenderPass(in_device,
-                           &render_pass_info,
-                           nullptr,
-                           &result) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create offscreen render pass!");
-    }
+        if (vkCreateRenderPass(in_device,
+                               &render_pass_info,
+                               nullptr,
+                               &result) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create offscreen render pass!");
+        }
 
-    return result;
+        return result;
     }
 
     inline VkShaderModule CreateShaderModule(
