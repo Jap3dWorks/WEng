@@ -49,10 +49,8 @@ WVkRender::WVkRender() noexcept :
     render_command_buffer_(),
     pipelines_manager_(),
     sync_semaphores_(),
+    semaphore_index_(0),
     sync_fences_(),
-    // image_available_semaphore_(),
-    // render_finished_semaphore_(),
-    // flight_fence_(),
     frame_index_(0)
 {
 }
@@ -72,10 +70,8 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     render_command_buffer_(std::move(other.render_command_buffer_)),
     pipelines_manager_(std::move(other.pipelines_manager_)),
     sync_semaphores_(std::move(other.sync_semaphores_)),
+    semaphore_index_(std::move(other.semaphore_index_)),
     sync_fences_(std::move(other.sync_fences_)),
-    // image_available_semaphore_(std::move(other.image_available_semaphore_)),
-    // render_finished_semaphore_(std::move(other.render_finished_semaphore_)),
-    // flight_fence_(std::move(other.flight_fence_)),
     frame_index_(std::move(other.frame_index_))
 {
 }
@@ -96,10 +92,8 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         render_command_buffer_ = std::move(other.render_command_buffer_);
         pipelines_manager_ = std::move(other.pipelines_manager_);
         sync_semaphores_ = std::move(other.sync_semaphores_);
+        semaphore_index_ = std::move(other.semaphore_index_);
         sync_fences_ = std::move(other.sync_fences_);
-        // image_available_semaphore_ = std::move(other.image_available_semaphore_);
-        // render_finished_semaphore_ = std::move(other.render_finished_semaphore_);
-        // flight_fence_ = std::move(other.flight_fence_);
         frame_index_ = std::move(other.frame_index_);
     }
 
