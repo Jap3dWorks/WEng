@@ -183,16 +183,16 @@ struct WVkCommandBufferInfo
     std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
 };
 
-struct WVkSemaphoreInfo
-{
-    std::array<VkSemaphore, WENG_MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
-};
+// struct WVkSemaphoreInfo
+// {
+//     std::array<VkSemaphore, WENG_MAX_FRAMES_IN_FLIGHT> semaphores {VK_NULL_HANDLE};
+// };
 
-struct WVkFenceInfo
-{
-    std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
-    VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
-};
+// struct WVkFenceInfo
+// {
+//     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> fences {VK_NULL_HANDLE};
+//     VkFenceCreateFlagBits creation_flags {VK_FENCE_CREATE_SIGNALED_BIT};
+// };
 
 // Pipeline Bindings
 

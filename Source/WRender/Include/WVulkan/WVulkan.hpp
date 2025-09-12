@@ -196,16 +196,6 @@ namespace WVulkan
         VkMemoryPropertyFlags properties
     );
 
-    void Create(
-        WVkSemaphoreInfo & out_semaphore_info,
-        const WVkDeviceInfo & in_device_info
-        );
-
-    void Create(
-        WVkFenceInfo & out_fence_info,
-        const WVkDeviceInfo & in_device_info
-        );
-
     // Destroy functions
     // -----------------
 
@@ -221,9 +211,6 @@ namespace WVulkan
 
     void DestroyImageView(WVkSwapChainInfo & swap_chain_info,
                           const WVkDeviceInfo & device_info);
-
-    // void Destroy(WVkOffscreenRenderStruct & render_pass_info,
-    //              const WVkDeviceInfo & device_info);
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
@@ -241,16 +228,6 @@ namespace WVulkan
 
     void Destroy(
         WVkCommandPoolInfo & out_command_pool,
-        const WVkDeviceInfo & in_device_info
-        );
-
-    void Destroy(
-        WVkSemaphoreInfo & out_semaphore_info,
-        const WVkDeviceInfo & in_device_info
-        );
-
-    void Destroy(
-        WVkFenceInfo & out_fence_info,
         const WVkDeviceInfo & in_device_info
         );
 
@@ -285,22 +262,6 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info,
         const VkExtent2D & in_extent
         );
-
-    // void CreateOffscreenFramebuffer(
-    //     WVkOffscreenRenderStruct & offscreen_render_pass,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
-    
-    // void CreatePostprocessFramebuffer(
-    //     WVkPostprocessRenderStruct  & framebuffer_render_pass,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
-
-    // void CreateOffcreenRenderFrameBuffers_DEPRECATED(
-    //     WVkSwapChainInfo & out_swap_chain_info,
-    //     const WVkOffscreenRenderStruct & out_render_pass_info,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
 
     // Descriptor Set Layout
     // ---------------------
@@ -456,14 +417,14 @@ namespace WVulkan
 
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
 
-    void TransitionImageLayout1(
-        const VkDevice & device, 
-        const VkCommandPool & command_pool, 
-        const VkQueue & graphics_queue, 
-        const VkImage & image, 
-        const VkImageLayout & old_layout, 
-        const VkImageLayout & new_layout, 
-        const uint32_t & mip_levels
+    void TransitionTextureImageLayout(
+        const VkDevice & in_device, 
+        const VkCommandPool & in_command_pool, 
+        const VkQueue & in_graphics_queue, 
+        const VkImage & in_image, 
+        const VkImageLayout & in_old_layout, 
+        const VkImageLayout & in_new_layout, 
+        const uint32_t & in_mip_levels
     );
 
     void CopyBufferToImage(

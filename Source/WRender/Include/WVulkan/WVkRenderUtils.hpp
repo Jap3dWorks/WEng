@@ -321,6 +321,60 @@ namespace WVkRenderUtils {
         return descriptor_set;
     }
 
+    template<typename T>
+    inline std::vector<T> CreateSyncSemaphore(const std::size_t & in_images,
+                                              const VkDevice & in_device) {
+        std::vector<T> result(in_images);
+
+        VkSemaphoreCreateInfo create_info{};
+        create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        create_info.pNext = VK_NULL_HANDLE;
+
+        for(std::size_t i=0; i<in_images; i++) {
+            T itm{};
+            
+            if (vkCreateSemaphore(in_device, &create_info, nullptr, &itm.image_available)
+                != VK_SUCCESS) {
+                throw std::runtime_error("Failed Creating a Semaphore!");
+            }
+
+            if (vkCreateSemaphore(in_device, &create_info, nullptr, &itm.render_finished)
+               != VK_SUCCESS) {
+                throw std::runtime_error("Failed creating a Semaphore!");
+            }
+
+            result[i] = itm;
+        }
+
+        return result;
+    }
+
+    template<std::size_t N>
+    inline std::array<VkFence, N> CreateSyncFences(const VkDevice & in_device) {
+        VkFenceCreateInfo create_info{};
+        create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        create_info.pNext = VK_NULL_HANDLE;
+
+        std::array<VkFence, N> result;
+
+        for(std::size_t i=0; i<N; i++) {
+            VkFence itm;
+            if (vkCreateFence(
+                    in_device,
+                    &create_info,
+                    nullptr,
+                    &itm
+                    ) != VK_SUCCESS) {
+                throw std::runtime_error("Failed creating a Fence!");
+            }
+
+            result[i] = itm;
+        }
+
+        return result;
+    }
+
     template<CIterable<WVkOffscreenRenderStruct> T>
     inline void CreateOffscreenRender(T & in_offscreen_structs,
                                       const WVkDeviceInfo & in_device_info,
@@ -349,6 +403,38 @@ namespace WVkRenderUtils {
                 in_device_info,
                 offrnd.depth.extent
                 );
+        }
+    }
+
+    template<typename T>
+    inline void DestroySyncSemaphores(std::vector<T> & out_semaphores, const VkDevice & in_device) {
+        for(auto & smph : out_semaphores) {
+            vkDestroySemaphore(
+                in_device,
+                smph.image_available,
+                nullptr
+                );
+            smph.image_available = VK_NULL_HANDLE;
+
+            vkDestroySemaphore(
+                in_device,
+                smph.render_finished,
+                nullptr
+                );
+            smph.render_finished = VK_NULL_HANDLE;
+        }
+    }
+
+    template<std::size_t N>
+    inline void DestroySyncFences(std::array<VkFence, N> & out_fences, const VkDevice & in_device) {
+        for(auto & fnc : out_fences) {
+            vkDestroyFence(
+                in_device,
+                fnc,
+                nullptr
+                );
+
+            fnc = VK_NULL_HANDLE;
         }
     }
 

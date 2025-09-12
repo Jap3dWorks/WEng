@@ -157,9 +157,14 @@ private:
 
     WVkRenderPipelinesManager pipelines_manager_;
 
-    WVkSemaphoreInfo image_available_semaphore_;
-    WVkSemaphoreInfo render_finished_semaphore_;
-    WVkFenceInfo flight_fence_;
+    struct SyncSemaphores {
+        VkSemaphore image_available{VK_NULL_HANDLE};
+        VkSemaphore render_finished{VK_NULL_HANDLE};
+    };
+    std::vector<SyncSemaphores> sync_semaphores_{};
+    std::size_t semaphore_index_{0};
+    
+    std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> sync_fences_{};
 
     uint32_t frame_index_;
     // bool frame_buffer_resized_;

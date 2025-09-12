@@ -48,9 +48,11 @@ WVkRender::WVkRender() noexcept :
     render_command_pool_(),
     render_command_buffer_(),
     pipelines_manager_(),
-    image_available_semaphore_(),
-    render_finished_semaphore_(),
-    flight_fence_(),
+    sync_semaphores_(),
+    sync_fences_(),
+    // image_available_semaphore_(),
+    // render_finished_semaphore_(),
+    // flight_fence_(),
     frame_index_(0)
 {
 }
@@ -69,9 +71,11 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     render_command_pool_(std::move(other.render_command_pool_)),
     render_command_buffer_(std::move(other.render_command_buffer_)),
     pipelines_manager_(std::move(other.pipelines_manager_)),
-    image_available_semaphore_(std::move(other.image_available_semaphore_)),
-    render_finished_semaphore_(std::move(other.render_finished_semaphore_)),
-    flight_fence_(std::move(other.flight_fence_)),
+    sync_semaphores_(std::move(other.sync_semaphores_)),
+    sync_fences_(std::move(other.sync_fences_)),
+    // image_available_semaphore_(std::move(other.image_available_semaphore_)),
+    // render_finished_semaphore_(std::move(other.render_finished_semaphore_)),
+    // flight_fence_(std::move(other.flight_fence_)),
     frame_index_(std::move(other.frame_index_))
 {
 }
@@ -91,9 +95,11 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         render_command_pool_ = std::move(other.render_command_pool_);
         render_command_buffer_ = std::move(other.render_command_buffer_);
         pipelines_manager_ = std::move(other.pipelines_manager_);
-        image_available_semaphore_ = std::move(other.image_available_semaphore_);
-        render_finished_semaphore_ = std::move(other.render_finished_semaphore_);
-        flight_fence_ = std::move(other.flight_fence_);
+        sync_semaphores_ = std::move(other.sync_semaphores_);
+        sync_fences_ = std::move(other.sync_fences_);
+        // image_available_semaphore_ = std::move(other.image_available_semaphore_);
+        // render_finished_semaphore_ = std::move(other.render_finished_semaphore_);
+        // flight_fence_ = std::move(other.flight_fence_);
         frame_index_ = std::move(other.frame_index_);
     }
 
@@ -150,8 +156,8 @@ void WVkRender::Initialize()
 
     // Create Vulkan Device
     WVulkan::Create(
-        device_info_, 
-        instance_info_, 
+        device_info_,
+        instance_info_,
         surface_info_,
         debug_info_
         );
@@ -206,19 +212,13 @@ void WVkRender::Initialize()
         render_command_pool_.
         CreateCommandBuffer();
 
-    WVulkan::Create(
-        image_available_semaphore_,
-        device_info_
+    sync_semaphores_ = WVkRenderUtils::CreateSyncSemaphore<SyncSemaphores>(
+        swap_chain_info_.images.size(),
+        device_info_.vk_device
         );
 
-    WVulkan::Create(
-        render_finished_semaphore_,
-        device_info_
-        );
-
-    WVulkan::Create(
-        flight_fence_,
-        device_info_
+    sync_fences_ = WVkRenderUtils::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
+        device_info_.vk_device
         );
 
     render_resources_ = WVkRenderResources(
@@ -239,7 +239,7 @@ void WVkRender::Draw()
     vkWaitForFences(
         device_info_.vk_device,
         1,
-        &flight_fence_.fences[frame_index_],
+        &sync_fences_[frame_index_],
         VK_TRUE,
         UINT64_MAX
         );
@@ -250,7 +250,7 @@ void WVkRender::Draw()
         device_info_.vk_device,
         swap_chain_info_.swap_chain,
         UINT64_MAX,
-        image_available_semaphore_.semaphores[frame_index_],
+        sync_semaphores_[semaphore_index_].image_available,
         VK_NULL_HANDLE,
         &image_index
         );
@@ -266,12 +266,8 @@ void WVkRender::Draw()
     vkResetFences(
         device_info_.vk_device,
         1,
-        &flight_fence_.fences[frame_index_]
+        &sync_fences_[frame_index_]
         );
-
-    VkSemaphore signal_semaphores[] = {
-        render_finished_semaphore_.semaphores[frame_index_]
-    };
 
     // Begin command buffer
 
@@ -299,13 +295,11 @@ void WVkRender::Draw()
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.pNext = nullptr;
 
-    VkSemaphore wait_semaphores[] =
-        { image_available_semaphore_.semaphores[frame_index_] };
     VkPipelineStageFlags wait_stages[] =
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
     submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = wait_semaphores;
+    submit_info.pWaitSemaphores = &sync_semaphores_[semaphore_index_].image_available;
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
@@ -313,13 +307,13 @@ void WVkRender::Draw()
         &render_command_buffer_.command_buffers[frame_index_];
 
     submit_info.signalSemaphoreCount = 1;
-    submit_info.pSignalSemaphores = signal_semaphores;
+    submit_info.pSignalSemaphores = &sync_semaphores_[image_index].render_finished;
 
     if (vkQueueSubmit(
             device_info_.vk_graphics_queue,
             1,
             &submit_info,
-            flight_fence_.fences[frame_index_]) != VK_SUCCESS)
+            sync_fences_[frame_index_]) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit draw command buffer");
     }
@@ -327,15 +321,14 @@ void WVkRender::Draw()
     VkPresentInfoKHR present_info{};
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = signal_semaphores;
-    
-    VkSwapchainKHR swap_chains[] = {swap_chain_info_.swap_chain};
+    present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;
-    present_info.pSwapchains = swap_chains;
+    present_info.pSwapchains = &swap_chain_info_.swap_chain;
     present_info.pImageIndices = &image_index;
     present_info.pResults = nullptr;
 
-    result = vkQueuePresentKHR(device_info_.vk_present_queue, &present_info);
+    result = vkQueuePresentKHR(device_info_.vk_present_queue,
+                               &present_info);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         RecreateSwapChain();
@@ -343,8 +336,7 @@ void WVkRender::Draw()
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    // TODO:
-    // semaphoreIndex = (semaphoreIndex + 1) % presentCompleteSemaphore.size();
+    semaphore_index_ = (semaphore_index_ + 1) % sync_semaphores_.size();
     frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -454,12 +446,16 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy Fences and Semaphores");
 
-    WVulkan::Destroy(image_available_semaphore_, device_info_);
+    WVkRenderUtils::DestroySyncSemaphores(
+        sync_semaphores_,
+        device_info_.vk_device
+        );
 
-    WVulkan::Destroy(render_finished_semaphore_, device_info_);
-
-    WVulkan::Destroy(flight_fence_, device_info_);
-
+    WVkRenderUtils::DestroySyncFences(
+        sync_fences_,
+        device_info_.vk_device
+        );
+    
     WVkRenderUtils::DestroyOffscreenRender(
         offscreen_render_,
         device_info_

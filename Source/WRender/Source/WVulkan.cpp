@@ -674,7 +674,7 @@ void WVulkan::CreateTexture(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    TransitionImageLayout1(
+    TransitionTextureImageLayout(
         device_info.vk_device,
         command_pool_info.vk_command_pool,
         device_info.vk_graphics_queue,
@@ -721,6 +721,9 @@ void WVulkan::CreateTexture(
         device_info.vk_physical_device,
         out_texture_info.mip_levels
         );
+
+    vkFreeMemory(device_info.vk_device, staging_buffer_memory, nullptr);
+    vkDestroyBuffer(device_info.vk_device, staging_buffer, nullptr);
 
 }
 
@@ -1230,45 +1233,6 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(WVkSemaphoreInfo & out_semaphore_info, const WVkDeviceInfo & in_device_info)
-{
-    VkSemaphoreCreateInfo semaphore_create_info{}; 
-    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphore_create_info.pNext = VK_NULL_HANDLE;
-    // semaphore_create_info.flags = {};
-
-    for (size_t i = 0; i < out_semaphore_info.semaphores.size(); i++)
-    {
-        if (vkCreateSemaphore(
-                in_device_info.vk_device,
-                &semaphore_create_info,
-                nullptr,
-                &out_semaphore_info.semaphores[i]
-                ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed creating a semaphore!");
-        }
-    }
-}
-
-void WVulkan::Create(WVkFenceInfo & out_fence_info, const WVkDeviceInfo & in_device_info)
-{
-    VkFenceCreateInfo fence_create_info{};
-    fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fence_create_info.flags = out_fence_info.creation_flags;
-    fence_create_info.pNext = VK_NULL_HANDLE;
-
-    for (size_t i=0; i < out_fence_info.fences.size(); i++)
-    {
-        if (vkCreateFence(
-              in_device_info.vk_device,
-              &fence_create_info,
-              nullptr,
-              &out_fence_info.fences[i]) != VK_SUCCESS) {
-        throw std::runtime_error("Failed creating a fence!");
-      }
-    }
-}
-
 // Destroy functions
 // -----------------
 
@@ -1385,40 +1349,6 @@ void WVulkan::Destroy(
         );
 
     out_command_pool.vk_command_pool = nullptr;
-}
-
-void WVulkan::Destroy(
-    WVkSemaphoreInfo & out_semaphore_info,
-    const WVkDeviceInfo & in_device_info
-    )
-{
-    for(size_t i = 0; i<out_semaphore_info.semaphores.size(); i++)
-    {
-        vkDestroySemaphore(
-            in_device_info.vk_device,
-            out_semaphore_info.semaphores[i],
-            nullptr
-            );
-
-        out_semaphore_info.semaphores[i] = VK_NULL_HANDLE;
-    }
-}
-
-void WVulkan::Destroy(
-    WVkFenceInfo & out_fence_info,
-    const WVkDeviceInfo & in_device_info
-    )
-{
-    for(size_t i=0; i<out_fence_info.fences.size(); i++)
-    {
-        vkDestroyFence(
-            in_device_info.vk_device,
-            out_fence_info.fences[i],
-            nullptr
-            );
-
-        out_fence_info.fences[i] = VK_NULL_HANDLE;
-    }
 }
 
 void WVulkan::Destroy(
@@ -1828,6 +1758,8 @@ void WVulkan::CreateVkBuffer(
     }
 
     vkBindBufferMemory(device, out_buffer, out_buffer_memory, 0);
+
+    // WFLOG("Create new Buffer {}", static_cast<void*>(out_buffer));
 }
 
 VkFormat WVulkan::FindSupportedFormat(
@@ -1897,7 +1829,7 @@ VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const EShaderType &type)
     }
 }
 
-void WVulkan::TransitionImageLayout1(
+void WVulkan::TransitionTextureImageLayout(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
