@@ -15,7 +15,7 @@
 /**
  * @brief A render pipeline is a collection of shaders and render states.
  */
-class WRENDER_API WVkRenderPipelinesManager
+class WRENDER_API WVkGraphicsPipelines
 {
 
 private:
@@ -39,30 +39,30 @@ public:
     using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
     using WVkDescriptorPoolDb =
         std::array<TObjectDataBase<WVkDescriptorPoolInfo, void, WAssetId>,
-        WENG_MAX_FRAMES_IN_FLIGHT>;
+            WENG_MAX_FRAMES_IN_FLIGHT>;
 
-    WVkRenderPipelinesManager() noexcept = default;
+    WVkGraphicsPipelines() noexcept = default;
 
-    virtual ~WVkRenderPipelinesManager();
+    virtual ~WVkGraphicsPipelines();
 
-    WVkRenderPipelinesManager(
+    WVkGraphicsPipelines(
         WVkDeviceInfo device, 
         uint32_t in_width,
         uint32_t in_height
         );
 
-    WVkRenderPipelinesManager(const WVkRenderPipelinesManager & other)=delete;
+    WVkGraphicsPipelines(const WVkGraphicsPipelines & other)=delete;
 
-    WVkRenderPipelinesManager(
-        WVkRenderPipelinesManager && other
+    WVkGraphicsPipelines(
+        WVkGraphicsPipelines && other
         ) noexcept;
 
-    WVkRenderPipelinesManager & operator=(
-        const WVkRenderPipelinesManager & other
+    WVkGraphicsPipelines & operator=(
+        const WVkGraphicsPipelines & other
         )=delete;
 
-    WVkRenderPipelinesManager & operator=(
-        WVkRenderPipelinesManager && other
+    WVkGraphicsPipelines & operator=(
+        WVkGraphicsPipelines && other
         ) noexcept;
 
     // Create Graphics Render Pipeline
@@ -110,11 +110,11 @@ public:
 
     WNODISCARD constexpr uint32_t Width() const noexcept { return width_; }
 
-    void constexpr Width(uint32_t in_width) noexcept { width_ = in_width; }
+    void constexpr Width(const std::uint32_t & in_width) noexcept { width_ = in_width; }
 
     WNODISCARD constexpr uint32_t Heigth() const noexcept { return height_; }
 
-    void constexpr Height(uint32_t in_height) noexcept { height_ = in_height; }
+    void constexpr Height(const std::uint32_t & in_height) noexcept { height_ = in_height; }
 
     void ForEachPipeline(EPipelineType in_type,
                          TFunction<void(const WAssetId &)> in_predicate);
@@ -129,7 +129,6 @@ public:
                         TFunction<void(WVkPipelineBindingInfo)> in_predicate);
 
     auto IteratePipelines(EPipelineType in_pipeline_type) {
-        
         return WIteratorUtils::DefaultIteratorPtr<WAssetId>(
             &(*ptype_pipelines_[in_pipeline_type].begin()),
             &(*ptype_pipelines_[in_pipeline_type].end())
@@ -137,7 +136,6 @@ public:
     }
 
     auto IterateBindings(const WAssetId & in_pipeline_id) {
-
         return WIteratorUtils::DefaultIteratorPtr<WEntityComponentId>(
             &(*pipeline_pbindings_[in_pipeline_id].begin()),
             &(*pipeline_pbindings_[in_pipeline_id].end())
@@ -201,7 +199,7 @@ private:
     /** Camera, lights, ... */
     GlobalGraphicsResources global_graphics_descsets_{};
 
-    WVkDeviceInfo device_info_ {};
+    WVkDeviceInfo device_info_{};
 
     uint32_t width_{0};
     uint32_t height_{0};

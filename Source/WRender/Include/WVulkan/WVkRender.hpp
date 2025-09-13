@@ -6,7 +6,7 @@
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRenderPipeline.hpp"
+#include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
@@ -98,7 +98,7 @@ public:
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
 
-    WNODISCARD WVkRenderPipelinesManager & RenderPipelinesManager()
+    WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
     {
         return pipelines_manager_;
     }
@@ -155,7 +155,7 @@ private:
     WVkRenderCommandPool render_command_pool_;
     WVkCommandBufferInfo render_command_buffer_;
 
-    WVkRenderPipelinesManager pipelines_manager_;
+    WVkGraphicsPipelines pipelines_manager_;
 
     struct SyncSemaphores {
         VkSemaphore image_available{VK_NULL_HANDLE};

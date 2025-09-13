@@ -349,9 +349,7 @@ private:
         rendering_info.colorAttachmentCount = 1;
         rendering_info.pColorAttachmentFormats = &color_format;
         rendering_info.depthAttachmentFormat = depth_format;
-        // rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
         rendering_info.pNext = VK_NULL_HANDLE;
-        // rendering_info.viewMaskp
 
         pipeline_info.pNext = &rendering_info;
 
@@ -433,9 +431,7 @@ private:
     }
 
     std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
-        return {
-            2,1,0,0,3,2
-        };
+        return { 2,1,0,0,3,2 };
     }
 
     void InitializeRenderPlane(const WVkCommandPoolInfo & in_command_pool) {

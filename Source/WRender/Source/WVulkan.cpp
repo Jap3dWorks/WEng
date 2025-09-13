@@ -2027,7 +2027,7 @@ void WVulkan::CopyBufferToImage(
         );
 }
 
-WVkShaderStageInfo WVulkan::CreateShaderStageInfo(
+WVkShaderStageInfo WVulkan::BuildGraphicsShaderStageInfo(
     const char * in_shader_file_path,
     const char * in_entry_point,
     EShaderType in_shader_type

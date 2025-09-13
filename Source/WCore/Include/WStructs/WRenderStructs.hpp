@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+#define WENG_MAX_PIPELINE_SHADERS 8
+
 /**
  * @brief Uniform buffer data structure.
 */
@@ -42,23 +44,25 @@ enum class EShaderType : uint8_t
 
 enum class EPipelineType : uint8_t
 {
-    Graphics,       // Default
+    Graphics,       // Default Opaque
     Transparency,   // Alpha Blending
-    Compute,        // GPGPU
-    RayTracing,     // Ray Tracing
-    Postprocess     // Camera shader pipelines
+    Postprocess,     // Camera shader pipelines
+    Compute,        // GPU
+    RayTracing     // Ray Tracing
 };
 
 struct WShaderStruct {
     EShaderType type{EShaderType::None};
-    char file[64]{""};
+    char file[128]{""};
+    char entry[16]{"main"};
 };
 
-using WShaderList = std::array<WShaderStruct, 4>;
+using WShaderList = std::array<WShaderStruct, WENG_MAX_PIPELINE_SHADERS>;
 
 struct WRenderPipelineStruct {
     EPipelineType type {EPipelineType::Graphics};
     WShaderList shaders{};
+
     uint8_t shaders_count{0};
 };
 

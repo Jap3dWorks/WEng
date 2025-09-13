@@ -1,4 +1,4 @@
-#include "WVulkan/WVkRenderPipeline.hpp"
+#include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WStringUtils.hpp"
@@ -18,12 +18,12 @@
 // WRenderPipelinesManager
 // -------------------
 
-WVkRenderPipelinesManager::~WVkRenderPipelinesManager()
+WVkGraphicsPipelines::~WVkGraphicsPipelines()
 {
     Destroy();
 }
 
-WVkRenderPipelinesManager::WVkRenderPipelinesManager(
+WVkGraphicsPipelines::WVkGraphicsPipelines(
     WVkDeviceInfo device,
     uint32_t in_width,
     uint32_t in_height
@@ -36,8 +36,8 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     Initialize_ClearLambdas();
 }
 
-WVkRenderPipelinesManager::WVkRenderPipelinesManager(
-    WVkRenderPipelinesManager && other
+WVkGraphicsPipelines::WVkGraphicsPipelines(
+    WVkGraphicsPipelines && other
     ) noexcept :
     pipelines_(std::move(other.pipelines_)),
     descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
@@ -54,7 +54,7 @@ WVkRenderPipelinesManager::WVkRenderPipelinesManager(
     other.global_graphics_descsets_ = {};
 }
 
-WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipelinesManager && other) noexcept
+WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && other) noexcept
 {
     if (this != &other) {
         Clear();
@@ -81,7 +81,7 @@ WVkRenderPipelinesManager & WVkRenderPipelinesManager::operator=(WVkRenderPipeli
     return *this;
 }
 
-void WVkRenderPipelinesManager::CreateRenderPipeline(
+void WVkGraphicsPipelines::CreateRenderPipeline(
     const WAssetId & in_id,
     const WRenderPipelineStruct & pipeline_struct
     ) {
@@ -92,11 +92,12 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     std::vector<WVkShaderStageInfo> shaders;
     shaders.reserve(pipeline_struct.shaders_count);
 
+    // TODO transition to slang
     for (uint8_t i=0; i < pipeline_struct.shaders_count; i++) {
         shaders.push_back(
-            WVulkan::CreateShaderStageInfo(
+            WVulkan::BuildGraphicsShaderStageInfo(
                 WStringUtils::SystemPath(pipeline_struct.shaders[i].file).c_str(),
-                "main",
+                pipeline_struct.shaders[i].entry,
                 pipeline_struct.shaders[i].type
                 )
             );
@@ -139,7 +140,7 @@ void WVkRenderPipelinesManager::CreateRenderPipeline(
     ptype_pipelines_[render_pipeline_info.type].Insert(in_id.GetId(), in_id);
 }
 
-void WVkRenderPipelinesManager::DeleteRenderPipeline(
+void WVkGraphicsPipelines::DeleteRenderPipeline(
     const WAssetId & in_id
     )
 {
@@ -163,7 +164,7 @@ void WVkRenderPipelinesManager::DeleteRenderPipeline(
     }
 }
 
-void WVkRenderPipelinesManager::ResetDescriptorPool(const WAssetId & in_pipeline_id,
+void WVkGraphicsPipelines::ResetDescriptorPool(const WAssetId & in_pipeline_id,
                                                     const std::uint32_t & in_frameindex) {
     vkResetDescriptorPool(
         device_info_.vk_device,
@@ -172,7 +173,7 @@ void WVkRenderPipelinesManager::ResetDescriptorPool(const WAssetId & in_pipeline
         );
 }
 
-WId WVkRenderPipelinesManager::CreateBinding(
+WId WVkGraphicsPipelines::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
     const WAssetIndexId & in_mesh_asset_id,
@@ -234,8 +235,7 @@ WId WVkRenderPipelinesManager::CreateBinding(
     return component_id;
 }
 
-void WVkRenderPipelinesManager::DeleteBinding(const WEntityComponentId & in_id) {
-
+void WVkGraphicsPipelines::DeleteBinding(const WEntityComponentId & in_id) {
     bindings_.Remove(in_id);
 
     for(auto & p : pipeline_pbindings_) {
@@ -245,7 +245,7 @@ void WVkRenderPipelinesManager::DeleteBinding(const WEntityComponentId & in_id) 
     }
 }
 
-void WVkRenderPipelinesManager::ForEachPipeline(EPipelineType in_type,
+void WVkGraphicsPipelines::ForEachPipeline(EPipelineType in_type,
                                                 TFunction<void(const WAssetId &)> in_predicate)
 {
     for(auto & wid : ptype_pipelines_[in_type]) {
@@ -253,7 +253,7 @@ void WVkRenderPipelinesManager::ForEachPipeline(EPipelineType in_type,
     }
 }
     
-void WVkRenderPipelinesManager::ForEachPipeline(EPipelineType in_type,
+void WVkGraphicsPipelines::ForEachPipeline(EPipelineType in_type,
                                                 TFunction<void(WVkRenderPipelineInfo&)> in_predicate)
 {
     for(auto & wid : ptype_pipelines_[in_type]) {
@@ -261,7 +261,7 @@ void WVkRenderPipelinesManager::ForEachPipeline(EPipelineType in_type,
     }
 }
     
-void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
+void WVkGraphicsPipelines::ForEachBinding(const WAssetId & in_pipeline_id,
                                                TFunction<void(const WEntityComponentId &)> in_predicate)
 {
     for(auto & wid : pipeline_pbindings_[in_pipeline_id]) {
@@ -269,7 +269,7 @@ void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
     }
 }
     
-void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
+void WVkGraphicsPipelines::ForEachBinding(const WAssetId & in_pipeline_id,
                                                TFunction<void(WVkPipelineBindingInfo)> in_predicate)
 {
     for (auto & wid : pipeline_pbindings_[in_pipeline_id]) {
@@ -277,7 +277,7 @@ void WVkRenderPipelinesManager::ForEachBinding(const WAssetId & in_pipeline_id,
     }
 }
 
-void WVkRenderPipelinesManager::Clear()
+void WVkGraphicsPipelines::Clear()
 {
     bindings_.Clear();
     pipelines_.Clear();
@@ -289,7 +289,7 @@ void WVkRenderPipelinesManager::Clear()
     descriptor_set_layouts_.Clear();
 }
 
-void WVkRenderPipelinesManager::Destroy() {
+void WVkGraphicsPipelines::Destroy() {
     bindings_.Clear();
     pipelines_.Clear();
 
@@ -307,7 +307,7 @@ void WVkRenderPipelinesManager::Destroy() {
     height_=0;
 }
 
-void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId & in_id) {
+void WVkGraphicsPipelines::CreateGraphicDescriptorSetLayout(const WAssetId & in_id) {
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
@@ -327,7 +327,7 @@ void WVkRenderPipelinesManager::CreateGraphicDescriptorSetLayout(const WAssetId 
     });
 }
 
-void WVkRenderPipelinesManager::Initialize_ClearLambdas() {
+void WVkGraphicsPipelines::Initialize_ClearLambdas() {
 
     bindings_.SetDestroyFn([di_=device_info_](auto & b) {
         for(auto& ubo: b.ubo) {
@@ -356,7 +356,7 @@ void WVkRenderPipelinesManager::Initialize_ClearLambdas() {
     });
 }
 
-void WVkRenderPipelinesManager::Initialize_GlobalGraphicDescriptors() {
+void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
 
     WVulkan::AddDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
@@ -412,7 +412,7 @@ void WVkRenderPipelinesManager::Initialize_GlobalGraphicDescriptors() {
 
 }
 
-void WVkRenderPipelinesManager::Destroy_GlobalGraphics() {
+void WVkGraphicsPipelines::Destroy_GlobalGraphics() {
 
     if (device_info_.vk_device) {
 
@@ -440,7 +440,7 @@ void WVkRenderPipelinesManager::Destroy_GlobalGraphics() {
     global_graphics_descsets_ = GlobalGraphicsResources();
 }
 
-void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
+void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
@@ -461,7 +461,7 @@ void WVkRenderPipelinesManager::UpdateGlobalGraphicsDescriptorSet(
         );
 }
 
-void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
+void WVkGraphicsPipelines::UpdateModelDescriptorSet(
     const WUBOModelStruct & in_ubo_model_struct,
     const WEntityComponentId & in_desc_set,
     uint32_t in_frame_index
@@ -481,7 +481,7 @@ void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
         );
 }
 
-void WVkRenderPipelinesManager::UpdateModelDescriptorSet(
+void WVkGraphicsPipelines::UpdateModelDescriptorSet(
     const WUBOModelStruct & in_ubo_model_struct,
     const WEntityComponentId & in_desc_set
     ) {

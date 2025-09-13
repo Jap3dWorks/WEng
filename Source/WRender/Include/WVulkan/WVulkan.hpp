@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRenderPipeline.hpp"
+#include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WLog.hpp"
 
 #include <cstdint>
@@ -457,7 +457,7 @@ namespace WVulkan
     /**
      * @brief Creates a shader stage from a spir-v shader file in disk.
      */
-    WVkShaderStageInfo CreateShaderStageInfo(
+    WVkShaderStageInfo BuildGraphicsShaderStageInfo(
 	const char* in_shader_file_path,
 	const char* int_entry_point,
 	EShaderType in_shader_type

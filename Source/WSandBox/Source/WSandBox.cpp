@@ -16,16 +16,23 @@ std::tuple<int, float, std::string> getThreeValues() {
     return std::make_tuple(42, 3.14f, "hello");
 }
 
+using WShaderEntryPointStr = char[16];
+using WShaderEntryPointList = std::array<WShaderEntryPointStr, 8>;
+
+struct TestStruct {
+    WShaderEntryPointList entry_points{"main"};
+};
 
 int main(int argc, char* argv[])
 {
 
-    auto r = getThreeValues();
+    TestStruct ts;
 
-    int v = std::get<0>(r);
+    for (auto & ep : ts.entry_points) {
+        std::print("{}\n", ep);
+    }
 
-    // Usage
-    auto [number, pi, greeting] = getThreeValues();
+    return 0;
 
 }
 

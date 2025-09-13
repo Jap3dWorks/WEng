@@ -12,7 +12,7 @@
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRenderPipeline.hpp"
+#include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WVulkan/WVkRenderResources.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
@@ -188,7 +188,7 @@ void WVkRender::Initialize()
 
     // --
 
-    pipelines_manager_ = WVkRenderPipelinesManager(
+    pipelines_manager_ = WVkGraphicsPipelines(
         device_info_,
         dimensions[0],
         dimensions[1]
@@ -337,6 +337,7 @@ void WVkRender::Draw()
 void WVkRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
     ) {
+    // TODO: check pipeline type
     pipelines_manager_.CreateRenderPipeline(
         render_pipeline->WID(),
         render_pipeline->RenderPipeline()
@@ -698,6 +699,10 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     for(auto pipeline_id : pipelines_manager_.IteratePipelines(EPipelineType::Postprocess)) {
         // TODO postprocess rendering
+
+        
+
+        
     }
 
     VkImage swapchain_image = swap_chain_info_.images[in_image_index];
