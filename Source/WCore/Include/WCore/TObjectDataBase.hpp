@@ -36,8 +36,6 @@ public:
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
 
-    // TODO can I implement here an iterator?
-
     virtual void ForEach(TFunction<void(B*)> in_function)=0;
     virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>) =0;
     
@@ -50,12 +48,11 @@ public:
  * You can specify a create_fn to create objects inside the container.
  * And a destroy_fn called when remove objects in the container.
  */
-template<typename T, CConvertibleTo<T> B=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
-class TObjectDataBase : public IObjectDataBase<B, WIdClass> {
+template<typename T, typename CreateFn, typename DestroyFn, CConvertibleTo<T> B=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
+class TObjDb : public IObjectDataBase<B, WIdClass> {
 public:
 
     using Super = IObjectDataBase<B, WIdClass>;
-    using Type = TObjectDataBase<T, B, WIdClass, Allocator>;
     using ObjectsType = TSparseSet<T, Allocator>;
 
     template<typename IndexIterator, typename ValueFn, typename IncrFn>
@@ -65,28 +62,25 @@ public:
                                        ValueFn,
                                        IncrFn>;
 
-    using CreateFn = TFunction<T(const WIdClass &)>;  // TODO: class template argument
-    using DestroyFn = TFunction<void(T&)>;            // TODO: class template argument
-
 public:
 
-    constexpr TObjectDataBase() noexcept :
-        create_fn_([](const WIdClass &) -> T {return T{};}),
-        destroy_fn_([](T&)->void {}),
+    constexpr TObjDb() noexcept :
+        create_fn_(),
+        destroy_fn_(),
         id_pool_(),
         objects_()
         {}
 
-    constexpr TObjectDataBase(
+    constexpr TObjDb(
         const Allocator & in_allocator
         ) :
-        create_fn_([](const WIdClass &) -> T { return T{}; }),
-        destroy_fn_([](T&) -> void {}),
+        create_fn_(),
+        destroy_fn_(),
         id_pool_(),
         objects_(in_allocator)
         {}
 
-    constexpr TObjectDataBase(
+    constexpr TObjDb(
         const CreateFn & in_create_fn,
         const DestroyFn & in_destroy_fn
         ) :
@@ -96,7 +90,7 @@ public:
         objects_()
         {}
 
-    constexpr TObjectDataBase(
+    constexpr TObjDb(
         const CreateFn & in_create_fn,
         const DestroyFn & in_destroy_fn,
         const Allocator & in_allocator
@@ -107,25 +101,25 @@ public:
         objects_(in_allocator)
         {}
 
-    virtual ~TObjectDataBase() {
+    virtual ~TObjDb() {
         Clear();
     }
 
-    TObjectDataBase(const TObjectDataBase & other) :
+    TObjDb(const TObjDb & other) :
         create_fn_(other.create_fn_),
         destroy_fn_(other.destroy_fn_),
         id_pool_(other.id_pool_),
         objects_(other.objects_)
         {}
 
-    constexpr TObjectDataBase(TObjectDataBase && other) noexcept :
+    constexpr TObjDb(TObjDb && other) noexcept :
         create_fn_(std::move(other.create_fn_)),
         destroy_fn_(std::move(other.destroy_fn_)),
         id_pool_(std::move(other.id_pool_)),
         objects_(std::move(other.objects_))
         {}
 
-    TObjectDataBase & operator=(const TObjectDataBase & other) {
+    TObjDb & operator=(const TObjDb & other) {
         if (this != &other) {
             Clear();
             create_fn_ = other.create_fn_;
@@ -137,7 +131,7 @@ public:
         return *this;
     }
 
-    TObjectDataBase & operator=(TObjectDataBase && other) noexcept {
+    TObjDb & operator=(TObjDb && other) noexcept {
         if (this != &other) {
             Clear();
             create_fn_ = std::move(other.create_fn_);
@@ -150,7 +144,7 @@ public:
     }
 
     virtual std::unique_ptr<Super> Clone() const override {
-        return std::make_unique<TObjectDataBase>(*this);
+        return std::make_unique<TObjDb>(*this);
     }
 
     template<CCallable<T, const WIdClass &> TCreateFn>
@@ -352,7 +346,6 @@ public:
 private:
 
     CreateFn create_fn_;
-
     DestroyFn destroy_fn_; 
 
     WIdPool<WIdClass> id_pool_;
@@ -360,3 +353,12 @@ private:
     ObjectsType objects_;
     
 };
+
+template<typename T, CConvertibleTo<T> B=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
+using TObjectDataBase = TObjDb<T, TFunction<T(const WIdClass&)>,
+                               TFunction<void(T&)>,
+                               B, WIdClass,
+                               Allocator>;
+
+
+

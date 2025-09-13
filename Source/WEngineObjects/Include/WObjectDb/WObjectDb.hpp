@@ -27,9 +27,8 @@ class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
-    using DbType =
-        std::unordered_map<const WClass *,
-                           std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
+    using DbType = std::unordered_map<const WClass *,
+                                      std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
 
     template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,

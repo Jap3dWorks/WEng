@@ -26,20 +26,24 @@
 bool TWAllocator_in_vector() {
     WFLOG("START")
 
-    TWAllocator<size_t> a;
-
-    a.SetAllocateFn([](size_t* prev, size_t pn, size_t * ptr, size_t n) -> void {
+    auto allocfn = [](size_t* prev, size_t pn, size_t * ptr, size_t n) -> void {
         WLOG("Allocating {} size from {} to {}!\n", n, (size_t)prev, (size_t)ptr);
         prev = ptr;
-    });
+    };
 
-    a.SetDeallocateFn([](size_t * ptr, size_t n){
+    auto deallocfn = [](size_t * ptr, size_t n){
         for(size_t i=0; i<n; i++) {
             WLOG("{:d}", (size_t)ptr[i]);
         }
-    });
+    };
 
-    std::vector<size_t, TWAllocator<size_t>> v{a};
+    TWAllocator<size_t, decltype(allocfn), decltype(deallocfn)> a;
+
+    a.SetAllocateFn(allocfn);
+
+    a.SetDeallocateFn(deallocfn);
+
+    std::vector<size_t, TWAllocator<size_t, decltype(allocfn), decltype(deallocfn)>> v{a};
 
     for (size_t i=0; i<10; i++) {
         v.push_back(i);

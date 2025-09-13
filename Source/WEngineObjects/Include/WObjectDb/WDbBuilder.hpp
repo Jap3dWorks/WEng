@@ -78,46 +78,80 @@ private:
 
     template<typename T, CConvertibleTo<T> B, typename I>
     static inline VoidPtr CreateObjectDb() {
-        TWAllocator<T> a;
         
-        a.SetAllocateFn(
-            []
-            (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
-                if (_pptr) {
-                    for(size_t i=0; i<_pn; i++) {
-                        if (!BWRef::IsInstanced(_pptr + i)) continue;
+        auto allocatefn = [] (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
+            if (_pptr) {
+                for(size_t i=0; i<_pn; i++) {
+                    if (!BWRef::IsInstanced(_pptr + i)) continue;
                         
-                        for (auto & ref : BWRef::Instances(_pptr + i)) {
-                            if (ref == nullptr) continue;
+                    for (auto & ref : BWRef::Instances(_pptr + i)) {
+                        if (ref == nullptr) continue;
                             
-                            ref->BSet(_nptr + i);
-                        }
+                        ref->BSet(_nptr + i);
                     }
                 }
             }
-            );
+        };
 
-        a.SetDeallocateFn(
-            []
-            (T * _ptr, std::size_t _n) {
-                if (_ptr) {
-                    for(std::size_t i=0; i<_n; i++) {
-                        if (!BWRef::IsInstanced(_ptr + i)) continue;
+        auto deallocatefn = [] (T * _ptr, std::size_t _n) {
+            if (_ptr) {
+                for(std::size_t i=0; i<_n; i++) {
+                    if (!BWRef::IsInstanced(_ptr + i)) continue;
 
-                        for (auto & ref : BWRef::Instances(_ptr + i)) {
-                            if (ref == nullptr) continue;
+                    for (auto & ref : BWRef::Instances(_ptr + i)) {
+                        if (ref == nullptr) continue;
 
-                            ref->BSet(_ptr + i);
-                        }
+                        ref->BSet(_ptr + i);
                     }
                 }
             }
-            );
+        };
 
-        return  new TObjectDataBase<T,
-                                    B,
-                                    I,
-                                    TWAllocator<T>>(a);
+        TWAllocator<T, decltype(allocatefn), decltype(deallocatefn)> a;
+
+        a.SetAllocateFn(allocatefn);
+            // []
+            // (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
+            //     if (_pptr) {
+            //         for(size_t i=0; i<_pn; i++) {
+            //             if (!BWRef::IsInstanced(_pptr + i)) continue;
+                        
+            //             for (auto & ref : BWRef::Instances(_pptr + i)) {
+            //                 if (ref == nullptr) continue;
+                            
+            //                 ref->BSet(_nptr + i);
+            //             }
+            //         }
+            //     }
+            // }
+            // );
+
+        a.SetDeallocateFn(deallocatefn);
+            // []
+            // (T * _ptr, std::size_t _n) {
+            //     if (_ptr) {
+            //         for(std::size_t i=0; i<_n; i++) {
+            //             if (!BWRef::IsInstanced(_ptr + i)) continue;
+
+            //             for (auto & ref : BWRef::Instances(_ptr + i)) {
+            //                 if (ref == nullptr) continue;
+
+            //                 ref->BSet(_ptr + i);
+            //             }
+            //         }
+            //     }
+            // }
+            // );
+
+        auto crtfn = [](const I & in_Id) -> T { return T{}; };
+        auto dstrfn = [](T & in_obj) -> void {};
+
+        return new TObjDb<T,
+                          decltype(crtfn),
+                          decltype(dstrfn),
+                          B,
+                          I,
+                          decltype(a)>(crtfn, dstrfn, a);
     }
 
     VoidPtr CreateDb(std::type_index typeindex) const {

@@ -33,7 +33,10 @@ bool TWAllocator_1_Test() {
         std::size_t a;
     };
 
-    std::vector<A, TWAllocator<A>> va;
+    auto allocfn = [](A*, std::size_t, A*, std::size_t){};
+    auto deallfn = [](A*, std::size_t){};
+
+    std::vector<A, TWAllocator<A, decltype(allocfn), decltype(deallfn)>> va;
 
     for (std::uint32_t i=0; i<8; i++) {
         va.push_back(A(i));

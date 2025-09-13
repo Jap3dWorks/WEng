@@ -1,10 +1,12 @@
 #pragma once
 
 #include <type_traits>
-#include "WCore/TFunction.hpp"
+#include "WCore/WConcepts.hpp"
 #include "WLog.hpp"
 
-template<typename T>
+template<typename T,
+         CCallable<void, T*, std::size_t, T*, std::size_t>  AllocateFn,
+         CCallable<void, T*, std::size_t> DeallocateFn>
 class TWAllocator {
 public:
     
@@ -18,12 +20,9 @@ public:
     using propagate_on_container_move_assignment = std::true_type;
     using is_always_equal = std::true_type;
 
-    using DeallocateFunction = TFunction<void(pointer, std::size_t)>;
-    using AllocateFunction = TFunction<void(pointer _pptr, std::size_t _pn, pointer _nptr, std::size_t _nn)>;
-
     constexpr TWAllocator() noexcept :
-        allocate_fn_([](pointer, std::size_t, pointer, std::size_t){}),
-        deallocate_fn_([](pointer, std::size_t){}),
+        allocate_fn_(),   // [](pointer, std::size_t, pointer, std::size_t){}),
+        deallocate_fn_(), // [](pointer, std::size_t){}),
         pptr_(nullptr),
         pn_{0}
         {}
@@ -71,34 +70,34 @@ public:
         ::operator delete[](p);
     }
 
-    void SetAllocateFn(const AllocateFunction & in_fn) {
+    void SetAllocateFn(const AllocateFn & in_fn) {
         allocate_fn_ = in_fn;
     }
 
-    void SetAllocateFn(AllocateFunction && in_fn) noexcept {
+    void SetAllocateFn(AllocateFn && in_fn) noexcept {
         allocate_fn_ = std::move(in_fn);
     }
 
-    void SetDeallocateFn(const DeallocateFunction & in_fn) {
+    void SetDeallocateFn(const DeallocateFn & in_fn) {
         deallocate_fn_ = in_fn;
     }
 
-    void SetDeallocateFn(DeallocateFunction && in_fn) noexcept {
+    void SetDeallocateFn(DeallocateFn && in_fn) noexcept {
         deallocate_fn_ = std::move(in_fn);
     }
 
 private:
 
-    AllocateFunction allocate_fn_;
-    DeallocateFunction deallocate_fn_;
+    AllocateFn allocate_fn_;
+    DeallocateFn deallocate_fn_;
 
     pointer pptr_;
     std::size_t pn_;
 
 };
 
-template< class T1, class T2 >
-constexpr bool operator==( const TWAllocator<T1>& lhs, const TWAllocator<T2>& rhs ) noexcept
+template<typename T1,typename T2, typename AllocateFn, typename DeallocateFn>
+constexpr bool operator==( const TWAllocator<T1, AllocateFn, DeallocateFn>& lhs, const TWAllocator<T2, AllocateFn, DeallocateFn>& rhs ) noexcept
 {
     return std::is_same_v<T1, T2>;
 }
