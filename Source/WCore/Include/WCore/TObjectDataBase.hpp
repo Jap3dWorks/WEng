@@ -320,11 +320,24 @@ public:
         return objects_.cend();
     }
 
-    
+    template<CCallable<void, T&> TPredicate>
+    void ForEach(TPredicate && in_predicate) {
+        for (auto & v : objects_) {
+            std::forward<TPredicate>(in_predicate)(v);
+        }
+    }
 
     void ForEach(TFunction<void(B*)> in_function) override {
         for (auto& v : objects_) {
             in_function(static_cast<B*>(&v));
+        }
+    }
+
+    template<CCallable<void, const WIdClass &, B*> TPredicate>
+    void ForEachIdValue(TPredicate && in_predicate) {
+        std::size_t i=0;
+        for (auto& v : objects_) {
+            std::forward<TPredicate>(in_predicate)(objects_.IndexAt(i++), v);
         }
     }
 
