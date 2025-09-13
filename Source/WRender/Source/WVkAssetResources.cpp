@@ -2,7 +2,6 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include <vector>
 
 WVkAssetResources::WVkAssetResources()=default;
 
@@ -16,10 +15,7 @@ WVkAssetResources::WVkAssetResources(
     command_pool_info_(in_command_pool_info),
     texture_collection_(),
     static_mesh_collection_()
-{
-    InitializeStaticMeshFunctions();
-    InitializeTextureFunctions();
-}
+{}
 
 WVkAssetResources::WVkAssetResources(WVkAssetResources && other) :
     device_info_(std::move(other.device_info_)),
@@ -27,9 +23,6 @@ WVkAssetResources::WVkAssetResources(WVkAssetResources && other) :
     texture_collection_(std::move(other.texture_collection_)),
     static_mesh_collection_(std::move(other.static_mesh_collection_))
 {
-    InitializeStaticMeshFunctions();
-    InitializeTextureFunctions();
-
     other.device_info_ = {};
     other.command_pool_info_ = {};
 }
@@ -41,9 +34,6 @@ WVkAssetResources & WVkAssetResources::operator=(WVkAssetResources && other) {
         texture_collection_ = std::move(other.texture_collection_);
         static_mesh_collection_ = std::move(other.static_mesh_collection_);
         
-        InitializeStaticMeshFunctions();
-        InitializeTextureFunctions();
-
         other.device_info_ = {};
         other.command_pool_info_ = {};
     }
@@ -52,29 +42,8 @@ WVkAssetResources & WVkAssetResources::operator=(WVkAssetResources && other) {
 }
 
 void WVkAssetResources::UnloadTexture(const WAssetId & in_id) {
-    texture_collection_.UnloadResource(in_id);
-}
-
-void WVkAssetResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
-    static_mesh_collection_.UnloadResource(in_id);
-}
-
-const WVkTextureInfo & WVkAssetResources::TextureInfo(const WAssetId & in_id) const {
-    return texture_collection_.GetData(in_id);
-}
-
-const WVkMeshInfo & WVkAssetResources::StaticMeshInfo(const WAssetIndexId & in_id) const {
-    return static_mesh_collection_.GetData(in_id);
-}
-
-void WVkAssetResources::Clear() {
-    texture_collection_.Clear();
-    static_mesh_collection_.Clear();    
-}
-
-void WVkAssetResources::InitializeTextureFunctions() {
-
-    texture_collection_.SetClearFn(
+    texture_collection_.Remove(
+        in_id,
         [this](WVkTextureInfo & in_texture_info) -> void {
             WVulkan::Destroy(
                 in_texture_info,
@@ -84,9 +53,37 @@ void WVkAssetResources::InitializeTextureFunctions() {
         );
 }
 
-void WVkAssetResources::InitializeStaticMeshFunctions() {
-    
-    static_mesh_collection_.SetClearFn(
+void WVkAssetResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
+
+    static_mesh_collection_.Remove(
+        in_id,
+        [this] (WVkMeshInfo & in_mesh_info) -> void {
+            WVulkan::Destroy(
+                in_mesh_info,
+                device_info_
+                );
+        });    
+}
+
+const WVkTextureInfo & WVkAssetResources::TextureInfo(const WAssetId & in_id) const {
+    return texture_collection_.Get(in_id);
+}
+
+const WVkMeshInfo & WVkAssetResources::StaticMeshInfo(const WAssetIndexId & in_id) const {
+    return static_mesh_collection_.Get(in_id);
+}
+
+void WVkAssetResources::Clear() {
+    texture_collection_.Clear(
+        [this](WVkTextureInfo & in_texture_info) -> void {
+            WVulkan::Destroy(
+                in_texture_info,
+                device_info_
+                );
+        }
+        );
+
+    static_mesh_collection_.Clear(
         [this] (WVkMeshInfo & in_mesh_info) -> void {
             WVulkan::Destroy(
                 in_mesh_info,

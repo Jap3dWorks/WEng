@@ -1,20 +1,24 @@
 #pragma once
 
+#include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
+
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-// #include "WAssets/WTextureAsset.hpp"
-// #include "WAssets/WStaticMeshAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
 
-#include "WVulkan/TVkResourceCollection.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 /**
  * @brief Manage the lifetime of asset render resources like geometries or textures.
  */
 class WRENDER_API WVkAssetResources {
+private:
+
+using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId>;
+
+using WVkAssetDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId>;
 
 public:
 
@@ -38,7 +42,7 @@ public:
     // Texture
 
     void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) {
-        texture_collection_.LoadResource(
+        texture_collection_.CreateAt(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
                 WVkTextureInfo result;
@@ -59,7 +63,8 @@ public:
     // Static Mesh
 
     void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) {
-        static_mesh_collection_.LoadResource(
+
+        static_mesh_collection_.CreateAt(
             in_id,
             [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
@@ -86,14 +91,10 @@ public:
     void Clear();
 
 private:
-
-    void InitializeTextureFunctions();
-
-    void InitializeStaticMeshFunctions();
-
-    TVkResourceCollection<WVkTextureInfo, WAssetId> texture_collection_;
-
-    TVkResourceCollection<WVkMeshInfo, WAssetIndexId> static_mesh_collection_;
+    
+    WVkTextureDb texture_collection_;
+             
+    WVkAssetDb static_mesh_collection_;
 
     std::unordered_map<WAssetId, std::vector<WAssIdxId>> mesh_indexes_;
 

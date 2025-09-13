@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <concepts>
+#include <utility>
 
 template<typename B=void, typename WIdClass=WId>
 class IObjectDataBase {
@@ -64,8 +65,8 @@ public:
                                        ValueFn,
                                        IncrFn>;
 
-    using CreateFn = TFunction<T(const WIdClass &)>;
-    using DestroyFn = TFunction<void(T&)>;
+    using CreateFn = TFunction<T(const WIdClass &)>;  // TODO: class template argument
+    using DestroyFn = TFunction<void(T&)>;            // TODO: class template argument
 
 public:
 
@@ -152,9 +153,10 @@ public:
         return std::make_unique<TObjectDataBase>(*this);
     }
 
-    WIdClass Create(const CreateFn & in_predicate) {
+    template<CCallable<T, const WIdClass &> TCreateFn>
+    WIdClass Create(TCreateFn && in_create_fn) {
         WIdClass oid = id_pool_.Generate();
-        objects_.Insert(oid.GetId(), in_predicate(oid));
+        objects_.Insert(oid.GetId(), std::forward<TCreateFn>(in_create_fn) (oid));
 
         return oid;
     }
@@ -175,9 +177,10 @@ public:
         objects_.Insert(in_id.GetId(), create_fn_(in_id));
     }
 
-    void CreateAt(const WIdClass & in_id, const CreateFn & in_predicate) {
+    template<CCallable<T, const WIdClass &> TCreateFn>
+    void CreateAt(const WIdClass & in_id, TCreateFn && in_create_fn) {
         id_pool_.Reserve(in_id);
-        objects_.Insert(in_id.GetId(), in_predicate(in_id));
+        objects_.Insert(in_id.GetId(), std::forward<TCreateFn>(in_create_fn)(in_id));
     }
 
     template<typename D> requires std::is_same_v<std::remove_cvref_t<D>, T>
@@ -199,8 +202,9 @@ public:
         objects_.Insert(in_id.GetId(), *static_cast<T*>(in_value));
     }
 
-    void Remove(const WIdClass & in_id, const DestroyFn & in_destroy_fn) {
-        in_destroy_fn(objects_.Get(in_id.GetId()));
+    template<CCallable<void, T&> TDestroyFn>
+    void Remove(const WIdClass & in_id, TDestroyFn && in_destroy_fn) {
+        std::forward<TDestroyFn>(in_destroy_fn)(objects_.Get(in_id.GetId()));
         id_pool_.Release(in_id);
         objects_.Remove(in_id.GetId());
     }
@@ -315,6 +319,8 @@ public:
     constexpr ObjectsType::ConstIterator cend() const noexcept {
         return objects_.cend();
     }
+
+    
 
     void ForEach(TFunction<void(B*)> in_function) override {
         for (auto& v : objects_) {
