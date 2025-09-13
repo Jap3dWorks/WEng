@@ -9,7 +9,7 @@
 #include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
-#include "WVulkan/WVkRenderResources.hpp"
+#include "WVulkan/WVkAssetResources.hpp"
 #include "WVkSwapChainResources.hpp"
 
 #include <cstddef>
@@ -144,7 +144,7 @@ private:
     WVkDeviceInfo device_info_;
     WVkRenderDebugInfo debug_info_;
 
-    WVkRenderResources render_resources_;
+    WVkAssetResources render_resources_;
 
     std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_;
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_;

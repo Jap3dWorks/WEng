@@ -4,36 +4,36 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WAssets/WTextureAsset.hpp"
-#include "WAssets/WStaticMeshAsset.hpp"
+// #include "WAssets/WTextureAsset.hpp"
+// #include "WAssets/WStaticMeshAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
 
-#include "WVulkan/WVkResourceCollection.hpp"
+#include "WVulkan/TVkResourceCollection.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 /**
- * @brief Manage the lifetime of render resources like geometries or textures.
+ * @brief Manage the lifetime of asset render resources like geometries or textures.
  */
-class WRENDER_API WVkRenderResources {
+class WRENDER_API WVkAssetResources {
 
 public:
 
-    WVkRenderResources();
+    WVkAssetResources();
 
-    WVkRenderResources(
+    WVkAssetResources(
         const WVkDeviceInfo & in_device_info,
         const WVkCommandPoolInfo & in_command_pool_info
         );
 
-    virtual ~WVkRenderResources();
+    virtual ~WVkAssetResources();
 
-    WVkRenderResources(const WVkRenderResources & other) = delete;
+    WVkAssetResources(const WVkAssetResources & other) = delete;
 
-    WVkRenderResources(WVkRenderResources && other);
+    WVkAssetResources(WVkAssetResources && other);
 
-    WVkRenderResources & operator=(const WVkRenderResources & other) = delete;
+    WVkAssetResources & operator=(const WVkAssetResources & other) = delete;
 
-    WVkRenderResources & operator=(WVkRenderResources && other);
+    WVkAssetResources & operator=(WVkAssetResources && other);
 
     // Texture
 
@@ -91,9 +91,9 @@ private:
 
     void InitializeStaticMeshFunctions();
 
-    WVkResourceCollection<WVkTextureInfo, WAssetId> texture_collection_;
+    TVkResourceCollection<WVkTextureInfo, WAssetId> texture_collection_;
 
-    WVkResourceCollection<WVkMeshInfo, WAssetIndexId> static_mesh_collection_;
+    TVkResourceCollection<WVkMeshInfo, WAssetIndexId> static_mesh_collection_;
 
     std::unordered_map<WAssetId, std::vector<WAssIdxId>> mesh_indexes_;
 

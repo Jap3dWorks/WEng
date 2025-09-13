@@ -7,7 +7,7 @@ add_library(
         Source/WVkGraphicsPipelines.cpp
         Source/WVulkan.cpp
 	    Source/WVkRenderCommandPool.cpp
-        Source/WVulkan/WVkRenderResources.cpp
+        Source/WVulkan/WVkAssetResources.cpp
         Source/WDescriptorPoolUtils.cpp
     )
 

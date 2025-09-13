@@ -15,7 +15,7 @@
  * @brief Manage the aquirement and release of texture or mesh buffer and stuffs like that.
  */
 template<typename D, CIsWId WIdType=WAssetId>
-class WRENDER_API WVkResourceCollection
+class WRENDER_API TVkResourceCollection
 {
 public:
 
@@ -24,24 +24,24 @@ public:
 
 public:
 
-    constexpr WVkResourceCollection() noexcept :
+    constexpr TVkResourceCollection() noexcept :
     vulkan_data_()
     {}
 
-    constexpr WVkResourceCollection(ClearFn in_clear_fn) :
+    constexpr TVkResourceCollection(ClearFn in_clear_fn) :
     vulkan_data_(in_clear_fn) {}
 
-    virtual ~WVkResourceCollection() { Clear(); }
+    virtual ~TVkResourceCollection() { Clear(); }
 
-    WVkResourceCollection(const WVkResourceCollection & other) :
+    TVkResourceCollection(const TVkResourceCollection & other) :
     vulkan_data_(other.vulkan_data_)
     {}
 
-    constexpr WVkResourceCollection(WVkResourceCollection && other) noexcept :
+    constexpr TVkResourceCollection(TVkResourceCollection && other) noexcept :
     vulkan_data_(std::move(other.vulkan_data_))
     {}
 
-    WVkResourceCollection & operator=(const WVkResourceCollection & other) {
+    TVkResourceCollection & operator=(const TVkResourceCollection & other) {
         if (this != &other) {
             vulkan_data_ = other.vulkan_data_;            
         }
@@ -49,7 +49,7 @@ public:
         return *this;
     }
 
-    constexpr WVkResourceCollection & operator=(WVkResourceCollection && other) noexcept {
+    constexpr TVkResourceCollection & operator=(TVkResourceCollection && other) noexcept {
         if (this != &other) {
             vulkan_data_ = std::move(other.vulkan_data_);
         }

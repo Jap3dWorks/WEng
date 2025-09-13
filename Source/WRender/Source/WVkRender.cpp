@@ -13,7 +13,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkGraphicsPipelines.hpp"
-#include "WVulkan/WVkRenderResources.hpp"
+#include "WVulkan/WVkAssetResources.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderUtils.hpp"
@@ -215,7 +215,7 @@ void WVkRender::Initialize()
         device_info_.vk_device
         );
 
-    render_resources_ = WVkRenderResources(
+    render_resources_ = WVkAssetResources(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );

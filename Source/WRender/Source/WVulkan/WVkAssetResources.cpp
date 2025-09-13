@@ -1,14 +1,14 @@
-#include "WVulkan/WVkRenderResources.hpp"
+#include "WVulkan/WVkAssetResources.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vector>
 
-WVkRenderResources::WVkRenderResources()=default;
+WVkAssetResources::WVkAssetResources()=default;
 
-WVkRenderResources::~WVkRenderResources()=default;
+WVkAssetResources::~WVkAssetResources()=default;
 
-WVkRenderResources::WVkRenderResources(
+WVkAssetResources::WVkAssetResources(
     const WVkDeviceInfo & in_device_info,
     const WVkCommandPoolInfo & in_command_pool_info
     )  :
@@ -21,7 +21,7 @@ WVkRenderResources::WVkRenderResources(
     InitializeTextureFunctions();
 }
 
-WVkRenderResources::WVkRenderResources(WVkRenderResources && other) :
+WVkAssetResources::WVkAssetResources(WVkAssetResources && other) :
     device_info_(std::move(other.device_info_)),
     command_pool_info_(std::move(other.command_pool_info_)),
     texture_collection_(std::move(other.texture_collection_)),
@@ -34,7 +34,7 @@ WVkRenderResources::WVkRenderResources(WVkRenderResources && other) :
     other.command_pool_info_ = {};
 }
 
-WVkRenderResources & WVkRenderResources::operator=(WVkRenderResources && other) {
+WVkAssetResources & WVkAssetResources::operator=(WVkAssetResources && other) {
     if (this != &other) {
         device_info_ = std::move(other.device_info_);
         command_pool_info_ = std::move(other.command_pool_info_);
@@ -51,28 +51,28 @@ WVkRenderResources & WVkRenderResources::operator=(WVkRenderResources && other) 
     return *this;
 }
 
-void WVkRenderResources::UnloadTexture(const WAssetId & in_id) {
+void WVkAssetResources::UnloadTexture(const WAssetId & in_id) {
     texture_collection_.UnloadResource(in_id);
 }
 
-void WVkRenderResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
+void WVkAssetResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
     static_mesh_collection_.UnloadResource(in_id);
 }
 
-const WVkTextureInfo & WVkRenderResources::TextureInfo(const WAssetId & in_id) const {
+const WVkTextureInfo & WVkAssetResources::TextureInfo(const WAssetId & in_id) const {
     return texture_collection_.GetData(in_id);
 }
 
-const WVkMeshInfo & WVkRenderResources::StaticMeshInfo(const WAssetIndexId & in_id) const {
+const WVkMeshInfo & WVkAssetResources::StaticMeshInfo(const WAssetIndexId & in_id) const {
     return static_mesh_collection_.GetData(in_id);
 }
 
-void WVkRenderResources::Clear() {
+void WVkAssetResources::Clear() {
     texture_collection_.Clear();
     static_mesh_collection_.Clear();    
 }
 
-void WVkRenderResources::InitializeTextureFunctions() {
+void WVkAssetResources::InitializeTextureFunctions() {
 
     texture_collection_.SetClearFn(
         [this](WVkTextureInfo & in_texture_info) -> void {
@@ -84,7 +84,7 @@ void WVkRenderResources::InitializeTextureFunctions() {
         );
 }
 
-void WVkRenderResources::InitializeStaticMeshFunctions() {
+void WVkAssetResources::InitializeStaticMeshFunctions() {
     
     static_mesh_collection_.SetClearFn(
         [this] (WVkMeshInfo & in_mesh_info) -> void {
