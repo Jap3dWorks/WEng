@@ -100,7 +100,7 @@ public:
 
     WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
     {
-        return pipelines_manager_;
+        return graphics_pipelines_;
     }
 
     WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
@@ -155,7 +155,7 @@ private:
     WVkRenderCommandPool render_command_pool_;
     WVkCommandBufferInfo render_command_buffer_;
 
-    WVkGraphicsPipelines pipelines_manager_;
+    WVkGraphicsPipelines graphics_pipelines_;
 
     struct SyncSemaphores {
         VkSemaphore image_available{VK_NULL_HANDLE};

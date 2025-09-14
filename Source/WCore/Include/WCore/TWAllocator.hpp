@@ -2,7 +2,6 @@
 
 #include <type_traits>
 #include "WCore/WConcepts.hpp"
-#include "WLog.hpp"
 
 template<typename T,
          CCallable<void, T*, std::size_t, T*, std::size_t>  AllocateFn,

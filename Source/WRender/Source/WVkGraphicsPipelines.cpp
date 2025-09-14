@@ -44,7 +44,6 @@ WVkGraphicsPipelines::WVkGraphicsPipelines(
     descriptor_pools_(std::move(other.descriptor_pools_)),
     bindings_(std::move(other.bindings_)),
     pipeline_pbindings_(std::move(other.pipeline_pbindings_)),
-    ptype_pipelines_(std::move(other.ptype_pipelines_)),
     global_graphics_descsets_(std::move(other.global_graphics_descsets_)),
     device_info_(std::move(other.device_info_)),
     width_(std::move(other.width_)),
@@ -69,7 +68,6 @@ WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && o
         bindings_ = std::move(other.bindings_);
 
         pipeline_pbindings_ = std::move(other.pipeline_pbindings_);
-        ptype_pipelines_ = std::move(other.ptype_pipelines_);
 
         width_ = std::move(other.width_);
         height_ = std::move(other.height_);
@@ -137,7 +135,6 @@ void WVkGraphicsPipelines::CreateRenderPipeline(
     }
 
     pipeline_pbindings_[in_id] = {};
-    ptype_pipelines_[render_pipeline_info.type].Insert(in_id.GetId(), in_id);
 }
 
 void WVkGraphicsPipelines::DeleteRenderPipeline(
@@ -152,12 +149,6 @@ void WVkGraphicsPipelines::DeleteRenderPipeline(
     pipeline_pbindings_.erase(in_id);
     
     pipelines_.Remove(in_id);
-
-    for(auto & p : ptype_pipelines_) {
-        if (p.second.Contains(in_id.GetId())) {
-            p.second.Remove(in_id.GetId());
-        }
-    }
 
     for (std::uint8_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         descriptor_pools_[i].Remove(in_id);
@@ -242,38 +233,6 @@ void WVkGraphicsPipelines::DeleteBinding(const WEntityComponentId & in_id) {
         if (p.second.Contains(in_id.GetId())) {
             p.second.Remove(in_id.GetId());            
         }
-    }
-}
-
-void WVkGraphicsPipelines::ForEachPipeline(EPipelineType in_type,
-                                                TFunction<void(const WAssetId &)> in_predicate)
-{
-    for(auto & wid : ptype_pipelines_[in_type]) {
-        in_predicate(wid);
-    }
-}
-    
-void WVkGraphicsPipelines::ForEachPipeline(EPipelineType in_type,
-                                                TFunction<void(WVkRenderPipelineInfo&)> in_predicate)
-{
-    for(auto & wid : ptype_pipelines_[in_type]) {
-        in_predicate(pipelines_.Get(wid));
-    }
-}
-    
-void WVkGraphicsPipelines::ForEachBinding(const WAssetId & in_pipeline_id,
-                                               TFunction<void(const WEntityComponentId &)> in_predicate)
-{
-    for(auto & wid : pipeline_pbindings_[in_pipeline_id]) {
-        in_predicate(wid);
-    }
-}
-    
-void WVkGraphicsPipelines::ForEachBinding(const WAssetId & in_pipeline_id,
-                                               TFunction<void(WVkPipelineBindingInfo)> in_predicate)
-{
-    for (auto & wid : pipeline_pbindings_[in_pipeline_id]) {
-        in_predicate(bindings_.Get(wid));
     }
 }
 

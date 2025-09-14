@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -116,29 +117,33 @@ public:
 
     void constexpr Height(const std::uint32_t & in_height) noexcept { height_ = in_height; }
 
-    void ForEachPipeline(EPipelineType in_type,
-                         TFunction<void(const WAssetId &)> in_predicate);
-    
-    void ForEachPipeline(EPipelineType in_type,
-                         TFunction<void(WVkRenderPipelineInfo&)> in_predicate);
-    
-    void ForEachBinding(const WAssetId & in_pipeline_id,
-                        TFunction<void(const WEntityComponentId &)> in_predicate);
-    
-    void ForEachBinding(const WAssetId & in_pipeline_id,
-                        TFunction<void(WVkPipelineBindingInfo)> in_predicate);
-
-    auto IteratePipelines(EPipelineType in_pipeline_type) {
-        return WIteratorUtils::DefaultIteratorPtr<WAssetId>(
-            &(*ptype_pipelines_[in_pipeline_type].begin()),
-            &(*ptype_pipelines_[in_pipeline_type].end())
-            );
+    template<CCallable<void, const WAssetId&, WVkRenderPipelineInfo&> TFn>
+    void ForEachPipeline(TFn && in_fn) const {
+        pipelines_.ForEachIdValue(std::forward<TFn>(in_fn));
     }
 
-    auto IterateBindings(const WAssetId & in_pipeline_id) {
-        return WIteratorUtils::DefaultIteratorPtr<WEntityComponentId>(
-            &(*pipeline_pbindings_[in_pipeline_id].begin()),
-            &(*pipeline_pbindings_[in_pipeline_id].end())
+    template<CCallable<void, const WEntityComponentId &> TFn>
+    void ForEachBinding(const WAssetId & in_pipeline_id, TFn && in_predicate) const {
+        for (const auto & wid : pipeline_pbindings_.at(in_pipeline_id)) {
+            std::forward<TFn>(in_predicate)(wid);
+        }
+    }
+
+    template<CCallable<void, const WVkPipelineBindingInfo &> TFn>
+    void ForEachBinding(const WAssetId & in_pipeline_id, TFn && in_fn) const {
+        for (const auto & wid : pipeline_pbindings_.at(in_pipeline_id)) {
+            std::forward<TFn>(in_fn)(bindings_.Get(wid));
+        }
+    }
+
+    auto IteratePipelines() const {
+        return pipelines_.IterIndexes();
+    }
+
+    auto IterateBindings(const WAssetId & in_pipeline_id) const {
+        return WIteratorUtils::DefaultIteratorPtr<const WEntityComponentId>(
+            &(*pipeline_pbindings_.at(in_pipeline_id).begin()),
+            &(*pipeline_pbindings_.at(in_pipeline_id).end())
             );
     }
 
@@ -192,9 +197,6 @@ private:
 
     /** Relation between each pipeline and its bindings */
     std::unordered_map<WAssetId, TSparseSet<WEntityComponentId>> pipeline_pbindings_{};
-
-    /** Pipelines grouped by PipelineType*/
-    std::unordered_map<EPipelineType, TSparseSet<WAssetId>> ptype_pipelines_{};
 
     /** Camera, lights, ... */
     GlobalGraphicsResources global_graphics_descsets_{};
