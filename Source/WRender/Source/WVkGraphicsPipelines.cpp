@@ -79,7 +79,7 @@ WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && o
     return *this;
 }
 
-void WVkGraphicsPipelines::CreateRenderPipeline(
+void WVkGraphicsPipelines::CreatePipeline(
     const WAssetId & in_id,
     const WRenderPipelineStruct & pipeline_struct
     ) {
@@ -137,7 +137,7 @@ void WVkGraphicsPipelines::CreateRenderPipeline(
     pipeline_pbindings_[in_id] = {};
 }
 
-void WVkGraphicsPipelines::DeleteRenderPipeline(
+void WVkGraphicsPipelines::DeletePipeline(
     const WAssetId & in_id
     )
 {
@@ -274,16 +274,15 @@ void WVkGraphicsPipelines::CreateGraphicDescriptorSetLayout(const WAssetId & in_
 
     descriptor_set_layouts_.CreateAt(
         in_id,
-        [this,
-         &descriptor_set_layout_info](const WAssetId & _in_id) -> auto {
-        WVulkan::Create(
-            descriptor_set_layout_info,
-            device_info_
-            );
-
-        descriptor_set_layout_info.wid = _in_id;
-        return descriptor_set_layout_info;
-    });
+        [this, &descriptor_set_layout_info]
+        (const WAssetId & _in_id) -> auto {
+            WVulkan::Create(
+                descriptor_set_layout_info,
+                device_info_
+                );
+            descriptor_set_layout_info.wid = _in_id;
+            return descriptor_set_layout_info;
+        });
 }
 
 void WVkGraphicsPipelines::Initialize_ClearLambdas() {

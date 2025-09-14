@@ -338,14 +338,14 @@ void WVkRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
     ) {
     // TODO: check pipeline type
-    graphics_pipelines_.CreateRenderPipeline(
+    graphics_pipelines_.CreatePipeline(
         render_pipeline->WID(),
         render_pipeline->RenderPipeline()
         );
 }
 
 void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
-    graphics_pipelines_.DeleteRenderPipeline(
+    graphics_pipelines_.DeletePipeline(
         in_id
         );
 }
@@ -591,7 +591,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_render_[in_frame_index].extent
         );
 
-    for(auto pipeline_id : graphics_pipelines_.IteratePipelines()) {
+    for(auto pipeline_id : graphics_pipelines_.IterPipelines()) {
         
         graphics_pipelines_.ResetDescriptorPool(pipeline_id, frame_index_);
 
@@ -609,8 +609,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
             offscreen_render_[in_frame_index].extent
             );
 
-        for (auto & bid : graphics_pipelines_.IterateBindings(pipeline_id))
-        {
+        for (auto & bid : graphics_pipelines_.IterBindings(pipeline_id)) {
 
             auto& binding = graphics_pipelines_.Binding(bid);
 

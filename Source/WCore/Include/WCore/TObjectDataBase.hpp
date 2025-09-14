@@ -209,9 +209,10 @@ public:
         objects_.Remove(in_id.GetId());
     }
 
-    void Clear(const DestroyFn & in_destroy_fn) {
+    template<CCallable<void, T&> TFn>
+    void Clear(TFn && in_destroy_fn) {
         for (auto & o : objects_) {
-            in_destroy_fn(o);
+            std::forward<TFn>(in_destroy_fn)(o);
         }
         
         id_pool_.Clear();
@@ -355,7 +356,8 @@ private:
 };
 
 template<typename T, CConvertibleTo<T> B=void, typename WIdClass=WId, typename Allocator=std::allocator<T>>
-using TObjectDataBase = TObjDb<T, TFunction<T(const WIdClass&)>,
+using TObjectDataBase = TObjDb<T,
+                               TFunction<T(const WIdClass&)>,
                                TFunction<void(T&)>,
                                B, WIdClass,
                                Allocator>;

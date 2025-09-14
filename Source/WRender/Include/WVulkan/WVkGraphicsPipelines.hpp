@@ -27,7 +27,7 @@ private:
     struct GlobalGraphicsResources {
         WVkDescriptorPoolInfo descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
-        
+
         std::array<WVkDescriptorSetInfo, WENG_MAX_FRAMES_IN_FLIGHT> descset_info{};
         std::array<WVkUBOInfo, WENG_MAX_FRAMES_IN_FLIGHT> camera_ubo{};
     };
@@ -36,7 +36,6 @@ public:
 
     using WVkRenderPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WAssetId>;
     using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WAssetId>;
-    using WVkDesSetDb = TObjectDataBase<WVkDescriptorSetInfo, void, WEntityComponentId>;
     using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
     using WVkDescriptorPoolDb =
         std::array<TObjectDataBase<WVkDescriptorPoolInfo, void, WAssetId>,
@@ -67,12 +66,12 @@ public:
         ) noexcept;
 
     // Create Graphics Render Pipeline
-    void CreateRenderPipeline(
+    void CreatePipeline(
         const WAssetId & in_id,
         const WRenderPipelineStruct & pstruct
         );
 
-    void DeleteRenderPipeline(
+    void DeletePipeline(
         const WAssetId & in_id
         );
 
@@ -136,11 +135,11 @@ public:
         }
     }
 
-    auto IteratePipelines() const {
+    auto IterPipelines() const {
         return pipelines_.IterIndexes();
     }
 
-    auto IterateBindings(const WAssetId & in_pipeline_id) const {
+    auto IterBindings(const WAssetId & in_pipeline_id) const {
         return WIteratorUtils::DefaultIteratorPtr<const WEntityComponentId>(
             &(*pipeline_pbindings_.at(in_pipeline_id).begin()),
             &(*pipeline_pbindings_.at(in_pipeline_id).end())

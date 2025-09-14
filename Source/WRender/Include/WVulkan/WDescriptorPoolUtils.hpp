@@ -4,6 +4,8 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
+// TODO Move to WVulkan and remove this file
+
 namespace WDescPoolUtils {
     
     void CreateGraphicsDescSetPool(
