@@ -188,11 +188,11 @@ void WVkRender::Initialize()
 
     // --
 
-    graphics_pipelines_ = WVkGraphicsPipelines(
-        device_info_,
-        dimensions[0],
-        dimensions[1]
-        );
+    graphics_pipelines_ = WVkGraphicsPipelines(device_info_);
+        // device_info_ // ,
+        // dimensions[0],
+        // dimensions[1]
+        // );
 
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
@@ -497,8 +497,8 @@ void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in
 
     RecreateSwapChain();
     
-    graphics_pipelines_.Width(window_.width);
-    graphics_pipelines_.Height(window_.height);
+    // graphics_pipelines_.Width(window_.width);
+    // graphics_pipelines_.Height(window_.height);
 }
 
 void WVkRender::RecreateSwapChain() {
@@ -596,7 +596,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         graphics_pipelines_.ResetDescriptorPool(pipeline_id, frame_index_);
 
         const WVkRenderPipelineInfo & render_pipeline =
-            graphics_pipelines_.RenderPipelineInfo(pipeline_id);
+            graphics_pipelines_.Pipeline(pipeline_id);
 
         vkCmdBindPipeline(
             render_command_buffer_.command_buffers[in_frame_index],
@@ -616,7 +616,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
             // Create descriptor
             VkDescriptorSet descriptorset = WVkRenderUtils::CreateGraphicsDescriptor(
                 device_info_.vk_device,
-                graphics_pipelines_.DescriptorPoolInfo(pipeline_id, in_frame_index).descriptor_pool,
+                graphics_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
                 graphics_pipelines_.DescriptorSetLayout(pipeline_id).descriptor_set_layout,
                 binding.ubo[in_frame_index],
                 binding.textures

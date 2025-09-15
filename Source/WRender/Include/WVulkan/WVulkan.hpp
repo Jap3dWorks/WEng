@@ -2,7 +2,6 @@
 
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WLog.hpp"
 
 #include <cstdint>
@@ -22,22 +21,22 @@ namespace WVulkan
 
     /**
      * Creates a Vulkan Instance.
-    */
+     */
     void Create(WVkInstanceInfo &out_instance_info, const WVkRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Surface.
-    */
+     */
     void Create(WVkSurfaceInfo & surface_info, WVkInstanceInfo & instance, GLFWwindow * window);
 
     /**
      * Creates a Vulkan Device.
-    */
+     */
     void Create(WVkDeviceInfo &Device, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info);
 
     /**
      * Creates a Vulkan Swap Chain.
-    */
+     */
     void Create(
         WVkSwapChainInfo & out_swap_chain, 
         const WVkDeviceInfo &device_info, 
@@ -49,7 +48,7 @@ namespace WVulkan
 
     /**
      * @brief Creates offscreen Render Pass.
-    */
+     */
     void CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pass,
                                    const VkFormat & in_swap_chain_image_format,
                                    const WVkDeviceInfo& in_device_info);
@@ -61,19 +60,19 @@ namespace WVulkan
 
     /**
      * @brief Creates a Vulkan Command Pool.
-    */
+     */
     void Create(
         WVkCommandPoolInfo & command_pool_info,
         const WVkDeviceInfo & device_info,
         const WVkSurfaceInfo & surface_info
-	);
+        );
 
     void CreateTexture(
         WVkTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
         const WVkDeviceInfo& device_info,
         const WVkCommandPoolInfo& command_pool_info
-    );
+        );
 
     void Create(
         WVkRenderPipelineInfo & out_pipeline_info,
@@ -99,7 +98,7 @@ namespace WVulkan
         const std::uint32_t & index_count,
         const WVkDeviceInfo & device,
         const WVkCommandPoolInfo & command_pool_info
-    );
+        );
 
     void CreateUBO(
         WVkUBOInfo & out_uniform_buffer_info,
@@ -119,14 +118,14 @@ namespace WVulkan
     void Create(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & device
-    );
+        );
 
     void Create(
         WVkDescriptorSetInfo& out_descriptor_set_info,
         const WVkDeviceInfo &device,
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WVkDescriptorPoolInfo& descriptor_pool_info
-    );
+        );
  
     // ----------------
  
@@ -150,12 +149,12 @@ namespace WVulkan
 
     /**
      * @brief Create a WCommandBufferInfo.
-    */
+     */
     void Create(
         WVkCommandBufferInfo & out_command_buffer_info,
         const WVkDeviceInfo & device,
         const WVkCommandPoolInfo & command_pool_info
-    );
+        );
 
     void CreateImage(
         VkImage& out_image,
@@ -170,7 +169,7 @@ namespace WVulkan
         const VkImageTiling& tiling, 
         const VkImageUsageFlags& usage, 
         const VkMemoryPropertyFlags& properties
-    );
+        );
 
     VkImageView CreateImageView(
         const VkImage& image, 
@@ -178,13 +177,13 @@ namespace WVulkan
         const VkImageAspectFlags& aspect_flags, 
         const uint32_t& mip_levels,
         const VkDevice& device 
-    );
+        );
 
     VkSampler CreateTextureSampler(
         const VkDevice& device, 
         const VkPhysicalDevice& physical_device,
         const uint32_t& mip_levels
-    );
+        );
 
     void CreateVkBuffer(
         VkBuffer & out_buffer, 
@@ -194,7 +193,7 @@ namespace WVulkan
         VkDeviceSize size, 
         VkBufferUsageFlags usage, 
         VkMemoryPropertyFlags properties
-    );
+        );
 
     // Destroy functions
     // -----------------
@@ -265,16 +264,6 @@ namespace WVulkan
 
     // Descriptor Set Layout
     // ---------------------
-
-    /**
-     * @brief Adds the Camera and lightings UBOs (std140, set=0)
-     */
-    void AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
-
-    /**
-     * @brief Adds common graphic pipeline bindings, should be used in set=1
-     */
-    void AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_descriptor_set_layout);
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,
@@ -360,7 +349,7 @@ namespace WVulkan
 
     /**
      * @brief Checks if the requested validation layers are available.
-    */
+     */
     bool CheckValidationLayerSupport(const WVkRenderDebugInfo &debug_info);
 
     struct QueueFamilyIndices
@@ -369,9 +358,9 @@ namespace WVulkan
         std::optional<uint32_t> present_family;
 
         bool IsComplete()
-        {
-            return graphics_family.has_value() && present_family.has_value();
-        }
+            {
+                return graphics_family.has_value() && present_family.has_value();
+            }
     };
 
     struct SwapChainSupportDetails
@@ -397,7 +386,7 @@ namespace WVulkan
 
     /**
      * Return a list of required vulkan instance extensions.
-    */
+     */
     std::vector<const char*> GetRequiredExtensions(bool enable_validation_layers=false);
 
     VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
@@ -405,7 +394,7 @@ namespace WVulkan
         VkDebugUtilsMessageTypeFlagsEXT InMessageType,
         const VkDebugUtilsMessengerCallbackDataEXT* InCallbackData,
         void* InUserData
-    );
+        );
 
     bool IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, const std::vector<const char*>& device_extensions);
 
@@ -425,7 +414,7 @@ namespace WVulkan
         const VkImageLayout & in_old_layout, 
         const VkImageLayout & in_new_layout, 
         const uint32_t & in_mip_levels
-    );
+        );
 
     void CopyBufferToImage(
         VkBuffer in_buffer,
@@ -445,23 +434,14 @@ namespace WVulkan
     VkCommandBuffer BeginSingleTimeCommands(
         const VkDevice & device, 
         const VkCommandPool & command_pool
-    );
+        );
 
     void EndSingleTimeCommands(
         const VkDevice& device, 
         const VkCommandPool& command_pool, 
         const VkQueue& graphics_queue, 
         const VkCommandBuffer& command_buffer
-    );
-
-    /**
-     * @brief Creates a shader stage from a spir-v shader file in disk.
-     */
-    WVkShaderStageInfo BuildGraphicsShaderStageInfo(
-	const char* in_shader_file_path,
-	const char* int_entry_point,
-	EShaderType in_shader_type
-	);
+        );
 
     VkSampleCountFlagBits GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device);
 

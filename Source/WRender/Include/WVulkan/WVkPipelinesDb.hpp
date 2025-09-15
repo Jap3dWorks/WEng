@@ -1,19 +1,19 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WStructs/WRenderStructs.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WDescriptorPoolUtils.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WCore/WStringUtils.hpp"
 
 #include <utility>
 #include <vulkan/vulkan_core.h>
 
-template<std::uint32_t FramesInFlight,
-         typename WPipelineIdType=WAssetId>
+template<typename WPipelineIdType=WAssetId, std::uint32_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesDb {
 public:
 
@@ -38,41 +38,31 @@ public:
 
     WVkPipelinesDb & operator=(WVkPipelinesDb &&) noexcept = default;
 
-    template<CCallable<void, WVkRenderPipelineInfo&, const WVkDescriptorSetLayoutInfo &> CreateFn>
     void CreatePipeline(const WVkDeviceInfo & in_device_info,
-                        const WPipelineIdType & in_id,
-                        const WRenderPipelineStruct & pipeline_struct,
-                        const WVkDescriptorSetLayoutInfo & descriptor_set_layout,
-                        CreateFn && create_fn) {
-        std::vector<WVkShaderStageInfo> shaders;
-        shaders.reserve(pipeline_struct.shaders_count);
-
-        // TODO transition to slang
-        for (uint8_t i=0; i < pipeline_struct.shaders_count; i++) {
-            shaders.push_back(
-                WVulkan::BuildGraphicsShaderStageInfo(
-                    WStringUtils::SystemPath(pipeline_struct.shaders[i].file).c_str(),
-                    pipeline_struct.shaders[i].entry,
-                    pipeline_struct.shaders[i].type
-                    )
-                );
-        }
-
+                        const WPipelineIdType & in_pipeline_id,
+                        const std::vector<WVkDescriptorSetLayoutInfo> & in_descset_layouts,
+                        const std::vector<WVkShaderStageInfo> & in_shaders) {
+        
         WVkRenderPipelineInfo render_pipeline_info;
-        render_pipeline_info.type = pipeline_struct.type;
 
-        create_fn(render_pipeline_info, descriptor_set_layout);
+        WVulkan::Create(
+            render_pipeline_info,
+            in_device_info,
+            in_descset_layouts,
+            in_shaders
+            );
 
-        pipelines.InsertAt(in_id, render_pipeline_info);
+        pipelines.InsertAt(in_pipeline_id, render_pipeline_info);
 
-        render_pipeline_info.wid = in_id;
-        render_pipeline_info.descriptor_set_layout_id = in_id;
+        render_pipeline_info.wid = in_pipeline_id;
+        render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
     template<CCallable<void, WVkDescriptorSetLayoutInfo&> ConfigInfoFn>
-    void CreateDescriptorSetLayout(const WVkDeviceInfo & in_device,
+    void CreateDescSetLayout(const WVkDeviceInfo & in_device,
                                    const WPipelineIdType & in_id,
                                    ConfigInfoFn && info_fn) {
+        
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
         std::forward<ConfigInfoFn>(info_fn)(descriptor_set_layout_info);
@@ -91,7 +81,7 @@ public:
     }
 
     template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const WVkDeviceInfo&> TCreateFn>
-    void CreateDescriptorPool(const WVkDeviceInfo & in_device,
+    void CreateDescSetPool(const WVkDeviceInfo & in_device,
                               const WPipelineIdType & in_id,
                               TCreateFn && create_fn
         ) {
@@ -108,6 +98,26 @@ public:
         }
     }
 
+    template<typename ShadersData,
+             CCallable<WVkShaderStageInfo, const char*, const char *, EShaderType> TFn>
+    std::vector<WVkShaderStageInfo> BuildShaders(const std::uint32_t & shaders_count,
+                                                 ShadersData && in_data,
+                                                 TFn && in_fn) {
+        std::vector<WVkShaderStageInfo> result;
+        result.reserve(shaders_count);
+
+        // TODO transition to slang
+        for (uint8_t i=0; i < shaders_count; i++) {
+            result.push_back(
+                std::forward<TFn>(in_fn)(
+                    WStringUtils::SystemPath(std::forward<ShadersData>(in_data)[i].file).c_str(),
+                    std::forward<ShadersData>(in_data)[i].entry,
+                    std::forward<ShadersData>(in_data)[i].type)
+                );
+        }
+        
+        return result;
+    }
 
     void ResetDescriptorPool(const WVkDeviceInfo & in_device,
                              const WPipelineIdType & in_id,
@@ -119,12 +129,37 @@ public:
             );
     }
 
+    void RemovePipeline(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+        pipelines.Remove(in_id, [&in_device](auto & rpip) {
+            WVulkan::Destroy(
+                rpip,
+                in_device);
+        });
+    }
+
+    void RemoveDescSetLayout(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+        descriptor_set_layouts.Remove(in_id,
+                                      [&in_device](auto & dsetlay) {
+                                          WVulkan::Destroy(dsetlay,
+                                                           in_device);
+                                      });
+    }
+
+    void RemoveDescPool(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+        for(std::uint32_t i=0; i<FramesInFlight; i++) {
+            descriptor_pools[i].Remove(in_id,
+                                       [&in_device](auto & dpool) {
+                                           WVulkan::Destroy(dpool, in_device);
+                                       });
+        }
+    }
+
     void Clear(const WVkDeviceInfo & in_device) {
         
         for(std::uint32_t i=0; i < FramesInFlight; i++) {
             descriptor_pools[i].Clear(
                 [di_=in_device](auto & b) {
-                    WDescPoolUtils::Destroy(b, di_);
+                    WVulkan::Destroy(b, di_);
                 }
                 );
         }

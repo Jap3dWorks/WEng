@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include "WCore/TObjectDataBase.hpp"
+#include "WVulkan/WVkPipelinesDb.hpp"
 
 /**
  * @brief A render pipeline is a collection of shaders and render states.
@@ -34,21 +35,14 @@ private:
 
 public:
 
-    using WVkRenderPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WAssetId>;
-    using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WAssetId>;
     using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
-    using WVkDescriptorPoolDb =
-        std::array<TObjectDataBase<WVkDescriptorPoolInfo, void, WAssetId>,
-            WENG_MAX_FRAMES_IN_FLIGHT>;
 
     WVkGraphicsPipelines() noexcept = default;
 
     virtual ~WVkGraphicsPipelines();
 
     WVkGraphicsPipelines(
-        WVkDeviceInfo device, 
-        uint32_t in_width,
-        uint32_t in_height
+        WVkDeviceInfo device 
         );
 
     WVkGraphicsPipelines(const WVkGraphicsPipelines & other)=delete;
@@ -87,20 +81,20 @@ public:
 
     void DeleteBinding(const WEntityComponentId & in_id);
 
-    WNODISCARD const WVkRenderPipelineInfo & RenderPipelineInfo(const WAssetId & in_id) const {
-        assert(pipelines_.Contains(in_id));
-        return pipelines_.Get(in_id);
+    WNODISCARD const WVkRenderPipelineInfo & Pipeline(const WAssetId & in_id) const {
+        assert(pipelines_db_.pipelines.Contains(in_id));
+        return pipelines_db_.pipelines.Get(in_id);
     }
     
     WNODISCARD const WVkDescriptorSetLayoutInfo & DescriptorSetLayout(const WAssetId & in_id) const {
-        assert(descriptor_set_layouts_.Contains(in_id));
-        return descriptor_set_layouts_.Get(in_id);
+        assert(pipelines_db_.descriptor_set_layouts.Contains(in_id));
+        return pipelines_db_.descriptor_set_layouts.Get(in_id);
     }
 
-    WNODISCARD const WVkDescriptorPoolInfo & DescriptorPoolInfo(const WAssetId & in_id,
+    WNODISCARD const WVkDescriptorPoolInfo & DescriptorPool(const WAssetId & in_id,
                                                                 const std::uint32_t & in_frameindex) const {
-        assert(descriptor_pools_.at(in_frameindex).Contains(in_id));
-        return descriptor_pools_.at(in_frameindex).Get(in_id);
+        assert(pipelines_db_.descriptor_pools.at(in_frameindex).Contains(in_id));
+        return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }
 
     WNODISCARD const WVkPipelineBindingInfo & Binding(const WEntityComponentId & in_id) const {
@@ -108,17 +102,9 @@ public:
         return bindings_.Get(in_id);
     }
 
-    WNODISCARD constexpr uint32_t Width() const noexcept { return width_; }
-
-    void constexpr Width(const std::uint32_t & in_width) noexcept { width_ = in_width; }
-
-    WNODISCARD constexpr uint32_t Heigth() const noexcept { return height_; }
-
-    void constexpr Height(const std::uint32_t & in_height) noexcept { height_ = in_height; }
-
     template<CCallable<void, const WAssetId&, WVkRenderPipelineInfo&> TFn>
     void ForEachPipeline(TFn && in_fn) const {
-        pipelines_.ForEachIdValue(std::forward<TFn>(in_fn));
+        pipelines_db_.pipelines.ForEachIdValue(std::forward<TFn>(in_fn));
     }
 
     template<CCallable<void, const WEntityComponentId &> TFn>
@@ -136,7 +122,7 @@ public:
     }
 
     auto IterPipelines() const {
-        return pipelines_.IterIndexes();
+        return pipelines_db_.pipelines.IterIndexes();
     }
 
     auto IterBindings(const WAssetId & in_pipeline_id) const {
@@ -181,18 +167,15 @@ public:
 
 private:
 
-    void CreateDescriptorSetLayout(const WAssetId & in_id);
-
     void Initialize_ClearLambdas();
 
     void Initialize_GlobalGraphicDescriptors();
 
     void Destroy_GlobalGraphics();
+
+    WVkPipelinesDb<WAssetId, WENG_MAX_FRAMES_IN_FLIGHT> pipelines_db_{};
     
-    WVkRenderPipelineDb pipelines_{};
-    WVkDescSetLayoutDb descriptor_set_layouts_{};
     WVkPipelineBindingDb bindings_{};
-    WVkDescriptorPoolDb descriptor_pools_{};
 
     /** Relation between each pipeline and its bindings */
     std::unordered_map<WAssetId, TSparseSet<WEntityComponentId>> pipeline_pbindings_{};
@@ -201,9 +184,6 @@ private:
     GlobalGraphicsResources global_graphics_descsets_{};
 
     WVkDeviceInfo device_info_{};
-
-    uint32_t width_{0};
-    uint32_t height_{0};
 
 };
 

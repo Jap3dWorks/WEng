@@ -3,6 +3,9 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVulkan.hpp"
+#include "WStructs/WGeometryStructs.hpp"
+#include "WShaderUtils.hpp"
 #include <stdexcept>
 #include <array>
 
@@ -41,6 +44,98 @@ namespace WVkGraphicsPipelinesUtils {
         {
             throw std::runtime_error("Failed to create descriptor pool!");
         }
+    }
+
+    inline WVkShaderStageInfo BuildGraphicsShaderStageInfo(
+        const char* in_shader_file_path,
+        const char* in_entry_point,
+        EShaderType in_shader_type
+        ) {
+        WVkShaderStageInfo result;
+
+        std::string file_path = in_shader_file_path;
+
+        result.code = WShaderUtils::ReadShader(file_path);
+
+        result.entry_point = in_entry_point;
+        result.type = in_shader_type;
+
+        if (in_shader_type == EShaderType::Vertex)
+        {
+            result.attribute_descriptors.resize(3);
+
+            // Geometry data structure
+
+            result.attribute_descriptors[0].binding = 0;
+            result.attribute_descriptors[0].location = 0;
+            result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+            result.attribute_descriptors[0].offset = offsetof(WVertexStruct, Position);
+
+            result.attribute_descriptors[1].binding = 0;
+            result.attribute_descriptors[1].location = 1;
+            result.attribute_descriptors[1].format = VK_FORMAT_R32G32_SFLOAT;
+            result.attribute_descriptors[1].offset = offsetof(WVertexStruct, TexCoords);
+
+            result.attribute_descriptors[2].binding = 0;
+            result.attribute_descriptors[2].location = 2;
+            result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+            result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
+
+        // TODO Normals
+
+        // more vertex data bindings here
+
+            result.binding_descriptors.resize(1);
+            result.binding_descriptors[0].binding = 0;
+            result.binding_descriptors[0].stride = sizeof(WVertexStruct);
+            result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        }
+
+        return result;
+    }
+
+    /**
+     * @brief Adds common graphic pipeline bindings, should be used in set=1
+     */
+    inline void AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
+        // Model UBO
+        VkDescriptorSetLayoutBinding ubo_layout_binding{};
+        ubo_layout_binding.binding = 0;
+        ubo_layout_binding.descriptorCount = 1;
+        ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ubo_layout_binding.pImmutableSamplers = nullptr;
+        ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        // A texture in the fragment shader
+        VkDescriptorSetLayoutBinding sampler_layout_binding{};
+        sampler_layout_binding.binding = 1;
+        sampler_layout_binding.descriptorCount = 1;
+        sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        sampler_layout_binding.pImmutableSamplers = nullptr;
+        sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        out_dsl.bindings = {
+            ubo_layout_binding,
+            sampler_layout_binding
+        };
+    }
+
+    /**
+     * @brief Adds the Camera and lightings UBOs (std140, set=0)
+     */
+    inline void AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
+        VkDescriptorSetLayoutBinding camera_binding{};
+        camera_binding.binding=0;
+        camera_binding.descriptorCount = 1;
+        camera_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        camera_binding.pImmutableSamplers = nullptr;
+        camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        // TODO lights here as another ubo
+
+        out_dsl.bindings = {
+            camera_binding
+        };
     }
 
 }

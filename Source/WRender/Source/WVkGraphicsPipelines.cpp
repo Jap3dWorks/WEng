@@ -1,7 +1,7 @@
 #include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WCore/WStringUtils.hpp"
+// #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -24,12 +24,8 @@ WVkGraphicsPipelines::~WVkGraphicsPipelines()
 }
 
 WVkGraphicsPipelines::WVkGraphicsPipelines(
-    WVkDeviceInfo device,
-    uint32_t in_width,
-    uint32_t in_height
-) : device_info_(device),
-    width_(in_width),
-    height_(in_height)
+    WVkDeviceInfo device
+) : device_info_(device)
 {
     WFLOG("Initialize Global Graphic Descriptors.");
     Initialize_GlobalGraphicDescriptors();
@@ -39,15 +35,11 @@ WVkGraphicsPipelines::WVkGraphicsPipelines(
 WVkGraphicsPipelines::WVkGraphicsPipelines(
     WVkGraphicsPipelines && other
     ) noexcept :
-    pipelines_(std::move(other.pipelines_)),
-    descriptor_set_layouts_(std::move(other.descriptor_set_layouts_)),
-    descriptor_pools_(std::move(other.descriptor_pools_)),
+    pipelines_db_(std::move(other.pipelines_db_)),
     bindings_(std::move(other.bindings_)),
     pipeline_pbindings_(std::move(other.pipeline_pbindings_)),
     global_graphics_descsets_(std::move(other.global_graphics_descsets_)),
-    device_info_(std::move(other.device_info_)),
-    width_(std::move(other.width_)),
-    height_(std::move(other.height_))
+    device_info_(std::move(other.device_info_))
 {
     other.device_info_ = {};
     other.global_graphics_descsets_ = {};
@@ -59,18 +51,13 @@ WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && o
         Clear();
 
         device_info_ = std::move(other.device_info_);
-        descriptor_pools_ = std::move(other.descriptor_pools_);
 
         global_graphics_descsets_ = std::move(other.global_graphics_descsets_);
 
-        pipelines_ = std::move(other.pipelines_);
-        descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+        pipelines_db_ = std::move(other.pipelines_db_);
         bindings_ = std::move(other.bindings_);
 
         pipeline_pbindings_ = std::move(other.pipeline_pbindings_);
-
-        width_ = std::move(other.width_);
-        height_ = std::move(other.height_);
 
         other.device_info_ = {};
         other.global_graphics_descsets_ = {};
@@ -84,55 +71,32 @@ void WVkGraphicsPipelines::CreatePipeline(
     const WRenderPipelineStruct & pipeline_struct
     ) {
 
-    WVkRenderPipelineInfo render_pipeline_info;
-    render_pipeline_info.type = pipeline_struct.type;
+    std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
+        pipeline_struct.shaders_count,
+        pipeline_struct.shaders,
+        WVkGraphicsPipelinesUtils::BuildGraphicsShaderStageInfo
+        );
 
-    std::vector<WVkShaderStageInfo> shaders;
-    shaders.reserve(pipeline_struct.shaders_count);
-
-    // TODO transition to slang
-    for (uint8_t i=0; i < pipeline_struct.shaders_count; i++) {
-        shaders.push_back(
-            WVulkan::BuildGraphicsShaderStageInfo(
-                WStringUtils::SystemPath(pipeline_struct.shaders[i].file).c_str(),
-                pipeline_struct.shaders[i].entry,
-                pipeline_struct.shaders[i].type
-                )
-            );
-    }
-    
-    // Use asset pipeline id too.
-    CreateDescriptorSetLayout(in_id);
-
-    auto& d_set_layout = descriptor_set_layouts_.Get(in_id);
-
-    WVulkan::Create(
-        render_pipeline_info,
+    pipelines_db_.CreateDescSetLayout(
         device_info_,
+        in_id,
+        WVkGraphicsPipelinesUtils::AddDSL_DefaultGraphicBindings
+        );
+
+    pipelines_db_.CreatePipeline(
+        device_info_,
+        in_id,
         {
             global_graphics_descsets_.descset_layout_info,
-            d_set_layout
+            pipelines_db_.descriptor_set_layouts.Get(in_id)
         },
         shaders
         );
 
-    pipelines_.InsertAt(in_id, render_pipeline_info);
-            
-    render_pipeline_info.wid = in_id;
-    render_pipeline_info.descriptor_set_layout_id = in_id;
-
-    for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        WVkDescriptorPoolInfo dpoolinfo{};
-
-        // Create a descriptor pool by frame index
-        WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool(
-            dpoolinfo, device_info_
-            );
-
-        descriptor_pools_[i].InsertAt(
-            in_id, dpoolinfo
-            );
-    }
+    pipelines_db_.CreateDescSetPool(
+        device_info_,
+        in_id,
+        WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool);
 
     pipeline_pbindings_[in_id] = {};
 }
@@ -147,21 +111,16 @@ void WVkGraphicsPipelines::DeletePipeline(
     }
 
     pipeline_pbindings_.erase(in_id);
-    
-    pipelines_.Remove(in_id);
 
-    for (std::uint8_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        descriptor_pools_[i].Remove(in_id);
-    }
+    pipelines_db_.RemoveDescPool(device_info_, in_id);
+    pipelines_db_.RemovePipeline(device_info_, in_id);
+    pipelines_db_.RemoveDescSetLayout(device_info_, in_id);
+
 }
 
 void WVkGraphicsPipelines::ResetDescriptorPool(const WAssetId & in_pipeline_id,
                                                const std::uint32_t & in_frameindex) {
-    vkResetDescriptorPool(
-        device_info_.vk_device,
-        descriptor_pools_[in_frameindex].Get(in_pipeline_id).descriptor_pool,
-        0
-        );
+    pipelines_db_.ResetDescriptorPool(device_info_, in_pipeline_id, in_frameindex);
 }
 
 WId WVkGraphicsPipelines::CreateBinding(
@@ -174,7 +133,7 @@ WId WVkGraphicsPipelines::CreateBinding(
 {
     assert(pipeline_pbindings_.contains(in_pipeline_id));
 
-    WVkRenderPipelineInfo pipeline_info = RenderPipelineInfo(in_pipeline_id);
+    WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
 
     // Lambda ensures NRVO and avoids moves
     //  Create Descriptor binding objects with default values
@@ -239,50 +198,17 @@ void WVkGraphicsPipelines::DeleteBinding(const WEntityComponentId & in_id) {
 void WVkGraphicsPipelines::Clear()
 {
     bindings_.Clear();
-    pipelines_.Clear();
 
-    for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        descriptor_pools_[i].Clear();
-    }
-
-    descriptor_set_layouts_.Clear();
+    pipelines_db_.Clear(device_info_);
 }
 
 void WVkGraphicsPipelines::Destroy() {
     bindings_.Clear();
-    pipelines_.Clear();
-
-    for(std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        descriptor_pools_[i].Clear();
-    }
-
-    descriptor_set_layouts_.Clear();
-
+    pipelines_db_.Clear(device_info_);
+    
     Destroy_GlobalGraphics();
 
     device_info_ = {};
- 
-    width_=0;
-    height_=0;
-}
-
-void WVkGraphicsPipelines::CreateDescriptorSetLayout(const WAssetId & in_id) {
-
-    WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
-
-    WVulkan::AddDSL_DefaultGraphicBindings(descriptor_set_layout_info);
-
-    descriptor_set_layouts_.CreateAt(
-        in_id,
-        [this, &descriptor_set_layout_info]
-        (const WAssetId & _in_id) -> auto {
-            WVulkan::Create(
-                descriptor_set_layout_info,
-                device_info_
-                );
-            descriptor_set_layout_info.wid = _in_id;
-            return descriptor_set_layout_info;
-        });
 }
 
 void WVkGraphicsPipelines::Initialize_ClearLambdas() {
@@ -293,30 +219,11 @@ void WVkGraphicsPipelines::Initialize_ClearLambdas() {
         }
     });
 
-    for(std::uint32_t i=0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        descriptor_pools_[i].SetDestroyFn([di_=device_info_](auto & b) {
-            WVulkan::Destroy(b, di_);
-        });
-    }
-
-    pipelines_.SetDestroyFn([di_=device_info_](auto & p) {
-        WVulkan::Destroy(
-            p,
-            di_
-            );
-    });
-
-    descriptor_set_layouts_.SetDestroyFn([di_=device_info_](auto & d) {
-        WVulkan::Destroy(
-            d,
-            di_
-            );
-    });
 }
 
 void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
 
-    WVulkan::AddDSL_DefaultGlobalGraphicBindings(
+    WVkGraphicsPipelinesUtils::AddDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
         );
 
