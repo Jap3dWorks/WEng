@@ -181,7 +181,7 @@ public:
 
 private:
 
-    void CreateGraphicDescriptorSetLayout(const WAssetId & in_id);
+    void CreateDescriptorSetLayout(const WAssetId & in_id);
 
     void Initialize_ClearLambdas();
 

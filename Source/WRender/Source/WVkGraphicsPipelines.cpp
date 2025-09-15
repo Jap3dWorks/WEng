@@ -7,7 +7,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
-#include "WVulkan/WDescriptorPoolUtils.hpp"
+#include "WVkGraphicsPipelinesUtils.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -102,7 +102,7 @@ void WVkGraphicsPipelines::CreatePipeline(
     }
     
     // Use asset pipeline id too.
-    CreateGraphicDescriptorSetLayout(in_id);
+    CreateDescriptorSetLayout(in_id);
 
     auto& d_set_layout = descriptor_set_layouts_.Get(in_id);
 
@@ -125,7 +125,7 @@ void WVkGraphicsPipelines::CreatePipeline(
         WVkDescriptorPoolInfo dpoolinfo{};
 
         // Create a descriptor pool by frame index
-        WDescPoolUtils::CreateGraphicsDescSetPool(
+        WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool(
             dpoolinfo, device_info_
             );
 
@@ -156,7 +156,7 @@ void WVkGraphicsPipelines::DeletePipeline(
 }
 
 void WVkGraphicsPipelines::ResetDescriptorPool(const WAssetId & in_pipeline_id,
-                                                    const std::uint32_t & in_frameindex) {
+                                               const std::uint32_t & in_frameindex) {
     vkResetDescriptorPool(
         device_info_.vk_device,
         descriptor_pools_[in_frameindex].Get(in_pipeline_id).descriptor_pool,
@@ -266,7 +266,7 @@ void WVkGraphicsPipelines::Destroy() {
     height_=0;
 }
 
-void WVkGraphicsPipelines::CreateGraphicDescriptorSetLayout(const WAssetId & in_id) {
+void WVkGraphicsPipelines::CreateDescriptorSetLayout(const WAssetId & in_id) {
 
     WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
@@ -295,7 +295,7 @@ void WVkGraphicsPipelines::Initialize_ClearLambdas() {
 
     for(std::uint32_t i=0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++) {
         descriptor_pools_[i].SetDestroyFn([di_=device_info_](auto & b) {
-            WDescPoolUtils::Destroy(b, di_);
+            WVulkan::Destroy(b, di_);
         });
     }
 
