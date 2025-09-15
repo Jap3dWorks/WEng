@@ -189,10 +189,6 @@ void WVkRender::Initialize()
     // --
 
     graphics_pipelines_ = WVkGraphicsPipelines(device_info_);
-        // device_info_ // ,
-        // dimensions[0],
-        // dimensions[1]
-        // );
 
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
@@ -384,7 +380,7 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 }
 
 void WVkRender::ClearPipelines() {
-    graphics_pipelines_.Clear();
+    graphics_pipelines_.ClearPipelinesDb();
 }
 
 void WVkRender::UnloadAllResources() {

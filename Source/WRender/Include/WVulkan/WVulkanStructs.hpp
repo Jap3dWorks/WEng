@@ -196,6 +196,8 @@ struct WVkDescriptorSetTextureBinding {
     VkDescriptorImageInfo image_info{};
 };
 
+// struct WVkDescriptorSetUniformsBinding{};
+
 /**
  * @brief Render Pipeline Bindings data
  */
@@ -206,5 +208,8 @@ struct WVkPipelineBindingInfo
 
     std::vector<WVkDescriptorSetTextureBinding> textures{};
     std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
+
+    // TODO parameters
+
 };
 

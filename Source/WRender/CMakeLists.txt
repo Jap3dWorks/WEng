@@ -8,6 +8,7 @@ add_library(
         Source/WVulkan.cpp
 	    Source/WVkRenderCommandPool.cpp
         Source/WVkAssetResources.cpp
+        Source/WVkPostprocessPipelines.cpp
     )
 
 find_package(glm REQUIRED)

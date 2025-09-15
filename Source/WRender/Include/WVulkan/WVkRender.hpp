@@ -47,6 +47,10 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
 
+    // TODO CreatePipelineBindinf(id, assetid, parameters); useful for pipelines like postprocess (no mesh)
+
+    // 
+
     void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,

@@ -1,7 +1,6 @@
 #include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-// #include "WCore/WStringUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -25,41 +24,28 @@ WVkGraphicsPipelines::~WVkGraphicsPipelines()
 
 WVkGraphicsPipelines::WVkGraphicsPipelines(
     WVkDeviceInfo device
-) : device_info_(device)
+    ) : Super(device)
 {
     WFLOG("Initialize Global Graphic Descriptors.");
     Initialize_GlobalGraphicDescriptors();
-    Initialize_ClearLambdas();
 }
 
 WVkGraphicsPipelines::WVkGraphicsPipelines(
     WVkGraphicsPipelines && other
     ) noexcept :
-    pipelines_db_(std::move(other.pipelines_db_)),
-    bindings_(std::move(other.bindings_)),
-    pipeline_pbindings_(std::move(other.pipeline_pbindings_)),
-    global_graphics_descsets_(std::move(other.global_graphics_descsets_)),
-    device_info_(std::move(other.device_info_))
+    Super(std::move(other)),
+    global_graphics_descsets_(std::move(other.global_graphics_descsets_))
 {
-    other.device_info_ = {};
     other.global_graphics_descsets_ = {};
 }
 
 WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && other) noexcept
 {
     if (this != &other) {
-        Clear();
-
-        device_info_ = std::move(other.device_info_);
+        Super::operator=(std::move(other));
 
         global_graphics_descsets_ = std::move(other.global_graphics_descsets_);
 
-        pipelines_db_ = std::move(other.pipelines_db_);
-        bindings_ = std::move(other.bindings_);
-
-        pipeline_pbindings_ = std::move(other.pipeline_pbindings_);
-
-        other.device_info_ = {};
         other.global_graphics_descsets_ = {};
     }
 
@@ -99,28 +85,6 @@ void WVkGraphicsPipelines::CreatePipeline(
         WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool);
 
     pipeline_pbindings_[in_id] = {};
-}
-
-void WVkGraphicsPipelines::DeletePipeline(
-    const WAssetId & in_id
-    )
-{
-    // Remove bindings
-    for (auto & bid : pipeline_pbindings_[in_id]) {
-        bindings_.Remove(bid) ;
-    }
-
-    pipeline_pbindings_.erase(in_id);
-
-    pipelines_db_.RemoveDescPool(device_info_, in_id);
-    pipelines_db_.RemovePipeline(device_info_, in_id);
-    pipelines_db_.RemoveDescSetLayout(device_info_, in_id);
-
-}
-
-void WVkGraphicsPipelines::ResetDescriptorPool(const WAssetId & in_pipeline_id,
-                                               const std::uint32_t & in_frameindex) {
-    pipelines_db_.ResetDescriptorPool(device_info_, in_pipeline_id, in_frameindex);
 }
 
 WId WVkGraphicsPipelines::CreateBinding(
@@ -172,7 +136,7 @@ WId WVkGraphicsPipelines::CreateBinding(
         return tx;
     };
 
-    bindings_.InsertAt(
+    pipelines_db_.bindings.InsertAt(
         component_id,
         WVkPipelineBindingInfo{in_pipeline_id,
                                in_mesh_asset_id,
@@ -185,40 +149,13 @@ WId WVkGraphicsPipelines::CreateBinding(
     return component_id;
 }
 
-void WVkGraphicsPipelines::DeleteBinding(const WEntityComponentId & in_id) {
-    bindings_.Remove(in_id);
-
-    for(auto & p : pipeline_pbindings_) {
-        if (p.second.Contains(in_id.GetId())) {
-            p.second.Remove(in_id.GetId());            
-        }
-    }
-}
-
-void WVkGraphicsPipelines::Clear()
-{
-    bindings_.Clear();
-
-    pipelines_db_.Clear(device_info_);
-}
-
 void WVkGraphicsPipelines::Destroy() {
-    bindings_.Clear();
-    pipelines_db_.Clear(device_info_);
+
+    ClearPipelinesDb();
     
     Destroy_GlobalGraphics();
 
     device_info_ = {};
-}
-
-void WVkGraphicsPipelines::Initialize_ClearLambdas() {
-
-    bindings_.SetDestroyFn([di_=device_info_](auto & b) {
-        for(auto& ubo: b.ubo) {
-            WVulkan::Destroy(ubo.ubo_info, di_);
-        }
-    });
-
 }
 
 void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
@@ -328,20 +265,21 @@ void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
 
 void WVkGraphicsPipelines::UpdateModelDescriptorSet(
     const WUBOModelStruct & in_ubo_model_struct,
-    const WEntityComponentId & in_desc_set,
+    const WEntityComponentId & in_binding_id,
     uint32_t in_frame_index
     ) {
+    auto & binding = pipelines_db_.bindings.Get(in_binding_id);
+
     WVulkan::MapUBO(
-        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
+        binding.ubo[in_frame_index].ubo_info,
         device_info_
         );
     WVulkan::UpdateUBOModel(
-        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
-        // Initial Position
+        binding.ubo[in_frame_index].ubo_info,
         in_ubo_model_struct
         );
     WVulkan::UnmapUBO(
-        bindings_.Get(in_desc_set).ubo[in_frame_index].ubo_info,
+        binding.ubo[in_frame_index].ubo_info,
         device_info_
         );
 }

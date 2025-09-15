@@ -13,7 +13,9 @@
 #include <utility>
 #include <vulkan/vulkan_core.h>
 
-template<typename WPipelineIdType=WAssetId, std::uint32_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
+template<typename WPipelineIdType=WAssetId,
+         typename WBindingIdType=WEntityComponentId,
+         std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesDb {
 public:
 
@@ -23,6 +25,7 @@ public:
         TObjectDataBase<WVkDescriptorPoolInfo, void, WPipelineIdType>,
         FramesInFlight
         >;
+    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
 
 public:
 
@@ -37,6 +40,8 @@ public:
     WVkPipelinesDb & operator=(const WVkPipelinesDb &) = delete;
 
     WVkPipelinesDb & operator=(WVkPipelinesDb &&) noexcept = default;
+
+public:
 
     void CreatePipeline(const WVkDeviceInfo & in_device_info,
                         const WPipelineIdType & in_pipeline_id,
@@ -154,6 +159,16 @@ public:
         }
     }
 
+    void RemoveBinding(const WVkDeviceInfo & in_device, const WBindingIdType & in_id) {
+        bindings.Remove(in_id,
+                        [di_=in_device](auto & b) {
+                            for(auto& ubo: b.ubo) {
+                                WVulkan::Destroy(ubo.ubo_info, di_);
+                            }
+                        }
+            );
+    }
+
     void Clear(const WVkDeviceInfo & in_device) {
         
         for(std::uint32_t i=0; i < FramesInFlight; i++) {
@@ -180,6 +195,14 @@ public:
                     );
             });
 
+        bindings.Clear(
+            [di_=in_device](auto & b) {
+                for(auto& ubo: b.ubo) {
+                    WVulkan::Destroy(ubo.ubo_info, di_);
+                }
+            }
+            );
+
     }
 
 public:
@@ -187,5 +210,6 @@ public:
     WVkPipelineDb pipelines{};
     WVkDescSetLayoutDb descriptor_set_layouts{};
     WVkDescriptorPoolDb descriptor_pools{};
+    WVkPipelineBindingDb bindings{};
 
 };
