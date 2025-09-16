@@ -74,8 +74,8 @@ struct WVkShaderStageInfo
     EShaderType type;
     std::string entry_point{"main"};
     
-    std::vector<VkVertexInputBindingDescription> binding_descriptors{};
-    std::vector<VkVertexInputAttributeDescription> attribute_descriptors{};
+    std::vector<VkVertexInputBindingDescription> binding_descriptors{};     // vertex size, ...
+    std::vector<VkVertexInputAttributeDescription> attribute_descriptors{}; // vertex attributes, ...
 
 };
 

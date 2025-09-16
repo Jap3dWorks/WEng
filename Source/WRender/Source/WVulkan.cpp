@@ -727,132 +727,52 @@ void WVulkan::CreateTexture(
 
 }
 
-void WVulkan::Create(
+void WVulkan::CreateDefaultPipeline(
     WVkRenderPipelineInfo & out_pipeline_info,
     const WVkDeviceInfo & in_device,
     const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
     const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
     )
 {
-    // Create Shader Stages
-    std::vector<VkPipelineShaderStageCreateInfo> shader_stages(
-        in_shader_stage_infos.size()
+
+    WVkShaderStageInfo wvertex_stage_info;
+    std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
+    
+    std::vector<VkShaderModule> shader_modules = WVulkanUtils::CreateShaderModules(
+        wvertex_stage_info, shader_stages, in_device.vk_device, in_shader_stage_infos
         );
 
-    std::vector<VkShaderModule> shader_modules(in_shader_stage_infos.size(), VK_NULL_HANDLE);
-
-    const WVkShaderStageInfo * vertex_shader_stage = nullptr;
-
-    for (uint32_t i = 0; i < in_shader_stage_infos.size(); i++)
-    {
-        shader_stages[i].pNext = VK_NULL_HANDLE;
-        shader_stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shader_stages[i].stage = WVulkan::ToShaderStageFlagBits(
-            in_shader_stage_infos[i].type
-            );
-
-        if (in_shader_stage_infos[i].type == EShaderType::Vertex)
-        {
-            vertex_shader_stage = &in_shader_stage_infos[i];
-        }
-
-        shader_modules[i] = WVulkanUtils::CreateShaderModule(in_device.vk_device,
-                                                             in_shader_stage_infos[i].code.data(),
-                                                             in_shader_stage_infos[i].code.size());
-
-        shader_stages[i].module = shader_modules[i];
-        shader_stages[i].pName = in_shader_stage_infos[i].entry_point.c_str();
-    }
-
-    if (vertex_shader_stage == nullptr)
-    {
-        throw std::runtime_error("Vertex shader stage not found!");
-    }
-
-    VkPipelineVertexInputStateCreateInfo vertex_input_info{};
-    vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
-        vertex_shader_stage->binding_descriptors.size());
-    vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
-        vertex_shader_stage->attribute_descriptors.size());
-    vertex_input_info.pVertexBindingDescriptions =
-        vertex_shader_stage->binding_descriptors.data();
-    vertex_input_info.pVertexAttributeDescriptions =
-        vertex_shader_stage->attribute_descriptors.data();
-
-    VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
-    InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    InputAssembly.primitiveRestartEnable = VK_FALSE;
-
-    VkPipelineViewportStateCreateInfo ViewportState{};
-    ViewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    ViewportState.viewportCount = 1;
-    ViewportState.scissorCount = 1;
-
-    VkPipelineRasterizationStateCreateInfo Rasterizer{};
-    Rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    Rasterizer.depthClampEnable = VK_FALSE;
-    Rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    Rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    Rasterizer.lineWidth = 1.0f;
-    Rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    Rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of y-flip in the projection matrix
-    Rasterizer.depthBiasEnable = VK_FALSE;
-
-    VkPipelineMultisampleStateCreateInfo Multisampling{};
-    Multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    Multisampling.sampleShadingEnable = VK_FALSE;
-    Multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT; //in_device.msaa_samples;
-
-    VkPipelineDepthStencilStateCreateInfo DepthStencil{};
-    DepthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    DepthStencil.depthTestEnable = VK_TRUE;
-    DepthStencil.depthWriteEnable = VK_TRUE;
-    DepthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-    DepthStencil.depthBoundsTestEnable = VK_FALSE;
-    DepthStencil.stencilTestEnable = VK_FALSE;
-
-    VkPipelineColorBlendAttachmentState ColorBlendAttachment{};
-    ColorBlendAttachment.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT |
-        VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT |
-        VK_COLOR_COMPONENT_A_BIT;
-    ColorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo ColorBlending{};
-    ColorBlending.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    ColorBlending.logicOpEnable = VK_FALSE;
-    ColorBlending.logicOp = VK_LOGIC_OP_COPY;
-    ColorBlending.attachmentCount = 1;
-    ColorBlending.pAttachments = &ColorBlendAttachment;
-    ColorBlending.blendConstants[0] = 0.f;
-    ColorBlending.blendConstants[1] = 0.f;
-    ColorBlending.blendConstants[2] = 0.f;
-    ColorBlending.blendConstants[3] = 0.f;
-
-    std::vector<VkDynamicState> DynamicStates = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR};
-
-    VkPipelineDynamicStateCreateInfo DynamicState{};
-    DynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
-    DynamicState.pDynamicStates = DynamicStates.data();
-
-    std::vector<VkDescriptorSetLayout> slayouts;
-    slayouts.reserve(in_descriptor_set_layout_infos.size());
+    std::vector<VkDescriptorSetLayout> desc_layouts;
+    desc_layouts.reserve(in_descriptor_set_layout_infos.size());
+    
     for(auto & v : in_descriptor_set_layout_infos) {
-        slayouts.push_back(v.descriptor_set_layout);
+        desc_layouts.push_back(v.descriptor_set_layout);
     }
 
-    VkPipelineLayoutCreateInfo pipeline_layout_info{};
-    pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = slayouts.size();
-    pipeline_layout_info.pSetLayouts = slayouts.data();
+    VkPipelineVertexInputStateCreateInfo vertex_input_info;
+    VkPipelineInputAssemblyStateCreateInfo input_assembly;
+    VkPipelineViewportStateCreateInfo viewport_state;
+    VkPipelineRasterizationStateCreateInfo rasterizer;
+    VkPipelineMultisampleStateCreateInfo multisampling;
+    VkPipelineDepthStencilStateCreateInfo depth_stencil;
+    VkPipelineColorBlendAttachmentState color_blend_attachment;
+    VkPipelineColorBlendStateCreateInfo color_blend_create_info;
+    std::vector<VkDynamicState> dynamic_states;
+    VkPipelineDynamicStateCreateInfo dynamic_state;
+    VkPipelineLayoutCreateInfo pipeline_layout_info;
+    VkFormat color_format;
+    VkFormat depth_format;
+    VkPipelineRenderingCreateInfo rendering_info;
+    VkGraphicsPipelineCreateInfo pipeline_create_info;
+    
+    WVulkanUtils::InitializeDefaultPipelineStructs(
+        wvertex_stage_info, shader_stages, desc_layouts,
+        vertex_input_info, input_assembly, viewport_state, rasterizer,
+        multisampling, depth_stencil, color_blend_attachment, color_blend_create_info,
+        dynamic_states, dynamic_state,
+        color_format, depth_format, rendering_info,
+        pipeline_layout_info, pipeline_create_info
+        );
 
     if (vkCreatePipelineLayout(
             in_device.vk_device,
@@ -863,43 +783,13 @@ void WVulkan::Create(
         throw std::runtime_error("Failed to create pipeline layout!");
     }
 
-    VkGraphicsPipelineCreateInfo pipeline_info{};
-    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipeline_info.stageCount = static_cast<uint32_t>(shader_stages.size());
-    pipeline_info.pStages = shader_stages.data();
-    pipeline_info.pVertexInputState = &vertex_input_info;
-    pipeline_info.pInputAssemblyState = &InputAssembly;
-    pipeline_info.pViewportState = &ViewportState;
-    pipeline_info.pRasterizationState = &Rasterizer;
-    pipeline_info.pMultisampleState = &Multisampling;
-    pipeline_info.pDepthStencilState = &DepthStencil;
-    pipeline_info.pColorBlendState = &ColorBlending;
-    pipeline_info.pDynamicState = &DynamicState;
-    pipeline_info.layout = out_pipeline_info.pipeline_layout;
-    
-    pipeline_info.renderPass = VK_NULL_HANDLE; // in_render_pass_info.render_pass;
-    pipeline_info.subpass = 0;                 // out_pipeline_info.subpass;
-    pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
-
-    // Dynamic rendering info
-
-    VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB;  // TODO: check format with image render format
-    VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
-
-    VkPipelineRenderingCreateInfo rendering_info{};
-    rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-    rendering_info.colorAttachmentCount = 1;
-    rendering_info.pColorAttachmentFormats = &color_format;
-    rendering_info.depthAttachmentFormat = depth_format;
-    rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
-
-    pipeline_info.pNext = &rendering_info;
+    pipeline_create_info.layout = out_pipeline_info.pipeline_layout;
 
     if (vkCreateGraphicsPipelines(
             in_device.vk_device,
             VK_NULL_HANDLE,
             1,
-            &pipeline_info,
+            &pipeline_create_info,
             nullptr,
             &out_pipeline_info.pipeline) != VK_SUCCESS)
     {
@@ -1812,21 +1702,6 @@ uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_f
         }
     }
     throw std::runtime_error("Failed to find suitable memory type!");
-}
-
-VkShaderStageFlagBits WVulkan::ToShaderStageFlagBits(const EShaderType &type)
-{
-    switch (type)
-    {
-    case EShaderType::Vertex:
-        return VK_SHADER_STAGE_VERTEX_BIT;
-    case EShaderType::Fragment:
-        return VK_SHADER_STAGE_FRAGMENT_BIT;
-    case EShaderType::Compute:
-        return VK_SHADER_STAGE_COMPUTE_BIT;
-    default:
-        throw std::runtime_error("Invalid shader type!");
-    }
 }
 
 void WVulkan::TransitionTextureImageLayout(

@@ -64,24 +64,32 @@ void WVkGraphicsPipelines::CreatePipeline(
         );
 
     pipelines_db_.CreateDescSetLayout(
-        device_info_,
         in_id,
-        WVkGraphicsPipelinesUtils::AddDSL_DefaultGraphicBindings
+        device_info_,
+        WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGraphicBindings
         );
 
     pipelines_db_.CreatePipeline(
+        in_id,
         device_info_,
         in_id,
-        {
-            global_graphics_descsets_.descset_layout_info,
-            pipelines_db_.descriptor_set_layouts.Get(in_id)
-        },
-        shaders
+        shaders,
+        [this](auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
+            WVulkan::CreateDefaultPipeline(
+                _rp,
+                _dvc,
+                {
+                    global_graphics_descsets_.descset_layout_info,
+                    _desclay
+                },
+                _shdrs
+                );
+        }
         );
 
     pipelines_db_.CreateDescSetPool(
-        device_info_,
         in_id,
+        device_info_,
         WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool);
 
     pipeline_pbindings_[in_id] = {};
@@ -160,7 +168,7 @@ void WVkGraphicsPipelines::Destroy() {
 
 void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
 
-    WVkGraphicsPipelinesUtils::AddDSL_DefaultGlobalGraphicBindings(
+    WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
         );
 

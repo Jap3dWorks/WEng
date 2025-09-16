@@ -3,16 +3,11 @@
 
 #pragma once
 
-#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
-#include "WCore/TIterator.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include <vector>
-#include <unordered_map>
-#include "WCore/TObjectDataBase.hpp"
-#include "WVulkan/WVkPipelinesDb.hpp"
 #include "WVulkan/WVkPipelinesBase.hpp"
 
 /**
@@ -69,11 +64,11 @@ public:
 public:
 
     WEntityComponentId CreateBinding(
-        const WEntityComponentId & component_id,
+        const WEntityComponentId & in_binding_id,
         const WAssetId & in_pipeline_id,
         const WAssetIndexId & in_mesh_asset_id,
         std::vector<WVkTextureInfo> in_textures,
-        std::vector<std::uint16_t> in_textures_bindings // TODO values bindings
+        std::vector<std::uint16_t> in_textures_bindings
         ) noexcept;
 
     void UpdateGlobalGraphicsDescriptorSet(

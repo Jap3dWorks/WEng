@@ -69,19 +69,20 @@ public:
         {
             // Remove bindings
             for (auto & bid : pipeline_pbindings_[in_id]) {
-                pipelines_db_.RemoveBinding(device_info_, bid);
+                pipelines_db_.RemoveBinding(bid, device_info_);
             }
 
             pipeline_pbindings_.erase(in_id);
 
-            pipelines_db_.RemoveDescPool(device_info_, in_id);
-            pipelines_db_.RemovePipeline(device_info_, in_id);
-            pipelines_db_.RemoveDescSetLayout(device_info_, in_id);
+            pipelines_db_.RemoveDescPool(in_id, device_info_);
+            pipelines_db_.RemovePipeline(in_id, device_info_);
+            pipelines_db_.RemoveDescSetLayout(in_id, device_info_);
 
         }
 
     void DeleteBinding(const WBindingIdType & in_id) {
-        pipelines_db_.RemoveBinding(device_info_, in_id);
+        pipelines_db_.RemoveBinding(in_id,
+                                    device_info_);
 
         for(auto & p : pipeline_pbindings_) {
             if (p.second.Contains(in_id.GetId())) {
@@ -91,7 +92,7 @@ public:
     }
 
     void ResetDescriptorPool(const WPipelineIdType & in_pipeline_id, const std::uint32_t & in_frameindex) {
-        pipelines_db_.ResetDescriptorPool(device_info_, in_pipeline_id, in_frameindex);
+        pipelines_db_.ResetDescriptorPool(in_pipeline_id, device_info_, in_frameindex);
     }
 
     WNODISCARD const WVkRenderPipelineInfo & Pipeline(const WPipelineIdType & in_id) const {

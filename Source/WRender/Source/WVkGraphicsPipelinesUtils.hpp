@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -47,15 +48,13 @@ namespace WVkGraphicsPipelinesUtils {
     }
 
     inline WVkShaderStageInfo BuildGraphicsShaderStageInfo(
-        const char* in_shader_file_path,
-        const char* in_entry_point,
+        const char * in_shader_file_path,
+        const char * in_entry_point,
         EShaderType in_shader_type
         ) {
         WVkShaderStageInfo result;
 
-        std::string file_path = in_shader_file_path;
-
-        result.code = WShaderUtils::ReadShader(file_path);
+        result.code = WShaderUtils::ReadShader(in_shader_file_path);
 
         result.entry_point = in_entry_point;
         result.type = in_shader_type;
@@ -81,9 +80,9 @@ namespace WVkGraphicsPipelinesUtils {
             result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
             result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
 
-        // TODO Normals
+            // TODO Normals
 
-        // more vertex data bindings here
+            // more vertex data bindings here
 
             result.binding_descriptors.resize(1);
             result.binding_descriptors[0].binding = 0;
@@ -97,33 +96,37 @@ namespace WVkGraphicsPipelinesUtils {
     /**
      * @brief Adds common graphic pipeline bindings, should be used in set=1
      */
-    inline void AddDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
+    inline void UpdateDSL_DefaultGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
         // Model UBO
-        VkDescriptorSetLayoutBinding ubo_layout_binding{};
-        ubo_layout_binding.binding = 0;
-        ubo_layout_binding.descriptorCount = 1;
-        ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        ubo_layout_binding.pImmutableSamplers = nullptr;
-        ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        VkDescriptorSetLayoutBinding ubo_binding{};
+        ubo_binding.binding = 0;
+        ubo_binding.descriptorCount = 1;
+        ubo_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ubo_binding.pImmutableSamplers = nullptr;
+        ubo_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+        // TODO: Parameters UBO
 
         // A texture in the fragment shader
-        VkDescriptorSetLayoutBinding sampler_layout_binding{};
-        sampler_layout_binding.binding = 1;
-        sampler_layout_binding.descriptorCount = 1;
-        sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        sampler_layout_binding.pImmutableSamplers = nullptr;
-        sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        VkDescriptorSetLayoutBinding sampler_binding{};
+        sampler_binding.binding = 1;
+        sampler_binding.descriptorCount = 1;
+        sampler_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        sampler_binding.pImmutableSamplers = nullptr;
+        sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        // TODO: Other texture bindings (Normal, MRExtr)
 
         out_dsl.bindings = {
-            ubo_layout_binding,
-            sampler_layout_binding
+            ubo_binding,
+            sampler_binding
         };
     }
 
     /**
      * @brief Adds the Camera and lightings UBOs (std140, set=0)
      */
-    inline void AddDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
+    inline void UpdateDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
         VkDescriptorSetLayoutBinding camera_binding{};
         camera_binding.binding=0;
         camera_binding.descriptorCount = 1;

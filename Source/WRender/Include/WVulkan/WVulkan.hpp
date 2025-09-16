@@ -74,7 +74,7 @@ namespace WVulkan
         const WVkCommandPoolInfo& command_pool_info
         );
 
-    void Create(
+    void CreateDefaultPipeline(
         WVkRenderPipelineInfo & out_pipeline_info,
         const WVkDeviceInfo & device,
         const std::vector<WVkDescriptorSetLayoutInfo> & descriptor_set_layout_infos,
@@ -425,11 +425,6 @@ namespace WVulkan
         const VkCommandPool & in_command_pool,
         const VkQueue & in_graphics_queue
         );
-
-    /**
-     * @brief Enum representing the shader stage flags for Vulkan.
-     */
-    VkShaderStageFlagBits ToShaderStageFlagBits(const EShaderType & type);
 
     VkCommandBuffer BeginSingleTimeCommands(
         const VkDevice & device, 

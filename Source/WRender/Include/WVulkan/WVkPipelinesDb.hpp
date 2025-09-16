@@ -43,17 +43,24 @@ public:
 
 public:
 
-    void CreatePipeline(const WVkDeviceInfo & in_device_info,
-                        const WPipelineIdType & in_pipeline_id,
-                        const std::vector<WVkDescriptorSetLayoutInfo> & in_descset_layouts,
-                        const std::vector<WVkShaderStageInfo> & in_shaders) {
+    template<CCallable<void,
+                       WVkRenderPipelineInfo &,
+                       const WVkDeviceInfo &,
+                       const WVkDescriptorSetLayoutInfo &,
+                       const std::vector<WVkShaderStageInfo> &> TCrtFn>
+    void CreatePipeline(const WPipelineIdType & in_pipeline_id,
+                        const WVkDeviceInfo & in_device_info,
+                        const WPipelineIdType & in_desclay_id,
+                        const std::vector<WVkShaderStageInfo> & in_shaders,
+                        TCrtFn && in_create_fn
+        ) {
         
         WVkRenderPipelineInfo render_pipeline_info;
 
-        WVulkan::Create(
+        std::forward<TCrtFn>(in_create_fn)(
             render_pipeline_info,
             in_device_info,
-            in_descset_layouts,
+            descriptor_set_layouts.Get(in_desclay_id),
             in_shaders
             );
 
@@ -64,9 +71,9 @@ public:
     }
 
     template<CCallable<void, WVkDescriptorSetLayoutInfo&> ConfigInfoFn>
-    void CreateDescSetLayout(const WVkDeviceInfo & in_device,
-                                   const WPipelineIdType & in_id,
-                                   ConfigInfoFn && info_fn) {
+    void CreateDescSetLayout(const WPipelineIdType & in_id,
+                             const WVkDeviceInfo & in_device,
+                             ConfigInfoFn && info_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
@@ -86,9 +93,9 @@ public:
     }
 
     template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const WVkDeviceInfo&> TCreateFn>
-    void CreateDescSetPool(const WVkDeviceInfo & in_device,
-                              const WPipelineIdType & in_id,
-                              TCreateFn && create_fn
+    void CreateDescSetPool(const WPipelineIdType & in_id,
+                           const WVkDeviceInfo & in_device,
+                           TCreateFn && create_fn
         ) {
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             
@@ -124,8 +131,8 @@ public:
         return result;
     }
 
-    void ResetDescriptorPool(const WVkDeviceInfo & in_device,
-                             const WPipelineIdType & in_id,
+    void ResetDescriptorPool(const WPipelineIdType & in_id,
+                             const WVkDeviceInfo & in_device,
                              const std::uint32_t  & in_frameindex) {
         vkResetDescriptorPool(
             in_device.vk_device,
@@ -134,7 +141,7 @@ public:
             );
     }
 
-    void RemovePipeline(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+    void RemovePipeline(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
         pipelines.Remove(in_id, [&in_device](auto & rpip) {
             WVulkan::Destroy(
                 rpip,
@@ -142,7 +149,7 @@ public:
         });
     }
 
-    void RemoveDescSetLayout(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+    void RemoveDescSetLayout(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
         descriptor_set_layouts.Remove(in_id,
                                       [&in_device](auto & dsetlay) {
                                           WVulkan::Destroy(dsetlay,
@@ -150,7 +157,7 @@ public:
                                       });
     }
 
-    void RemoveDescPool(const WVkDeviceInfo & in_device, const WPipelineIdType & in_id) {
+    void RemoveDescPool(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             descriptor_pools[i].Remove(in_id,
                                        [&in_device](auto & dpool) {
@@ -159,7 +166,7 @@ public:
         }
     }
 
-    void RemoveBinding(const WVkDeviceInfo & in_device, const WBindingIdType & in_id) {
+    void RemoveBinding( const WBindingIdType & in_id, const WVkDeviceInfo & in_device) {
         bindings.Remove(in_id,
                         [di_=in_device](auto & b) {
                             for(auto& ubo: b.ubo) {
