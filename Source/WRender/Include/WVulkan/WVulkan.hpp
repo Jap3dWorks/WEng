@@ -245,6 +245,11 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
+    void Destroy(
+        VkSampler & out_sampler,
+        const WVkDeviceInfo & in_device_info
+        );
+
     void CreateRenderColorResource(
         VkImage & out_image,
         VkDeviceMemory & out_memory,
@@ -322,24 +327,24 @@ namespace WVulkan
         WVkUBOInfo & uniform_buffer_object_info_,
         const glm::mat4 & model
         ) {
-        WUBOModelStruct ubo{};
+        WUBOGraphicsStruct ubo{};
 
         ubo.model = model;
         
         memcpy(uniform_buffer_object_info_.mapped_data,
                &ubo,
-               sizeof(WUBOModelStruct));
+               sizeof(WUBOGraphicsStruct));
 
         return true;
     }
 
     inline bool UpdateUBOModel(
         WVkUBOInfo & uniform_buffer_object_info_,
-        const WUBOModelStruct & in_ubo_model_struct
+        const WUBOGraphicsStruct & in_ubo_model_struct
         ) {
         memcpy(uniform_buffer_object_info_.mapped_data,
                &in_ubo_model_struct,
-               sizeof(WUBOModelStruct));
+               sizeof(WUBOGraphicsStruct));
 
         return true;
     }

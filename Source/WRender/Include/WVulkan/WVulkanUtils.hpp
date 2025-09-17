@@ -275,6 +275,7 @@ namespace WVulkanUtils {
         out_depth_stencil.depthBoundsTestEnable = VK_FALSE;
         out_depth_stencil.stencilTestEnable = VK_FALSE;
 
+        // TODO gbuffers attachments
         out_color_blend_attachment = {};
         out_color_blend_attachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT |
@@ -328,7 +329,7 @@ namespace WVulkanUtils {
         out_create_pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
 
         // Dynamic Rendering
-        // TODO gBuffers attachments
+        // TODO gBuffers attachments (other config function)
 
         out_color_format=VK_FORMAT_B8G8R8A8_SRGB;
         out_depth_format = VK_FORMAT_D32_SFLOAT;
@@ -340,8 +341,51 @@ namespace WVulkanUtils {
         out_rendering_info.depthAttachmentFormat = out_depth_format;
         out_rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
+        // --
+
         out_create_pipeline_info.pNext = &out_rendering_info;
 
+    }
+
+    inline std::array<float, 16> RenderPlaneVertex() noexcept {
+        return {
+            -1.f, -1.f, 0.f, 0.f,
+            1.f, -1.f, 1.f, 0.f,
+            1.f, 1.f, 1.f, 1.f,
+            -1.f, 1.f, 0.f, 1.f
+        };
+    }
+
+    inline std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
+        return { 2,1,0,0,3,2 };
+    }
+
+
+    WNODISCARD inline VkSampler CreateRenderPlaneSampler(const VkDevice & in_device) {
+        VkSampler result;
+        VkSamplerCreateInfo sampler_info{};
+        sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        sampler_info.magFilter = VK_FILTER_LINEAR;
+        sampler_info.minFilter = VK_FILTER_LINEAR;
+        sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        sampler_info.anisotropyEnable = VK_FALSE;
+        sampler_info.maxAnisotropy = 0;
+        sampler_info.compareEnable = VK_FALSE;
+        sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+        sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+        sampler_info.unnormalizedCoordinates = VK_FALSE;
+
+        if(vkCreateSampler(in_device,
+                           &sampler_info,
+                           nullptr,
+                           &result) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create sampler!");
+        }
+
+        return result;
     }
 
 }

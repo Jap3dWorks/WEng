@@ -7,6 +7,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkGraphicsPipelines.hpp"
+#include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkAssetResources.hpp"
@@ -47,10 +48,6 @@ public:
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
 
-    // TODO CreatePipelineBindinf(id, assetid, parameters); useful for pipelines like postprocess (no mesh)
-
-    // 
-
     void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
@@ -61,6 +58,8 @@ public:
     void DeleteRenderPipeline(const WAssetId & in_id) override;
 
     void DeletePipelineBinding(const WEntityComponentId & in_id) override;
+
+    void RefreshPipelines() override;
 
     void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) override {
         render_resources_.LoadTexture(in_id, in_texture);
@@ -83,6 +82,7 @@ public:
         const WTransformStruct & transform_struct
         ) override;
 
+    // TODO Also update ubo parameters
     /** only current frame index */
     void UpdateUboModelDynamic(
         const WEntityComponentId & in_component_id,
@@ -136,30 +136,35 @@ private:
         const std::uint32_t & in_image_index
         );
 
-    WVkInstanceInfo instance_info_;
+    WVkInstanceInfo instance_info_{};
 
     struct WVkRenderWindow {
         GLFWwindow * window{nullptr};
         std::uint32_t width{800};  // TODO size struct
         std::uint32_t height{600};
-    } window_;
+    } window_{};
 
-    WVkSurfaceInfo surface_info_;
-    WVkDeviceInfo device_info_;
-    WVkRenderDebugInfo debug_info_;
+    WVkSurfaceInfo surface_info_{};
+    WVkDeviceInfo device_info_{};
+    WVkRenderDebugInfo debug_info_{};
 
-    WVkAssetResources render_resources_;
+    WVkAssetResources render_resources_{};
 
-    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_;
-    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_;
+    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_{};
+    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_{};
 
-    WVkSwapChainInfo swap_chain_info_;
-    WVkSwapChainResources<WENG_MAX_FRAMES_IN_FLIGHT> swap_chain_resources_;
+    WVkSwapChainInfo swap_chain_info_{};
+    WVkSwapChainResources<WENG_MAX_FRAMES_IN_FLIGHT> swap_chain_resources_{};
 
-    WVkRenderCommandPool render_command_pool_;
-    WVkCommandBufferInfo render_command_buffer_;
+    WVkRenderCommandPool render_command_pool_{};
+    WVkCommandBufferInfo render_command_buffer_{};
 
-    WVkGraphicsPipelines graphics_pipelines_;
+    WVkGraphicsPipelines graphics_pipelines_{};
+    WVkPostprocessPipelines ppcss_pipelines_{};
+    struct PipelinesTrack {
+        std::unordered_map<WAssetId, EPipelineType> pipeline_ptype{};
+        std::unordered_map<WEntityComponentId, EPipelineType> binding_ptype{};
+    } pipeline_track_;
 
     struct SyncSemaphores {
         VkSemaphore image_available{VK_NULL_HANDLE};
@@ -170,8 +175,7 @@ private:
     
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> sync_fences_{};
 
-    uint32_t frame_index_;
-    // bool frame_buffer_resized_;
+    uint32_t frame_index_{0};
 
 };
 

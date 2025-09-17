@@ -85,7 +85,7 @@ public:
 
         InitializeDescriptorPool();
 
-        InitializeInputRenderSampler();
+        input_render_sampler_ = WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
 
         InitializeRenderPlane(in_command_pool);
 
@@ -133,9 +133,8 @@ public:
         descriptor_layout_ = VK_NULL_HANDLE;
 
         if (input_render_sampler_) {
-            vkDestroySampler(device_info_.vk_device,
-                             input_render_sampler_,
-                             nullptr);
+            WVulkan::Destroy(input_render_sampler_,
+                             device_info_);
         }
 
         input_render_sampler_=VK_NULL_HANDLE;
@@ -397,56 +396,23 @@ private:
         }
     }
 
-    void InitializeInputRenderSampler() {
-        VkSamplerCreateInfo sampler_info{};
-        sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        sampler_info.magFilter = VK_FILTER_LINEAR;
-        sampler_info.minFilter = VK_FILTER_LINEAR;
-        sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.anisotropyEnable = VK_FALSE;
-        sampler_info.maxAnisotropy = 0;
-        sampler_info.compareEnable = VK_FALSE;
-        sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
-        sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-        sampler_info.unnormalizedCoordinates = VK_FALSE;
-
-        if(vkCreateSampler(device_info_.vk_device,
-                           &sampler_info,
-                           nullptr,
-                           &input_render_sampler_) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create sampler!");
-        }
-    }
-
-    std::array<float, 16> RenderPlaneVertex() noexcept {
-        return {
-            -1.f, -1.f, 0.f, 0.f,
-            1.f, -1.f, 1.f, 0.f,
-            1.f, 1.f, 1.f, 1.f,
-            -1.f, 1.f, 0.f, 1.f
-        };
-    }
-
-    std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
-        return { 2,1,0,0,3,2 };
-    }
-
     void InitializeRenderPlane(const WVkCommandPoolInfo & in_command_pool) {
+
+        auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
+        auto plane_index = WVulkanUtils::RenderPlaneIndexes();
 
         WVulkan::CreateMeshBuffers(
             render_plane_,
-            RenderPlaneVertex().data(),
-            sizeof(float) * 16,
-            RenderPlaneIndexes().data(),
-            sizeof(std::uint32_t) * 6,
-            6,
+            WVulkanUtils::RenderPlaneVertex().data(),
+            sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
+            // sizeof(float) * 16,
+            WVulkanUtils::RenderPlaneIndexes().data(),
+            sizeof(decltype(plane_index)::value_type) * plane_index.size(),
+            // sizeof(std::uint32_t) * 6,
+            plane_index.size(),
             device_info_,
             in_command_pool
             );
-
     }
 
     VkPipeline pipeline_{VK_NULL_HANDLE};

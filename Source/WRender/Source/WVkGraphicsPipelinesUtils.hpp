@@ -12,7 +12,7 @@
 
 namespace WVkGraphicsPipelinesUtils {
     
-    inline void CreateGraphicsDescSetPool(
+    inline void CreateDescSetPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & device
         ) {
@@ -20,22 +20,17 @@ namespace WVkGraphicsPipelinesUtils {
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
 
         pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        pool_sizes[0].descriptorCount = static_cast<uint32_t>(
-            WENG_MAX_FRAMES_IN_FLIGHT * 20
-            );
+        pool_sizes[0].descriptorCount = 20;
 
         pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        pool_sizes[1].descriptorCount = static_cast<uint32_t>(
-            WENG_MAX_FRAMES_IN_FLIGHT * 20
-            );
+        pool_sizes[1].descriptorCount = 40;
 
         VkDescriptorPoolCreateInfo pool_info{};
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.poolSizeCount = static_cast<uint32_t>(
-            pool_sizes.size()
-            );
+        pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
         pool_info.pPoolSizes = pool_sizes.data();
-        pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 40);
+        
+        pool_info.maxSets = 60;
 
         if (vkCreateDescriptorPool(
                 device.vk_device,
@@ -47,7 +42,7 @@ namespace WVkGraphicsPipelinesUtils {
         }
     }
 
-    inline WVkShaderStageInfo BuildGraphicsShaderStageInfo(
+    inline WVkShaderStageInfo BuildShaderStageInfo(
         const char * in_shader_file_path,
         const char * in_entry_point,
         EShaderType in_shader_type

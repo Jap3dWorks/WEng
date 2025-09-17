@@ -95,8 +95,8 @@ public:
     template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const WVkDeviceInfo&> TCreateFn>
     void CreateDescSetPool(const WPipelineIdType & in_id,
                            const WVkDeviceInfo & in_device,
-                           TCreateFn && create_fn
-        ) {
+                           TCreateFn && create_fn) {
+        
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             
             WVkDescriptorPoolInfo dpoolinfo{};
@@ -129,16 +129,6 @@ public:
         }
         
         return result;
-    }
-
-    void ResetDescriptorPool(const WPipelineIdType & in_id,
-                             const WVkDeviceInfo & in_device,
-                             const std::uint32_t  & in_frameindex) {
-        vkResetDescriptorPool(
-            in_device.vk_device,
-            descriptor_pools[in_frameindex].Get(in_id).descriptor_pool,
-            {}
-            );
     }
 
     void RemovePipeline(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {

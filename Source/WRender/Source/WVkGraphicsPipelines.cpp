@@ -23,14 +23,6 @@ WVkGraphicsPipelines::~WVkGraphicsPipelines()
 }
 
 WVkGraphicsPipelines::WVkGraphicsPipelines(
-    WVkDeviceInfo device
-    ) : Super(device)
-{
-    WFLOG("Initialize Global Graphic Descriptors.");
-    Initialize_GlobalGraphicDescriptors();
-}
-
-WVkGraphicsPipelines::WVkGraphicsPipelines(
     WVkGraphicsPipelines && other
     ) noexcept :
     Super(std::move(other)),
@@ -60,7 +52,7 @@ void WVkGraphicsPipelines::CreatePipeline(
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
         pipeline_struct.shaders_count,
         pipeline_struct.shaders,
-        WVkGraphicsPipelinesUtils::BuildGraphicsShaderStageInfo
+        WVkGraphicsPipelinesUtils::BuildShaderStageInfo
         );
 
     pipelines_db_.CreateDescSetLayout(
@@ -90,9 +82,9 @@ void WVkGraphicsPipelines::CreatePipeline(
     pipelines_db_.CreateDescSetPool(
         in_id,
         device_info_,
-        WVkGraphicsPipelinesUtils::CreateGraphicsDescSetPool);
+        WVkGraphicsPipelinesUtils::CreateDescSetPool);
 
-    pipeline_pbindings_[in_id] = {};
+    pipeline_bindings_[in_id] = {};
 }
 
 WId WVkGraphicsPipelines::CreateBinding(
@@ -103,56 +95,18 @@ WId WVkGraphicsPipelines::CreateBinding(
     std::vector<uint16_t> in_textures_bindings
     ) noexcept
 {
-    assert(pipeline_pbindings_.contains(in_pipeline_id));
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
-
-    // Lambda ensures NRVO and avoids moves
-    //  Create Descriptor binding objects with default values
-    auto f = [this] () {
-        std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> bindings;
-
-        for(uint32_t i = 0; i < bindings.size(); i++) {
-            
-            bindings[i].binding = 0;
-            bindings[i].ubo_info.range = sizeof(WUBOModelStruct);
-
-            WVulkan::CreateUBO(bindings[i].ubo_info, device_info_);
-
-            bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
-            bindings[i].buffer_info.offset = 0;
-            bindings[i].buffer_info.range = bindings[i].ubo_info.range;
-        }
-
-        return bindings;
-    };
-
-    auto t = [this,
-              &in_textures,
-              &in_textures_bindings] () {
-        std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        
-        for (uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-            for (uint32_t j = 0; j<tx.size(); j++) {
-
-                tx[j].image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                tx[j].binding = in_textures_bindings[j];
-                tx[j].image_info.imageView = in_textures[j].image_view;
-                tx[j].image_info.sampler = in_textures[j].sampler;
-            }
-        }
-        return tx;
-    };
 
     pipelines_db_.bindings.InsertAt(
         component_id,
         WVkPipelineBindingInfo{in_pipeline_id,
                                in_mesh_asset_id,
-                               t(),
-                               f()}
+                               InitTextureDescriptorBindings(in_textures, in_textures_bindings),
+                               InitUboDescriptorBinding<WUBOGraphicsStruct>()}
         );
 
-    pipeline_pbindings_[in_pipeline_id].Insert(component_id.GetId(), component_id);
+    pipeline_bindings_[in_pipeline_id].Insert(component_id.GetId(), component_id);
 
     return component_id;
 }
@@ -161,12 +115,12 @@ void WVkGraphicsPipelines::Destroy() {
 
     ClearPipelinesDb();
     
-    Destroy_GlobalGraphics();
+    Destroy_GlobalResources();
 
     device_info_ = {};
 }
 
-void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
+void WVkGraphicsPipelines::Initialize_GlobalResources() {
 
     WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
@@ -176,13 +130,14 @@ void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
         global_graphics_descsets_.descset_layout_info,
         device_info_
         );
-    
+
+    // TODO CreateGlobalDescPool (camera and lights)
     WVulkan::Create(
         global_graphics_descsets_.descpool_info,
         device_info_
         );
 
-    for (std::uint32_t i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
+    for (std::uint32_t i=0; i<frames_in_flight; i++) {
         WVulkan::Create(
             global_graphics_descsets_.descset_info[i],
             device_info_,
@@ -191,9 +146,9 @@ void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
             );        
     }
 
-    std::array<VkWriteDescriptorSet, WENG_MAX_FRAMES_IN_FLIGHT> ws;
+    std::array<VkWriteDescriptorSet, frames_in_flight> ws;
 
-    for(uint32_t i=0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++) {
+    for(uint32_t i=0; i < frames_in_flight; i++) {
         global_graphics_descsets_.camera_ubo[i].range = sizeof(WUBOCameraStruct);
 
         WVulkan::CreateUBO(
@@ -222,7 +177,7 @@ void WVkGraphicsPipelines::Initialize_GlobalGraphicDescriptors() {
 
 }
 
-void WVkGraphicsPipelines::Destroy_GlobalGraphics() {
+void WVkGraphicsPipelines::Destroy_GlobalResources() {
 
     if (device_info_.vk_device) {
 
@@ -238,7 +193,7 @@ void WVkGraphicsPipelines::Destroy_GlobalGraphics() {
 
         if (global_graphics_descsets_
             .descset_layout_info
-            .descriptor_set_layout)
+            .descset_layout)
         {
             WVulkan::Destroy(
                 global_graphics_descsets_.descset_layout_info,
@@ -272,7 +227,7 @@ void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
 }
 
 void WVkGraphicsPipelines::UpdateModelDescriptorSet(
-    const WUBOModelStruct & in_ubo_model_struct,
+    const WUBOGraphicsStruct & in_ubo_model_struct,
     const WEntityComponentId & in_binding_id,
     uint32_t in_frame_index
     ) {
@@ -293,7 +248,7 @@ void WVkGraphicsPipelines::UpdateModelDescriptorSet(
 }
 
 void WVkGraphicsPipelines::UpdateModelDescriptorSet(
-    const WUBOModelStruct & in_ubo_model_struct,
+    const WUBOGraphicsStruct & in_ubo_model_struct,
     const WEntityComponentId & in_desc_set
     ) {
     for(int i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {

@@ -119,7 +119,7 @@ struct WVkDescriptorSetLayoutInfo
 {
     WAssetId wid{0};
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
-    VkDescriptorSetLayout descriptor_set_layout{VK_NULL_HANDLE};
+    VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
 };
 
 /**
@@ -176,7 +176,7 @@ struct WVkRenderPipelineInfo
 };
 
 /**
- * @brief Helper struxt to store command buffer data
+ * @brief Helper struct to store command buffer data
  */
 struct WVkCommandBufferInfo
 {
@@ -203,13 +203,10 @@ struct WVkDescriptorSetTextureBinding {
  */
 struct WVkPipelineBindingInfo
 {
-    WAssetId render_pipeline_id{0};
+    WAssetId pipeline_id{0};
     WAssetIndexId mesh_asset_id{0};
 
     std::vector<WVkDescriptorSetTextureBinding> textures{};
     std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
-
-    // TODO parameters
-
 };
 

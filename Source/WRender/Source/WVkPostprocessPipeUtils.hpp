@@ -66,7 +66,7 @@ namespace WVkPostprocessPipeUtils {
 
     inline void CreatePostprocessPipeline(WVkRenderPipelineInfo & out_pipeline_info,
                                           const WVkDeviceInfo & in_device,
-                                          const std::vector<WVkDescriptorSetLayoutInfo> & in_descset_lay_infos,
+                                          const WVkDescriptorSetLayoutInfo & in_descset_lay_infos,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
         WVkShaderStageInfo wvertex_stage_info;
@@ -77,12 +77,8 @@ namespace WVkPostprocessPipeUtils {
                 wvertex_stage_info, shader_stages, in_device.vk_device, in_shader_stage_infos
                 );
 
-        std::vector<VkDescriptorSetLayout> desc_layouts;
-        desc_layouts.reserve(in_descset_lay_infos.size());
-    
-        for(auto & v : in_descset_lay_infos) {
-            desc_layouts.push_back(v.descriptor_set_layout);
-        }
+        std::vector<VkDescriptorSetLayout> desc_layouts =
+            { in_descset_lay_infos.descset_layout };
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info;
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
@@ -100,13 +96,6 @@ namespace WVkPostprocessPipeUtils {
         VkPipelineRenderingCreateInfo rendering_info;
         VkGraphicsPipelineCreateInfo pipeline_create_info;
 
-        // Disable depth testing
-        depth_stencil.depthTestEnable = VK_FALSE;
-        depth_stencil.depthWriteEnable = VK_FALSE;
-        depth_stencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
-
-        // pipeline_create_info.pDepthStencilState=VK_NULL_HANDLE;
-
         WVulkanUtils::InitializeDefaultPipelineStructs(
             wvertex_stage_info, shader_stages, desc_layouts,
             vertex_input_info, input_assembly, viewport_state, rasterizer,
@@ -115,6 +104,13 @@ namespace WVkPostprocessPipeUtils {
             color_format, depth_format, rendering_info,
             pipeline_layout_info, pipeline_create_info
             );
+
+        // Disable depth testing
+        depth_stencil.depthTestEnable = VK_FALSE;
+        depth_stencil.depthWriteEnable = VK_FALSE;
+        depth_stencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+
+        // pipeline_create_info.pDepthStencilState=VK_NULL_HANDLE;
 
         if (vkCreatePipelineLayout(
                 in_device.vk_device,
@@ -147,5 +143,83 @@ namespace WVkPostprocessPipeUtils {
                 );
         }
     }
+
+    inline void CreateDescSetPool(
+        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        const WVkDeviceInfo & in_device
+        ) {
+        std::array<VkDescriptorPoolSize, 2> pool_sizes;
+
+        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        pool_sizes[0].descriptorCount = 5;
+
+        pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[1].descriptorCount = 10;
+
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.poolSizeCount = static_cast<std::uint32_t>(pool_sizes.size());
+        pool_info.pPoolSizes = pool_sizes.data();
+        
+        pool_info.maxSets = 15;
+
+        if (vkCreateDescriptorPool(
+                in_device.vk_device,
+                &pool_info,
+                nullptr,
+                &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create descriptor pool!");
+        }
+    }
+
+    inline void UpdateDSL_DefaultGlobalBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
+        VkDescriptorSetLayoutBinding rbinding1{};
+
+        rbinding1.binding=0;
+        rbinding1.descriptorCount = 1;
+        rbinding1.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        rbinding1.pImmutableSamplers = nullptr;
+        rbinding1.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        out_dsl.bindings = {
+            rbinding1
+        };
+
+    }
+
+    inline void CreateGlobalResourcesDescPool(
+        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        const WVkDeviceInfo & in_device
+        ) {
+
+        std::array<VkDescriptorPoolSize, 2> pool_sizes;
+
+        pool_sizes[0]={};
+        pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        pool_sizes[0].descriptorCount = 10;
+        
+        pool_sizes[1]={};
+        pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[1].descriptorCount = 10;
+
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
+        pool_info.pPoolSizes = pool_sizes.data();
+        pool_info.maxSets = static_cast<uint32_t>(35);
+
+        if (vkCreateDescriptorPool(
+                in_device.vk_device,
+                &pool_info,
+                nullptr,
+                &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create descriptor pool!");
+        }
+
+    }
+
+
 
 }

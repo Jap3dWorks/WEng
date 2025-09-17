@@ -746,7 +746,7 @@ void WVulkan::CreateDefaultPipeline(
     desc_layouts.reserve(in_descriptor_set_layout_infos.size());
     
     for(auto & v : in_descriptor_set_layout_infos) {
-        desc_layouts.push_back(v.descriptor_set_layout);
+        desc_layouts.push_back(v.descset_layout);
     }
 
     VkPipelineVertexInputStateCreateInfo vertex_input_info;
@@ -827,7 +827,7 @@ void WVulkan::Create(
             device.vk_device,
             &create_info,
             nullptr,
-            &out_descriptor_set_layout_info.descriptor_set_layout) != VK_SUCCESS)
+            &out_descriptor_set_layout_info.descset_layout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create descriptor set layout!");
     }
@@ -1027,7 +1027,7 @@ void WVulkan::UnmapUBO(
 
 void WVulkan::Create(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
-    const WVkDeviceInfo & device)
+    const WVkDeviceInfo & in_device)
 {
     std::array<VkDescriptorPoolSize,2> pool_sizes;
 
@@ -1047,7 +1047,7 @@ void WVulkan::Create(
     pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); //70 as max sets
 
     if (vkCreateDescriptorPool(
-            device.vk_device,
+            in_device.vk_device,
             &pool_info,
             nullptr,
             &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
@@ -1074,7 +1074,7 @@ void WVulkan::Create(
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
     alloc_info.descriptorSetCount = 1;
-    alloc_info.pSetLayouts = &descriptor_set_layout_info.descriptor_set_layout;
+    alloc_info.pSetLayouts = &descriptor_set_layout_info.descset_layout;
 
     if (vkAllocateDescriptorSets(
             device.vk_device,
@@ -1207,7 +1207,7 @@ void WVulkan::Destroy(
     // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(
         device.vk_device,
-        descriptor_set_layout_info.descriptor_set_layout,
+        descriptor_set_layout_info.descset_layout,
         nullptr
         );
 }
@@ -1320,6 +1320,14 @@ void WVulkan::Destroy(
     out_ubo_info.uniform_buffer = VK_NULL_HANDLE;
     out_ubo_info.uniform_buffer_memory = VK_NULL_HANDLE;
     out_ubo_info.range = 0;
+}
+
+void WVulkan::Destroy(
+    VkSampler & out_sampler,
+    const WVkDeviceInfo & in_device_info
+    ) {
+    vkDestroySampler(in_device_info.vk_device, out_sampler, nullptr);
+    out_sampler = VK_NULL_HANDLE;
 }
 
 // Descriptor Set Layout

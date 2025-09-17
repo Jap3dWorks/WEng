@@ -25,21 +25,17 @@ private:
         WVkDescriptorPoolInfo descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
 
-        std::array<WVkDescriptorSetInfo, WENG_MAX_FRAMES_IN_FLIGHT> descset_info{};
-        std::array<WVkUBOInfo, WENG_MAX_FRAMES_IN_FLIGHT> camera_ubo{};
+        std::array<WVkDescriptorSetInfo, frames_in_flight> descset_info{};
+        std::array<WVkUBOInfo, frames_in_flight> camera_ubo{};
     };
 
 public:
 
-    using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, WENG_MAX_FRAMES_IN_FLIGHT>;
+    using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
 
     WVkGraphicsPipelines() noexcept = default;
 
-    virtual ~WVkGraphicsPipelines();
-
-    WVkGraphicsPipelines(
-        WVkDeviceInfo device 
-        );
+    virtual ~WVkGraphicsPipelines() override;
 
     WVkGraphicsPipelines(const WVkGraphicsPipelines & other)=delete;
 
@@ -63,6 +59,11 @@ public:
 
 public:
 
+    void Initialize(const WVkDeviceInfo & in_device) override {
+        Super::Initialize(in_device);
+        Initialize_GlobalResources();
+    }
+
     WEntityComponentId CreateBinding(
         const WEntityComponentId & in_binding_id,
         const WAssetId & in_pipeline_id,
@@ -84,13 +85,13 @@ public:
     }
 
     void UpdateModelDescriptorSet(
-        const WUBOModelStruct & in_ubo_model_struct,
+        const WUBOGraphicsStruct & in_ubo_model_struct,
         const WEntityComponentId & in_desc_set,
         uint32_t in_frame_index
         );
 
     void UpdateModelDescriptorSet(
-        const WUBOModelStruct & in_ubo_model_struct,
+        const WUBOGraphicsStruct & in_ubo_model_struct,
         const WEntityComponentId & in_desc_set
         );
 
@@ -101,9 +102,9 @@ public:
 
 private:
 
-    void Initialize_GlobalGraphicDescriptors();
+    void Initialize_GlobalResources();
 
-    void Destroy_GlobalGraphics();
+    void Destroy_GlobalResources();
 
     /** Camera, lights, ... */
     GlobalGraphicsResources global_graphics_descsets_{};

@@ -12,9 +12,21 @@
 /**
  * @brief Uniform buffer data structure.
 */
-struct WUBOModelStruct
+struct WUBOGraphicsStruct
 {
     glm::mat4 model;
+    // TODO params here
+};
+
+/**
+ * @brief parameters to use in a shader.
+ */
+struct WUBOPostprocessStruct
+{
+    glm::vec4 param1;
+    glm::vec4 param2;
+    glm::vec4 param3;
+    glm::vec4 param4;
 };
 
 /**
