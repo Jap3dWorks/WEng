@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WStructs/WGeometryStructs.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -78,21 +79,21 @@ public:
     }
 
     void UpdateUboCamera(
-        const WCameraStruct & camera_struct,
-        const WTransformStruct & transform_struct
+        const WUBOCameraStruct & in_ubo
         ) override;
 
-    // TODO Also update ubo parameters
     /** only current frame index */
-    void UpdateUboModelDynamic(
+    void UpdateUboBindingDynamic(
         const WEntityComponentId & in_component_id,
-        const WTransformStruct & in_transform_struct
+        const void * in_data,
+        const std::size_t & in_size
         ) override;
 
     /** both frame index */
-    void UpdateUboModelStatic(
+    void UpdateUboBindingStatic(
         const WEntityComponentId & in_component_id,
-        const WTransformStruct & in_transform_struct
+        const void * in_data,
+        const std::size_t & in_size
         ) override;
 
     void UnloadAllResources() override;
@@ -101,6 +102,8 @@ public:
 
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
+
+    WRenderSize RenderSize() const override { return { window_.width, window_.height }; }
 
     WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
     {
@@ -159,13 +162,15 @@ private:
     WVkRenderCommandPool render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};
 
+    // Pipelines, Maybe should create a container class.
     WVkGraphicsPipelines graphics_pipelines_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     struct PipelinesTrack {
         std::unordered_map<WAssetId, EPipelineType> pipeline_ptype{};
         std::unordered_map<WEntityComponentId, EPipelineType> binding_ptype{};
     } pipeline_track_;
-
+    // --
+    
     struct SyncSemaphores {
         VkSemaphore image_available{VK_NULL_HANDLE};
         VkSemaphore render_finished{VK_NULL_HANDLE};

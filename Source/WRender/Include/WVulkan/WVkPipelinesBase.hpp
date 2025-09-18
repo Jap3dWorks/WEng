@@ -159,6 +159,35 @@ public:
             );
     }
 
+    void UpdateUboBinding(const WBindingIdType & in_binding_id,
+                          const std::uint32_t & in_frame_index,
+                          const void * in_data,
+                          const std::size_t & in_size) {
+        
+        WVkDescriptorSetUBOBinding ubodt =
+            pipelines_db_.bindings.Get(in_binding_id).ubo[in_frame_index];
+
+        WVulkan::MapUBO(ubodt.ubo_info, device_info_);
+        
+        WVulkan::UpdateUBO(ubodt.ubo_info, in_data, in_size);
+
+        WVulkan::UnmapUBO(ubodt.ubo_info, device_info_);
+                                
+    }
+
+    void UpdateUboBinding(const WBindingIdType & in_binding_id,
+                          const void * in_data,
+                          const std::size_t & in_size) {
+        auto & ubos = pipelines_db_.bindings.Get(in_binding_id).ubo;
+        for (auto & b : ubos) {
+            WVulkan::MapUBO(b.ubo_info, device_info_);
+            WVulkan::UpdateUBO(b.ubo_info, in_data, in_size);
+            WVulkan::UnmapUBO(b.ubo_info, device_info_);
+        }
+    }
+
+protected:
+    
     template<typename TUBOType>
     std::array<WVkDescriptorSetUBOBinding, FramesInFlight> InitUboDescriptorBinding() {
         std::array<WVkDescriptorSetUBOBinding, frames_in_flight> bindings;
@@ -200,7 +229,6 @@ protected:
 
     WVkPipelinesDb<WPipelineIdType, WBindingIdType, FramesInFlight> pipelines_db_{};
 
-    
     std::unordered_map<WPipelineIdType, TSparseSet<WBindingIdType>> pipeline_bindings_{};
 
     WVkDeviceInfo device_info_{};

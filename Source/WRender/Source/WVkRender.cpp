@@ -338,7 +338,7 @@ void WVkRender::Draw()
 void WVkRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
     ) {
-    // TODO: check pipeline type
+
     switch(render_pipeline->RenderPipeline().type) {
         
     case EPipelineType::Graphics:
@@ -356,7 +356,7 @@ void WVkRender::CreateRenderPipeline(
         break;
 
     default:
-        // Not implemented
+        WFLOG("Pipeline type not implemented.");
     }
 
     pipeline_track_.pipeline_ptype[render_pipeline->WID()] =
@@ -371,16 +371,17 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
     };
         
     switch(pipeline_track_.pipeline_ptype[in_id]) {
-        case EPipelineType::Graphics:
-            graphics_pipelines_.ForEachBinding(
-                in_id, clearbindingfn
-                );
+        
+    case EPipelineType::Graphics:
+        graphics_pipelines_.ForEachBinding(
+            in_id, clearbindingfn
+            );
             
-            graphics_pipelines_.DeletePipeline(
-                in_id
-                );
+        graphics_pipelines_.DeletePipeline(
+            in_id
+            );
             
-            break;
+        break;
 
     case EPipelineType::Postprocess:
         ppcss_pipelines_.ForEachBinding(
@@ -394,8 +395,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
         break;
 
     default:
-        // Not implemented    
-            
+        WFLOG("Pipeline type not implemented.");
     }
 
     pipeline_track_.pipeline_ptype.erase(in_id);
@@ -409,7 +409,7 @@ void WVkRender::CreatePipelineBinding(
     const WRenderPipelineParametersStruct & in_parameters
     )
 {
-    assert(pipeline_ptype_.contains(pipeline_id));
+    assert(pipeline_track_.pipeline_ptype.contains(pipeline_id));
 
     std::vector<WVkTextureInfo> tinfo{
         in_parameters.texture_assets_count
@@ -446,7 +446,7 @@ void WVkRender::CreatePipelineBinding(
         break;
         
     default:
-        // Not implemented
+        WFLOG("Pipeline type not implemented.");
     }
 
     pipeline_track_.binding_ptype[component_id] =
@@ -464,81 +464,97 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
         ppcss_pipelines_.DeleteBinding(in_id);
         break;
     default:
-        // not implemented
+        WFLOG("Pipeline type not implemented.");
     }
 
     pipeline_track_.binding_ptype.erase(in_id);
 }
 
-
 void WVkRender::RefreshPipelines() {
     ppcss_pipelines_.CalcBindingOrder();
 }
 
-
 void WVkRender::ClearPipelines() {
+    // preserve global pipelines
     graphics_pipelines_.ClearPipelinesDb();
     ppcss_pipelines_.ClearPipelinesDb();
+    ppcss_pipelines_.CalcBindingOrder();
 }
 
 // Resources
+// ---------
 
 void WVkRender::UnloadAllResources() {
     render_resources_.Clear();
 }
 
 void WVkRender::UpdateUboCamera(
-    const WCameraStruct & camera_struct,
-    const WTransformStruct & transform_struct
+    const WUBOCameraStruct & camera_ubo
     ) {
-
-    WUBOCameraStruct camera_ubo = WRenderUtils::ToUBOCameraStruct(
-        camera_struct,
-        transform_struct,
-        (float) window_.width / (float) window_.height
-        );
-
     graphics_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
         frame_index_
         );
 }
 
-void WVkRender::UpdateUboModelDynamic(
+void WVkRender::UpdateUboBindingDynamic(
     const WEntityComponentId & in_component_id,
-    const WTransformStruct & in_transform_struct
+    const void * in_data,
+    const std::size_t & in_size
     ) {
-    // TODO check binding type
-    WUBOGraphicsStruct ubo_model = WRenderUtils::ToUBOModelStruct(
-        in_transform_struct
-        );
-    graphics_pipelines_.UpdateModelDescriptorSet(
-        ubo_model, in_component_id, frame_index_
-        );
+    switch(pipeline_track_.binding_ptype[in_component_id]) {
+    case EPipelineType::Graphics:
+        graphics_pipelines_.UpdateUboBinding(in_component_id,
+                                             frame_index_,
+                                             &in_data,
+                                             in_size);
+        break;
+    case EPipelineType::Postprocess:
+        ppcss_pipelines_.UpdateUboBinding(in_component_id,
+                                          frame_index_,
+                                          &in_data,
+                                          in_size);
+        break;
+    default:
+        WFLOG("Pipeline type not implemented.");
+    }
+
 }
 
-void WVkRender::UpdateUboModelStatic(
+void WVkRender::UpdateUboBindingStatic(
     const WEntityComponentId & in_component_id,
-    const WTransformStruct & in_transform_struct
+    const void * in_data,
+    const std::size_t & in_size
     ) {
-    // TODO check binding type
-    WUBOGraphicsStruct ubo_model = WRenderUtils::ToUBOModelStruct(
-        in_transform_struct
-        );
-    graphics_pipelines_.UpdateModelDescriptorSet(
-        ubo_model, in_component_id
-        );
+    switch(pipeline_track_.binding_ptype[in_component_id]) {
+    case EPipelineType::Graphics:
+        graphics_pipelines_.UpdateUboBinding(
+            in_component_id,
+            in_data,
+            in_size
+            );
+        break;
+    case EPipelineType::Postprocess:
+        ppcss_pipelines_.UpdateUboBinding(
+            in_component_id,
+            in_data,
+            in_size
+            );
+        break;
+    default:
+        WFLOG("Pipeline type not implemented.");
+    }
 }
 
 void WVkRender::Destroy() {
 
     WFLOG("Destroy WVkRender...");
 
-    WFLOG("Destroy Render Pipelines");
+    WFLOG("Destroy Render Pipelines.");
     graphics_pipelines_.Destroy();
     ppcss_pipelines_.Destroy();
 
-    WFLOG("Destroy Fences and Semaphores");
+    WFLOG("Destroy Fences and Semaphores.");
 
     WVkRenderUtils::DestroySyncSemaphores(
         sync_semaphores_,
@@ -560,24 +576,24 @@ void WVkRender::Destroy() {
         device_info_
         );
 
-    WFLOG("Destroy Swap Chain Info");
+    WFLOG("Destroy Swap Chain Info.");
 
     // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
     swap_chain_resources_.Destroy();
 
-    WFLOG("Destroy Render Command Pool");
+    WFLOG("Destroy Render Command Pool.");
 
     render_command_pool_.Clear();
     render_command_pool_ = {};
     render_command_buffer_ = {};
 
-    WFLOG("Destroy Render Resources");
+    WFLOG("Destroy Render Resources.");
 
     render_resources_.Clear();
 
-    WFLOG("Destroy Vulkan Device");
+    WFLOG("Destroy Vulkan Device.");
 
     // Destroy Vulkan Device
     WVulkan::Destroy(device_info_);

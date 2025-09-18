@@ -64,6 +64,14 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
     return in_binding_id;
 }
 
+void WVkPostprocessPipelines::Destroy() {
+    ClearPipelinesDb();
+
+    Destroy_GlobalResources();
+
+    device_info_={};
+}
+
 void WVkPostprocessPipelines::CalcBindingOrder() {
     binding_order_.clear();
     binding_order_.resize(pipelines_db_.bindings.Count());
@@ -108,9 +116,6 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
             device_info_
             );
     }
-
-    // Desc sets create and update at render time
-
 }
 
 void WVkPostprocessPipelines::Destroy_GlobalResources() {

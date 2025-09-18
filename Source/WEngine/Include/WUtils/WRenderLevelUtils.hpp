@@ -11,6 +11,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
+#include "WRenderUtils.hpp"
 #include "WUtils/WMathUtils.hpp"
 
 namespace WRenderLevelUtils {
@@ -152,9 +153,11 @@ namespace WRenderLevelUtils {
                             in_component->EntityId()
                             )->TransformStruct();
 
-                        in_render->UpdateUboModelStatic(
+                        WUBOGraphicsStruct grpubo = WRenderUtils::ToUBOGraphicsStruct(tstruct);
+                        in_render->UpdateUboBindingStatic(
                             ecid,
-                            tstruct
+                            &grpubo,
+                            sizeof(WUBOGraphicsStruct)
                             );
                     }
                     );

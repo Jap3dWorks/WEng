@@ -84,17 +84,6 @@ public:
         return global_graphics_descsets_.descset_info[in_frame_index];
     }
 
-    void UpdateModelDescriptorSet(
-        const WUBOGraphicsStruct & in_ubo_model_struct,
-        const WEntityComponentId & in_desc_set,
-        uint32_t in_frame_index
-        );
-
-    void UpdateModelDescriptorSet(
-        const WUBOGraphicsStruct & in_ubo_model_struct,
-        const WEntityComponentId & in_desc_set
-        );
-
     /**
      * @brief destroy the obejct, resulting instance is useless.
      */

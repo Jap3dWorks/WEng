@@ -36,7 +36,7 @@ namespace WRenderUtils {
         return ubo_camera;
     }
 
-    inline WUBOGraphicsStruct ToUBOModelStruct(
+    inline WUBOGraphicsStruct ToUBOGraphicsStruct(
         const WTransformStruct & in_transform
         ) {
         return {in_transform.transform_matrix};

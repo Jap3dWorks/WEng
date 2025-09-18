@@ -226,39 +226,4 @@ void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
         );
 }
 
-void WVkGraphicsPipelines::UpdateModelDescriptorSet(
-    const WUBOGraphicsStruct & in_ubo_model_struct,
-    const WEntityComponentId & in_binding_id,
-    uint32_t in_frame_index
-    ) {
-    auto & binding = pipelines_db_.bindings.Get(in_binding_id);
-
-    WVulkan::MapUBO(
-        binding.ubo[in_frame_index].ubo_info,
-        device_info_
-        );
-    WVulkan::UpdateUBOModel(
-        binding.ubo[in_frame_index].ubo_info,
-        in_ubo_model_struct
-        );
-    WVulkan::UnmapUBO(
-        binding.ubo[in_frame_index].ubo_info,
-        device_info_
-        );
-}
-
-void WVkGraphicsPipelines::UpdateModelDescriptorSet(
-    const WUBOGraphicsStruct & in_ubo_model_struct,
-    const WEntityComponentId & in_desc_set
-    ) {
-    for(int i=0; i<WENG_MAX_FRAMES_IN_FLIGHT; i++) {
-        UpdateModelDescriptorSet(
-            in_ubo_model_struct,
-            in_desc_set,
-            i
-            );
-    }
-}
-
-
 

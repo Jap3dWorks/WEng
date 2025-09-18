@@ -92,24 +92,26 @@ public:
     virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
-        const WCameraStruct & camera_struct,
-        const WTransformStruct & transform_struct
+        const WUBOCameraStruct & in_ubo
         )=0;
 
-    virtual void UpdateUboModelDynamic(
-        const WEntityComponentId & in_component_id,
-        const WTransformStruct & in_transform_struct
-        )=0;
+    /** @brief Current frame, but other frames in flight will not be updated. */
+    virtual void UpdateUboBindingDynamic(const WEntityComponentId & in_id,
+                                  const void * in_data,
+                                  const std::size_t & in_size)=0;
 
-    virtual void UpdateUboModelStatic(
-        const WEntityComponentId & in_component_id,
-        const WTransformStruct & in_transform_struct
-        )=0;
+    /** @brief Updates current frame and other frames in flight. */
+    virtual void UpdateUboBindingStatic(const WEntityComponentId & in_id,
+                                        const void * in_data,
+                                        const std::size_t & in_size) =0;
 
     /**
      * @brief Unload all render resources.
      */
     virtual void UnloadAllResources() = 0;
+
+    // Window
+    // ------
 
     /**
      * Returns current render window.
@@ -117,5 +119,10 @@ public:
     virtual void Window(GLFWwindow * in_window)=0;
 
     virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
+
+    // Render Data
+    // -----------
+
+    virtual WRenderSize RenderSize() const =0;
 
 };

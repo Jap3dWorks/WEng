@@ -323,6 +323,20 @@ namespace WVulkan
             );
     }
 
+    inline bool UpdateUBO(
+        WVkUBOInfo & in_ubo_info,
+        const void * in_data,
+        const std::size_t & in_size
+        ) {
+        
+        memcpy(in_ubo_info.mapped_data,
+               in_data,
+               in_size
+            );
+
+        return true;
+    }
+
     inline bool UpdateUBOModel(
         WVkUBOInfo & uniform_buffer_object_info_,
         const glm::mat4 & model
@@ -342,6 +356,7 @@ namespace WVulkan
         WVkUBOInfo & uniform_buffer_object_info_,
         const WUBOGraphicsStruct & in_ubo_model_struct
         ) {
+        
         memcpy(uniform_buffer_object_info_.mapped_data,
                &in_ubo_model_struct,
                sizeof(WUBOGraphicsStruct));

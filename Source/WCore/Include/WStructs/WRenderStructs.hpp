@@ -43,6 +43,11 @@ struct WUBOCameraStruct {
     float far_clipping{100.f};
 };
 
+struct WRenderSize {
+    std::uint32_t width{0};
+    std::uint32_t  height{0};
+};
+
 enum class EShaderType : uint8_t
 {
     None,

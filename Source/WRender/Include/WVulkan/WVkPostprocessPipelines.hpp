@@ -59,8 +59,6 @@ public:
                               {});
     }
 
-    // void Clear();
-
     void Destroy();
 
     void CalcBindingOrder();
