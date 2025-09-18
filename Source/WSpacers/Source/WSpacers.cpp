@@ -278,7 +278,7 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraInputComponent>(cid);
 
     WCameraComponent * cameracomp = level.GetComponent<WCameraComponent>(cid);
-
+    cameracomp->RenderId(1); // renderable camera
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
