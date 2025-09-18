@@ -18,7 +18,7 @@ public:
     glm::mat4 transform_matrix{1.0};
 };
 
-struct WCameraStruct
+struct WCameraPropertiesStruct
 {
     glm::vec3 point{0};
     float angle_of_view{45.f};
@@ -26,11 +26,17 @@ struct WCameraStruct
     float far_clipping{100.f};
 };
 
-struct WStaticMeshStruct
-{
-    WAssetId static_mesh_asset{};
-    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_assets{};
-    // WAssetId render_pipeline_asset{};
-    std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_params_assets{};
-    // WAssetId render_pipeline_parameters_asset{};
+struct WRenderPipelineAssignmentStruct {
+    WAssetId pipeline{};
+    WAssetId params{};
 };
+
+using WRenderPipelineAssignments = std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS>;
+
+// struct WRenderPipelineAssignmentsStruct {
+//     // postprocess pipelines
+//     std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS> assignments{};
+//     // std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_assets{};
+//     // std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_params_assets{};
+// };
+

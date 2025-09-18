@@ -63,9 +63,10 @@ enum class EPipelineType : uint8_t
 {
     Graphics,       // Default Opaque
     Transparency,   // Alpha Blending
-    Postprocess,     // Camera shader pipelines
+    Postprocess,    // Camera shader pipelines
     Compute,        // GPU
-    RayTracing     // Ray Tracing
+    RayTracing,     // Ray Tracing
+    Swap            // Used to write in the swap chain
 };
 
 struct WShaderStruct {

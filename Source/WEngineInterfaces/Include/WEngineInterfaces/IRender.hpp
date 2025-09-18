@@ -12,7 +12,7 @@ class WRenderPipelineAsset;
 struct WTextureStruct;
 struct WMeshStruct;
 struct WTransformStruct;
-struct WCameraStruct;
+struct WCameraPropertiesStruct;
 
 
 struct GLFWwindow;
@@ -39,7 +39,7 @@ public:
      * than the WRenderPipelineAsset * parameter.
      */
     virtual void CreateRenderPipeline(
-        WRenderPipelineAsset * in_pipeline_asset
+        WRenderPipelineAsset * in_pipeline_asset //TODO: avoid asset
         )=0;
 
     /**
@@ -75,10 +75,6 @@ public:
     // -----------------
 
     /**
-     * @brief Register a texture, later you can load it using the asset id.
-     */
-
-    /**
      * @brief Load the registered texture asset with id in_id.
      */
     virtual void LoadTexture(const WAssetId & in_id,
@@ -97,8 +93,8 @@ public:
 
     /** @brief Current frame, but other frames in flight will not be updated. */
     virtual void UpdateUboBindingDynamic(const WEntityComponentId & in_id,
-                                  const void * in_data,
-                                  const std::size_t & in_size)=0;
+                                         const void * in_data,
+                                         const std::size_t & in_size)=0;
 
     /** @brief Updates current frame and other frames in flight. */
     virtual void UpdateUboBindingStatic(const WEntityComponentId & in_id,

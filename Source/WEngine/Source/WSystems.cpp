@@ -44,7 +44,7 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
         mapping = a->WID();
     });
 
-    // TODO Get assets by Name, store in a GeneralTree?
+    // TODO: Get assets by Name, store in a GeneralTree?
     parameters.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
                                                              &backaction,
                                                              &leftaction,
@@ -247,7 +247,7 @@ START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
 
             parameters.engine->Render()->UpdateUboCamera(
                 WRenderUtils::ToUBOCameraStruct(
-                    cam->CameraStruct(),
+                    cam->GetCameraStruct(),
                     ts->TransformStruct(),
                     (float) rsize.width / (float) rsize.height
                     )

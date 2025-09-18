@@ -114,7 +114,7 @@ public:
         WLevelId lid;
         WEntityId eid;
         WComponentTypeId cid;
-        WAssIdxId idxid;
+        WSubIdxId idxid;
     
         WIdUtils::FromEntityComponentId(in_entity_component_id, lid, eid, cid, idxid);
 

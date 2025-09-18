@@ -99,14 +99,14 @@ public:
 
     template<std::derived_from<WComponent> T>
     WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
-                                            const WAssIdxId & in_index_id=0) const noexcept {
+                                            const WSubIdxId & in_index_id=0) const noexcept {
         
         return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
     }
 
     WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
                                             const WEntityId & in_entity_id,
-                                            const WAssIdxId & in_index_id=0) const noexcept {
+                                            const WSubIdxId & in_index_id=0) const noexcept {
         assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
         
         WComponentTypeId cid = entity_component_db_.GetComponentTypeId(in_component_class);

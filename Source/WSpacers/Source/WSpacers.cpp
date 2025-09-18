@@ -23,6 +23,7 @@
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
 #include "WStructs/WMathStructs.hpp"
+#include "WStructs/WRenderStructs.hpp"
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>
@@ -143,6 +144,35 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     return true;
 }
 
+bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmentStruct> & out_postprcss) {
+    WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur.PPBlur");
+
+    WRenderPipelineAsset * pipeline_asset =
+        engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
+
+    pipeline_asset->RenderPipeline().type = EPipelineType::Postprocess;
+    pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
+                "/Content/Shaders/WRender_blur.pprcess.spv");
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].entry, "vsMain");
+
+    pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
+                "/Content/Shaders/WRender_blur.pprcess.spv");
+    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
+
+    WAssetId paramid = engine.AssetManager().Create<WRenderPipelineParametersAsset>("/Content/Assets/PPBlurParam.PPBlurParam");
+
+    WRenderPipelineParametersAsset * paramass =
+        engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+
+    out_postprcss.clear();
+
+    out_postprcss.push_back({pipid, paramid});
+
+    return true;
+}
+
 bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_render_pipeline) {
     WImportObj obj_importer =
         engine.ImportersRegister()
@@ -224,7 +254,9 @@ bool InputAssets(WEngine & in_engine) {
 
 bool SetupLevel(WEngine & in_engine,
                 const ModelAssets & in_viking_room,
-                const ModelAssets & in_monkey_dt
+                const ModelAssets & in_monkey_dt,
+                const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
+                
     ) {
 
     WLevelId levelid = in_engine.LevelRegister().Create();
@@ -245,9 +277,16 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WMovementComponent>(cid);
     level.CreateComponent<WCameraInputComponent>(cid);
 
+    WCameraComponent * cameracomp = level.GetComponent<WCameraComponent>(cid);
+
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
+
+    // postprocess
+    for(std::uint8_t i=0; i < in_ppcss_assgnm.size(); i++) {
+        cameracomp->SetRenderPipelineAssignment({i}, in_ppcss_assgnm[i]);
+    }
 
     // Models
     // Viking Room
@@ -264,8 +303,9 @@ bool SetupLevel(WEngine & in_engine,
     WStaticMeshComponent * smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
     smcomponent->StaticMeshAsset(in_viking_room.static_mesh);
-    smcomponent->SetRenderPipelineAsset(in_viking_room.pipeline_asset);
-    smcomponent->SetRenderPipelineParametersAsset(in_viking_room.param_asset);
+    smcomponent->SetRenderPipelineAssignment(
+        0, in_viking_room.pipeline_asset, in_viking_room.param_asset
+        );
 
     // Monkey 1
     WEntityId monkey_id = level.CreateEntity<WEntity>();
@@ -281,8 +321,9 @@ bool SetupLevel(WEngine & in_engine,
     auto * monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
 
     monkeysm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkeysm->SetRenderPipelineAsset(in_monkey_dt.pipeline_asset);
-    monkeysm->SetRenderPipelineParametersAsset(in_monkey_dt.param_asset);
+    monkeysm->SetRenderPipelineAssignment(0,
+                                          in_monkey_dt.pipeline_asset,
+                                          in_monkey_dt.param_asset);
 
     // Monkey 2
     WEntityId monkey2_id = level.CreateEntity<WEntity>();
@@ -298,8 +339,9 @@ bool SetupLevel(WEngine & in_engine,
     auto * monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
 
     monkey2sm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkey2sm->SetRenderPipelineAsset(in_monkey_dt.pipeline_asset);
-    monkey2sm->SetRenderPipelineParametersAsset(in_monkey_dt.param_asset);
+    monkey2sm->SetRenderPipelineAssignment(0,
+                                           in_monkey_dt.pipeline_asset,
+                                           in_monkey_dt.param_asset);
 
     return true;
 
@@ -313,6 +355,8 @@ int main(int argc, char** argv)
     {
         WEngine engine = WEngine::DefaultCreate();
 
+        std::vector<WRenderPipelineAssignmentStruct> ppcsst_assignments;
+
         ModelAssets viking_room;
         ModelAssets monkey_1;
         ModelAssets monkey_2;
@@ -320,11 +364,15 @@ int main(int argc, char** argv)
         LoadVikingRoom(engine, viking_room);
         LoadMonkey(engine, monkey_1, viking_room.pipeline_asset);
 
+        PostprocessPipelines(engine, ppcsst_assignments);
+
         InputAssets(engine);
        
         SetupLevel(engine,
                    viking_room,
-                   monkey_1);
+                   monkey_1,
+                   ppcsst_assignments
+            );
 
         WFLOG("Initialize While Loop");
 

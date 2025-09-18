@@ -21,6 +21,7 @@ using WShaderEntryPointList = std::array<WShaderEntryPointStr, 8>;
 
 struct TestStruct {
     WShaderEntryPointList entry_points{"main"};
+    std::uint32_t a{0};
 };
 
 int main(int argc, char* argv[])
@@ -31,6 +32,10 @@ int main(int argc, char* argv[])
     for (auto & ep : ts.entry_points) {
         std::print("{}\n", ep);
     }
+
+    TestStruct * const ptr = &ts;
+
+    ptr->a=10;
 
     return 0;
 

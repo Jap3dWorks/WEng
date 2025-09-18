@@ -426,7 +426,7 @@ private:
 
     WVkMeshInfo render_plane_{};
 
-    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.graphic.spv"};
+    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.swap.spv"};
 
     WVkDeviceInfo device_info_{};
 

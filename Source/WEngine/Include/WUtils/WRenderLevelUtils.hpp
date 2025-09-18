@@ -1,9 +1,11 @@
 #pragma once
 
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
@@ -12,6 +14,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WRenderUtils.hpp"
+#include "WStructs/WComponentStructs.hpp"
 #include "WUtils/WMathUtils.hpp"
 
 namespace WRenderLevelUtils {
@@ -28,13 +31,11 @@ namespace WRenderLevelUtils {
         texture_assets.Reserve(64);
         TSparseSet<WAssetId> render_pipelines;
         render_pipelines.Reserve(64);
-        TSparseSet<WAssetId> pipeline_parameters;
-        pipeline_parameters.Reserve(64);
 
         in_level->ForEachComponent<WStaticMeshComponent>(
             [&static_meshes,
              &render_pipelines,
-             &pipeline_parameters,
+             &texture_assets,
              &in_asset_db](WStaticMeshComponent * in_component) {
                 
                 WAssetId smid = in_component->GetStaticMeshAsset();
@@ -54,51 +55,45 @@ namespace WRenderLevelUtils {
                 smasset->ForEachMesh(
                     [&in_component,
                      &render_pipelines,
-                     &pipeline_parameters](WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct& _m) {
-                        WAssetId pipeid = in_component->GetRenderPipelineAsset(_id);
+                     &texture_assets,
+                     &in_asset_db](WStaticMeshAsset * _sm, const WSubIdxId & _id, WMeshStruct& _m) {
                         
-                        if(pipeid.IsValid()) {
-                            render_pipelines.Insert(pipeid.GetId(), pipeid);
+                        WRenderPipelineAssignmentStruct pipassign =
+                            in_component->GetRenderPipelineAssignment(0);
+                        
+                        if(pipassign.pipeline.IsValid() && pipassign.params.IsValid()) {
+                            
+                            render_pipelines.Insert(
+                                pipassign.pipeline.GetId(), pipassign.pipeline
+                                );
+                            
+                            auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(pipassign.params);
+
+                            for(uint32_t i=0; i < param->RenderPipelineParameters().texture_assets_count; i++)
+                            {
+                                WAssetId tid = param->RenderPipelineParameters().texture_assets[i].value;
+                                texture_assets.Insert(tid.GetId(), tid);
+                            }
+                            
                         }
                         else {
                             WFLOG_Warning(
                                 "Invalid WRenderPipelineAsset in WStaticMeshComponent with id {}.",
                                 in_component->EntityId().GetId()
                                 );
-                        }
-
-                        WAssetId paramid = in_component->GetRenderPipelineParametersAsset();
-                        
-                        if(paramid.IsValid()) {
-                            pipeline_parameters.Insert(paramid.GetId(), paramid);
-                        }
-                        else {
-                            WFLOG_Warning(
-                                "Invalid WRenderPipelineParametersAsset in WStaticMeshComponent with id {}.",
-                                in_component->EntityId().GetId()
-                                );
+                            return;
                         }
                     }
                     );
             }
             );
 
-        for (const WAssetId & id : pipeline_parameters) {
-
-            auto pparam = in_asset_db.Get<WRenderPipelineParametersAsset>(id);
-
-            for(uint32_t i=0; i<pparam->RenderPipelineParameters().texture_assets_count; i++) {
-                WAssetId tid = pparam->RenderPipelineParameters().texture_assets[i].value;
-                texture_assets.Insert(tid.GetId(), tid);
-            }
-        }
-
         // Load Meshes
         for (const WAssetId & id : static_meshes) {
             auto static_mesh = in_asset_db.Get<WStaticMeshAsset>(id);
             
             static_mesh->ForEachMesh(
-                [&in_render](WStaticMeshAsset* _sma, const WAssIdxId & _id, WMeshStruct& _m) {
+                [&in_render](WStaticMeshAsset* _sma, const WSubIdxId & _id, WMeshStruct& _m) {
                     WAssetIndexId asset_index = WIdUtils::ToAssetIndexId(
                         _sma->WID(), _id
                         );
@@ -132,9 +127,10 @@ namespace WRenderLevelUtils {
                     [&in_asset_db,
                      &in_level,
                      &in_render,
-                     &in_component](WStaticMeshAsset* _sma, const WAssIdxId & _id, WMeshStruct& _m) {
+                     &in_component](WStaticMeshAsset* _sma, const WSubIdxId & _id, WMeshStruct& _m) {
+                        
                         auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(
-                            in_component->GetRenderPipelineParametersAsset(_id)
+                            in_component->GetRenderPipelineAssignment(_id).params
                             );
 
                         WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
@@ -144,7 +140,7 @@ namespace WRenderLevelUtils {
                         WAssetIndexId assidx = WIdUtils::ToAssetIndexId(_sma->WID(), _id);
                         in_render->CreatePipelineBinding(
                             ecid,
-                            in_component->GetRenderPipelineAsset(_id),
+                            in_component->GetRenderPipelineAssignment(_id).pipeline,
                             assidx,
                             param->RenderPipelineParameters()
                             );
@@ -161,9 +157,63 @@ namespace WRenderLevelUtils {
                             );
                     }
                     );
-
             }
             );
+
+        // TODO: Camera postprocess pipelines
+        // Temporal solution, only one camera.
+        WEntityId camera_entt{};
+        in_level->ForEachComponent<WCameraComponent>(
+            [&camera_entt](WCameraComponent * _cam){
+                if (!camera_entt && _cam->RenderId().IsValid()) {
+                    camera_entt = _cam->EntityId();
+                }
+            }
+            );
+
+        if(camera_entt.IsValid()) {
+            TSparseSet<WAssetId> cam_render_pipelines;
+            cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
+
+            in_level->GetComponent<WCameraComponent>(camera_entt)->ForEachAssignment(
+                [&cam_render_pipelines](
+                     const WCameraComponent * _cmp,
+                     const WSubIdxId & _idx,
+                     const WRenderPipelineAssignmentStruct & _assgn) {
+                    
+                    cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
+                }
+                );
+
+            for (const WAssetId & id : cam_render_pipelines) {
+                auto render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
+                in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
+            }
+            
+            WCameraComponent* comp = in_level->GetComponent<WCameraComponent>(camera_entt);
+            comp->ForEachAssignment(
+                [&in_level,
+                 &in_render,
+                 &in_asset_db](
+                    const WCameraComponent * _cmp,
+                    const WSubIdxId & _idx,
+                    const WRenderPipelineAssignmentStruct & _assgn
+                    ) {
+                    WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                        _cmp->EntityId(), _idx
+                        );
+
+                    in_render->CreatePipelineBinding(
+                        ecid,
+                        _assgn.pipeline, {},
+                        in_asset_db.Get<WRenderPipelineParametersAsset>(_assgn.params)
+                            ->RenderPipelineParameters()
+                        );
+                }
+                );
+        }
+
+        in_render->RefreshPipelines();
     }
 
     inline void ReleaseRenderResources(
@@ -203,12 +253,12 @@ namespace WRenderLevelUtils {
                      &texture_assets,
                      &in_level,
                      &pipeline_bindings]
-                    (WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct& _m) {
+                    (WStaticMeshAsset * _sm, const WSubIdxId & _id, WMeshStruct& _m) {
 
                         auto pipeline_parameters =
                             static_cast<WRenderPipelineParametersAsset*>(
                                 in_asset_db.Get(
-                                    _component->GetRenderPipelineParametersAsset(_id)
+                                    _component->GetRenderPipelineAssignment(_id).params
                                     ));
 
                         auto & parameters_struct = pipeline_parameters
@@ -228,8 +278,6 @@ namespace WRenderLevelUtils {
                             );
 
                         pipeline_bindings.Insert(ecid.GetId(), ecid);
-
-                        
                     }
                     );
             }
@@ -237,7 +285,7 @@ namespace WRenderLevelUtils {
         
         for(auto & id : static_meshes) {
             in_asset_db.Get<WStaticMeshAsset>(id)->ForEachMesh(
-                [&in_render](WStaticMeshAsset * _sm, const WAssIdxId & _id, WMeshStruct & _m) {
+                [&in_render](WStaticMeshAsset * _sm, const WSubIdxId & _id, WMeshStruct & _m) {
                     in_render->UnloadStaticMesh(
                         WIdUtils::ToAssetIndexId(_sm->WID(), _id)
                         );
@@ -252,7 +300,7 @@ namespace WRenderLevelUtils {
         for(auto & id : pipeline_bindings) {
             in_render->DeletePipelineBinding(id);
             
-            // TODO if a render pipeline has no bindings can be marked to unload.
+            // TODO: if a render pipeline has no bindings can be marked to unload.
         }
     }
 }

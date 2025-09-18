@@ -20,15 +20,15 @@ class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 
 public:
 
-    constexpr void SetMesh(const WMeshStruct & in_mesh, const WAssIdxId & in_id=0) {
+    constexpr void SetMesh(const WMeshStruct & in_mesh, const WSubIdxId & in_id=0) {
         meshes_[in_id.GetId()] = in_mesh;
     }
 
-    constexpr void SetMesh(WMeshStruct && in_mesh, const WAssIdxId & in_id=0) noexcept {
+    constexpr void SetMesh(WMeshStruct && in_mesh, const WSubIdxId & in_id=0) noexcept {
         meshes_[in_id.GetId()] = std::move(in_mesh);
     }
 
-    constexpr const WMeshStruct & GetMesh(const WAssIdxId & in_index=0) const noexcept {
+    constexpr const WMeshStruct & GetMesh(const WSubIdxId & in_index=0) const noexcept {
         return meshes_[in_index.GetId()];
     }
 
@@ -45,7 +45,7 @@ public:
         return r;
     }
 
-    template<CCallable<void, WStaticMeshAsset *, const WAssIdxId &, WMeshStruct&> F>
+    template<CCallable<void, WStaticMeshAsset *, const WSubIdxId &, WMeshStruct&> F>
     void ForEachMesh(F && in_fn) {
         for(std::uint32_t i=0; i<meshes_.size(); i++) {
             WMeshStruct & m = meshes_[i];

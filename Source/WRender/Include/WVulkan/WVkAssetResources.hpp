@@ -96,7 +96,7 @@ private:
              
     WVkAssetDb static_mesh_collection_;
 
-    std::unordered_map<WAssetId, std::vector<WAssIdxId>> mesh_indexes_;
+    std::unordered_map<WAssetId, std::vector<WSubIdxId>> mesh_indexes_;
 
     WVkDeviceInfo device_info_;
     WVkCommandPoolInfo command_pool_info_;

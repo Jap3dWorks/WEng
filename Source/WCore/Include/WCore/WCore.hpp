@@ -132,7 +132,7 @@ using WComponentTypeId = _WId<std::uint8_t>;
 using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
 
 using WAssetId = _WId<std::uint32_t>;
-using WAssIdxId = _WId<std::uint8_t>;
+using WSubIdxId = _WId<std::uint8_t>;
 using WAssetIndexId = _WId<std::uint64_t>; // WAssetId[32] | Index[4] (StaticMesh with material ids)
 
 using WEventId = _WId<std::uint32_t>;
@@ -140,6 +140,9 @@ using WEventId = _WId<std::uint32_t>;
 using WSystemId = _WId<std::uint16_t>;
 
 using WLevelSystemId = _WId<std::uint32_t>;
+
+// If multirender identify each one. 0 disabled.
+using WRenderId = _WId<std::uint8_t>;
 
 namespace std
 {
@@ -159,7 +162,7 @@ namespace WIdUtils {
                                       WLevelId & out_dst1,
                                       WEntityId & out_dst2,
                                       WComponentTypeId & out_dst3,
-                                      WAssIdxId & out_dst4
+                                      WSubIdxId & out_dst4
         ) {
         std::size_t value = in_src.GetId();
         
@@ -187,7 +190,7 @@ namespace WIdUtils {
     inline WEntityComponentId ToEntityComponentId(const WLevelId & in_src1,
                                                   const WEntityId & in_src2,
                                                   const WComponentTypeId & in_src3,
-                                                  const WAssIdxId & in_src4
+                                                  const WSubIdxId & in_src4
         ) {
         size_t v=0;
 
@@ -230,7 +233,7 @@ namespace WIdUtils {
 
     inline void FromAssetIndexId(const WAssetIndexId & in_asset_index_id,
                                  WAssetId & out_asset_id,
-                                 WAssIdxId & out_index) {
+                                 WSubIdxId & out_index) {
         
         std::uint64_t v = in_asset_index_id.GetId();
 
@@ -250,7 +253,7 @@ namespace WIdUtils {
     }
 
     inline WAssetIndexId ToAssetIndexId(const WAssetId & in_asset_id,
-                                        const WAssIdxId & in_index) {
+                                        const WSubIdxId & in_index) {
 
         assert(in_index.GetId() < WENG_MAX_ASSET_IDS);
 

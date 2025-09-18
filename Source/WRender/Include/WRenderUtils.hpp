@@ -11,7 +11,7 @@
 
 namespace WRenderUtils {
     inline WUBOCameraStruct ToUBOCameraStruct(
-        const WCameraStruct & in_camera,
+        const WCameraPropertiesStruct & in_camera,
         const WTransformStruct & in_transform,
         float in_aspect
         ) {
