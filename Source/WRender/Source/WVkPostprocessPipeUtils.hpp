@@ -51,22 +51,31 @@ namespace WVkPostprocessPipeUtils {
     }
 
     inline void UpdateDSL_PostprocessBinding(WVkDescriptorSetLayoutInfo & out_dsl) {
+        // Model UBO
+        VkDescriptorSetLayoutBinding ubo_binding{};
+        ubo_binding.binding=0;
+        ubo_binding.descriptorCount=1;
+        ubo_binding.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ubo_binding.pImmutableSamplers = nullptr;
+        ubo_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
         // texture bindings
         VkDescriptorSetLayoutBinding sampler_binding{};
-        sampler_binding.binding = 0;
+        sampler_binding.binding = 1;
         sampler_binding.descriptorCount=1;
         sampler_binding.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         sampler_binding.pImmutableSamplers = nullptr;
         sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
         out_dsl.bindings = {
+            ubo_binding,
             sampler_binding
         };
     }
 
     inline void CreatePostprocessPipeline(WVkRenderPipelineInfo & out_pipeline_info,
                                           const WVkDeviceInfo & in_device,
-                                          const WVkDescriptorSetLayoutInfo & in_descset_lay_infos,
+                                          const std::vector<VkDescriptorSetLayout> & in_desc_lay,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
         WVkShaderStageInfo wvertex_stage_info;
@@ -76,9 +85,6 @@ namespace WVkPostprocessPipeUtils {
             WVulkanUtils::CreateShaderModules(
                 wvertex_stage_info, shader_stages, in_device.vk_device, in_shader_stage_infos
                 );
-
-        std::vector<VkDescriptorSetLayout> desc_layouts =
-            { in_descset_lay_infos.descset_layout };
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info;
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
@@ -97,7 +103,7 @@ namespace WVkPostprocessPipeUtils {
         VkGraphicsPipelineCreateInfo pipeline_create_info;
 
         WVulkanUtils::InitializeDefaultPipelineStructs(
-            wvertex_stage_info, shader_stages, desc_layouts,
+            wvertex_stage_info, shader_stages, in_desc_lay,
             vertex_input_info, input_assembly, viewport_state, rasterizer,
             multisampling, depth_stencil, color_blend_attachment, color_blend_create_info,
             dynamic_states, dynamic_state,
@@ -106,6 +112,7 @@ namespace WVkPostprocessPipeUtils {
             );
 
         // Disable depth testing
+
         depth_stencil.depthTestEnable = VK_FALSE;
         depth_stencil.depthWriteEnable = VK_FALSE;
         depth_stencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
@@ -178,7 +185,7 @@ namespace WVkPostprocessPipeUtils {
 
         rbinding1.binding=0;
         rbinding1.descriptorCount = 1;
-        rbinding1.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        rbinding1.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         rbinding1.pImmutableSamplers = nullptr;
         rbinding1.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 

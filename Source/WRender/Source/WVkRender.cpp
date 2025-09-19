@@ -707,11 +707,9 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         const WVkRenderPipelineInfo & render_pipeline =
             graphics_pipelines_.Pipeline(pipeline_id);
 
-        vkCmdBindPipeline(
-            render_command_buffer_.command_buffers[in_frame_index],
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            render_pipeline.pipeline
-            );
+        vkCmdBindPipeline(render_command_buffer_.command_buffers[in_frame_index],
+                          VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          render_pipeline.pipeline);
 
         WVkRenderUtils::RndCmd_SetViewportAndScissor(
             in_command_buffer,
@@ -800,14 +798,13 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     )
 {
     // first input
+    
     VkImageView input_view = offscreen_render_[in_frame_index].color.view;
     VkImage input_img = offscreen_render_[in_frame_index].color.image;
     
     VkImageView dst_view = postprocess_render_[in_frame_index].color.view;
     VkImage dst_img = postprocess_render_[in_frame_index].color.image;
     
-    // TODO render dst image layout
-
     std::array<VkImageView, 2> pp_views = {input_view, dst_view};
     std::array<VkImage, 2> pp_images = {input_img, dst_img};
 
@@ -871,8 +868,9 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             device_info_.vk_device, in_command_buffer,
             render_plane.vertex_buffer, render_plane.index_buffer,
             render_plane.index_count,
-            pipeline.pipeline_layout, pipeline.pipeline,
-            std::array<VkDescriptorSet,2>{ input_render_descriptor, pp_descriptor}
+            pipeline.pipeline_layout,
+            pipeline.pipeline,
+            std::array<VkDescriptorSet,2>{ input_render_descriptor, pp_descriptor }
             );
 
         vkCmdEndRendering(in_command_buffer);

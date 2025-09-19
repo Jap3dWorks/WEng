@@ -2,6 +2,7 @@
 #include "WStructs/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVulkanUtils.hpp"
 #include <algorithm>
 
 void WVkPostprocessPipelines::Initialize(const WVkDeviceInfo & in_device,
@@ -30,7 +31,17 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
         device_info_,
         in_id,
         shaders,
-        WVkPostprocessPipeUtils::CreatePostprocessPipeline
+        [this](auto& _render_pipeline, const auto & _device, const auto & _desc_lay, const auto & _shdrs) {
+            WVkPostprocessPipeUtils::CreatePostprocessPipeline(
+                _render_pipeline,
+                _device,
+                {
+                    global_resources_.descset_layout_info.descset_layout,
+                    _desc_lay.descset_layout
+                },
+                _shdrs
+                );
+        }
         );
 
     pipelines_db_.CreateDescSetPool(
@@ -100,6 +111,7 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
         in_command_pool
         );
 
+    global_resources_.descset_layout_info = {};
     WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(
         global_resources_.descset_layout_info
         );
@@ -116,6 +128,10 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
             device_info_
             );
     }
+
+    global_resources_.render_sampler = WVulkanUtils::CreateRenderPlaneSampler(
+        device_info_.vk_device
+        );
 }
 
 void WVkPostprocessPipelines::Destroy_GlobalResources() {
@@ -132,4 +148,6 @@ void WVkPostprocessPipelines::Destroy_GlobalResources() {
         descpool = {};
         WVulkan::Destroy(descpool, device_info_);
     }
+
+    WVulkan::Destroy(global_resources_.render_sampler, device_info_);
 }

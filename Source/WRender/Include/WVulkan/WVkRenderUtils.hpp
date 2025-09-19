@@ -158,7 +158,7 @@ namespace WVkRenderUtils {
         const VkImageView & in_input_render_view,
         const VkSampler & in_input_render_sampler
         ) {
-        VkDescriptorSet descriptor_set;
+        VkDescriptorSet descriptor_set{};
         VkDescriptorSetAllocateInfo alloc_info{};
         
         alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -176,11 +176,12 @@ namespace WVkRenderUtils {
 
         std::array<VkWriteDescriptorSet, 1> write_ds;
 
-        VkDescriptorImageInfo image_info;
+        VkDescriptorImageInfo image_info{};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         image_info.imageView = in_input_render_view;
         image_info.sampler = in_input_render_sampler;
 
+        write_ds[0] = {};
         write_ds[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write_ds[0].dstBinding = 0; // only 1 binding in this descriptor
         write_ds[0].dstSet = descriptor_set;
@@ -445,22 +446,25 @@ namespace WVkRenderUtils {
         const VkImageView & in_color_view,
         const VkExtent2D & in_extent
         ) {
+        VkClearValue clear_value = {0.5, 0.5, 0.5, 1.f};
 
         // Color Attachment
-        VkRenderingAttachmentInfo color_attachment;
+        VkRenderingAttachmentInfo color_attachment{};
         color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         color_attachment.imageView = in_color_view;
         color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        color_attachment.clearValue = {{0.5, 0.5, 0.5, 1.f}};
+        color_attachment.clearValue = {0.5, 0.5, 0.5, 1.f};
 
-        VkRenderingInfo rendering_info;
+        VkRenderingInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
         rendering_info.colorAttachmentCount = 1;
         rendering_info.pColorAttachments = &color_attachment;
+        rendering_info.pDepthAttachment = VK_NULL_HANDLE;
+        rendering_info.pStencilAttachment = VK_NULL_HANDLE;
 
         vkCmdBeginRendering(
             in_command_buffer,
@@ -474,8 +478,8 @@ namespace WVkRenderUtils {
         const VkImageView & in_resolve_view,
         const VkExtent2D & in_extent
         ) {
-        std::array<VkClearValue,1> clear_values;
-        clear_values[0] = {{0.5, 0.5, 0.5, 1.f}};
+
+        VkClearValue clear_value = {0.5, 0.5, 0.5, 1.f};
 
         // Color Attachment
         VkRenderingAttachmentInfo color_attachment{};
@@ -484,7 +488,7 @@ namespace WVkRenderUtils {
         color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        color_attachment.clearValue = clear_values[0];
+        color_attachment.clearValue = clear_value;
         color_attachment.resolveImageView = in_resolve_view;
         color_attachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 

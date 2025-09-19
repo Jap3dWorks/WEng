@@ -161,6 +161,8 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
 
+    pipeline_asset->RenderPipeline().shaders_count = 2;
+
     WAssetId paramid = engine.AssetManager().Create<WRenderPipelineParametersAsset>("/Content/Assets/PPBlurParam.PPBlurParam");
 
     WRenderPipelineParametersAsset * paramass =

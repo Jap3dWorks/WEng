@@ -100,8 +100,6 @@ namespace WVkGraphicsPipelinesUtils {
         ubo_binding.pImmutableSamplers = nullptr;
         ubo_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-        // TODO: Parameters UBO
-
         // A texture in the fragment shader
         VkDescriptorSetLayoutBinding sampler_binding{};
         sampler_binding.binding = 1;

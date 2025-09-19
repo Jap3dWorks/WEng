@@ -38,20 +38,24 @@ uniform Sampler2D prev_render;
 [shader("fragment")]
 float4 fsMain(VSOutput vertIn) : SV_TARGET
 {
-    // return float4(0.1, 0.0, 0.0, 1.0);
     float width, height;
+
     prev_render.GetDimensions(width, height);
 
     float aspect = width / height;
 
-    float pxlw = 1/width;
-    float pxlh = 1/height;
+    float pxlw = 1.f / width;
+    float pxlh = 1.f / height;
 
-    float3 samples[9];
+    const int samples_count=25;
+    
+    float3 samples[samples_count]={0};
+
+    int range = (int) sqrt(samples_count) / 2;
 
     int idx=0;
-    for(int i=-1 ; i < 2; i++) {
-        for (int j=-1; i<2; i++) {
+    for(int i=-range ; i <= range; i++) {
+        for (int j=-range; j<=range; j++) {
             float2 coord = float2(pxlw * i, pxlh * j);
             samples[idx] = prev_render.Sample(vertIn.fragTexCoord + coord).xyz;
             idx++;
@@ -59,11 +63,11 @@ float4 fsMain(VSOutput vertIn) : SV_TARGET
     }
 
     float3 color = float3(0.0, 0.0, 0.0);
-    for(int i=0; i<9; i++) {
+    for(int i=0; i<samples_count; i++) {
         color+=samples[i];
     }
 
-    color /= 9;
+    color /= samples_count;
 
     return float4(color, 1.f);
 }
