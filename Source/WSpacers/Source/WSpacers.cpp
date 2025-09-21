@@ -118,15 +118,24 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
-    pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
                 "/Content/Shaders/Spacers_ShaderBase.vert.graphics.glsl");
 
-    pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    pipeline_asset->RenderPipeline().shaders[1].type=EShaderStageFlag::Fragment;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl");
 
     pipeline_asset->RenderPipeline().shaders_count = 2;
+
+    auto & params = pipeline_asset->RenderPipeline().params;
+
+    params[0].binding=0;
+    params[0].type=EPipeParamType::Ubo;
+    params[0].stage_flags=EShaderStageFlag::Vertex;
+    params[1].binding=1;
+    params[1].type=EPipeParamType::Texture;
+    params[1].stage_flags=EShaderStageFlag::Fragment;
 
     // Create Pipeline Parameter Asset
 
@@ -151,19 +160,27 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
         engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Postprocess;
-    pipeline_asset->RenderPipeline().shaders[0].type=EShaderType::Vertex;
+    pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].entry, "vsMain");
 
-    pipeline_asset->RenderPipeline().shaders[1].type=EShaderType::Fragment;
+    pipeline_asset->RenderPipeline().shaders[1].type=EShaderStageFlag::Fragment;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
 
-    pipeline_asset->RenderPipeline().shaders_count = 2;
+    pipeline_asset->RenderPipeline().shaders_count = 2; // TODO: deduce;
 
-    WAssetId paramid = engine.AssetManager().Create<WRenderPipelineParametersAsset>("/Content/Assets/PPBlurParam.PPBlurParam");
+    auto & params = pipeline_asset->RenderPipeline().params;
+    params[0].binding=0;
+    params[0].type=EPipeParamType::Ubo;
+    params[0].stage_flags = EShaderStageFlag::Vertex;
+
+    WAssetId paramid =
+        engine.AssetManager().Create<WRenderPipelineParametersAsset>(
+            "/Content/Assets/PPBlurParam.PPBlurParam"
+            );
 
     WRenderPipelineParametersAsset * paramass =
         engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
@@ -286,6 +303,7 @@ bool SetupLevel(WEngine & in_engine,
     cts.position = {0.0, 0.0f, .5f};
 
     // postprocess
+    
     for(std::uint8_t i=0; i < in_ppcss_assgnm.size(); i++) {
         cameracomp->SetRenderPipelineAssignment({i}, in_ppcss_assgnm[i]);
     }

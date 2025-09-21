@@ -7,6 +7,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
 #include "WVkGraphicsPipelinesUtils.hpp"
+#include "WVulkan/WVulkanUtils.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -55,10 +56,13 @@ void WVkGraphicsPipelines::CreatePipeline(
         WVkGraphicsPipelinesUtils::BuildShaderStageInfo
         );
 
+    // pipeparams
+    // one Ubo should be required as first binding (0)
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_info_,
-        WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGraphicBindings
+        pipeline_struct.params,
+        WVulkanUtils::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(
@@ -97,6 +101,8 @@ WId WVkGraphicsPipelines::CreateBinding(
 {
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
+
+    // TODO: Check with pipeline params
 
     pipelines_db_.bindings.InsertAt(
         component_id,

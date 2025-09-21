@@ -19,7 +19,7 @@ namespace WVkPostprocessPipeUtils {
     inline WVkShaderStageInfo BuildPostprocessShaderStageInfo(
         const char * in_shader_file_path,
         const char * in_entry_point,
-        EShaderType in_shader_type
+        EShaderStageFlag in_shader_type
         ) {
         WVkShaderStageInfo result;
 
@@ -27,7 +27,7 @@ namespace WVkPostprocessPipeUtils {
         result.entry_point = in_entry_point;
         result.type = in_shader_type;
 
-        if (in_shader_type == EShaderType::Vertex) {
+        if (in_shader_type == EShaderStageFlag::Vertex) {
             result.attribute_descriptors.resize(2);
 
             result.attribute_descriptors[0].binding=0;
@@ -48,29 +48,6 @@ namespace WVkPostprocessPipeUtils {
 
         return result;
 
-    }
-
-    inline void UpdateDSL_PostprocessBinding(WVkDescriptorSetLayoutInfo & out_dsl) {
-        // Model UBO
-        VkDescriptorSetLayoutBinding ubo_binding{};
-        ubo_binding.binding=0;
-        ubo_binding.descriptorCount=1;
-        ubo_binding.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        ubo_binding.pImmutableSamplers = nullptr;
-        ubo_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-        // texture bindings
-        VkDescriptorSetLayoutBinding sampler_binding{};
-        sampler_binding.binding = 1;
-        sampler_binding.descriptorCount=1;
-        sampler_binding.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        sampler_binding.pImmutableSamplers = nullptr;
-        sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        out_dsl.bindings = {
-            ubo_binding,
-            sampler_binding
-        };
     }
 
     inline void CreatePostprocessPipeline(WVkRenderPipelineInfo & out_pipeline_info,

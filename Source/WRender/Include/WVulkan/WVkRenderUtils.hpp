@@ -50,6 +50,7 @@ namespace WVkRenderUtils {
         const WVkDescriptorSetUBOBinding & ubo_binding,
         const std::vector<WVkDescriptorSetTextureBinding> & in_textures_binding
         ) {
+        // TODO: use pipeline params to deduce the write descriptors.
         
         VkDescriptorSet descriptor_set;
         VkDescriptorSetAllocateInfo alloc_info{};
@@ -68,7 +69,7 @@ namespace WVkRenderUtils {
         }    
 
         std::vector<VkWriteDescriptorSet> write_ds{in_textures_binding.size() + 1};
-
+        
         WVulkan::UpdateWriteDescriptorSet_UBO(
             write_ds[0],
             ubo_binding.binding,

@@ -19,11 +19,13 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
         in_pipeline_struct.shaders,
         WVkPostprocessPipeUtils::BuildPostprocessShaderStageInfo
         );
-
+    
+    // One Ubo should be required as first binding (0)
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_info_,
-        WVkPostprocessPipeUtils::UpdateDSL_PostprocessBinding
+        in_pipeline_struct.params,
+        WVulkanUtils::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(

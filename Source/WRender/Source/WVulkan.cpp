@@ -1913,7 +1913,7 @@ void WVulkan::CopyBufferToImage(
 // WVkShaderStageInfo WVulkan::BuildGraphicsShaderStageInfo(
 //     const char * in_shader_file_path,
 //     const char * in_entry_point,
-//     EShaderType in_shader_type
+//     EShaderStageFlag in_shader_type
 //     )
 // {
 //     WVkShaderStageInfo result;
@@ -1925,7 +1925,7 @@ void WVulkan::CopyBufferToImage(
 //     result.entry_point = in_entry_point;
 //     result.type = in_shader_type;
 
-//     if (in_shader_type == EShaderType::Vertex)
+//     if (in_shader_type == EShaderStageFlag::Vertex)
 //     {
 //         result.attribute_descriptors.resize(3);
 

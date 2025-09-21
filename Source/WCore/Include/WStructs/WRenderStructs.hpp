@@ -48,16 +48,29 @@ struct WRenderSize {
     std::uint32_t  height{0};
 };
 
-enum class EShaderType : uint8_t
+enum class EShaderStageFlag : uint8_t
 {
-    None,
-    Vertex,
-    Fragment,
+    None=0,
+    Vertex=1,
+    Fragment=2,
     // Geometry,
-    Compute,
+    Compute=4,
     // TessellationControl,
     // TessellationEvaluation
 };
+
+constexpr const std::array<EShaderStageFlag, 4> WShaderStageFlagsList = {EShaderStageFlag::None,
+                                                                         EShaderStageFlag::Vertex,
+                                                                         EShaderStageFlag::Fragment,
+                                                                         EShaderStageFlag::Compute };
+
+constexpr EShaderStageFlag operator|(const EShaderStageFlag & l, const EShaderStageFlag & r) noexcept {
+    return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) | static_cast<std::uint8_t>(r));
+}
+
+constexpr EShaderStageFlag operator&(const EShaderStageFlag & l, const EShaderStageFlag & r) noexcept {
+    return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) & static_cast<std::uint8_t>(r));
+}
 
 enum class EPipelineType : uint8_t
 {
@@ -69,8 +82,22 @@ enum class EPipelineType : uint8_t
     Swap            // Used to write in the swap chain
 };
 
+enum class EPipeParamType {
+    None,
+    Texture,
+    Ubo
+};
+
+struct WPipeParam {
+    std::uint8_t binding{0};
+    EPipeParamType type{EPipeParamType::None};
+    EShaderStageFlag stage_flags{EShaderStageFlag::None};
+};
+
+using WPipeParamList = std::array<WPipeParam, 16>;
+
 struct WShaderStruct {
-    EShaderType type{EShaderType::None};
+    EShaderStageFlag type{EShaderStageFlag::None};
     char file[128]{""};
     char entry[16]{"main"};
 };
@@ -80,23 +107,24 @@ using WShaderList = std::array<WShaderStruct, WENG_MAX_PIPELINE_SHADERS>;
 struct WRenderPipelineStruct {
     EPipelineType type {EPipelineType::Graphics};
     WShaderList shaders{};
+    std::uint8_t shaders_count{0};  // TODO: check if this is required
 
-    uint8_t shaders_count{0};
+    WPipeParamList params{};
 };
 
 template<typename T>
-struct TRPParameter {
-    uint16_t binding;
+struct TRPParam {
+    std::uint16_t binding;
     T value;
 };
 
-using WRPParameterList_Float = std::array<TRPParameter<float>, 8>;
-using WRPParameterList_WAssetId = std::array<TRPParameter<WAssetId>, 8>;
+using WRPParameterList_Float = std::array<TRPParam<float>, 8>;
+using WRPParameterList_WAssetId = std::array<TRPParam<WAssetId>, 8>;
 
 struct WRenderPipelineParametersStruct {
     WRPParameterList_Float float_parameters{};
-    uint8_t float_parameters_count{0};
+    std::uint8_t float_parameters_count{0};
     WRPParameterList_WAssetId texture_assets{};
-    uint8_t texture_assets_count{0};
+    std::uint8_t texture_assets_count{0};
 };
 

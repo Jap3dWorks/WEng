@@ -70,14 +70,15 @@ public:
         render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
-    template<CCallable<void, WVkDescriptorSetLayoutInfo&> ConfigInfoFn>
+    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const WVkDeviceInfo & in_device,
+                             const WPipeParamList & params,
                              ConfigInfoFn && info_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
-        std::forward<ConfigInfoFn>(info_fn)(descriptor_set_layout_info);
+        std::forward<ConfigInfoFn>(info_fn)(descriptor_set_layout_info, params);
 
         descriptor_set_layouts.CreateAt(
             in_id,
@@ -111,7 +112,9 @@ public:
     }
 
     template<typename ShadersData,
-             CCallable<WVkShaderStageInfo, const char*, const char *, EShaderType> TFn>
+             CCallable<WVkShaderStageInfo,
+                       const char*, const char *,
+                       EShaderStageFlag> TFn>
     std::vector<WVkShaderStageInfo> BuildShaders(const std::uint32_t & shaders_count,
                                                  ShadersData && in_data,
                                                  TFn && in_fn) {
