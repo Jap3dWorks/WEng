@@ -128,7 +128,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     pipeline_asset->RenderPipeline().shaders_count = 2;
 
-    auto & params = pipeline_asset->RenderPipeline().params;
+    auto & params = pipeline_asset->RenderPipeline().params_descriptor;
 
     params[0].binding=0;
     params[0].type=EPipeParamType::Ubo;
@@ -172,7 +172,7 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
 
     pipeline_asset->RenderPipeline().shaders_count = 2; // TODO: deduce;
 
-    auto & params = pipeline_asset->RenderPipeline().params;
+    auto & params = pipeline_asset->RenderPipeline().params_descriptor;
     params[0].binding=0;
     params[0].type=EPipeParamType::Ubo;
     params[0].stage_flags = EShaderStageFlag::Vertex;

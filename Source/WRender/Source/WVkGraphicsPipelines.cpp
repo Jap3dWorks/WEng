@@ -61,7 +61,7 @@ void WVkGraphicsPipelines::CreatePipeline(
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_info_,
-        pipeline_struct.params,
+        pipeline_struct.params_descriptor,
         WVulkanUtils::UpdateDescriptorSetLayout
         );
 
@@ -99,6 +99,9 @@ WId WVkGraphicsPipelines::CreateBinding(
     std::vector<uint16_t> in_textures_bindings
     ) noexcept
 {
+
+    WRenderPipelineParametersStruct parameters; // TODO
+    
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
 

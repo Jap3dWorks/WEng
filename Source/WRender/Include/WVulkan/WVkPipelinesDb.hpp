@@ -73,7 +73,7 @@ public:
     template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const WVkDeviceInfo & in_device,
-                             const WPipeParamList & params,
+                             const WPipeParamDescriptorList & params,
                              ConfigInfoFn && info_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;

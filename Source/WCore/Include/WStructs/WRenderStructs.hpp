@@ -88,13 +88,13 @@ enum class EPipeParamType {
     Ubo
 };
 
-struct WPipeParam {
+struct WPipeParamDescriptorStruct {
     std::uint8_t binding{0};
     EPipeParamType type{EPipeParamType::None};
     EShaderStageFlag stage_flags{EShaderStageFlag::None};
 };
 
-using WPipeParamList = std::array<WPipeParam, 16>;
+using WPipeParamDescriptorList = std::array<WPipeParamDescriptorStruct, 16>;
 
 struct WShaderStruct {
     EShaderStageFlag type{EShaderStageFlag::None};
@@ -109,7 +109,7 @@ struct WRenderPipelineStruct {
     WShaderList shaders{};
     std::uint8_t shaders_count{0};  // TODO: check if this is required
 
-    WPipeParamList params{};
+    WPipeParamDescriptorList params_descriptor{};
 };
 
 template<typename T>
@@ -118,12 +118,71 @@ struct TRPParam {
     T value;
 };
 
-using WRPParameterList_Float = std::array<TRPParam<float>, 8>;
+// template<>
+// struct TRPParam<void *> {
+//     std::uint16_t binding;
+//     void * ptr;
+//     std::size_t size;
+//     std::size_t offset;
+// };
+
+// using WRPPTexture = TRPParam<WAssetId>;
+// using WRPPUbo = TRPParam<void*>;
+
+struct WRPParameterStruct;
+struct WRPParameterStruct_Texture;
+struct WRPParameterStruct_Ubo;
+
+struct WRPParameterVisitor {
+    virtual void Visit(WRPParameterStruct *)=0;
+    virtual void Visit(WRPParameterStruct_Texture *)=0;
+    virtual void Visit(WRPParameterStruct_Ubo*)=0;
+};
+
+struct WRPParameterStruct {
+    std::uint8_t binding{0};
+    // EPipeParamType type{EPipeParamType::None};
+    // void * data;
+    // std::size_t size;
+    // std::size_t offset;
+    virtual void Visit(WRPParameterVisitor * in_visitor) {
+        in_visitor->Visit(this);
+    }
+};
+
+struct WRPParameterStruct_Texture : public WRPParameterStruct {
+    WAssetId texture_id;
+};
+
+struct WRPParameterStruct_Ubo : public WRPParameterStruct {
+    virtual void* Data() const=0;
+    virtual std::size_t Size() const=0;
+    std::size_t offset{0};
+};
+
+template<std::size_t N>
+struct TRPParameterStruct_Ubo : public WRPParameterStruct_Ubo {
+    char data[N];
+    void * Data() const override { return data; }
+    std::size_t Size() const override { return N; }
+};
+
+// struct 
+
+// TODO: parameter UBO
+// using WRPParameterList_Float = std::array<TRPParam<float>, 8>;
 using WRPParameterList_WAssetId = std::array<TRPParam<WAssetId>, 8>;
+// using WRPParameterList_Ubo = std::array<WRPPUbo,8>;
+
+using WRPParameterList = std::array<WRPParameterStruct, 8>;
 
 struct WRenderPipelineParametersStruct {
-    WRPParameterList_Float float_parameters{};
-    std::uint8_t float_parameters_count{0};
+    WRPParameterList parameter_list{};
+    std::uint8_t parameters_counts;
+    
+    // WRPParameterList_Float float_parameters{};
+    // std::uint8_t float_parameters_count{0};
+    
     WRPParameterList_WAssetId texture_assets{};
     std::uint8_t texture_assets_count{0};
 };

@@ -422,7 +422,7 @@ namespace WVulkanUtils {
 
     inline void UpdateDescriptorSetLayout(
         WVkDescriptorSetLayoutInfo & out_dsl,
-        const WPipeParamList & in_param_list
+        const WPipeParamDescriptorList & in_param_list
         ) {
 
         std::vector<VkDescriptorSetLayoutBinding> bindings;
