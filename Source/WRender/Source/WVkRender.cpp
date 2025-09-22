@@ -411,37 +411,53 @@ void WVkRender::CreatePipelineBinding(
 {
     assert(pipeline_track_.pipeline_ptype.contains(pipeline_id));
 
-    std::vector<WVkTextureInfo> tinfo{
-        in_parameters.texture_assets_count
-    };
+    std::vector<WVkDescriptorSetTextureWriteStruct> textures{};
+    textures.resize(in_parameters.texture_params.size());
 
-    std::vector<uint16_t> tbinding{in_parameters.texture_assets_count};
-
-    for (uint8_t i=0; i < in_parameters.texture_assets_count; i++) {
-        tinfo[i] = render_resources_.TextureInfo(
-            in_parameters.texture_assets[i].value
+    for(std::uint32_t i=0; i < in_parameters.texture_params.size(); i++) {
+        const auto & tx = render_resources_.TextureInfo(
+            in_parameters.texture_params[i].value
             );
+        
+        textures[i] = {
+            .binding = in_parameters.texture_params[i].binding,
+            .image_info = {
+                .sampler = tx.sampler,
+                .imageView = tx.view,
+                .imageLayout = tx.layout
+            }
+        };
+    }
 
-        tbinding[i] = in_parameters.texture_assets[i].binding;
+    std::vector<WVkDescriptorSetUBOWriteStruct> ubos{};
+    ubos.resize(in_parameters.ubo_params.size());
+
+    for(std::uint32_t i=0; i < in_parameters.ubo_params.size(); i++) {
+        const auto & ubop = in_parameters.ubo_params[i];
+        ubos[i] = {
+            .binding = ubop.binding,
+            .data = ubop.databuffer.data(),
+            .size = ubop.databuffer.size(),
+            .offset = ubop.offset
+        };
     }
 
     switch(pipeline_track_.pipeline_ptype[pipeline_id]) {
 
     case EPipelineType::Graphics:
-        graphics_pipelines_.CreateBinding(
-            component_id,
-            pipeline_id,
-            in_assetindex_id,
-            tinfo,
-            tbinding
-            );
+        graphics_pipelines_.CreateBinding(component_id,
+                                          pipeline_id,
+                                          in_assetindex_id,
+                                          ubos,
+                                          textures);
         break;
         
     case EPipelineType::Postprocess:
-        ppcss_pipelines_.CreateBinding(
-            component_id,
-            pipeline_id,
-            tinfo, tbinding
+        ppcss_pipelines_.CreateBinding(component_id,
+                                       pipeline_id,
+                                       ubos,
+                                       textures
+                                       // tinfo, tbinding
             );
         break;
         
@@ -497,49 +513,55 @@ void WVkRender::UpdateUboCamera(
         );
 }
 
-void WVkRender::UpdateUboBindingDynamic(
-    const WEntityComponentId & in_component_id,
-    const void * in_data,
-    const std::size_t & in_size
+void WVkRender::UpdateParameterDynamic(
+        const WEntityComponentId & in_component_id,
+        const WRPParamUboStruct & ubo_write
     ) {
+
+    WVkDescriptorSetUBOWriteStruct ubowrt{
+        .binding = ubo_write.binding,
+        .data = ubo_write.databuffer.data(),
+        .size = ubo_write.databuffer.size(),
+        .offset = ubo_write.offset
+    };
+
     switch(pipeline_track_.binding_ptype[in_component_id]) {
     case EPipelineType::Graphics:
-        graphics_pipelines_.UpdateUboBinding(in_component_id,
-                                             frame_index_,
-                                             &in_data,
-                                             in_size);
+        graphics_pipelines_.UpdateBinding(in_component_id,
+                                          frame_index_,
+                                          ubowrt);
         break;
     case EPipelineType::Postprocess:
-        ppcss_pipelines_.UpdateUboBinding(in_component_id,
-                                          frame_index_,
-                                          &in_data,
-                                          in_size);
+        ppcss_pipelines_.UpdateBinding(in_component_id,
+                                       frame_index_,
+                                       ubowrt);
         break;
     default:
         WFLOG("Pipeline type not implemented.");
     }
-
 }
 
-void WVkRender::UpdateUboBindingStatic(
-    const WEntityComponentId & in_component_id,
-    const void * in_data,
-    const std::size_t & in_size
+void WVkRender::UpdateParameterStatic(
+        const WEntityComponentId & in_component_id,
+        const WRPParamUboStruct & ubo_write
     ) {
+
+    WVkDescriptorSetUBOWriteStruct ubowrt{
+        .binding = ubo_write.binding,
+        .data = ubo_write.databuffer.data(),
+        .size = ubo_write.databuffer.size(),
+        .offset = ubo_write.offset
+    };
+
     switch(pipeline_track_.binding_ptype[in_component_id]) {
     case EPipelineType::Graphics:
-        graphics_pipelines_.UpdateUboBinding(
-            in_component_id,
-            in_data,
-            in_size
+        graphics_pipelines_.UpdateBinding(
+            in_component_id, ubowrt
             );
         break;
     case EPipelineType::Postprocess:
-        ppcss_pipelines_.UpdateUboBinding(
-            in_component_id,
-            in_data,
-            in_size
-            );
+        ppcss_pipelines_.UpdateBinding(in_component_id,
+                                       ubowrt);
         break;
     default:
         WFLOG("Pipeline type not implemented.");
@@ -721,11 +743,12 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
             auto& binding = graphics_pipelines_.Binding(bid);
 
             // Create descriptor
-            VkDescriptorSet descriptorset = WVkRenderUtils::CreateGraphicsDescriptor(
+            VkDescriptorSet descriptorset = WVkRenderUtils::CreateRenderDescriptor(
                 device_info_.vk_device,
                 graphics_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
                 graphics_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
-                binding.ubo[in_frame_index],
+                frame_index_,
+                binding.ubos,
                 binding.textures
                 );
 
@@ -857,9 +880,11 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             ppcss_pipelines_.GlobalSampler()
             );
 
-        VkDescriptorSet pp_descriptor = WVkRenderUtils::CreatePostprocessDescriptor(
+        VkDescriptorSet pp_descriptor = WVkRenderUtils::CreateRenderDescriptor(
             device_info_.vk_device, dpool.descriptor_pool, dsetlay.descset_layout,
-            binding.ubo[in_frame_index], binding.textures
+            frame_index_,
+            binding.ubos,
+            binding.textures
             );
 
         const WVkMeshInfo& render_plane = ppcss_pipelines_.RenderPlane();

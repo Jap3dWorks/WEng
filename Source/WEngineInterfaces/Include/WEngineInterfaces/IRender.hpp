@@ -91,20 +91,16 @@ public:
         const WUBOCameraStruct & in_ubo
         )=0;
 
-    /** @brief Current frame, but other frames in flight will not be updated. */
-    virtual void UpdateUboBindingDynamic(const WEntityComponentId & in_id,
-                                         const void * in_data,
-                                         const std::size_t & in_size)=0;
+    virtual void UpdateParameterDynamic(const WEntityComponentId & in_id,
+                                        const WRPParamUboStruct & ubo_write)=0;
 
-    /** @brief Updates current frame and other frames in flight. */
-    virtual void UpdateUboBindingStatic(const WEntityComponentId & in_id,
-                                        const void * in_data,
-                                        const std::size_t & in_size) =0;
+    virtual void UpdateParameterStatic(const WEntityComponentId & in_id,
+                                       const WRPParamUboStruct & ubo_write)=0;
 
     /**
      * @brief Unload all render resources.
      */
-    virtual void UnloadAllResources() = 0;
+    virtual void UnloadAllResources()=0;
 
     // Window
     // ------

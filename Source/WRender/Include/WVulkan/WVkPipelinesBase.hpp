@@ -3,9 +3,11 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkPipelinesDb.hpp"
+#include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 #include <cstdint>
+#include <unordered_set>
 
 template<typename WPipelineIdType=WAssetId,
          typename WBindingIdType=WEntityComponentId,
@@ -159,69 +161,106 @@ public:
             );
     }
 
-    void UpdateUboBinding(const WBindingIdType & in_binding_id,
-                          const std::uint32_t & in_frame_index,
-                          const void * in_data,
-                          const std::size_t & in_size) {
+    void UpdateBinding(const WBindingIdType & in_binding_id,
+                       const std::uint32_t & in_frame_index,
+                       const WVkDescriptorSetUBOWriteStruct & ubo_write
+        ) {
+        auto & binding = pipelines_db_.bindings.Get(in_binding_id);
         
-        WVkDescriptorSetUBOBinding ubodt =
-            pipelines_db_.bindings.Get(in_binding_id).ubo[in_frame_index];
+        TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
-        WVulkan::MapUBO(ubodt.ubo_info, device_info_);
+        // TODO: Check using pipeline description
+        for ( auto & b : binding.ubos) {
+            if(b[0].binding == ubo_write.binding) {
+                ubo = &b;
+                break;
+            }
+        }
+
+        if(!ubo) return;
+
+        WVulkan::MapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
         
-        WVulkan::UpdateUBO(ubodt.ubo_info, in_data, in_size);
+        WVulkan::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
 
-        WVulkan::UnmapUBO(ubodt.ubo_info, device_info_);
-                                
+        WVulkan::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
     }
 
-    void UpdateUboBinding(const WBindingIdType & in_binding_id,
-                          const void * in_data,
-                          const std::size_t & in_size) {
-        auto & ubos = pipelines_db_.bindings.Get(in_binding_id).ubo;
-        for (auto & b : ubos) {
+    void UpdateBinding(const WBindingIdType & in_binding_id,
+                       const WVkDescriptorSetUBOWriteStruct & ubo_write
+        ) {
+        auto & binding = pipelines_db_.bindings.Get(in_binding_id);
+        
+        TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
+
+        // TODO: Check using pipeline description
+        for ( auto & b : binding.ubos) {
+            if(b[0].binding == ubo_write.binding) {
+                ubo = &b;
+                break;
+            }
+        }
+
+        if(!ubo) return;
+
+        for(auto & b: (*ubo)) {
             WVulkan::MapUBO(b.ubo_info, device_info_);
-            WVulkan::UpdateUBO(b.ubo_info, in_data, in_size);
-            WVulkan::UnmapUBO(b.ubo_info, device_info_);
+            WVulkan::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
+            WVulkan::UnmapUBO(b.ubo_info, device_info_);            
         }
     }
 
 protected:
     
-    template<typename TUBOType>
-    std::array<WVkDescriptorSetUBOBinding, FramesInFlight> InitUboDescriptorBinding() {
-        std::array<WVkDescriptorSetUBOBinding, frames_in_flight> bindings;
+    std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
+        const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
+        ) {
 
-        for(uint32_t i = 0; i < bindings.size(); i++) {
-            
-            bindings[i].binding = 0;
-            bindings[i].ubo_info.range = sizeof(TUBOType);
+        std::unordered_map<std::uint32_t, TVkDescriptorSetUBOBindingFrames<FramesInFlight>> bindings;
+        std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
 
-            WVulkan::CreateUBO(bindings[i].ubo_info, device_info_);
+        for(std::uint32_t i = 0; i < in_ubos.size(); i++) {
+            if(!bindings.contains(in_ubos[i].binding)) {
+                for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+                    
+                    bindings[i][frm].binding = in_ubos[i].binding;
+                    bindings[i][frm].ubo_info.range = in_ubos[i].range;
 
-            bindings[i].buffer_info.buffer = bindings[i].ubo_info.uniform_buffer;
-            bindings[i].buffer_info.offset = 0;
-            bindings[i].buffer_info.range = bindings[i].ubo_info.range;
+                    WVulkan::CreateUBO(bindings[i][frm].ubo_info, device_info_);
+
+                    bindings[i][frm].buffer_info.buffer = bindings[i][frm].ubo_info.buffer;
+                    bindings[i][frm].buffer_info.offset = 0; // use the whole buffer
+                    bindings[i][frm].buffer_info.range = bindings[i][frm].ubo_info.range;
+                }
+                result.push_back(bindings[i]);
+            }
+
+            for (std::uint32_t frm=0; i<FramesInFlight; frm++) {
+                WVulkan::MapUBO(bindings[i][frm].ubo_info, device_info_);
+                WVulkan::UpdateUBO(bindings[i][frm].ubo_info,
+                                   in_ubos[i].data,
+                                   in_ubos[i].size,
+                                   in_ubos[i].offset);
+                WVulkan::UnmapUBO(bindings[i][frm].ubo_info, device_info_);                
+            }
         }
 
-        return bindings;
+        return result;
     }
 
     std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
-        const std::vector<WVkTextureInfo> & in_textures,
-        const std::vector<std::uint16_t> & in_bindings
+        const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {
         std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
-        
-        for (uint32_t i=0; i<frames_in_flight; i++) {
-            for (uint32_t j = 0; j<tx.size(); j++) {
 
-                tx[j].image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                tx[j].binding = in_bindings[j];
-                tx[j].image_info.imageView = in_textures[j].image_view;
-                tx[j].image_info.sampler = in_textures[j].sampler;
-            }
+        for (std::uint32_t i = 0; i<tx.size(); i++) {
+            tx[i].binding = in_textures[i].binding;
+
+            tx[i].image_info.imageLayout = in_textures[i].image_info.imageLayout;
+            tx[i].image_info.imageView = in_textures[i].image_info.imageView;
+            tx[i].image_info.sampler = in_textures[i].image_info.sampler;
         }
+
         return tx;
     }
 

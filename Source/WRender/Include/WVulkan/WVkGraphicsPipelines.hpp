@@ -68,8 +68,11 @@ public:
         const WEntityComponentId & in_binding_id,
         const WAssetId & in_pipeline_id,
         const WAssetIndexId & in_mesh_asset_id,
-        std::vector<WVkTextureInfo> in_textures,
-        std::vector<std::uint16_t> in_textures_bindings
+        const std::vector<WVkDescriptorSetUBOWriteStruct> in_ubos,
+        const std::vector<WVkDescriptorSetTextureWriteStruct> in_texture
+        // ,
+        // std::vector<WVkTextureInfo> in_textures,
+        // std::vector<std::uint16_t> in_textures_bindings
         ) noexcept;
 
     void UpdateGlobalGraphicsDescriptorSet(

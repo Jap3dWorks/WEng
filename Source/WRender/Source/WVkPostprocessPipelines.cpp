@@ -24,7 +24,7 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_info_,
-        in_pipeline_struct.params,
+        in_pipeline_struct.params_descriptor,
         WVulkanUtils::UpdateDescriptorSetLayout
         );
 
@@ -58,8 +58,8 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
 WEntityComponentId WVkPostprocessPipelines::CreateBinding(
     const WEntityComponentId & in_binding_id,
     const WAssetId & in_pipeline_id,
-    std::vector<WVkTextureInfo> in_textures,
-    std::vector<std::uint16_t> in_texture_bindings
+    const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
+    const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture
     ) {
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
@@ -68,8 +68,8 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
         in_binding_id,
         WVkPipelineBindingInfo{in_pipeline_id,
                                {}, //  <- Render plane
-                               InitTextureDescriptorBindings(in_textures, in_texture_bindings),
-                               InitUboDescriptorBinding<WUBOPostprocessStruct>()}
+                               InitUboDescriptorBindings(in_ubos),
+                               InitTextureDescriptorBindings(in_texture)}
         );
 
     pipeline_bindings_[in_pipeline_id].Insert(in_binding_id.GetId(), in_binding_id);

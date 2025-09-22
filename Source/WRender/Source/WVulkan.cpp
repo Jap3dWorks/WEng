@@ -661,7 +661,7 @@ void WVulkan::CreateTexture(
 
     CreateImage(
         out_texture_info.image,
-        out_texture_info.image_memory,
+        out_texture_info.memory,
         device_info.vk_device,
         device_info.vk_physical_device,
         texture_ptr->width,
@@ -707,7 +707,7 @@ void WVulkan::CreateTexture(
         );
 
     // Image view
-    out_texture_info.image_view = CreateImageView(
+    out_texture_info.view = CreateImageView(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
@@ -988,8 +988,8 @@ void WVulkan::CreateUBO(
     const WVkDeviceInfo &device)
 {
     CreateVkBuffer(
-        out_ubo_info.uniform_buffer,
-        out_ubo_info.uniform_buffer_memory,
+        out_ubo_info.buffer,
+        out_ubo_info.buffer_memory,
         device.vk_device,
         device.vk_physical_device,
         out_ubo_info.range,
@@ -1005,11 +1005,11 @@ void WVulkan::MapUBO(
 {
     vkMapMemory(
         in_device.vk_device,
-        out_uniform_buffer_info.uniform_buffer_memory,
+        out_uniform_buffer_info.buffer_memory,
         0,
         out_uniform_buffer_info.range,
         0,
-        &out_uniform_buffer_info.mapped_data
+        &out_uniform_buffer_info.mapped_memory
         );
 }
 
@@ -1019,10 +1019,10 @@ void WVulkan::UnmapUBO(
     ) {
     vkUnmapMemory(
         in_device.vk_device,
-        out_uniform_buffer_info.uniform_buffer_memory
+        out_uniform_buffer_info.buffer_memory
         );
 
-    out_uniform_buffer_info.mapped_data = nullptr;
+    out_uniform_buffer_info.mapped_memory = nullptr;
 }
 
 void WVulkan::Create(
@@ -1253,10 +1253,10 @@ void WVulkan::Destroy(
     in_texture_info.sampler = VK_NULL_HANDLE;
 
     vkDestroyImageView(in_device_info.vk_device,
-                       in_texture_info.image_view,
+                       in_texture_info.view,
                        nullptr);
 
-    in_texture_info.image_view = VK_NULL_HANDLE;
+    in_texture_info.view = VK_NULL_HANDLE;
 
     vkDestroyImage(in_device_info.vk_device,
                    in_texture_info.image,
@@ -1265,10 +1265,10 @@ void WVulkan::Destroy(
     in_texture_info.image = VK_NULL_HANDLE;
 
     vkFreeMemory(in_device_info.vk_device,
-                 in_texture_info.image_memory,
+                 in_texture_info.memory,
                  nullptr);
 
-    in_texture_info.image_memory = VK_NULL_HANDLE;
+    in_texture_info.memory = VK_NULL_HANDLE;
     
 }
 
@@ -1300,25 +1300,25 @@ void WVulkan::Destroy(
     const WVkDeviceInfo & in_device_info
     ) {
 
-    if (out_ubo_info.mapped_data) {
-        vkUnmapMemory(in_device_info.vk_device, out_ubo_info.uniform_buffer_memory);
-        out_ubo_info.mapped_data = nullptr;
+    if (out_ubo_info.mapped_memory) {
+        vkUnmapMemory(in_device_info.vk_device, out_ubo_info.buffer_memory);
+        out_ubo_info.mapped_memory = nullptr;
     }
     
     vkDestroyBuffer(
         in_device_info.vk_device,
-        out_ubo_info.uniform_buffer,
+        out_ubo_info.buffer,
         nullptr
         );
 
     vkFreeMemory(
         in_device_info.vk_device,
-        out_ubo_info.uniform_buffer_memory,
+        out_ubo_info.buffer_memory,
         nullptr
         );
 
-    out_ubo_info.uniform_buffer = VK_NULL_HANDLE;
-    out_ubo_info.uniform_buffer_memory = VK_NULL_HANDLE;
+    out_ubo_info.buffer = VK_NULL_HANDLE;
+    out_ubo_info.buffer_memory = VK_NULL_HANDLE;
     out_ubo_info.range = 0;
 }
 

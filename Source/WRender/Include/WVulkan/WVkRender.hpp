@@ -82,18 +82,14 @@ public:
         const WUBOCameraStruct & in_ubo
         ) override;
 
-    /** only current frame index */
-    void UpdateUboBindingDynamic(
+    void UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
-        const void * in_data,
-        const std::size_t & in_size
+        const WRPParamUboStruct & ubo_write
         ) override;
 
-    /** both frame index */
-    void UpdateUboBindingStatic(
+    void UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
-        const void * in_data,
-        const std::size_t & in_size
+        const WRPParamUboStruct & ubo_write
         ) override;
 
     void UnloadAllResources() override;

@@ -431,13 +431,8 @@ namespace WVulkanUtils {
         bool stop=false;
 
         for(auto & p : in_param_list) {
-            if (stop) break;
 
             VkDescriptorSetLayoutBinding bndng{};
-            bndng.binding=p.binding;
-            bndng.descriptorCount=1;
-            bndng.pImmutableSamplers=nullptr;
-            bndng.stageFlags = ToVkShaderStageFlag(p.stage_flags);
 
             switch(p.type) {
             case EPipeParamType::None:
@@ -455,6 +450,13 @@ namespace WVulkanUtils {
             default:
                 continue;
             }
+
+            if (stop) break;
+
+            bndng.binding=p.binding;
+            bndng.descriptorCount=1;
+            bndng.pImmutableSamplers=nullptr;
+            bndng.stageFlags = ToVkShaderStageFlag(p.stage_flags);
 
             bindings.push_back(bndng);
         }

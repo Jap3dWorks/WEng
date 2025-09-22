@@ -126,7 +126,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl");
 
-    pipeline_asset->RenderPipeline().shaders_count = 2;
+    pipeline_asset->RenderPipeline().shaders_count = 2;  // TODO: deduce
 
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
 
@@ -146,9 +146,12 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    param_asset->RenderPipelineParameters().texture_assets[0].value = tex_ids[0];
-    param_asset->RenderPipelineParameters().texture_assets[0].binding = 1;
-    param_asset->RenderPipelineParameters().texture_assets_count = 1;
+    // param_asset->RenderPipelineParameters().ubo_params.push_back(
+    //     {.binding=0, .databuffer={}, .offset=0}
+    //     );
+    param_asset->RenderPipelineParameters().texture_params.push_back(
+        {.binding=1, .value=tex_ids[0]}
+        );
 
     return true;
 }
@@ -223,9 +226,12 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    param_asset->RenderPipelineParameters().texture_assets[0].value = tex_ids[0];
-    param_asset->RenderPipelineParameters().texture_assets[0].binding=1;
-    param_asset->RenderPipelineParameters().texture_assets_count = 1;
+    // param_asset->RenderPipelineParameters().ubo_params.push_back(
+    //     {.binding=0, .databuffer={}, .offset=0}
+    //     );
+    param_asset->RenderPipelineParameters().texture_params.push_back(
+        {.binding=1, .value=tex_ids[0]}
+        );
 
     return true;
 }

@@ -34,8 +34,8 @@ public:
 
     WEntityComponentId CreateBinding(const WEntityComponentId & in_binding_id,
                                      const WAssetId & in_pipeline_id,
-                                     std::vector<WVkTextureInfo> in_textures,
-                                     std::vector<std::uint16_t> in_texture_bindings);
+                                     const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
+                                     const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
     const WVkMeshInfo RenderPlane() const {
         return global_resources_.render_plane;

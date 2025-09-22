@@ -326,12 +326,14 @@ namespace WVulkan
     inline bool UpdateUBO(
         WVkUBOInfo & in_ubo_info,
         const void * in_data,
-        const std::size_t & in_size
+        const std::size_t & in_size,
+        const std::size_t & in_offset=0
         ) {
-        
-        memcpy(in_ubo_info.mapped_data,
+
+        char * mapped_mem = reinterpret_cast<char*>(in_ubo_info.mapped_memory);
+        memcpy((mapped_mem + in_offset),
                in_data,
-               in_size
+               in_size               
             );
 
         return true;
@@ -345,7 +347,7 @@ namespace WVulkan
 
         ubo.model = model;
         
-        memcpy(uniform_buffer_object_info_.mapped_data,
+        memcpy(uniform_buffer_object_info_.mapped_memory,
                &ubo,
                sizeof(WUBOGraphicsStruct));
 
@@ -357,7 +359,7 @@ namespace WVulkan
         const WUBOGraphicsStruct & in_ubo_model_struct
         ) {
         
-        memcpy(uniform_buffer_object_info_.mapped_data,
+        memcpy(uniform_buffer_object_info_.mapped_memory,
                &in_ubo_model_struct,
                sizeof(WUBOGraphicsStruct));
 

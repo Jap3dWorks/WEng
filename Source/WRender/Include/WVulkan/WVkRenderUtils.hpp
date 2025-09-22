@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
@@ -42,16 +43,14 @@ namespace WVkRenderUtils {
 
     }
 
-    // TODO: Move to GraphicsPipelineDb?
-    inline VkDescriptorSet CreateGraphicsDescriptor(
+    inline VkDescriptorSet CreateRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,
-        const WVkDescriptorSetUBOBinding & ubo_binding,
+        const std::uint32_t & in_frame_index,
+        const std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> & ubo_binding,
         const std::vector<WVkDescriptorSetTextureBinding> & in_textures_binding
         ) {
-        // TODO: use pipeline params to deduce the write descriptors.
-        
         VkDescriptorSet descriptor_set;
         VkDescriptorSetAllocateInfo alloc_info{};
         alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -68,20 +67,25 @@ namespace WVkRenderUtils {
             throw std::runtime_error("Failed to allocate descriptor sets!");
         }    
 
-        std::vector<VkWriteDescriptorSet> write_ds{in_textures_binding.size() + 1};
-        
-        WVulkan::UpdateWriteDescriptorSet_UBO(
-            write_ds[0],
-            ubo_binding.binding,
-            ubo_binding.buffer_info,
-            descriptor_set
-            );
+        std::vector<VkWriteDescriptorSet> write_ds{};
+        write_ds.reserve(ubo_binding.size() + in_textures_binding.size());
 
-        for(std::uint32_t i=0; i<in_textures_binding.size(); i++) {
+        for(auto & frames : ubo_binding) {
+            write_ds.push_back({});
+            WVulkan::UpdateWriteDescriptorSet_UBO(
+                write_ds.back(),
+                frames[in_frame_index].binding,
+                frames[in_frame_index].buffer_info,
+                descriptor_set
+                );
+        }
+
+        for (auto & texbnd : in_textures_binding) {
+            write_ds.push_back({});
             WVulkan::UpdateWriteDescriptorSet_Texture(
-                write_ds[i+1],
-                in_textures_binding[i].binding,
-                in_textures_binding[i].image_info,
+                write_ds.back(),
+                texbnd.binding,
+                texbnd.image_info,
                 descriptor_set
                 );
         }
@@ -95,61 +99,6 @@ namespace WVkRenderUtils {
             );
 
         return descriptor_set;
-    }
-
-    // TODO: Move to PostprocessPipelineDb?
-    inline VkDescriptorSet CreatePostprocessDescriptor(
-        const VkDevice & in_device,
-        const VkDescriptorPool & in_desc_pool,
-        const VkDescriptorSetLayout & in_desc_lay,
-        const WVkDescriptorSetUBOBinding & ubo_binding,
-        const std::vector<WVkDescriptorSetTextureBinding> & in_textures_binding
-        ) {
-        VkDescriptorSet descriptor_set;
-        
-        VkDescriptorSetAllocateInfo alloc_info{};
-        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        alloc_info.descriptorPool = in_desc_pool;
-        alloc_info.descriptorSetCount = 1;
-        alloc_info.pSetLayouts = &in_desc_lay;
-
-        if (vkAllocateDescriptorSets(
-                in_device,
-                &alloc_info,
-                &descriptor_set
-                ) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to allocate descriptor sets!");
-        }    
-
-        std::vector<VkWriteDescriptorSet> write_ds{in_textures_binding.size() + 1};
-
-        WVulkan::UpdateWriteDescriptorSet_UBO(
-            write_ds[0],
-            ubo_binding.binding,
-            ubo_binding.buffer_info,
-            descriptor_set
-            );
-
-        for(std::uint32_t i=0; i<in_textures_binding.size(); i++) {
-            WVulkan::UpdateWriteDescriptorSet_Texture(
-                write_ds[i+1],
-                in_textures_binding[i].binding,
-                in_textures_binding[i].image_info,
-                descriptor_set
-                );
-        }
-
-        vkUpdateDescriptorSets(
-            in_device,
-            static_cast<std::uint32_t>(write_ds.size()),
-            write_ds.data(),
-            0,
-            nullptr
-            );
-
-        return descriptor_set;
-        
     }
 
     inline VkDescriptorSet CreateInputRenderDescriptor(

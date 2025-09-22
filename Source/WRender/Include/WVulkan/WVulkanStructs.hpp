@@ -57,9 +57,11 @@ struct WVkCommandPoolInfo
 struct WVkTextureInfo
 {
     VkImage image{VK_NULL_HANDLE};
-    VkDeviceMemory image_memory{VK_NULL_HANDLE};
-    VkImageView image_view{VK_NULL_HANDLE};
+    VkDeviceMemory memory{VK_NULL_HANDLE};
+    VkImageView view{VK_NULL_HANDLE};
     VkSampler sampler{VK_NULL_HANDLE};
+    // TODO: imageLayout
+    VkImageLayout layout{VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 
     uint32_t mip_levels{1};
 };
@@ -139,7 +141,7 @@ struct WVkDescriptorPoolInfo
 */
 struct WVkDescriptorSetInfo
 {
-    // The len of this vector is the number of frames in flight
+    // The len of this vector is the number of frames in flight. TODO: REMOVE
     VkDescriptorSet descriptor_set{VK_NULL_HANDLE};
 };
 
@@ -152,15 +154,11 @@ struct WVkMeshInfo
     uint32_t index_count {0};
 };
 
-/**
- * @brief Single vulkan uniform buffer object, 
- * Create a vector of these for multiple frames in flight.
-*/
 struct WVkUBOInfo
 {
-    VkBuffer uniform_buffer{VK_NULL_HANDLE};
-    VkDeviceMemory uniform_buffer_memory{VK_NULL_HANDLE};
-    void * mapped_data{nullptr};
+    VkBuffer buffer{VK_NULL_HANDLE};
+    VkDeviceMemory buffer_memory{VK_NULL_HANDLE};
+    void * mapped_memory{nullptr};
     VkDeviceSize range{1};
 };
 
@@ -184,19 +182,37 @@ struct WVkCommandBufferInfo
 };
 
 // Pipeline Bindings
+// -----------------
+
+struct WVkDescriptorSetUBOWriteStruct {
+    std::uint32_t binding{0};
+    
+    const void * data{nullptr};
+    std::size_t size{0};
+    std::size_t offset{0};
+
+    std::size_t range{0};
+};
+
+struct WVkDescriptorSetTextureWriteStruct {
+    std::uint32_t binding{0};
+    VkDescriptorImageInfo image_info{}; // TODO: WVkTextureInfo. descriptor deducible.
+};
 
 struct WVkDescriptorSetUBOBinding {
     uint32_t binding{0};
     WVkUBOInfo ubo_info{};
-    VkDescriptorBufferInfo buffer_info{};
+    VkDescriptorBufferInfo buffer_info{}; // TODO: required?
+    
+    std::size_t size{0};
 };
 
-struct WVkDescriptorSetTextureBinding {
-    uint32_t binding{0};
-    VkDescriptorImageInfo image_info{};
-};
+using WVkDescriptorSetTextureBinding =
+    WVkDescriptorSetTextureWriteStruct;
 
-// struct WVkDescriptorSetUniformsBinding{};
+template<std::uint32_t Frames>
+using TVkDescriptorSetUBOBindingFrames =
+    std::array<WVkDescriptorSetUBOBinding, Frames>;
 
 /**
  * @brief Render Pipeline Bindings data
@@ -206,7 +222,8 @@ struct WVkPipelineBindingInfo
     WAssetId pipeline_id{0};
     WAssetIndexId mesh_asset_id{0};
 
+    std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescriptorSetTextureBinding> textures{};
-    std::array<WVkDescriptorSetUBOBinding, WENG_MAX_FRAMES_IN_FLIGHT> ubo{};
+
 };
 

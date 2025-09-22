@@ -12,30 +12,79 @@
 
 #include <string>
 
-std::tuple<int, float, std::string> getThreeValues() {
-    return std::make_tuple(42, 3.14f, "hello");
-}
+struct WRPParameterStruct;
+struct WRPParameterStruct_Texture;
+struct WRPParameterStruct_Ubo;
 
-using WShaderEntryPointStr = char[16];
-using WShaderEntryPointList = std::array<WShaderEntryPointStr, 8>;
-
-struct TestStruct {
-    WShaderEntryPointList entry_points{"main"};
-    std::uint32_t a{0};
+struct WRPParameterVisitor {
+    virtual void Visit(WRPParameterStruct *)=0;
+    virtual void Visit(WRPParameterStruct_Texture *)=0;
+    virtual void Visit(WRPParameterStruct_Ubo*)=0;
 };
+
+struct WRPParameterStruct {
+    std::uint8_t binding{0};
+
+    virtual void Visit(WRPParameterVisitor * in_visitor) {
+        in_visitor->Visit(this);
+    }
+};
+
+struct WRPParameterStruct_Texture : public WRPParameterStruct {
+    std::size_t texture_id;
+    void Visit(WRPParameterVisitor * in_visitor) override {
+        in_visitor->Visit(this);
+    }
+};
+
+struct WRPParameterStruct_Ubo : public WRPParameterStruct {
+    virtual void* Data() const=0;
+    virtual std::size_t Size() const=0;
+    std::size_t offset{0};
+    
+    void Visit(WRPParameterVisitor * in_visitor) override {
+        in_visitor->Visit(this);
+    }
+};
+
+template<std::size_t N>
+struct TRPParameterStruct_Ubo : public WRPParameterStruct_Ubo {
+    char data[N];
+    void * Data() const override { return data; }
+    std::size_t Size() const override { return N; }
+};
+
+using WRPParameterList = std::array<WRPParameterStruct, 8>;
+
+struct WRenderPipelineParametersStruct {
+    WRPParameterList parameter_list{};
+    std::uint8_t parameters_counts;
+    
+    WRPParameterStruct_Texture texture_params{};
+    std::uint8_t texture_assets_count{0};
+};
+
+
+struct TestVisitor : public WRPParameterVisitor {
+    void Visit(WRPParameterStruct *) override {
+        std::println("WRPParameterStruct");
+    }
+    void Visit(WRPParameterStruct_Texture *) override {
+        std::println("WRPParameterStruct_Texture");
+    }
+    void Visit(WRPParameterStruct_Ubo*) override {
+        std::println("WRPParameterStruct_Ubo");
+    }
+};
+
 
 int main(int argc, char* argv[])
 {
 
-    TestStruct ts;
+    WRPParameterStruct_Texture txp{};
 
-    for (auto & ep : ts.entry_points) {
-        std::print("{}\n", ep);
-    }
-
-    TestStruct * const ptr = &ts;
-
-    ptr->a=10;
+    TestVisitor vst{};
+    txp.Visit(&vst);
 
     return 0;
 

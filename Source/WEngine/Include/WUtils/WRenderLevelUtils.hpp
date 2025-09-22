@@ -69,9 +69,9 @@ namespace WRenderLevelUtils {
                             
                             auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(pipassign.params);
 
-                            for(uint32_t i=0; i < param->RenderPipelineParameters().texture_assets_count; i++)
+                            for(uint32_t i=0; i < param->RenderPipelineParameters().texture_params.size(); i++)
                             {
-                                WAssetId tid = param->RenderPipelineParameters().texture_assets[i].value;
+                                WAssetId tid = param->RenderPipelineParameters().texture_params[i].value;
                                 texture_assets.Insert(tid.GetId(), tid);
                             }
                             
@@ -150,11 +150,12 @@ namespace WRenderLevelUtils {
                             )->TransformStruct();
 
                         WUBOGraphicsStruct grpubo = WRenderUtils::ToUBOGraphicsStruct(tstruct);
-                        in_render->UpdateUboBindingStatic(
-                            ecid,
-                            &grpubo,
-                            sizeof(WUBOGraphicsStruct)
-                            );
+                        WRPParamUboStruct ubodt{.binding=0, .offset=0};
+                        ubodt.databuffer.resize(sizeof(decltype(grpubo)));
+
+                        std::memcpy(ubodt.databuffer.data(), &grpubo, sizeof(decltype(grpubo)));
+
+                        in_render->UpdateParameterStatic(ecid, ubodt);
                     }
                     );
             }
@@ -264,8 +265,8 @@ namespace WRenderLevelUtils {
                         auto & parameters_struct = pipeline_parameters
                             ->RenderPipelineParameters();
 
-                        for(uint8_t i=0; i < parameters_struct.texture_assets_count; i++) {
-                            WAssetId t_id = parameters_struct.texture_assets[i].value;
+                        for(uint8_t i=0; i < parameters_struct.texture_params.size(); i++) {
+                            WAssetId t_id = parameters_struct.texture_params[i].value;
                     
                             texture_assets.Insert(
                                 t_id.GetId(),

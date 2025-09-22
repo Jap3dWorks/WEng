@@ -95,13 +95,10 @@ WId WVkGraphicsPipelines::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
     const WAssetIndexId & in_mesh_asset_id,
-    std::vector<WVkTextureInfo> in_textures,
-    std::vector<uint16_t> in_textures_bindings
+    const std::vector<WVkDescriptorSetUBOWriteStruct> in_ubos,
+    const std::vector<WVkDescriptorSetTextureWriteStruct> in_texture
     ) noexcept
 {
-
-    WRenderPipelineParametersStruct parameters; // TODO
-    
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
 
@@ -111,8 +108,8 @@ WId WVkGraphicsPipelines::CreateBinding(
         component_id,
         WVkPipelineBindingInfo{in_pipeline_id,
                                in_mesh_asset_id,
-                               InitTextureDescriptorBindings(in_textures, in_textures_bindings),
-                               InitUboDescriptorBinding<WUBOGraphicsStruct>()}
+                               InitUboDescriptorBindings(in_ubos),
+                               InitTextureDescriptorBindings(in_texture)}
         );
 
     pipeline_bindings_[in_pipeline_id].Insert(component_id.GetId(), component_id);
@@ -167,7 +164,7 @@ void WVkGraphicsPipelines::Initialize_GlobalResources() {
 
         VkDescriptorBufferInfo buffer_info{};
 
-        buffer_info.buffer = global_graphics_descsets_.camera_ubo[i].uniform_buffer;
+        buffer_info.buffer = global_graphics_descsets_.camera_ubo[i].buffer;
         buffer_info.offset = 0;
         buffer_info.range = global_graphics_descsets_.camera_ubo[i].range;
 
@@ -224,7 +221,7 @@ void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
         );
     
     memcpy(
-        global_graphics_descsets_.camera_ubo[in_frame_index].mapped_data,
+        global_graphics_descsets_.camera_ubo[in_frame_index].mapped_memory,
         &camera_struct,
         sizeof(WUBOCameraStruct)
         );

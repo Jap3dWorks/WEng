@@ -70,7 +70,7 @@ public:
         render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
-    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamList &> ConfigInfoFn>
+    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamDescriptorList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const WVkDeviceInfo & in_device,
                              const WPipeParamDescriptorList & params,
@@ -162,8 +162,10 @@ public:
     void RemoveBinding( const WBindingIdType & in_id, const WVkDeviceInfo & in_device) {
         bindings.Remove(in_id,
                         [di_=in_device](auto & b) {
-                            for(auto& ubo: b.ubo) {
-                                WVulkan::Destroy(ubo.ubo_info, di_);
+                            for(auto& ubofrm: b.ubos) {
+                                for(auto& ubo:ubofrm) {
+                                    WVulkan::Destroy(ubo.ubo_info, di_);
+                                }
                             }
                         }
             );
@@ -197,8 +199,10 @@ public:
 
         bindings.Clear(
             [di_=in_device](auto & b) {
-                for(auto& ubo: b.ubo) {
-                    WVulkan::Destroy(ubo.ubo_info, di_);
+                for(auto& ubofrm: b.ubos) {
+                    for(auto& ubo : ubofrm) {
+                        WVulkan::Destroy(ubo.ubo_info, di_);
+                    }
                 }
             }
             );
