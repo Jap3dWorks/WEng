@@ -99,7 +99,7 @@ public:
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
 
-    WRenderSize RenderSize() const override { return { window_.width, window_.height }; }
+    WRenderSize RenderSize() const override { return render_size_; }
 
     WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
     {
@@ -139,9 +139,11 @@ private:
 
     struct WVkRenderWindow {
         GLFWwindow * window{nullptr};
-        std::uint32_t width{800};  // TODO size struct
-        std::uint32_t height{600};
     } window_{};
+
+    WRenderSize render_size_{
+        800, 600
+    };
 
     WVkSurfaceInfo surface_info_{};
     WVkDeviceInfo device_info_{};

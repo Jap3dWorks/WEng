@@ -37,6 +37,7 @@
 WVkRender::WVkRender() noexcept :
     instance_info_(),
     window_(),
+    render_size_(),
     surface_info_(),
     device_info_(),
     debug_info_(),
@@ -58,6 +59,7 @@ WVkRender::WVkRender() noexcept :
 WVkRender::WVkRender(WVkRender && other) noexcept :
     instance_info_(std::move(other.instance_info_)),
     window_(std::move(other.window_)),
+    render_size_(std::move(other.render_size_)),
     surface_info_(std::move(other.surface_info_)),
     device_info_(std::move(other.device_info_)),
     debug_info_(std::move(other.debug_info_)),
@@ -80,6 +82,7 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
     if (this != &other) {
         instance_info_ = std::move(other.instance_info_);
         window_ = std::move(other.window_);
+        render_size_ = std::move(other.render_size_);
         surface_info_ = std::move(other.surface_info_);
         device_info_ = std::move(other.device_info_);
         debug_info_ = std::move(other.debug_info_);
@@ -122,8 +125,11 @@ void WVkRender::Window(GLFWwindow * in_window) {
     
     glfwGetFramebufferSize(window_.window, &width, &height);
 
-    window_.width = static_cast<std::uint32_t>(width);
-    window_.height = static_cast<std::uint32_t>(height);
+    // window_.width = static_cast<std::uint32_t>(width);
+    // window_.height = static_cast<std::uint32_t>(height);
+
+    render_size_.width = static_cast<std::uint32_t>(width);
+    render_size_.height = static_cast<std::uint32_t>(height);
 }
 
 void WVkRender::Initialize()
@@ -131,8 +137,8 @@ void WVkRender::Initialize()
     debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
 
     std::array<std::uint32_t,2> dimensions = {
-        window_.width,
-        window_.height
+        render_size_.width,
+        render_size_.height
     };
 
     // Create Vulkan Instance
@@ -471,12 +477,15 @@ void WVkRender::CreatePipelineBinding(
 void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 
     switch(pipeline_track_.binding_ptype[in_id]) {
+        
     case EPipelineType::Graphics:
         graphics_pipelines_.DeleteBinding(in_id);
         break;
+        
     case EPipelineType::Postprocess:
         ppcss_pipelines_.DeleteBinding(in_id);
         break;
+        
     default:
         WFLOG("Pipeline type not implemented.");
     }
@@ -524,16 +533,19 @@ void WVkRender::UpdateParameterDynamic(
     };
 
     switch(pipeline_track_.binding_ptype[in_component_id]) {
+
     case EPipelineType::Graphics:
         graphics_pipelines_.UpdateBinding(in_component_id,
                                           frame_index_,
                                           ubowrt);
         break;
+
     case EPipelineType::Postprocess:
         ppcss_pipelines_.UpdateBinding(in_component_id,
                                        frame_index_,
                                        ubowrt);
         break;
+
     default:
         WFLOG("Pipeline type not implemented.");
     }
@@ -552,15 +564,18 @@ void WVkRender::UpdateParameterStatic(
     };
 
     switch(pipeline_track_.binding_ptype[in_component_id]) {
+        
     case EPipelineType::Graphics:
         graphics_pipelines_.UpdateBinding(
             in_component_id, ubowrt
             );
         break;
+
     case EPipelineType::Postprocess:
         ppcss_pipelines_.UpdateBinding(in_component_id,
                                        ubowrt);
         break;
+
     default:
         WFLOG("Pipeline type not implemented.");
     }
@@ -627,8 +642,9 @@ void WVkRender::Destroy() {
 }
 
 void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {
-    window_.width = in_width;
-    window_.height = in_height;
+
+    render_size_.width = in_width;
+    render_size_.height = in_height;
 
     RecreateSwapChain();
 }
@@ -637,8 +653,8 @@ void WVkRender::RecreateSwapChain() {
     WFLOG("RECREATE SWAP CHAIN!");
 
     std::array<std::uint32_t,2> dimensions = {
-        window_.width,
-        window_.height
+        render_size_.width,
+        render_size_.height
     };
 
     WaitIdle();

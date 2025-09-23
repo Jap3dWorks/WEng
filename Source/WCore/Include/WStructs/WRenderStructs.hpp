@@ -49,8 +49,7 @@ struct WRenderSize {
     std::uint32_t height{0};
 };
 
-enum class EShaderStageFlag : std::uint8_t
-{
+enum class EShaderStageFlag : std::uint8_t {
     None=0,
     Vertex=1,
     Fragment=2,
