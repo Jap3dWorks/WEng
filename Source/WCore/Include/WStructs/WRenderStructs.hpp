@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WConcepts.hpp"
 
 #include <cstdint>
 #include <array>
@@ -45,10 +46,10 @@ struct WUBOCameraStruct {
 
 struct WRenderSize {
     std::uint32_t width{0};
-    std::uint32_t  height{0};
+    std::uint32_t height{0};
 };
 
-enum class EShaderStageFlag : uint8_t
+enum class EShaderStageFlag : std::uint8_t
 {
     None=0,
     Vertex=1,
@@ -58,11 +59,6 @@ enum class EShaderStageFlag : uint8_t
     // TessellationControl,
     // TessellationEvaluation
 };
-
-constexpr const std::array<EShaderStageFlag, 4> WShaderStageFlagsList = {EShaderStageFlag::None,
-                                                                         EShaderStageFlag::Vertex,
-                                                                         EShaderStageFlag::Fragment,
-                                                                         EShaderStageFlag::Compute };
 
 constexpr EShaderStageFlag operator|(const EShaderStageFlag & l, const EShaderStageFlag & r) noexcept {
     return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) | static_cast<std::uint8_t>(r));
@@ -92,6 +88,9 @@ struct WPipeParamDescriptorStruct {
     std::uint8_t binding{0};
     EPipeParamType type{EPipeParamType::None};
     EShaderStageFlag stage_flags{EShaderStageFlag::None};
+    
+    /** @brief UBO range, total UBO size. */
+    std::size_t range{0};
 };
 
 using WPipeParamDescriptorList = std::array<WPipeParamDescriptorStruct, 16>;
@@ -107,24 +106,23 @@ using WShaderList = std::array<WShaderStruct, WENG_MAX_PIPELINE_SHADERS>;
 struct WRenderPipelineStruct {
     EPipelineType type {EPipelineType::Graphics};
     WShaderList shaders{};
-    std::uint8_t shaders_count{0};  // TODO: check if this is required
 
     WPipeParamDescriptorList params_descriptor{};
 };
 
-// Parameters Structs
-// ------------------
-
-template<typename T>
-struct TRPParamStruct {
-    std::uint16_t binding{0};
-    T value{};
-};
+// Pipeline Parameters Structs
+// ---------------------------
 
 struct WRPParamUboStruct {
     std::uint16_t binding{0};
     std::vector<char> databuffer{};
     std::size_t offset{0};
+};
+
+template<typename T>
+struct TRPParamStruct {
+    std::uint16_t binding{0};
+    T value{};
 };
 
 using WRPParamAssetStruct = TRPParamStruct<WAssetId>;
@@ -134,9 +132,36 @@ using WRPParameterList_Ubo = std::vector<WRPParamUboStruct>;
 
 struct WRenderPipelineParametersStruct {
     WRPParameterList_Ubo ubo_params{};
-    // std::uint8_t ubo_parameters_count{0};
     WRPParameterList_WAssetId texture_params{};
-    // std::uint8_t texture_assets_count{0};
 };
-
  
+namespace WRenderUtils {
+    
+    template<CCallable<void, const WPipeParamDescriptorStruct &> TFn>
+    inline void ForEach(const WPipeParamDescriptorList & in_lst, TFn && in_fn) {
+        for(const auto& param: in_lst) {
+            if (param.type==EPipeParamType::None)
+                break;
+
+            std::forward<TFn>(in_fn)(param);
+        }
+    }
+
+    template<CCallable<void, const WShaderStruct &> TFn>
+    inline void ForEach(const WShaderList & in_lst, TFn && in_fn) {
+        for(const auto& shd : in_lst) {
+            if (shd.type == EShaderStageFlag::None)
+                break;
+
+            std::forward<TFn>(in_fn)(shd);
+        }
+    }
+
+    constexpr const std::array<EShaderStageFlag, 4> SHADER_STAGE_FLAGS_LIST =
+    {EShaderStageFlag::None,
+     EShaderStageFlag::Vertex,
+     EShaderStageFlag::Fragment,
+     EShaderStageFlag::Compute};
+    
+}
+

@@ -456,9 +456,7 @@ void WVkRender::CreatePipelineBinding(
         ppcss_pipelines_.CreateBinding(component_id,
                                        pipeline_id,
                                        ubos,
-                                       textures
-                                       // tinfo, tbinding
-            );
+                                       textures);
         break;
         
     default:

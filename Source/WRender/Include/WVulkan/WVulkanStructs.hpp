@@ -71,14 +71,12 @@ struct WVkTextureInfo
  */
 struct WVkShaderStageInfo
 {
-
     std::vector<char> code;
     EShaderStageFlag type;
     std::string entry_point{"main"};
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors{};     // vertex size, ...
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors{}; // vertex attributes, ...
-
 };
 
 struct WVkRenderTarget {
@@ -171,6 +169,9 @@ struct WVkRenderPipelineInfo
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
     WAssetId descriptor_set_layout_id{0};
+
+    // TODO: Pipeline layout bindings description
+    WPipeParamDescriptorList params_descriptor{};
 };
 
 /**
@@ -196,7 +197,9 @@ struct WVkDescriptorSetUBOWriteStruct {
 
 struct WVkDescriptorSetTextureWriteStruct {
     std::uint32_t binding{0};
-    VkDescriptorImageInfo image_info{}; // TODO: WVkTextureInfo. descriptor deducible.
+    VkDescriptorImageInfo image_info{.sampler=VK_NULL_HANDLE,
+                                     .imageView=VK_NULL_HANDLE,
+                                     .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 };
 
 struct WVkDescriptorSetUBOBinding {

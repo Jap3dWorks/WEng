@@ -15,7 +15,6 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
                                              const WRenderPipelineStruct & in_pipeline_struct) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
-        in_pipeline_struct.shaders_count,
         in_pipeline_struct.shaders,
         WVkPostprocessPipeUtils::BuildPostprocessShaderStageInfo
         );
@@ -33,16 +32,19 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
         device_info_,
         in_id,
         shaders,
-        [this](auto& _render_pipeline, const auto & _device, const auto & _desc_lay, const auto & _shdrs) {
+        [this, &in_pipeline_struct]
+        (auto& _rp, const auto & _dvc, const auto & _desclay, const auto & _shdrs) {
             WVkPostprocessPipeUtils::CreatePostprocessPipeline(
-                _render_pipeline,
-                _device,
+                _rp,
+                _dvc,
                 {
                     global_resources_.descset_layout_info.descset_layout,
-                    _desc_lay.descset_layout
+                    _desclay.descset_layout
                 },
                 _shdrs
                 );
+
+            _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
 
@@ -52,7 +54,6 @@ void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
         );
 
     pipeline_bindings_[in_id] = {};
-
 }
 
 WEntityComponentId WVkPostprocessPipelines::CreateBinding(
@@ -66,10 +67,13 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
 
     pipelines_db_.bindings.InsertAt(
         in_binding_id,
-        WVkPipelineBindingInfo{in_pipeline_id,
-                               {}, //  <- Render plane
-                               InitUboDescriptorBindings(in_ubos),
-                               InitTextureDescriptorBindings(in_texture)}
+        WVkPipelineBindingInfo{
+            in_pipeline_id,
+            {},
+                InitUboDescriptorBindings(pipeline_info.params_descriptor,
+                                          in_ubos),
+                InitTextureDescriptorBindings(pipeline_info.params_descriptor,
+                                              in_texture)}
         );
 
     pipeline_bindings_[in_pipeline_id].Insert(in_binding_id.GetId(), in_binding_id);
@@ -138,8 +142,10 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
 
 void WVkPostprocessPipelines::Destroy_GlobalResources() {
 
-    WVulkan::Destroy(global_resources_.render_plane,
-                     device_info_);
+    WVulkan::Destroy(
+        global_resources_.render_plane,
+        device_info_
+        );
 
     WVulkan::Destroy(
         global_resources_.descset_layout_info,
@@ -147,9 +153,11 @@ void WVkPostprocessPipelines::Destroy_GlobalResources() {
         );
 
     for(auto & descpool : global_resources_.descpool_info) {
-        descpool = {};
         WVulkan::Destroy(descpool, device_info_);
     }
 
-    WVulkan::Destroy(global_resources_.render_sampler, device_info_);
+    WVulkan::Destroy(
+        global_resources_.render_sampler,
+        device_info_
+        );
 }

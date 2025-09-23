@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVkPipelinesDb.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -68,20 +69,19 @@ public:
 
     void DeletePipeline(
         const WPipelineIdType & in_id
-        )
-        {
-            // Remove bindings
-            for (auto & bid : pipeline_bindings_[in_id]) {
-                pipelines_db_.RemoveBinding(bid, device_info_);
-            }
-
-            pipeline_bindings_.erase(in_id);
-
-            pipelines_db_.RemoveDescPool(in_id, device_info_);
-            pipelines_db_.RemovePipeline(in_id, device_info_);
-            pipelines_db_.RemoveDescSetLayout(in_id, device_info_);
-
+        ) {
+        // Remove bindings
+        for (auto & bid : pipeline_bindings_[in_id]) {
+            pipelines_db_.RemoveBinding(bid, device_info_);
         }
+
+        pipeline_bindings_.erase(in_id);
+
+        pipelines_db_.RemoveDescPool(in_id, device_info_);
+        pipelines_db_.RemovePipeline(in_id, device_info_);
+        pipelines_db_.RemoveDescSetLayout(in_id, device_info_);
+
+    }
 
     void DeleteBinding(const WBindingIdType & in_id) {
         pipelines_db_.RemoveBinding(in_id,
@@ -166,10 +166,9 @@ public:
                        const WVkDescriptorSetUBOWriteStruct & ubo_write
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
-        
+
         TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
-        // TODO: Check using pipeline description
         for ( auto & b : binding.ubos) {
             if(b[0].binding == ubo_write.binding) {
                 ubo = &b;
@@ -180,9 +179,7 @@ public:
         if(!ubo) return;
 
         WVulkan::MapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
-        
         WVulkan::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
-
         WVulkan::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
     }
 
@@ -190,10 +187,9 @@ public:
                        const WVkDescriptorSetUBOWriteStruct & ubo_write
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
-        
+
         TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
-        // TODO: Check using pipeline description
         for ( auto & b : binding.ubos) {
             if(b[0].binding == ubo_write.binding) {
                 ubo = &b;
@@ -213,35 +209,52 @@ public:
 protected:
     
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
+        const WPipeParamDescriptorList & in_param_descriptors,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
         ) {
 
-        std::unordered_map<std::uint32_t, TVkDescriptorSetUBOBindingFrames<FramesInFlight>> bindings;
+        std::unordered_map<
+            std::uint8_t,
+            TVkDescriptorSetUBOBindingFrames<FramesInFlight>
+            > bindings;
+
         std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
+        result.reserve(in_param_descriptors.size());
 
-        for(std::uint32_t i = 0; i < in_ubos.size(); i++) {
-            if(!bindings.contains(in_ubos[i].binding)) {
-                for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                    
-                    bindings[i][frm].binding = in_ubos[i].binding;
-                    bindings[i][frm].ubo_info.range = in_ubos[i].range;
+        WRenderUtils::ForEach(
+            in_param_descriptors,
+            [&bindings, &result, this]
+            (const WPipeParamDescriptorStruct & ubopd) {
+                if(ubopd.type == EPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
 
-                    WVulkan::CreateUBO(bindings[i][frm].ubo_info, device_info_);
+                    for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+                        bindings[ubopd.binding][frm]={};
+                        bindings[ubopd.binding][frm].binding = ubopd.binding;
+                        bindings[ubopd.binding][frm].ubo_info.range = ubopd.range;
 
-                    bindings[i][frm].buffer_info.buffer = bindings[i][frm].ubo_info.buffer;
-                    bindings[i][frm].buffer_info.offset = 0; // use the whole buffer
-                    bindings[i][frm].buffer_info.range = bindings[i][frm].ubo_info.range;
+                        WVulkan::CreateUBO(bindings[ubopd.binding][frm].ubo_info, device_info_);
+
+                        bindings[ubopd.binding][frm].buffer_info.buffer =
+                            bindings[ubopd.binding][frm].ubo_info.buffer;
+                        
+                        bindings[ubopd.binding][frm].buffer_info.offset = 0;
+
+                        bindings[ubopd.binding][frm].buffer_info.range =
+                            bindings[ubopd.binding][frm].ubo_info.range;
+                    }
+            
+                    result.push_back(bindings[ubopd.binding]);
                 }
-                result.push_back(bindings[i]);
-            }
-
-            for (std::uint32_t frm=0; i<FramesInFlight; frm++) {
-                WVulkan::MapUBO(bindings[i][frm].ubo_info, device_info_);
-                WVulkan::UpdateUBO(bindings[i][frm].ubo_info,
-                                   in_ubos[i].data,
-                                   in_ubos[i].size,
-                                   in_ubos[i].offset);
-                WVulkan::UnmapUBO(bindings[i][frm].ubo_info, device_info_);                
+            });
+        
+        for(auto & ubo : in_ubos) {
+            for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+                WVulkan::MapUBO(bindings[ubo.binding][frm].ubo_info, device_info_);
+                WVulkan::UpdateUBO(bindings[ubo.binding][frm].ubo_info,
+                                   in_ubos[ubo.binding].data,
+                                   in_ubos[ubo.binding].size,
+                                   in_ubos[ubo.binding].offset);
+                WVulkan::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_info_);                
             }
         }
 
@@ -249,19 +262,71 @@ protected:
     }
 
     std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
+        const WPipeParamDescriptorList & in_param_descriptors,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {
-        std::vector<WVkDescriptorSetTextureBinding> tx{in_textures.size()};
 
-        for (std::uint32_t i = 0; i<tx.size(); i++) {
-            tx[i].binding = in_textures[i].binding;
+        std::vector<WPipeParamDescriptorStruct> result;
+        result.reserve(in_param_descriptors.size());
+        
+        std::unordered_map<std::uint8_t, WVkDescriptorSetTextureWriteStruct> bindings{};
 
-            tx[i].image_info.imageLayout = in_textures[i].image_info.imageLayout;
-            tx[i].image_info.imageView = in_textures[i].image_info.imageView;
-            tx[i].image_info.sampler = in_textures[i].image_info.sampler;
+        WRenderUtils::ForEach(
+            in_param_descriptors,
+            [&bindings]
+            (const WPipeParamDescriptorStruct & _ubopd) {
+                if(_ubopd.type == EPipeParamType::Texture && !bindings.contains(_ubopd.binding)) {
+                    bindings[_ubopd.binding]={};
+                    bindings[_ubopd.binding].binding = _ubopd.binding;
+                    bindings[_ubopd.binding].image_info = {}; // TODO: default image or something
+                }
+            });
+
+        for(auto& wrt : in_textures) {
+            bindings[wrt.binding].image_info.imageLayout = wrt.image_info.imageLayout;
+            bindings[wrt.binding].image_info.imageView = wrt.image_info.imageView;
+            bindings[wrt.binding].image_info.sampler = wrt.image_info.sampler;
+        }
+
+        std::vector<WVkDescriptorSetTextureBinding> tx{};
+        tx.reserve(bindings.size());
+
+        for(auto&p : bindings) {
+            tx.push_back(p.second);
         }
 
         return tx;
+    }
+
+    inline bool ValidateBindingParams(
+        const WPipeParamDescriptorList & in_pipeline_params,
+        const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
+        const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures) {
+
+        std::unordered_set<std::uint8_t> pipebindings{};
+        
+        for(const auto & b : in_pipeline_params) {
+            pipebindings.insert(b.binding);
+        }
+
+        for(const auto & ubo : in_ubos) {
+            if (!pipebindings.contains(ubo.binding)) {
+                WFLOG("Invalid binding {}", ubo.binding);
+                return false;
+            }
+            pipebindings.erase(ubo.binding);
+        }
+
+        for (const auto & tex : in_textures) {
+            if (!pipebindings.contains(tex.binding)) {
+                WFLOG("Invalid binding {}", tex.binding);
+                return false;
+            }
+            pipebindings.erase(tex.binding);
+        }
+
+        return pipebindings.empty();
+
     }
 
 protected:

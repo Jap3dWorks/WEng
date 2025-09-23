@@ -9,6 +9,7 @@
 #include "WVkGraphicsPipelinesUtils.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 
+#include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
@@ -47,12 +48,11 @@ WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && o
 
 void WVkGraphicsPipelines::CreatePipeline(
     const WAssetId & in_id,
-    const WRenderPipelineStruct & pipeline_struct
+    const WRenderPipelineStruct & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
-        pipeline_struct.shaders_count,
-        pipeline_struct.shaders,
+        in_pipeline_struct.shaders,
         WVkGraphicsPipelinesUtils::BuildShaderStageInfo
         );
 
@@ -61,7 +61,7 @@ void WVkGraphicsPipelines::CreatePipeline(
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_info_,
-        pipeline_struct.params_descriptor,
+        in_pipeline_struct.params_descriptor,
         WVulkanUtils::UpdateDescriptorSetLayout
         );
 
@@ -70,7 +70,8 @@ void WVkGraphicsPipelines::CreatePipeline(
         device_info_,
         in_id,
         shaders,
-        [this](auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
+        [this, &in_pipeline_struct]
+        (auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
             WVulkan::CreateDefaultPipeline(
                 _rp,
                 _dvc,
@@ -80,6 +81,8 @@ void WVkGraphicsPipelines::CreatePipeline(
                 },
                 _shdrs
                 );
+            
+            _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
 
@@ -95,21 +98,20 @@ WId WVkGraphicsPipelines::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
     const WAssetIndexId & in_mesh_asset_id,
-    const std::vector<WVkDescriptorSetUBOWriteStruct> in_ubos,
-    const std::vector<WVkDescriptorSetTextureWriteStruct> in_texture
-    ) noexcept
+    const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
+    const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
+    )
 {
-
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
-
-    // TODO: Check with pipeline params
 
     pipelines_db_.bindings.InsertAt(
         component_id,
         WVkPipelineBindingInfo{in_pipeline_id,
                                in_mesh_asset_id,
-                               InitUboDescriptorBindings(in_ubos),
-                               InitTextureDescriptorBindings(in_texture)}
+                               InitUboDescriptorBindings(pipeline_info.params_descriptor,
+                                                         in_ubos),
+                               InitTextureDescriptorBindings(pipeline_info.params_descriptor,
+                                                             in_textures)}
         );
 
     pipeline_bindings_[in_pipeline_id].Insert(component_id.GetId(), component_id);
@@ -187,9 +189,8 @@ void WVkGraphicsPipelines::Destroy_GlobalResources() {
 
     if (device_info_.vk_device) {
 
-        WVulkan::Destroy(
-            global_graphics_descsets_.descpool_info,
-            device_info_);
+        WVulkan::Destroy(global_graphics_descsets_.descpool_info,
+                         device_info_);
 
         for(uint32_t i=0; i<global_graphics_descsets_.camera_ubo.size(); i++) {
             WVulkan::Destroy(

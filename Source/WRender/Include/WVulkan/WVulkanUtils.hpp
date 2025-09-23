@@ -392,7 +392,7 @@ namespace WVulkanUtils {
     inline VkShaderStageFlags ToVkShaderStageFlag(const EShaderStageFlag & in_pipe_flags) {
 
         VkShaderStageFlags result{0};
-        for(const auto & f : WShaderStageFlagsList) {
+        for(const auto & f : WRenderUtils::SHADER_STAGE_FLAGS_LIST) {
             
             if ((f & in_pipe_flags) == EShaderStageFlag::None)
                 continue; 
@@ -428,38 +428,35 @@ namespace WVulkanUtils {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
         bindings.reserve(in_param_list.size());
 
-        bool stop=false;
+        WRenderUtils::ForEach(
+            in_param_list,
+            [&bindings]
+            (const auto& _prm) {
+                VkDescriptorSetLayoutBinding bndng{};
 
-        for(auto & p : in_param_list) {
+                switch(_prm.type) {
 
-            VkDescriptorSetLayoutBinding bndng{};
+                case EPipeParamType::Ubo:
+                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
+                    break;
 
-            switch(p.type) {
-            case EPipeParamType::None:
-                stop=true;
-                break;
+                case EPipeParamType::Texture:
+                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    break;
                 
-            case EPipeParamType::Ubo:
-                bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
-                break;
+                default:
+                    return;
+                                  
+                }
 
-            case EPipeParamType::Texture:
-                bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                break;
-                
-            default:
-                continue;
+                bndng.binding = _prm.binding;
+                bndng.descriptorCount = 1;
+                bndng.pImmutableSamplers = nullptr;
+                bndng.stageFlags = ToVkShaderStageFlag(_prm.stage_flags);
+
+                bindings.push_back(bndng);
             }
-
-            if (stop) break;
-
-            bndng.binding=p.binding;
-            bndng.descriptorCount=1;
-            bndng.pImmutableSamplers=nullptr;
-            bndng.stageFlags = ToVkShaderStageFlag(p.stage_flags);
-
-            bindings.push_back(bndng);
-        }
+            );
 
         out_dsl.bindings = bindings;
 

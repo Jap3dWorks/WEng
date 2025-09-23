@@ -126,13 +126,12 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl");
 
-    pipeline_asset->RenderPipeline().shaders_count = 2;  // TODO: deduce
-
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
 
     params[0].binding=0;
     params[0].type=EPipeParamType::Ubo;
     params[0].stage_flags=EShaderStageFlag::Vertex;
+    params[0].range=sizeof(WUBOGraphicsStruct);
     params[1].binding=1;
     params[1].type=EPipeParamType::Texture;
     params[1].stage_flags=EShaderStageFlag::Fragment;
@@ -146,9 +145,6 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    // param_asset->RenderPipelineParameters().ubo_params.push_back(
-    //     {.binding=0, .databuffer={}, .offset=0}
-    //     );
     param_asset->RenderPipelineParameters().texture_params.push_back(
         {.binding=1, .value=tex_ids[0]}
         );
@@ -173,12 +169,11 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
 
-    pipeline_asset->RenderPipeline().shaders_count = 2; // TODO: deduce;
-
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
-    params[0].binding=0;
-    params[0].type=EPipeParamType::Ubo;
+    params[0].binding = 0;
+    params[0].type = EPipeParamType::Ubo;
     params[0].stage_flags = EShaderStageFlag::Vertex;
+    params[0].range = sizeof(WUBOPostprocessStruct);
 
     WAssetId paramid =
         engine.AssetManager().Create<WRenderPipelineParametersAsset>(
@@ -213,9 +208,8 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
         .GetImporter<WImportTexture>();
 
     std::vector<WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
-                        "Content/Assets/Textures/orange.png",
-                        "/Content/Assets/orange.orange"
-        );
+                                                        "Content/Assets/Textures/orange.png",
+                                                        "/Content/Assets/orange.orange");
 
     out_model.pipeline_asset = in_render_pipeline;
 
@@ -226,9 +220,6 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    // param_asset->RenderPipelineParameters().ubo_params.push_back(
-    //     {.binding=0, .databuffer={}, .offset=0}
-    //     );
     param_asset->RenderPipelineParameters().texture_params.push_back(
         {.binding=1, .value=tex_ids[0]}
         );

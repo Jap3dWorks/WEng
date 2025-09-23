@@ -111,25 +111,26 @@ public:
         }
     }
 
-    template<typename ShadersData,
-             CCallable<WVkShaderStageInfo,
+    template<CCallable<WVkShaderStageInfo,
                        const char*, const char *,
                        EShaderStageFlag> TFn>
-    std::vector<WVkShaderStageInfo> BuildShaders(const std::uint32_t & shaders_count,
-                                                 ShadersData && in_data,
+    std::vector<WVkShaderStageInfo> BuildShaders(const WShaderList & in_data,
                                                  TFn && in_fn) {
         std::vector<WVkShaderStageInfo> result;
-        result.reserve(shaders_count);
 
-        // TODO transition to slang
-        for (uint8_t i=0; i < shaders_count; i++) {
-            result.push_back(
-                std::forward<TFn>(in_fn)(
-                    WStringUtils::SystemPath(std::forward<ShadersData>(in_data)[i].file).c_str(),
-                    std::forward<ShadersData>(in_data)[i].entry,
-                    std::forward<ShadersData>(in_data)[i].type)
-                );
-        }
+        result.reserve(in_data.size());
+
+        // TODO Use slang
+        WRenderUtils::ForEach(
+            in_data,
+            [&result, &in_fn]
+            (const WShaderStruct & shd) {
+                result.push_back(
+                    in_fn(WStringUtils::SystemPath(shd.file).c_str(),
+                          shd.entry,
+                          shd.type)
+                    );
+            });
         
         return result;
     }
@@ -153,7 +154,8 @@ public:
     void RemoveDescPool(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             descriptor_pools[i].Remove(in_id,
-                                       [&in_device](auto & dpool) {
+                                       [&in_device]
+                                       (auto & dpool) {
                                            WVulkan::Destroy(dpool, in_device);
                                        });
         }
