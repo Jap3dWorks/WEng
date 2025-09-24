@@ -35,44 +35,6 @@ bool Run(WEngine & engine)
     return true;
 }
 
-WMeshStruct MeshPlane()
-{
-    WMeshStruct mesh;
-
-    mesh.vertices.push_back({
-            glm::vec3(-1.f, -1.f, 0.f),
-            glm::vec2(0.f, 0.f),
-            glm::vec3(0.f, 0.f, 1.f)
-        });
-
-    mesh.vertices.push_back({
-            glm::vec3(-1.f, 1.f, 0.f),
-            glm::vec2(0.f, 1.f),
-            glm::vec3(0.f, 0.f, 1.f)
-        });
-
-    mesh.vertices.push_back({
-            glm::vec3(1.f, 1.f, 0.f),
-            glm::vec2(1.f, 1.f),
-            glm::vec3(0.f, 0.f, 1.f)
-        });
-
-    mesh.vertices.push_back({
-            glm::vec3(1.f, -1.f, 0.f),
-            glm::vec2(1.f, 0.f),
-            glm::vec3(0.f, 0.f, 1.f)
-        });
-
-    mesh.indices.push_back(0);
-    mesh.indices.push_back(3);
-    mesh.indices.push_back(1);
-    mesh.indices.push_back(2);
-    mesh.indices.push_back(1);
-    mesh.indices.push_back(3);
-
-    return mesh;
-}
-
 struct ModelAssets {
     WAssetId static_mesh;
     WAssetId pipeline_asset;

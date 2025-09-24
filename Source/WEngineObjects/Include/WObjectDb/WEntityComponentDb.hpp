@@ -68,13 +68,13 @@ public:
     /**
      * @brief Run in_predicate for each in_class entity (derived from in_class).
      */
-    void ForEachEntity(const WClass * in_class,
-                       TFunction<void(WEntity*)> in_predicate) const {
+    template<CCallable<void, WEntity*> TFn>
+    void ForEachEntity(const WClass * in_class, TFn && in_fn) const {
         assert(in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class));
     
         for(const WClass * c : entity_db_.IterWClasses()) {
             if(in_class == c || in_class->IsBaseOf(c)) {
-                entity_db_.ForEach(c, in_predicate);
+                entity_db_.ForEach(c, std::forward<TFn>(in_fn));
             }
         }
     }
@@ -130,31 +130,20 @@ public:
         return component_db_.GetFirst<T>(out_id);
     }
 
-    // WEntityComponentId EntityComponentId(const WLevelId & in_lvlid,
-    //                                      const WEntityId & in_id,
-    //                                      const WClass * in_component_class) const {
-    //     assert(componentclass_id_.contains(in_component_class));
-        
-    //     return WIdUtils::ToEntityComponentId(
-    //         in_lvlid,
-    //         in_id,
-    //         componentclass_id_.at(in_component_class));
-    // }
-
-    void ForEachComponent(const WClass * in_class,
-                          TFunction<void(WComponent*)> in_predicate) const {
+    template<CCallable<void, WComponent*> TFn>
+    void ForEachComponent(const WClass * in_class, TFn && in_fn) const {
         for(const WClass * c : component_db_.IterWClasses()) {
             if (c == in_class || in_class->IsBaseOf(c)) {
-                component_db_.ForEach(c, in_predicate);
+                component_db_.ForEach(c, std::forward<TFn>(in_fn));
             }
         }
     }
 
-    template<std::derived_from<WComponent> T>
-    void ForEachComponent(TFunction<void(T*)> in_predicate) const {
+    template<std::derived_from<WComponent> T, CCallable<void, T*> TFn>
+    void ForEachComponent(TFn && in_fn) const {
         ForEachComponent(T::StaticClass(),
-                         [&in_predicate](WComponent* in_component) {
-                             in_predicate(static_cast<T*>(in_component));
+                         [&in_fn](WComponent* in_component) {
+                             in_fn(static_cast<T*>(in_component));
                          });
     }
 

@@ -36,8 +36,9 @@ public:
     virtual void Reserve(size_t in_value) = 0;
     virtual std::vector<WIdClass> Indexes() = 0;
 
+    // TODO: TFunction contains 1 virtual call. function ptr should be more efficient.
     virtual void ForEach(TFunction<void(B*)> in_function)=0;
-    virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>) =0;
+    virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>)=0;
     
 };
 

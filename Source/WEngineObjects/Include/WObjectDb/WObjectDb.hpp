@@ -143,33 +143,33 @@ public:
         return static_cast<T*>(GetFirst(T::StaticClass(), out_id));
     }
 
-    void ForEachIdValue(const WClass * in_class,
-                        const TFunction<void(const WIdClass &, WObjClass *)> & in_predicate) const {
-        db_.at(in_class)->ForEachIdValue(in_predicate);
+    template<CCallable<void, const WIdClass &, WObjClass *> TFn>
+    void ForEachIdValue(const WClass * in_class, TFn && in_fn) const {
+        db_.at(in_class)->ForEachIdValue(std::forward<TFn>(in_fn));
     }
 
-    template<std::derived_from<WObjClass> T>
-    void ForEachIdValue(const TFunction<void(const WIdClass &, T *)> & in_predicate) const {
+    template<std::derived_from<WObjClass> T, CCallable<void, const WIdClass &, T*> TFn>
+    void ForEachIdValue(TFn && in_fn) const {
         db_.at(T::StaticClass())->ForEachIdValue(
-            [&in_predicate](const WIdClass & _wid, WObjClass * _ptr) {
-                in_predicate(_wid, static_cast<T*>(_ptr));
+            [&in_fn](const WIdClass & _wid, WObjClass * _ptr) {
+                in_fn(_wid, static_cast<T*>(_ptr));
             }
             );
     }
 
-    void ForEach(const WClass * in_class, const TFunction<void(WObjClass*)> & in_predicate) const {
+    template<CCallable<void, WObjClass*> TFn>
+    void ForEach(const WClass * in_class, TFn && in_fn) const {
         assert(db_.contains(in_class));
-
-        db_.at(in_class)->ForEach(in_predicate);
+        db_.at(in_class)->ForEach(std::forward<TFn>(in_fn));
     }
 
-    template<std::derived_from<WObjClass> T>
-    void ForEach(const TFunction<void(T*)> & in_predicate) const {
+    template<std::derived_from<WObjClass> T, CCallable<void, T*> TFn>
+    void ForEach(TFn && in_fn) const {
         assert(db_.contains(T::StaticClass()));
 
         db_.at(T::StaticClass())->ForEach(
-            [&in_predicate](WObjClass * _ptr) {
-                in_predicate(static_cast<T*>(_ptr));
+            [&in_fn](WObjClass * _ptr) {
+                in_fn(static_cast<T*>(_ptr));
             } );
     }
 
