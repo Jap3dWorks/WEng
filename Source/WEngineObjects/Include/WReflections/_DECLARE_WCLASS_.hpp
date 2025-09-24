@@ -37,8 +37,8 @@ constexpr const char WENG_CLASSNAME_VAR(WENG_MP( _WCLASS_ )) [WCLASSFOR_N_SIZE] 
 
 using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, WENG_CLASSNAME_VAR(WENG_MP(_WCLASS_)), _PWCLASS_>;
 
-template<>
-struct TSingleton<WClass, WENG_CLASSNAME(_WCLASS_)> {
-    _WENG_API_ static WENG_CLASSNAME(_WCLASS_) & Value();
-};
+// template<>
+// struct TSingleton<WClass, WENG_CLASSNAME(_WCLASS_)> {
+//     _WENG_API_ static WENG_CLASSNAME(_WCLASS_) & Value();
+// };
 
