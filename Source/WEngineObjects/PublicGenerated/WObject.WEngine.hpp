@@ -8,8 +8,13 @@
 #undef _PWCLASS_
 #endif
 
+#ifdef _WENG_API_
+#undef _WENG_API_
+#endif
+
 #define _WCLASS_ WObject
 #define _PWCLASS_ WObject
+#define _WENG_API_ WENGINEOBJECTS_API
 
 #include "WReflections/_DECLARE_WCLASS_.hpp"
 

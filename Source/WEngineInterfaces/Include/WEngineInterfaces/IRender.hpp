@@ -110,11 +110,11 @@ public:
      */
     virtual void Window(GLFWwindow * in_window)=0;
 
-    virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
-
     // Render Data
     // -----------
 
     virtual WRenderSize RenderSize() const =0;
+    virtual void RenderSize(const WRenderSize & in_render_size)=0;
+    virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
 
 };

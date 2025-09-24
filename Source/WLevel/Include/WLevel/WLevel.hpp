@@ -4,7 +4,6 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
 #include "WEngineObjects/WEntity.hpp"
-// #include "WEngineObjects/TWRef.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
@@ -52,8 +51,10 @@ public:
     /**
      * @brief Run in_predicate for each in_class actor (derived from in_class).
      */
-    void ForEachEntity(const WClass * in_class,
-                       TFunction<void(WEntity*)> in_predicate) const ;
+    template<CCallable<void, WEntity*> TFn>
+    void ForEachEntity(const WClass * in_class, TFn && in_fn)  const {
+        entity_component_db_.ForEachEntity(in_class, std::forward<TFn>(in_fn));
+    }
 
     template<std::derived_from<WComponent> T>
     WEntityComponentId CreateComponent(const WEntityId & in_entity_id) {
@@ -87,12 +88,16 @@ public:
         return entity_component_db_.GetFirstComponent(in_class, out_id);
     }
 
-    void ForEachComponent(const WClass * in_class,
-                          TFunction<void(WComponent*)> in_predicate) const ;
+    template<CCallable<void, WComponent*> TFn>
+    void ForEachComponent(const WClass * in_class, TFn && in_fn) const {
+        entity_component_db_.ForEachComponent(in_class, std::forward<TFn>(in_fn));        
+    }
 
-    template<std::derived_from<WComponent> T>
-    void ForEachComponent(TFunction<void(T*)> in_predicate) const {
-        entity_component_db_.ForEachComponent<T>(in_predicate);
+    // --
+
+    template<std::derived_from<WComponent> T, CCallable<void, T*> TFn>
+    void ForEachComponent(TFn && in_fn) const {
+        entity_component_db_.ForEachComponent<T>(std::forward<TFn>(in_fn));
     }
 
     const char * Name() const;

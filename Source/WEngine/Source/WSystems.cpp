@@ -25,6 +25,7 @@ START_DEFINE_WSYSTEM(SystemInit_InitializeTransformsMatrix)
         );
 END_DEFINE_WSYSTEM()
 
+
 START_DEFINE_WSYSTEM(SystemInit_RenderLevelResources)
     WRenderLevelUtils::InitializeResources(
         parameters.engine->Render().Ptr(),
@@ -37,13 +38,16 @@ END_DEFINE_WSYSTEM()
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
     WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
 
+    WFLOG("[DEBUG] Find Camera Component.");
     WEntityId cid;
     WCameraComponent * camcomponent = parameters.level->GetFirstComponent<WCameraComponent>(cid);
 
+    WFLOG("[DEBUG] Find Input Mapping.");
     parameters.engine->AssetManager().ForEach<WInputMappingAsset>([&mapping](WInputMappingAsset * a){
         mapping = a->WID();
     });
 
+    WFLOG("[DEBUG] Find Actions.");
     // TODO: Get assets by Name, store in a GeneralTree?
     parameters.engine->AssetManager().ForEach<WActionAsset>([&frontaction,
                                                              &backaction,
@@ -69,6 +73,7 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
         }
     });
 
+    WFLOG("[DEBUG] Put Input Mapping.");
     parameters.engine->InputMappingRegister().PutInputMapping(mapping);
 
     parameters.engine->InputMappingRegister().BindAction(
@@ -163,6 +168,7 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
         );
 END_DEFINE_WSYSTEM()
 
+
 START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
     parameters.level->ForEachComponent<WMovementComponent>(
         [&parameters](WMovementComponent * mc){
@@ -210,6 +216,7 @@ START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
         );
 END_DEFINE_WSYSTEM()
 
+
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
     WEntityId id;
     auto * ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
@@ -233,6 +240,7 @@ START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
 
     mc->Acceleration(acc * 3.f);
 END_DEFINE_WSYSTEM()
+
 
 START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
     parameters.level->ForEachComponent<WCameraComponent> (

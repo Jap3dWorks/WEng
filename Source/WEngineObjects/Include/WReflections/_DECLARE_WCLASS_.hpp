@@ -1,3 +1,5 @@
+#include "WCore/WCore.hpp"
+#include "WCore/TSingleton.hpp"
 #include "WReflections/WClassFor.hpp"
 
 #ifndef _WCLASS_
@@ -8,28 +10,35 @@
 #define _PWCLASS_ WObject
 #endif
 
-#define DCONCAT(A,B) A##B
-
-#ifdef _CLASSNAME
-#undef _CLASSNAME
+#ifndef WENG_DCONCAT
+#define WENG_DCONCAT(A,B) A##B
 #endif
 
-#define _CLASSNAME(_CLS) DCONCAT(WClass__,_CLS)
+#ifndef WENG_CLASSNAME
+#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__,_CLS)
+#endif
 
-// #define _XSTR(x) #x
-// #define _STR(x) _XSTR(x)
+#ifndef WENG_MP
+#define WENG_MP(x) x
+#endif
 
-#define _MP(x) x
+#ifndef WENG_CLASSNAME_STR
+#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
+#endif
 
-#define _CLASSNAME_STR(_CLS) _STR(_CLS)
-
-#define _CLASSNAME_VAR(_CLS) DCONCAT(_NAME_, _CLS)
+#ifndef WENG_CLASSNAME_VAR
+#define WENG_CLASSNAME_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
+#endif
 
 class _WCLASS_;
 class _PWCLASS_;
 
-constexpr const char _CLASSNAME_VAR(_MP( _WCLASS_ )) [WCLASSFOR_N_SIZE] = _CLASSNAME_STR(_WCLASS_);
+constexpr const char WENG_CLASSNAME_VAR(WENG_MP( _WCLASS_ )) [WCLASSFOR_N_SIZE] = WENG_CLASSNAME_STR(_WCLASS_);
 
-using _CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _CLASSNAME_VAR(_MP(_WCLASS_)), _PWCLASS_>;
+using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, WENG_CLASSNAME_VAR(WENG_MP(_WCLASS_)), _PWCLASS_>;
 
+template<>
+struct TSingleton<WClass, WENG_CLASSNAME(_WCLASS_)> {
+    _WENG_API_ static WENG_CLASSNAME(_WCLASS_) & Value();
+};
 

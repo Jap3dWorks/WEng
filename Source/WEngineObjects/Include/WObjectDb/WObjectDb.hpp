@@ -130,6 +130,8 @@ public:
     }
 
     WObjClass * GetFirst(const WClass * in_class, WIdClass & out_id) const {
+        assert(db_.contains(in_class));
+        
         WObjClass * result;
         db_.at(in_class)->GetFirst(result, out_id);
         

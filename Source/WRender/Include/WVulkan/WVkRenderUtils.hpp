@@ -72,6 +72,7 @@ namespace WVkRenderUtils {
 
         for(auto & frames : ubo_binding) {
             write_ds.push_back({});
+            
             WVulkan::UpdateWriteDescriptorSet_UBO(
                 write_ds.back(),
                 frames[in_frame_index].binding,
@@ -82,6 +83,7 @@ namespace WVkRenderUtils {
 
         for (auto & texbnd : in_textures_binding) {
             write_ds.push_back({});
+            
             WVulkan::UpdateWriteDescriptorSet_Texture(
                 write_ds.back(),
                 texbnd.binding,

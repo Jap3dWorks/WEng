@@ -167,6 +167,9 @@ class BuildCommand(CliCommand):
 
         if self.cmd_args.build_type == CliVars.DEBUG_TYPE:
             cmd.append('-DCMAKE_CXX_FLAGS=-g -O0')
+        else:
+            pass
+            # cmd.append("-DCMAKE_CXX_FLAGS=-g -O2")
 
         completed_process = subprocess.run(cmd, stderr=subprocess.STDOUT)
 

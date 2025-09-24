@@ -115,7 +115,8 @@ protected:
 private:
 
     const char * name_;
-
+    
+    
 };
 
 namespace std

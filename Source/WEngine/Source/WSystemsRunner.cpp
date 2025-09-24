@@ -84,7 +84,9 @@ void WSystemsRunner::Clear() {
 
 void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
-    if(!init_systems_.contains(in_level_id)) return;
+    if(!init_systems_.contains(in_level_id)) {
+        return;
+    }
 
     for(auto & fn : init_systems_.at(in_level_id)) {
         fn(in_parameters);

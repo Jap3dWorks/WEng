@@ -30,7 +30,6 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-
 [[vk::binding(0,0)]]  // binding 0 , set 0
 uniform Sampler2D prev_render;
 // SamplerState
@@ -47,11 +46,10 @@ float4 fsMain(VSOutput vertIn) : SV_TARGET
     float pxlw = 1.f / width;
     float pxlh = 1.f / height;
 
-    const int samples_count=25;
+    const int range = 1;
+    const int samples_count = (range * 2 + 1) * (range * 2 + 1);
     
     float3 samples[samples_count]={0};
-
-    int range = (int) sqrt(samples_count) / 2;
 
     int idx=0;
     for(int i=-range ; i <= range; i++) {

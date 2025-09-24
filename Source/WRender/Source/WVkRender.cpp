@@ -121,15 +121,16 @@ void WVkRender::WaitIdle() const
 
 void WVkRender::Window(GLFWwindow * in_window) {
     window_.window = in_window;
-    std::int32_t width, height;
     
-    glfwGetFramebufferSize(window_.window, &width, &height);
+    // std::int32_t width, height;
+    
+    // glfwGetFramebufferSize(window_.window, &width, &height);
 
     // window_.width = static_cast<std::uint32_t>(width);
     // window_.height = static_cast<std::uint32_t>(height);
 
-    render_size_.width = static_cast<std::uint32_t>(width);
-    render_size_.height = static_cast<std::uint32_t>(height);
+    // render_size_.width = static_cast<std::uint32_t>(width);
+    // render_size_.height = static_cast<std::uint32_t>(height);
 }
 
 void WVkRender::Initialize()
@@ -192,16 +193,16 @@ void WVkRender::Initialize()
         swap_chain_info_.format
         );
 
-    // --
-
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
         device_info_,
         surface_info_
         );
 
+    WFLOG("[DEBUG] Initialize Graphics Pipelines.");
     graphics_pipelines_.Initialize(device_info_);
-    
+
+    WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
     ppcss_pipelines_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()

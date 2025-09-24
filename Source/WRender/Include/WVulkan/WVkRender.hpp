@@ -101,6 +101,8 @@ public:
 
     WRenderSize RenderSize() const override { return render_size_; }
 
+    void RenderSize(const WRenderSize & in_render_size) override { render_size_ = in_render_size; }
+
     WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
     {
         return graphics_pipelines_;

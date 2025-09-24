@@ -78,11 +78,6 @@ WEntity * WLevel::GetEntity(const WEntityId & in_id) const {
     return entity_component_db_.GetEntity(in_id);
 }
 
-void WLevel::ForEachEntity(const WClass * in_class,
-                          TFunction<void(WEntity*)> in_predicate) const {
-    entity_component_db_.ForEachEntity(in_class, in_predicate);
-}
-
 WEntityComponentId WLevel::CreateComponent(const WEntityId & in_entity_id,
                                            const WClass * in_class) {
 
@@ -92,10 +87,6 @@ WEntityComponentId WLevel::CreateComponent(const WEntityId & in_entity_id,
 
     // WEntityComponentId
     return GetEntityComponentId(in_class, in_entity_id, 0);
-}
-void WLevel::ForEachComponent(const WClass * in_class,
-                              TFunction<void(WComponent*)> in_predicate) const {
-    entity_component_db_.ForEachComponent(in_class, in_predicate);
 }
 
 const char * WLevel::Name() const {

@@ -119,6 +119,16 @@ bool WEngine::Initialize() {
     InitializeWindow();
 
     render_->Window(window_.window);
+
+    std::int32_t width, height;
+    glfwGetFramebufferSize(window_.window, &width, &height);
+
+    render_->RenderSize({
+            static_cast<std::uint32_t>(width),
+            static_cast<std::uint32_t>(height)
+        });
+
+    WFLOG("[DEBUG] Initialize Renderer.")
     render_->Initialize();
 
     return true;
@@ -129,12 +139,13 @@ void WEngine::Destroy() {
     DestroyWindow();
 }
 
-void WEngine::run()
+void WEngine::Run()
 {
-    assert(startup_info_.startup_level);
-    
+    assert(startup_info_.startup_level.IsValid());
+
     level_info_.current_level = startup_info_.startup_level;
     level_info_.level = level_db_.Get(level_info_.current_level);
+
     LoadLevel(level_info_.level);
 
     level_info_.loaded = true;
@@ -179,10 +190,12 @@ void WEngine::MarkLoadLevel(const WLevelId & in_level) {
 void WEngine::LoadLevel(WLevel & in_level) {
     // TODO: register level systems
 
+    WFLOG("[DEBUG] Run Engine Init Systems.");
     systems_runner_.RunInitSystems(
         0, {this, &level_info_.level}
         );
-    
+
+    WFLOG("[DEBUG] Run Level Init Systems.")
     systems_runner_.RunInitSystems(
         level_info_.level.WID(),
         {this, &level_info_.level}

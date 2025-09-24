@@ -29,11 +29,9 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <vector>
 
-#include <iostream>
-
-bool run(WEngine & engine)
+bool Run(WEngine & engine)
 {
-    engine.run();
+    engine.Run();
     return true;
 }
 
@@ -272,9 +270,10 @@ bool SetupLevel(WEngine & in_engine,
                 const ModelAssets & in_viking_room,
                 const ModelAssets & in_monkey_dt,
                 const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
-                
     ) {
 
+    WFLOG("[DEBUG] leveldb address {}.", (void*)&in_engine.LevelRegister());
+    
     WLevelId levelid = in_engine.LevelRegister().Create();
 
     WLevel & level = in_engine.LevelRegister().Get(levelid);
@@ -315,7 +314,7 @@ bool SetupLevel(WEngine & in_engine,
     ts.rotation.x = -3.1415 * 0.5;
     ts.rotation.y = -3.1415 * 0.5 ;
 
-    level.CreateComponent<WStaticMeshComponent>(eid);
+    level.CreateComponent<WStaticMeshComponent>(eid);    
 
     WStaticMeshComponent * smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
@@ -370,6 +369,8 @@ int main(int argc, char** argv)
     
     try
     {
+        WFLOG("Create Engine Instance.");
+        
         WEngine engine = WEngine::DefaultCreate();
 
         std::vector<WRenderPipelineAssignmentStruct> ppcsst_assignments;
@@ -378,12 +379,16 @@ int main(int argc, char** argv)
         ModelAssets monkey_1;
         ModelAssets monkey_2;
 
+        WFLOG("[INFO] Create Assets.");
+
         LoadVikingRoom(engine, viking_room);
         LoadMonkey(engine, monkey_1, viking_room.pipeline_asset);
 
         PostprocessPipelines(engine, ppcsst_assignments);
 
         InputAssets(engine);
+
+        WFLOG("[INFO] Setup Init Level.");
        
         SetupLevel(engine,
                    viking_room,
@@ -391,9 +396,9 @@ int main(int argc, char** argv)
                    ppcsst_assignments
             );
 
-        WFLOG("Initialize While Loop");
+        WFLOG("[INFO] Initialize While Loop");
 
-        run(engine);
+        Run(engine);
 
         WFLOG("Clossing app ...");
 

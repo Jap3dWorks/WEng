@@ -24,6 +24,10 @@ private:
         WLevel level{};
     };
 
+    struct StartupInfo {
+        WLevelId startup_level{0};
+    };
+
 public:
 
     WEngine(std::unique_ptr<IRender> && in_render);
@@ -40,9 +44,13 @@ public:
 
     static WEngine DefaultCreate();
 
-    void run();
+    void Run();
 
     void StartupLevel(const WLevelId & in_id) noexcept;
+
+    WLevelId StartupLevel() const noexcept {
+        return startup_info_.startup_level;
+    }
 
     /** Set a level to be loaded when possible */
     void MarkLoadLevel(const WLevelId & in_level_id);
@@ -115,31 +123,29 @@ private:
 
     void UnloadLevel(WLevel & in_level);
 
-    LevelInfoStruct level_info_;
+    LevelInfoStruct level_info_{};
 
-    struct StartupInfo {
-        WLevelId startup_level{0};
-    } startup_info_;
+    StartupInfo startup_info_{};
 
     struct EngineStatus {
         bool close{false};
     }engine_status_;
 
-    WWindowStruct window_;
+    WWindowStruct window_{};
 
-    WEngineCycleStruct engine_cycle_;
+    WEngineCycleStruct engine_cycle_{};
 
-    std::unique_ptr<IRender> render_;
+    std::unique_ptr<IRender> render_{};
 
-    WAssetDb asset_db_;
-    WLevelDb level_db_;
+    WAssetDb asset_db_{};
+    WLevelDb level_db_{};
 
-    WSystemsRegister systems_reg_;
-    WSystemsRunner systems_runner_;
+    WSystemsRegister systems_reg_{};
+    WSystemsRunner systems_runner_{};
 
-    WInputMappingRegister input_mapping_register_;
+    WInputMappingRegister input_mapping_register_{};
 
-    WImporterRegister importers_register_;
+    WImporterRegister importers_register_{};
 
 };
 

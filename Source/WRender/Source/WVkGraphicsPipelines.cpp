@@ -129,7 +129,7 @@ void WVkGraphicsPipelines::Destroy() {
 }
 
 void WVkGraphicsPipelines::Initialize_GlobalResources() {
-
+    
     WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
         );
@@ -154,9 +154,8 @@ void WVkGraphicsPipelines::Initialize_GlobalResources() {
             );        
     }
 
-    std::array<VkWriteDescriptorSet, frames_in_flight> ws;
-
     for(uint32_t i=0; i < frames_in_flight; i++) {
+        
         global_graphics_descsets_.camera_ubo[i].range = sizeof(WUBOCameraStruct);
 
         WVulkan::CreateUBO(
@@ -164,6 +163,7 @@ void WVkGraphicsPipelines::Initialize_GlobalResources() {
             device_info_
             );
 
+        VkWriteDescriptorSet ws = {};
         VkDescriptorBufferInfo buffer_info{};
 
         buffer_info.buffer = global_graphics_descsets_.camera_ubo[i].buffer;
@@ -171,17 +171,20 @@ void WVkGraphicsPipelines::Initialize_GlobalResources() {
         buffer_info.range = global_graphics_descsets_.camera_ubo[i].range;
 
         WVulkan::UpdateWriteDescriptorSet_UBO(
-            ws[i],
+            ws,
             0,
             buffer_info,
             global_graphics_descsets_.descset_info[i].descriptor_set
             );
-    }
 
-    WVulkan::UpdateDescriptorSets(
-        ws,
-        device_info_
-        );
+        vkUpdateDescriptorSets(
+            device_info_.vk_device,
+            1,
+            &ws,
+            0,
+            nullptr
+            );
+    }
 
 }
 
