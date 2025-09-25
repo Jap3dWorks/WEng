@@ -100,7 +100,7 @@ public:
     }
 
     template<std::derived_from<WComponent> T>
-    T * GetComponent(const WEntityId & in_entity_id) const {
+    T & GetComponent(const WEntityId & in_entity_id) const {
         return component_db_.Get<T>(in_entity_id);
     }
 

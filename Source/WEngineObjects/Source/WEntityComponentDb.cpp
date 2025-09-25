@@ -31,8 +31,6 @@ void WEntityComponentDb::CreateComponent(const WClass * in_component_class,
 
     UpdateComponentMetadata(in_component_class, in_entity_id);
 
-    WFLOG("[DEBUG] Create Component {}.", in_component_class->Name());
-
     component_db_.CreateAt(in_component_class, in_entity_id);
 
     WComponent * component = component_db_.Get(in_component_class, in_entity_id);

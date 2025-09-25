@@ -6,6 +6,7 @@
 #include <utility>
 #include <memory>
 #include <cassert>
+#include <typeindex>
 
 class WIMPORTERS_API WImporterRegister {
     
@@ -44,30 +45,31 @@ public:
         return *this;
     }
 
-    void Register(WClassKeyType in_key, std::unique_ptr<WImporter> && in_importer) {
-        assert(!reg_.contains(in_key));
-        
-        reg_.insert({in_key, std::move(in_importer)});
-    }
-
     /**
      * @brief run in_fn for each registered importer.
      * Is in_fn returns true the iteration continues.
      * if in_fn returns false the iteration stops.
      */
-    void ForEach(const TFunction<bool(WImporter*)> & in_fn) const;
+    template<CCallable<bool, WImporter*> TFn>
+    void ForEach(TFn && in_fn) const {
+        for(auto& p : reg_) {
+            if (!in_fn(p.second.get())) {
+                break;
+            }
+        }
+    }
 
     template<typename T>
     void Register() {
-        assert(!reg_.contains( TClassKey_v<T> ));
-        reg_.insert({TClassKey_v<T>, std::make_unique<T>()});
+        assert(!reg_.contains( std::type_index(typeid(T)) ));
+        reg_.insert({std::type_index(typeid(T)), std::make_unique<T>()});
     }
 
     template<typename T>
     T GetImporter() const {
-        assert(reg_.contains( TClassKey_v<T> ));
+        assert(reg_.contains( std::type_index(typeid(T)) ));
 
-        return *static_cast<T*>(reg_.at(TClassKey_v<T>).get());
+        return *static_cast<T*>(reg_.at(std::type_index(typeid(T))).get());
     }
 
     TOptionalRef<WImporter> GetImporter(const char * in_extension) const {
@@ -92,6 +94,7 @@ public:
 
 private:
 
-    std::unordered_map<WClassKeyType, std::unique_ptr<WImporter>> reg_;
+    // std::unordered_map<WClassKeyType, std::unique_ptr<WImporter>> reg_;
+    std::unordered_map<std::type_index, std::unique_ptr<WImporter>> reg_;
     
 };

@@ -35,8 +35,7 @@ public:
                                     typename DbType::const_iterator,
                                     const WClass *,
                                     ValueFn,
-                                    IncrFn
-                                    >;
+                                    IncrFn>;
 
 public:
 
@@ -124,53 +123,72 @@ public:
         return result;
     }
 
+    /**
+     * @brief get element at in_id.
+     */
     template<std::derived_from<WObjClass> T>
-    T * Get(WIdClass in_id) const {
-        return static_cast<T*>(Get(T::StaticClass(), in_id));
+    T & Get(WIdClass in_id) const {
+
+        return T::StaticClass()->DbBuilder()
+            .template DbCast<T,WObjClass,WIdClass>(
+                db_.at(T::StaticClass()).get()
+                )->Get(in_id);
     }
 
     WObjClass * GetFirst(const WClass * in_class, WIdClass & out_id) const {
         assert(db_.contains(in_class));
         
         WObjClass * result;
-        db_.at(in_class)->GetFirst(result, out_id);
+        db_.at(in_class)->BGetFirst(result, out_id);
         
         return result;
     }
 
     template<std::derived_from<WObjClass> T>
     T * GetFirst(WIdClass & out_id) const {
+        // TODO: StaticCast and T&
         return static_cast<T*>(GetFirst(T::StaticClass(), out_id));
     }
 
+    /**
+     * @brief More flexible but less performant.
+     */
     template<CCallable<void, const WIdClass &, WObjClass *> TFn>
     void ForEachIdValue(const WClass * in_class, TFn && in_fn) const {
-        db_.at(in_class)->ForEachIdValue(std::forward<TFn>(in_fn));
+        db_.at(in_class)->BForEachIdValue(std::forward<TFn>(in_fn));
     }
 
-    template<std::derived_from<WObjClass> T, CCallable<void, const WIdClass &, T*> TFn>
+    /**
+     * @brief Less flexible bur more performant for each.
+     */
+    template<std::derived_from<WObjClass> T, CCallable<void, const WIdClass &, T&> TFn>
     void ForEachIdValue(TFn && in_fn) const {
-        db_.at(T::StaticClass())->ForEachIdValue(
-            [&in_fn](const WIdClass & _wid, WObjClass * _ptr) {
-                in_fn(_wid, static_cast<T*>(_ptr));
-            }
-            );
+        T::StaticClass()->DbBuilder()
+            .template DbCast<T,WObjClass,WIdClass>(
+                db_.at(T::StaticClass()).get()
+                )->ForEachIdValue(std::forward<TFn>(in_fn));
     }
 
+    /**
+     * @brief More flexible but less performant.
+     */
     template<CCallable<void, WObjClass*> TFn>
     void ForEach(const WClass * in_class, TFn && in_fn) const {
         assert(db_.contains(in_class));
-        db_.at(in_class)->ForEach(std::forward<TFn>(in_fn));
+        db_.at(in_class)->BForEach(std::forward<TFn>(in_fn));
     }
 
-    template<std::derived_from<WObjClass> T, CCallable<void, T*> TFn>
+    /**
+     * @brief Less flexible bur more performant for each.
+     */
+    template<std::derived_from<WObjClass> T, CCallable<void, T&> TFn>
     void ForEach(TFn && in_fn) const {
         assert(db_.contains(T::StaticClass()));
 
-        db_.at(T::StaticClass())->ForEach(
-            [&in_fn](WObjClass * _ptr) {
-                in_fn(static_cast<T*>(_ptr));
-            } );
+        T::StaticClass()->DbBuilder()
+            .template DbCast<T,WObjClass,WIdClass>(
+                db_.at(T::StaticClass()).get()
+                )->ForEach(std::forward<TFn>(in_fn));
     }
 
     template<typename T>

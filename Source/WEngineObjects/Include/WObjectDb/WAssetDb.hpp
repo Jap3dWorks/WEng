@@ -57,12 +57,11 @@ public:
         return *this;
     }
 
-    template<std::derived_from<WAsset> T>
-    void ForEach(TFunction<void(T*)> in_predicate) const {
+    template<std::derived_from<WAsset> T, CCallable<void, T&> TFn>
+    void ForEach(TFn && in_fn) const {
         object_manager_.ForEach<T>(
-            [&in_predicate](WAsset* in_asset) {
-                in_predicate(static_cast<T*>(in_asset));
-        });
+            std::forward<TFn>(in_fn)
+            );
     }
 
     template<std::derived_from<WAsset> T>

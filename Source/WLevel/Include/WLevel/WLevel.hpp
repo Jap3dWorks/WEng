@@ -65,7 +65,7 @@ public:
                                        const WClass * in_class) ;
 
     template<std::derived_from<WComponent> T>
-    T * GetComponent(const WEntityId & in_entity_id) const {
+    T & GetComponent(const WEntityId & in_entity_id) const {
         return entity_component_db_.GetComponent<T>(in_entity_id);
     }
 

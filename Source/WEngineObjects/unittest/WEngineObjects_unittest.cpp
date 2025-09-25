@@ -149,30 +149,30 @@ bool WEntityComponentDb_Test() {
     cdb->Create();
 
     auto cp = smdb->Clone();
-    smdb->ForEach([](WComponent * _cmp) {
+    smdb->BForEach([](WComponent * _cmp) {
         WFLOG("PRINT Orig MStaticMeshComponent.");
     });
-    cp->ForEach([](WComponent * _cmp) {
+    cp->BForEach([](WComponent * _cmp) {
         WFLOG("Print Cloned MStaticMeshComponent.");
     });
 
     if (smdb->Count() != cp->Count()) return false;
 
-    tdb->ForEach([](WComponent * _cmp) {
+    tdb->BForEach([](WComponent * _cmp) {
         WFLOG("Print Orig MTansformsComponent.");
     });
     auto cp2 = tdb->Clone();
-    cp2->ForEach([](WComponent * _cmp) {
+    cp2->BForEach([](WComponent * _cmp) {
         WFLOG("Print Cloned MTransformComponent.");
     });
     
     if (tdb->Count() != cp2->Count()) return false;
 
     auto cp3 = cdb->Clone();
-    cdb->ForEach([](WComponent * _cmp) {
+    cdb->BForEach([](WComponent * _cmp) {
         WFLOG("Print Orig WCameraComponent");
     });
-    cp3->ForEach([](WComponent * _cmp) {
+    cp3->BForEach([](WComponent * _cmp) {
         WFLOG("Print Cloned WCameraComponent");
     });
 

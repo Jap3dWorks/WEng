@@ -147,7 +147,7 @@ namespace WRenderLevelUtils {
 
                         WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
                             in_component->EntityId()
-                            )->TransformStruct();
+                            ).TransformStruct();
 
                         WUBOGraphicsStruct grpubo = WRenderUtils::ToUBOGraphicsStruct(tstruct);
                         WRPParamUboStruct ubodt{.binding=0, .offset=0};
@@ -176,7 +176,7 @@ namespace WRenderLevelUtils {
             TSparseSet<WAssetId> cam_render_pipelines;
             cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
 
-            in_level->GetComponent<WCameraComponent>(camera_entt)->ForEachAssignment(
+            in_level->GetComponent<WCameraComponent>(camera_entt).ForEachAssignment(
                 [&cam_render_pipelines](
                      const WCameraComponent * _cmp,
                      const WSubIdxId & _idx,
@@ -191,8 +191,8 @@ namespace WRenderLevelUtils {
                 in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
             }
             
-            WCameraComponent* comp = in_level->GetComponent<WCameraComponent>(camera_entt);
-            comp->ForEachAssignment(
+            WCameraComponent & comp = in_level->GetComponent<WCameraComponent>(camera_entt);
+            comp.ForEachAssignment(
                 [&in_level,
                  &in_render,
                  &in_asset_db](

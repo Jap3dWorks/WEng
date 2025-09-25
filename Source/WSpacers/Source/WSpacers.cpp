@@ -234,8 +234,6 @@ bool SetupLevel(WEngine & in_engine,
                 const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
     ) {
 
-    WFLOG("[DEBUG] leveldb address {}.", (void*)&in_engine.LevelRegister());
-    
     WLevelId levelid = in_engine.LevelRegister().Create();
 
     WLevel & level = in_engine.LevelRegister().Get(levelid);
@@ -254,23 +252,23 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WMovementComponent>(cid);
     level.CreateComponent<WCameraInputComponent>(cid);
 
-    WCameraComponent * cameracomp = level.GetComponent<WCameraComponent>(cid);
-    cameracomp->RenderId(1); // renderable camera
-    WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid)->TransformStruct();
+    WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
+    cameracomp.RenderId(1); // renderable camera
+    WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
 
     // postprocess
     
     for(std::uint8_t i=0; i < in_ppcss_assgnm.size(); i++) {
-        cameracomp->SetRenderPipelineAssignment({i}, in_ppcss_assgnm[i]);
+        cameracomp.SetRenderPipelineAssignment({i}, in_ppcss_assgnm[i]);
     }
 
     // Models
     // Viking Room
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
-    WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid)->TransformStruct();
+    WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid).TransformStruct();
     ts.rotation_order = ERotationOrder::zxy;
     ts.position.z = -2.0f;
     ts.rotation.x = -3.1415 * 0.5;
@@ -278,17 +276,17 @@ bool SetupLevel(WEngine & in_engine,
 
     level.CreateComponent<WStaticMeshComponent>(eid);    
 
-    WStaticMeshComponent * smcomponent =
+    WStaticMeshComponent & smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
-    smcomponent->StaticMeshAsset(in_viking_room.static_mesh);
-    smcomponent->SetRenderPipelineAssignment(
+    smcomponent.StaticMeshAsset(in_viking_room.static_mesh);
+    smcomponent.SetRenderPipelineAssignment(
         0, in_viking_room.pipeline_asset, in_viking_room.param_asset
         );
 
     // Monkey 1
     WEntityId monkey_id = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(monkey_id);
-    WTransformStruct & monkey_ts = level.GetComponent<WTransformComponent>(monkey_id)->TransformStruct();
+    WTransformStruct & monkey_ts = level.GetComponent<WTransformComponent>(monkey_id).TransformStruct();
     monkey_ts.rotation_order = ERotationOrder::zxy;
     monkey_ts.position.z = -2.0;
     monkey_ts.position.y = 0.5;
@@ -296,17 +294,17 @@ bool SetupLevel(WEngine & in_engine,
 
     level.CreateComponent<WStaticMeshComponent>(monkey_id);
 
-    auto * monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
+    auto & monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
 
-    monkeysm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkeysm->SetRenderPipelineAssignment(0,
-                                          in_monkey_dt.pipeline_asset,
-                                          in_monkey_dt.param_asset);
+    monkeysm.StaticMeshAsset(in_monkey_dt.static_mesh);
+    monkeysm.SetRenderPipelineAssignment(0,
+                                         in_monkey_dt.pipeline_asset,
+                                         in_monkey_dt.param_asset);
 
     // Monkey 2
     WEntityId monkey2_id = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(monkey2_id);
-    WTransformStruct & monkey2_ts = level.GetComponent<WTransformComponent>(monkey2_id)->TransformStruct();
+    WTransformStruct & monkey2_ts = level.GetComponent<WTransformComponent>(monkey2_id).TransformStruct();
     monkey2_ts.rotation_order = ERotationOrder::zxy;
     monkey2_ts.position.z = -2.0;
     monkey2_ts.position.y = 0.65;
@@ -314,12 +312,12 @@ bool SetupLevel(WEngine & in_engine,
     monkey2_ts.scale *= 0.25;
 
     level.CreateComponent<WStaticMeshComponent>(monkey2_id);
-    auto * monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
+    auto & monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
 
-    monkey2sm->StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkey2sm->SetRenderPipelineAssignment(0,
-                                           in_monkey_dt.pipeline_asset,
-                                           in_monkey_dt.param_asset);
+    monkey2sm.StaticMeshAsset(in_monkey_dt.static_mesh);
+    monkey2sm.SetRenderPipelineAssignment(0,
+                                          in_monkey_dt.pipeline_asset,
+                                          in_monkey_dt.param_asset);
 
     return true;
 

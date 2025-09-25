@@ -6,17 +6,68 @@
 #include "WCore/TWAllocator.hpp"
 #include "WLog.hpp"
 
+#include <format>
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
 
 struct WDbBuilder {
+    
+private:
+
+    template<typename T>
+    static inline void AllocateFn(T * pptr, std::size_t pn, T * nptr, std::size_t nn) {
+        if (pptr) {
+            for(size_t i=0; i<pn; i++) {
+                if (!BWRef::IsInstanced(pptr + i)) continue;
+                        
+                for (auto & ref : BWRef::Instances(pptr + i)) {
+                    if (ref == nullptr) continue;
+                            
+                    ref->BSet(nptr + i);
+                }
+            }
+        }
+    }
+
+    template<typename T>
+    static inline void DeallocateFn(T * ptr, std::size_t n) {
+        if (ptr) {
+            for(std::size_t i=0; i<n; i++) {
+                if (!BWRef::IsInstanced(ptr + i)) continue;
+
+                for (auto & ref : BWRef::Instances(ptr + i)) {
+                    if (ref == nullptr) continue;
+
+                    ref->BSet(ptr + i);
+                }
+            }
+        }
+    }
+
+    template<typename T, typename I>
+    static inline T CrtFn(const I & in_id) {
+        return T{};
+    }
+
+    template<typename T>
+    static inline void DstrFn(T & in_obj) {}
+
+    template<typename T>
+    using TAllocatorBld = TWAllocator<T, decltype(&AllocateFn<T>), decltype(&DeallocateFn<T>)>;
+
+    template<typename T, CConvertibleTo<T> B, typename I>
+    using TObjectDbBld = TObjDb<T,
+                                decltype(&CrtFn<T,I>),
+                                decltype(&DstrFn<T>),
+                                B, I,
+                                TAllocatorBld<T>>;
 
 public:
 
     template<typename B, typename I>
     using DbType = IObjectDataBase<B,I>;
-
+    
     template<typename B, typename I>
     using DbRawPtr = DbType<B,I>*;
 
@@ -24,34 +75,29 @@ public:
 
     template<typename B, typename I>
     using RegKey = std::pair<B,I>;
-
-    using Register = std::unordered_map<std::type_index, TFnPtr< VoidPtr() >>;
-
-    template<typename T>
-    struct ParamType{
-        using Type=T;
-    };
-
+    
+    using CreateReg = std::unordered_map<std::type_index, TFnPtr< VoidPtr() >>;
+    
     constexpr WDbBuilder()=default;
 
     virtual ~WDbBuilder()=default;
 
     constexpr WDbBuilder(const WDbBuilder & other) :
-        register_(other.register_) {}
+        dbcreate_(other.dbcreate_) {}
 
     constexpr WDbBuilder(WDbBuilder && other) noexcept :
-        register_(std::move(other.register_)) {}
+        dbcreate_(std::move(other.dbcreate_)) {}
 
     constexpr WDbBuilder & operator=(const WDbBuilder & other) {
         if (this != &other) {
-            register_ = other.register_;
+            dbcreate_ = other.dbcreate_;
         }
         return *this;
     }
 
     constexpr WDbBuilder & operator=(WDbBuilder && other) {
         if (this != &other) {
-            register_ = std::move(other.register_);
+            dbcreate_ = std::move(other.dbcreate_);
         }
 
         return *this;
@@ -67,97 +113,42 @@ public:
 
     template<typename T, CConvertibleTo<T> B, typename I>
     void RegisterBuilder() {
-        if (register_.contains(typeid(RegKey<B,I>))) {
+        if (dbcreate_.contains(typeid(RegKey<B,I>))) {
             return;
         }
 
-        register_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
+        dbcreate_[typeid(RegKey<B,I>)] = &CreateObjectDb<T,B,I>;
+        // dbops_[typeid(RegKey<B,I>)] = std::make_unique<TDbOps<T,B,I>>();
     }
+
+    template<typename T, CConvertibleTo<T> B, typename I>
+    TObjectDbBld<T,B,I>* DbCast(DbType<B,I> * in_db) const {
+        return static_cast<TObjectDbBld<T,B,I>*>(in_db);
+    }
+
+    // template<typename B, typename I, CCallable<void, B*> TFn>
+    // void ForEachPtr(DbType<B,I> * in_db, TFn && in_fn) {
+    //     // dbops_[typeid(RegKey<B,I>)]->ForEach(std::forward<TFn>(in_fn));
+    // }
 
 private:
 
     template<typename T, CConvertibleTo<T> B, typename I>
     static inline VoidPtr CreateObjectDb() {
-        
-        auto allocatefn = [] (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
-            if (_pptr) {
-                for(size_t i=0; i<_pn; i++) {
-                    if (!BWRef::IsInstanced(_pptr + i)) continue;
-                        
-                    for (auto & ref : BWRef::Instances(_pptr + i)) {
-                        if (ref == nullptr) continue;
-                            
-                        ref->BSet(_nptr + i);
-                    }
-                }
-            }
-        };
 
-        auto deallocatefn = [] (T * _ptr, std::size_t _n) {
-            if (_ptr) {
-                for(std::size_t i=0; i<_n; i++) {
-                    if (!BWRef::IsInstanced(_ptr + i)) continue;
+        TAllocatorBld<T> a;
 
-                    for (auto & ref : BWRef::Instances(_ptr + i)) {
-                        if (ref == nullptr) continue;
+        a.SetAllocateFn(&AllocateFn<T>);
 
-                        ref->BSet(_ptr + i);
-                    }
-                }
-            }
-        };
+        a.SetDeallocateFn(&DeallocateFn<T>);
 
-        TWAllocator<T, decltype(allocatefn), decltype(deallocatefn)> a;
-
-        a.SetAllocateFn(allocatefn);
-            // []
-            // (T * _pptr, size_t _pn, T* _nptr, size_t _nn) {
-            //     if (_pptr) {
-            //         for(size_t i=0; i<_pn; i++) {
-            //             if (!BWRef::IsInstanced(_pptr + i)) continue;
-                        
-            //             for (auto & ref : BWRef::Instances(_pptr + i)) {
-            //                 if (ref == nullptr) continue;
-                            
-            //                 ref->BSet(_nptr + i);
-            //             }
-            //         }
-            //     }
-            // }
-            // );
-
-        a.SetDeallocateFn(deallocatefn);
-            // []
-            // (T * _ptr, std::size_t _n) {
-            //     if (_ptr) {
-            //         for(std::size_t i=0; i<_n; i++) {
-            //             if (!BWRef::IsInstanced(_ptr + i)) continue;
-
-            //             for (auto & ref : BWRef::Instances(_ptr + i)) {
-            //                 if (ref == nullptr) continue;
-
-            //                 ref->BSet(_ptr + i);
-            //             }
-            //         }
-            //     }
-            // }
-            // );
-
-        auto crtfn = [](const I & in_Id) -> T { return T{}; };
-        auto dstrfn = [](T & in_obj) -> void {};
-
-        return new TObjDb<T,
-                          decltype(crtfn),
-                          decltype(dstrfn),
-                          B,
-                          I,
-                          decltype(a)>(crtfn, dstrfn, a);
+        return new TObjectDbBld<T,B,I>(&CrtFn, &DstrFn, a);
     }
 
     VoidPtr CreateDb(std::type_index typeindex) const {
-        assert(register_.contains(typeindex));
+        assert(dbcreate_.contains(typeindex));
         
-        return register_.at(typeindex)();
+        return dbcreate_.at(typeindex)();
     }
 
     template<typename B, typename I>
@@ -165,6 +156,7 @@ private:
         return static_cast<DbRawPtr<B,I>>(in_cast);
     }
 
-    Register register_;
-
+    CreateReg dbcreate_;
+    // DbOpsReg dbops_;
+    
 };

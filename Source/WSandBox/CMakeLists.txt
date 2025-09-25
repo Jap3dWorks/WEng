@@ -1,17 +1,17 @@
 
-add_executable(WSandBox Source/WSandBox.cpp)
+# add_executable(WSandBox Source/WSandBox.cpp)
 
-message(STATUS "WSandBox Standalone")
+# message(STATUS "WSandBox Standalone")
 
-target_include_directories(
-    WSandBox
-    PUBLIC
-    Include
-    Source
-)
+# target_include_directories(
+#     WSandBox
+#     PUBLIC
+#     Include
+#     Source
+# )
 
-target_link_libraries(
-    WSandBox 
-)
+# target_link_libraries(
+#     WSandBox 
+# )
 
-install(TARGETS WSandBox DESTINATION bin)
+# install(TARGETS WSandBox DESTINATION bin)

@@ -2,6 +2,11 @@
 
 using WClassKeyType = const void *;
 
+/**
+   DEPRECATED
+   Might not be reliable between different compile processes like .so files.
+   Better use std::type_index
+*/
 template<typename T>
 struct TClassKey {
 
@@ -11,8 +16,8 @@ struct TClassKey {
     
 private:
     
-    static inline constexpr WClassKeyType v_{nullptr};
+    static constexpr WClassKeyType v_{nullptr};
 };
 
 template<typename T>
-inline constexpr WClassKeyType TClassKey_v=TClassKey<T>::Value();
+constexpr WClassKeyType TClassKey_v=TClassKey<T>::Value();

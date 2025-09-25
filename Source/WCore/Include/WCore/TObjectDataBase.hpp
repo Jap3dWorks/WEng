@@ -28,8 +28,8 @@ public:
     virtual void Get(const WIdClass &, B* &) = 0;
     virtual void Get(const WIdClass &, const B* &) const = 0;
 
-    virtual void GetFirst(B* &, WIdClass &) = 0;
-    virtual void GetFirst(const B*&, WIdClass &) const =0;
+    virtual void BGetFirst(B* &, WIdClass &) = 0;
+    virtual void BGetFirst(const B*&, WIdClass &) const =0;
     
     virtual size_t Count() const = 0;
     virtual bool Contains(const WIdClass & in_id) const = 0;
@@ -37,8 +37,8 @@ public:
     virtual std::vector<WIdClass> Indexes() = 0;
 
     // TODO: TFunction contains 1 virtual call. function ptr should be more efficient.
-    virtual void ForEach(TFunction<void(B*)> in_function)=0;
-    virtual void ForEachIdValue(TFunction<void(const WIdClass & _id, B * _value)>)=0;
+    virtual void BForEach(TFunction<void(B*)> in_function)=0;
+    virtual void BForEachIdValue(TFunction<void(const WIdClass &, B *)>)=0;
     
 };
 
@@ -245,12 +245,22 @@ public:
         out_value = &objects_.Get(in_id.GetId());
     }
 
-    void GetFirst(B* & out_first, WIdClass & out_id) override {
+    T & GetFirst(WIdClass & out_id) {
+        out_id = objects_.IndexInPos(0);
+        return objects_.Get(out_id.GetId());
+    }
+
+    T & GetFirst(WIdClass & out_id) const {
+        out_id = objects_.IndexInPos(0);
+        return objects_.Get(out_id.GetId());
+    }
+
+    void BGetFirst(B* & out_first, WIdClass & out_id) override {
         out_id = objects_.IndexInPos(0);
         out_first = &(objects_.Get(out_id.GetId()));
     }
     
-    void GetFirst(const B*& out_first, WIdClass & out_id) const override {
+    void BGetFirst(const B*& out_first, WIdClass & out_id) const override {
         out_id = objects_.IndexInPos(0);
         out_first = &(objects_.Get(out_id.GetId()));
     }
@@ -316,28 +326,30 @@ public:
         return objects_.cend();
     }
 
-    template<CCallable<void, T&> TPredicate>
-    void ForEach(TPredicate && in_predicate) {
+    // TODO: const versions
+
+    template<CCallable<void, T&> TFn>
+    void ForEach(TFn && in_fn) {
         for (auto & v : objects_) {
-            std::forward<TPredicate>(in_predicate)(v);
+            in_fn(v);
         }
     }
 
-    void ForEach(TFunction<void(B*)> in_function) override {
+    void BForEach(TFunction<void(B*)> in_function) override {
         for (auto& v : objects_) {
             in_function(static_cast<B*>(&v));
         }
     }
 
-    template<CCallable<void, const WIdClass &, B*> TPredicate>
-    void ForEachIdValue(TPredicate && in_predicate) {
+    template<CCallable<void, const WIdClass &, T&> TFn>
+    void ForEachIdValue(TFn && in_fn) {
         std::size_t i=0;
         for (auto& v : objects_) {
-            std::forward<TPredicate>(in_predicate)(objects_.IndexAt(i++), v);
+            in_fn(objects_.IndexAt(i++), v);
         }
     }
 
-    void ForEachIdValue(TFunction<void(const WIdClass & _id, B* _value)> in_predicate) override {
+    void BForEachIdValue(TFunction<void(const WIdClass & _id, B* _value)> in_predicate) override {
         std::size_t i=0;
         for (auto& v : objects_) {
             in_predicate(objects_.IndexAt(i++),
