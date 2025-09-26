@@ -38,8 +38,8 @@ END_DEFINE_WSYSTEM()
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
     WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
 
-    WEntityId cid;
-    WCameraComponent * camcomponent = parameters.level->GetFirstComponent<WCameraComponent>(cid);
+    WEntityId camid;
+    parameters.level->GetFirstComponent<WCameraComponent>(camid);
 
     parameters.engine->AssetManager().ForEach<WInputMappingAsset>(
         [&mapping](WInputMappingAsset & a){
@@ -76,9 +76,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         frontaction,
-        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(cid);
+            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -95,9 +95,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         backaction,
-        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(cid);
+            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -114,9 +114,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         leftaction,
-        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(cid);
+            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -133,9 +133,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         rightaction,
-        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(cid);
+            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -152,10 +152,10 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         mousemovement,
-        [cid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
             
             WTransformStruct & t = _e->LevelInfo()
-                .level.GetComponent<WTransformComponent>(cid)
+                .level.GetComponent<WTransformComponent>(camid)
                 .TransformStruct();
 
             t.rotation.x = _v.direction.y * -0.001;
@@ -217,22 +217,22 @@ END_DEFINE_WSYSTEM()
 
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
     WEntityId id;
-    auto * ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
+    auto & ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
     auto & tc = parameters.level->GetComponent<WTransformComponent>(id);
     auto & mc = parameters.level->GetComponent<WMovementComponent>(id);
 
     glm::vec3 acc{0};
 
-    if(ic->Front()) {
+    if(ic.Front()) {
         acc -= glm::vec3(tc.TransformStruct().transform_matrix[2]);
     }
-    if(ic->Back()) {
+    if(ic.Back()) {
         acc += glm::vec3(tc.TransformStruct().transform_matrix[2]);
     }
-    if(ic->Left()) {
+    if(ic.Left()) {
         acc -= glm::vec3(tc.TransformStruct().transform_matrix[0]);
     }
-    if(ic->Right()) {
+    if(ic.Right()) {
         acc += glm::vec3(tc.TransformStruct().transform_matrix[0]);
     }
 

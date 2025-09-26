@@ -128,7 +128,6 @@ public:
      */
     template<std::derived_from<WObjClass> T>
     T & Get(WIdClass in_id) const {
-
         return T::StaticClass()->DbBuilder()
             .template DbCast<T,WObjClass,WIdClass>(
                 db_.at(T::StaticClass()).get()
@@ -145,9 +144,11 @@ public:
     }
 
     template<std::derived_from<WObjClass> T>
-    T * GetFirst(WIdClass & out_id) const {
-        // TODO: StaticCast and T&
-        return static_cast<T*>(GetFirst(T::StaticClass(), out_id));
+    T & GetFirst(WIdClass & out_id) const {
+        return T::StaticClass()->DbBuilder()
+            .template DbCast<T, WObjClass, WIdClass>(
+                db_.at(T::StaticClass()).get()
+                )->GetFirst(out_id);
     }
 
     /**

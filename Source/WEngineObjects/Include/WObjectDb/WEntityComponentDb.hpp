@@ -126,7 +126,7 @@ public:
     }
 
     template<std::derived_from<WComponent> T>
-    T * GetFirstComponent(WEntityId & out_id) const {
+    T & GetFirstComponent(WEntityId & out_id) const {
         return component_db_.GetFirst<T>(out_id);
     }
 
