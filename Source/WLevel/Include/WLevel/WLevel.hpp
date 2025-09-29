@@ -105,7 +105,6 @@ public:
     template<std::derived_from<WComponent> T>
     WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
                                             const WSubIdxId & in_index_id=0) const noexcept {
-        
         return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
     }
 

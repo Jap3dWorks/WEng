@@ -57,7 +57,7 @@ namespace WVkGraphicsPipelinesUtils {
 
         if (in_shader_type == EShaderStageFlag::Vertex)
         {
-            result.attribute_descriptors.resize(3);
+            result.attribute_descriptors.resize(4);
 
             // Geometry data structure
 
@@ -76,7 +76,10 @@ namespace WVkGraphicsPipelinesUtils {
             result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
             result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
 
-            // TODO Normals
+            result.attribute_descriptors[3].binding = 0;
+            result.attribute_descriptors[3].location = 3;
+            result.attribute_descriptors[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+            result.attribute_descriptors[3].offset = offsetof(WVertexStruct, Normal);
 
             // more vertex data bindings here
 
