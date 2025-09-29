@@ -30,6 +30,7 @@ layout(location = 3) in vec3 InNormal;
 
 layout(location = 0) out vec3 FragColor;
 layout(location = 1) out vec2 FragTexCoord;
+layout(location = 2) out vec3 FragNormal;
 
 void main()
 {
@@ -37,5 +38,6 @@ void main()
 
     FragColor = vec3(1.f, 1.f, 1.f);
     FragTexCoord = InTexCoord;
+    FragNormal = InNormal;
 }
 

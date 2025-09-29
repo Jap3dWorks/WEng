@@ -53,8 +53,8 @@ WImportObj::WImportObj() noexcept {}
 
 std::vector<WAssetId> WImportObj::Import(
     WAssetDb & in_asset_manager,
-    const char* file_path,
-    const char* asset_directory)
+    const char * file_path,
+    const char * asset_directory)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -105,6 +105,12 @@ std::vector<WAssetId> WImportObj::Import(
             };
 
             vertex.Color = {1.0f, 1.0f, 1.0f};
+
+            vertex.Normal = {
+                attrib.normals[(3 * index.normal_index) + 0],
+                attrib.normals[(3 * index.normal_index) + 1],
+                attrib.normals[(3 * index.normal_index) + 2]
+            };
 
             if (!unique_vertices.contains(vertex))
             {
