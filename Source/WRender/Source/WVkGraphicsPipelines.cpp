@@ -81,7 +81,6 @@ void WVkGraphicsPipelines::CreatePipeline(
                 },
                 _shdrs
                 );
-            
             _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
