@@ -16,6 +16,8 @@
 struct WUBOGraphicsStruct
 {
     glm::mat4 model;
+    glm::mat3 normal_matrix;
+    
     // TODO params here
 };
 

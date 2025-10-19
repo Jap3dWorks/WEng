@@ -39,7 +39,17 @@ namespace WRenderUtils {
     inline WUBOGraphicsStruct ToUBOGraphicsStruct(
         const WTransformStruct & in_transform
         ) {
-        return {in_transform.transform_matrix};
+
+        glm::mat3 normal_matrix = glm::transpose(
+            glm::inverse(
+                glm::mat3(in_transform.transform_matrix)
+                )
+            );
+
+        return {
+            in_transform.transform_matrix,
+            normal_matrix
+        };
     }
 
 }

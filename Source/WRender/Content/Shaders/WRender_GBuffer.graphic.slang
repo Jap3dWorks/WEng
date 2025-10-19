@@ -1,4 +1,31 @@
 // Camera stuffs
+struct Camera {
+  float4x4 proj;
+  float4x4 view;
+  float px;
+  float py;
+  float pz;
+  float pitch;
+  float yaw;
+  float roll;
+  float sx;
+  float sy;
+  float sz;
+  float angle_of_view;
+  float near_clipping;
+  float far_clipping;
+};
+
+[[vk::binding(0, 0)]] // binding, set
+ConstantBuffer<Camera> camera;
+
+struct SUniformBufferObject {
+    float4x4 model;
+    float3x3 normal_matrix;
+};
+
+[[vk::binding(0, 1)]] // binding, set
+ConstantBuffer<SUniformBufferObject> ubo;
 
 struct VSInput {
     float3 position;
@@ -7,24 +34,33 @@ struct VSInput {
 };
 
 struct VSOutput {
-    float4 pos : SV_POSITION;
-    float2 tex_coords;
-    float3 normal;
-    float3 world_pos;
+    float4 pos        : SV_POSITION;
+    float2 tex_coords : TEXCOORD0;
+    float3 normal     : TEXCOORD1;
+    float3 world_pos  : TEXCOORD2;
+    float depth       : TEXCOORD3;
 };
 
 [shader("vertex")]
 VSOutput vsMain(VSInput input) {
     VSOutput output;
 
-    output.pos = float4(input.position, 1.f);
+    output.normal = mul(ubo.normal_matrix, input.normal);
+
+    float4 wp = mul(ubo.model, float4(input.position, 1.0));
+
+    output.pos = mul(camera.proj, mul(camera.view, wp));
+    output.world_pos = wp.xyz;
     output.tex_coords = input.tex_coords;
+
+    output.depth = output.pos.z / output.pos.w;
 
     return output;
 }
 
 uniform Sampler2D texture;
 
+// Output structure
 struct FSOutput {
     float4 color : SV_TARGET0;
     float depth : SV_TARGET1;
@@ -37,8 +73,9 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     FSOutput output;
 
     output.color = texture.Sample(vert_in.tex_coords);
-    output.normal=vert_in.normal;
+    output.normal = vert_in.normal;
     output.worldPos=vert_in.world_pos;
+    output.depth = vert_in.pos.z;
 
     return output;
 
