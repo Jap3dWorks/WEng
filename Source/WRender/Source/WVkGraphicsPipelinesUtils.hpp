@@ -64,22 +64,22 @@ namespace WVkGraphicsPipelinesUtils {
             result.attribute_descriptors[0].binding = 0;
             result.attribute_descriptors[0].location = 0;
             result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[0].offset = offsetof(WVertexStruct, Position);
+            result.attribute_descriptors[0].offset = offsetof(WVertexStruct, position);
 
             result.attribute_descriptors[1].binding = 0;
             result.attribute_descriptors[1].location = 1;
             result.attribute_descriptors[1].format = VK_FORMAT_R32G32_SFLOAT;
-            result.attribute_descriptors[1].offset = offsetof(WVertexStruct, TexCoords);
+            result.attribute_descriptors[1].offset = offsetof(WVertexStruct, tex_coords);
 
             result.attribute_descriptors[2].binding = 0;
             result.attribute_descriptors[2].location = 2;
             result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[2].offset = offsetof(WVertexStruct, Color);
+            result.attribute_descriptors[2].offset = offsetof(WVertexStruct, color);
 
             result.attribute_descriptors[3].binding = 0;
             result.attribute_descriptors[3].location = 3;
             result.attribute_descriptors[3].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[3].offset = offsetof(WVertexStruct, Normal);
+            result.attribute_descriptors[3].offset = offsetof(WVertexStruct, normal);
 
             // more vertex data bindings here
 

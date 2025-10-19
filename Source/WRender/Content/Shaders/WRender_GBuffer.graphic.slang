@@ -30,6 +30,7 @@ ConstantBuffer<SUniformBufferObject> ubo;
 struct VSInput {
     float3 position;
     float2 tex_coords;
+    float3 color;
     float3 normal;
 };
 
@@ -45,7 +46,8 @@ struct VSOutput {
 VSOutput vsMain(VSInput input) {
     VSOutput output;
 
-    output.normal = mul(ubo.normal_matrix, input.normal);
+    output.normal = normalize(mul(ubo.normal_matrix, input.normal));
+    // output.normal = normalize(input.normal);
 
     float4 wp = mul(ubo.model, float4(input.position, 1.0));
 
@@ -58,13 +60,14 @@ VSOutput vsMain(VSInput input) {
     return output;
 }
 
-uniform Sampler2D texture;
+[[vk::binding(1, 1)]]
+ConstantBuffer<Sampler2D> texture;
 
 // Output structure
 struct FSOutput {
-    float4 color : SV_TARGET0;
-    float depth : SV_TARGET1;
-    float3 normal : SV_TARGET2;
+    float4 color    : SV_TARGET0;
+    float depth     : SV_TARGET1;
+    float3 normal   : SV_TARGET2;
     float3 worldPos : SV_target3;
 };
 
@@ -73,10 +76,12 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     FSOutput output;
 
     output.color = texture.Sample(vert_in.tex_coords);
+
+    // output.color = float4(vert_in.normal, 1.0);
+
     output.normal = vert_in.normal;
-    output.worldPos=vert_in.world_pos;
+    output.worldPos = vert_in.world_pos;
     output.depth = vert_in.pos.z;
 
     return output;
-
 }

@@ -78,13 +78,33 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
 
+    // TEMP use gbufer shader for debug
+
     pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
-                "/Content/Shaders/Spacers_ShaderBase.vert.graphics.glsl");
+
+    std::strcpy(
+        pipeline_asset->RenderPipeline().shaders[0].file,
+        "/Content/Shaders/WRender_GBuffer.graphic.slang"
+        // "/Content/Shaders/Spacers_ShaderBase.vert.graphics.glsl"
+        );
+
+    std::strcpy(
+        pipeline_asset->RenderPipeline().shaders[0].entry,
+        "vsMain"
+        );
 
     pipeline_asset->RenderPipeline().shaders[1].type=EShaderStageFlag::Fragment;
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
-                "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl");
+    
+    std::strcpy(
+        pipeline_asset->RenderPipeline().shaders[1].file,
+        "/Content/Shaders/WRender_GBuffer.graphic.slang"
+        // "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl"
+        );
+
+    std::strcpy(
+        pipeline_asset->RenderPipeline().shaders[1].entry,
+        "fsMain"
+        );
 
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
 
@@ -120,6 +140,7 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
 
     pipeline_asset->RenderPipeline().type = EPipelineType::Postprocess;
     pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
+
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].entry, "vsMain");
