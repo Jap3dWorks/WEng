@@ -170,7 +170,7 @@ private:
         std::unordered_map<WEntityComponentId, EPipelineType> binding_ptype{};
     } pipeline_track_;
     // --
-    
+
     struct SyncSemaphores {
         VkSemaphore image_available{VK_NULL_HANDLE};
         VkSemaphore render_finished{VK_NULL_HANDLE};

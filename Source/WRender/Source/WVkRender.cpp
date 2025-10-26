@@ -180,7 +180,7 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
+        swap_chain_info_.format  // TODO: Use a 16 bit color format
         );
     
     // Postprocess Render Pass
@@ -733,6 +733,8 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     WVkRenderUtils::RndCmd_BeginOffscreenRendering(
         in_command_buffer,
         offscreen_render_[in_frame_index].color.view,
+        offscreen_render_[in_frame_index].normal.view,
+        offscreen_render_[in_frame_index].ws_position.view,
         offscreen_render_[in_frame_index].depth.view,
         offscreen_render_[in_frame_index].extent
         );

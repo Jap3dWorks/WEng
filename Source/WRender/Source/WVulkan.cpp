@@ -319,7 +319,8 @@ void WVulkan::CreateRenderColorResource(VkImage & out_image,
                                   const WVkDeviceInfo & in_device_info,
                                   const VkExtent2D & in_extent)
 {
-    // VkFormat ColorFormat = out_swap_chain_info.swap_chain_image_format;
+    // TODO set and check buffer color format (16 bit float)
+    // VkFormat color_format = VK_FORMAT_R16G16B16_SFLOAT;
 
     CreateImage(
         out_image,
@@ -347,6 +348,77 @@ void WVulkan::CreateRenderColorResource(VkImage & out_image,
         );
 }
 
+void WVulkan::CreateRenderNormalResource(
+    VkImage & out_image,
+    VkDeviceMemory & out_memory,
+    VkImageView & out_image_view,
+    const WVkDeviceInfo & in_device_info,
+    const VkExtent2D & in_extent
+    )
+{
+
+    VkFormat normal_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+
+    CreateImage(
+        out_image,
+        out_memory,
+        in_device_info.vk_device,
+        in_device_info.vk_physical_device,
+        in_extent.width, in_extent.height,
+        1,
+        VK_SAMPLE_COUNT_1_BIT,
+        normal_format,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        );
+
+    out_image_view = CreateImageView(
+        out_image,
+        normal_format,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1,
+        in_device_info.vk_device
+        );
+}
+
+void WVulkan::CreateRenderWSPositionResource(
+    VkImage & out_image,
+    VkDeviceMemory & out_memory,
+    VkImageView & out_image_view,
+    const WVkDeviceInfo & in_device_info,
+    const VkExtent2D & in_extent
+    ) {
+    
+    VkFormat ws_position_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+
+    CreateImage(
+        out_image,
+        out_memory,
+        in_device_info.vk_device,
+        in_device_info.vk_physical_device,
+        in_extent.width, in_extent.height,
+        1,
+        VK_SAMPLE_COUNT_1_BIT,
+        ws_position_format,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        );
+
+    out_image_view = CreateImageView(
+        out_image,
+        ws_position_format,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        1,
+        in_device_info.vk_device
+        );
+}
+
 void WVulkan::CreateRenderDepthResource(
     VkImage & out_image,
     VkDeviceMemory & out_memory,
@@ -356,7 +428,7 @@ void WVulkan::CreateRenderDepthResource(
     // const float & width, const float height
     )
 {
-    VkFormat DepthFormat = FindDepthFormat(in_device_info.vk_physical_device);
+    VkFormat depth_format = FindDepthFormat(in_device_info.vk_physical_device);
 
     CreateImage(
         out_image,
@@ -366,7 +438,7 @@ void WVulkan::CreateRenderDepthResource(
         in_extent.width, in_extent.height,
         1,
         VK_SAMPLE_COUNT_1_BIT, // in_device_info.msaa_samples,
-        DepthFormat,
+        depth_format,
         VK_IMAGE_TILING_OPTIMAL, 
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -374,7 +446,7 @@ void WVulkan::CreateRenderDepthResource(
 
     out_image_view = CreateImageView(
         out_image,
-        DepthFormat,
+        depth_format,
         VK_IMAGE_ASPECT_DEPTH_BIT,
         1,
         in_device_info.vk_device

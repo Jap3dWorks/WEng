@@ -213,7 +213,7 @@ namespace WVkRenderUtils {
                                       const WVkDeviceInfo & in_device_info,
                                       const std::uint32_t & in_width,
                                       const std::uint32_t & in_height,
-                                      const VkFormat & in_format) {
+                                      const VkFormat & in_color_format) {
         for(auto& offrnd : in_offscreen_structs) {
             
             offrnd.extent = {in_width, in_height};
@@ -223,9 +223,27 @@ namespace WVkRenderUtils {
                 offrnd.color.image,
                 offrnd.color.memory,
                 offrnd.color.view,
-                in_format,
+                in_color_format,
                 in_device_info,
                 offrnd.color.extent
+                );
+
+            offrnd.normal.extent = {in_width, in_height};
+            WVulkan::CreateRenderNormalResource(
+                offrnd.normal.image,
+                offrnd.normal.memory,
+                offrnd.normal.view,
+                in_device_info,
+                offrnd.normal.extent
+                );
+
+            offrnd.ws_position.extent = {in_width, in_height};
+            WVulkan::CreateRenderWSPositionResource(
+                offrnd.ws_position.image,
+                offrnd.normal.memory,
+                offrnd.normal.view,
+                in_device_info,
+                offrnd.ws_position.extent
                 );
 
             offrnd.depth.extent = {in_width, in_height};
@@ -353,21 +371,40 @@ namespace WVkRenderUtils {
     inline void RndCmd_BeginOffscreenRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,
+        const VkImageView & in_normal_view,
+        const VkImageView & in_ws_position_view,
         const VkImageView & in_depth_view,
         const VkExtent2D & in_extent
         ) {
-        std::array<VkClearValue, 2> clear_values{};
-        clear_values[0].color={{0.5, 0.5, 0.5, 1.f}};
-        clear_values[1].depthStencil = {1.f, 0};
+
+        std::array<VkRenderingAttachmentInfo, 3> color_attachments;
 
         // Color Attachment
-        VkRenderingAttachmentInfo color_attachment{};
-        color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        color_attachment.imageView = in_color_view;
-        color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        color_attachment.clearValue = clear_values[0];
+        color_attachments[0] = {};
+        color_attachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachments[0].imageView = in_color_view;
+        color_attachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachments[0].clearValue = {0.5, 0.5, 0.5, 1.f};
+
+        // Normal Attachment
+        color_attachments[1] = {};
+        color_attachments[1].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachments[1].imageView = in_normal_view;
+        color_attachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachments[1].clearValue = {0.f, 0.f, 0.f, 1.f};
+
+        // WS Position Attachment
+        color_attachments[2] = {};
+        color_attachments[2].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachments[2].imageView = in_ws_position_view;
+        color_attachments[2].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachments[2].clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // Depth Attachment
         VkRenderingAttachmentInfo depth_attachment{};
@@ -375,16 +412,15 @@ namespace WVkRenderUtils {
         depth_attachment.imageView = in_depth_view;
         depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-         // If later i need it, should change depth storeOp (I think)
-        depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depth_attachment.clearValue = clear_values[1];
+        depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        depth_attachment.clearValue = {1.f, 0.f};
 
         VkRenderingInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
-        rendering_info.colorAttachmentCount = 1;
-        rendering_info.pColorAttachments = &color_attachment;
+        rendering_info.colorAttachmentCount = color_attachments.size();
+        rendering_info.pColorAttachments = color_attachments.data();
         rendering_info.pDepthAttachment = &depth_attachment;
 
         vkCmdBeginRendering(

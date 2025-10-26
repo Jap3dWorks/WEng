@@ -259,6 +259,22 @@ namespace WVulkan
         const VkExtent2D & in_extent
         );
 
+    void CreateRenderNormalResource(
+        VkImage & out_image,
+        VkDeviceMemory & out_memory,
+        VkImageView & out_image_view,
+        const WVkDeviceInfo & in_device_info,
+        const VkExtent2D & in_extent
+        );
+
+    void CreateRenderWSPositionResource(
+        VkImage & out_image,
+        VkDeviceMemory & out_memory,
+        VkImageView & out_image_view,
+        const WVkDeviceInfo & in_device_info,
+        const VkExtent2D & in_extent
+        );
+
     void CreateRenderDepthResource(
         VkImage & out_image,
         VkDeviceMemory & out_memory,
