@@ -162,7 +162,7 @@ private:
     WVkRenderCommandPool render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};
 
-    // Pipelines, Maybe should create a container class.
+    // Pipelines, Maybe I should create a container class/struct.
     WVkGraphicsPipelines graphics_pipelines_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     struct PipelinesTrack {

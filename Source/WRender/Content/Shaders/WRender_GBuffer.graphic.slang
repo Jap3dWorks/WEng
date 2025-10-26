@@ -68,7 +68,10 @@ struct FSOutput {
     float4 color    : SV_TARGET0;
     float depth     : SV_TARGET1;
     float3 normal   : SV_TARGET2;
-    float3 worldPos : SV_target3;
+    float3 ws_position : SV_target3;
+    float3 rt_extra01 : SV_target4;
+    float3 rt_extra02 : SV_target5;
+    float3 rt_extra03 : SV_target6;
 };
 
 [shader("fragment")]
@@ -81,7 +84,7 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
 
     output.normal = vert_in.normal;
     output.worldPos = vert_in.world_pos;
-    output.depth = vert_in.pos.z;
+    output.depth = vert_in.depth;
 
     return output;
 }

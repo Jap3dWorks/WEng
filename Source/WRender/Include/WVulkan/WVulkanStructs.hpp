@@ -93,6 +93,15 @@ struct WVkOffscreenRenderStruct
 {
     WVkRenderTarget color{};
     WVkRenderTarget depth{};
+    WVkRenderTarget normal{};
+    WVkRenderTarget ws_position{};
+
+    // others like roughness stencil etc
+
+    WVkRenderTarget rt_extra01{};
+    WVkRenderTarget rt_extra02{};
+    WVkRenderTarget rt_extra03{};
+    
     VkExtent2D extent{};
 };
 

@@ -84,8 +84,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[0].file,
-        "/Content/Shaders/WRender_GBuffer.graphic.slang"
-        // "/Content/Shaders/Spacers_ShaderBase.vert.graphics.glsl"
+        "/Content/Shaders/WRender_GBuffer.graphic.spv"
         );
 
     std::strcpy(
@@ -97,8 +96,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[1].file,
-        "/Content/Shaders/WRender_GBuffer.graphic.slang"
-        // "/Content/Shaders/Spacers_ShaderBase.frag.graphics.glsl"
+        "/Content/Shaders/WRender_GBuffer.graphic.spv"
         );
 
     std::strcpy(
