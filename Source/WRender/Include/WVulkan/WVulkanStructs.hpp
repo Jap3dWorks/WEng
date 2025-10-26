@@ -89,9 +89,9 @@ struct WVkRenderTarget {
 
 // Render Resources
 
-struct WVkOffscreenRenderStruct
+struct WVkGBuffersRenderStruct
 {
-    WVkRenderTarget color{};
+    WVkRenderTarget albedo{};
     WVkRenderTarget normal{};
     WVkRenderTarget ws_position{};
     WVkRenderTarget depth{};
@@ -102,6 +102,13 @@ struct WVkOffscreenRenderStruct
     WVkRenderTarget rt_extra02{};
     WVkRenderTarget rt_extra03{};
     
+    VkExtent2D extent{};
+};
+
+struct WVkOffscreenRenderStruct {
+
+    WVkRenderTarget color{};
+
     VkExtent2D extent{};
 };
 

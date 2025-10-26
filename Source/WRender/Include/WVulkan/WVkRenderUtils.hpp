@@ -368,9 +368,161 @@ namespace WVkRenderUtils {
         }
     }
 
-    inline void RndCmd_BeginOffscreenRendering(
+    inline void RndCmd_TransitionRenderImageLayout(
         const VkCommandBuffer & in_command_buffer,
-        const VkImageView & in_color_view,
+        const VkImage & in_image,
+        const VkImageLayout & in_old_layout,
+        const VkImageLayout & in_new_layout,
+        const VkAccessFlags2 & in_src_access_mask,
+        const VkAccessFlags2 & in_dst_access_mask,
+        const VkPipelineStageFlags2 & in_src_stage_mask,
+        const VkPipelineStageFlags2 & in_dst_stage_mask,
+        const VkImageAspectFlags & in_img_aspect=VK_IMAGE_ASPECT_COLOR_BIT
+        ) {
+        
+        VkImageMemoryBarrier2 barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        barrier.srcStageMask = in_src_stage_mask;
+        barrier.srcAccessMask = in_src_access_mask;
+        barrier.dstStageMask = in_dst_stage_mask;
+        barrier.dstAccessMask = in_dst_access_mask;
+        barrier.oldLayout = in_old_layout;
+        barrier.newLayout = in_new_layout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = in_image;
+        barrier.subresourceRange = {
+            .aspectMask = in_img_aspect,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1
+        };
+
+        VkDependencyInfo dependency_info{};
+        dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+        dependency_info.dependencyFlags = {};
+        dependency_info.imageMemoryBarrierCount = 1;
+        dependency_info.pImageMemoryBarriers = &barrier;
+        dependency_info.pNext=VK_NULL_HANDLE;
+
+        vkCmdPipelineBarrier2(
+            in_command_buffer,
+            &dependency_info
+            );
+    }
+
+    inline void RndCmd_TransitionGBufferWriteLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_albedo,
+        const VkImage & in_normal,
+        const VkImage & in_ws_position,
+        const VkImage & in_depth
+        ) {
+            // Image Layouts
+    RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        in_albedo,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        );
+
+    RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        in_normal,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        );
+
+    RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        in_ws_position,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        );
+
+    RndCmd_TransitionRenderImageLayout(
+        in_command_buffer,
+        in_depth,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        {},
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        VK_IMAGE_ASPECT_DEPTH_BIT
+        );
+    }
+
+    inline void RndCmd_TransitionGBufferReadLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_albedo,
+        const VkImage & in_normal,
+        const VkImage & in_ws_position,
+        const VkImage & in_depth
+        ) {
+
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_albedo,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_normal,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_ws_position,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_depth,
+            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+    }
+
+    inline void RndCmd_BeginGBuffersRendering(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImageView & in_albedo_view,
         const VkImageView & in_normal_view,
         const VkImageView & in_ws_position_view,
         const VkImageView & in_depth_view,
@@ -382,7 +534,7 @@ namespace WVkRenderUtils {
         // Color Attachment
         color_attachments[0] = {};
         color_attachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        color_attachments[0].imageView = in_color_view;
+        color_attachments[0].imageView = in_albedo_view;
         color_attachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -517,50 +669,6 @@ namespace WVkRenderUtils {
             in_command_buffer,
             0, 1,
             &scissor
-            );
-    }
-
-    inline void RndCmd_TransitionRenderImageLayout(
-        const VkCommandBuffer & in_command_buffer,
-        const VkImage & in_image,
-        const VkImageLayout & in_old_layout,
-        const VkImageLayout & in_new_layout,
-        const VkAccessFlags2 & in_src_access_mask,
-        const VkAccessFlags2 & in_dst_access_mask,
-        const VkPipelineStageFlags2 & in_src_stage_mask,
-        const VkPipelineStageFlags2 & in_dst_stage_mask,
-        const VkImageAspectFlags & in_img_aspect=VK_IMAGE_ASPECT_COLOR_BIT
-        ) {
-        
-        VkImageMemoryBarrier2 barrier{};
-        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-        barrier.srcStageMask = in_src_stage_mask;
-        barrier.srcAccessMask = in_src_access_mask;
-        barrier.dstStageMask = in_dst_stage_mask;
-        barrier.dstAccessMask = in_dst_access_mask;
-        barrier.oldLayout = in_old_layout;
-        barrier.newLayout = in_new_layout;
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.image = in_image;
-        barrier.subresourceRange = {
-            .aspectMask = in_img_aspect,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1
-        };
-
-        VkDependencyInfo dependency_info{};
-        dependency_info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-        dependency_info.dependencyFlags = {};
-        dependency_info.imageMemoryBarrierCount = 1;
-        dependency_info.pImageMemoryBarriers = &barrier;
-        dependency_info.pNext=VK_NULL_HANDLE;
-
-        vkCmdPipelineBarrier2(
-            in_command_buffer,
-            &dependency_info
             );
     }
 

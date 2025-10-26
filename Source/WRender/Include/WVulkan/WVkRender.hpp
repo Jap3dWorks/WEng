@@ -126,10 +126,17 @@ private:
 
     void RecreateSwapChain();
 
+    void RecordGBuffersRenderCommandBuffer(
+        const VkCommandBuffer & in_command_buffer,
+        const std::uint32_t & in_frame_index
+        );
+
     void RecordOffscreenRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index
         );
+
+    // TODO: transparency render commands
 
     void RecordPostprocessRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
@@ -153,6 +160,7 @@ private:
 
     WVkAssetResources render_resources_{};
 
+    std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_render_{};
     std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_{};
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_{};
 

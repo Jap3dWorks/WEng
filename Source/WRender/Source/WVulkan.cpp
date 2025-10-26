@@ -453,7 +453,7 @@ void WVulkan::CreateRenderDepthResource(
         );
 }
 
-void WVulkan::CreateOffscreenRenderPass(WVkOffscreenRenderStruct & out_render_pass_info,
+void WVulkan::CreateOffscreenRenderPass(WVkGBuffersRenderStruct & out_render_pass_info,
                                         const VkFormat & in_swap_chain_image_format,
                                         const WVkDeviceInfo &device_info)
 {
