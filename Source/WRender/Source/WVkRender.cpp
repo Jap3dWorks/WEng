@@ -603,7 +603,8 @@ void WVkRender::Destroy() {
         );
     
     WVkRenderUtils::DestroyOffscreenRender(
-        gbuffers_render_,
+        // gbuffers_render_,
+        offscreen_render_,
         device_info_
         );
 
@@ -825,7 +826,36 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         );
 }
 
+void WVkRender::RecordOffscreenRenderCommandBuffer(
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index
+    ) {
+    
+    WVkRenderUtils::RndCmd_TransitionOffscreenWriteLayout(
+        in_command_buffer,
+        offscreen_render_[in_frame_index].color.image
+        );
 
+    WVkRenderUtils::RndCmd_BeginOffscreenRendering(
+        in_command_buffer,
+        offscreen_render_[in_frame_index].color.view,
+        offscreen_render_[in_frame_index].extent
+        );
+
+    // TODO: Offscreen Render
+
+    // TODO: Add here the deferred rendering processes
+
+    // --
+
+    vkCmdEndRendering(in_command_buffer);
+    WVkRenderUtils::RndCmd_TransitionOffscreenReadLayout(
+        in_command_buffer,
+        offscreen_render_[in_frame_index].color.image
+        );
+    
+
+}
 
 void WVkRender::RecordPostprocessRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,
@@ -846,6 +876,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     ppcss_pipelines_.ResetDescriptorPools(in_frame_index);
 
+    // Render each postprocess shader
     std::uint32_t idx=0;
     for(auto pbindingid : ppcss_pipelines_.IterBindingOrder()) {
 

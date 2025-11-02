@@ -94,13 +94,15 @@ struct WVkGBuffersRenderStruct
     WVkRenderTarget albedo{};
     WVkRenderTarget normal{};
     WVkRenderTarget ws_position{};
-    WVkRenderTarget depth{};
 
     // others like roughness Specular etc
 
     WVkRenderTarget rt_extra01{};
     WVkRenderTarget rt_extra02{};
     WVkRenderTarget rt_extra03{};
+
+    WVkRenderTarget depth{};
+
     
     VkExtent2D extent{};
 };

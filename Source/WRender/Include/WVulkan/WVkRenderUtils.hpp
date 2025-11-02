@@ -307,17 +307,17 @@ namespace WVkRenderUtils {
                          offrnd.color.memory,
                          nullptr);
 
-            vkDestroyImageView(in_device_info.vk_device,
-                               offrnd.depth.view,
-                               nullptr);
+            // vkDestroyImageView(in_device_info.vk_device,
+            //                    offrnd.depth.view,
+            //                    nullptr);
 
-            vkDestroyImage(in_device_info.vk_device,
-                           offrnd.depth.image,
-                           nullptr);
+            // vkDestroyImage(in_device_info.vk_device,
+            //                offrnd.depth.image,
+            //                nullptr);
 
-            vkFreeMemory(in_device_info.vk_device,
-                         offrnd.depth.memory,
-                         nullptr);
+            // vkFreeMemory(in_device_info.vk_device,
+            //              offrnd.depth.memory,
+            //              nullptr);
 
         }
     }
@@ -517,7 +517,6 @@ namespace WVkRenderUtils {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
             );
-
     }
 
     inline void RndCmd_BeginGBuffersRendering(
@@ -581,13 +580,75 @@ namespace WVkRenderUtils {
             );
     }
 
+    inline void RndCmd_TransitionOffscreenWriteLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_color
+        ) {
+        // Image Layouts
+        RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_color,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            {},
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            );
+    }
+
+    inline void RndCmd_TransitionOffscreenReadLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_color
+        ) {
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_color,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+    }
+
+    inline void RndCmd_BeginOffscreenRendering(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImageView & in_color_view,
+        const VkExtent2D & in_extent
+        ) {
+
+        // Color Attachment
+        VkRenderingAttachmentInfo color_attachment{};
+        color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachment.imageView = in_color_view;
+        color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachment.clearValue = {0.5, 0.5, 0.5, 1.f};
+
+        VkRenderingInfo rendering_info{};
+        rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        rendering_info.renderArea = {{0,0}, in_extent};
+        rendering_info.layerCount = 1;
+        rendering_info.colorAttachmentCount = 1;
+        rendering_info.pColorAttachments = &color_attachment;
+        rendering_info.pDepthAttachment = VK_NULL_HANDLE;
+        rendering_info.pStencilAttachment = VK_NULL_HANDLE;
+
+        vkCmdBeginRendering(
+            in_command_buffer,
+            &rendering_info
+            );
+    }
+
     inline void RndCmd_BeginPostprocessRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,
         const VkExtent2D & in_extent
         ) {
-        VkClearValue clear_value = {0.5, 0.5, 0.5, 1.f};
-
         // Color Attachment
         VkRenderingAttachmentInfo color_attachment{};
         color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;

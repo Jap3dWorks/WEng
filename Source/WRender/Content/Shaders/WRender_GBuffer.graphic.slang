@@ -39,7 +39,7 @@ struct VSOutput {
     float2 tex_coords : TEXCOORD0;
     float3 normal     : TEXCOORD1;
     float3 world_pos  : TEXCOORD2;
-    float depth       : TEXCOORD3;
+    // float depth       : TEXCOORD3;
 };
 
 [shader("vertex")]
@@ -47,7 +47,6 @@ VSOutput vsMain(VSInput input) {
     VSOutput output;
 
     output.normal = normalize(mul(ubo.normal_matrix, input.normal));
-    // output.normal = normalize(input.normal);
 
     float4 wp = mul(ubo.model, float4(input.position, 1.0));
 
@@ -55,7 +54,7 @@ VSOutput vsMain(VSInput input) {
     output.world_pos = wp.xyz;
     output.tex_coords = input.tex_coords;
 
-    output.depth = output.pos.z / output.pos.w;
+    // output.depth = output.pos.z / output.pos.w;
 
     return output;
 }
@@ -65,13 +64,14 @@ ConstantBuffer<Sampler2D> texture;
 
 // Output structure
 struct FSOutput {
-    float4 color    : SV_TARGET0;
-    float depth     : SV_TARGET1;
-    float3 normal   : SV_TARGET2;
-    float3 ws_position : SV_target3;
-    float3 rt_extra01 : SV_target4;
-    float3 rt_extra02 : SV_target5;
-    float3 rt_extra03 : SV_target6;
+    float4 color       : SV_TARGET0;
+    float3 normal      : SV_TARGET1;
+    float3 ws_position : SV_target2;
+    float3 rt_extra01  : SV_target3;
+    float3 rt_extra02  : SV_target4;
+    float3 rt_extra03  : SV_target5;
+    // float depth     : SV_TARGET6;
+
 };
 
 [shader("fragment")]
@@ -84,7 +84,7 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
 
     output.normal = vert_in.normal;
     output.worldPos = vert_in.world_pos;
-    output.depth = vert_in.depth;
+    // output.depth = vert_in.depth;
 
     return output;
 }
