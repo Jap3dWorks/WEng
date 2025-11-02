@@ -43,7 +43,7 @@ WVkRender::WVkRender() noexcept :
     debug_info_(),
     render_resources_(),
     swap_chain_info_(),
-    swap_chain_resources_(),
+    swap_chain_pipeline_(),
     gbuffers_render_(),
     postprocess_render_(),
     render_command_pool_(),
@@ -65,7 +65,7 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     debug_info_(std::move(other.debug_info_)),
     render_resources_(std::move(other.render_resources_)),
     swap_chain_info_(std::move(other.swap_chain_info_)),
-    swap_chain_resources_(std::move(other.swap_chain_resources_)),
+    swap_chain_pipeline_(std::move(other.swap_chain_pipeline_)),
     gbuffers_render_(std::move(other.gbuffers_render_)),
     postprocess_render_(std::move(other.postprocess_render_)),
     render_command_pool_(std::move(other.render_command_pool_)),
@@ -88,7 +88,7 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         debug_info_ = std::move(other.debug_info_);
         render_resources_ = std::move(other.render_resources_);
         swap_chain_info_ = std::move(other.swap_chain_info_);
-        swap_chain_resources_ = std::move(other.swap_chain_resources_);
+        swap_chain_pipeline_ = std::move(other.swap_chain_pipeline_);
         gbuffers_render_ = std::move(other.gbuffers_render_);
         postprocess_render_ = std::move(other.postprocess_render_);
         render_command_pool_ = std::move(other.render_command_pool_);
@@ -173,16 +173,26 @@ void WVkRender::Initialize()
         debug_info_
         );
 
-    // Offscreen Render Pass
+    // GBuffers Render Pass
 
-    WVkRenderUtils::CreateOffscreenRender(
+    WVkRenderUtils::CreateGBuffersRender(
         gbuffers_render_,
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format  // TODO: Use a 16 bit color format
+        swap_chain_info_.format  // TODO: Use 16 bit color format
         );
-    
+
+    // Offscreen Render Pass
+
+    WVkRenderUtils::CreateOffscreenRender(
+        offscreen_render_,
+        device_info_,
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format // TODO: Use 16 bit color format
+        );
+
     // Postprocess Render Pass
 
     WVkRenderUtils::CreatePostprocessRender(
@@ -226,7 +236,7 @@ void WVkRender::Initialize()
         render_command_pool_.CommandPoolInfo()
         );
 
-    swap_chain_resources_.Initialize(
+    swap_chain_pipeline_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
@@ -276,6 +286,10 @@ void WVkRender::Draw()
         );
 
     RecordGBuffersRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_);
+
+    RecordOffscreenRenderCommandBuffer(
         render_command_buffer_.command_buffers[frame_index_],
         frame_index_);
 
@@ -601,9 +615,13 @@ void WVkRender::Destroy() {
         sync_fences_,
         device_info_.vk_device
         );
+
+    WVkRenderUtils::DestroyGBuffersRender(
+        gbuffers_render_,
+        device_info_
+        );
     
     WVkRenderUtils::DestroyOffscreenRender(
-        // gbuffers_render_,
         offscreen_render_,
         device_info_
         );
@@ -618,7 +636,7 @@ void WVkRender::Destroy() {
     // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
-    swap_chain_resources_.Destroy();
+    swap_chain_pipeline_.Destroy();
 
     WFLOG("Destroy Render Command Pool.");
 
@@ -666,10 +684,10 @@ void WVkRender::RecreateSwapChain() {
         device_info_
         );
 
-    // WVkRenderUtils::DestroyGBuffersRender(
-    //     gbuffers_render_,
-    //     device_info_
-    //     );
+    WVkRenderUtils::DestroyGBuffersRender(
+        gbuffers_render_,
+        device_info_
+        );
 
     WVkRenderUtils::DestroyOffscreenRender(
         offscreen_render_,
@@ -690,13 +708,13 @@ void WVkRender::RecreateSwapChain() {
         debug_info_
         );
 
-    // WVkRenderUtils::CreateOffscreenRender(
-    //     gbuffers_render_,
-    //     device_info_,
-    //     dimensions[0],
-    //     dimensions[1],
-    //     swap_chain_info_.format
-    //     );
+    WVkRenderUtils::CreateGBuffersRender(
+        gbuffers_render_,
+        device_info_,
+        dimensions[0],
+        dimensions[1],
+        swap_chain_info_.format
+        );
 
     WVkRenderUtils::CreateOffscreenRender(
         offscreen_render_,
@@ -843,7 +861,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // TODO: Offscreen Render
-
+    
     // TODO: Add here the deferred rendering processes
 
     // --
@@ -988,11 +1006,11 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         swap_chain_info_.extent
         );
 
-    VkDescriptorPool dspool = swap_chain_resources_.DescriptorPool(in_frame_index);
+    VkDescriptorPool dspool = swap_chain_pipeline_.DescriptorPool(in_frame_index);
     vkResetDescriptorPool(device_info_.vk_device, dspool, 0);
 
-    VkPipeline pipeline = swap_chain_resources_.Pipeline();
-    VkDescriptorSetLayout dslay = swap_chain_resources_.DescriptorSetLayout();
+    VkPipeline pipeline = swap_chain_pipeline_.Pipeline();
+    VkDescriptorSetLayout dslay = swap_chain_pipeline_.DescriptorSetLayout();
 
     vkCmdBindPipeline(
         in_command_buffer,
@@ -1010,10 +1028,10 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         dspool,
         dslay,
         input_view,
-        swap_chain_resources_.InputRenderSampler()
+        swap_chain_pipeline_.InputRenderSampler()
         );
 
-    auto & render_plane = swap_chain_resources_.RenderPlane();
+    auto & render_plane = swap_chain_pipeline_.RenderPlane();
     VkDeviceSize offsets=0;
 
     vkCmdBindVertexBuffers(in_command_buffer,
@@ -1029,7 +1047,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     vkCmdBindDescriptorSets(in_command_buffer,
                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            swap_chain_resources_.PipelineLayout(),
+                            swap_chain_pipeline_.PipelineLayout(),
                             0,
                             1,
                             &descriptor,

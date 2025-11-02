@@ -15,20 +15,20 @@
 
 #include <stdexcept>
 
-template<std::uint32_t FramesInFlight>
-class WVkSwapChainResources {
+template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
+class WVkSwapChainPipeline {
     
 public:
     
-    WVkSwapChainResources() noexcept = default;
+    WVkSwapChainPipeline() noexcept = default;
     
-    virtual ~WVkSwapChainResources() {
+    virtual ~WVkSwapChainPipeline() {
         Destroy();
     }
 
-    WVkSwapChainResources(const WVkSwapChainResources & other) = delete;
+    WVkSwapChainPipeline(const WVkSwapChainPipeline & other) = delete;
 
-    WVkSwapChainResources(WVkSwapChainResources && other) noexcept :
+    WVkSwapChainPipeline(WVkSwapChainPipeline && other) noexcept :
         device_info_(std::move(other.device_info_)),
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
@@ -48,9 +48,9 @@ public:
             }
         }
 
-    WVkSwapChainResources & operator=(const WVkSwapChainResources & other) = delete;
+    WVkSwapChainPipeline & operator=(const WVkSwapChainPipeline & other) = delete;
 
-    WVkSwapChainResources & operator=(WVkSwapChainResources && other) noexcept {
+    WVkSwapChainPipeline & operator=(WVkSwapChainPipeline && other) noexcept {
         if (this != &other) {
             device_info_ = std::move(other.device_info_);
             descriptor_layout_ = std::move(other.descriptor_layout_);

@@ -12,7 +12,7 @@
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkAssetResources.hpp"
-#include "WVkSwapChainResources.hpp"
+#include "WVkSwapChainPipeline.hpp"
 
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
@@ -165,7 +165,7 @@ private:
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_{};
 
     WVkSwapChainInfo swap_chain_info_{};
-    WVkSwapChainResources<WENG_MAX_FRAMES_IN_FLIGHT> swap_chain_resources_{};
+    WVkSwapChainPipeline<> swap_chain_pipeline_{};
 
     WVkRenderCommandPool render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};

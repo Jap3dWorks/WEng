@@ -43,6 +43,100 @@ namespace WVkRenderUtils {
 
     }
 
+    
+    template<CIterable<WVkPostprocessRenderStruct> T>
+    void CreatePostprocessRender(T & postprocess_structs,
+                                 const WVkDeviceInfo & in_device_info,
+                                 const std::uint32_t & in_width,
+                                 const std::uint32_t & in_height,
+                                 const VkFormat & in_format) {
+        for (auto & pstrnd : postprocess_structs) {
+            pstrnd.extent = {in_width, in_height};
+            pstrnd.color.extent = {in_width, in_height};
+
+            WVulkan::CreateRenderColorResource(
+                pstrnd.color.image,
+                pstrnd.color.memory,
+                pstrnd.color.view,
+                in_format,
+                in_device_info,
+                pstrnd.color.extent
+                );
+        }
+    }
+
+    template<CIterable<WVkGBuffersRenderStruct> T>
+    inline void CreateGBuffersRender(T & in_gbuffers_structs,
+                                     const WVkDeviceInfo & in_device_info,
+                                     const std::uint32_t & in_width,
+                                     const std::uint32_t & in_height,
+                                     const VkFormat & in_color_format) {
+        for(auto& offrnd : in_gbuffers_structs) {
+            
+            offrnd.extent = {in_width, in_height};
+            offrnd.color.extent = {in_width, in_height};
+            
+            WVulkan::CreateRenderColorResource(
+                offrnd.albedo.image,
+                offrnd.albedo.memory,
+                offrnd.albedo.view,
+                in_color_format,
+                in_device_info,
+                offrnd.albedo.extent
+                );
+
+            offrnd.normal.extent = {in_width, in_height};
+            WVulkan::CreateRenderNormalResource(
+                offrnd.normal.image,
+                offrnd.normal.memory,
+                offrnd.normal.view,
+                in_device_info,
+                offrnd.normal.extent
+                );
+
+            offrnd.ws_position.extent = {in_width, in_height};
+            WVulkan::CreateRenderWSPositionResource(
+                offrnd.ws_position.image,
+                offrnd.ws_position.memory,
+                offrnd.ws_position.view,
+                in_device_info,
+                offrnd.ws_position.extent
+                );
+
+            offrnd.depth.extent = {in_width, in_height};
+            WVulkan::CreateRenderDepthResource(
+                offrnd.depth.image,
+                offrnd.depth.memory,
+                offrnd.depth.view,
+                in_device_info,
+                offrnd.depth.extent
+                );
+        }
+    }
+
+    template<CIterable<WVkOffscreenRenderStruct> T>
+    inline void CreateOffscreenRender(T & in_offscreen_structs,
+                                      const WVkDeviceInfo & in_device_info,
+                                      const std::uint32_t & in_width,
+                                      const std::uint32_t & in_height,
+                                      const VkFormat & in_color_format)
+    {
+        for(auto& offrnd : in_offscreen_structs) {
+            
+            offrnd.extent = {in_width, in_height};
+            offrnd.color.extent = {in_width, in_height};
+            
+            WVulkan::CreateRenderColorResource(
+                offrnd.color.image,
+                offrnd.color.memory,
+                offrnd.color.view,
+                in_color_format,
+                in_device_info,
+                offrnd.albedo.extent
+                );
+        }
+    }
+
     inline VkDescriptorSet CreateRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
@@ -208,55 +302,6 @@ namespace WVkRenderUtils {
         return result;
     }
 
-    template<CIterable<WVkOffscreenRenderStruct> T>
-    inline void CreateOffscreenRender(T & in_offscreen_structs,
-                                      const WVkDeviceInfo & in_device_info,
-                                      const std::uint32_t & in_width,
-                                      const std::uint32_t & in_height,
-                                      const VkFormat & in_color_format) {
-        for(auto& offrnd : in_offscreen_structs) {
-            
-            offrnd.extent = {in_width, in_height};
-            offrnd.color.extent = {in_width, in_height};
-            
-            WVulkan::CreateRenderColorResource(
-                offrnd.color.image,
-                offrnd.color.memory,
-                offrnd.color.view,
-                in_color_format,
-                in_device_info,
-                offrnd.color.extent
-                );
-
-            offrnd.normal.extent = {in_width, in_height};
-            WVulkan::CreateRenderNormalResource(
-                offrnd.normal.image,
-                offrnd.normal.memory,
-                offrnd.normal.view,
-                in_device_info,
-                offrnd.normal.extent
-                );
-
-            offrnd.ws_position.extent = {in_width, in_height};
-            WVulkan::CreateRenderWSPositionResource(
-                offrnd.ws_position.image,
-                offrnd.normal.memory,
-                offrnd.normal.view,
-                in_device_info,
-                offrnd.ws_position.extent
-                );
-
-            offrnd.depth.extent = {in_width, in_height};
-            WVulkan::CreateRenderDepthResource(
-                offrnd.depth.image,
-                offrnd.depth.memory,
-                offrnd.depth.view,
-                in_device_info,
-                offrnd.depth.extent
-                );
-        }
-    }
-
     template<typename T>
     inline void DestroySyncSemaphores(std::vector<T> & out_semaphores, const VkDevice & in_device) {
         for(auto & smph : out_semaphores) {
@@ -289,58 +334,47 @@ namespace WVkRenderUtils {
         }
     }
 
+    inline void DestroyRenderTarget(WVkRenderTarget & in_render_target,
+                             const WVkDeviceInfo & in_device_info) {
+        vkDestroyImageView(in_device_info.vk_device,
+                           in_render_target.view,
+                           nullptr);
+        vkDestroyImage(in_device_info.vk_device,
+                       in_render_target.image,
+                       nullptr);
+        vkFreeMemory(in_device_info.vk_device,
+                     in_render_target.memory,
+                     nullptr);
+
+        in_render_target.view = VK_NULL_HANDLE;
+        in_render_target.image = VK_NULL_HANDLE;
+        in_render_target.memory = VK_NULL_HANDLE;
+    }
+
+    template<CIterable<WVkGBuffersRenderStruct> T>
+    void DestroyGBuffersRender(const T & in_gbuffers_structs,
+                               const WVkDeviceInfo & in_device_info) {
+        for(auto& gbffr : in_gbuffers_structs) {
+            DestroyRenderTarget(gbffr.albedo, in_device_info);
+            DestroyRenderTarget(gbffr.normal, in_device_info);
+            DestroyRenderTarget(gbffr.ws_position, in_device_info);
+
+            if (gbffr.rt_extra01.image) {
+                DestroyRenderTarget(gbffr.rt_extra01, in_device_info);
+                DestroyRenderTarget(gbffr.rt_extra02, in_device_info);
+                DestroyRenderTarget(gbffr.rt_extra03, in_device_info);
+            }
+
+            DestroyRenderTarget(gbffr.depth, in_device_info);
+        }
+    }
+
     template<CIterable<WVkOffscreenRenderStruct> T>
     void DestroyOffscreenRender(const T & in_offscreen_structs,
                                 const WVkDeviceInfo & in_device_info) {
         
         for(auto& offrnd : in_offscreen_structs) {
-            
-            vkDestroyImageView(in_device_info.vk_device,
-                               offrnd.color.view,
-                               nullptr);
-
-            vkDestroyImage(in_device_info.vk_device,
-                           offrnd.color.image,
-                           nullptr);
-
-            vkFreeMemory(in_device_info.vk_device,
-                         offrnd.color.memory,
-                         nullptr);
-
-            // vkDestroyImageView(in_device_info.vk_device,
-            //                    offrnd.depth.view,
-            //                    nullptr);
-
-            // vkDestroyImage(in_device_info.vk_device,
-            //                offrnd.depth.image,
-            //                nullptr);
-
-            // vkFreeMemory(in_device_info.vk_device,
-            //              offrnd.depth.memory,
-            //              nullptr);
-
-        }
-    }
-
-    template<CIterable<WVkPostprocessRenderStruct> T>
-    void CreatePostprocessRender(T & postprocess_structs,
-                                 const WVkDeviceInfo & in_device_info,
-                                 const std::uint32_t & in_width,
-                                 const std::uint32_t & in_height,
-                                 const VkFormat & in_format) {
-        for (auto & pstrnd : postprocess_structs) {
-            pstrnd.extent = {in_width, in_height};
-            pstrnd.color.extent = {in_width, in_height};
-
-            WVulkan::CreateRenderColorResource(
-            pstrnd.color.image,
-            pstrnd.color.memory,
-            pstrnd.color.view,
-            in_format,
-            in_device_info,
-            pstrnd.color.extent
-            );
-            
+            DestroyRenderTarget(offrnd.color, in_device_info);
         }
     }
 
@@ -348,23 +382,7 @@ namespace WVkRenderUtils {
     void DestroyPostprocessRender(const T & postprocess_render,
                                   const WVkDeviceInfo & in_device_info) {
         for (auto & pstrnd : postprocess_render) {
-            vkDestroyImageView(
-                in_device_info.vk_device,
-                pstrnd.color.view,
-                nullptr
-                );
-
-            vkDestroyImage(
-                in_device_info.vk_device,
-                pstrnd.color.image,
-                nullptr
-                );
-
-            vkFreeMemory(
-                in_device_info.vk_device,
-                pstrnd.color.memory,
-                nullptr
-                );
+            DestroyRenderTarget(pstrnd.color, in_device_info);
         }
     }
 

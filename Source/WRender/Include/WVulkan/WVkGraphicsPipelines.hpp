@@ -45,7 +45,7 @@ public:
 
     WVkGraphicsPipelines & operator=(
         const WVkGraphicsPipelines & other
-        )=delete;
+        ) = delete;
 
     WVkGraphicsPipelines & operator=(
         WVkGraphicsPipelines && other
