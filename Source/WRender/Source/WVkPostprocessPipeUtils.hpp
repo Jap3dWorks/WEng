@@ -181,7 +181,7 @@ namespace WVkPostprocessPipeUtils {
 
         pool_sizes[0]={};
         pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        pool_sizes[0].descriptorCount = 10;
+        pool_sizes[0].descriptorCount = 32; // bytes
         
         pool_sizes[1]={};
         pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -191,7 +191,7 @@ namespace WVkPostprocessPipeUtils {
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
         pool_info.pPoolSizes = pool_sizes.data();
-        pool_info.maxSets = static_cast<uint32_t>(35);
+        pool_info.maxSets = 32;
 
         if (vkCreateDescriptorPool(
                 in_device.vk_device,
