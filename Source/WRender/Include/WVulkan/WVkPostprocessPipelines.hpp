@@ -3,7 +3,7 @@
 #include "WCore/TIterator.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkanStructs.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkPipelinesBase.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -18,9 +18,6 @@ public:
     struct GlobalPostprocessResources {
         std::array<WVkDescriptorPoolInfo, frames_in_flight> descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
-        
-        // std::array<WVkDescriptorSetInfo, frames_in_flight> descset_info{};
-
         WVkMeshInfo render_plane{};
         VkSampler render_sampler{};
     };
@@ -37,7 +34,7 @@ public:
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
                                      const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
-    const WVkMeshInfo RenderPlane() const {
+    const WVkMeshInfo & RenderPlane() const {
         return global_resources_.render_plane;
     }
 

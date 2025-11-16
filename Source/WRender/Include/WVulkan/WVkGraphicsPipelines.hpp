@@ -11,7 +11,7 @@
 #include "WVulkan/WVkPipelinesBase.hpp"
 
 /**
- * @brief A render pipeline is a collection of shaders and render states.
+ * @brief Graphics Pipelines outputs the GBuffers.
  */
 class WVkGraphicsPipelines : public WVkPipelinesBase<WAssetId, WEntityComponentId, WENG_MAX_FRAMES_IN_FLIGHT>
 {

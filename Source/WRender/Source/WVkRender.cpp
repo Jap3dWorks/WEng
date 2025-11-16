@@ -872,7 +872,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_render_[in_frame_index].color.image
         );
     
-
+    
 }
 
 void WVkRender::RecordPostprocessRenderCommandBuffer(
