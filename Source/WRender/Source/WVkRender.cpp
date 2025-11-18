@@ -212,6 +212,11 @@ void WVkRender::Initialize()
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
     graphics_pipelines_.Initialize(device_info_);
 
+    offscreen_pipeline_.Initialize(
+        device_info_,
+        render_command_pool_.CommandPoolInfo()
+        );
+
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
     ppcss_pipelines_.Initialize(
         device_info_,

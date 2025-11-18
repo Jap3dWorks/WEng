@@ -9,6 +9,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
+#include "WVulkan/WVkOffscreenPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkAssetResources.hpp"
@@ -172,6 +173,7 @@ private:
 
     // Pipelines, Maybe I should create a container class/struct.
     WVkGraphicsPipelines graphics_pipelines_{};
+    WVkOffscreenPipeline<> offscreen_pipeline_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     struct PipelinesTrack {
         std::unordered_map<WAssetId, EPipelineType> pipeline_ptype{};
