@@ -5,6 +5,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
+#include "WVulkan/WVkPipelineHelper.hpp"
 #include "WShaderUtils.hpp"
 
 #include <glm/fwd.hpp>
@@ -32,14 +33,14 @@ public:
         device_info_(std::move(other.device_info_)),
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
-        descriptor_layout_(std::move(other.descriptor_layout_)),
+        descset_layout_(std::move(other.descset_layout_)),
         descriptor_pool_(std::move(other.descriptor_pool_)),
         input_render_sampler_(std::move(other.input_render_sampler_))
         {
             other.device_info_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
-            other.descriptor_layout_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
             other.input_render_sampler_ = VK_NULL_HANDLE;
 
@@ -53,7 +54,7 @@ public:
     WVkSwapChainPipeline & operator=(WVkSwapChainPipeline && other) noexcept {
         if (this != &other) {
             device_info_ = std::move(other.device_info_);
-            descriptor_layout_ = std::move(other.descriptor_layout_);
+            descset_layout_ = std::move(other.descset_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             pipeline_ = std::move(other.pipeline_);
             input_render_sampler_ = std::move(other.input_render_sampler_);
@@ -61,7 +62,7 @@ public:
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
             other.device_info_ = {};
-            other.descriptor_layout_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
             other.input_render_sampler_ = VK_NULL_HANDLE;
@@ -79,7 +80,7 @@ public:
 
         device_info_ = in_device;
 
-        InitializeDescriptorLayout();
+        InitializeDescSetLayout();
 
         InitializeRenderPipeline();
 
@@ -124,13 +125,13 @@ public:
 
         pipeline_layout_ = VK_NULL_HANDLE;
         
-        if (descriptor_layout_) {
+        if (descset_layout_) {
             vkDestroyDescriptorSetLayout(device_info_.vk_device,
-                                         descriptor_layout_,
+                                         descset_layout_,
                                          nullptr);
         }
 
-        descriptor_layout_ = VK_NULL_HANDLE;
+        descset_layout_ = VK_NULL_HANDLE;
 
         if (input_render_sampler_) {
             WVulkan::Destroy(input_render_sampler_,
@@ -156,7 +157,7 @@ public:
     }
 
     const VkDescriptorSetLayout & DescriptorSetLayout() const noexcept {
-        return descriptor_layout_;
+        return descset_layout_;
     }
 
     const VkSampler & InputRenderSampler() const noexcept {
@@ -169,7 +170,7 @@ public:
 
 private:
 
-    void InitializeDescriptorLayout() {
+    void InitializeDescSetLayout() {
         
         VkDescriptorSetLayoutBinding sampler_binding{};
         sampler_binding.binding = 0;
@@ -186,7 +187,7 @@ private:
         if (vkCreateDescriptorSetLayout(device_info_.vk_device,
                                         &layout_info,
                                         nullptr,
-                                        &descriptor_layout_) != VK_SUCCESS) {
+                                        &descset_layout_) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create Descriptor Set Layout!");
         }
 
@@ -205,153 +206,79 @@ private:
             );
 
         std::array<VkPipelineShaderStageCreateInfo,2> shader_stages;
-
-        WVulkanUtils::UpdateVertexFragmentVkPipelineShaderStageCreateInfo(
+        WVkPipelineHelper::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
             shader_stages.data(),
             shader_module
             );
 
         std::array<VkVertexInputAttributeDescription, 2> attr_desc;
-        attr_desc[0].binding=0;
-        attr_desc[0].location=0;
-        attr_desc[0].format=VK_FORMAT_R32G32B32_SFLOAT;
-        attr_desc[0].offset=0;  // position
+        WVkPipelineHelper::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
 
-        attr_desc[1].binding=0;
-        attr_desc[1].location=1;
-        attr_desc[1].format = VK_FORMAT_R32G32_SFLOAT;
-        attr_desc[1].offset = sizeof(float) * 2; // uv
+        VkVertexInputBindingDescription binding_desc =
+            WVkPipelineHelper::RenderPlane_VertBindingDescrpt();
 
-        VkVertexInputBindingDescription binding_desc{};
-        binding_desc.binding=0;
-        binding_desc.stride = sizeof(float) * 2 + sizeof(float) * 2;
-        binding_desc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        VkPipelineVertexInputStateCreateInfo vertex_input_info =
+            WVkPipelineHelper::RenderPlane_VkPipelineVertexInputStateCreateInfo(
+                binding_desc, attr_desc.data(), static_cast<std::uint32_t>(attr_desc.size())
+                );
 
-        VkPipelineVertexInputStateCreateInfo vertex_input_info{};
-        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertex_input_info.vertexBindingDescriptionCount=1;
-        vertex_input_info.pVertexBindingDescriptions = &binding_desc;
-        vertex_input_info.vertexAttributeDescriptionCount=static_cast<std::uint32_t>(
-            attr_desc.size()
+        VkPipelineInputAssemblyStateCreateInfo input_assembly =
+            WVkPipelineHelper::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
+
+        VkPipelineViewportStateCreateInfo viewport_state =
+            WVkPipelineHelper::RenderPlane_VkPipelineViewportStateCreateInfo();
+
+        VkPipelineRasterizationStateCreateInfo rasterizer =
+            WVkPipelineHelper::RenderPlane_VkPipelineRasterizationStateCreateInfo();
+
+        VkPipelineMultisampleStateCreateInfo multisampling =
+            WVkPipelineHelper::RenderPlane_VkPipelineMultisampleStateCreateInfo();
+        
+        VkPipelineDepthStencilStateCreateInfo depth_stencil =
+            WVkPipelineHelper::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
+
+        VkPipelineColorBlendAttachmentState color_blend_attachment =
+            WVkPipelineHelper::RenderPlane_VkPipelineColorBlendAttachmentState();
+
+        VkPipelineColorBlendStateCreateInfo color_blending =
+            WVkPipelineHelper::RenderPlane_VkPipelineColorBlendStateCreateInfo(
+                color_blend_attachment
+                );
+
+        std::vector<VkDynamicState> dynamic_states;
+        VkPipelineDynamicStateCreateInfo dynamic_state =
+            WVkPipelineHelper::RenderPlane_VkPipelineDynamicStateCreateInfo(
+                dynamic_states
+                );
+
+        pipeline_layout_ = WVkPipelineHelper::RenderPlane_VkPipelineLayout(
+            device_info_.vk_device,
+            descset_layout_
             );
-        vertex_input_info.pVertexAttributeDescriptions=attr_desc.data();
 
-        VkPipelineInputAssemblyStateCreateInfo input_assembly{};
-        input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        input_assembly.primitiveRestartEnable = VK_FALSE;
-
-        VkPipelineViewportStateCreateInfo viewport_state{};
-        viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewport_state.viewportCount=1;
-        viewport_state.scissorCount=1;
-
-        VkPipelineRasterizationStateCreateInfo rasterizer{};
-        rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        rasterizer.depthClampEnable = VK_FALSE;
-        rasterizer.rasterizerDiscardEnable = VK_FALSE;
-        rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-        rasterizer.lineWidth = 1.0f;
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of y-flip in the projection matrix
-        rasterizer.depthBiasEnable = VK_FALSE;
-
-        VkPipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        multisampling.sampleShadingEnable = VK_FALSE;
-        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;  // no msaa
-
-        VkPipelineDepthStencilStateCreateInfo depth_stencil{};
-        depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        depth_stencil.depthTestEnable = VK_FALSE;
-        depth_stencil.depthWriteEnable = VK_FALSE;
-
-        VkPipelineColorBlendAttachmentState color_blend_attachment{};
-        color_blend_attachment.colorWriteMask =
-            VK_COLOR_COMPONENT_R_BIT |
-            VK_COLOR_COMPONENT_G_BIT |
-            VK_COLOR_COMPONENT_B_BIT |
-            VK_COLOR_COMPONENT_A_BIT;
-        color_blend_attachment.blendEnable = VK_FALSE;
-
-        VkPipelineColorBlendStateCreateInfo color_blending{};
-        color_blending.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        color_blending.logicOpEnable = VK_FALSE;
-        color_blending.logicOp = VK_LOGIC_OP_COPY;
-        color_blending.attachmentCount = 1;
-        color_blending.pAttachments = &color_blend_attachment;
-        color_blending.blendConstants[0] = 0.f;
-        color_blending.blendConstants[1] = 0.f;
-        color_blending.blendConstants[2] = 0.f;
-        color_blending.blendConstants[3] = 0.f;
-
-        std::vector<VkDynamicState> dynamic_states = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
-        };
-
-        VkPipelineDynamicStateCreateInfo dynamic_state{};
-        dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamic_state.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
-        dynamic_state.pDynamicStates = dynamic_states.data();
-
-        VkPipelineLayoutCreateInfo pipeline_layout_info{};
-        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipeline_layout_info.setLayoutCount = 1; // slayouts.size();
-        pipeline_layout_info.pSetLayouts = &descriptor_layout_; // slayouts.data();
-
-        if (vkCreatePipelineLayout(
-                device_info_.vk_device,
-                &pipeline_layout_info,
-                nullptr,
-                &pipeline_layout_) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create pipeline layout!");
-        }
-
-        VkGraphicsPipelineCreateInfo pipeline_info{};
-        pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipeline_info.stageCount = static_cast<uint32_t>(shader_stages.size());
-        pipeline_info.pStages = shader_stages.data();
-        pipeline_info.pVertexInputState = &vertex_input_info;
-        pipeline_info.pInputAssemblyState = &input_assembly;
-        pipeline_info.pViewportState = &viewport_state;
-        pipeline_info.pRasterizationState = &rasterizer;
-        pipeline_info.pMultisampleState = &multisampling;
-        pipeline_info.pDepthStencilState = &depth_stencil;
-        pipeline_info.pColorBlendState = &color_blending;
-        pipeline_info.pDynamicState = &dynamic_state;
-        pipeline_info.layout = pipeline_layout_;
-
-        pipeline_info.renderPass = VK_NULL_HANDLE; // in_render_pass_info.render_pass;
-        pipeline_info.subpass = 0;                 // out_pipeline_info.subpass;
-        pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+        VkGraphicsPipelineCreateInfo graphics_pipeline_info =
+            WVkPipelineHelper::RenderPlane_VkGraphicsPipelineCreateInfo(
+                static_cast<std::uint32_t>(shader_stages.size()),
+                shader_stages.data(),
+                &vertex_input_info,
+                &input_assembly,
+                &viewport_state,
+                &rasterizer,
+                &multisampling,
+                &depth_stencil,
+                &color_blending,
+                &dynamic_state,
+                pipeline_layout_
+            );
 
         // Dynamic rendering info
 
-        VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB; // TODO: USE swap chain format
-        VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
-
-        VkPipelineRenderingCreateInfo rendering_info{};
-        rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-        rendering_info.colorAttachmentCount = 1;
-        rendering_info.pColorAttachmentFormats = &color_format;
-        rendering_info.depthAttachmentFormat = depth_format;
-        rendering_info.pNext = VK_NULL_HANDLE;
-
-        pipeline_info.pNext = &rendering_info;
-
-        if (vkCreateGraphicsPipelines(
-        device_info_.vk_device,
-        VK_NULL_HANDLE,
-        1,
-        &pipeline_info,
-        nullptr,
-        &pipeline_) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create graphics pipeline!");
-        }
+        pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
+            VK_FORMAT_B8G8R8A8_SRGB, // TODO: USE swap chain format
+            VK_FORMAT_D32_SFLOAT,
+            graphics_pipeline_info,
+            device_info_.vk_device
+            );
 
         vkDestroyShaderModule(device_info_.vk_device,
                               shader_module,
@@ -408,7 +335,7 @@ private:
     VkPipeline pipeline_{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
 
-    VkDescriptorSetLayout descriptor_layout_{VK_NULL_HANDLE};
+    VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 

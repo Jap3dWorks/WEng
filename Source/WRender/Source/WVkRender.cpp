@@ -212,6 +212,7 @@ void WVkRender::Initialize()
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
     graphics_pipelines_.Initialize(device_info_);
 
+    WFLOG("[DEBUG] Initialize Offscreen Pipeline.")
     offscreen_pipeline_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()
@@ -248,9 +249,73 @@ void WVkRender::Initialize()
 
 }
 
+void WVkRender::Destroy() {
+
+    WFLOG("Destroy WVkRender...");
+
+    WFLOG("Destroy Render Pipelines.");
+    graphics_pipelines_.Destroy();
+    offscreen_pipeline_.Destroy();
+    ppcss_pipelines_.Destroy();
+
+    WFLOG("Destroy Fences and Semaphores.");
+
+    WVkRenderUtils::DestroySyncSemaphores(
+        sync_semaphores_,
+        device_info_.vk_device
+        );
+
+    WVkRenderUtils::DestroySyncFences(
+        sync_fences_,
+        device_info_.vk_device
+        );
+
+    WVkRenderUtils::DestroyGBuffersRender(
+        gbuffers_render_,
+        device_info_
+        );
+    
+    WVkRenderUtils::DestroyOffscreenRender(
+        offscreen_render_,
+        device_info_
+        );
+
+    WVkRenderUtils::DestroyPostprocessRender(
+        postprocess_render_,
+        device_info_
+        );
+
+    WFLOG("Destroy Swap Chain Info.");
+
+    // Destroy Swap Chain and Image Views
+    WVulkan::Destroy(swap_chain_info_, device_info_);
+
+    swap_chain_pipeline_.Destroy();
+
+    WFLOG("Destroy Render Command Pool.");
+
+    render_command_pool_.Clear();
+    render_command_pool_ = {};
+    render_command_buffer_ = {};
+
+    WFLOG("Destroy Render Resources.");
+
+    render_resources_.Clear();
+
+    WFLOG("Destroy Vulkan Device.");
+
+    // Destroy Vulkan Device
+    WVulkan::Destroy(device_info_);
+
+    // Destroy Vulkan Surface
+    WVulkan::Destroy(surface_info_, instance_info_);
+
+    // Destroy Vulkan Instance
+    WVulkan::Destroy(instance_info_);
+}
+
 void WVkRender::Draw()
 {
-
     vkWaitForFences(
         device_info_.vk_device,
         1,
@@ -601,71 +666,6 @@ void WVkRender::UpdateParameterStatic(
     }
 }
 
-void WVkRender::Destroy() {
-
-    WFLOG("Destroy WVkRender...");
-
-    WFLOG("Destroy Render Pipelines.");
-    graphics_pipelines_.Destroy();
-    ppcss_pipelines_.Destroy();
-
-    WFLOG("Destroy Fences and Semaphores.");
-
-    WVkRenderUtils::DestroySyncSemaphores(
-        sync_semaphores_,
-        device_info_.vk_device
-        );
-
-    WVkRenderUtils::DestroySyncFences(
-        sync_fences_,
-        device_info_.vk_device
-        );
-
-    WVkRenderUtils::DestroyGBuffersRender(
-        gbuffers_render_,
-        device_info_
-        );
-    
-    WVkRenderUtils::DestroyOffscreenRender(
-        offscreen_render_,
-        device_info_
-        );
-
-    WVkRenderUtils::DestroyPostprocessRender(
-        postprocess_render_,
-        device_info_
-        );
-
-    WFLOG("Destroy Swap Chain Info.");
-
-    // Destroy Swap Chain and Image Views
-    WVulkan::Destroy(swap_chain_info_, device_info_);
-
-    swap_chain_pipeline_.Destroy();
-
-    WFLOG("Destroy Render Command Pool.");
-
-    render_command_pool_.Clear();
-    render_command_pool_ = {};
-    render_command_buffer_ = {};
-
-    WFLOG("Destroy Render Resources.");
-
-    render_resources_.Clear();
-
-    WFLOG("Destroy Vulkan Device.");
-
-    // Destroy Vulkan Device
-    WVulkan::Destroy(device_info_);
-
-    // Destroy Vulkan Surface
-    WVulkan::Destroy(surface_info_, instance_info_);
-
-    // Destroy Vulkan Instance
-    WVulkan::Destroy(instance_info_);
-
-}
-
 void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {
 
     render_size_.width = in_width;
@@ -866,12 +866,18 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // TODO: Offscreen Render
-    
-    // TODO: Add here the deferred rendering processes
+    // ResetDescriptorPools
+
+    // Bind Pipeline
+
+    // DescriptorSet
+
+    // Draw Commands
 
     // --
 
     vkCmdEndRendering(in_command_buffer);
+    
     WVkRenderUtils::RndCmd_TransitionOffscreenReadLayout(
         in_command_buffer,
         offscreen_render_[in_frame_index].color.image
