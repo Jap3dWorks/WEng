@@ -5,6 +5,8 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include "WShaderUtils.hpp"
+#include "WCore/WStringUtils.hpp"
 #include <vulkan/vulkan_core.h>
 
 /**
@@ -20,6 +22,8 @@ public:
         WVkDescriptorSetLayoutInfo descset_layout_info{};
         WVkMeshInfo render_plane{};
         VkSampler render_sampler{};
+        
+        WVkRenderPipelineInfo render_pipeline{};
     };
 
 public:
@@ -58,7 +62,7 @@ public:
 
         for(auto & descpool : global_resources_.descpool_info) {
             descpool = {};
-            CreateDescPool(
+            InitializeDescPool(
                 descpool,
                 in_device
                 );
@@ -159,7 +163,7 @@ private:
         };
     }
 
-    void CreateDescPool(
+    void InitializeDescPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const WVkDeviceInfo & in_device
         ) {
@@ -190,6 +194,30 @@ private:
         }
     }
 
-    
+    void InitializeRenderPipeline(
+        WVkRenderPipelineInfo & render_pipeline,
+        const WVkDeviceInfo & in_device
+        ) {
+        std::vector<char> shadercode = WShaderUtils::ReadShader(
+            WStringUtils::SystemPath(shader_path)
+            );
+
+        VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
+            in_device.vk_device,
+            shadercode.data(),
+            shadercode.size()
+            );
+
+        std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages;
+        
+        WVulkanUtils::UpdateVertexFragmentVkPipelineShaderStageCreateInfo(
+            shader_stages.data(),
+            shader_module
+            );
+
+    }
+
+    const char * shader_path{"Content/Shaders/WRender_Offscreen.spv"}; // TODO Config file
+
 };
 

@@ -462,4 +462,31 @@ namespace WVulkanUtils {
 
     }
 
+    /**
+     * helper function to config VkPipelineShaderStageCreateInfo.
+     */
+    inline void UpdateVertexFragmentVkPipelineShaderStageCreateInfo(
+        VkPipelineShaderStageCreateInfo in_data[2],
+        const VkShaderModule & in_shader_module
+        ) {
+
+        // VkShaderStageFlagBits
+        (*in_data) = {};
+        in_data->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        in_data->stage = VK_SHADER_STAGE_VERTEX_BIT;
+        in_data->pNext=VK_NULL_HANDLE;
+        in_data->module=in_shader_module;
+        in_data->pName="vsMain";
+
+        in_data++;
+        
+        (*in_data) = {};
+        in_data->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        in_data->stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        in_data->pNext = VK_NULL_HANDLE;
+        in_data->module=in_shader_module;
+        in_data->pName="fsMain";
+
+    }
+
 }

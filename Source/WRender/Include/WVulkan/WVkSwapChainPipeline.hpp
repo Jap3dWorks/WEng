@@ -81,7 +81,7 @@ public:
 
         InitializeDescriptorLayout();
 
-        InitializePipeline();
+        InitializeRenderPipeline();
 
         InitializeDescriptorPool();
 
@@ -192,7 +192,7 @@ private:
 
     }
 
-    void InitializePipeline() {
+    void InitializeRenderPipeline() {
         // shader modules
         std::vector<char> shadercode = WShaderUtils::ReadShader(
             WStringUtils::SystemPath(shader_path)
@@ -206,20 +206,10 @@ private:
 
         std::array<VkPipelineShaderStageCreateInfo,2> shader_stages;
 
-        // VkShaderStageFlagBits
-        shader_stages[0] = VkPipelineShaderStageCreateInfo{};
-        shader_stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shader_stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        shader_stages[0].pNext=VK_NULL_HANDLE;
-        shader_stages[0].module=shader_module;
-        shader_stages[0].pName="vsMain";
-
-        shader_stages[1] = VkPipelineShaderStageCreateInfo{};
-        shader_stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shader_stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shader_stages[1].pNext = VK_NULL_HANDLE;
-        shader_stages[1].module=shader_module;
-        shader_stages[1].pName="fsMain";
+        WVulkanUtils::UpdateVertexFragmentVkPipelineShaderStageCreateInfo(
+            shader_stages.data(),
+            shader_module
+            );
 
         std::array<VkVertexInputAttributeDescription, 2> attr_desc;
         attr_desc[0].binding=0;
@@ -426,7 +416,7 @@ private:
 
     WVkMeshInfo render_plane_{};
 
-    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.swap.spv"};
+    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.swap.spv"}; // TODO config file
 
     WVkDeviceInfo device_info_{};
 
