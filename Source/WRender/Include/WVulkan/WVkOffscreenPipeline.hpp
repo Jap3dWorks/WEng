@@ -82,12 +82,22 @@ public:
         return descpool_info_[in_frame_index];
     }
 
-    const VkDescriptorSetLayout & DescSetLayout() const noexcept {
+    const VkDescriptorSetLayout & DescriptorSetLayout() const noexcept {
         return descset_layout_;
     }
 
     const VkSampler & Sampler() const noexcept {
         return render_sampler_;
+    }
+
+    const VkPipeline & Pipeline() const noexcept {
+        return pipeline_;
+    }
+
+    void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
+        vkResetDescriptorPool(device_info_.vk_device,
+                              descpool_info_[in_frame_index],
+                              0);
     }
 
 private:

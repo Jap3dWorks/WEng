@@ -168,6 +168,12 @@ public:
         return render_plane_;
     }
 
+    void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
+        vkResetDescriptorPool(device_info_.vk_device,
+                              descriptor_pool_[in_frame_index],
+                              0);
+    }
+
 private:
 
     void InitializeDescSetLayout() {

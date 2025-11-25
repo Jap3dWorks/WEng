@@ -197,6 +197,77 @@ namespace WVkRenderUtils {
         return descriptor_set;
     }
 
+    inline VkDescriptorSet CreateOffscreenRenderDescriptor(
+        const VkDevice & vk_device,
+        const VkDescriptorPool & in_desc_pool,
+        const VkDescriptorSetLayout & in_desc_lay,
+        const VkSampler & in_sampler,
+        const VkImageView & in_albedo_view,
+        const VkImageView & in_normal_view,
+        const VkImageView & in_ws_position_view,
+
+        // others like roughnessSpecular etc
+
+        // const VkImageView & in_rt_extra01_view,
+        // const VkImageView & in_rt_extra02_view,
+        // const VkImageView & in_rt_extra03_view,
+
+        const VkImageView & in_depth_view
+        ) {
+        VkDescriptorSet descriptor_set{};
+        VkDescriptorSetAllocateInfo alloc_info{};
+        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        alloc_info.descriptorPool = in_desc_pool;
+        alloc_info.descriptorSetCount = 1;
+        alloc_info.pSetLayouts = &in_desc_lay;
+
+        if (vkAllocateDescriptorSets(
+                vk_device,
+                &alloc_info,
+                &descriptor_set
+                ) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to allocate descriptor sets!");
+        }
+
+        std::array<VkWriteDescriptorSet,4> write_ds;
+        std::array<VkDescriptorImageInfo, 4> image_infos;
+
+        std::uint32_t idx=0;
+        for (const VkImageView & vw : {in_albedo_view,
+                                       in_normal_view,
+                                       in_ws_position_view,
+                                       in_depth_view}) {
+
+            image_infos[idx]={};
+            image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            image_infos[idx].imageView = vw;
+            image_infos[idx].sampler = in_sampler;
+
+            write_ds[idx] = {};
+            write_ds[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write_ds[idx].dstBinding = 0;
+            write_ds[idx].dstSet = descriptor_set;
+            write_ds[idx].dstArrayElement=0;
+            write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            write_ds[idx].descriptorCount=1;  // TODO check documentation (can I use only one write?)
+            write_ds[idx].pImageInfo = &image_infos[idx];
+            write_ds[idx].pNext = VK_NULL_HANDLE;
+
+            idx++;
+        }
+
+        vkUpdateDescriptorSets(
+            vk_device,
+            static_cast<std::uint32_t>(write_ds.size()),
+            write_ds.data(),
+            0,
+            nullptr
+            );
+
+        return descriptor_set;
+    }
+
+
     inline VkDescriptorSet CreateInputRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,

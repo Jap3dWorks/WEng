@@ -868,9 +868,32 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     // TODO: Offscreen Render
     // ResetDescriptorPools
 
+    offscreen_pipeline_.ResetDescriptorPool(in_frame_index);
+
+    VkPipeline pipeline = offscreen_pipeline_.Pipeline();
+    VkDescriptorSetLayout dslay = offscreen_pipeline_.DescriptorSetLayout();
+
     // Bind Pipeline
+    vkCmdBindPipeline(
+        in_command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline
+        );
+
+    WVkRenderUtils::RndCmd_SetViewportAndScissor(
+        in_command_buffer,
+        offscreen_render_[in_frame_index].extent
+        );
 
     // DescriptorSet
+    VkDescriptorSet descriptor = WVkRenderUtils::CreateOffscreenRenderDescriptor(
+        device_info_.vk_device,
+        offscreen_pipeline_.DescriptorPool(in_frame_index),
+        dslay,
+        offscreen_pipeline_.Sampler();
+        gbuffers_render_[in_frame_index].albedo.view,
+        // views
+        );
 
     // Draw Commands
 
@@ -1017,8 +1040,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         swap_chain_info_.extent
         );
 
-    VkDescriptorPool dspool = swap_chain_pipeline_.DescriptorPool(in_frame_index);
-    vkResetDescriptorPool(device_info_.vk_device, dspool, 0);
+    swap_chain_pipeline_.ResetDescriptorPool(in_frame_index);
 
     VkPipeline pipeline = swap_chain_pipeline_.Pipeline();
     VkDescriptorSetLayout dslay = swap_chain_pipeline_.DescriptorSetLayout();
@@ -1036,7 +1058,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     VkDescriptorSet descriptor = WVkRenderUtils::CreateInputRenderDescriptor(
         device_info_.vk_device,
-        dspool,
+        swap_chain_pipeline_.DescriptorPool(in_frame_index),
+        // dspool,
         dslay,
         input_view,
         swap_chain_pipeline_.InputRenderSampler()
