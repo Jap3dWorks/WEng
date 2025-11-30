@@ -177,6 +177,8 @@ namespace WVkPipelineHelper {
 
         VkPipelineLayout pipeline_lay;
 
+        // Only one desc set, in the future I could need more (some global parameters).
+
         pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 1;         // slayouts.size();
         pipeline_layout_info.pSetLayouts = &in_desc_lay; // slayouts.data();

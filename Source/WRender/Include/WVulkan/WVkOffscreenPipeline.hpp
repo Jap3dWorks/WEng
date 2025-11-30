@@ -50,6 +50,8 @@ public:
         render_sampler_ = WVulkanUtils::CreateRenderPlaneSampler(
             in_device.vk_device
             );
+
+        InitializeRenderPipeline();
     }
 
     void Destroy() {
@@ -179,17 +181,30 @@ private:
 
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
-        VkDescriptorSetLayoutBinding sampler_binding{};
-        sampler_binding.binding = 0;
-        sampler_binding.descriptorCount = 1;
-        sampler_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        sampler_binding.pImmutableSamplers = nullptr;
-        sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        std::array<VkDescriptorSetLayoutBinding, 4> sampler_bindings;
+        for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
+            sampler_bindings[i]={};
+            sampler_bindings[i].binding = 0;
+            sampler_bindings[i].descriptorCount = 1;
+            sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            sampler_bindings[i].pImmutableSamplers = nullptr;
+            sampler_bindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        }
+
+        // VkDescriptorSetLayoutBinding albedo_binding{};
+        // albedo_binding.binding = 0;
+        // albedo_binding.descriptorCount = 1;
+        // albedo_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        // albedo_binding.pImmutableSamplers = nullptr;
+        // albedo_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        // VkDescriptorSetLayoutBinding normal_binding{};
 
         VkDescriptorSetLayoutCreateInfo layout_info{};
         layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layout_info.bindingCount = 1;
-        layout_info.pBindings=&sampler_binding;
+        layout_info.bindingCount = static_cast<std::uint32_t>(sampler_bindings.size());
+        layout_info.pBindings=sampler_bindings.data();
 
         if (vkCreateDescriptorSetLayout(device_info_.vk_device,
                                         &layout_info,

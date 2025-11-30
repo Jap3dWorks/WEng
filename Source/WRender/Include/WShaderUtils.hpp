@@ -2,7 +2,9 @@
 
 #include "WCore/WStringUtils.hpp"
 
-#include <cstdint>
+// #include <cstdint>
+#include <format>
+#include <cstdio>
 #include <vector>
 #include <string>
 #include <regex>
@@ -63,7 +65,9 @@ namespace WShaderUtils {
 
         if (!file.is_open())
         {
-            throw std::runtime_error("FAIL while reading shader file!");
+            throw std::runtime_error(
+                std::format("FAIL while reading shader file! \"{}\"", in_shader_path)
+                );
         }
 
         size_t file_size = (size_t) file.tellg();

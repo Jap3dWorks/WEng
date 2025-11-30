@@ -388,7 +388,6 @@ int main(int argc, char** argv)
     {
         WFLOG("[ERROR] {}", e.what());
         throw;
-        // return 1;
     }
 
     WFLOG("WSpacers App Ends");

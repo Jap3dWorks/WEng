@@ -82,11 +82,14 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
 }
 
 void WVkPostprocessPipelines::Destroy() {
-    ClearPipelinesDb();
+    if(device_info_.vk_device) {
+        ClearPipelinesDb();
 
-    Destroy_GlobalResources();
+        Destroy_GlobalResources();
 
-    device_info_={};
+        device_info_={};        
+    }
+
 }
 
 void WVkPostprocessPipelines::CalcBindingOrder() {

@@ -30,7 +30,7 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]]  // binding 0 , set 0
+[[vk::binding(0,0)]]  // binding 0, set 0
 uniform Sampler2D prev_render;
 // SamplerState
 
