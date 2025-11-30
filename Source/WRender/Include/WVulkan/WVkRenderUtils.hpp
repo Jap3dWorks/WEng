@@ -74,7 +74,7 @@ namespace WVkRenderUtils {
         for(auto& offrnd : in_gbuffers_structs) {
             
             offrnd.extent = {in_width, in_height};
-            offrnd.color.extent = {in_width, in_height};
+            offrnd.albedo.extent = {in_width, in_height};
             
             WVulkan::CreateRenderColorResource(
                 offrnd.albedo.image,
@@ -102,6 +102,8 @@ namespace WVkRenderUtils {
                 in_device_info,
                 offrnd.ws_position.extent
                 );
+
+            // TODO specular and others
 
             offrnd.depth.extent = {in_width, in_height};
             WVulkan::CreateRenderDepthResource(
@@ -132,7 +134,7 @@ namespace WVkRenderUtils {
                 offrnd.color.view,
                 in_color_format,
                 in_device_info,
-                offrnd.albedo.extent
+                offrnd.extent
                 );
         }
     }
@@ -249,7 +251,7 @@ namespace WVkRenderUtils {
             write_ds[idx].dstSet = descriptor_set;
             write_ds[idx].dstArrayElement=0;
             write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            write_ds[idx].descriptorCount=1;  // TODO check documentation (can I use only one write?)
+            write_ds[idx].descriptorCount=1;  // TODO check documentation
             write_ds[idx].pImageInfo = &image_infos[idx];
             write_ds[idx].pNext = VK_NULL_HANDLE;
 
@@ -423,7 +425,7 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkGBuffersRenderStruct> T>
-    void DestroyGBuffersRender(const T & in_gbuffers_structs,
+    void DestroyGBuffersRender(T & in_gbuffers_structs,
                                const WVkDeviceInfo & in_device_info) {
         for(auto& gbffr : in_gbuffers_structs) {
             DestroyRenderTarget(gbffr.albedo, in_device_info);
@@ -441,7 +443,7 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkOffscreenRenderStruct> T>
-    void DestroyOffscreenRender(const T & in_offscreen_structs,
+    void DestroyOffscreenRender(T & in_offscreen_structs,
                                 const WVkDeviceInfo & in_device_info) {
         
         for(auto& offrnd : in_offscreen_structs) {
@@ -450,7 +452,7 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkPostprocessRenderStruct> T>
-    void DestroyPostprocessRender(const T & postprocess_render,
+    void DestroyPostprocessRender(T & postprocess_render,
                                   const WVkDeviceInfo & in_device_info) {
         for (auto & pstrnd : postprocess_render) {
             DestroyRenderTarget(pstrnd.color, in_device_info);

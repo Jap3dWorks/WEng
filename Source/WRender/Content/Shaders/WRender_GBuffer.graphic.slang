@@ -83,7 +83,7 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     // output.color = float4(vert_in.normal, 1.0);
 
     output.normal = vert_in.normal;
-    output.worldPos = vert_in.world_pos;
+    output.ws_position = vert_in.world_pos;
     // output.depth = vert_in.depth;
 
     return output;

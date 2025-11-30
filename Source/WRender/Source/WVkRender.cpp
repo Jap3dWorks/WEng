@@ -886,18 +886,57 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // DescriptorSet
-    VkDescriptorSet descriptor = WVkRenderUtils::CreateOffscreenRenderDescriptor(
+    VkDescriptorSet descriptorset = WVkRenderUtils::CreateOffscreenRenderDescriptor(
         device_info_.vk_device,
-        offscreen_pipeline_.DescriptorPool(in_frame_index),
+        offscreen_pipeline_.DescriptorPool(in_frame_index).descriptor_pool,
         dslay,
-        offscreen_pipeline_.Sampler();
+        offscreen_pipeline_.Sampler(),
         gbuffers_render_[in_frame_index].albedo.view,
-        // views
+        gbuffers_render_[in_frame_index].normal.view,
+        gbuffers_render_[in_frame_index].ws_position.view,
+        gbuffers_render_[in_frame_index].depth.view
         );
 
     // Draw Commands
+    const WVkMeshInfo & rplane = offscreen_pipeline_.RenderPlane();
+    
+    VkBuffer vertex_buffers[] = {rplane.vertex_buffer};
+    VkDeviceSize offsets[] = {0};
 
-    // --
+    vkCmdBindVertexBuffers(
+        in_command_buffer,
+        0,
+        1,
+        vertex_buffers,
+        offsets
+        );
+
+    vkCmdBindIndexBuffer(
+        in_command_buffer,
+        rplane.index_buffer,
+        0,
+        VK_INDEX_TYPE_UINT32
+        );
+
+    std::array<VkDescriptorSet,1> descsets = {
+        descriptorset
+    };
+
+    vkCmdBindDescriptorSets(in_command_buffer,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            offscreen_pipeline_.PipelineLayout(),
+                            0,
+                            static_cast<std::uint32_t>(descsets.size()),
+                            descsets.data(),
+                            0,
+                            nullptr);
+
+    vkCmdDrawIndexed(in_command_buffer,
+                     rplane.index_count,
+                     1,
+                     0,
+                     0,
+                     0);
 
     vkCmdEndRendering(in_command_buffer);
     
@@ -905,7 +944,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         in_command_buffer,
         offscreen_render_[in_frame_index].color.image
         );
-    
     
 }
 

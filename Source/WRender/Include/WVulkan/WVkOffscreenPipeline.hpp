@@ -94,9 +94,13 @@ public:
         return pipeline_;
     }
 
+    const VkPipelineLayout & PipelineLayout() const noexcept {
+        return pipeline_layout_;
+    }
+
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
         vkResetDescriptorPool(device_info_.vk_device,
-                              descpool_info_[in_frame_index],
+                              descpool_info_[in_frame_index].descriptor_pool,
                               0);
     }
 
