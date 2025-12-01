@@ -432,10 +432,11 @@ namespace WVkRenderUtils {
             DestroyRenderTarget(gbffr.normal, in_device_info);
             DestroyRenderTarget(gbffr.ws_position, in_device_info);
 
+            // rm, emission
+
             if (gbffr.rt_extra01.image) {
                 DestroyRenderTarget(gbffr.rt_extra01, in_device_info);
                 DestroyRenderTarget(gbffr.rt_extra02, in_device_info);
-                DestroyRenderTarget(gbffr.rt_extra03, in_device_info);
             }
 
             DestroyRenderTarget(gbffr.depth, in_device_info);

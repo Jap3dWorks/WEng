@@ -26,6 +26,12 @@ uniform Sampler2D albedo;
 uniform Sampler2D normal;
 [[vk::binding(2,0)]]
 uniform Sampler2D ws_position;
+
+// rm (roughness/metallic)
+// emission
+
+// extras 1 and 2
+
 [[vk::binding(3,0)]]
 uniform Sampler2D depth;
 

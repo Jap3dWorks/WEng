@@ -332,12 +332,12 @@ namespace WVulkanUtils {
         // Dynamic Rendering
         // TODO gBuffers attachments (other config function)
 
-        out_color_format=VK_FORMAT_B8G8R8A8_SRGB;
+        out_color_format=VK_FORMAT_B8G8R8A8_SRGB; // TODO 16 bit colors
         out_depth_format = VK_FORMAT_D32_SFLOAT;
 
         out_rendering_info={};
         out_rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-        out_rendering_info.colorAttachmentCount = 1;
+        out_rendering_info.colorAttachmentCount = 1; // TODO: 4
         out_rendering_info.pColorAttachmentFormats = &out_color_format;
         out_rendering_info.depthAttachmentFormat = out_depth_format;
         out_rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;

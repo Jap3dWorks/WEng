@@ -865,9 +865,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_render_[in_frame_index].extent
         );
 
-    // TODO: Offscreen Render
-    // ResetDescriptorPools
-
     offscreen_pipeline_.ResetDescriptorPool(in_frame_index);
 
     VkPipeline pipeline = offscreen_pipeline_.Pipeline();

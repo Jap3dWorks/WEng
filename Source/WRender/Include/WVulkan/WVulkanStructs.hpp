@@ -95,11 +95,12 @@ struct WVkGBuffersRenderStruct
     WVkRenderTarget normal{};
     WVkRenderTarget ws_position{};
 
-    WVkRenderTarget rm{}; // roughness metallic
+    WVkRenderTarget rm{}; // roughness/metallic/(2 normal components)
+
+    WVkRenderTarget emission{};
 
     WVkRenderTarget rt_extra01{};
     WVkRenderTarget rt_extra02{};
-    WVkRenderTarget rt_extra03{};
 
     WVkRenderTarget depth{};
     

@@ -64,12 +64,13 @@ ConstantBuffer<Sampler2D> texture;
 
 // Output structure
 struct FSOutput {
-    float4 color       : SV_TARGET0;
+    float4 albedo       : SV_TARGET0;
     float3 normal      : SV_TARGET1;
     float3 ws_position : SV_target2;
-    float3 rt_extra01  : SV_target3;
-    float3 rt_extra02  : SV_target4;
-    float3 rt_extra03  : SV_target5;
+    // rm (roughness metallic)
+    // emission
+    // float3 rt_extra01  : SV_target3;
+    // float3 rt_extra02  : SV_target4;
     // float depth     : SV_TARGET6;
 
 };
@@ -78,13 +79,12 @@ struct FSOutput {
 FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     FSOutput output;
 
-    output.color = texture.Sample(vert_in.tex_coords);
+    output.albedo = texture.Sample(vert_in.tex_coords);
 
-    // output.color = float4(vert_in.normal, 1.0);
+    // output.albedo = float4(vert_in.normal, 1.0);
 
     output.normal = vert_in.normal;
     output.ws_position = vert_in.world_pos;
-    // output.depth = vert_in.depth;
 
     return output;
 }
