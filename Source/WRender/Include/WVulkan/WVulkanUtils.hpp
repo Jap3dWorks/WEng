@@ -209,6 +209,7 @@ namespace WVulkanUtils {
         vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
     }
 
+    // DEPRECATED
     inline void InitializeDefaultPipelineStructs(
         const WVkShaderStageInfo & in_wvertex_stage_info,
         const std::vector<VkPipelineShaderStageCreateInfo> & in_shader_stages,

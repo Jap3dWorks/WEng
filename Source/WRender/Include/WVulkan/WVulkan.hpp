@@ -74,13 +74,6 @@ namespace WVulkan
         const WVkCommandPoolInfo& command_pool_info
         );
 
-    void CreateDefaultPipeline(
-        WVkRenderPipelineInfo & out_pipeline_info,
-        const WVkDeviceInfo & device,
-        const std::vector<WVkDescriptorSetLayoutInfo> & descriptor_set_layout_infos,
-        const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
-        );
-
     void Create(
         WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
         const WVkDeviceInfo &device

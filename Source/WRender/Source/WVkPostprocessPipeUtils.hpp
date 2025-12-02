@@ -79,6 +79,7 @@ namespace WVkPostprocessPipeUtils {
         VkPipelineRenderingCreateInfo rendering_info;
         VkGraphicsPipelineCreateInfo pipeline_create_info;
 
+        // TODO: write pipeline code here (easier edition later)
         WVulkanUtils::InitializeDefaultPipelineStructs(
             wvertex_stage_info, shader_stages, in_desc_lay,
             vertex_input_info, input_assembly, viewport_state, rasterizer,
