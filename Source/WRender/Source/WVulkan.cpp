@@ -799,6 +799,7 @@ void WVulkan::CreateTexture(
 
 }
 
+// DEPRECATED
 void WVulkan::CreateDefaultPipeline(
     WVkRenderPipelineInfo & out_pipeline_info,
     const WVkDeviceInfo & in_device,

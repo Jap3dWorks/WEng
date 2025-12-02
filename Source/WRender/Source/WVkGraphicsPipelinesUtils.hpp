@@ -110,4 +110,8 @@ namespace WVkGraphicsPipelinesUtils {
         };
     }
 
+    inline void CreatePipelien() {
+        // TODO finish and use in WVkGraphicsPipelines
+    }
+
 }

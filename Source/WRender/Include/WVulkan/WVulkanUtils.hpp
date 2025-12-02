@@ -276,7 +276,6 @@ namespace WVulkanUtils {
         out_depth_stencil.depthBoundsTestEnable = VK_FALSE;
         out_depth_stencil.stencilTestEnable = VK_FALSE;
 
-        // TODO gbuffers attachments
         out_color_blend_attachment = {};
         out_color_blend_attachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT |
@@ -332,6 +331,11 @@ namespace WVulkanUtils {
         // Dynamic Rendering
         // TODO gBuffers attachments (other config function)
 
+        // std::array<VkFormat, 4> color_format  {VK_FORMAT_B8G8R8A8_SRGB,
+        //                                        VK_FORMAT_B8G8R8A8_SRGB,
+        //                                        VK_FORMAT_B8G8R8A8_SRGB,
+        //                                        VK_FORMAT_B8G8R8A8_SRGB};
+        
         out_color_format=VK_FORMAT_B8G8R8A8_SRGB; // TODO 16 bit colors
         out_depth_format = VK_FORMAT_D32_SFLOAT;
 
