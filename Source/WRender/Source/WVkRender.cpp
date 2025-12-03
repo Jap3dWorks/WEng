@@ -180,7 +180,8 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format  // TODO: Use 16 bit color format
+        VK_FORMAT_R16G16B16A16_SFLOAT
+        // swap_chain_info_.format  // TODO: Use 16 bit color format
         );
 
     // Offscreen Render Pass

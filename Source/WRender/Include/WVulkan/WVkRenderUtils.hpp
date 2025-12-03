@@ -103,7 +103,7 @@ namespace WVkRenderUtils {
                 offrnd.ws_position.extent
                 );
 
-            // TODO specular and others
+            // TODO: rm, emission, extra1 and 2
 
             offrnd.depth.extent = {in_width, in_height};
             WVulkan::CreateRenderDepthResource(

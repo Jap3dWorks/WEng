@@ -184,12 +184,11 @@ namespace WVkGraphicsPipelinesUtils {
         // dynamic rendering color formats
         // TODO: rm, emission, rt_extra01, rt_extra02
         std::array<VkFormat, 3> color_formats  {
-            VK_FORMAT_B8G8R8A8_SRGB, // albedo
-            VK_FORMAT_B8G8R8A8_SRGB, // normal
-            VK_FORMAT_B8G8R8A8_SRGB  // ws_position
+            VK_FORMAT_R16G16B16A16_SFLOAT, // albedo
+            VK_FORMAT_R16G16B16A16_SFLOAT, // normal
+            VK_FORMAT_R16G16B16A16_SFLOAT  // ws_position
         };
 
-        // TODO color blend for each attachment
         std::array<VkPipelineColorBlendAttachmentState, 3> color_blend_attachments;
         for(auto & cblend_attch : color_blend_attachments) {
             cblend_attch = {};
@@ -198,6 +197,7 @@ namespace WVkGraphicsPipelinesUtils {
                 VK_COLOR_COMPONENT_G_BIT |
                 VK_COLOR_COMPONENT_B_BIT |
                 VK_COLOR_COMPONENT_A_BIT;
+            
             cblend_attch.blendEnable = VK_FALSE;
         }
         

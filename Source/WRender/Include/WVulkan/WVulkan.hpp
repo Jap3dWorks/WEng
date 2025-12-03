@@ -46,13 +46,6 @@ namespace WVulkan
         const WVkRenderDebugInfo &debug_info
         );
 
-    /**
-     * @brief Creates offscreen Render Pass.
-     */
-    void CreateOffscreenRenderPass(WVkGBuffersRenderStruct & out_render_pass,
-                                   const VkFormat & in_swap_chain_image_format,
-                                   const WVkDeviceInfo& in_device_info);
-
     /** @brief Create Postprocess render pass. */
     void CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
                                      const VkFormat & in_swap_chain_image_format,

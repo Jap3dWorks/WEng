@@ -218,100 +218,6 @@ void WVulkan::Create(
 
 }
 
-// void WVulkan::CreateOffscreenFramebuffer(
-//     WVkOffscreenRenderStruct & out_offscreen_render_pass,
-//     const WVkDeviceInfo & in_device_info
-//     ) {
-//     std::array<VkImageView, 2> attachments = {
-//         out_offscreen_render_pass.color.view,
-//         out_offscreen_render_pass.depth.view
-//     };
-
-//     VkFramebufferCreateInfo framebufferinfo{};
-
-//     framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-//     framebufferinfo.renderPass = out_offscreen_render_pass.render_pass;
-//     framebufferinfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-//     framebufferinfo.pAttachments = attachments.data();
-//     framebufferinfo.width = out_offscreen_render_pass.extent.width;
-//     framebufferinfo.height = out_offscreen_render_pass.extent.height;
-//     framebufferinfo.layers = 1;
-
-//     if (vkCreateFramebuffer(
-//         in_device_info.vk_device, 
-//         &framebufferinfo, 
-//         nullptr, 
-//         &out_offscreen_render_pass.framebuffer) != VK_SUCCESS
-//     )
-//     {
-//         throw std::runtime_error("Failed to create offscreen framebuffer!");
-//     }
-// }
-
-// void WVulkan::CreatePostprocessFramebuffer(
-//     WVkPostprocessRenderStruct & out_postprocess_render,
-//     const WVkDeviceInfo & in_device_info
-//     ) {
-
-//     VkFramebufferCreateInfo framebufferinfo{};
-
-//     framebufferinfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-
-//     framebufferinfo.renderPass = out_postprocess_render.render_pass;
-//     framebufferinfo.attachmentCount = 1;
-//     framebufferinfo.pAttachments = &out_postprocess_render.color.view;
-//     framebufferinfo.width = out_postprocess_render.extent.width;
-//     framebufferinfo.height = out_postprocess_render.extent.height;
-//     framebufferinfo.layers = 1;
-
-//     if (vkCreateFramebuffer(
-//             in_device_info.vk_device,
-//             &framebufferinfo,
-//             nullptr,
-//             &out_postprocess_render.framebuffer
-//             ) != VK_SUCCESS) {
-//         throw std::runtime_error("Failed to create postprocess framebuffer!");
-//     }
-// }
-
-// void WVulkan::CreateOffcreenRenderFrameBuffers_DEPRECATED(WVkSwapChainInfo & out_swap_chain_info,
-//                                                const WVkOffscreenRenderStruct & out_render_pass_info,
-//                                                const WVkDeviceInfo & in_device_info)
-// {
-//     out_swap_chain_info.framebuffers.resize(
-//         out_swap_chain_info.views.size()
-//         );
-
-//     for (size_t i=0; i < out_swap_chain_info.views.size(); i++)
-//     {
-//         std::array<VkImageView, 3> Attachments = {
-//             out_render_pass_info.color.view,
-//             out_render_pass_info.depth.view,
-//             out_swap_chain_info.views[i]
-//         };
-
-//         VkFramebufferCreateInfo FramebufferInfo{};
-//         FramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-//         FramebufferInfo.renderPass = out_render_pass_info.render_pass;
-//         FramebufferInfo.attachmentCount = static_cast<uint32_t>(Attachments.size());
-//         FramebufferInfo.pAttachments = Attachments.data();
-//         FramebufferInfo.width = out_swap_chain_info.extent.width;
-//         FramebufferInfo.height = out_swap_chain_info.extent.height;
-//         FramebufferInfo.layers = 1;
-
-//         if (vkCreateFramebuffer(
-//             in_device_info.vk_device, 
-//             &FramebufferInfo, 
-//             nullptr, 
-//             &out_swap_chain_info.framebuffers[i]) != VK_SUCCESS
-//         )
-//         {
-//             throw std::runtime_error("Failed to create framebuffer!");
-//         }
-//     }
-
-// }
-
 void WVulkan::CreateRenderColorResource(VkImage & out_image,
                                   VkDeviceMemory & out_memory,
                                   VkImageView & out_image_view,
@@ -319,9 +225,6 @@ void WVulkan::CreateRenderColorResource(VkImage & out_image,
                                   const WVkDeviceInfo & in_device_info,
                                   const VkExtent2D & in_extent)
 {
-    // TODO set and check buffer color format (16 bit float)
-    // VkFormat color_format = VK_FORMAT_R16G16B16_SFLOAT;
-
     CreateImage(
         out_image,
         out_memory,
@@ -451,68 +354,6 @@ void WVulkan::CreateRenderDepthResource(
         1,
         in_device_info.vk_device
         );
-}
-
-void WVulkan::CreateOffscreenRenderPass(WVkGBuffersRenderStruct & out_render_pass_info,
-                                        const VkFormat & in_swap_chain_image_format,
-                                        const WVkDeviceInfo &device_info)
-{
-    VkAttachmentDescription color_attachment{};
-    color_attachment.format = in_swap_chain_image_format;
-    // color_attachment.samples = device_info.msaa_samples;
-    color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    color_attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentDescription depth_attachment{};
-    depth_attachment.format = FindDepthFormat(device_info.vk_physical_device);
-    // depth_attachment.samples = device_info.msaa_samples;
-    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    // VkAttachmentDescription color_attachment_resolve{};
-    // color_attachment_resolve.format = in_swap_chain_image_format;
-    // color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
-    // color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    // color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    // color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    // color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    // color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    // color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentReference color_attachment_ref{};
-    color_attachment_ref.attachment = 0;
-    color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference depth_attachment_ref{};
-    depth_attachment_ref.attachment = 1;
-    depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    // VkAttachmentReference color_attachment_resolve_ref{};
-    // color_attachment_resolve_ref.attachment = 2;
-    // color_attachment_resolve_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &color_attachment_ref;
-    subpass.pDepthStencilAttachment = &depth_attachment_ref;
-    // subpass.pResolveAttachments = &color_attachment_resolve_ref;
-
-    // out_render_pass_info.render_pass = WVulkanUtils::CreateRenderPass<2>(
-    //     {color_attachment, depth_attachment},
-    //     subpass,
-    //     device_info.vk_device
-    //     );
 }
 
 void WVulkan::CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
