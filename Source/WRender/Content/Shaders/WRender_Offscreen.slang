@@ -20,7 +20,7 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]] // binding 0, set 1
+[[vk::binding(0,0)]] // binding 0, set 0
 uniform Sampler2D albedo;
 [[vk::binding(1,0)]] // binding 1, set 0
 uniform Sampler2D normal;
@@ -36,7 +36,11 @@ uniform Sampler2D ws_position;
 uniform Sampler2D depth;
 
 [shader("fragment")]
-float4 fsMain(VSOutput vertexOuptut) : SV_TARGET
+float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
-    return albedo.Sample(vertexOuptut.fragTexCoord);
+    return albedo.Sample(vertexOutput.fragTexCoord);
+
+    // return float4(vertexOutput.fragTexCoord, 0.f, 1.f);
+
+    // return float4(0.f, 0.f, 1.f, 1.f);
 }

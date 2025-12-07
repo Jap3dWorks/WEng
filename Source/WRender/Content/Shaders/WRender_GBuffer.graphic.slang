@@ -39,7 +39,6 @@ struct VSOutput {
     float2 tex_coords : TEXCOORD0;
     float3 normal     : TEXCOORD1;
     float3 world_pos  : TEXCOORD2;
-    // float depth       : TEXCOORD3;
 };
 
 [shader("vertex")]
@@ -54,8 +53,6 @@ VSOutput vsMain(VSInput input) {
     output.world_pos = wp.xyz;
     output.tex_coords = input.tex_coords;
 
-    // output.depth = output.pos.z / output.pos.w;
-
     return output;
 }
 
@@ -65,8 +62,8 @@ ConstantBuffer<Sampler2D> texture;
 // Output structure
 struct FSOutput {
     float4 albedo       : SV_TARGET0;
-    float3 normal      : SV_TARGET1;
-    float3 ws_position : SV_target2;
+    float4 normal      : SV_TARGET1;
+    float4 ws_position : SV_target2;
     // rm (roughness metallic)
     // emission
     // float3 rt_extra01  : SV_target3;
@@ -79,12 +76,12 @@ struct FSOutput {
 FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     FSOutput output;
 
-    output.albedo = texture.Sample(vert_in.tex_coords);
+    // output.albedo = texture.Sample(vert_in.tex_coords);
 
-    // output.albedo = float4(vert_in.normal, 1.0);
+    output.albedo = float4(0.f, 0.f, 1.f, 1.f);
 
-    output.normal = vert_in.normal;
-    output.ws_position = vert_in.world_pos;
+    output.normal = float4(vert_in.normal, 1.f);
+    output.ws_position = float4(vert_in.world_pos, 1.f);
 
     return output;
 }

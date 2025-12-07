@@ -108,46 +108,6 @@ public:
 
 private:
 
-    void UpdateDSL(WVkDescriptorSetLayoutInfo & out_descset_lay) {
-        VkDescriptorSetLayoutBinding albedo_binding{};
-        albedo_binding.binding=0;
-        albedo_binding.descriptorCount=1;
-        albedo_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        albedo_binding.pImmutableSamplers = nullptr;
-        albedo_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        VkDescriptorSetLayoutBinding normal_binding{};
-        normal_binding.binding=0;
-        normal_binding.descriptorCount=1;
-        normal_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        normal_binding.pImmutableSamplers = nullptr;
-        normal_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        VkDescriptorSetLayoutBinding ws_position_binding{};
-        ws_position_binding.binding=0;
-        ws_position_binding.descriptorCount=1;
-        ws_position_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        ws_position_binding.pImmutableSamplers = nullptr;
-        ws_position_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        // extras ...
-
-        VkDescriptorSetLayoutBinding depth_binding{};
-        depth_binding.binding=0;
-        depth_binding.descriptorCount=1;
-        depth_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        depth_binding.pImmutableSamplers = nullptr;
-        depth_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        out_descset_lay.bindings = {
-            albedo_binding,
-            normal_binding,
-            ws_position_binding,
-            // extras ..
-            depth_binding
-        };
-    }
-
     void InitializeDescPool() {
         for(auto & descpool : descpool_info_) {
             

@@ -343,7 +343,9 @@ void WVulkan::CreateRenderDepthResource(
         VK_SAMPLE_COUNT_1_BIT, // in_device_info.msaa_samples,
         depth_format,
         VK_IMAGE_TILING_OPTIMAL, 
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+          VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 

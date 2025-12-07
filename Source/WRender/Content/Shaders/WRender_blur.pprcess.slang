@@ -68,6 +68,7 @@ float4 fsMain(VSOutput vertIn) : SV_TARGET
     color /= samples_count;
 
     return float4(color, 1.f);
+
 }
 
 
