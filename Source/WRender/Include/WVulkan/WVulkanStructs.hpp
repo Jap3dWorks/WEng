@@ -60,7 +60,7 @@ struct WVkTextureInfo
     VkDeviceMemory memory{VK_NULL_HANDLE};
     VkImageView view{VK_NULL_HANDLE};
     VkSampler sampler{VK_NULL_HANDLE};
-    // TODO: imageLayout
+    // is layout required here?
     VkImageLayout layout{VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
 
     uint32_t mip_levels{1};
@@ -120,6 +120,11 @@ struct WVkPostprocessRenderStruct
     VkExtent2D extent{};
 };
 
+struct WVkTonemappingRenderStruct {
+    WVkRenderTarget color{};
+    VkExtent2D extent{};
+};
+
 struct WVkSwapChainInfo
 {
     VkFormat format;
@@ -141,7 +146,7 @@ struct WVkDescriptorSetLayoutInfo
 };
 
 /**
- * Descriptor pool is used to allocate descriptors memory., 
+ * Descriptor pool is used to allocate descriptors memory, 
  * Represents the maximum number of descriptors that can be allocated.
 */
 struct WVkDescriptorPoolInfo
@@ -150,14 +155,10 @@ struct WVkDescriptorPoolInfo
 };
 
 /**
- * Descriptor set is the relation between the descriptor set layout 
- * and the descriptor pool
- * you can have multiple descriptor sets with the same layout, 
- * this is used for multiple frames in flight
+ * Descriptor set struct
 */
 struct WVkDescriptorSetInfo
 {
-    // The len of this vector is the number of frames in flight. TODO: REMOVE
     VkDescriptorSet descriptor_set{VK_NULL_HANDLE};
 };
 

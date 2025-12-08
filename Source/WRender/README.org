@@ -1,4 +1,52 @@
 #+title: WRender
 
+* Render Pipeline
 
+** Pipeline
 
+#+BEGIN_EXAMPLE
+                 GBuffer (Albedo, Normal, Position)
+                    ↓
+[Lighting Pass] → HDR 16F (Linear, values > 1.0)
+                    ↓
+             --Postprocess--
+  [Bloom Pass] → Extract bright areas (> 1.0)
+                    ↓                    ↓
+            [Gaussian Blur] → [Bloom Combine]
+                    ↓                    ↓
+             ---------------       
+            [Tone Mapping] ←-------------┘
+                    ↓
+            LDR 8-bit (0-1, Linear)
+                    ↓
+        [Gamma Correction] → sRGB
+                    ↓
+            Swap Chain (BGRA sRGB)
+#+END_EXAMPLE
+
+** Tone mapping
+
+#+BEGIN_EXAMPLE
+// Simplest tone mapping shader to start:
+[shader("fragment")]
+float4 fsMainSimple(VSOutput input) : SV_TARGET {
+    float3 hdr = hdrInput.Sample(input.uv).rgb;
+    
+    // 1. Apply exposure
+    hdr *= 1.0;  // Start with 1.0
+    
+    // 2. ACES tone mapping (just copy-paste this)
+    const float a = 2.51;
+    const float b = 0.03;
+    const float c = 2.43;
+    const float d = 0.59;
+    const float e = 0.14;
+    float3 ldr = (hdr * (a * hdr + b)) / (hdr * (c * hdr + d) + e);
+    ldr = clamp(ldr, 0.0, 1.0);
+    
+    // 3. Gamma
+    ldr = pow(ldr, 1.0/2.2);
+    
+    return float4(ldr, 1.0);
+}
+#+END_EXAMPLE

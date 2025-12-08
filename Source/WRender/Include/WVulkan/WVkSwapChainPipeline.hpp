@@ -74,7 +74,9 @@ public:
         return *this;
     }
 
-    void Initialize(const WVkDeviceInfo & in_device, const WVkCommandPoolInfo & in_command_pool) {
+    void Initialize(const WVkDeviceInfo & in_device,
+                    const WVkCommandPoolInfo & in_command_pool,
+                    VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
 
         assert(device_info_.vk_device == VK_NULL_HANDLE);
 
@@ -82,11 +84,12 @@ public:
 
         InitializeDescSetLayout();
 
-        InitializeRenderPipeline();
+        InitializeRenderPipeline(in_swap_chain_format);
 
         InitializeDescriptorPool();
 
-        input_render_sampler_ = WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
+        input_render_sampler_ =
+            WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
 
         InitializeRenderPlane(in_command_pool);
 
@@ -199,7 +202,7 @@ private:
 
     }
 
-    void InitializeRenderPipeline() {
+    void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
         // shader modules
         std::vector<char> shadercode = WShaderUtils::ReadShader(
             WStringUtils::SystemPath(shader_path)
@@ -280,8 +283,8 @@ private:
         // Dynamic rendering info
 
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
-            VK_FORMAT_B8G8R8A8_SRGB, // TODO: USE swap chain format
-            VK_FORMAT_D32_SFLOAT,
+            swap_chain_format,
+            VK_FORMAT_D32_SFLOAT,   // depth format
             graphics_pipeline_info,
             device_info_.vk_device
             );
@@ -349,7 +352,7 @@ private:
 
     WVkMeshInfo render_plane_{};
 
-    const char * shader_path{"Content/Shaders/WRender_DrawInSwapChain.swap.spv"}; // TODO config file
+    const char * shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
 
     WVkDeviceInfo device_info_{};
 

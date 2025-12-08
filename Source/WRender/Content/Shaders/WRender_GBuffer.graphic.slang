@@ -76,9 +76,9 @@ struct FSOutput {
 FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     FSOutput output;
 
-    // output.albedo = texture.Sample(vert_in.tex_coords);
+    output.albedo = texture.Sample(vert_in.tex_coords);
 
-    output.albedo = float4(0.f, 0.f, 1.f, 1.f);
+    // output.albedo = float4(0.f, 0.f, 1.f, 1.f);
 
     output.normal = float4(vert_in.normal, 1.f);
     output.ws_position = float4(vert_in.world_pos, 1.f);

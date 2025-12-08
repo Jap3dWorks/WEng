@@ -45,79 +45,199 @@ namespace WVkRenderUtils {
 
     
     template<CIterable<WVkPostprocessRenderStruct> T>
-    void CreatePostprocessRender(T & postprocess_structs,
-                                 const WVkDeviceInfo & in_device_info,
-                                 const std::uint32_t & in_width,
-                                 const std::uint32_t & in_height,
-                                 const VkFormat & in_format) {
+    void CreatePostprocessRenderTargets(T & postprocess_structs,
+                                        const WVkDeviceInfo & in_device_info,
+                                        const std::uint32_t & in_width,
+                                        const std::uint32_t & in_height,
+                                        const VkFormat & in_color_format) {
         for (auto & pstrnd : postprocess_structs) {
             pstrnd.extent = {in_width, in_height};
             pstrnd.color.extent = {in_width, in_height};
 
-            WVulkan::CreateRenderColorResource(
+            WVulkan::CreateImage(
                 pstrnd.color.image,
                 pstrnd.color.memory,
-                pstrnd.color.view,
-                in_format,
-                in_device_info,
-                pstrnd.color.extent
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                pstrnd.extent.width, pstrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
+                in_color_format,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+
+            pstrnd.color.view = WVulkan::CreateImageView(
+                pstrnd.color.image,
+                in_color_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
+                );
+        }
+    }
+
+    template<CIterable<WVkTonemappingRenderStruct> T>
+    inline void CreateTonemappingRenderTargets(
+        T & out_tonemapping_targets,
+        const WVkDeviceInfo & in_device_info,
+        const std::uint32_t & in_width,
+        const std::uint32_t & in_height,
+        const VkFormat & in_color_format
+        ) {
+        for (auto & tmprt : out_tonemapping_targets) {
+            tmprt.extent = {in_width, in_height};
+            tmprt.color.extent = tmprt.extent;
+
+            WVulkan::CreateImage(
+                tmprt.color.image,
+                tmprt.color.memory,
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                tmprt.extent.width, tmprt.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
+                in_color_format,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+
+            tmprt.color.view = WVulkan::CreateImageView(
+                tmprt.color.image,
+                in_color_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
                 );
         }
     }
 
     template<CIterable<WVkGBuffersRenderStruct> T>
-    inline void CreateGBuffersRender(T & in_gbuffers_structs,
-                                     const WVkDeviceInfo & in_device_info,
-                                     const std::uint32_t & in_width,
-                                     const std::uint32_t & in_height,
-                                     const VkFormat & in_color_format) {
+    inline void CreateGBuffersRenderTargets(
+        T & in_gbuffers_structs,
+        const WVkDeviceInfo & in_device_info,
+        const std::uint32_t & in_width,
+        const std::uint32_t & in_height,
+        const VkFormat & in_color_format // TODO: other target formats
+        ) {
         for(auto& offrnd : in_gbuffers_structs) {
             
             offrnd.extent = {in_width, in_height};
             offrnd.albedo.extent = {in_width, in_height};
-            
-            WVulkan::CreateRenderColorResource(
+
+            // TODO create and config here
+            WVulkan::CreateImage(
                 offrnd.albedo.image,
                 offrnd.albedo.memory,
-                offrnd.albedo.view,
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                offrnd.extent.width, offrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
                 in_color_format,
-                in_device_info,
-                offrnd.albedo.extent
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+            offrnd.albedo.view = WVulkan::CreateImageView(
+                offrnd.albedo.image,
+                in_color_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
                 );
 
+            
             offrnd.normal.extent = {in_width, in_height};
-            WVulkan::CreateRenderNormalResource(
+            VkFormat normal_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+            WVulkan::CreateImage(
                 offrnd.normal.image,
                 offrnd.normal.memory,
-                offrnd.normal.view,
-                in_device_info,
-                offrnd.normal.extent
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                offrnd.extent.width, offrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
+                normal_format,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+            offrnd.normal.view = WVulkan::CreateImageView(
+                offrnd.normal.image,
+                normal_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
                 );
 
             offrnd.ws_position.extent = {in_width, in_height};
-            WVulkan::CreateRenderWSPositionResource(
+            VkFormat ws_position_format = VK_FORMAT_R16G16B16A16_SFLOAT; // TODO 32 bit
+            WVulkan::CreateImage(
                 offrnd.ws_position.image,
                 offrnd.ws_position.memory,
-                offrnd.ws_position.view,
-                in_device_info,
-                offrnd.ws_position.extent
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                offrnd.extent.width, offrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
+                ws_position_format,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+            offrnd.ws_position.view = WVulkan::CreateImageView(
+                offrnd.ws_position.image,
+                ws_position_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
                 );
 
             // TODO: rm, emission, extra1 and 2
 
-            offrnd.depth.extent = {in_width, in_height};
-            WVulkan::CreateRenderDepthResource(
+            offrnd.depth.extent = offrnd.extent;
+            VkFormat depth_format = WVulkan::FindDepthFormat(in_device_info.vk_physical_device);
+            WVulkan::CreateImage(
                 offrnd.depth.image,
                 offrnd.depth.memory,
-                offrnd.depth.view,
-                in_device_info,
-                offrnd.depth.extent
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                offrnd.extent.width, offrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
+                depth_format,
+                VK_IMAGE_TILING_OPTIMAL, 
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+
+            offrnd.depth.view = WVulkan::CreateImageView(
+                offrnd.depth.image,
+                depth_format,
+                VK_IMAGE_ASPECT_DEPTH_BIT,
+                1,
+                in_device_info.vk_device
                 );
         }
     }
 
     template<CIterable<WVkOffscreenRenderStruct> T>
-    inline void CreateOffscreenRender(T & in_offscreen_structs,
+    inline void CreateOffscreenRenderTargets(T & in_offscreen_structs,
                                       const WVkDeviceInfo & in_device_info,
                                       const std::uint32_t & in_width,
                                       const std::uint32_t & in_height,
@@ -127,14 +247,29 @@ namespace WVkRenderUtils {
             
             offrnd.extent = {in_width, in_height};
             offrnd.color.extent = {in_width, in_height};
-            
-            WVulkan::CreateRenderColorResource(
+
+            WVulkan::CreateImage(
                 offrnd.color.image,
                 offrnd.color.memory,
-                offrnd.color.view,
+                in_device_info.vk_device,
+                in_device_info.vk_physical_device,
+                offrnd.extent.width, offrnd.extent.height,
+                1,
+                VK_SAMPLE_COUNT_1_BIT,
                 in_color_format,
-                in_device_info,
-                offrnd.extent
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_SAMPLED_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+                );
+
+            offrnd.color.view = WVulkan::CreateImageView(
+                offrnd.color.image,
+                in_color_format,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                1,
+                in_device_info.vk_device
                 );
         }
     }
@@ -247,11 +382,11 @@ namespace WVkRenderUtils {
 
             write_ds[idx] = {};
             write_ds[idx].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            write_ds[idx].dstBinding = 0;
+            write_ds[idx].dstBinding = idx;
             write_ds[idx].dstSet = descriptor_set;
             write_ds[idx].dstArrayElement=0;
             write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            write_ds[idx].descriptorCount=1;  // TODO check documentation
+            write_ds[idx].descriptorCount=1;
             write_ds[idx].pImageInfo = &image_infos[idx];
             write_ds[idx].pNext = VK_NULL_HANDLE;
 
@@ -626,7 +761,7 @@ namespace WVkRenderUtils {
 
         std::array<VkRenderingAttachmentInfo, 3> color_attachments;
 
-        // Color Attachment
+        // albedo Attachment
         color_attachments[0] = {};
         color_attachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         color_attachments[0].imageView = in_albedo_view;

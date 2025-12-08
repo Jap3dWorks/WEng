@@ -45,7 +45,6 @@ public:
 
     void WaitIdle() const override;
 
-    // TODO pipeline struct and WAssetId
     void CreateRenderPipeline(
         WRenderPipelineAsset * in_pipeline_asset
         ) override;
@@ -137,8 +136,6 @@ private:
         const std::uint32_t & in_frame_index
         );
 
-    // TODO: transparency render commands
-
     void RecordPostprocessRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index,
@@ -161,9 +158,10 @@ private:
 
     WVkAssetResources render_resources_{};
 
-    std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_render_{};
-    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_render_{};
-    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_render_{};
+    std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
+    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
+    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};
+    std::array<WVkTonemappingRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_rtargets_{};
 
     WVkSwapChainInfo swap_chain_info_{};
     WVkSwapChainPipeline<> swap_chain_pipeline_{};

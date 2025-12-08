@@ -46,11 +46,6 @@ namespace WVulkan
         const WVkRenderDebugInfo &debug_info
         );
 
-    /** @brief Create Postprocess render pass. */
-    void CreatePostprocessRenderPass(WVkPostprocessRenderStruct & out_render_pass,
-                                     const VkFormat & in_swap_chain_image_format,
-                                     const WVkDeviceInfo & in_device_info);
-
     /**
      * @brief Creates a Vulkan Command Pool.
      */
@@ -234,39 +229,6 @@ namespace WVulkan
     void Destroy(
         VkSampler & out_sampler,
         const WVkDeviceInfo & in_device_info
-        );
-
-    void CreateRenderColorResource(
-        VkImage & out_image,
-        VkDeviceMemory & out_memory,
-        VkImageView & out_image_view,
-        const VkFormat & in_color_format,
-        const WVkDeviceInfo & in_device_info,
-        const VkExtent2D & in_extent
-        );
-
-    void CreateRenderNormalResource(
-        VkImage & out_image,
-        VkDeviceMemory & out_memory,
-        VkImageView & out_image_view,
-        const WVkDeviceInfo & in_device_info,
-        const VkExtent2D & in_extent
-        );
-
-    void CreateRenderWSPositionResource(
-        VkImage & out_image,
-        VkDeviceMemory & out_memory,
-        VkImageView & out_image_view,
-        const WVkDeviceInfo & in_device_info,
-        const VkExtent2D & in_extent
-        );
-
-    void CreateRenderDepthResource(
-        VkImage & out_image,
-        VkDeviceMemory & out_memory,
-        VkImageView & out_image_view,
-        const WVkDeviceInfo & in_device_info,
-        const VkExtent2D & in_extent
         );
 
     // Descriptor Set Layout

@@ -120,7 +120,6 @@ public:
 
         result.reserve(in_data.size());
 
-        // TODO Use slang
         WRenderUtils::ForEach(
             in_data,
             [&result, &in_fn]
