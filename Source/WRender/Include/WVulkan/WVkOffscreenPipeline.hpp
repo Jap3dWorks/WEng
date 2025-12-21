@@ -120,12 +120,14 @@ private:
         
             pool_sizes[1]={};
             pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            // 10 images
             pool_sizes[1].descriptorCount = 10;
 
             VkDescriptorPoolCreateInfo pool_info{};
             pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
             pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
             pool_info.pPoolSizes = pool_sizes.data();
+            // max number of sets (an image is a set)
             pool_info.maxSets = 32;
 
             if (vkCreateDescriptorPool(
@@ -192,7 +194,9 @@ private:
 
                 VkPipelineVertexInputStateCreateInfo vertex_input_info =
             WVkPipelineHelper::RenderPlane_VkPipelineVertexInputStateCreateInfo(
-                binding_desc, attr_desc.data(), static_cast<std::uint32_t>(attr_desc.size())
+                binding_desc,
+                attr_desc.data(),
+                static_cast<std::uint32_t>(attr_desc.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
@@ -219,6 +223,7 @@ private:
                 );
 
         std::vector<VkDynamicState> dynamic_states;
+        
         VkPipelineDynamicStateCreateInfo dynamic_state =
             WVkPipelineHelper::RenderPlane_VkPipelineDynamicStateCreateInfo(
                 dynamic_states
@@ -246,8 +251,11 @@ private:
 
         // Dynamic rendering info
 
+        VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB;  // TODO: 16 bit format?
+
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
-            VK_FORMAT_B8G8R8A8_SRGB, // TODO: 16 bit format?
+            &color_format,
+            1,
             VK_FORMAT_D32_SFLOAT,
             graphics_pipeline_info,
             device_info_.vk_device
@@ -294,7 +302,10 @@ private:
 
     std::array<WVkDescriptorPoolInfo, FramesInFlight> descpool_info_{};
     VkDescriptorSetLayout descset_layout_{};
+
+    // TODO: common resource
     WVkMeshInfo render_plane_{};
+    
     VkSampler render_sampler_{};
         
     // WVkRenderPipelineInfo render_pipeline_{};
@@ -302,7 +313,7 @@ private:
     VkPipelineLayout pipeline_layout_{};
     WVkDeviceInfo device_info_{};
 
-    const char * shader_path_{"Content/Shaders/WRender_Offscreen.spv"}; // TODO Config file
+    const char * shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH}; // TODO Config file
 
 };
 

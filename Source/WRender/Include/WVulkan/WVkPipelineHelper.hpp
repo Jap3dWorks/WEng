@@ -39,7 +39,8 @@ namespace WVkPipelineHelper {
         ) {
         in_data[0].binding=0;
         in_data[0].location=0;
-        in_data[0].format=VK_FORMAT_R32G32B32_SFLOAT; // RG?
+        // in_data[0].format=VK_FORMAT_R32G32B32_SFLOAT; // RG?
+        in_data[0].format=VK_FORMAT_R32G32_SFLOAT;
         in_data[0].offset=0;  // position
 
         in_data[1].binding=0;
@@ -51,7 +52,7 @@ namespace WVkPipelineHelper {
     inline VkVertexInputBindingDescription RenderPlane_VertBindingDescrpt() {
         VkVertexInputBindingDescription result{};
         result.binding = 0;
-        result.stride = sizeof(float) * 2 + sizeof(float) * 2;
+        result.stride = sizeof(float) * 2 + sizeof(float) * 2;  // position + uv
         result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
         return result;
@@ -232,7 +233,8 @@ namespace WVkPipelineHelper {
     }
 
     inline VkPipeline RenderPlane_VkPipeline(
-        VkFormat in_color_format,
+        VkFormat * in_color_attachment_format,
+        std::uint32_t in_color_attachment_count,
         VkFormat in_depth_format,
         VkGraphicsPipelineCreateInfo in_graphics_pipeline_create_info,
         const VkDevice & in_device
@@ -241,8 +243,8 @@ namespace WVkPipelineHelper {
         VkPipelineRenderingCreateInfo rendering_info{};
         rendering_info.sType =
             VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-        rendering_info.colorAttachmentCount = 1;
-        rendering_info.pColorAttachmentFormats = &in_color_format;
+        rendering_info.colorAttachmentCount = in_color_attachment_count;
+        rendering_info.pColorAttachmentFormats = in_color_attachment_format;
         rendering_info.depthAttachmentFormat = in_depth_format;
         rendering_info.pNext = VK_NULL_HANDLE;
 

@@ -23,9 +23,7 @@ public:
     
     WVkSwapChainPipeline() noexcept = default;
     
-    virtual ~WVkSwapChainPipeline() {
-        Destroy();
-    }
+    virtual ~WVkSwapChainPipeline() noexcept = default;
 
     WVkSwapChainPipeline(const WVkSwapChainPipeline & other) = delete;
 
@@ -35,14 +33,14 @@ public:
         pipeline_(std::move(other.pipeline_)),
         descset_layout_(std::move(other.descset_layout_)),
         descriptor_pool_(std::move(other.descriptor_pool_)),
-        input_render_sampler_(std::move(other.input_render_sampler_))
+        sampler_(std::move(other.sampler_))
         {
             other.device_info_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
-            other.input_render_sampler_ = VK_NULL_HANDLE;
+            other.sampler_ = VK_NULL_HANDLE;
 
             for(std::uint32_t i=0; i<FramesInFlight; i++) {
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
@@ -57,7 +55,7 @@ public:
             descset_layout_ = std::move(other.descset_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             pipeline_ = std::move(other.pipeline_);
-            input_render_sampler_ = std::move(other.input_render_sampler_);
+            sampler_ = std::move(other.sampler_);
 
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
@@ -65,7 +63,7 @@ public:
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
-            other.input_render_sampler_ = VK_NULL_HANDLE;
+            other.sampler_ = VK_NULL_HANDLE;
 
             for(std::uint32_t i=0; i<FramesInFlight; i++) {
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
@@ -88,7 +86,7 @@ public:
 
         InitializeDescriptorPool();
 
-        input_render_sampler_ =
+        sampler_ =
             WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
 
         InitializeRenderPlane(in_command_pool);
@@ -136,12 +134,12 @@ public:
 
         descset_layout_ = VK_NULL_HANDLE;
 
-        if (input_render_sampler_) {
-            WVulkan::Destroy(input_render_sampler_,
+        if (sampler_) {
+            WVulkan::Destroy(sampler_,
                              device_info_);
         }
 
-        input_render_sampler_=VK_NULL_HANDLE;
+        sampler_=VK_NULL_HANDLE;
 
         WVulkan::Destroy(render_plane_,
                          device_info_);
@@ -164,7 +162,7 @@ public:
     }
 
     const VkSampler & InputRenderSampler() const noexcept {
-        return input_render_sampler_;
+        return sampler_;
     }
 
     const WVkMeshInfo & RenderPlane() const noexcept {
@@ -228,7 +226,9 @@ private:
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
             WVkPipelineHelper::RenderPlane_VkPipelineVertexInputStateCreateInfo(
-                binding_desc, attr_desc.data(), static_cast<std::uint32_t>(attr_desc.size())
+                binding_desc,
+                attr_desc.data(),
+                static_cast<std::uint32_t>(attr_desc.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
@@ -280,10 +280,9 @@ private:
                 pipeline_layout_
             );
 
-        // Dynamic rendering info
-
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
-            swap_chain_format,
+            &swap_chain_format,
+            1,
             VK_FORMAT_D32_SFLOAT,   // depth format
             graphics_pipeline_info,
             device_info_.vk_device
@@ -349,7 +348,7 @@ private:
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
-    VkSampler input_render_sampler_{VK_NULL_HANDLE};
+    VkSampler sampler_{VK_NULL_HANDLE};
 
     // TODO: common resource
     WVkMeshInfo render_plane_{};
