@@ -296,6 +296,7 @@ private:
 
     void InitializeDescriptorPool() {
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
+        // uniformbuffer?
         pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         pool_sizes[0].descriptorCount = 1;
         pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -350,6 +351,7 @@ private:
 
     VkSampler input_render_sampler_{VK_NULL_HANDLE};
 
+    // TODO: common resource
     WVkMeshInfo render_plane_{};
 
     const char * shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};

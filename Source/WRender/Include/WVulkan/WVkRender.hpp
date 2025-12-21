@@ -142,6 +142,12 @@ private:
         const std::uint32_t & in_image_index
         );
 
+    void RecordTonemappingRenderCommandBuffer(
+        const VkCommandBuffer & in_command_buffer,
+        const std::uint32_t & in_frame_index,
+        const std::uint32_t & in_image_index
+        );
+
     WVkInstanceInfo instance_info_{};
 
     struct WVkRenderWindow {

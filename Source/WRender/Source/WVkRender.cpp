@@ -381,7 +381,11 @@ void WVkRender::Draw()
         image_index
         );
 
-    // TODO: Record Tonemapping Swapchain Command Buffer
+    RecordTonemappingRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_,
+        image_index
+        );
 
     // End Command buffer
 
@@ -1157,4 +1161,13 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
         );
+}
+
+void WVkRender::RecordTonemappingRenderCommandBuffer(
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index,
+    const std::uint32_t & in_image_index
+    ) {
+    // TODO: Record Tonemapping Swapchain Command Buffer
+    
 }
