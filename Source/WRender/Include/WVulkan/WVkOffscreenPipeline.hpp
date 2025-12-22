@@ -58,7 +58,7 @@ public:
         if (device_info_.vk_device != VK_NULL_HANDLE) {
             DestroyRenderPipeline();
 
-            DestroyDescPool();
+            WVulkan::DestroyDescPools(descpool_info_, device_info_);
 
             DestroyDescSetLayout();
 
@@ -276,11 +276,11 @@ private:
         descset_layout_ = VK_NULL_HANDLE;
     }
 
-    void DestroyDescPool() {
-        for(auto & descpool : descpool_info_) {
-            WVulkan::Destroy(descpool, device_info_);
-        }
-    }
+    // void DestroyDescPool() {
+    //     for(auto & descpool : descpool_info_) {
+    //         WVulkan::Destroy(descpool, device_info_);
+    //     }
+    // }
 
     void DestroyRenderPipeline() {
         vkDestroyPipeline(device_info_.vk_device,

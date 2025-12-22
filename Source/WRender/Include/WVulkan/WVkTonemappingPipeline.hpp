@@ -3,6 +3,7 @@
 #include "WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WShaderUtils.hpp"
+#include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WVulkan/WVkPipelineHelper.hpp"
 
@@ -60,9 +61,59 @@ public:
         return *this;
     }
 
-    void Initialize();
+    void Initialize(const WVkDeviceInfo & in_device,
+                    const VkFormat & in_color_format) {
+        assert(device_info_.vk_device == VK_NULL_HANDLE);
 
-    void Destroy();
+        device_info_ = in_device;
+
+        InitializeDescSetLayout();
+
+        InitializeRenderPipeline(in_color_format);
+
+        sampler_ = WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
+    }
+
+    void Destroy() {
+        if (!device_info_.vk_device) {
+            return;
+        }
+
+        WVulkan::DestroyDescPools(descriptor_pool_, device_info_);
+
+        if (pipeline_) {
+            vkDestroyPipeline(device_info_.vk_device,
+                              pipeline_,
+                              nullptr);
+
+            pipeline_=VK_NULL_HANDLE;
+        }
+
+
+        if (pipeline_layout_) {
+            vkDestroyPipelineLayout(device_info_.vk_device,
+                                    pipeline_layout_,
+                                    nullptr);
+            
+            pipeline_layout_ = VK_NULL_HANDLE;
+        }
+
+        if (descset_layout_) {
+            vkDestroyDescriptorSetLayout(device_info_.vk_device,
+                                         descset_layout_,
+                                         nullptr);
+
+            descset_layout_ = VK_NULL_HANDLE;
+        }
+
+        if (sampler_) {
+            WVulkan::Destroy(sampler_, device_info_);
+
+            sampler_ = VK_NULL_HANDLE;
+        }
+
+        device_info_ = {};
+    }
 
 private:
 

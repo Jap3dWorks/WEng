@@ -231,6 +231,22 @@ namespace WVulkan
         const WVkDeviceInfo & in_device_info
         );
 
+    template<std::size_t N>
+    void DestroyDescPools(std::array<VkDescriptorPool, N> & out_desc_pools,
+                          const WVkDeviceInfo & in_device_info) {
+        for (std::uint32_t i=0; i<N; i++) {
+            if(out_desc_pools[i]) {
+                vkDestroyDescriptorPool(
+                    in_device_info.vk_device,
+                    out_desc_pools[i],
+                    nullptr
+                    );
+            }
+
+            out_desc_pools[i] = VK_NULL_HANDLE;
+        }
+    }
+
     // Descriptor Set Layout
     // ---------------------
 

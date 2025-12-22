@@ -98,48 +98,40 @@ public:
             return;
         }
 
-        for (std::uint32_t i=0; i<FramesInFlight; i++) {
-            if (descriptor_pool_[i]) {
-                vkDestroyDescriptorPool(
-                    device_info_.vk_device,
-                    descriptor_pool_[i],
-                    nullptr
-                    );
-            }
-            
-            descriptor_pool_[i] = VK_NULL_HANDLE;
-        }
-
+        WVulkan::DestroyDescPools(descriptor_pool_, device_info_);
+        
         if (pipeline_) {
             vkDestroyPipeline(device_info_.vk_device,
                               pipeline_,
                               nullptr);
+
+            pipeline_=VK_NULL_HANDLE;
         }
 
-        pipeline_=VK_NULL_HANDLE;
 
         if (pipeline_layout_) {
             vkDestroyPipelineLayout(device_info_.vk_device,
                                     pipeline_layout_,
                                     nullptr);
+
+            pipeline_layout_ = VK_NULL_HANDLE;
         }
 
-        pipeline_layout_ = VK_NULL_HANDLE;
         
         if (descset_layout_) {
             vkDestroyDescriptorSetLayout(device_info_.vk_device,
                                          descset_layout_,
                                          nullptr);
-        }
 
-        descset_layout_ = VK_NULL_HANDLE;
+            descset_layout_ = VK_NULL_HANDLE;
+        }
 
         if (sampler_) {
             WVulkan::Destroy(sampler_,
                              device_info_);
-        }
 
-        sampler_=VK_NULL_HANDLE;
+            sampler_=VK_NULL_HANDLE;
+        }
 
         WVulkan::Destroy(render_plane_,
                          device_info_);
