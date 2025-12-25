@@ -26,22 +26,23 @@ uniform Sampler2D hdr_color;
 [shader("fragment")]
 float4 fsMain(VSOutput vert_out) : SV_TARGET
 {
-    float3 hdr = hdr_color.Sample(vert_out.uv).rgb;
+    float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
 
-    // exposure
-    // hdr *= 1.f;
+    // // exposure
+    // // hdr *= 1.f;
 
     // 2.ACES tonemapping
     const float a = 2.51;
     const float b = 0.03;
     const float c = 2.43;
     const float d = 0.59;
-    const e = 0.14;
+    const float e = 0.14;
     float3 ldr = (hdr * (a * hdr + b)) / (hdr * (c * hdr + d) + e);
     ldr = clamp(ldr, 0.0, 1.0);
 
     ldr = pow(ldr, 1.0/2.2);
 
     return float4(ldr, 1.0);
+
 }
 

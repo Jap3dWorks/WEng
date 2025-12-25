@@ -58,7 +58,9 @@ public:
         if (device_info_.vk_device != VK_NULL_HANDLE) {
             DestroyRenderPipeline();
 
-            WVulkan::DestroyDescPools(descpool_info_, device_info_);
+            WVulkan::DestroyDescPools(
+                descpool_info_,
+                device_info_);
 
             DestroyDescSetLayout();
 
@@ -80,7 +82,7 @@ public:
         return render_plane_;
     }
 
-    const WVkDescriptorPoolInfo & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
+    const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
         return descpool_info_[in_frame_index];
     }
 
@@ -102,7 +104,7 @@ public:
 
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
         vkResetDescriptorPool(device_info_.vk_device,
-                              descpool_info_[in_frame_index].descriptor_pool,
+                              descpool_info_[in_frame_index],
                               0);
     }
 
@@ -134,7 +136,7 @@ private:
                     device_info_.vk_device,
                     &pool_info,
                     nullptr,
-                    &descpool.descriptor_pool) != VK_SUCCESS)
+                    &descpool) != VK_SUCCESS)
             {
                 throw std::runtime_error("Failed to create descriptor pool!");
             }
@@ -276,12 +278,6 @@ private:
         descset_layout_ = VK_NULL_HANDLE;
     }
 
-    // void DestroyDescPool() {
-    //     for(auto & descpool : descpool_info_) {
-    //         WVulkan::Destroy(descpool, device_info_);
-    //     }
-    // }
-
     void DestroyRenderPipeline() {
         vkDestroyPipeline(device_info_.vk_device,
                           pipeline_,
@@ -300,7 +296,7 @@ private:
 
 private:
 
-    std::array<WVkDescriptorPoolInfo, FramesInFlight> descpool_info_{};
+    std::array<VkDescriptorPool, FramesInFlight> descpool_info_{};
     VkDescriptorSetLayout descset_layout_{};
 
     // TODO: common resource

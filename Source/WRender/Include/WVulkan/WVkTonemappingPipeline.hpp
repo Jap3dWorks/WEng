@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WVkRenderConfig.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WShaderUtils.hpp"
 #include "WVulkan/WVulkan.hpp"

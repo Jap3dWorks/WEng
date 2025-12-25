@@ -902,7 +902,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     // DescriptorSet
     VkDescriptorSet descriptorset = WVkRenderUtils::CreateOffscreenRenderDescriptor(
         device_info_.vk_device,
-        offscreen_pipeline_.DescriptorPool(in_frame_index).descriptor_pool,
+        offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
         offscreen_pipeline_.Sampler(),
         gbuffers_rtargets_[in_frame_index].albedo.view,
