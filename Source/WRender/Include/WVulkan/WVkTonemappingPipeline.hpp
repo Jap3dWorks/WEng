@@ -17,6 +17,10 @@ class WVkTonemappingPipeline {
 
 public:
 
+    WVkTonemappingPipeline() = default;
+
+    virtual ~WVkTonemappingPipeline()=default;
+
     WVkTonemappingPipeline(const WVkTonemappingPipeline &) = delete;
 
     WVkTonemappingPipeline(WVkTonemappingPipeline && other) noexcept :

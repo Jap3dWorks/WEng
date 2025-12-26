@@ -109,17 +109,6 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
     auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
     auto plane_index = WVulkanUtils::RenderPlaneIndexes();
 
-    WVulkan::CreateMeshBuffers(
-        global_resources_.render_plane,
-        WVulkanUtils::RenderPlaneVertex().data(),
-        sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
-        WVulkanUtils::RenderPlaneIndexes().data(),
-        sizeof(decltype(plane_index)::value_type) * plane_index.size(),
-        plane_index.size(),
-        device_info_,
-        in_command_pool
-        );
-
     global_resources_.descset_layout_info = {};
     WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(
         global_resources_.descset_layout_info
@@ -138,17 +127,9 @@ void WVkPostprocessPipelines::Initialize_GlobalResources(const WVkCommandPoolInf
             );
     }
 
-    global_resources_.render_sampler = WVulkanUtils::CreateRenderPlaneSampler(
-        device_info_.vk_device
-        );
 }
 
 void WVkPostprocessPipelines::Destroy_GlobalResources() {
-
-    WVulkan::Destroy(
-        global_resources_.render_plane,
-        device_info_
-        );
 
     WVulkan::Destroy(
         global_resources_.descset_layout_info,
@@ -159,8 +140,4 @@ void WVkPostprocessPipelines::Destroy_GlobalResources() {
         WVulkan::Destroy(descpool, device_info_);
     }
 
-    WVulkan::Destroy(
-        global_resources_.render_sampler,
-        device_info_
-        );
 }

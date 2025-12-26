@@ -235,6 +235,16 @@ void WVkRender::Initialize()
         render_command_pool_.CommandPoolInfo()
         );
 
+    // TODO Initialize tonemapping pipeline
+    
+
+    // TODO Initialize pipeline resources
+
+    pipeline_resources_.Initialize(
+        device_info_,
+        render_command_pool_.CommandPoolInfo()
+        );
+
     render_command_buffer_ =
         render_command_pool_.
         CreateCommandBuffer();
@@ -468,7 +478,7 @@ void WVkRender::CreateRenderPipeline(
         WFLOG("Pipeline type not implemented.");
     }
 
-    pipeline_track_.pipeline_ptype[render_pipeline->WID()] =
+    pipeline_track_.pipeline_pipetype[render_pipeline->WID()] =
         render_pipeline->RenderPipeline().type;
 
 }
@@ -476,10 +486,10 @@ void WVkRender::CreateRenderPipeline(
 void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
 
     auto clearbindingfn = [this](const WEntityComponentId & binding) {
-        pipeline_track_.binding_ptype.erase(binding);
+        pipeline_track_.binding_pipetype.erase(binding);
     };
         
-    switch(pipeline_track_.pipeline_ptype[in_id]) {
+    switch(pipeline_track_.pipeline_pipetype[in_id]) {
         
     case EPipelineType::Graphics:
         graphics_pipelines_.ForEachBinding(
@@ -507,7 +517,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
         WFLOG("Pipeline type not implemented.");
     }
 
-    pipeline_track_.pipeline_ptype.erase(in_id);
+    pipeline_track_.pipeline_pipetype.erase(in_id);
 
 }
 
@@ -551,7 +561,7 @@ void WVkRender::CreatePipelineBinding(
         };
     }
 
-    switch(pipeline_track_.pipeline_ptype[pipeline_id]) {
+    switch(pipeline_track_.pipeline_pipetype[pipeline_id]) {
 
     case EPipelineType::Graphics:
         graphics_pipelines_.CreateBinding(component_id,
@@ -572,14 +582,14 @@ void WVkRender::CreatePipelineBinding(
         WFLOG("Pipeline type not implemented.");
     }
 
-    pipeline_track_.binding_ptype[component_id] =
-        pipeline_track_.pipeline_ptype[pipeline_id];
+    pipeline_track_.binding_pipetype[component_id] =
+        pipeline_track_.pipeline_pipetype[pipeline_id];
     
 }
 
 void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 
-    switch(pipeline_track_.binding_ptype[in_id]) {
+    switch(pipeline_track_.binding_pipetype[in_id]) {
         
     case EPipelineType::Graphics:
         graphics_pipelines_.DeleteBinding(in_id);
@@ -593,7 +603,7 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
         WFLOG("Pipeline type not implemented.");
     }
 
-    pipeline_track_.binding_ptype.erase(in_id);
+    pipeline_track_.binding_pipetype.erase(in_id);
 }
 
 void WVkRender::RefreshPipelines() {
@@ -635,7 +645,7 @@ void WVkRender::UpdateParameterDynamic(
         .offset = ubo_write.offset
     };
 
-    switch(pipeline_track_.binding_ptype[in_component_id]) {
+    switch(pipeline_track_.binding_pipetype[in_component_id]) {
 
     case EPipelineType::Graphics:
         graphics_pipelines_.UpdateBinding(in_component_id,
@@ -666,7 +676,7 @@ void WVkRender::UpdateParameterStatic(
         .offset = ubo_write.offset
     };
 
-    switch(pipeline_track_.binding_ptype[in_component_id]) {
+    switch(pipeline_track_.binding_pipetype[in_component_id]) {
         
     case EPipelineType::Graphics:
         graphics_pipelines_.UpdateBinding(
@@ -1026,7 +1036,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
             // gbuffers_render_[in_frame_index].albedo.view,
             input_view,
-            ppcss_pipelines_.GlobalSampler()
+            // ppcss_pipelines_.GlobalSampler()
+            pipeline_resources_.Sampler()
             );
 
         VkDescriptorSet pp_descriptor = WVkRenderUtils::CreateRenderDescriptor(
@@ -1038,7 +1049,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             binding.textures
             );
 
-        const WVkMeshInfo& render_plane = ppcss_pipelines_.RenderPlane();
+        const WVkMeshInfo & render_plane = pipeline_resources_.RenderPlane();
 
         WVkRenderUtils::RndCmd_PostprocessDrawCommands(
             device_info_.vk_device, in_command_buffer,
@@ -1117,10 +1128,12 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         dslay,
         input_view,
         // gbuffers_render_[in_frame_index].albedo.view,  // TODO for testing
-        swap_chain_pipeline_.InputRenderSampler()
+        // swap_chain_pipeline_.InputRenderSampler()
+        pipeline_resources_.Sampler()
         );
 
-    auto & render_plane = swap_chain_pipeline_.RenderPlane();
+    // auto & render_plane = swap_chain_pipeline_.RenderPlane();
+    auto & render_plane = pipeline_resources_.RenderPlane();
     VkDeviceSize offsets=0;
 
     vkCmdBindVertexBuffers(in_command_buffer,

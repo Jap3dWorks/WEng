@@ -7,9 +7,11 @@
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVkPipelineResources.hpp"
 #include "WVulkan/WVkGraphicsPipelines.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkOffscreenPipeline.hpp"
+#include "WVulkan/WVkTonemappingPipeline.hpp"
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkAssetResources.hpp"
@@ -176,13 +178,15 @@ private:
     WVkCommandBufferInfo render_command_buffer_{};
 
     // Pipelines, Maybe I should create a container class/struct.
+    WVkPipelineResources pipeline_resources_{};
     WVkGraphicsPipelines graphics_pipelines_{};
     WVkOffscreenPipeline<> offscreen_pipeline_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
+    WVkTonemappingPipeline<> tonemapping_pipeline_{};
     struct PipelinesTrack {
-        std::unordered_map<WAssetId, EPipelineType> pipeline_ptype{};
-        std::unordered_map<WEntityComponentId, EPipelineType> binding_ptype{};
-    } pipeline_track_;
+        std::unordered_map<WAssetId, EPipelineType> pipeline_pipetype{};
+        std::unordered_map<WEntityComponentId, EPipelineType> binding_pipetype{};
+    } pipeline_track_{};
     // --
 
     struct SyncSemaphores {

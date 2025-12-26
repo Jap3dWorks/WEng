@@ -18,8 +18,6 @@ public:
     struct GlobalPostprocessResources {
         std::array<WVkDescriptorPoolInfo, frames_in_flight> descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
-        WVkMeshInfo render_plane{};
-        VkSampler render_sampler{};
     };
 
 public:
@@ -34,20 +32,12 @@ public:
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
                                      const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
-    const WVkMeshInfo & RenderPlane() const {
-        return global_resources_.render_plane;
-    }
-
     const WVkDescriptorPoolInfo & GlobalDescriptorPool(const std::uint32_t & in_frame_index) const {
         return global_resources_.descpool_info[in_frame_index];
     }
 
     const WVkDescriptorSetLayoutInfo & GlobalDescSetLayout() const {
         return global_resources_.descset_layout_info;
-    }
-
-    const VkSampler & GlobalSampler() const {
-        return global_resources_.render_sampler;
     }
 
     void ResetGlobalDescriptorPool(const std::uint32_t & in_frame_index) {

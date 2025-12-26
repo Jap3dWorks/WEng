@@ -32,15 +32,15 @@ public:
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
         descset_layout_(std::move(other.descset_layout_)),
-        descriptor_pool_(std::move(other.descriptor_pool_)),
-        sampler_(std::move(other.sampler_))
+        descriptor_pool_(std::move(other.descriptor_pool_))
+        // sampler_(std::move(other.sampler_))
         {
             other.device_info_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
-            other.sampler_ = VK_NULL_HANDLE;
+            // other.sampler_ = VK_NULL_HANDLE;
 
             for(std::uint32_t i=0; i<FramesInFlight; i++) {
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
@@ -55,7 +55,7 @@ public:
             descset_layout_ = std::move(other.descset_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             pipeline_ = std::move(other.pipeline_);
-            sampler_ = std::move(other.sampler_);
+            // sampler_ = std::move(other.sampler_);
 
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
@@ -63,7 +63,7 @@ public:
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
-            other.sampler_ = VK_NULL_HANDLE;
+            // other.sampler_ = VK_NULL_HANDLE;
 
             for(std::uint32_t i=0; i<FramesInFlight; i++) {
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
@@ -86,10 +86,10 @@ public:
 
         InitializeDescriptorPool();
 
-        sampler_ =
-            WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
+        // sampler_ =
+        //     WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
 
-        InitializeRenderPlane(in_command_pool);
+        // InitializeRenderPlane(in_command_pool);
 
     }
 
@@ -126,15 +126,15 @@ public:
             descset_layout_ = VK_NULL_HANDLE;
         }
 
-        if (sampler_) {
-            WVulkan::Destroy(sampler_,
-                             device_info_);
+        // if (sampler_) {
+        //     WVulkan::Destroy(sampler_,
+        //                      device_info_);
 
-            sampler_=VK_NULL_HANDLE;
-        }
+        //     sampler_=VK_NULL_HANDLE;
+        // }
 
-        WVulkan::Destroy(render_plane_,
-                         device_info_);
+        // WVulkan::Destroy(render_plane_,
+        //                  device_info_);
 
         device_info_ = {};
     }
@@ -153,13 +153,13 @@ public:
         return descset_layout_;
     }
 
-    const VkSampler & InputRenderSampler() const noexcept {
-        return sampler_;
-    }
+    // const VkSampler & InputRenderSampler() const noexcept {
+    //     return sampler_;
+    // }
 
-    const WVkMeshInfo & RenderPlane() const noexcept {
-        return render_plane_;
-    }
+    // const WVkMeshInfo & RenderPlane() const noexcept {
+    //     return render_plane_;
+    // }
 
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
         vkResetDescriptorPool(device_info_.vk_device,
@@ -314,24 +314,24 @@ private:
         }
     }
 
-    void InitializeRenderPlane(const WVkCommandPoolInfo & in_command_pool) {
+    // void InitializeRenderPlane(const WVkCommandPoolInfo & in_command_pool) {
 
-        auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
-        auto plane_index = WVulkanUtils::RenderPlaneIndexes();
+    //     auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
+    //     auto plane_index = WVulkanUtils::RenderPlaneIndexes();
 
-        WVulkan::CreateMeshBuffers(
-            render_plane_,
-            WVulkanUtils::RenderPlaneVertex().data(),
-            sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
-            // sizeof(float) * 16,
-            WVulkanUtils::RenderPlaneIndexes().data(),
-            sizeof(decltype(plane_index)::value_type) * plane_index.size(),
-            // sizeof(std::uint32_t) * 6,
-            plane_index.size(),
-            device_info_,
-            in_command_pool
-            );
-    }
+    //     WVulkan::CreateMeshBuffers(
+    //         render_plane_,
+    //         WVulkanUtils::RenderPlaneVertex().data(),
+    //         sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
+    //         // sizeof(float) * 16,
+    //         WVulkanUtils::RenderPlaneIndexes().data(),
+    //         sizeof(decltype(plane_index)::value_type) * plane_index.size(),
+    //         // sizeof(std::uint32_t) * 6,
+    //         plane_index.size(),
+    //         device_info_,
+    //         in_command_pool
+    //         );
+    // }
 
     VkPipeline pipeline_{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
@@ -340,10 +340,10 @@ private:
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
-    VkSampler sampler_{VK_NULL_HANDLE};
+    // VkSampler sampler_{VK_NULL_HANDLE};
 
     // TODO: common resource
-    WVkMeshInfo render_plane_{};
+    // WVkMeshInfo render_plane_{};
 
     const char * shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
 
