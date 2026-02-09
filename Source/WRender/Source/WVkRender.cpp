@@ -314,6 +314,8 @@ void WVkRender::Destroy() {
 
     swap_chain_pipeline_.Destroy();
 
+    pipeline_resources_.Destroy();
+
     WFLOG("Destroy Render Command Pool.");
 
     render_command_pool_.Clear();
@@ -391,11 +393,11 @@ void WVkRender::Draw()
         image_index
         );
 
-    RecordTonemappingRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
-        frame_index_,
-        image_index
-        );
+    // RecordTonemappingRenderCommandBuffer(
+    //     render_command_buffer_.command_buffers[frame_index_],
+    //     frame_index_,
+    //     image_index
+    //     );
 
     // End Command buffer
 
@@ -914,7 +916,8 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         device_info_.vk_device,
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
-        offscreen_pipeline_.Sampler(),
+        pipeline_resources_.Sampler(),
+        // offscreen_pipeline_.Sampler(),
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
         gbuffers_rtargets_[in_frame_index].ws_position.view,
@@ -922,7 +925,8 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // Draw Commands
-    const WVkMeshInfo & rplane = offscreen_pipeline_.RenderPlane();
+    // const WVkMeshInfo & rplane = offscreen_pipeline_.RenderPlane();
+    const WVkMeshInfo & rplane = pipeline_resources_.RenderPlane();
     
     VkBuffer vertex_buffers[] = {rplane.vertex_buffer};
     VkDeviceSize offsets[] = {0};
@@ -1064,7 +1068,6 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
         idx++;
 
-        // TODO: swap input render
         input_view = pp_views[idx % 2];
         input_img = pp_images[idx % 2];
         dst_view = pp_views[(idx + 1) % 2];
@@ -1083,10 +1086,27 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             );
     }
 
+    // Image view that will be used by the swap chain pipeline pass
+    swap_chain_input_img_view = input_view;
+
+}
+
+void WVkRender::RecordTonemappingRenderCommandBuffer(
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index,
+    const std::uint32_t & in_image_index
+    ) {
+    
+    // TODO: Record Tonemapping Swapchain Command Buffer
+
+    
+
+    // Swapchain commands
+
     VkImage swapchain_image = swap_chain_info_.images[in_image_index];
     VkImageView swapchain_imageview = swap_chain_info_.views[in_image_index];
 
-    // swap chain image layout to render into
+    // swap chain image layout to render into it
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
         swapchain_image,
@@ -1126,7 +1146,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         swap_chain_pipeline_.DescriptorPool(in_frame_index),
         // dspool,
         dslay,
-        input_view,
+        swap_chain_input_img_view,
         // gbuffers_render_[in_frame_index].albedo.view,  // TODO for testing
         // swap_chain_pipeline_.InputRenderSampler()
         pipeline_resources_.Sampler()
@@ -1174,13 +1194,5 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
         );
-}
 
-void WVkRender::RecordTonemappingRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index,
-    const std::uint32_t & in_image_index
-    ) {
-    // TODO: Record Tonemapping Swapchain Command Buffer
-    
 }

@@ -38,6 +38,7 @@ uniform Sampler2D depth;
 [shader("fragment")]
 float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
+    // return ws_position.Sample(vertexOutput.fragTexCoord);
     return albedo.Sample(vertexOutput.fragTexCoord);
 
     // return float4(vertexOutput.fragTexCoord, 0.f, 1.f);

@@ -7,6 +7,9 @@
 
 #include <cassert>
 
+/**
+ * Contains common render pipelines resources
+ */
 class WVkPipelineResources {
 
 public:
