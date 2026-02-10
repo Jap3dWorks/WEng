@@ -66,6 +66,7 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     render_resources_(std::move(other.render_resources_)),
     swap_chain_info_(std::move(other.swap_chain_info_)),
     swap_chain_pipeline_(std::move(other.swap_chain_pipeline_)),
+    swap_chain_input_img_view(std::move(other.swap_chain_input_img_view)),
     gbuffers_rtargets_(std::move(other.gbuffers_rtargets_)),
     postprocess_rtargets_(std::move(other.postprocess_rtargets_)),
     render_command_pool_(std::move(other.render_command_pool_)),
@@ -89,6 +90,7 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         render_resources_ = std::move(other.render_resources_);
         swap_chain_info_ = std::move(other.swap_chain_info_);
         swap_chain_pipeline_ = std::move(other.swap_chain_pipeline_);
+        swap_chain_input_img_view = std::move(other.swap_chain_input_img_view);
         gbuffers_rtargets_ = std::move(other.gbuffers_rtargets_);
         postprocess_rtargets_ = std::move(other.postprocess_rtargets_);
         render_command_pool_ = std::move(other.render_command_pool_);
@@ -206,6 +208,7 @@ void WVkRender::Initialize()
         );
 
     // tonemapping render targets
+    
     WVkRenderUtils::CreateTonemappingRenderTargets(
         tonemapping_rtargets_,
         device_info_,
@@ -214,6 +217,8 @@ void WVkRender::Initialize()
         swap_chain_info_.format
         );
 
+    // Create Render Command Pool
+
     render_command_pool_ = WVkRenderCommandPool( 
         WVkCommandPoolInfo(),
         device_info_,
@@ -221,24 +226,37 @@ void WVkRender::Initialize()
         );
 
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
+
     graphics_pipelines_.Initialize(device_info_);
 
     WFLOG("[DEBUG] Initialize Offscreen Pipeline.")
+
     offscreen_pipeline_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
 
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
+
     ppcss_pipelines_.Initialize(
         device_info_,
         render_command_pool_.CommandPoolInfo()
         );
 
-    // TODO Initialize tonemapping pipeline
-    
+    WFLOG("[DEBUG] Initialize tonemapping pipeline");
 
-    // TODO Initialize pipeline resources
+    tonemapping_pipeline_.Initialize(
+        device_info_,
+        swap_chain_info_.format        
+        );
+    
+    WFLOG("[DEBUG] Initialize swap chain pipeline")
+
+    swap_chain_pipeline_.Initialize(
+        device_info_,
+        render_command_pool_.CommandPoolInfo(),
+        swap_chain_info_.format
+        );
 
     pipeline_resources_.Initialize(
         device_info_,
@@ -263,12 +281,6 @@ void WVkRender::Initialize()
         render_command_pool_.CommandPoolInfo()
         );
 
-    swap_chain_pipeline_.Initialize(
-        device_info_,
-        render_command_pool_.CommandPoolInfo(),
-        swap_chain_info_.format
-        );
-
 }
 
 void WVkRender::Destroy() {
@@ -276,6 +288,7 @@ void WVkRender::Destroy() {
     WFLOG("Destroy WVkRender...");
 
     WFLOG("Destroy Render Pipelines.");
+    swap_chain_input_img_view = VK_NULL_HANDLE;
     graphics_pipelines_.Destroy();
     offscreen_pipeline_.Destroy();
     ppcss_pipelines_.Destroy();
@@ -292,6 +305,8 @@ void WVkRender::Destroy() {
         device_info_.vk_device
         );
 
+    WFLOG("Destroy render targets.")
+
     WVkRenderUtils::DestroyGBuffersRender(
         gbuffers_rtargets_,
         device_info_
@@ -307,9 +322,13 @@ void WVkRender::Destroy() {
         device_info_
         );
 
+    WVkRenderUtils::DestroyTonemappingRender(
+        tonemapping_rtargets_,
+        device_info_
+        );
+
     WFLOG("Destroy Swap Chain Info.");
 
-    // Destroy Swap Chain and Image Views
     WVulkan::Destroy(swap_chain_info_, device_info_);
 
     swap_chain_pipeline_.Destroy();
@@ -393,11 +412,11 @@ void WVkRender::Draw()
         image_index
         );
 
-    // RecordTonemappingRenderCommandBuffer(
-    //     render_command_buffer_.command_buffers[frame_index_],
-    //     frame_index_,
-    //     image_index
-    //     );
+    RecordTonemappingRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_,
+        image_index
+        );
 
     // End Command buffer
 
@@ -1088,7 +1107,6 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
     // Image view that will be used by the swap chain pipeline pass
     swap_chain_input_img_view = input_view;
-
 }
 
 void WVkRender::RecordTonemappingRenderCommandBuffer(
@@ -1098,8 +1116,6 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     ) {
     
     // TODO: Record Tonemapping Swapchain Command Buffer
-
-    
 
     // Swapchain commands
 

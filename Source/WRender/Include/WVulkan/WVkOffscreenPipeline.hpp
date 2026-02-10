@@ -27,29 +27,30 @@ public:
 
     void Initialize(const WVkDeviceInfo & in_device,
                     const WVkCommandPoolInfo & in_command_pool) {
+        
         device_info_ = in_device;
 
-        auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
-        auto plane_index = WVulkanUtils::RenderPlaneIndexes();
+        // auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
+        // auto plane_index = WVulkanUtils::RenderPlaneIndexes();
 
-        WVulkan::CreateMeshBuffers(
-            render_plane_,
-            WVulkanUtils::RenderPlaneVertex().data(),
-            sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
-            WVulkanUtils::RenderPlaneIndexes().data(),
-            sizeof(decltype(plane_index)::value_type) * plane_index.size(),
-            plane_index.size(),
-            in_device,
-            in_command_pool
-            );
+        // WVulkan::CreateMeshBuffers(
+        //     render_plane_,
+        //     WVulkanUtils::RenderPlaneVertex().data(),
+        //     sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),
+        //     WVulkanUtils::RenderPlaneIndexes().data(),
+        //     sizeof(decltype(plane_index)::value_type) * plane_index.size(),
+        //     plane_index.size(),
+        //     in_device,
+        //     in_command_pool
+        //     );
 
         InitializeDescSetLayout();
 
         InitializeDescPool();
 
-        render_sampler_ = WVulkanUtils::CreateRenderPlaneSampler(
-            in_device.vk_device
-            );
+        // render_sampler_ = WVulkanUtils::CreateRenderPlaneSampler(
+        //     in_device.vk_device
+        //     );
 
         InitializeRenderPipeline();
     }
@@ -64,23 +65,23 @@ public:
 
             DestroyDescSetLayout();
 
-            WVulkan::Destroy(
-                render_sampler_,
-                device_info_
-                );
+            // WVulkan::Destroy(
+            //     render_sampler_,
+            //     device_info_
+            //     );
 
-            WVulkan::Destroy(
-                render_plane_,
-                device_info_
-                );
+            // WVulkan::Destroy(
+            //     render_plane_,
+            //     device_info_
+            //     );
 
             device_info_ = {};
         }
     }
 
-    const WVkMeshInfo & RenderPlane() const noexcept{
-        return render_plane_;
-    }
+    // const WVkMeshInfo & RenderPlane() const noexcept{
+    //     return render_plane_;
+    // }
 
     const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
         return descpool_info_[in_frame_index];
@@ -90,9 +91,9 @@ public:
         return descset_layout_;
     }
 
-    const VkSampler & Sampler() const noexcept {
-        return render_sampler_;
-    }
+    // const VkSampler & Sampler() const noexcept {
+    //     return render_sampler_;
+    // }
 
     const VkPipeline & Pipeline() const noexcept {
         return pipeline_;
@@ -194,7 +195,7 @@ private:
         VkVertexInputBindingDescription binding_desc =
             WVkPipelineHelper::RenderPlane_VertBindingDescrpt();
 
-                VkPipelineVertexInputStateCreateInfo vertex_input_info =
+        VkPipelineVertexInputStateCreateInfo vertex_input_info =
             WVkPipelineHelper::RenderPlane_VkPipelineVertexInputStateCreateInfo(
                 binding_desc,
                 attr_desc.data(),
@@ -300,16 +301,16 @@ private:
     VkDescriptorSetLayout descset_layout_{};
 
     // TODO: common resource
-    WVkMeshInfo render_plane_{};
+    // WVkMeshInfo render_plane_{};
     
-    VkSampler render_sampler_{};
+    // VkSampler render_sampler_{};
         
     // WVkRenderPipelineInfo render_pipeline_{};
     VkPipeline pipeline_{};
     VkPipelineLayout pipeline_layout_{};
     WVkDeviceInfo device_info_{};
 
-    const char * shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH}; // TODO Config file
+    const char * shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
 
 };
 

@@ -582,19 +582,27 @@ namespace WVkRenderUtils {
     }
 
     template<CIterable<WVkOffscreenRenderStruct> T>
-    void DestroyOffscreenRender(T & in_offscreen_structs,
+    void DestroyOffscreenRender(T & out_offscreen_structs,
                                 const WVkDeviceInfo & in_device_info) {
         
-        for(auto& offrnd : in_offscreen_structs) {
+        for(auto& offrnd : out_offscreen_structs) {
             DestroyRenderTarget(offrnd.color, in_device_info);
         }
     }
 
     template<CIterable<WVkPostprocessRenderStruct> T>
-    void DestroyPostprocessRender(T & postprocess_render,
+    void DestroyPostprocessRender(T & out_postprocess_render,
                                   const WVkDeviceInfo & in_device_info) {
-        for (auto & pstrnd : postprocess_render) {
+        for (auto & pstrnd : out_postprocess_render) {
             DestroyRenderTarget(pstrnd.color, in_device_info);
+        }
+    }
+
+    template<CIterable<WVkTonemappingRenderStruct> T>
+    void DestroyTonemappingRender(T & out_tonemapping_render,
+                                  const WVkDeviceInfo & in_device_info) {
+        for (auto & tnrnd : out_tonemapping_render) {
+            DestroyRenderTarget(tnrnd.color, in_device_info);
         }
     }
 

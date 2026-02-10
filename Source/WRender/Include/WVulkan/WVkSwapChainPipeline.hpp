@@ -340,11 +340,6 @@ private:
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
-    // VkSampler sampler_{VK_NULL_HANDLE};
-
-    // TODO: common resource
-    // WVkMeshInfo render_plane_{};
-
     const char * shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
 
     WVkDeviceInfo device_info_{};

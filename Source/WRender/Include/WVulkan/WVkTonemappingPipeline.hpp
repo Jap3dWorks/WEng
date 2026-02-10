@@ -28,15 +28,13 @@ public:
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
         descset_layout_(std::move(other.descset_layout_)),
-        descriptor_pool_(std::move(other.descriptor_pool_)),
-        sampler_(std::move(other.sampler_))
+        descriptor_pool_(std::move(other.descriptor_pool_))
         {
             other.device_info_ = {};
 
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
-            other.sampler_ = VK_NULL_HANDLE;
 
             for(std::uint32_t i=0; i<FramesInFlight; i++) {
                 other.descriptor_pool_[i] = VK_NULL_HANDLE;
@@ -51,13 +49,11 @@ public:
             pipeline_layout_ = std::move(other.pipeline_layout_);
             descset_layout_ = std::move(other.descset_layout_);
             descriptor_pool_ = std::move(other.descriptor_pool_);
-            sampler_ = std::move(other.sampler_);
             device_info_ = std::move(other.device_info_);
 
             other.pipeline_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
-            other.sampler_ = VK_NULL_HANDLE;
             other.descriptor_pool_ = {};
             other.device_info_ = {};
         }
@@ -75,7 +71,6 @@ public:
 
         InitializeRenderPipeline(in_color_format);
 
-        sampler_ = WVulkanUtils::CreateRenderPlaneSampler(device_info_.vk_device);
     }
 
     void Destroy() {
@@ -108,12 +103,6 @@ public:
                                          nullptr);
 
             descset_layout_ = VK_NULL_HANDLE;
-        }
-
-        if (sampler_) {
-            WVulkan::Destroy(sampler_, device_info_);
-
-            sampler_ = VK_NULL_HANDLE;
         }
 
         device_info_ = {};
@@ -271,11 +260,7 @@ private:
     VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
-    VkSampler sampler_{VK_NULL_HANDLE};
-
-    // TODO: common resource
-    // WVkMeshInfo render_plane_{};
-
+    
     const char* shader_path{WENG_VK_TONEMAPPING_SHADER_PATH};
 
     WVkDeviceInfo device_info_{};
