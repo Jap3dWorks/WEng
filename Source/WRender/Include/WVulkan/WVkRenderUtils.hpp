@@ -911,7 +911,119 @@ namespace WVkRenderUtils {
             &rendering_info
             );
     }
-    
+
+    inline void RndCmd_TransitionTonemappingWriteLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_color
+        ) {
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_color,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+    }
+
+    inline void RndCmd_TransitionTonemappingReadLayout(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImage & in_color
+        ) {
+        WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_color,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+    }
+
+    inline void RndCmd_BeginTonemappingRendering(
+        const VkCommandBuffer & in_command_buffer,
+        const VkImageView & in_color_view,
+        const VkExtent2D & in_extent
+        )
+    {
+        VkRenderingAttachmentInfo color_attachment{};
+        color_attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachment.imageView = in_color_view;
+        color_attachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachment.clearValue = {0.5, 0.5, 0.5, 1.f};
+
+        VkRenderingInfo rendering_info{};
+        rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        rendering_info.renderArea = {{0,0}, in_extent};
+        rendering_info.layerCount = 1;
+        rendering_info.colorAttachmentCount = 1;
+        rendering_info.pColorAttachments = &color_attachment;
+        rendering_info.pDepthAttachment = VK_NULL_HANDLE;
+        rendering_info.pStencilAttachment = VK_NULL_HANDLE;
+
+        vkCmdBeginRendering(
+            in_command_buffer,
+            &rendering_info
+            );        
+    }
+
+    inline VkDescriptorSet CreateTonemappingDescriptor(
+        const VkDevice & vk_device,
+        const VkDescriptorPool & in_desc_pool,
+        const VkDescriptorSetLayout & in_desc_lay,
+        const VkSampler & in_sampler,
+        const VkImageView & in_color_view
+        ) {
+        VkDescriptorSet descriptor_set{};
+        VkDescriptorSetAllocateInfo alloc_info{};
+        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        alloc_info.descriptorPool = in_desc_pool;
+        alloc_info.descriptorSetCount = 1;
+        alloc_info.pSetLayouts = &in_desc_lay;
+
+        if (vkAllocateDescriptorSets(
+                vk_device,
+                &alloc_info,
+                &descriptor_set
+                ) != VK_SUCCESS ) {
+            throw std::runtime_error("Failed to allocate descriptor sets!");
+        }
+
+        std::array<VkWriteDescriptorSet,1> write_ds;
+        std::array<VkDescriptorImageInfo,1> image_info;
+
+        image_info[0] = {};
+        image_info[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        image_info[0].imageView = in_color_view;
+        image_info[0].sampler = in_sampler;
+        
+        write_ds[0] = {};
+        write_ds[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write_ds[0].dstBinding = 0;
+        write_ds[0].dstSet = descriptor_set;
+        write_ds[0].dstArrayElement = 0;
+        write_ds[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write_ds[0].descriptorCount=1;
+        write_ds[0].pImageInfo = &image_info[0];
+        write_ds[0].pNext = VK_NULL_HANDLE;
+
+        vkUpdateDescriptorSets(
+            vk_device,
+            static_cast<std::uint32_t>(write_ds.size()),
+            write_ds.data(),
+            0,
+            nullptr
+            );
+
+        return descriptor_set;
+    }
+
     inline void RndCmd_BeginSwapchainRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,

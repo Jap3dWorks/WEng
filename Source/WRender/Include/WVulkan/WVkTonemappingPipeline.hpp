@@ -108,6 +108,26 @@ public:
         device_info_ = {};
     }
 
+    const VkPipeline & Pipeline() const noexcept { return pipeline_; }
+
+    const VkPipelineLayout & PipelineLayout() const noexcept {
+        return pipeline_layout_;
+    }
+
+    const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
+        return descriptor_pool_[in_frame_index];
+    }
+
+    const VkDescriptorSetLayout & DescriptorSetLayout() const noexcept {
+        return descset_layout_;
+    }
+
+    void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
+        vkResetDescriptorPool(device_info_.vk_device,
+                              descriptor_pool_[in_frame_index],
+                              0);
+    }
+
 private:
 
     void InitializeDescSetLayout() {

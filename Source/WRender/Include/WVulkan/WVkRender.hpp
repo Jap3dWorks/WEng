@@ -173,7 +173,7 @@ private:
 
     WVkSwapChainInfo swap_chain_info_{};
     WVkSwapChainPipeline<> swap_chain_pipeline_{};
-    VkImageView swap_chain_input_img_view{VK_NULL_HANDLE};
+    VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 
     WVkRenderCommandPool render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};

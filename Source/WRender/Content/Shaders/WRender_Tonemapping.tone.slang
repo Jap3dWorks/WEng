@@ -20,12 +20,15 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]] // binding 0, set 0
+[[vk::binding(0, 0)]] // binding 0, set 0
 uniform Sampler2D hdr_color;
 
 [shader("fragment")]
 float4 fsMain(VSOutput vert_out) : SV_TARGET
 {
+    return hdr_color.Sample(vert_out.fragTexCoord).rgb;
+    
+    /*
     float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
 
     // // exposure
@@ -43,6 +46,6 @@ float4 fsMain(VSOutput vert_out) : SV_TARGET
     ldr = pow(ldr, 1.0/2.2);
 
     return float4(ldr, 1.0);
-
+    */
 }
 

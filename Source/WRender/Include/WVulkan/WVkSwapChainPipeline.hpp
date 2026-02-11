@@ -153,14 +153,6 @@ public:
         return descset_layout_;
     }
 
-    // const VkSampler & InputRenderSampler() const noexcept {
-    //     return sampler_;
-    // }
-
-    // const WVkMeshInfo & RenderPlane() const noexcept {
-    //     return render_plane_;
-    // }
-
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
         vkResetDescriptorPool(device_info_.vk_device,
                               descriptor_pool_[in_frame_index],
