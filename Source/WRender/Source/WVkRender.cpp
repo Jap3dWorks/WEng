@@ -182,9 +182,8 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
-        // VK_FORMAT_R16G16B16A16_SFLOAT
-        // swap_chain_info_.format  // TODO: Use 16 bit color format
+        // swap_chain_info_.format
+        WENG_VK_GBUFFER_RENDER_FORMAT
         );
 
     // Offscreen render targets
@@ -194,7 +193,8 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format // TODO: Use 16 bit unorm
+        // swap_chain_info_.format // TODO: Use 16 bit SFLOAT
+        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
         );
 
     // Postprocess render targets
@@ -204,7 +204,8 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format // TODO: hdr
+        // swap_chain_info_.format // TODO: SFLOAT
+        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
         );
 
     // tonemapping render targets
@@ -945,7 +946,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
         pipeline_resources_.Sampler(),
-        // offscreen_pipeline_.Sampler(),
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
         gbuffers_rtargets_[in_frame_index].ws_position.view,
@@ -1066,9 +1066,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             device_info_.vk_device,
             ppcss_pipelines_.GlobalDescriptorPool(in_frame_index).descriptor_pool,
             ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
-            // gbuffers_render_[in_frame_index].albedo.view,
             input_view,
-            // ppcss_pipelines_.GlobalSampler()
             pipeline_resources_.Sampler()
             );
 
@@ -1124,8 +1122,6 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     const std::uint32_t & in_image_index
     ) {
     
-    // TODO: Tonemapping and swap chain as separate processes.
-
     WVkRenderUtils::RndCmd_TransitionTonemappingWriteLayout(
         in_command_buffer,
         tonemapping_rtargets_[in_frame_index].color.image
@@ -1237,15 +1233,11 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
     VkDescriptorSet descriptor = WVkRenderUtils::CreateInputRenderDescriptor(
         device_info_.vk_device,
         swap_chain_pipeline_.DescriptorPool(in_frame_index),
-        // dspool,
         dslay,
         swap_chain_input_imgview_ref,
-        // gbuffers_render_[in_frame_index].albedo.view,  // TODO for testing
-        // swap_chain_pipeline_.InputRenderSampler()
         pipeline_resources_.Sampler()
         );
 
-    // auto & render_plane = swap_chain_pipeline_.RenderPlane();
     auto & render_plane = pipeline_resources_.RenderPlane();
     VkDeviceSize offsets=0;
 

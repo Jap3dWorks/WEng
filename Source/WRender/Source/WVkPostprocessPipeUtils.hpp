@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WShaderUtils.hpp"
@@ -163,8 +164,10 @@ namespace WVkPostprocessPipeUtils {
         pipeline_create_info.subpass = 0;
         pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 
-        VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB; // TODO: 16 bit colors
+        // VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB; // TODO: 16 bit colors
+        VkFormat color_format = WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT;
         VkFormat depth_format = VK_FORMAT_D32_SFLOAT;
+        // TODO check, depth pass is not required here
 
         VkPipelineRenderingCreateInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

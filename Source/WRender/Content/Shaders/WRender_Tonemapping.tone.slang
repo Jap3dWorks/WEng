@@ -26,7 +26,11 @@ uniform Sampler2D hdr_color;
 [shader("fragment")]
 float4 fsMain(VSOutput vert_out) : SV_TARGET
 {
-    return float4(hdr_color.Sample(vert_out.fragTexCoord).rgb, 1.f);
+    return float4(
+        clamp(hdr_color.Sample(vert_out.fragTexCoord).rgb,
+              float3(0.f),
+              float3(1.f)),
+        1.f);
     
     /*
     float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;

@@ -185,10 +185,13 @@ namespace WVkGraphicsPipelinesUtils {
         // dynamic rendering color formats
         // TODO: rm, emission, rt_extra01, rt_extra02
         std::array<VkFormat, 3> color_formats  {
-            VK_FORMAT_B8G8R8A8_SRGB,
+            // VK_FORMAT_B8G8R8A8_SRGB,
+            WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
             // VK_FORMAT_R16G16B16A16_SFLOAT, // albedo
-            VK_FORMAT_R16G16B16A16_SFLOAT, // normal
-            VK_FORMAT_R16G16B16A16_SFLOAT  // ws_position
+            WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
+            // VK_FORMAT_R16G16B16A16_SFLOAT, // normal
+            WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT
+            // VK_FORMAT_R16G16B16A16_SFLOAT  // ws_position
         };
 
         std::array<VkPipelineColorBlendAttachmentState, 3> color_blend_attachments;
@@ -200,7 +203,8 @@ namespace WVkGraphicsPipelinesUtils {
                 VK_COLOR_COMPONENT_B_BIT |
                 VK_COLOR_COMPONENT_A_BIT;
             
-            cblend_attch.blendEnable = VK_FALSE;
+            // Overrides the color
+            cblend_attch.blendEnable = VK_FALSE;  
         }
         
         VkPipelineColorBlendStateCreateInfo color_blend_create_info;
@@ -255,7 +259,7 @@ namespace WVkGraphicsPipelinesUtils {
         // Dynamic Rendering
 
         VkFormat depth_format;
-        depth_format = VK_FORMAT_D32_SFLOAT;
+        depth_format = WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT;
 
         VkPipelineRenderingCreateInfo rendering_info;
         rendering_info={};
