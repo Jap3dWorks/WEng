@@ -128,6 +128,8 @@ private:
 
     void RecreateSwapChain();
 
+    // TODO move Record commands to an inline library
+
     void RecordGBuffersRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index
@@ -145,6 +147,12 @@ private:
         );
 
     void RecordTonemappingRenderCommandBuffer(
+        const VkCommandBuffer & in_command_buffer,
+        const std::uint32_t & in_frame_index,
+        const std::uint32_t & in_image_index
+        );
+
+    void RecordSwapChainRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index,
         const std::uint32_t & in_image_index

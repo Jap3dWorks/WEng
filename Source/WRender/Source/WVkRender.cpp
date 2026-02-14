@@ -292,6 +292,7 @@ void WVkRender::Destroy() {
     graphics_pipelines_.Destroy();
     offscreen_pipeline_.Destroy();
     ppcss_pipelines_.Destroy();
+    tonemapping_pipeline_.Destroy();
 
     WFLOG("Destroy Fences and Semaphores.");
 
@@ -418,6 +419,12 @@ void WVkRender::Draw()
         image_index
         );
 
+    RecordSwapChainRenderCommandBuffer(
+        render_command_buffer_.command_buffers[frame_index_],
+        frame_index_,
+        image_index
+        );
+
     // End Command buffer
 
     WVkRenderUtils::EndRenderCommandBuffer(
@@ -432,7 +439,8 @@ void WVkRender::Draw()
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
     submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = &sync_semaphores_[semaphore_index_].image_available;
+    submit_info.pWaitSemaphores =
+        &sync_semaphores_[semaphore_index_].image_available;
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
@@ -440,7 +448,8 @@ void WVkRender::Draw()
         &render_command_buffer_.command_buffers[frame_index_];
 
     submit_info.signalSemaphoreCount = 1;
-    submit_info.pSignalSemaphores = &sync_semaphores_[image_index].render_finished;
+    submit_info.pSignalSemaphores =
+        &sync_semaphores_[image_index].render_finished;
 
     if (vkQueueSubmit(
             device_info_.vk_graphics_queue,
@@ -1115,7 +1124,7 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     const std::uint32_t & in_image_index
     ) {
     
-    // TODO: Record Tonemapping Swapchain Command Buffer
+    // TODO: Tonemapping and swap chain as separate processes.
 
     WVkRenderUtils::RndCmd_TransitionTonemappingWriteLayout(
         in_command_buffer,
@@ -1143,12 +1152,50 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
         tonemapping_rtargets_[in_frame_index].extent
         );
 
-    // VkDescriptorSet descriptorset = WVkRenderUtils::CreateTonemappingDescriptor(
-    
-    // WVkRenderUtils::RndCmd_TransitionTonemappingReadLayout
+    VkDescriptorSet descriptorset =
+        WVkRenderUtils::CreateTonemappingDescriptor(
+            device_info_.vk_device,
+            tonemapping_pipeline_.DescriptorPool(in_frame_index),
+            tonemapping_pipeline_.DescriptorSetLayout(),
+            pipeline_resources_.Sampler(),
+            swap_chain_input_imgview_ref
+            );
 
-    // Swapchain commands
+    const WVkMeshInfo & rplane = pipeline_resources_. RenderPlane();
+    VkDeviceSize offsets = 0;
 
+    WVkRenderUtils::TonemappingBindings(
+        in_command_buffer,
+        rplane.vertex_buffer,
+        rplane.index_buffer,
+        offsets,
+        descriptorset,
+        tonemapping_pipeline_.PipelineLayout()
+        );
+
+    vkCmdDrawIndexed(in_command_buffer,
+                     rplane.index_count,
+                     1,
+                     0,
+                     0,
+                     0);
+
+    vkCmdEndRendering(in_command_buffer);
+
+    WVkRenderUtils::RndCmd_TransitionTonemappingReadLayout(
+        in_command_buffer,
+        tonemapping_rtargets_[in_frame_index].color.image
+        );
+
+    swap_chain_input_imgview_ref =
+        tonemapping_rtargets_[in_frame_index].color.view;
+}
+
+void WVkRender::RecordSwapChainRenderCommandBuffer(
+    const VkCommandBuffer & in_command_buffer,
+    const std::uint32_t & in_frame_index,
+    const std::uint32_t & in_image_index
+    ) {
     VkImage swapchain_image = swap_chain_info_.images[in_image_index];
     VkImageView swapchain_imageview = swap_chain_info_.views[in_image_index];
 
@@ -1240,5 +1287,4 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
         );
-
 }

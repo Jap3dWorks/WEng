@@ -1024,6 +1024,43 @@ namespace WVkRenderUtils {
         return descriptor_set;
     }
 
+    inline void TonemappingBindings(
+        const VkCommandBuffer & in_command_buffer,
+        const VkBuffer & in_vertex_buffer,
+        const VkBuffer & in_index_buffer,
+        const VkDeviceSize & in_offsets,
+        VkDescriptorSet in_descriptorset,
+        const VkPipelineLayout & in_pipeline_layout
+        ) {
+        vkCmdBindVertexBuffers(
+            in_command_buffer,
+            0,
+            1,
+            &in_vertex_buffer,
+            &in_offsets
+            );
+
+        vkCmdBindIndexBuffer(
+            in_command_buffer,
+            in_index_buffer,
+            0,
+            VK_INDEX_TYPE_UINT32
+            );
+
+        std::array<VkDescriptorSet,1> descsets = {
+            in_descriptorset
+        };
+
+        vkCmdBindDescriptorSets(in_command_buffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                in_pipeline_layout,
+                                0,
+                                static_cast<std::uint32_t>(descsets.size()),
+                                descsets.data(),
+                                0,
+                                nullptr);
+    }
+
     inline void RndCmd_BeginSwapchainRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,

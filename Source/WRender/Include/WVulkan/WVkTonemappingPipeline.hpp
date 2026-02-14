@@ -69,7 +69,9 @@ public:
 
         InitializeDescSetLayout();
 
-        InitializeRenderPipeline(in_color_format);
+        InitializeDescriptorPool();
+
+        InitializePipeline(in_color_format);
 
     }
 
@@ -178,7 +180,7 @@ private:
         }
     }
 
-    void InitializeRenderPipeline(VkFormat color_format) {
+    void InitializePipeline(VkFormat color_format) {
 
         std::vector<char> shadercode = WShaderUtils::ReadShader(
             WStringUtils::SystemPath(shader_path)
