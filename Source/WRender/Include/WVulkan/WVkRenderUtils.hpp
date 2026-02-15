@@ -124,7 +124,10 @@ namespace WVkRenderUtils {
         const WVkDeviceInfo & in_device_info,
         const std::uint32_t & in_width,
         const std::uint32_t & in_height,
-        const VkFormat & in_color_format // TODO: other target formats
+        const VkFormat & in_color_format, // TODO: other target formats
+        const VkFormat & in_normal_format,
+        const VkFormat & in_ws_position_format,
+        const VkFormat & in_depth_format
         ) {
         for(auto& offrnd : in_gbuffers_structs) {
             
@@ -147,6 +150,7 @@ namespace WVkRenderUtils {
                   VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
+            
             offrnd.albedo.view = WVulkan::CreateImageView(
                 offrnd.albedo.image,
                 in_color_format,
@@ -157,7 +161,7 @@ namespace WVkRenderUtils {
 
             
             offrnd.normal.extent = {in_width, in_height};
-            VkFormat normal_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+            // VkFormat normal_format = VK_FORMAT_R16G16B16A16_SFLOAT;
             WVulkan::CreateImage(
                 offrnd.normal.image,
                 offrnd.normal.memory,
@@ -166,7 +170,7 @@ namespace WVkRenderUtils {
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
-                normal_format,
+                in_normal_format,
                 VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
@@ -175,14 +179,14 @@ namespace WVkRenderUtils {
                 );
             offrnd.normal.view = WVulkan::CreateImageView(
                 offrnd.normal.image,
-                normal_format,
+                in_normal_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
                 in_device_info.vk_device
                 );
 
             offrnd.ws_position.extent = {in_width, in_height};
-            VkFormat ws_position_format = VK_FORMAT_R16G16B16A16_SFLOAT; // TODO 32 bit
+            // VkFormat ws_position_format = VK_FORMAT_R16G16B16A16_SFLOAT; // TODO 32 bit
             WVulkan::CreateImage(
                 offrnd.ws_position.image,
                 offrnd.ws_position.memory,
@@ -191,7 +195,7 @@ namespace WVkRenderUtils {
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
-                ws_position_format,
+                in_ws_position_format,
                 VK_IMAGE_TILING_OPTIMAL,
                 VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
@@ -200,7 +204,7 @@ namespace WVkRenderUtils {
                 );
             offrnd.ws_position.view = WVulkan::CreateImageView(
                 offrnd.ws_position.image,
-                ws_position_format,
+                in_ws_position_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
                 in_device_info.vk_device
@@ -209,7 +213,8 @@ namespace WVkRenderUtils {
             // TODO: rm, emission, extra1 and 2
 
             offrnd.depth.extent = offrnd.extent;
-            VkFormat depth_format = WVulkan::FindDepthFormat(in_device_info.vk_physical_device);
+            // VkFormat depth_format =
+            //     WVulkan::FindDepthFormat(in_device_info.vk_physical_device);
             WVulkan::CreateImage(
                 offrnd.depth.image,
                 offrnd.depth.memory,
@@ -218,7 +223,7 @@ namespace WVkRenderUtils {
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
-                depth_format,
+                in_depth_format,
                 VK_IMAGE_TILING_OPTIMAL, 
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
                 VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
@@ -228,7 +233,7 @@ namespace WVkRenderUtils {
 
             offrnd.depth.view = WVulkan::CreateImageView(
                 offrnd.depth.image,
-                depth_format,
+                in_depth_format,
                 VK_IMAGE_ASPECT_DEPTH_BIT,
                 1,
                 in_device_info.vk_device
@@ -406,7 +411,6 @@ namespace WVkRenderUtils {
 
         return descriptor_set;
     }
-
 
     inline VkDescriptorSet CreateInputRenderDescriptor(
         const VkDevice & in_device,

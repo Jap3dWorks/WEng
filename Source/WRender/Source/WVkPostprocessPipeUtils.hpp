@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WLog.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
@@ -56,6 +57,7 @@ namespace WVkPostprocessPipeUtils {
                                           const std::vector<VkDescriptorSetLayout> & in_desc_lay,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
+        WFLOG("Create Postprocess pipeline");
         WVkShaderStageInfo wvertex_stage_info;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     

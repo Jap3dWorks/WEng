@@ -183,7 +183,10 @@ void WVkRender::Initialize()
         dimensions[0],
         dimensions[1],
         // swap_chain_info_.format
-        WENG_VK_GBUFFER_RENDER_FORMAT
+        WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
+        WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
+        WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
         );
 
     // Offscreen render targets
@@ -559,7 +562,7 @@ void WVkRender::CreatePipelineBinding(
     const WRenderPipelineParametersStruct & in_parameters
     )
 {
-    assert(pipeline_track_.pipeline_ptype.contains(pipeline_id));
+    assert(pipeline_track_.pipeline_pipetype.contains(pipeline_id));
 
     std::vector<WVkDescriptorSetTextureWriteStruct> textures{};
     textures.resize(in_parameters.texture_params.size());
@@ -743,6 +746,8 @@ void WVkRender::RecreateSwapChain() {
 
     WaitIdle();
 
+    // Destroy swap chain and other render targets
+
     WVulkan::Destroy(
         swap_chain_info_,
         device_info_
@@ -763,6 +768,13 @@ void WVkRender::RecreateSwapChain() {
         device_info_
         );
 
+    WVkRenderUtils::DestroyTonemappingRender(
+        tonemapping_rtargets_,
+        device_info_
+        );
+
+    // Recreate swap chain and other reder targets
+
     WVulkan::Create(
         swap_chain_info_,
         device_info_,
@@ -777,7 +789,10 @@ void WVkRender::RecreateSwapChain() {
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
+        WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
+        WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
+        WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
         );
 
     WVkRenderUtils::CreateOffscreenRenderTargets(
@@ -785,7 +800,7 @@ void WVkRender::RecreateSwapChain() {
         device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
+        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
         );
 
     WVkRenderUtils::CreatePostprocessRenderTargets(
@@ -793,8 +808,17 @@ void WVkRender::RecreateSwapChain() {
         device_info_,
         dimensions[0],
         dimensions[1],
+        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
+        );
+
+    WVkRenderUtils::CreateTonemappingRenderTargets(
+        tonemapping_rtargets_,
+        device_info_,
+        dimensions[0],
+        dimensions[1],
         swap_chain_info_.format
         );
+
 }
 
 void WVkRender::RecordGBuffersRenderCommandBuffer(
