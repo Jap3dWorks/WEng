@@ -26,13 +26,12 @@ uniform Sampler2D hdr_color;
 [shader("fragment")]
 float4 fsMain(VSOutput vert_out) : SV_TARGET
 {
-    return float4(
-        clamp(hdr_color.Sample(vert_out.fragTexCoord).rgb,
-              float3(0.f),
-              float3(1.f)),
-        1.f);
+    // return float4(
+    //     clamp(hdr_color.Sample(vert_out.fragTexCoord).rgb,
+    //           float3(0.f),
+    //           float3(1.f)),
+    //     1.f);
     
-    /*
     float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
 
     // // exposure
@@ -44,12 +43,12 @@ float4 fsMain(VSOutput vert_out) : SV_TARGET
     const float c = 2.43;
     const float d = 0.59;
     const float e = 0.14;
+    
     float3 ldr = (hdr * (a * hdr + b)) / (hdr * (c * hdr + d) + e);
     ldr = clamp(ldr, 0.0, 1.0);
 
     ldr = pow(ldr, 1.0/2.2);
 
     return float4(ldr, 1.0);
-    */
 }
 
