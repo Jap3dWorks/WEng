@@ -225,7 +225,7 @@ private:
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
             &color_format,
             1,
-            VK_FORMAT_D32_SFLOAT,  // depth should not be used here
+            VK_FORMAT_D32_SFLOAT,  // TODO depth should not be used here
             graphics_pipeline_info,
             device_info_.vk_device
             );

@@ -182,7 +182,6 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        // swap_chain_info_.format
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
@@ -196,7 +195,6 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        // swap_chain_info_.format // TODO: Use 16 bit SFLOAT
         WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
         );
 
@@ -207,7 +205,6 @@ void WVkRender::Initialize()
         device_info_,
         dimensions[0],
         dimensions[1],
-        // swap_chain_info_.format // TODO: SFLOAT
         WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
         );
 

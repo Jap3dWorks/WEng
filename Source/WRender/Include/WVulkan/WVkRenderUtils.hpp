@@ -134,7 +134,6 @@ namespace WVkRenderUtils {
             offrnd.extent = {in_width, in_height};
             offrnd.albedo.extent = {in_width, in_height};
 
-            // TODO create and config here
             WVulkan::CreateImage(
                 offrnd.albedo.image,
                 offrnd.albedo.memory,
@@ -213,8 +212,6 @@ namespace WVkRenderUtils {
             // TODO: rm, emission, extra1 and 2
 
             offrnd.depth.extent = offrnd.extent;
-            // VkFormat depth_format =
-            //     WVulkan::FindDepthFormat(in_device_info.vk_physical_device);
             WVulkan::CreateImage(
                 offrnd.depth.image,
                 offrnd.depth.memory,
@@ -827,7 +824,6 @@ namespace WVkRenderUtils {
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_color
         ) {
-        // Image Layouts
         RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             in_color,
@@ -923,12 +919,12 @@ namespace WVkRenderUtils {
         WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             in_color,
+            VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            {},
             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_ACCESS_SHADER_READ_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
             );
     }
 
