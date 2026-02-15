@@ -12,7 +12,7 @@
 #include <array>
 #include <vulkan/vulkan_core.h>
 
-namespace WVkGraphicsPipelinesUtils {
+namespace WVkGBuffersPipelinesUtils {
     
     inline void CreateDescSetPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
@@ -183,18 +183,17 @@ namespace WVkGraphicsPipelinesUtils {
         depth_stencil.stencilTestEnable = VK_FALSE;
 
         // dynamic rendering color formats
-        // TODO: rm, emission, rt_extra01, rt_extra02
-        std::array<VkFormat, 3> color_formats  {
-            // VK_FORMAT_B8G8R8A8_SRGB,
-            WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
-            // VK_FORMAT_R16G16B16A16_SFLOAT, // albedo
-            WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
-            // VK_FORMAT_R16G16B16A16_SFLOAT, // normal
-            WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT
-            // VK_FORMAT_R16G16B16A16_SFLOAT  // ws_position
+        std::array<VkFormat, 7> color_formats  {
+            WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,       // albedo
+            WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,      // normal
+            WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,  // ws_position
+            WENG_VK_GBUFFER_RENDER_MTLLRGH_FORMAT,     // metallic roughness
+            WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,    // emission
+            WENG_VK_GBUFFER_RENDER_RTEXT01_FORMAT,     // render target ext 01
+            WENG_VK_GBUFFER_RENDER_RTEXT02_FORMAT      // render target ext 02
         };
 
-        std::array<VkPipelineColorBlendAttachmentState, 3> color_blend_attachments;
+        std::array<VkPipelineColorBlendAttachmentState, 7> color_blend_attachments;
         for(auto & cblend_attch : color_blend_attachments) {
             cblend_attch = {};
             cblend_attch.colorWriteMask =

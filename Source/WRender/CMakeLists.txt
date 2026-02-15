@@ -4,7 +4,7 @@ add_library(
     SHARED 
         CompileGenerated/CompileGenerated.cpp
         Source/WVkRender.cpp
-        Source/WVkGraphicsPipelines.cpp
+        Source/WVkGBuffersPipelines.cpp
         Source/WVulkan.cpp
 	    Source/WVkRenderCommandPool.cpp
         Source/WVkAssetResources.cpp

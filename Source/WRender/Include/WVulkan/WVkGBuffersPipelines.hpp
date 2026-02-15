@@ -13,7 +13,7 @@
 /**
  * @brief Graphics Pipelines outputs the GBuffers.
  */
-class WVkGraphicsPipelines : public WVkPipelinesBase<WAssetId, WEntityComponentId, WENG_MAX_FRAMES_IN_FLIGHT>
+class WVkGBuffersPipelines : public WVkPipelinesBase<WAssetId, WEntityComponentId, WENG_MAX_FRAMES_IN_FLIGHT>
 {
 
 private:
@@ -33,22 +33,22 @@ public:
 
     using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
 
-    WVkGraphicsPipelines() noexcept = default;
+    WVkGBuffersPipelines() noexcept = default;
 
-    virtual ~WVkGraphicsPipelines() override;
+    virtual ~WVkGBuffersPipelines() override;
 
-    WVkGraphicsPipelines(const WVkGraphicsPipelines & other)=delete;
+    WVkGBuffersPipelines(const WVkGBuffersPipelines & other)=delete;
 
-    WVkGraphicsPipelines(
-        WVkGraphicsPipelines && other
+    WVkGBuffersPipelines(
+        WVkGBuffersPipelines && other
         ) noexcept;
 
-    WVkGraphicsPipelines & operator=(
-        const WVkGraphicsPipelines & other
+    WVkGBuffersPipelines & operator=(
+        const WVkGBuffersPipelines & other
         ) = delete;
 
-    WVkGraphicsPipelines & operator=(
-        WVkGraphicsPipelines && other
+    WVkGBuffersPipelines & operator=(
+        WVkGBuffersPipelines && other
         ) noexcept;
 
     // Create Graphics Render Pipeline

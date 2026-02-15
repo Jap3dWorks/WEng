@@ -1,4 +1,4 @@
-#include "WVulkan/WVkGraphicsPipelines.hpp"
+#include "WVulkan/WVkGBuffersPipelines.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
@@ -6,7 +6,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
-#include "WVkGraphicsPipelinesUtils.hpp"
+#include "WVkGBuffersPipelinesUtils.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 
 #include <stdexcept>
@@ -19,13 +19,13 @@
 // WRenderPipelinesManager
 // -------------------
 
-WVkGraphicsPipelines::~WVkGraphicsPipelines()
+WVkGBuffersPipelines::~WVkGBuffersPipelines()
 {
     Destroy();
 }
 
-WVkGraphicsPipelines::WVkGraphicsPipelines(
-    WVkGraphicsPipelines && other
+WVkGBuffersPipelines::WVkGBuffersPipelines(
+    WVkGBuffersPipelines && other
     ) noexcept :
     Super(std::move(other)),
     global_graphics_descsets_(std::move(other.global_graphics_descsets_))
@@ -33,7 +33,7 @@ WVkGraphicsPipelines::WVkGraphicsPipelines(
     other.global_graphics_descsets_ = {};
 }
 
-WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && other) noexcept
+WVkGBuffersPipelines & WVkGBuffersPipelines::operator=(WVkGBuffersPipelines && other) noexcept
 {
     if (this != &other) {
         Super::operator=(std::move(other));
@@ -46,14 +46,14 @@ WVkGraphicsPipelines & WVkGraphicsPipelines::operator=(WVkGraphicsPipelines && o
     return *this;
 }
 
-void WVkGraphicsPipelines::CreatePipeline(
+void WVkGBuffersPipelines::CreatePipeline(
     const WAssetId & in_id,
     const WRenderPipelineStruct & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
         in_pipeline_struct.shaders,
-        WVkGraphicsPipelinesUtils::BuildShaderStageInfo
+        WVkGBuffersPipelinesUtils::BuildShaderStageInfo
         );
 
     // pipeparams
@@ -73,7 +73,7 @@ void WVkGraphicsPipelines::CreatePipeline(
         [this, &in_pipeline_struct]
         (auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
 
-            WVkGraphicsPipelinesUtils::CreatePipeline(
+            WVkGBuffersPipelinesUtils::CreatePipeline(
                 _rp,
                 _dvc,
                 {
@@ -89,12 +89,12 @@ void WVkGraphicsPipelines::CreatePipeline(
     pipelines_db_.CreateDescSetPool(
         in_id,
         device_info_,
-        WVkGraphicsPipelinesUtils::CreateDescSetPool);
+        WVkGBuffersPipelinesUtils::CreateDescSetPool);
 
     pipeline_bindings_[in_id] = {};
 }
 
-WId WVkGraphicsPipelines::CreateBinding(
+WId WVkGBuffersPipelines::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
     const WAssetIndexId & in_mesh_asset_id,
@@ -119,7 +119,7 @@ WId WVkGraphicsPipelines::CreateBinding(
     return component_id;
 }
 
-void WVkGraphicsPipelines::Destroy() {
+void WVkGBuffersPipelines::Destroy() {
 
     ClearPipelinesDb();
     
@@ -128,9 +128,9 @@ void WVkGraphicsPipelines::Destroy() {
     device_info_ = {};
 }
 
-void WVkGraphicsPipelines::Initialize_GlobalResources() {
+void WVkGBuffersPipelines::Initialize_GlobalResources() {
     
-    WVkGraphicsPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
+    WVkGBuffersPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
         );
 
@@ -188,7 +188,7 @@ void WVkGraphicsPipelines::Initialize_GlobalResources() {
 
 }
 
-void WVkGraphicsPipelines::Destroy_GlobalResources() {
+void WVkGBuffersPipelines::Destroy_GlobalResources() {
 
     if (device_info_.vk_device) {
 
@@ -215,7 +215,7 @@ void WVkGraphicsPipelines::Destroy_GlobalResources() {
     global_graphics_descsets_ = GlobalGraphicsResources();
 }
 
-void WVkGraphicsPipelines::UpdateGlobalGraphicsDescriptorSet(
+void WVkGBuffersPipelines::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {

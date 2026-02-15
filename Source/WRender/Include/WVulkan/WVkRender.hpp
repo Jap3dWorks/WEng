@@ -8,7 +8,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkPipelineResources.hpp"
-#include "WVulkan/WVkGraphicsPipelines.hpp"
+#include "WVulkan/WVkGBuffersPipelines.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkOffscreenPipeline.hpp"
 #include "WVulkan/WVkTonemappingPipeline.hpp"
@@ -105,9 +105,9 @@ public:
 
     void RenderSize(const WRenderSize & in_render_size) override { render_size_ = in_render_size; }
 
-    WNODISCARD WVkGraphicsPipelines & RenderPipelinesManager()
+    WNODISCARD WVkGBuffersPipelines & RenderPipelinesManager()
     {
-        return graphics_pipelines_;
+        return gbuffers_pipelines_;
     }
 
     WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
@@ -188,7 +188,7 @@ private:
 
     // Pipelines, Maybe I should create a container class/struct.
     WVkPipelineResources pipeline_resources_{};
-    WVkGraphicsPipelines graphics_pipelines_{};
+    WVkGBuffersPipelines gbuffers_pipelines_{};
     WVkOffscreenPipeline<> offscreen_pipeline_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     WVkTonemappingPipeline<> tonemapping_pipeline_{};

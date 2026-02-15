@@ -12,7 +12,7 @@
 #include "WVulkan/WVkRenderCommandPool.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkGraphicsPipelines.hpp"
+#include "WVulkan/WVkGBuffersPipelines.hpp"
 #include "WVulkan/WVkAssetResources.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
@@ -48,7 +48,7 @@ WVkRender::WVkRender() noexcept :
     postprocess_rtargets_(),
     render_command_pool_(),
     render_command_buffer_(),
-    graphics_pipelines_(),
+    gbuffers_pipelines_(),
     sync_semaphores_(),
     semaphore_index_(0),
     sync_fences_(),
@@ -71,7 +71,7 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     postprocess_rtargets_(std::move(other.postprocess_rtargets_)),
     render_command_pool_(std::move(other.render_command_pool_)),
     render_command_buffer_(std::move(other.render_command_buffer_)),
-    graphics_pipelines_(std::move(other.graphics_pipelines_)),
+    gbuffers_pipelines_(std::move(other.gbuffers_pipelines_)),
     sync_semaphores_(std::move(other.sync_semaphores_)),
     semaphore_index_(std::move(other.semaphore_index_)),
     sync_fences_(std::move(other.sync_fences_)),
@@ -95,7 +95,7 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         postprocess_rtargets_ = std::move(other.postprocess_rtargets_);
         render_command_pool_ = std::move(other.render_command_pool_);
         render_command_buffer_ = std::move(other.render_command_buffer_);
-        graphics_pipelines_ = std::move(other.graphics_pipelines_);
+        gbuffers_pipelines_ = std::move(other.gbuffers_pipelines_);
         sync_semaphores_ = std::move(other.sync_semaphores_);
         semaphore_index_ = std::move(other.semaphore_index_);
         sync_fences_ = std::move(other.sync_fences_);
@@ -123,16 +123,6 @@ void WVkRender::WaitIdle() const
 
 void WVkRender::Window(GLFWwindow * in_window) {
     window_.window = in_window;
-    
-    // std::int32_t width, height;
-    
-    // glfwGetFramebufferSize(window_.window, &width, &height);
-
-    // window_.width = static_cast<std::uint32_t>(width);
-    // window_.height = static_cast<std::uint32_t>(height);
-
-    // render_size_.width = static_cast<std::uint32_t>(width);
-    // render_size_.height = static_cast<std::uint32_t>(height);
 }
 
 void WVkRender::Initialize()
@@ -228,7 +218,7 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
 
-    graphics_pipelines_.Initialize(device_info_);
+    gbuffers_pipelines_.Initialize(device_info_);
 
     WFLOG("[DEBUG] Initialize Offscreen Pipeline.")
 
@@ -290,7 +280,7 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy Render Pipelines.");
     swap_chain_input_imgview_ref = VK_NULL_HANDLE;
-    graphics_pipelines_.Destroy();
+    gbuffers_pipelines_.Destroy();
     offscreen_pipeline_.Destroy();
     ppcss_pipelines_.Destroy();
     tonemapping_pipeline_.Destroy();
@@ -492,7 +482,7 @@ void WVkRender::CreateRenderPipeline(
     switch(render_pipeline->RenderPipeline().type) {
         
     case EPipelineType::Graphics:
-        graphics_pipelines_.CreatePipeline(
+        gbuffers_pipelines_.CreatePipeline(
             render_pipeline->WID(),
             render_pipeline->RenderPipeline()
             );
@@ -523,11 +513,11 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
     switch(pipeline_track_.pipeline_pipetype[in_id]) {
         
     case EPipelineType::Graphics:
-        graphics_pipelines_.ForEachBinding(
+        gbuffers_pipelines_.ForEachBinding(
             in_id, clearbindingfn
             );
             
-        graphics_pipelines_.DeletePipeline(
+        gbuffers_pipelines_.DeletePipeline(
             in_id
             );
             
@@ -538,7 +528,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
             in_id, clearbindingfn
             );
 
-        graphics_pipelines_.DeletePipeline(
+        gbuffers_pipelines_.DeletePipeline(
             in_id
             );
         
@@ -595,7 +585,7 @@ void WVkRender::CreatePipelineBinding(
     switch(pipeline_track_.pipeline_pipetype[pipeline_id]) {
 
     case EPipelineType::Graphics:
-        graphics_pipelines_.CreateBinding(component_id,
+        gbuffers_pipelines_.CreateBinding(component_id,
                                           pipeline_id,
                                           in_assetindex_id,
                                           ubos,
@@ -623,7 +613,7 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
     switch(pipeline_track_.binding_pipetype[in_id]) {
         
     case EPipelineType::Graphics:
-        graphics_pipelines_.DeleteBinding(in_id);
+        gbuffers_pipelines_.DeleteBinding(in_id);
         break;
         
     case EPipelineType::Postprocess:
@@ -643,7 +633,7 @@ void WVkRender::RefreshPipelines() {
 
 void WVkRender::ClearPipelines() {
     // preserve global pipelines
-    graphics_pipelines_.ClearPipelinesDb();
+    gbuffers_pipelines_.ClearPipelinesDb();
     ppcss_pipelines_.ClearPipelinesDb();
     ppcss_pipelines_.CalcBindingOrder();
 }
@@ -658,7 +648,7 @@ void WVkRender::UnloadAllResources() {
 void WVkRender::UpdateUboCamera(
     const WUBOCameraStruct & camera_ubo
     ) {
-    graphics_pipelines_.UpdateGlobalGraphicsDescriptorSet(
+    gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
         frame_index_
         );
@@ -679,7 +669,7 @@ void WVkRender::UpdateParameterDynamic(
     switch(pipeline_track_.binding_pipetype[in_component_id]) {
 
     case EPipelineType::Graphics:
-        graphics_pipelines_.UpdateBinding(in_component_id,
+        gbuffers_pipelines_.UpdateBinding(in_component_id,
                                           frame_index_,
                                           ubowrt);
         break;
@@ -710,7 +700,7 @@ void WVkRender::UpdateParameterStatic(
     switch(pipeline_track_.binding_pipetype[in_component_id]) {
         
     case EPipelineType::Graphics:
-        graphics_pipelines_.UpdateBinding(
+        gbuffers_pipelines_.UpdateBinding(
             in_component_id, ubowrt
             );
         break;
@@ -841,12 +831,12 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].extent
         );
 
-    for(auto pipeline_id : graphics_pipelines_.IterPipelines()) {
+    for(auto pipeline_id : gbuffers_pipelines_.IterPipelines()) {
         
-        graphics_pipelines_.ResetDescriptorPool(pipeline_id, frame_index_);
+        gbuffers_pipelines_.ResetDescriptorPool(pipeline_id, frame_index_);
 
         const WVkRenderPipelineInfo & render_pipeline =
-            graphics_pipelines_.Pipeline(pipeline_id);
+            gbuffers_pipelines_.Pipeline(pipeline_id);
 
         vkCmdBindPipeline(render_command_buffer_.command_buffers[in_frame_index],
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -857,15 +847,15 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
             gbuffers_rtargets_[in_frame_index].extent
             );
 
-        for (auto & bid : graphics_pipelines_.IterBindings(pipeline_id)) {
+        for (auto & bid : gbuffers_pipelines_.IterBindings(pipeline_id)) {
 
-            auto& binding = graphics_pipelines_.Binding(bid);
+            auto& binding = gbuffers_pipelines_.Binding(bid);
 
             // Create descriptor
             VkDescriptorSet descriptorset = WVkRenderUtils::CreateRenderDescriptor(
                 device_info_.vk_device,
-                graphics_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
-                graphics_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
+                gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
+                gbuffers_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
                 frame_index_,
                 binding.ubos,
                 binding.textures
@@ -896,7 +886,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
             std::array<VkDescriptorSet, 2> descsets =
                 {
-                    graphics_pipelines_.GlobalGraphicsDescriptorSet(frame_index_).descriptor_set,
+                    gbuffers_pipelines_.GlobalGraphicsDescriptorSet(frame_index_).descriptor_set,
                     descriptorset
                 };
 
