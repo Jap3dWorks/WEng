@@ -114,7 +114,7 @@ private:
         // albedo,normal,ws_position,mrAO,emission,extra01,depth
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
         for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
-            sampler_bindings[i]=WVulkan::WVulkanStructs::CreateVkDescriptorSetLayoutBinding();
+            sampler_bindings[i]=WVulkan::VkStructs::CreateVkDescriptorSetLayoutBinding();
             sampler_bindings[i].binding = i;
             sampler_bindings[i].descriptorCount = 1;
             sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

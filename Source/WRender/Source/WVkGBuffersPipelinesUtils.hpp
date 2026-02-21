@@ -132,7 +132,7 @@ namespace WVkGBuffersPipelinesUtils {
         }
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            WVulkan::WVulkanStructs::CreateVkPipelineVertexInputStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
             wvertex_stage_info.binding_descriptors.size());
         vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
@@ -144,17 +144,17 @@ namespace WVkGBuffersPipelinesUtils {
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
         input_assembly = 
-            WVulkan::WVulkanStructs::CreateVkPipelineInputAssemblyStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
         VkPipelineViewportStateCreateInfo viewport_state =
-            WVulkan::WVulkanStructs::CreateVkPipelineViewportStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount = 1;
         viewport_state.scissorCount = 1;
 
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            WVulkan::WVulkanStructs::CreateVkPipelineRasterizationStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -164,13 +164,13 @@ namespace WVkGBuffersPipelinesUtils {
         rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling =
-            WVulkan::WVulkanStructs::CreateVkPipelineMultisampleStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-        // TODO: Use WVulkan::WVulkanStructs
+        // TODO: Use WVulkan::VkStructs
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            WVulkan::WVulkanStructs::CreateVkPipelineDepthStencilStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_TRUE;
         depth_stencil.depthWriteEnable = VK_TRUE;
         depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
@@ -189,7 +189,7 @@ namespace WVkGBuffersPipelinesUtils {
 
         std::array<VkPipelineColorBlendAttachmentState, WENG_VK_GBUFFERS_COUNT-1> color_blend_attachments;
         for(auto & cblend_attch : color_blend_attachments) {
-            cblend_attch = WVulkan::WVulkanStructs::CreateVkPipelineColorBlendAttachmentState();
+            cblend_attch = WVulkan::VkStructs::CreateVkPipelineColorBlendAttachmentState();
             cblend_attch.colorWriteMask =
                 VK_COLOR_COMPONENT_R_BIT |
                 VK_COLOR_COMPONENT_G_BIT |
@@ -201,7 +201,7 @@ namespace WVkGBuffersPipelinesUtils {
         }
         
         VkPipelineColorBlendStateCreateInfo color_blend_create_info =
-            WVulkan::WVulkanStructs::CreateVkPipelineColorBlendStateCreateInfo();
+            WVulkan::VkStructs::CreateVkPipelineColorBlendStateCreateInfo();
         color_blend_create_info.logicOpEnable = VK_FALSE;
         color_blend_create_info.logicOp = VK_LOGIC_OP_COPY;
         color_blend_create_info.attachmentCount = color_blend_attachments.size();
@@ -217,24 +217,21 @@ namespace WVkGBuffersPipelinesUtils {
             VK_DYNAMIC_STATE_SCISSOR
         };
 
+        // TODO use WVulkan::VkStructs
 
-        // TODO use WVulkan::WVulkanStructs
-
-        VkPipelineDynamicStateCreateInfo dynamic_state_create_info;
-        dynamic_state_create_info = {};
-        dynamic_state_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        VkPipelineDynamicStateCreateInfo dynamic_state_create_info =
+            WVulkan::VkStructs::CreateVkPipelineDynamicStateCreateInfo();
         dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
         dynamic_state_create_info.pDynamicStates = dynamic_states.data();
 
-        VkPipelineLayoutCreateInfo pipeline_layout_info;
-        pipeline_layout_info = {};
-        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+        VkPipelineLayoutCreateInfo pipeline_layout_info =
+            WVulkan::VkStructs::CreateVkPipelineLayoutCreateInfo();
         pipeline_layout_info.setLayoutCount = desc_layouts.size();
         pipeline_layout_info.pSetLayouts = desc_layouts.data();
 
-        VkGraphicsPipelineCreateInfo pipeline_create_info;
-        pipeline_create_info = {};
-        pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        VkGraphicsPipelineCreateInfo pipeline_create_info =
+            WVulkan::VkStructs::CreateVkGraphicsPipelineCreateInfo();
         pipeline_create_info.stageCount = static_cast<uint32_t>(shader_stages.size());
         pipeline_create_info.pStages = shader_stages.data();
         pipeline_create_info.pVertexInputState = &vertex_input_info;
@@ -252,15 +249,11 @@ namespace WVkGBuffersPipelinesUtils {
 
         // Dynamic Rendering
 
-        VkFormat depth_format;
-        depth_format = WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT;
-
-        VkPipelineRenderingCreateInfo rendering_info;
-        rendering_info={};
-        rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+        VkPipelineRenderingCreateInfo rendering_info =
+            WVulkan::VkStructs::CreateVkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = color_formats.size();
         rendering_info.pColorAttachmentFormats = color_formats.data();
-        rendering_info.depthAttachmentFormat = depth_format;
+        rendering_info.depthAttachmentFormat = WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT;
         rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 
         pipeline_create_info.pNext = &rendering_info;
@@ -276,16 +269,28 @@ namespace WVkGBuffersPipelinesUtils {
 
         pipeline_create_info.layout = out_render_pipeline.pipeline_layout;
 
-        if (vkCreateGraphicsPipelines(
-                in_device.vk_device,
-                VK_NULL_HANDLE,
-                1,
-                &pipeline_create_info,
-                nullptr,
-                &out_render_pipeline.pipeline) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create graphics pipeline!");
-        }
+        
+        WVulkan::ExecVkProcChecked(
+            vkCreateGraphicsPipelines,
+            "Failed to create graphics pipeline!",
+            in_device.vk_device,
+            VK_NULL_HANDLE,
+            1,
+            &pipeline_create_info,
+            nullptr,
+            &out_render_pipeline.pipeline
+            );
+
+        // if (vkCreateGraphicsPipelines(
+        //         in_device.vk_device,
+        //         VK_NULL_HANDLE,
+        //         1,
+        //         &pipeline_create_info,
+        //         nullptr,
+        //         &out_render_pipeline.pipeline) != VK_SUCCESS)
+        // {
+        //     throw std::runtime_error("Failed to create graphics pipeline!");
+        // }
 
         for (auto& shader_module : shader_modules)
         {

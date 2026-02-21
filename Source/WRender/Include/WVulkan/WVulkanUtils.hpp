@@ -13,6 +13,8 @@
 
 namespace WVulkanUtils {
 
+    // TODO This file should contain more WEng based vulkan functions and procedures
+
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */

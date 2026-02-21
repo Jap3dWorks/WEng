@@ -67,7 +67,6 @@ struct FSOutput {
     float4 mrAO        : SV_TARGET3;
     float4 emission    : SV_TARGET4;
     float4 extra01     : SV_TARGET5;
-    float4 extra02     : SV_TARGET6;
 };
 
 [shader("fragment")]
@@ -85,8 +84,6 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
     output.emission = float4(0.f);
 
     output.extra01 = float4(0.f);
-
-    output.extra02 = float4(0.f);
 
     return output;
 }

@@ -16,6 +16,10 @@ struct GLFWwindow;
 
 namespace WVulkan
 {
+    // TODO this file should be more WENG agnostic
+    //  try to use only vulkan types.
+    //  No WENG dependent functions move to WVulkanUtils.
+    
     // Create functions
     // ----------------
 
@@ -180,7 +184,7 @@ namespace WVulkan
 
     // WVulkan Structs
     // ---------------
-    namespace WVulkanStructs {
+    namespace VkStructs {
 
         inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
             VkWriteDescriptorSet result{};
@@ -242,15 +246,39 @@ namespace WVulkan
             return result;
         }
 
-        inline const VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
+        inline constexpr VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
             VkPipelineDepthStencilStateCreateInfo result{};
             result.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
             return result;
         }
 
-        inline const VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
+        inline constexpr VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
             VkPipelineColorBlendStateCreateInfo result{};
             result.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineDynamicStateCreateInfo CreateVkPipelineDynamicStateCreateInfo() noexcept {
+            VkPipelineDynamicStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineLayoutCreateInfo CreateVkPipelineLayoutCreateInfo() noexcept {
+            VkPipelineLayoutCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkGraphicsPipelineCreateInfo CreateVkGraphicsPipelineCreateInfo() noexcept {
+            VkGraphicsPipelineCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineRenderingCreateInfo CreateVkPipelineRenderingCreateInfo() noexcept {
+            VkPipelineRenderingCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
             return result;
         }
 
@@ -426,6 +454,17 @@ namespace WVulkan
                sizeof(WUBOGraphicsStruct));
 
         return true;
+    }
+
+    // Other
+    // -----
+
+    template<typename TFn, typename ...Args>
+    inline void ExecVkProcChecked(TFn && in_fn, std::string_view message, Args && ... args) {
+        
+        if (std::forward<TFn>(in_fn) (std::forward<Args>(args)...) != VK_SUCCESS) {
+            throw std::runtime_error(std::string(message));
+            }
     }
 
     // Helper Functions TODO: move to WVulkanUtils

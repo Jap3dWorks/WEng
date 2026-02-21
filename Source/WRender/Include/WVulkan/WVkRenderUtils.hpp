@@ -479,12 +479,12 @@ namespace WVkRenderUtils {
                                        in_extra01_view,
                                        in_depth_view}) {
 
-            image_infos[idx] = WVulkan::WVulkanStructs::CreateVkDescriptorImageInfo();
+            image_infos[idx] = WVulkan::VkStructs::CreateVkDescriptorImageInfo();
             image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             image_infos[idx].imageView = vw;
             image_infos[idx].sampler = in_sampler;
 
-            write_ds[idx] = WVulkan::WVulkanStructs::CreateVkWriteDescriptorSet();
+            write_ds[idx] = WVulkan::VkStructs::CreateVkWriteDescriptorSet();
             write_ds[idx].dstBinding = idx;
             write_ds[idx].dstSet = descriptor_set;
             write_ds[idx].dstArrayElement=0;
@@ -916,15 +916,14 @@ namespace WVkRenderUtils {
         const VkImageView & in_mrAO_view,
         const VkImageView & in_emission_view,
         const VkImageView & in_extra01_view,
-        // const VkImageView & in_extra02_view,
         const VkImageView & in_depth_view,
         const VkExtent2D & in_extent
         ) {
 
-        std::array<VkRenderingAttachmentInfo, 7> color_attachments;
+        std::array<VkRenderingAttachmentInfo, WENG_VK_GBUFFERS_COUNT - 1> color_attachments;
 
         // albedo Attachment
-        color_attachments[0] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[0] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[0].imageView = in_albedo_view;
         color_attachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -932,7 +931,7 @@ namespace WVkRenderUtils {
         color_attachments[0].clearValue = {0.5, 0.5, 0.5, 1.f};
 
         // Normal Attachment
-        color_attachments[1] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[1] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[1].imageView = in_normal_view;
         color_attachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -940,7 +939,7 @@ namespace WVkRenderUtils {
         color_attachments[1].clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // WS Position Attachment
-        color_attachments[2] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[2] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[2].imageView = in_ws_position_view;
         color_attachments[2].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -948,7 +947,7 @@ namespace WVkRenderUtils {
         color_attachments[2].clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // mrAO attachment
-        color_attachments[3] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[3] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[3].imageView = in_mrAO_view;
         color_attachments[3].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -956,7 +955,7 @@ namespace WVkRenderUtils {
         color_attachments[3].clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // emission attachment
-        color_attachments[4] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[4] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[4].imageView = in_emission_view;
         color_attachments[4].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[4].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -964,24 +963,16 @@ namespace WVkRenderUtils {
         color_attachments[4].clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // extra01 attachment
-        color_attachments[5] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+        color_attachments[5] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         color_attachments[5].imageView = in_extra01_view;
         color_attachments[5].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[5].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[5].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         color_attachments[5].clearValue = {0.f, 0.f, 0.f, 1.f};
 
-        // extra02 attachment
-        // color_attachments[6] = WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
-        // color_attachments[6].imageView = in_extra02_view;
-        // color_attachments[6].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        // color_attachments[6].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        // color_attachments[6].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        // color_attachments[6].clearValue = {0.f, 0.f, 0.f, 1.f};
-
         // Depth Attachment
         VkRenderingAttachmentInfo depth_attachment =
-            WVulkan::WVulkanStructs::CreateVkRenderingAttachmentInfo();
+            WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();
         depth_attachment.imageView = in_depth_view;
         depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -989,7 +980,7 @@ namespace WVkRenderUtils {
         depth_attachment.clearValue = {1.f, 0.f};
 
         VkRenderingInfo rendering_info =
-            WVulkan::WVulkanStructs::CreateVkRenderingInfo();
+            WVulkan::VkStructs::CreateVkRenderingInfo();
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
         rendering_info.colorAttachmentCount = color_attachments.size();
