@@ -131,10 +131,8 @@ namespace WVkGBuffersPipelinesUtils {
             desc_layouts.push_back(v.descset_layout);
         }
 
-        VkPipelineVertexInputStateCreateInfo vertex_input_info;
-        vertex_input_info = {};
-        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
+        VkPipelineVertexInputStateCreateInfo vertex_input_info =
+            WVulkan::WVulkanStructs::CreateVkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
             wvertex_stage_info.binding_descriptors.size());
         vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
@@ -145,20 +143,18 @@ namespace WVkGBuffersPipelinesUtils {
             wvertex_stage_info.attribute_descriptors.data();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
-        input_assembly = {};
-        input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        input_assembly = 
+            WVulkan::WVulkanStructs::CreateVkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
-        VkPipelineViewportStateCreateInfo viewport_state;
-        viewport_state = {};
-        viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        VkPipelineViewportStateCreateInfo viewport_state =
+            WVulkan::WVulkanStructs::CreateVkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount = 1;
         viewport_state.scissorCount = 1;
 
-        VkPipelineRasterizationStateCreateInfo rasterizer;
-        rasterizer={};
-        rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        VkPipelineRasterizationStateCreateInfo rasterizer =
+            WVulkan::WVulkanStructs::CreateVkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -167,15 +163,14 @@ namespace WVkGBuffersPipelinesUtils {
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of y-flip in the projection matrix
         rasterizer.depthBiasEnable = VK_FALSE;
 
-        VkPipelineMultisampleStateCreateInfo multisampling;
-        multisampling = {};
-        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        VkPipelineMultisampleStateCreateInfo multisampling =
+            WVulkan::WVulkanStructs::CreateVkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-        VkPipelineDepthStencilStateCreateInfo depth_stencil;
-        depth_stencil = {};
-        depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        // TODO: Use WVulkan::WVulkanStructs
+        VkPipelineDepthStencilStateCreateInfo depth_stencil =
+            WVulkan::WVulkanStructs::CreateVkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_TRUE;
         depth_stencil.depthWriteEnable = VK_TRUE;
         depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
@@ -183,19 +178,18 @@ namespace WVkGBuffersPipelinesUtils {
         depth_stencil.stencilTestEnable = VK_FALSE;
 
         // dynamic rendering color formats
-        std::array<VkFormat, 7> color_formats  {
-            WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,       // albedo
-            WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,      // normal
-            WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,  // ws_position
-            WENG_VK_GBUFFER_RENDER_MTLLRGH_FORMAT,     // metallic roughness
-            WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,    // emission
-            WENG_VK_GBUFFER_RENDER_RTEXT01_FORMAT,     // render target ext 01
-            WENG_VK_GBUFFER_RENDER_RTEXT02_FORMAT      // render target ext 02
+        std::array<VkFormat, WENG_VK_GBUFFERS_COUNT-1> color_formats  {
+            WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,      // albedo
+            WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,     // normal
+            WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT, // ws_position
+            WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,  // metallic roughness AO
+            WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,   // emission
+            WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,    // extra 01
         };
 
-        std::array<VkPipelineColorBlendAttachmentState, 7> color_blend_attachments;
+        std::array<VkPipelineColorBlendAttachmentState, WENG_VK_GBUFFERS_COUNT-1> color_blend_attachments;
         for(auto & cblend_attch : color_blend_attachments) {
-            cblend_attch = {};
+            cblend_attch = WVulkan::WVulkanStructs::CreateVkPipelineColorBlendAttachmentState();
             cblend_attch.colorWriteMask =
                 VK_COLOR_COMPONENT_R_BIT |
                 VK_COLOR_COMPONENT_G_BIT |
@@ -206,10 +200,8 @@ namespace WVkGBuffersPipelinesUtils {
             cblend_attch.blendEnable = VK_FALSE;  
         }
         
-        VkPipelineColorBlendStateCreateInfo color_blend_create_info;
-        color_blend_create_info={};
-        color_blend_create_info.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        VkPipelineColorBlendStateCreateInfo color_blend_create_info =
+            WVulkan::WVulkanStructs::CreateVkPipelineColorBlendStateCreateInfo();
         color_blend_create_info.logicOpEnable = VK_FALSE;
         color_blend_create_info.logicOp = VK_LOGIC_OP_COPY;
         color_blend_create_info.attachmentCount = color_blend_attachments.size();
@@ -224,6 +216,9 @@ namespace WVkGBuffersPipelinesUtils {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR
         };
+
+
+        // TODO use WVulkan::WVulkanStructs
 
         VkPipelineDynamicStateCreateInfo dynamic_state_create_info;
         dynamic_state_create_info = {};

@@ -183,7 +183,7 @@ private:
     void InitializePipeline(VkFormat color_format) {
 
         std::vector<char> shadercode = WShaderUtils::ReadShader(
-            WStringUtils::SystemPath(shader_path)
+            WStringUtils::SystemPath(std::string(shader_path))
             );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
@@ -283,7 +283,7 @@ private:
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
     
-    const char* shader_path{WENG_VK_TONEMAPPING_SHADER_PATH};
+    const std::string_view shader_path{WENG_VK_TONEMAPPING_SHADER_PATH};
 
     WVkDeviceInfo device_info_{};
 

@@ -9,6 +9,7 @@
 #include "WShaderUtils.hpp"
 
 #include <glm/fwd.hpp>
+#include <string_view>
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
 #include <array>
@@ -187,7 +188,7 @@ private:
     void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
         // shader modules
         std::vector<char> shadercode = WShaderUtils::ReadShader(
-            WStringUtils::SystemPath(shader_path)
+            WStringUtils::SystemPath(std::string(shader_path))
             );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
@@ -332,7 +333,7 @@ private:
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
-    const char * shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
+    const std::string_view shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
 
     WVkDeviceInfo device_info_{};
 

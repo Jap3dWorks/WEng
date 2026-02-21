@@ -88,7 +88,7 @@ private:
             pool_sizes[1]={};
             pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             // 10 images
-            pool_sizes[1].descriptorCount = 10;
+            pool_sizes[1].descriptorCount = 10;  // TODO to CONFIG
 
             VkDescriptorPoolCreateInfo pool_info{};
             pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -111,11 +111,10 @@ private:
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
 
-        // albedo,normal,ws_position,depth
-        // TODO: emission,rm(roughness metallic), extras
-        std::array<VkDescriptorSetLayoutBinding, 4> sampler_bindings;
+        // albedo,normal,ws_position,mrAO,emission,extra01,depth
+        std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
         for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
-            sampler_bindings[i]={};
+            sampler_bindings[i]=WVulkan::WVulkanStructs::CreateVkDescriptorSetLayoutBinding();
             sampler_bindings[i].binding = i;
             sampler_bindings[i].descriptorCount = 1;
             sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -138,7 +137,7 @@ private:
 
     void InitializeRenderPipeline() {
         std::vector<char> shadercode = WShaderUtils::ReadShader(
-            WStringUtils::SystemPath(shader_path_)
+            WStringUtils::SystemPath(std::string(shader_path_))
             );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
@@ -266,17 +265,11 @@ private:
     std::array<VkDescriptorPool, FramesInFlight> descpool_info_{};
     VkDescriptorSetLayout descset_layout_{};
 
-    // TODO: common resource
-    // WVkMeshInfo render_plane_{};
-    
-    // VkSampler render_sampler_{};
-        
-    // WVkRenderPipelineInfo render_pipeline_{};
     VkPipeline pipeline_{};
     VkPipelineLayout pipeline_layout_{};
     WVkDeviceInfo device_info_{};
 
-    const char * shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
+    const std::string_view shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
 
 };
 

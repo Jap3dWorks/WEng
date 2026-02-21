@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
@@ -107,6 +107,8 @@ namespace WVulkan
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WVkDescriptorPoolInfo& descriptor_pool_info
         );
+
+    
  
     // ----------------
  
@@ -175,6 +177,84 @@ namespace WVulkan
         VkBufferUsageFlags usage, 
         VkMemoryPropertyFlags properties
         );
+
+    // WVulkan Structs
+    // ---------------
+    namespace WVulkanStructs {
+
+        inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
+            VkWriteDescriptorSet result{};
+            result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            return result;
+        }
+
+        inline constexpr VkDescriptorImageInfo CreateVkDescriptorImageInfo() noexcept {
+            return {};
+        }
+
+        inline constexpr VkRenderingInfo CreateVkRenderingInfo()  noexcept {
+            VkRenderingInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+            return result;
+        }
+
+        inline constexpr VkRenderingAttachmentInfo CreateVkRenderingAttachmentInfo() noexcept {
+            VkRenderingAttachmentInfo result {};
+            result.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            return result;
+        }
+
+        inline constexpr VkDescriptorSetLayoutBinding CreateVkDescriptorSetLayoutBinding() noexcept {
+            return {};
+        }
+
+        inline constexpr VkPipelineColorBlendAttachmentState CreateVkPipelineColorBlendAttachmentState() noexcept {
+            return {};
+        }
+
+        inline constexpr VkPipelineVertexInputStateCreateInfo CreateVkPipelineVertexInputStateCreateInfo() noexcept {
+            VkPipelineVertexInputStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineInputAssemblyStateCreateInfo CreateVkPipelineInputAssemblyStateCreateInfo() noexcept {
+            VkPipelineInputAssemblyStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineViewportStateCreateInfo CreateVkPipelineViewportStateCreateInfo() noexcept {
+            VkPipelineViewportStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineRasterizationStateCreateInfo CreateVkPipelineRasterizationStateCreateInfo() noexcept {
+            VkPipelineRasterizationStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineMultisampleStateCreateInfo CreateVkPipelineMultisampleStateCreateInfo() noexcept {
+            VkPipelineMultisampleStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline const VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
+            VkPipelineDepthStencilStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            return result;
+        }
+
+        inline const VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
+            VkPipelineColorBlendStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            return result;
+        }
+
+    }
 
     // Destroy functions
     // -----------------

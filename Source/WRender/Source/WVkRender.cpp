@@ -175,6 +175,9 @@ void WVkRender::Initialize()
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
         );
 
@@ -779,6 +782,9 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
         );
 
@@ -819,6 +825,9 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].albedo.image,
         gbuffers_rtargets_[in_frame_index].normal.image,
         gbuffers_rtargets_[in_frame_index].ws_position.image,
+        gbuffers_rtargets_[in_frame_index].mrAO.image,
+        gbuffers_rtargets_[in_frame_index].emission.image,
+        gbuffers_rtargets_[in_frame_index].extra01.image,
         gbuffers_rtargets_[in_frame_index].depth.image
         );
 
@@ -827,6 +836,9 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
         gbuffers_rtargets_[in_frame_index].ws_position.view,
+        gbuffers_rtargets_[in_frame_index].mrAO.view,
+        gbuffers_rtargets_[in_frame_index].emission.view,
+        gbuffers_rtargets_[in_frame_index].extra01.view,
         gbuffers_rtargets_[in_frame_index].depth.view,
         gbuffers_rtargets_[in_frame_index].extent
         );
@@ -915,6 +927,9 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].albedo.image,
         gbuffers_rtargets_[in_frame_index].normal.image,
         gbuffers_rtargets_[in_frame_index].ws_position.image,
+        gbuffers_rtargets_[in_frame_index].mrAO.image,
+        gbuffers_rtargets_[in_frame_index].emission.image,
+        gbuffers_rtargets_[in_frame_index].extra01.image,
         gbuffers_rtargets_[in_frame_index].depth.image
         );
 }
@@ -960,11 +975,13 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
         gbuffers_rtargets_[in_frame_index].ws_position.view,
+        gbuffers_rtargets_[in_frame_index].mrAO.view,
+        gbuffers_rtargets_[in_frame_index].emission.view,
+        gbuffers_rtargets_[in_frame_index].extra01.view,
         gbuffers_rtargets_[in_frame_index].depth.view
         );
 
     // Draw Commands
-    // const WVkMeshInfo & rplane = offscreen_pipeline_.RenderPlane();
     const WVkMeshInfo & rplane = pipeline_resources_.RenderPlane();
     
     VkBuffer vertex_buffers[] = {rplane.vertex_buffer};
@@ -1072,6 +1089,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             in_command_buffer,
             postprocess_rtargets_[in_frame_index].extent
             );
+
+        // TODO also pass GBuffers in the global descriptor
 
         VkDescriptorSet input_render_descriptor = WVkRenderUtils::CreateInputRenderDescriptor(
             device_info_.vk_device,

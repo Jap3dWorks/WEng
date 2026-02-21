@@ -61,15 +61,13 @@ ConstantBuffer<Sampler2D> texture;
 
 // Output structure
 struct FSOutput {
-    float4 albedo       : SV_TARGET0;
+    float4 albedo      : SV_TARGET0;
     float4 normal      : SV_TARGET1;
-    float4 ws_position : SV_target2;
-    // rm (roughness metallic)
-    // emission
-    // float3 rt_extra01  : SV_target3;
-    // float3 rt_extra02  : SV_target4;
-    // float depth     : SV_TARGET6;
-
+    float4 ws_position : SV_TARGET2;
+    float4 mrAO        : SV_TARGET3;
+    float4 emission    : SV_TARGET4;
+    float4 extra01     : SV_TARGET5;
+    float4 extra02     : SV_TARGET6;
 };
 
 [shader("fragment")]
@@ -78,10 +76,17 @@ FSOutput fsMain(VSOutput vert_in) : SV_TARGET {
 
     output.albedo = texture.Sample(vert_in.tex_coords);
 
-    // output.albedo = float4(0.f, 0.f, 1.f, 1.f);
-
     output.normal = float4(vert_in.normal, 1.f);
+
     output.ws_position = float4(vert_in.world_pos, 1.f);
+
+    output.mrAO = float4(0.f);
+
+    output.emission = float4(0.f);
+
+    output.extra01 = float4(0.f);
+
+    output.extra02 = float4(0.f);
 
     return output;
 }
