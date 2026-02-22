@@ -18,7 +18,7 @@ struct WVkDeviceInfo
     VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
 
-    std::vector<const char*> device_extensions {
+    std::vector<std::string_view> device_extensions {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
     };
@@ -41,8 +41,8 @@ struct WVkSurfaceInfo
 struct WVkRenderDebugInfo
 {
     bool enable_validation_layers{false};
-    std::vector<const char*> validation_layers{
-        "VK_LAYER_KHRONOS_validation",
+    std::vector<std::string_view> validation_layers{
+        "VK_LAYER_KHRONOS_validation"
     };
 
     PFN_vkDebugUtilsMessengerCallbackEXT debug_callback{VK_NULL_HANDLE};

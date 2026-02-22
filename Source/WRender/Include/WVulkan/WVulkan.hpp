@@ -165,6 +165,20 @@ namespace WVulkan
             return result;
         }
 
+        inline constexpr VkSubmitInfo CreateVkSubmitInfo() noexcept {
+            VkSubmitInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPresentInfoKHR CreateVkPresentInfoKHR() noexcept {
+            VkPresentInfoKHR result{};
+            result.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
     }
 
     /**
@@ -182,28 +196,34 @@ namespace WVulkan
     // ----------------
 
     // TODO, use pure vulkan classes as inputs
-
     /**
      * Creates a Vulkan Instance.
      */
-    // void Create(WVkInstanceInfo &out_instance_info, const WVkRenderDebugInfo &debug_info);
     void Create(VkInstance & out_instance,
                 bool in_enable_validation_layers,
                 const std::vector<std::string_view>& in_validation_layers,
                 const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
                 const VkDebugUtilsMessengerEXT & in_debug_messenger
-                // const WVkRenderDebugInfo & debug_info
         );
 
     /**
      * Creates a Vulkan Surface.
      */
-    void Create(WVkSurfaceInfo & surface_info, WVkInstanceInfo & instance, GLFWwindow * window);
+    void Create(VkSurfaceKHR & surface_info, const VkInstance & instance, GLFWwindow * window);
 
     /**
      * Creates a Vulkan Device.
      */
-    void Create(WVkDeviceInfo &Device, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info);
+    void Create(VkDevice & out_device,
+                VkPhysicalDevice & out_physical_device,
+                VkSampleCountFlagBits & out_max_msaa_samples,
+                VkQueue & out_graphics_queue,
+                VkQueue & out_present_queue,
+                const std::vector<std::string_view> & in_device_extensions,
+                const VkInstance & in_instance,
+                const VkSurfaceKHR & in_surface,
+                bool in_enable_validation_layers,
+                const std::vector<std::string_view> & validation_layers);
 
     /**
      * Creates a Vulkan Swap Chain.
@@ -213,8 +233,7 @@ namespace WVulkan
         const WVkDeviceInfo &device_info, 
         const WVkSurfaceInfo &surface_info, 
         const std::uint32_t & in_width,
-        const std::uint32_t & in_height,
-        const WVkRenderDebugInfo &debug_info
+        const std::uint32_t & in_height
         );
 
     /**
@@ -573,9 +592,9 @@ namespace WVulkan
         void* InUserData
         );
 
-    bool IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, const std::vector<const char*>& device_extensions);
+    bool IsDeviceSuitable(const VkPhysicalDevice& device, const VkSurfaceKHR& surface, const std::vector<std::string_view>& device_extensions);
 
-    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const std::vector<const char*>& device_extensions);
+    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device, const std::vector<std::string_view> & device_extensions);
 
     VkFormat FindSupportedFormat(const VkPhysicalDevice& device, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 

@@ -9,9 +9,17 @@
 #include <vulkan/vulkan.h>
 #include <stdexcept>
 #include <vector>
-#include <concepts>
 
 namespace WVkRenderUtils {
+
+    inline WVkRenderDebugInfo CreateWVkRenderDebugInfo(bool in_enable_validation_layers) {
+        return {
+            .enable_validation_layers = in_enable_validation_layers,
+            .validation_layers = {"VK_LAYER_KHRONOS_validation"},
+            .debug_callback = VK_NULL_HANDLE,
+            .debug_messenger = VK_NULL_HANDLE
+        };
+    }
 
     inline void BeginRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer

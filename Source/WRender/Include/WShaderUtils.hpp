@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WStringUtils.hpp"
+#include "WUtils/WStringUtils.hpp"
 
 // #include <cstdint>
 #include <format>

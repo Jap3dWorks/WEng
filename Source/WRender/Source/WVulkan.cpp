@@ -2,6 +2,11 @@
 #include "WLog.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WShaderUtils.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
+#include "WStructs/WTextureStructs.hpp"
+#include "WStructs/WGeometryStructs.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
+#include "WUtils/WStringUtils.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -15,13 +20,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include "WVulkan/WVulkanStructs.hpp"
-#include "WStructs/WTextureStructs.hpp"
-#include "WStructs/WGeometryStructs.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
-#include <fstream>
 #include <vulkan/vulkan_core.h>
-#include <regex>
 
 // WVulkan
 // -------
@@ -34,7 +33,6 @@ void WVulkan::Create(VkInstance & out_instance,
                      const std::vector<std::string_view>& in_validation_layers,
                      const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
                      const VkDebugUtilsMessengerEXT & in_debug_messenger
-                     // const WVkRenderDebugInfo & debug_info
     )
 {
     if (in_enable_validation_layers && !CheckValidationLayerSupport(in_validation_layers))
@@ -61,23 +59,26 @@ void WVulkan::Create(VkInstance & out_instance,
 
     VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
         VkStructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
-    
+
+    std::vector<const char*> enabled_layers_names{};
     if (in_enable_validation_layers)
     {
-        create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
-        create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
+        create_info.enabledLayerCount = static_cast<std::uint32_t>(in_validation_layers.size());
+        
+        WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
 
+        create_info.ppEnabledLayerNames = enabled_layers_names.data();
 
         debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 
-        debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT    |
-                                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+        debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT      |
+                                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT   |
                                         VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-        if (debug_info.debug_callback)
+        if (in_debug_callback)
         {
-            debug_create_info.pfnUserCallback = debug_info.debug_callback;
+            debug_create_info.pfnUserCallback = in_debug_callback;
         }
         else
         {
@@ -85,7 +86,6 @@ void WVulkan::Create(VkInstance & out_instance,
         }
 
         debug_create_info.flags = 0;
-        debug_create_info.pNext = VK_NULL_HANDLE;
 
         create_info.pNext = &debug_create_info;
     }
@@ -103,14 +103,16 @@ void WVulkan::Create(VkInstance & out_instance,
         );
 }
 
-void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, GLFWwindow * in_window)
+void WVulkan::Create(VkSurfaceKHR & surface,
+                     const VkInstance & in_instance,
+                     GLFWwindow * in_window)
 {
     VkResult result =
         glfwCreateWindowSurface(
-            instance_info.instance,
+            in_instance,
             in_window,
             nullptr,
-            & surface.surface
+            &surface
             );
     
     if (result != VK_SUCCESS)
@@ -124,8 +126,8 @@ void WVulkan::Create(
     const WVkDeviceInfo & in_device_info,
     const WVkSurfaceInfo & in_surface_info,
     const std::uint32_t & in_width,
-    const std::uint32_t & in_height,
-    const WVkRenderDebugInfo & in_debug_info
+    const std::uint32_t & in_height // ,
+    // const WVkRenderDebugInfo & in_debug_info
     )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
@@ -253,41 +255,56 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance_info, const WVkSurfaceInfo &surface_info, const WVkRenderDebugInfo &debug_info)
+void WVulkan::Create(VkDevice & out_device,
+                     VkPhysicalDevice & out_physical_device,
+                     VkSampleCountFlagBits & out_max_msaa_samples,
+                     VkQueue & out_graphics_queue,
+                     VkQueue & out_present_queue,
+                     const std::vector<std::string_view> & in_device_extensions,
+                     const VkInstance & in_instance,
+                     const VkSurfaceKHR & in_surface,
+                     bool in_enable_validation_layers,
+                     const std::vector<std::string_view>& in_validation_layers)
 {
     // Pick Physical Device
     
     uint32_t device_count = 0;
-    vkEnumeratePhysicalDevices(instance_info.instance, &device_count, nullptr);
+    vkEnumeratePhysicalDevices(in_instance, &device_count, nullptr);
     if (device_count == 0)
     {
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
     }
     
     std::vector<VkPhysicalDevice> devices(device_count);
-    vkEnumeratePhysicalDevices(instance_info.instance, &device_count, devices.data());
+    vkEnumeratePhysicalDevices(in_instance, &device_count, devices.data());
 
     for (const auto &device : devices)
     {
-        if (IsDeviceSuitable(device, surface_info.surface, device_info.device_extensions))
+        if (IsDeviceSuitable(device, in_surface, in_device_extensions))
         {
             // TODO device checks
-            device_info.vk_physical_device = device;
-            device_info.msaa_samples = GetMaxUsableSampleCount(device);
+            out_physical_device = device;
+            // device_info.vk_physical_device = device;
+            out_max_msaa_samples = GetMaxUsableSampleCount(device);
+            // device_info.msaa_samples = GetMaxUsableSampleCount(device);
             break;
         }
     }
 
-    if (device_info.vk_physical_device == VK_NULL_HANDLE)
+    if (out_physical_device == VK_NULL_HANDLE)
     {
         throw std::runtime_error("Failed to find a suitable GPU!");
     }
 
     // Create Logical Device
 
-    QueueFamilyIndices indices = FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+    QueueFamilyIndices indices =
+        FindQueueFamilies(out_physical_device, in_surface);
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-    std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
+    std::set<uint32_t> unique_queue_families = {
+        indices.graphics_family.value(),
+        indices.present_family.value()
+    };
 
     float queue_priority = 1.0f;
     for (uint32_t queue_family : unique_queue_families)
@@ -327,33 +344,38 @@ void WVulkan::Create(WVkDeviceInfo &device_info, const WVkInstanceInfo &instance
     create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
     create_info.pQueueCreateInfos = queue_create_infos.data();
 
-    // create_info.pEnabledFeatures = &device_features;
     create_info.pEnabledFeatures = nullptr;
 
-    create_info.enabledExtensionCount = static_cast<uint32_t>(device_info.device_extensions.size());
-    create_info.ppEnabledExtensionNames = device_info.device_extensions.data();
+    create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
+    
+    std::vector<const char *> enable_extension_names{};
+    WStringUtils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
+    
+    create_info.ppEnabledExtensionNames = enable_extension_names.data();
     
     create_info.pNext = &vk2_features;
-    
-    if (debug_info.enable_validation_layers)
+
+    std::vector<const char *> enabled_layer_names{};
+    if (in_enable_validation_layers)
     {
-        create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
-        create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
+        create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
+        WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
+        create_info.ppEnabledLayerNames = enabled_layer_names.data();
     }
     else
     {
         create_info.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(
-            device_info.vk_physical_device, &create_info, nullptr, &device_info.vk_device
-            ) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create logical device!");
-    }
+    ExecVkProcChecked(vkCreateDevice,
+                      "Failed to create logical device!",
+                      out_physical_device,
+                      &create_info,
+                      nullptr,
+                      &out_device);
     
-    vkGetDeviceQueue(device_info.vk_device, indices.graphics_family.value(), 0, &device_info.vk_graphics_queue);
-    vkGetDeviceQueue(device_info.vk_device, indices.present_family.value(), 0, &device_info.vk_present_queue);
+    vkGetDeviceQueue(out_device, indices.graphics_family.value(), 0, &out_graphics_queue);
+    vkGetDeviceQueue(out_device, indices.present_family.value(), 0, &out_present_queue);
 }
 
 void WVulkan::CreateTexture(
@@ -1051,7 +1073,6 @@ void WVulkan::Destroy(
 
 bool WVulkan::CheckValidationLayerSupport(
     const std::vector<std::string_view>& in_validation_layers
-    // const WVkRenderDebugInfo & debug_info
     )
 {
     uint32_t layer_count;
@@ -1113,7 +1134,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
 
 bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
                                const VkSurfaceKHR & surface,
-                               const std::vector<const char *> & device_extensions)
+                               const std::vector<std::string_view> & device_extensions)
 {
     QueueFamilyIndices indices = FindQueueFamilies(device, surface);
 
@@ -1134,14 +1155,15 @@ bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
 }
 
 bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
-                                          const std::vector<const char *> & device_extensions)
+                                          const std::vector<std::string_view> & device_extensions)
 {
     uint32_t extension_count;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
     std::vector<VkExtensionProperties> available_extensions(extension_count);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, available_extensions.data());
 
-    std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
+    std::set<std::string> required_extensions(device_extensions.begin(),
+                                              device_extensions.end());
 
     for (const auto &extension : available_extensions)
     {

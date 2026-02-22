@@ -65,4 +65,17 @@ namespace WStringUtils {
 
         return std::filesystem::absolute(in_path).string();
     }
+
+    /**
+     * @brief converts a vector of std::string_view into a vector of const char *.
+     */
+    inline void ToConstCharPtrs(const std::vector<std::string_view>& in_vw, std::vector<const char *> & out_char_ptr) {
+        out_char_ptr.clear();
+        out_char_ptr.reserve(in_vw.size());
+
+        for (const std::string_view & v : in_vw) {
+            out_char_ptr.push_back(v.data());
+        }
+
+    }
 }

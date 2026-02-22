@@ -24,3 +24,9 @@ inline constexpr VkFormat WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT{VK_FORMAT_R16G
 
 inline constexpr std::uint8_t WENG_VK_GBUFFERS_COUNT{7};
 
+#ifdef NDEBUG
+inline constexpr bool WENG_VK_ENABLE_VALIDATION_LAYERS{false};
+#else
+inline constexpr bool WENG_VK_ENABLE_VALIDATION_LAYERS{true};
+#endif
+

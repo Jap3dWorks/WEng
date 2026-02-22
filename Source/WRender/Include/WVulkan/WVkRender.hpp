@@ -170,7 +170,6 @@ private:
 
     WVkSurfaceInfo surface_info_{};
     WVkDeviceInfo device_info_{};
-    WVkRenderDebugInfo debug_info_{};
 
     WVkAssetResources render_resources_{};
 
@@ -196,6 +195,7 @@ private:
         std::unordered_map<WAssetId, EPipelineType> pipeline_pipetype{};
         std::unordered_map<WEntityComponentId, EPipelineType> binding_pipetype{};
     } pipeline_track_{};
+
     // --
 
     struct SyncSemaphores {

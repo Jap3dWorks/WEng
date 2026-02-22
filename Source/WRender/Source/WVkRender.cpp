@@ -25,12 +25,6 @@
 
 #include <array>
 
-#ifdef NDEBUG
-    #define _ENABLE_VALIDATON_LAYERS true
-#else
-    #define _ENABLE_VALIDATON_LAYERS true
-#endif
-
 // WVkRender
 // -------
 
@@ -40,7 +34,6 @@ WVkRender::WVkRender() noexcept :
     render_size_(),
     surface_info_(),
     device_info_(),
-    debug_info_(),
     render_resources_(),
     swap_chain_info_(),
     swap_chain_pipeline_(),
@@ -62,7 +55,6 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
     render_size_(std::move(other.render_size_)),
     surface_info_(std::move(other.surface_info_)),
     device_info_(std::move(other.device_info_)),
-    debug_info_(std::move(other.debug_info_)),
     render_resources_(std::move(other.render_resources_)),
     swap_chain_info_(std::move(other.swap_chain_info_)),
     swap_chain_pipeline_(std::move(other.swap_chain_pipeline_)),
@@ -86,7 +78,6 @@ WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
         render_size_ = std::move(other.render_size_);
         surface_info_ = std::move(other.surface_info_);
         device_info_ = std::move(other.device_info_);
-        debug_info_ = std::move(other.debug_info_);
         render_resources_ = std::move(other.render_resources_);
         swap_chain_info_ = std::move(other.swap_chain_info_);
         swap_chain_pipeline_ = std::move(other.swap_chain_pipeline_);
@@ -127,7 +118,8 @@ void WVkRender::Window(GLFWwindow * in_window) {
 
 void WVkRender::Initialize()
 {
-    debug_info_.enable_validation_layers = _ENABLE_VALIDATON_LAYERS;
+    WVkRenderDebugInfo render_debug_info =
+        WVkRenderUtils::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
 
     std::array<std::uint32_t,2> dimensions = {
         render_size_.width,
@@ -136,23 +128,32 @@ void WVkRender::Initialize()
 
     // Create Vulkan Instance
     WVulkan::Create(
-        instance_info_,
-        debug_info_
+        instance_info_.instance,
+        render_debug_info.enable_validation_layers,
+        render_debug_info.validation_layers,
+        render_debug_info.debug_callback,
+        render_debug_info.debug_messenger
         );
 
     // Create Vulkan Window Surface
     WVulkan::Create(
-        surface_info_,
-        instance_info_, 
+        surface_info_.surface,
+        instance_info_.instance, 
         window_.window
         );
 
     // Create Vulkan Device
     WVulkan::Create(
-        device_info_,
-        instance_info_,
-        surface_info_,
-        debug_info_
+        device_info_.vk_device,
+        device_info_.vk_physical_device,
+        device_info_.msaa_samples,
+        device_info_.vk_graphics_queue,
+        device_info_.vk_present_queue,
+        device_info_.device_extensions,
+        instance_info_.instance,
+        surface_info_.surface,
+        render_debug_info.enable_validation_layers,
+        render_debug_info.validation_layers
         );
 
     // Create Vulkan Swap Chain
@@ -161,8 +162,7 @@ void WVkRender::Initialize()
         device_info_,
         surface_info_,
         dimensions[0],
-        dimensions[1],
-        debug_info_
+        dimensions[1]
         );
 
     // GBuffers render targets
@@ -425,9 +425,7 @@ void WVkRender::Draw()
         render_command_buffer_.command_buffers[frame_index_]
         );
 
-    VkSubmitInfo submit_info;
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submit_info.pNext = nullptr;
+    VkSubmitInfo submit_info = WVulkan::VkStructs::CreateVkSubmitInfo();
 
     VkPipelineStageFlags wait_stages[] =
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -445,23 +443,22 @@ void WVkRender::Draw()
     submit_info.pSignalSemaphores =
         &sync_semaphores_[image_index].render_finished;
 
-    if (vkQueueSubmit(
-            device_info_.vk_graphics_queue,
-            1,
-            &submit_info,
-            sync_fences_[frame_index_]) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to submit draw command buffer");
-    }
+    WVulkan::ExecVkProcChecked(
+        vkQueueSubmit,
+        "Failed to submit draw command buffer",
+        device_info_.vk_graphics_queue,
+        1,
+        &submit_info,
+        sync_fences_[frame_index_]
+        );
 
-    VkPresentInfoKHR present_info{};
-    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    VkPresentInfoKHR present_info = WVulkan::VkStructs::CreateVkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;
     present_info.pSwapchains = &swap_chain_info_.swap_chain;
     present_info.pImageIndices = &image_index;
-    present_info.pResults = nullptr;
+    present_info.pResults = VK_NULL_HANDLE;
 
     result = vkQueuePresentKHR(device_info_.vk_present_queue,
                                &present_info);
@@ -770,8 +767,7 @@ void WVkRender::RecreateSwapChain() {
         device_info_,
         surface_info_,
         dimensions[0],
-        dimensions[1],
-        debug_info_
+        dimensions[1]
         );
 
     WVkRenderUtils::CreateGBuffersRenderTargets(

@@ -8,7 +8,7 @@
 #include "WVulkan/WVkPipelineHelper.hpp"
 
 #include "WShaderUtils.hpp"
-#include "WCore/WStringUtils.hpp"
+#include "WUtils/WStringUtils.hpp"
 #include <vulkan/vulkan_core.h>
 
 /**

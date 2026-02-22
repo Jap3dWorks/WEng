@@ -4,7 +4,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WCore/WStringUtils.hpp"
+#include "WUtils/WStringUtils.hpp"
 
 #include <string>
 #include <utility>

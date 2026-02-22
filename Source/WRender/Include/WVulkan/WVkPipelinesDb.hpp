@@ -8,7 +8,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
-#include "WCore/WStringUtils.hpp"
+#include "WUtils/WStringUtils.hpp"
 
 #include <utility>
 #include <vulkan/vulkan_core.h>
