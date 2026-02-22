@@ -94,11 +94,8 @@ struct WVkGBuffersRenderStruct
     WVkRenderTarget albedo{};
     WVkRenderTarget normal{};
     WVkRenderTarget ws_position{};
-
     WVkRenderTarget mrAO{};         // /metallic/roughness/ambientOclusion
-
     WVkRenderTarget emission{};
-
     WVkRenderTarget extra01{};
 
     WVkRenderTarget depth{};

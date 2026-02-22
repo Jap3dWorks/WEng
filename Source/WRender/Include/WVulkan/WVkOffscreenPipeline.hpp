@@ -217,14 +217,11 @@ private:
 
         // Dynamic rendering info
 
-        // VkFormat color_format = VK_FORMAT_B8G8R8A8_SRGB;  // TODO: 16 bit format?
         VkFormat color_format = WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT;
 
-        // TODO check depth attachment usage
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
             &color_format,
             1,
-            VK_FORMAT_D32_SFLOAT,  // TODO depth should not be used here
             graphics_pipeline_info,
             device_info_.vk_device
             );

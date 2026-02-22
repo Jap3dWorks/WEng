@@ -19,14 +19,181 @@ namespace WVulkan
     // TODO this file should be more WENG agnostic
     //  try to use only vulkan types.
     //  No WENG dependent functions move to WVulkanUtils.
-    
+
+    // WVulkan Create Structs
+    // ---------------
+    namespace VkStructs {
+
+        inline constexpr VkApplicationInfo CreateVkApplicationInfo() noexcept {
+            VkApplicationInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkInstanceCreateInfo CreateVkInstanceCreateInfo() noexcept {
+            VkInstanceCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkDebugUtilsMessengerCreateInfoEXT CreateVkDebugUtilsMessengerCreateInfoEXT() noexcept {
+            VkDebugUtilsMessengerCreateInfoEXT result{};
+            result.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
+            VkWriteDescriptorSet result{};
+            result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            return result;
+        }
+
+        inline constexpr VkDescriptorImageInfo CreateVkDescriptorImageInfo() noexcept {
+            return {};
+        }
+
+        inline constexpr VkRenderingInfo CreateVkRenderingInfo()  noexcept {
+            VkRenderingInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+            return result;
+        }
+
+        inline constexpr VkRenderingAttachmentInfo CreateVkRenderingAttachmentInfo() noexcept {
+            VkRenderingAttachmentInfo result {};
+            result.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            return result;
+        }
+
+        inline constexpr VkDescriptorSetLayoutBinding CreateVkDescriptorSetLayoutBinding() noexcept {
+            return {};
+        }
+
+        inline constexpr VkPipelineColorBlendAttachmentState CreateVkPipelineColorBlendAttachmentState() noexcept {
+            return {};
+        }
+
+        inline constexpr VkPipelineVertexInputStateCreateInfo CreateVkPipelineVertexInputStateCreateInfo() noexcept {
+            VkPipelineVertexInputStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineInputAssemblyStateCreateInfo CreateVkPipelineInputAssemblyStateCreateInfo() noexcept {
+            VkPipelineInputAssemblyStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineViewportStateCreateInfo CreateVkPipelineViewportStateCreateInfo() noexcept {
+            VkPipelineViewportStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineRasterizationStateCreateInfo CreateVkPipelineRasterizationStateCreateInfo() noexcept {
+            VkPipelineRasterizationStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineMultisampleStateCreateInfo CreateVkPipelineMultisampleStateCreateInfo() noexcept {
+            VkPipelineMultisampleStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
+            VkPipelineDepthStencilStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
+            VkPipelineColorBlendStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineDynamicStateCreateInfo CreateVkPipelineDynamicStateCreateInfo() noexcept {
+            VkPipelineDynamicStateCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineLayoutCreateInfo CreateVkPipelineLayoutCreateInfo() noexcept {
+            VkPipelineLayoutCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkGraphicsPipelineCreateInfo CreateVkGraphicsPipelineCreateInfo() noexcept {
+            VkGraphicsPipelineCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkPipelineRenderingCreateInfo CreateVkPipelineRenderingCreateInfo() noexcept {
+            VkPipelineRenderingCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+        inline constexpr VkShaderModuleCreateInfo CreateVkShaderModuleCreateInfo() noexcept {
+            VkShaderModuleCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+            return result;
+        }
+
+        inline constexpr VkPipelineShaderStageCreateInfo CreateVkPipelineShaderStageCreateInfo() noexcept {
+            VkPipelineShaderStageCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
+    }
+
+    /**
+     * @brief Execute and check if the result is differrent to VK_SUCCESS.
+     */
+    template<typename TFn, typename ...Args>
+    inline void ExecVkProcChecked(TFn && in_fn, std::string_view message, Args && ... args) {
+        
+        if (std::forward<TFn>(in_fn) (std::forward<Args>(args)...) != VK_SUCCESS) {
+            throw std::runtime_error(std::string(message));
+            }
+    }
+
     // Create functions
     // ----------------
+
+    // TODO, use pure vulkan classes as inputs
 
     /**
      * Creates a Vulkan Instance.
      */
-    void Create(WVkInstanceInfo &out_instance_info, const WVkRenderDebugInfo &debug_info);
+    // void Create(WVkInstanceInfo &out_instance_info, const WVkRenderDebugInfo &debug_info);
+    void Create(VkInstance & out_instance,
+                bool in_enable_validation_layers,
+                const std::vector<std::string_view>& in_validation_layers,
+                const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
+                const VkDebugUtilsMessengerEXT & in_debug_messenger
+                // const WVkRenderDebugInfo & debug_info
+        );
 
     /**
      * Creates a Vulkan Surface.
@@ -181,108 +348,6 @@ namespace WVulkan
         VkBufferUsageFlags usage, 
         VkMemoryPropertyFlags properties
         );
-
-    // WVulkan Structs
-    // ---------------
-    namespace VkStructs {
-
-        inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
-            VkWriteDescriptorSet result{};
-            result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            return result;
-        }
-
-        inline constexpr VkDescriptorImageInfo CreateVkDescriptorImageInfo() noexcept {
-            return {};
-        }
-
-        inline constexpr VkRenderingInfo CreateVkRenderingInfo()  noexcept {
-            VkRenderingInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-            return result;
-        }
-
-        inline constexpr VkRenderingAttachmentInfo CreateVkRenderingAttachmentInfo() noexcept {
-            VkRenderingAttachmentInfo result {};
-            result.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-            return result;
-        }
-
-        inline constexpr VkDescriptorSetLayoutBinding CreateVkDescriptorSetLayoutBinding() noexcept {
-            return {};
-        }
-
-        inline constexpr VkPipelineColorBlendAttachmentState CreateVkPipelineColorBlendAttachmentState() noexcept {
-            return {};
-        }
-
-        inline constexpr VkPipelineVertexInputStateCreateInfo CreateVkPipelineVertexInputStateCreateInfo() noexcept {
-            VkPipelineVertexInputStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineInputAssemblyStateCreateInfo CreateVkPipelineInputAssemblyStateCreateInfo() noexcept {
-            VkPipelineInputAssemblyStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineViewportStateCreateInfo CreateVkPipelineViewportStateCreateInfo() noexcept {
-            VkPipelineViewportStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineRasterizationStateCreateInfo CreateVkPipelineRasterizationStateCreateInfo() noexcept {
-            VkPipelineRasterizationStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineMultisampleStateCreateInfo CreateVkPipelineMultisampleStateCreateInfo() noexcept {
-            VkPipelineMultisampleStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
-            VkPipelineDepthStencilStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
-            VkPipelineColorBlendStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineDynamicStateCreateInfo CreateVkPipelineDynamicStateCreateInfo() noexcept {
-            VkPipelineDynamicStateCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineLayoutCreateInfo CreateVkPipelineLayoutCreateInfo() noexcept {
-            VkPipelineLayoutCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkGraphicsPipelineCreateInfo CreateVkGraphicsPipelineCreateInfo() noexcept {
-            VkGraphicsPipelineCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            return result;
-        }
-
-        inline constexpr VkPipelineRenderingCreateInfo CreateVkPipelineRenderingCreateInfo() noexcept {
-            VkPipelineRenderingCreateInfo result{};
-            result.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-            return result;
-        }
-
-    }
 
     // Destroy functions
     // -----------------
@@ -456,24 +521,13 @@ namespace WVulkan
         return true;
     }
 
-    // Other
-    // -----
-
-    template<typename TFn, typename ...Args>
-    inline void ExecVkProcChecked(TFn && in_fn, std::string_view message, Args && ... args) {
-        
-        if (std::forward<TFn>(in_fn) (std::forward<Args>(args)...) != VK_SUCCESS) {
-            throw std::runtime_error(std::string(message));
-            }
-    }
-
     // Helper Functions TODO: move to WVulkanUtils
     // ----------------
 
     /**
      * @brief Checks if the requested validation layers are available.
      */
-    bool CheckValidationLayerSupport(const WVkRenderDebugInfo &debug_info);
+    bool CheckValidationLayerSupport(const std::vector<std::string_view>& debug_info);
 
     struct QueueFamilyIndices
     {

@@ -512,7 +512,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
     auto clearbindingfn = [this](const WEntityComponentId & binding) {
         pipeline_track_.binding_pipetype.erase(binding);
     };
-        
+
     switch(pipeline_track_.pipeline_pipetype[in_id]) {
         
     case EPipelineType::Graphics:

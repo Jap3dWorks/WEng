@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <string_view>
 
-inline constexpr std::uint32_t WENG_MAX_FRAMES_IN_FLIGHT{2};
+inline constexpr std::uint8_t WENG_MAX_FRAMES_IN_FLIGHT{2};
 
 inline constexpr std::string_view WENG_VK_OFFSCREEN_SHADER_PATH{"Content/Shaders/WRender_Offscreen.offscrn.spv"};
 inline constexpr std::string_view WENG_VK_SWAPCHAIN_SHADER_PATH{"Content/Shaders/WRender_DrawInSwapChain.swap.spv"};

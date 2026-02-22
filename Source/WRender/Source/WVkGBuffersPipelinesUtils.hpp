@@ -258,17 +258,16 @@ namespace WVkGBuffersPipelinesUtils {
 
         pipeline_create_info.pNext = &rendering_info;
 
-        if (vkCreatePipelineLayout(
-                in_device.vk_device,
-                &pipeline_layout_info,
-                nullptr,
-                &out_render_pipeline.pipeline_layout) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create pipeline layout!");
-        }
+        WVulkan::ExecVkProcChecked(
+            vkCreatePipelineLayout,
+            "Failed to create pipeline layout!",
+            in_device.vk_device,
+            &pipeline_layout_info,
+            nullptr,
+            &out_render_pipeline.pipeline_layout
+            );
 
         pipeline_create_info.layout = out_render_pipeline.pipeline_layout;
-
         
         WVulkan::ExecVkProcChecked(
             vkCreateGraphicsPipelines,
@@ -280,17 +279,6 @@ namespace WVkGBuffersPipelinesUtils {
             nullptr,
             &out_render_pipeline.pipeline
             );
-
-        // if (vkCreateGraphicsPipelines(
-        //         in_device.vk_device,
-        //         VK_NULL_HANDLE,
-        //         1,
-        //         &pipeline_create_info,
-        //         nullptr,
-        //         &out_render_pipeline.pipeline) != VK_SUCCESS)
-        // {
-        //     throw std::runtime_error("Failed to create graphics pipeline!");
-        // }
 
         for (auto& shader_module : shader_modules)
         {

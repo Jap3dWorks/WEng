@@ -264,7 +264,6 @@ private:
         pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
             &color_format,
             1,
-            VK_FORMAT_D32_SFLOAT,
             graphics_pipeline_info,
             device_info_.vk_device
             );

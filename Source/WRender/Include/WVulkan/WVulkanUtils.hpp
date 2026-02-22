@@ -2,6 +2,7 @@
 
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVulkan.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
@@ -97,20 +98,19 @@ namespace WVulkanUtils {
     {
         VkShaderModule result;
 
-        VkShaderModuleCreateInfo shader_module_create_info{};
-        shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        VkShaderModuleCreateInfo shader_module_create_info =
+            WVulkan::VkStructs::CreateVkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
         shader_module_create_info.pCode = in_code;
 
-        if (vkCreateShaderModule(
-                in_device, 
-                &shader_module_create_info, 
-                nullptr, 
-                &result
-                ) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create shader module!");
-        }
+        WVulkan::ExecVkProcChecked(
+            vkCreateShaderModule,
+            "Failed to create shader module!",
+            in_device, 
+            &shader_module_create_info, 
+            nullptr, 
+            &result
+            );
 
         return result;
     }

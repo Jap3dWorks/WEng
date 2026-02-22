@@ -185,7 +185,6 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
             nullptr
             );
     }
-
 }
 
 void WVkGBuffersPipelines::Destroy_GlobalResources() {

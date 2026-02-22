@@ -2,9 +2,8 @@
 
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
-
-#include <stdexcept>
 
 namespace WVkPipelineHelper {
     /**
@@ -16,21 +15,15 @@ namespace WVkPipelineHelper {
         ) {
 
         // VkShaderStageFlagBits
-        (*in_data) = {};
-        in_data->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        in_data->stage = VK_SHADER_STAGE_VERTEX_BIT;
-        in_data->pNext=VK_NULL_HANDLE;
-        in_data->module=in_shader_module;
-        in_data->pName="vsMain";
+        in_data[0] = WVulkan::VkStructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+        in_data[0].module=in_shader_module;
+        in_data[0].pName="vsMain";
 
-        in_data++;
-        
-        (*in_data) = {};
-        in_data->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        in_data->stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        in_data->pNext = VK_NULL_HANDLE;
-        in_data->module=in_shader_module;
-        in_data->pName="fsMain";
+        in_data[1] = WVulkan::VkStructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        in_data[1].module=in_shader_module;
+        in_data[1].pName="fsMain";
 
     }
 
@@ -64,8 +57,9 @@ namespace WVkPipelineHelper {
         const std::uint32_t & in_attr_desc_count
         )
     {
-        VkPipelineVertexInputStateCreateInfo vertex_input_info{};
-        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        
+        VkPipelineVertexInputStateCreateInfo vertex_input_info =
+            WVulkan::VkStructs::CreateVkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount=1;
         vertex_input_info.pVertexBindingDescriptions = &in_binding_desc;
         vertex_input_info.vertexAttributeDescriptionCount=in_attr_desc_count;
@@ -75,25 +69,27 @@ namespace WVkPipelineHelper {
     }
 
     inline VkPipelineInputAssemblyStateCreateInfo RenderPlane_VkPipelineInputAssemblyStateCreateInfo() {
-        VkPipelineInputAssemblyStateCreateInfo input_assembly{};
-        input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        VkPipelineInputAssemblyStateCreateInfo input_assembly =
+            WVulkan::VkStructs::CreateVkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
+        
         return input_assembly;
     }
 
     inline VkPipelineViewportStateCreateInfo RenderPlane_VkPipelineViewportStateCreateInfo()
     {
-        VkPipelineViewportStateCreateInfo viewport_state{};
-        viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        VkPipelineViewportStateCreateInfo viewport_state =
+            WVulkan::VkStructs::CreateVkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount=1;
         viewport_state.scissorCount=1;
+        
         return viewport_state;
     }
 
     inline VkPipelineRasterizationStateCreateInfo RenderPlane_VkPipelineRasterizationStateCreateInfo() {
-        VkPipelineRasterizationStateCreateInfo rasterizer{};
-        rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        VkPipelineRasterizationStateCreateInfo rasterizer =
+            WVulkan::VkStructs::CreateVkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -102,22 +98,25 @@ namespace WVkPipelineHelper {
         // because of y-flip in the projection matrix
         rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
+        
         return rasterizer;
     }
 
     inline VkPipelineMultisampleStateCreateInfo RenderPlane_VkPipelineMultisampleStateCreateInfo() {
-        VkPipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        VkPipelineMultisampleStateCreateInfo multisampling =
+            WVulkan::VkStructs::CreateVkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;  // no msaa
+        
         return multisampling;        
     }
 
     inline VkPipelineDepthStencilStateCreateInfo RenderPlane_VkPipelineDepthStencilStateCreateInfo() {
-        VkPipelineDepthStencilStateCreateInfo depth_stencil{};
-        depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        VkPipelineDepthStencilStateCreateInfo depth_stencil =
+            WVulkan::VkStructs::CreateVkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_FALSE;
         depth_stencil.depthWriteEnable = VK_FALSE;
+        
         return depth_stencil;
     }
 
@@ -130,6 +129,7 @@ namespace WVkPipelineHelper {
             VK_COLOR_COMPONENT_B_BIT |
             VK_COLOR_COMPONENT_A_BIT;
         color_blend_attachment.blendEnable = VK_FALSE;
+        
         return color_blend_attachment;
     }
 
@@ -137,9 +137,8 @@ namespace WVkPipelineHelper {
         const VkPipelineColorBlendAttachmentState & in_color_blend_attachment
         )
     {
-        VkPipelineColorBlendStateCreateInfo color_blending{};
-        color_blending.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        VkPipelineColorBlendStateCreateInfo color_blending =
+            WVulkan::VkStructs::CreateVkPipelineColorBlendStateCreateInfo();
         color_blending.logicOpEnable = VK_FALSE;
         color_blending.logicOp = VK_LOGIC_OP_COPY;
         color_blending.attachmentCount = 1;
@@ -161,8 +160,8 @@ namespace WVkPipelineHelper {
             VK_DYNAMIC_STATE_SCISSOR
         };
 
-        VkPipelineDynamicStateCreateInfo dynamic_state{};
-        dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        VkPipelineDynamicStateCreateInfo dynamic_state =
+            WVulkan::VkStructs::CreateVkPipelineDynamicStateCreateInfo();
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(out_dyn_states.size());
         dynamic_state.pDynamicStates = out_dyn_states.data();
 
@@ -173,27 +172,25 @@ namespace WVkPipelineHelper {
         const VkDevice & in_device,
         const VkDescriptorSetLayout & in_desc_lay
         ) {
-        
-        VkPipelineLayoutCreateInfo pipeline_layout_info{};
 
-        VkPipelineLayout pipeline_lay;
+        VkPipelineLayout result;
+        
+        VkPipelineLayoutCreateInfo pipeline_layout_info =
+            WVulkan::VkStructs::CreateVkPipelineLayoutCreateInfo();
 
         // Only one desc set, in the future I could need more (some global parameters).
 
-        pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipeline_layout_info.setLayoutCount = 1;         // slayouts.size();
         pipeline_layout_info.pSetLayouts = &in_desc_lay; // slayouts.data();
 
-        if (vkCreatePipelineLayout(
-                in_device,
-                &pipeline_layout_info,
-                nullptr,
-                &pipeline_lay) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create pipeline layout!");
-        }
+        WVulkan::ExecVkProcChecked(vkCreatePipelineLayout,
+                                   "Failed to create pipeline layout!",
+                                   in_device,
+                                   &pipeline_layout_info,
+                                   nullptr,
+                                   &result);
 
-        return pipeline_lay;
+        return result;
 
     }
 
@@ -211,8 +208,8 @@ namespace WVkPipelineHelper {
         VkPipelineLayout in_pipeline_layout
         )
     {
-        VkGraphicsPipelineCreateInfo pipeline_info{};
-        pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        VkGraphicsPipelineCreateInfo pipeline_info =
+            WVulkan::VkStructs::CreateVkGraphicsPipelineCreateInfo();
         pipeline_info.stageCount = in_shader_stages_count;
         pipeline_info.pStages = in_shader_stages;
         pipeline_info.pVertexInputState = in_vertex_input_info;
@@ -235,33 +232,29 @@ namespace WVkPipelineHelper {
     inline VkPipeline RenderPlane_VkPipeline(
         VkFormat * in_color_attachment_format,
         std::uint32_t in_color_attachment_count,
-        VkFormat in_depth_format,
         VkGraphicsPipelineCreateInfo in_graphics_pipeline_create_info,
         const VkDevice & in_device
         )
     {
-        VkPipelineRenderingCreateInfo rendering_info{};
-        rendering_info.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+        VkPipelineRenderingCreateInfo rendering_info =
+            WVulkan::VkStructs::CreateVkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = in_color_attachment_count;
         rendering_info.pColorAttachmentFormats = in_color_attachment_format;
-        rendering_info.depthAttachmentFormat = in_depth_format;
-        rendering_info.pNext = VK_NULL_HANDLE;
 
         in_graphics_pipeline_create_info.pNext = &rendering_info;
 
         VkPipeline result;
 
-        if (vkCreateGraphicsPipelines(
-                in_device,
-                VK_NULL_HANDLE,
-                1,
-                &in_graphics_pipeline_create_info,
-                nullptr,
-                &result) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create graphics pipeline!");
-        }
+        WVulkan::ExecVkProcChecked(
+            vkCreateGraphicsPipelines,
+            "Failed to create graphics pipeline!",
+            in_device,
+            VK_NULL_HANDLE,
+            1,
+            &in_graphics_pipeline_create_info,
+            nullptr,
+            &result
+            );
 
         return result;
     }

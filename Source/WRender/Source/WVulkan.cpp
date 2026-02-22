@@ -29,37 +29,42 @@
 // Create functions
 // ----------------
 
-void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugInfo & debug_info)
+void WVulkan::Create(VkInstance & out_instance,
+                     bool in_enable_validation_layers,
+                     const std::vector<std::string_view>& in_validation_layers,
+                     const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
+                     const VkDebugUtilsMessengerEXT & in_debug_messenger
+                     // const WVkRenderDebugInfo & debug_info
+    )
 {
-    if (debug_info.enable_validation_layers && !CheckValidationLayerSupport(debug_info))
+    if (in_enable_validation_layers && !CheckValidationLayerSupport(in_validation_layers))
     {
         throw std::runtime_error("Validation layers requested, but not available!");
     }
 
-    VkApplicationInfo app_info{};
-    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    VkApplicationInfo app_info =
+        VkStructs::CreateVkApplicationInfo();
     app_info.pApplicationName = "WEngine";
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.pEngineName = "WEngine";
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.apiVersion = VK_API_VERSION_1_3;
 
-    VkInstanceCreateInfo create_info{};
-    create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    VkInstanceCreateInfo create_info =
+        VkStructs::CreateVkInstanceCreateInfo();
     create_info.pApplicationInfo = &app_info;
-    create_info.pNext = VK_NULL_HANDLE;
 
-    auto extensions = GetRequiredExtensions(debug_info.enable_validation_layers);
+    auto extensions = GetRequiredExtensions(in_enable_validation_layers);
     
     create_info.enabledExtensionCount = static_cast<std::uint32_t>(extensions.size());
     create_info.ppEnabledExtensionNames = extensions.data();
 
-    VkDebugUtilsMessengerCreateInfoEXT debug_create_info;
-    debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
+        VkStructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
     
-    if (debug_info.enable_validation_layers)
+    if (in_enable_validation_layers)
     {
-        create_info.enabledLayerCount = static_cast<uint32_t>(debug_info.validation_layers.size());
+        create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
         create_info.ppEnabledLayerNames = debug_info.validation_layers.data();
 
 
@@ -89,10 +94,13 @@ void WVulkan::Create(WVkInstanceInfo & out_instance_info, const WVkRenderDebugIn
         create_info.enabledLayerCount = 0;
     }
 
-    if (vkCreateInstance(&create_info, nullptr, &out_instance_info.instance) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create instance!");
-    }
+    ExecVkProcChecked(
+        vkCreateInstance,
+        "Failed to create instance!",
+        &create_info,
+        nullptr,
+        &out_instance
+        );
 }
 
 void WVulkan::Create(WVkSurfaceInfo & surface, WVkInstanceInfo & instance_info, GLFWwindow * in_window)
@@ -1041,7 +1049,10 @@ void WVulkan::Destroy(
 // Helper functions
 // ----------------
 
-bool WVulkan::CheckValidationLayerSupport(const WVkRenderDebugInfo & debug_info)
+bool WVulkan::CheckValidationLayerSupport(
+    const std::vector<std::string_view>& in_validation_layers
+    // const WVkRenderDebugInfo & debug_info
+    )
 {
     uint32_t layer_count;
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
@@ -1049,13 +1060,13 @@ bool WVulkan::CheckValidationLayerSupport(const WVkRenderDebugInfo & debug_info)
     std::vector<VkLayerProperties> available_layers(layer_count);
     vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
 
-    for (const char *layer_name : debug_info.validation_layers)
+    for (auto & layer_name : in_validation_layers)
     {
         bool layer_found = false;
 
         for (const auto &layer_properties : available_layers)
         {
-            if (std::strcmp(layer_name, layer_properties.layerName) == 0)
+            if (layer_name.compare(layer_properties.layerName) == 0)
             {
                 layer_found = true;
                 break;
