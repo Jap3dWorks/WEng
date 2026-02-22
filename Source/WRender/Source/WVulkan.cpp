@@ -284,9 +284,7 @@ void WVulkan::Create(VkDevice & out_device,
         {
             // TODO device checks
             out_physical_device = device;
-            // device_info.vk_physical_device = device;
             out_max_msaa_samples = GetMaxUsableSampleCount(device);
-            // device_info.msaa_samples = GetMaxUsableSampleCount(device);
             break;
         }
     }
