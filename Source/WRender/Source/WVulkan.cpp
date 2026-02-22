@@ -122,24 +122,32 @@ void WVulkan::Create(VkSurfaceKHR & surface,
 }
 
 void WVulkan::Create(
-    WVkSwapChainInfo & out_swap_chain_info,
-    const WVkDeviceInfo & in_device_info,
-    const WVkSurfaceInfo & in_surface_info,
+    VkSwapchainKHR & out_swap_chain,
+    VkFormat & out_format,
+    VkExtent2D & out_extent,
+    std::vector<VkImage> & out_images,
+    std::vector<VkImageView> & out_views,
+    std::vector<VkDeviceMemory> & out_memory,
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkSurfaceKHR & in_surface,
     const std::uint32_t & in_width,
     const std::uint32_t & in_height // ,
-    // const WVkRenderDebugInfo & in_debug_info
     )
 {
     SwapChainSupportDetails swap_chain_support = QuerySwapChainSupport(
-        in_device_info.vk_physical_device,
-        in_surface_info.surface
+        in_physical_device,
+        in_surface
         );
 
-    VkSurfaceFormatKHR surface_format = ChooseSwapSurfaceFormat(swap_chain_support.formats);
-    VkPresentModeKHR present_mode = ChooseSwapPresentMode(swap_chain_support.present_modes);
-    VkExtent2D extent = ChooseSwapExtent(swap_chain_support.capabilities,
-                                         in_width,
-                                         in_height);
+    VkSurfaceFormatKHR surface_format =
+        ChooseSwapSurfaceFormat(swap_chain_support.formats);
+    VkPresentModeKHR present_mode =
+        ChooseSwapPresentMode(swap_chain_support.present_modes);
+    VkExtent2D extent =
+        ChooseSwapExtent(swap_chain_support.capabilities,
+                         in_width,
+                         in_height);
 
     uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
     
@@ -149,19 +157,20 @@ void WVulkan::Create(
         image_count = swap_chain_support.capabilities.maxImageCount;
     }
 
-    VkSwapchainCreateInfoKHR create_info{};
-    create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    create_info.surface = in_surface_info.surface;
-
+    VkSwapchainCreateInfoKHR create_info =
+        WVulkan::VkStructs::CreateVkSwapchainCreateInfoKHR();
+    
+    create_info.surface = in_surface;
     create_info.minImageCount = image_count;
     create_info.imageFormat = surface_format.format;
     create_info.imageColorSpace = surface_format.colorSpace;
     create_info.imageExtent = extent; // Swap chain image resolution
     create_info.imageArrayLayers = 1;
-    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
+    // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
+    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
     QueueFamilyIndices indices =
-        FindQueueFamilies(in_device_info.vk_physical_device, in_surface_info.surface);
+        FindQueueFamilies(in_physical_device, in_surface);
 
     uint32_t queue_family_indices[] = {
         indices.graphics_family.value(),
@@ -184,46 +193,42 @@ void WVulkan::Create(
     create_info.presentMode = present_mode;
     create_info.clipped = VK_TRUE;
 
-    if (vkCreateSwapchainKHR(
-            in_device_info.vk_device,
-            &create_info,
-            nullptr,
-            &out_swap_chain_info.swap_chain) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create swap chain!");
-    }
+    ExecVkProcChecked(vkCreateSwapchainKHR,
+                      "Failed to create swap chain!",
+                      in_device,
+                      &create_info,
+                      nullptr,
+                      &out_swap_chain);
 
     // Retrieve Swap Chain Images
-    vkGetSwapchainImagesKHR(in_device_info.vk_device,
-                            out_swap_chain_info.swap_chain,
+    vkGetSwapchainImagesKHR(in_device,
+                            out_swap_chain,
                             &image_count,
                             nullptr);
-    out_swap_chain_info.images.resize(image_count);
+    out_images.resize(image_count);
     vkGetSwapchainImagesKHR(
-        in_device_info.vk_device,
-        out_swap_chain_info.swap_chain,
+        in_device,
+        out_swap_chain,
         &image_count,
-        out_swap_chain_info.images.data());
+        out_images.data());
 
     // Save Swap Chain Image Format
-    out_swap_chain_info.format = surface_format.format;
-    out_swap_chain_info.extent = extent;
-    image_count=image_count;
+    out_format = surface_format.format;
+    out_extent = extent;
+    // out_swap_chain_info.image_count=image_count;
 
     // Swap chain image views
-    out_swap_chain_info.views.resize(
-        out_swap_chain_info.images.size()
+    out_views.resize(
+        out_images.size()
         );
 
-    for (size_t i = 0; i < out_swap_chain_info.images.size(); i++)
+    for (size_t i = 0; i < out_images.size(); i++)
     {
-        out_swap_chain_info.views[i] = CreateImageView(
-            out_swap_chain_info.images[i],
-            out_swap_chain_info.format,
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            1,
-            in_device_info.vk_device
-            );
+        out_views[i] = CreateImageView(out_images[i],
+                                       out_format,
+                                       VK_IMAGE_ASPECT_COLOR_BIT,
+                                       1,
+                                       in_device);
     }
 
 }

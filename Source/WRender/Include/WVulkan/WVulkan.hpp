@@ -45,6 +45,13 @@ namespace WVulkan
             return result;
         }
 
+        inline constexpr VkSwapchainCreateInfoKHR CreateVkSwapchainCreateInfoKHR() noexcept {
+            VkSwapchainCreateInfoKHR result{};
+            result.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
+
         inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
             VkWriteDescriptorSet result{};
             result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -229,9 +236,15 @@ namespace WVulkan
      * Creates a Vulkan Swap Chain.
      */
     void Create(
-        WVkSwapChainInfo & out_swap_chain, 
-        const WVkDeviceInfo &device_info, 
-        const WVkSurfaceInfo &surface_info, 
+        VkSwapchainKHR & out_swap_chain,
+        VkFormat & out_format,
+        VkExtent2D & out_extent,
+        std::vector<VkImage> & out_images,
+        std::vector<VkImageView> & out_views,
+        std::vector<VkDeviceMemory> & out_memory,
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        const VkSurfaceKHR & in_surface,
         const std::uint32_t & in_width,
         const std::uint32_t & in_height
         );

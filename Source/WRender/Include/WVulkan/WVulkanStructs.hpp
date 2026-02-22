@@ -131,7 +131,7 @@ struct WVkSwapChainInfo
     std::vector<VkImageView> views;
     std::vector<VkDeviceMemory> memory;
     
-    std::uint32_t image_count{};
+    // std::uint32_t image_count{};
 };
 
 struct WVkDescriptorSetLayoutInfo

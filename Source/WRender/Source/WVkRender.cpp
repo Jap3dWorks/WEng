@@ -158,9 +158,15 @@ void WVkRender::Initialize()
 
     // Create Vulkan Swap Chain
     WVulkan::Create(
-        swap_chain_info_,
-        device_info_,
-        surface_info_,
+        swap_chain_info_.swap_chain,
+        swap_chain_info_.format,
+        swap_chain_info_.extent,
+        swap_chain_info_.images,
+        swap_chain_info_.views,
+        swap_chain_info_.memory,
+        device_info_.vk_device,
+        device_info_.vk_physical_device,
+        surface_info_.surface,
         dimensions[0],
         dimensions[1]
         );
@@ -763,9 +769,15 @@ void WVkRender::RecreateSwapChain() {
     // Recreate swap chain and other reder targets
 
     WVulkan::Create(
-        swap_chain_info_,
-        device_info_,
-        surface_info_,
+        swap_chain_info_.swap_chain,
+        swap_chain_info_.format,
+        swap_chain_info_.extent,
+        swap_chain_info_.images,
+        swap_chain_info_.views,
+        swap_chain_info_.memory,
+        device_info_.vk_device,
+        device_info_.vk_physical_device,
+        surface_info_.surface,
         dimensions[0],
         dimensions[1]
         );
