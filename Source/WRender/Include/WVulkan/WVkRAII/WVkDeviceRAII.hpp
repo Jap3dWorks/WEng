@@ -159,7 +159,7 @@ public:
             other.vk_present_queue = VK_NULL_HANDLE;
         }
 
-    WVkDeviceRAII & operator=(WVkDeviceRAII && other) noexcept {
+    WVkDeviceRAII & operator=(WVkDeviceRAII && other) {
         if (this != &other) {
 
             Destroy();

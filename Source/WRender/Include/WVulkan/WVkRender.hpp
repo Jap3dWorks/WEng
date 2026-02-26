@@ -17,10 +17,17 @@
 #include "WVulkan/WVkAssetResources.hpp"
 #include "WVkSwapChainPipeline.hpp"
 
+#include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
+#include "WVulkan/WVkRAII/WVkInstanceRAII.hpp"
+#include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
+
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
 
 struct GLFWwindow;
+// class WVkSurfaceRAII;
+// class WVkDeviceRAII;
+// class WVkInstanceRAII;
 
 /**
  * @brief Default Rendere class
@@ -158,7 +165,15 @@ private:
         const std::uint32_t & in_image_index
         );
 
+    // TODO remove
     WVkInstanceInfo instance_info_{};
+    WVkSurfaceInfo surface_info_{};
+    WVkDeviceInfo device_info_{};
+    // --
+
+    WVkInstanceRAII instance_{};
+    WVkInstanceRAII surface_{};
+    WVkDeviceRAII device_{};
 
     struct WVkRenderWindow {
         GLFWwindow * window{nullptr};
@@ -167,9 +182,6 @@ private:
     WRenderSize render_size_{
         800, 600
     };
-
-    WVkSurfaceInfo surface_info_{};
-    WVkDeviceInfo device_info_{};
 
     WVkAssetResources render_resources_{};
 

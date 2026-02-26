@@ -98,6 +98,7 @@ public:
 
     WVkInstanceRAII & operator=(WVkInstanceRAII && other) {
         if (this != &other) {
+            
             Destroy();
 
             vk_instance_ = std::move(other.vk_instance_);
