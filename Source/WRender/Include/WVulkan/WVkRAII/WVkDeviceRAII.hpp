@@ -16,10 +16,10 @@ public:
     WVkDeviceRAII()=default;
 
     WVkDeviceRAII(const std::vector<std::string_view> & in_device_extensions,
-              const VkInstance & in_instance,
-              const VkSurfaceKHR & in_surface,
-              bool in_enable_validation_layers,
-              const std::vector<std::string_view>& in_validation_layers) {
+                  const VkInstance & in_instance,
+                  const VkSurfaceKHR & in_surface,
+                  bool in_enable_validation_layers,
+                  const std::vector<std::string_view>& in_validation_layers) {
 
         // Pick Physical Device
     
@@ -99,52 +99,47 @@ public:
 
         create_info.pEnabledFeatures = nullptr;
 
-    create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
+        create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
     
-    std::vector<const char *> enable_extension_names{};
-    WStringUtils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
+        std::vector<const char *> enable_extension_names{};
+        WStringUtils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
     
-    create_info.ppEnabledExtensionNames = enable_extension_names.data();
+        create_info.ppEnabledExtensionNames = enable_extension_names.data();
     
-    create_info.pNext = &vk2_features;
+        create_info.pNext = &vk2_features;
 
-    std::vector<const char *> enabled_layer_names{};
-    if (in_enable_validation_layers)
-    {
-        create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
-        WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
-        create_info.ppEnabledLayerNames = enabled_layer_names.data();
-    }
-    else
-    {
-        create_info.enabledLayerCount = 0;
-    }
-
-    WVulkan::ExecVkProcChecked(vkCreateDevice,
-                      "Failed to create logical device!",
-                      vk_physical_device,
-                      &create_info,
-                      nullptr,
-                      &vk_device);
-    
-    vkGetDeviceQueue(vk_device,
-                     indices.graphics_family.value(),
-                     0,
-                     &vk_graphics_queue);
-    
-    vkGetDeviceQueue(vk_device,
-                     indices.present_family.value(),
-                     0,
-                     &vk_present_queue);
-    }
-
-    virtual ~WVkDeviceRAII() {
-        if (vk_device) {
-
-            // TODO
-
-            vk_device=VK_NULL_HANDLE;
+        std::vector<const char *> enabled_layer_names{};
+        if (in_enable_validation_layers)
+        {
+            create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
+            WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
+            create_info.ppEnabledLayerNames = enabled_layer_names.data();
         }
+        else
+        {
+            create_info.enabledLayerCount = 0;
+        }
+
+        WVulkan::ExecVkProcChecked(vkCreateDevice,
+                                   "Failed to create logical device!",
+                                   vk_physical_device,
+                                   &create_info,
+                                   nullptr,
+                                   &vk_device);
+    
+        vkGetDeviceQueue(vk_device,
+                         indices.graphics_family.value(),
+                         0,
+                         &vk_graphics_queue);
+    
+        vkGetDeviceQueue(vk_device,
+                         indices.present_family.value(),
+                         0,
+                         &vk_present_queue);
+    }
+
+    ~WVkDeviceRAII() {
+        Destroy();
     }
 
     WVkDeviceRAII(const WVkDeviceRAII & other) = delete;
@@ -154,7 +149,6 @@ public:
         vk_physical_device(std::move(other.vk_physical_device)),
         vk_device(std::move(other.vk_device)),
         msaa_samples(std::move(other.msaa_samples)),
-        device_extensions(std::move(other.device_extensions)),
         vk_graphics_queue(std::move(other.vk_graphics_queue)),
         vk_present_queue(std::move(other.vk_present_queue))
         {
@@ -167,10 +161,12 @@ public:
 
     WVkDeviceRAII & operator=(WVkDeviceRAII && other) noexcept {
         if (this != &other) {
+
+            Destroy();
+
             vk_physical_device = std::move(other.vk_physical_device);
             vk_device = std::move(other.vk_device);
             msaa_samples = std::move(other.msaa_samples);
-            device_extensions = std::move(other.device_extensions);
             vk_graphics_queue = std::move(other.vk_graphics_queue);
             vk_present_queue = std::move(other.vk_present_queue);
 
@@ -180,19 +176,48 @@ public:
             other.vk_graphics_queue = VK_NULL_HANDLE;
             other.vk_present_queue = VK_NULL_HANDLE;
         }
+
+        return *this;
+    }
+
+public:
+
+    VkPhysicalDevice PhysicalDevice() const noexcept {
+        return vk_physical_device;
+    }
+
+    VkDevice Device() const noexcept {
+        return vk_device;
+    }
+
+    VkSampleCountFlagBits MSAASamples() const noexcept {
+        return msaa_samples;
+    }
+
+    VkQueue GraphicsQueue() const noexcept {
+        return vk_graphics_queue;
+    }
+
+    VkQueue PresentQueue() const noexcept {
+        return vk_present_queue;
     }
 
 private:
-    
+
+    void Destroy() {
+        if (vk_device != VK_NULL_HANDLE) {
+            
+            vkDeviceWaitIdle(vk_device);
+            vkDestroyDevice(vk_device, nullptr);
+            
+            vk_device = VK_NULL_HANDLE;            
+        }
+    }
+
     VkPhysicalDevice vk_physical_device{VK_NULL_HANDLE};
     VkDevice vk_device {VK_NULL_HANDLE};
 
     VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
-
-    std::vector<std::string_view> device_extensions {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
-    };
 
     VkQueue vk_graphics_queue {VK_NULL_HANDLE};
     VkQueue vk_present_queue {VK_NULL_HANDLE};
