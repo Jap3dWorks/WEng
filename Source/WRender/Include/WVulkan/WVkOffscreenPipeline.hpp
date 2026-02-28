@@ -25,10 +25,9 @@ public:
 
 public:
 
-    void Initialize(const WVkDeviceInfo & in_device,
-                    const WVkCommandPoolInfo & in_command_pool) {
+    void Initialize(const VkDevice & in_device) {
         
-        device_info_ = in_device;
+        device_ = in_device;
 
         InitializeDescSetLayout();
 
@@ -38,16 +37,16 @@ public:
     }
 
     void Destroy() {
-        if (device_info_.vk_device != VK_NULL_HANDLE) {
+        if (device_ != VK_NULL_HANDLE) {
             DestroyRenderPipeline();
 
             WVulkan::DestroyDescPools(
                 descpool_info_,
-                device_info_);
+                device_);
 
             DestroyDescSetLayout();
 
-            device_info_ = {};
+            device_ = {};
         }
     }
 
@@ -68,7 +67,7 @@ public:
     }
 
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
-        vkResetDescriptorPool(device_info_.vk_device,
+        vkResetDescriptorPool(device_,
                               descpool_info_[in_frame_index],
                               0);
     }
@@ -98,7 +97,7 @@ private:
             pool_info.maxSets = 32;
 
             if (vkCreateDescriptorPool(
-                    device_info_.vk_device,
+                    device_,
                     &pool_info,
                     nullptr,
                     &descpool) != VK_SUCCESS)
@@ -127,7 +126,7 @@ private:
         layout_info.bindingCount = static_cast<std::uint32_t>(sampler_bindings.size());
         layout_info.pBindings=sampler_bindings.data();
 
-        if (vkCreateDescriptorSetLayout(device_info_.vk_device,
+        if (vkCreateDescriptorSetLayout(device_,
                                         &layout_info,
                                         nullptr,
                                         &descset_layout_) != VK_SUCCESS) {
@@ -141,7 +140,7 @@ private:
             );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
-            device_info_.vk_device,
+            device_,
             shadercode.data(),
             shadercode.size()
             );
@@ -196,7 +195,7 @@ private:
                 );
 
         pipeline_layout_ = WVkPipelineHelper::RenderPlane_VkPipelineLayout(
-            device_info_.vk_device,
+            device_,
             descset_layout_
             );
 
@@ -223,17 +222,17 @@ private:
             &color_format,
             1,
             graphics_pipeline_info,
-            device_info_.vk_device
+            device_
             );
 
-        vkDestroyShaderModule(device_info_.vk_device,
+        vkDestroyShaderModule(device_,
                               shader_module,
                               nullptr);
     }
 
     void DestroyDescSetLayout() {
         vkDestroyDescriptorSetLayout(
-            device_info_.vk_device,
+            device_,
             descset_layout_,
             nullptr
             );
@@ -242,14 +241,14 @@ private:
     }
 
     void DestroyRenderPipeline() {
-        vkDestroyPipeline(device_info_.vk_device,
+        vkDestroyPipeline(device_,
                           pipeline_,
                           nullptr);
 
 
         pipeline_=VK_NULL_HANDLE;
 
-        vkDestroyPipelineLayout(device_info_.vk_device,
+        vkDestroyPipelineLayout(device_,
                                 pipeline_layout_,
                                 nullptr);
 
@@ -259,12 +258,13 @@ private:
 
 private:
 
+    VkDevice device_{VK_NULL_HANDLE};
+
     std::array<VkDescriptorPool, FramesInFlight> descpool_info_{};
     VkDescriptorSetLayout descset_layout_{};
 
     VkPipeline pipeline_{};
     VkPipelineLayout pipeline_layout_{};
-    WVkDeviceInfo device_info_{};
 
     const std::string_view shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
 

@@ -53,7 +53,7 @@ namespace WVkPostprocessPipeUtils {
     }
 
     inline void CreatePostprocessPipeline(WVkRenderPipelineInfo & out_pipeline_info,
-                                          const WVkDeviceInfo & in_device,
+                                          const VkDevice & in_device,
                                           const std::vector<VkDescriptorSetLayout> & in_desc_lay,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
@@ -63,7 +63,7 @@ namespace WVkPostprocessPipeUtils {
     
         std::vector<VkShaderModule> shader_modules =
             WVulkanUtils::CreateShaderModules(
-                wvertex_stage_info, shader_stages, in_device.vk_device, in_shader_stage_infos
+                wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
                 );
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info{};
@@ -183,7 +183,7 @@ namespace WVkPostprocessPipeUtils {
         depth_stencil.depthCompareOp = VK_COMPARE_OP_ALWAYS;
 
         if (vkCreatePipelineLayout(
-                in_device.vk_device,
+                in_device,
                 &pipeline_layout_info,
                 nullptr,
                 &out_pipeline_info.pipeline_layout) != VK_SUCCESS)
@@ -194,7 +194,7 @@ namespace WVkPostprocessPipeUtils {
         pipeline_create_info.layout = out_pipeline_info.pipeline_layout;
 
         if (vkCreateGraphicsPipelines(
-                in_device.vk_device,
+                in_device,
                 VK_NULL_HANDLE,
                 1,
                 &pipeline_create_info,
@@ -207,7 +207,7 @@ namespace WVkPostprocessPipeUtils {
         for (auto& shader_module : shader_modules)
         {
             vkDestroyShaderModule(
-                in_device.vk_device, 
+                in_device, 
                 shader_module,
                 nullptr
                 );
@@ -216,7 +216,7 @@ namespace WVkPostprocessPipeUtils {
 
     inline void CreateDescSetPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device
         ) {
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
 
@@ -234,7 +234,7 @@ namespace WVkPostprocessPipeUtils {
         pool_info.maxSets = 15;
 
         if (vkCreateDescriptorPool(
-                in_device.vk_device,
+                in_device,
                 &pool_info,
                 nullptr,
                 &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
@@ -260,7 +260,7 @@ namespace WVkPostprocessPipeUtils {
 
     inline void CreateGlobalResourcesDescPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device
         ) {
 
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
@@ -280,7 +280,7 @@ namespace WVkPostprocessPipeUtils {
         pool_info.maxSets = 32;
 
         if (vkCreateDescriptorPool(
-                in_device.vk_device,
+                in_device,
                 &pool_info,
                 nullptr,
                 &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)

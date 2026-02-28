@@ -30,9 +30,13 @@ public:
         WVkPipelinesBase && other
         ) noexcept :
         pipelines_db_(std::move(other.pipelines_db_)),
-        device_info_(std::move(other.device_info_))
+        device_(std::move(other.device_)),
+        physical_device_(std::move(other.physical_device_))
+        // device_info_(std::move(other.device_info_))
         {
-            other.device_info_ = {};
+            other.device_ = VK_NULL_HANDLE;
+            other.physical_device_ = VK_NULL_HANDLE;
+            // other.device_info_ = {};
         }
 
     WVkPipelinesBase & operator=(
@@ -46,9 +50,11 @@ public:
             ClearPipelinesDb();
             
             pipelines_db_ = std::move(other.pipelines_db_);
-            device_info_ = std::move(other.device_info_);
+            device_ = std::move(other.device_);
+            physical_device_ = std::move(other.physical_device_);
 
-            other.device_info_ = {};
+            other.device_ = VK_NULL_HANDLE;
+            other.physical_device_ = VK_NULL_HANDLE;
         }
 
         return *this;
@@ -56,15 +62,18 @@ public:
 
 public:
     
-    virtual constexpr void Initialize(const WVkDeviceInfo & in_device) {
-        device_info_ = in_device;
+    virtual constexpr void Initialize(
+        const VkDevice & in_device, const VkPhysicalDevice & in_physical_device) {
+
+        device_ = in_device;
+        physical_device_ = in_physical_device;
     }
 
     /**
      * @brief Remove current active pipelines and bindings, resulting instance can be used.
      */
     void ClearPipelinesDb() {
-        pipelines_db_.Clear(device_info_);
+        pipelines_db_.Clear(device_);
     }
 
     void DeletePipeline(
@@ -72,20 +81,19 @@ public:
         ) {
         // Remove bindings
         for (auto & bid : pipeline_bindings_[in_id]) {
-            pipelines_db_.RemoveBinding(bid, device_info_);
+            pipelines_db_.RemoveBinding(bid, device_);
         }
 
         pipeline_bindings_.erase(in_id);
 
-        pipelines_db_.RemoveDescPool(in_id, device_info_);
-        pipelines_db_.RemovePipeline(in_id, device_info_);
-        pipelines_db_.RemoveDescSetLayout(in_id, device_info_);
+        pipelines_db_.RemoveDescPool(in_id, device_);
+        pipelines_db_.RemovePipeline(in_id, device_);
+        pipelines_db_.RemoveDescSetLayout(in_id, device_);
 
     }
 
     void DeleteBinding(const WBindingIdType & in_id) {
-        pipelines_db_.RemoveBinding(in_id,
-                                    device_info_);
+        pipelines_db_.RemoveBinding(in_id, device_);
 
         for(auto & p : pipeline_bindings_) {
             if (p.second.Contains(in_id.GetId())) {
@@ -97,7 +105,7 @@ public:
     void ResetDescriptorPool(const WPipelineIdType & in_id,
                              const std::uint32_t  & in_frameindex) {
         vkResetDescriptorPool(
-            device_info_.vk_device,
+            device_,
             pipelines_db_.descriptor_pools[in_frameindex].Get(in_id).descriptor_pool,
             {}
             );
@@ -105,9 +113,9 @@ public:
 
     void ResetDescriptorPools(const std::uint32_t  & in_frameindex) {
         pipelines_db_.descriptor_pools[in_frameindex].ForEach(
-            [&dev_info = device_info_](WVkDescriptorPoolInfo & _pool) {
+            [&dev_info = device_](WVkDescriptorPoolInfo & _pool) {
                 vkResetDescriptorPool(
-                    dev_info.vk_device,
+                    dev_info,
                     _pool.descriptor_pool,
                     {}
                     );
@@ -178,9 +186,9 @@ public:
 
         if(!ubo) return;
 
-        WVulkan::MapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
+        WVulkan::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
         WVulkan::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
-        WVulkan::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_info_);
+        WVulkan::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
     }
 
     void UpdateBinding(const WBindingIdType & in_binding_id,
@@ -200,9 +208,9 @@ public:
         if(!ubo) return;
 
         for(auto & b: (*ubo)) {
-            WVulkan::MapUBO(b.ubo_info, device_info_);
+            WVulkan::MapUBO(b.ubo_info, device_);
             WVulkan::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
-            WVulkan::UnmapUBO(b.ubo_info, device_info_);            
+            WVulkan::UnmapUBO(b.ubo_info, device_);            
         }
     }
 
@@ -232,7 +240,11 @@ protected:
                         bindings[ubopd.binding][frm].binding = ubopd.binding;
                         bindings[ubopd.binding][frm].ubo_info.range = ubopd.range;
 
-                        WVulkan::CreateUBO(bindings[ubopd.binding][frm].ubo_info, device_info_);
+                        WVulkan::CreateUBO(
+                            bindings[ubopd.binding][frm].ubo_info,
+                            device_,
+                            physical_device_
+                            );
 
                         bindings[ubopd.binding][frm].buffer_info.buffer =
                             bindings[ubopd.binding][frm].ubo_info.buffer;
@@ -249,12 +261,12 @@ protected:
         
         for(auto & ubo : in_ubos) {
             for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                WVulkan::MapUBO(bindings[ubo.binding][frm].ubo_info, device_info_);
+                WVulkan::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
                 WVulkan::UpdateUBO(bindings[ubo.binding][frm].ubo_info,
                                    in_ubos[ubo.binding].data,
                                    in_ubos[ubo.binding].size,
                                    in_ubos[ubo.binding].offset);
-                WVulkan::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_info_);                
+                WVulkan::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
             }
         }
 
@@ -335,6 +347,7 @@ protected:
 
     std::unordered_map<WPipelineIdType, TSparseSet<WBindingIdType>> pipeline_bindings_{};
 
-    WVkDeviceInfo device_info_{};
+    VkDevice device_{VK_NULL_HANDLE};
+    VkPhysicalDevice physical_device_{VK_NULL_HANDLE};
   
 };

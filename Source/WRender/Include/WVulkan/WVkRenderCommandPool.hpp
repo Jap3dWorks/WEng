@@ -4,6 +4,8 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 class WRENDER_API WVkRenderCommandPool
 {
 
@@ -13,8 +15,9 @@ public:
 
     WVkRenderCommandPool(
         WVkCommandPoolInfo in_command_pool_info,
-        const WVkDeviceInfo & in_device_info,
-        const WVkSurfaceInfo & in_surface_info
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        const VkSurfaceKHR & in_surface
 	);
 
     ~WVkRenderCommandPool();
@@ -27,15 +30,15 @@ public:
 
     WVkCommandBufferInfo CreateCommandBuffer();
 
-    WNODISCARD const WVkCommandPoolInfo & CommandPoolInfo() const noexcept
-    { return command_pool_info_; }
-
-    void Clear();
+    WNODISCARD const VkCommandPool & CommandPoolInfo() const noexcept
+    { return command_pool_; }
 
 private:
 
-    WVkDeviceInfo device_info_;
-    WVkCommandPoolInfo command_pool_info_;
+    void Destroy();
+
+    VkDevice device_;
+    VkCommandPool command_pool_;
     std::vector<WVkCommandBufferInfo> command_buffers_;
     
 };

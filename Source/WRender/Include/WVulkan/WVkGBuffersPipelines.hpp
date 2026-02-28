@@ -59,8 +59,10 @@ public:
 
 public:
 
-    void Initialize(const WVkDeviceInfo & in_device) override {
-        Super::Initialize(in_device);
+    void Initialize(const VkDevice & in_device,
+                    const VkPhysicalDevice & in_physical_device) override {
+        Super::Initialize(in_device,
+                          in_physical_device);
         Initialize_GlobalResources();
     }
 

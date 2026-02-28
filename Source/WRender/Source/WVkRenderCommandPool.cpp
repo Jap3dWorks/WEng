@@ -4,75 +4,107 @@
 #include <vulkan/vulkan_core.h>
 
 WVkRenderCommandPool::WVkRenderCommandPool() :
-    device_info_(),
+    device_(VK_NULL_HANDLE),
     command_pool_info_(),
     command_buffers_()
 {}
 
 WVkRenderCommandPool::WVkRenderCommandPool(
     WVkCommandPoolInfo in_command_pool_info,
-    const WVkDeviceInfo & in_device_info,
-    const WVkSurfaceInfo & in_surface_info
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkSurfaceKHR & in_surface
     ) :
-    device_info_(in_device_info),
+    device_(in_device),
     command_pool_info_(in_command_pool_info),
     command_buffers_()
 {
-    WVulkan::Create(
-        command_pool_info_,
-        device_info_,
-        in_surface_info
+    WVulkan::QueueFamilyIndices queue_family_indices =
+        WVulkan::FindQueueFamilies(in_physical_device, in_surface);
+
+    VkCommandPoolCreateInfo pool_info{};
+
+    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+
+    WVulkan::ExecVkProcChecked(
+        vkCreateCommandPool,
+        "Failed to create command pool!",
+        device_,
+        &pool_info,
+        nullptr,
+        &command_pool_
         );
 }
 
 WVkRenderCommandPool::~WVkRenderCommandPool()
 {
-    Clear();
+    Destroy();
 }
 
 WVkRenderCommandPool::WVkRenderCommandPool(WVkRenderCommandPool && other) noexcept :
-    device_info_(std::move(other.device_info_)),
-    command_pool_info_(std::move(other.command_pool_info_)),
+    device_(std::move(other.device_)),
+    command_pool_(std::move(other.command_pool_)),
     command_buffers_(std::move(other.command_buffers_))
 {
-    other.device_info_={};
-    other.command_pool_info_={};
+    other.device_ = VK_NULL_HANDLE;
+    other.command_pool_ = VK_NULL_HANDLE;
     other.command_buffers_={};
 }
 
 WVkRenderCommandPool& WVkRenderCommandPool::operator=(WVkRenderCommandPool && other) noexcept
 {
     if (this != &other) {
+        Destroy();
 
-        Clear();
-        device_info_ = std::move(other.device_info_);
-        command_pool_info_ = std::move(other.command_pool_info_);
+        device_ = std::move(other.device_);
+        command_pool_ = std::move(other.command_pool_);
         command_buffers_ = std::move(other.command_buffers_);
 
-        other.device_info_={};
-        other.command_pool_info_={};
+        other.device_ = VK_NULL_HANDLE;
+        other.command_pool_ = VK_NULL_HANDLE;
         other.command_buffers_={};
-        
     }
     
     return *this;
 }
 
-WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer()
-{
+WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer() {
     command_buffers_.push_back({});
-    WVulkan::Create(command_buffers_.back(), device_info_, command_pool_info_);
+
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.commandPool = command_pool_;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandBufferCount = static_cast<uint32_t>(
+        command_buffers_.back().command_buffers.size()
+        );
+
+    WVulkan::ExecVkProcChecked(
+        vkAllocateCommandBuffers,
+        "Failed to allocate command buffers!",
+        device_,
+        &alloc_info,
+        command_buffers_.back().command_buffers.data()
+        );
 
     return command_buffers_.back();
 }
 
-void WVkRenderCommandPool::Clear()
+void WVkRenderCommandPool::Destroy()
 {
-    if(command_pool_info_.vk_command_pool != VK_NULL_HANDLE) {
-        WVulkan::Destroy(command_pool_info_, device_info_);
-        command_pool_info_ = {};
-    }
+    if (device_ != VK_NULL_HANDLE) {
+        WFLOG("Destroy Command Pool");
+        
+        vkDestroyCommandPool(
+            device_,
+            command_pool_,
+            nullptr
+            );
 
-    device_info_ = {};
-    command_buffers_.clear();
+        command_pool_ = VK_NULL_HANDLE;
+        device_ = VK_NULL_HANDLE;
+        command_buffers_.clear();
+    }
 }

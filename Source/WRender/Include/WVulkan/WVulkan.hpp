@@ -267,7 +267,7 @@ namespace WVulkan
 
     void Create(
         WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-        const WVkDeviceInfo &device
+        const VkDevice & device
         );
 
     /**
@@ -286,27 +286,28 @@ namespace WVulkan
 
     void CreateUBO(
         WVkUBOInfo & out_uniform_buffer_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device
         );
 
     void MapUBO(
         WVkUBOInfo & out_uniform_buffer_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device
         );
 
     void UnmapUBO(
         WVkUBOInfo & out_uniform_buffer_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device
         );
 
     void Create(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const WVkDeviceInfo & device
+        const VkDevice & device
         );
 
     void Create(
         WVkDescriptorSetInfo& out_descriptor_set_info,
-        const WVkDeviceInfo &device,
+        const VkDevice &device,
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const WVkDescriptorPoolInfo& descriptor_pool_info
         );
@@ -399,16 +400,16 @@ namespace WVulkan
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
-        const WVkDeviceInfo &device);
+        const VkDevice & device);
 
     void Destroy(
         WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-        const WVkDeviceInfo & device
+        const VkDevice & device
         );
 
     void Destroy(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const WVkDeviceInfo & in_device
+        const VkDevice & in_device
         );
 
     void Destroy(
@@ -428,7 +429,7 @@ namespace WVulkan
 
     void Destroy(
         WVkUBOInfo & out_ubo_info,
-        const WVkDeviceInfo & in_device_info
+        const VkDevice & in_device
         );
 
     void Destroy(

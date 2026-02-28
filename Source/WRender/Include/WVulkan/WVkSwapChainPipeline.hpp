@@ -17,6 +17,8 @@
 
 #include <stdexcept>
 
+// TODO move to RAII
+
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkSwapChainPipeline {
     
@@ -29,13 +31,13 @@ public:
     WVkSwapChainPipeline(const WVkSwapChainPipeline & other) = delete;
 
     WVkSwapChainPipeline(WVkSwapChainPipeline && other) noexcept :
-        device_info_(std::move(other.device_info_)),
+        device_(std::move(other.device_)),
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
         descset_layout_(std::move(other.descset_layout_)),
         descriptor_pool_(std::move(other.descriptor_pool_))
         {
-            other.device_info_ = {};
+            other.device_ = {};
             
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
@@ -50,14 +52,14 @@ public:
 
     WVkSwapChainPipeline & operator=(WVkSwapChainPipeline && other) noexcept {
         if (this != &other) {
-            device_info_ = std::move(other.device_info_);
+            device_ = std::move(other.device_);
             descset_layout_ = std::move(other.descset_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             pipeline_ = std::move(other.pipeline_);
 
             descriptor_pool_ = std::move(other.descriptor_pool_);
 
-            other.device_info_ = {};
+            other.device_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
@@ -69,13 +71,12 @@ public:
         return *this;
     }
 
-    void Initialize(const WVkDeviceInfo & in_device,
-                    const WVkCommandPoolInfo & in_command_pool,
+    void Initialize(const VkDevice & in_device,
                     VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
 
         assert(device_info_.vk_device == VK_NULL_HANDLE);
 
-        device_info_ = in_device;
+        device_ = in_device;
 
         InitializeDescSetLayout();
 
@@ -86,14 +87,14 @@ public:
     }
 
     void Destroy() {
-        if (!device_info_.vk_device) {
+        if (device_ != VK_NULL_HANDLE) {
             return;
         }
 
-        WVulkan::DestroyDescPools(descriptor_pool_, device_info_);
+        WVulkan::DestroyDescPools(descriptor_pool_, device_);
         
         if (pipeline_) {
-            vkDestroyPipeline(device_info_.vk_device,
+            vkDestroyPipeline(device_,
                               pipeline_,
                               nullptr);
 
@@ -102,7 +103,7 @@ public:
 
 
         if (pipeline_layout_) {
-            vkDestroyPipelineLayout(device_info_.vk_device,
+            vkDestroyPipelineLayout(device_,
                                     pipeline_layout_,
                                     nullptr);
 
@@ -111,14 +112,14 @@ public:
 
         
         if (descset_layout_) {
-            vkDestroyDescriptorSetLayout(device_info_.vk_device,
+            vkDestroyDescriptorSetLayout(device_,
                                          descset_layout_,
                                          nullptr);
 
             descset_layout_ = VK_NULL_HANDLE;
         }
 
-        device_info_ = {};
+        device_ = VK_NULL_HANDLE;
     }
 
     const VkPipeline & Pipeline() const noexcept { return pipeline_; }
@@ -136,7 +137,7 @@ public:
     }
 
     void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
-        vkResetDescriptorPool(device_info_.vk_device,
+        vkResetDescriptorPool(device_,
                               descriptor_pool_[in_frame_index],
                               0);
     }
@@ -157,7 +158,7 @@ private:
         layout_info.bindingCount = 1;
         layout_info.pBindings=&sampler_binding;
 
-        if (vkCreateDescriptorSetLayout(device_info_.vk_device,
+        if (vkCreateDescriptorSetLayout(device_,
                                         &layout_info,
                                         nullptr,
                                         &descset_layout_) != VK_SUCCESS) {
@@ -173,7 +174,7 @@ private:
             );
 
         VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
-            device_info_.vk_device,
+            device_,
             shadercode.data(),
             shadercode.size()
             );
@@ -227,7 +228,7 @@ private:
                 );
 
         pipeline_layout_ = WVkPipelineHelper::RenderPlane_VkPipelineLayout(
-            device_info_.vk_device,
+            device_,
             descset_layout_
             );
 
@@ -250,10 +251,10 @@ private:
             &swap_chain_format,
             1,
             graphics_pipeline_info,
-            device_info_.vk_device
+            device_
             );
 
-        vkDestroyShaderModule(device_info_.vk_device,
+        vkDestroyShaderModule(device_,
                               shader_module,
                               nullptr);
     }
@@ -277,7 +278,7 @@ private:
         for (std::uint32_t i=0; i<FramesInFlight; i++) {
 
             if (vkCreateDescriptorPool(
-                    device_info_.vk_device,
+                    device_,
                     &pool_info,
                     nullptr,
                     &descriptor_pool_[i]
@@ -287,6 +288,8 @@ private:
         }
     }
 
+    VkDevice device_{VK_NULL_HANDLE};
+
     VkPipeline pipeline_{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
 
@@ -295,7 +298,5 @@ private:
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
 
     const std::string_view shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
-
-    WVkDeviceInfo device_info_{};
 
 };

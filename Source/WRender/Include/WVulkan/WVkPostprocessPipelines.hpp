@@ -22,7 +22,8 @@ public:
 
 public:
 
-    void Initialize(const WVkDeviceInfo & in_device, const WVkCommandPoolInfo & in_command_pool);
+    void Initialize(const VkDevice & in_device,
+                    const VkPhysicalDevice & in_physical_device) override;
 
     void CreatePipeline(const WAssetId & in_id,
                         const WRenderPipelineStruct & in_pipeline_struct);
@@ -41,7 +42,7 @@ public:
     }
 
     void ResetGlobalDescriptorPool(const std::uint32_t & in_frame_index) {
-        vkResetDescriptorPool(device_info_.vk_device,
+        vkResetDescriptorPool(device_,
                               global_resources_.descpool_info[in_frame_index].descriptor_pool,
                               {});
     }
@@ -59,9 +60,10 @@ public:
 
 private:
 
-    void Initialize(const WVkDeviceInfo & in_device) override {}
+    // void Initialize(const VkDevice & in_device,
+    //                 const VkPhysicalDevice & in_physical_device) override {}
 
-    void Initialize_GlobalResources(const WVkCommandPoolInfo & in_command_pool);
+    void Initialize_GlobalResources();
 
     void Destroy_GlobalResources();
 

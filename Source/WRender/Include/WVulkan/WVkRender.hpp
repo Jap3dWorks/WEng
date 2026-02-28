@@ -166,13 +166,13 @@ private:
         );
 
     // TODO remove
-    WVkInstanceInfo instance_info_{};
-    WVkSurfaceInfo surface_info_{};
-    WVkDeviceInfo device_info_{};
+    // WVkInstanceInfo instance_info_{};
+    // WVkSurfaceInfo surface_info_{};
+    // WVkDeviceInfo device_info_{};
     // --
 
     WVkInstanceRAII instance_{};
-    WVkInstanceRAII surface_{};
+    WVkSurfaceRAII surface_{};
     WVkDeviceRAII device_{};
 
     struct WVkRenderWindow {

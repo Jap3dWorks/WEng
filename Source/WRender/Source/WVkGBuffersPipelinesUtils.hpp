@@ -113,7 +113,7 @@ namespace WVkGBuffersPipelinesUtils {
 
     inline void CreatePipeline(
         WVkRenderPipelineInfo & out_render_pipeline,
-        const WVkDeviceInfo & in_device,
+        const VkDevice & in_device,
         const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         ) {
@@ -121,7 +121,7 @@ namespace WVkGBuffersPipelinesUtils {
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     
         std::vector<VkShaderModule> shader_modules = WVulkanUtils::CreateShaderModules(
-            wvertex_stage_info, shader_stages, in_device.vk_device, in_shader_stage_infos
+            wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
             );
 
         std::vector<VkDescriptorSetLayout> desc_layouts;
@@ -261,7 +261,7 @@ namespace WVkGBuffersPipelinesUtils {
         WVulkan::ExecVkProcChecked(
             vkCreatePipelineLayout,
             "Failed to create pipeline layout!",
-            in_device.vk_device,
+            in_device,
             &pipeline_layout_info,
             nullptr,
             &out_render_pipeline.pipeline_layout
@@ -272,7 +272,7 @@ namespace WVkGBuffersPipelinesUtils {
         WVulkan::ExecVkProcChecked(
             vkCreateGraphicsPipelines,
             "Failed to create graphics pipeline!",
-            in_device.vk_device,
+            in_device,
             VK_NULL_HANDLE,
             1,
             &pipeline_create_info,
@@ -283,7 +283,7 @@ namespace WVkGBuffersPipelinesUtils {
         for (auto& shader_module : shader_modules)
         {
             vkDestroyShaderModule(
-                in_device.vk_device, 
+                in_device, 
                 shader_module,
                 nullptr
                 );

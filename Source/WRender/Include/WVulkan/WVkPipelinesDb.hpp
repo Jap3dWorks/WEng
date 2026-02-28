@@ -45,11 +45,11 @@ public:
 
     template<CCallable<void,
                        WVkRenderPipelineInfo &,
-                       const WVkDeviceInfo &,
+                       const VkDevice &,
                        const WVkDescriptorSetLayoutInfo &,
                        const std::vector<WVkShaderStageInfo> &> TCrtFn>
     void CreatePipeline(const WPipelineIdType & in_pipeline_id,
-                        const WVkDeviceInfo & in_device_info,
+                        const VkDevice & in_device,
                         const WPipelineIdType & in_desclay_id,
                         const std::vector<WVkShaderStageInfo> & in_shaders,
                         TCrtFn && in_create_fn
@@ -59,7 +59,7 @@ public:
 
         std::forward<TCrtFn>(in_create_fn)(
             render_pipeline_info,
-            in_device_info,
+            in_device,
             descriptor_set_layouts.Get(in_desclay_id),
             in_shaders
             );
@@ -72,7 +72,7 @@ public:
 
     template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamDescriptorList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
-                             const WVkDeviceInfo & in_device,
+                             const VkDevice & in_device,
                              const WPipeParamDescriptorList & params,
                              ConfigInfoFn && info_fn) {
         
@@ -93,9 +93,9 @@ public:
             });
     }
 
-    template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const WVkDeviceInfo&> TCreateFn>
+    template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const VkDevice&> TCreateFn>
     void CreateDescSetPool(const WPipelineIdType & in_id,
-                           const WVkDeviceInfo & in_device,
+                           const VkDevice & in_device,
                            TCreateFn && create_fn) {
         
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
@@ -134,7 +134,7 @@ public:
         return result;
     }
 
-    void RemovePipeline(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
+    void RemovePipeline(const WPipelineIdType & in_id, const VkDevice & in_device) {
         pipelines.Remove(in_id, [&in_device](auto & rpip) {
             WVulkan::Destroy(
                 rpip,
@@ -142,7 +142,7 @@ public:
         });
     }
 
-    void RemoveDescSetLayout(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
+    void RemoveDescSetLayout(const WPipelineIdType & in_id, const VkDevice & in_device) {
         descriptor_set_layouts.Remove(in_id,
                                       [&in_device](auto & dsetlay) {
                                           WVulkan::Destroy(dsetlay,
@@ -150,7 +150,7 @@ public:
                                       });
     }
 
-    void RemoveDescPool(const WPipelineIdType & in_id, const WVkDeviceInfo & in_device) {
+    void RemoveDescPool(const WPipelineIdType & in_id, const VkDevice & in_device) {
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             descriptor_pools[i].Remove(in_id,
                                        [&in_device]
@@ -160,7 +160,7 @@ public:
         }
     }
 
-    void RemoveBinding( const WBindingIdType & in_id, const WVkDeviceInfo & in_device) {
+    void RemoveBinding( const WBindingIdType & in_id, const VkDevice & in_device) {
         bindings.Remove(in_id,
                         [di_=in_device](auto & b) {
                             for(auto& ubofrm: b.ubos) {
@@ -172,7 +172,7 @@ public:
             );
     }
 
-    void Clear(const WVkDeviceInfo & in_device) {
+    void Clear(const VkDevice & in_device) {
         
         for(std::uint32_t i=0; i < FramesInFlight; i++) {
             descriptor_pools[i].Clear(

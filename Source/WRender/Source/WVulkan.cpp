@@ -506,7 +506,7 @@ void WVulkan::CreateTexture(
 
 void WVulkan::Create(
     WVkDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
-    const WVkDeviceInfo & device
+    const VkDevice & in_device
     )
 {
     VkDescriptorSetLayoutCreateInfo create_info{};
@@ -522,7 +522,7 @@ void WVulkan::Create(
         out_descriptor_set_layout_info.bindings.data();
 
     if (vkCreateDescriptorSetLayout(
-            device.vk_device,
+            in_device,
             &create_info,
             nullptr,
             &out_descriptor_set_layout_info.descset_layout) != VK_SUCCESS)
@@ -683,13 +683,14 @@ void WVulkan::CreateMeshBuffers(
 
 void WVulkan::CreateUBO(
     WVkUBOInfo & out_ubo_info,
-    const WVkDeviceInfo &device)
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device)
 {
     CreateVkBuffer(
         out_ubo_info.buffer,
         out_ubo_info.buffer_memory,
-        device.vk_device,
-        device.vk_physical_device,
+        in_device,
+        in_physical_device,
         out_ubo_info.range,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
@@ -698,11 +699,11 @@ void WVulkan::CreateUBO(
 
 void WVulkan::MapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
-    const WVkDeviceInfo & in_device
+    const VkDevice & in_device
     )
 {
     vkMapMemory(
-        in_device.vk_device,
+        in_device,
         out_uniform_buffer_info.buffer_memory,
         0,
         out_uniform_buffer_info.range,
@@ -713,10 +714,10 @@ void WVulkan::MapUBO(
 
 void WVulkan::UnmapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
-    const WVkDeviceInfo & in_device
+    const VkDevice & in_device
     ) {
     vkUnmapMemory(
-        in_device.vk_device,
+        in_device,
         out_uniform_buffer_info.buffer_memory
         );
 
@@ -725,7 +726,7 @@ void WVulkan::UnmapUBO(
 
 void WVulkan::Create(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
-    const WVkDeviceInfo & in_device)
+    const VkDevice & in_device)
 {
     std::array<VkDescriptorPoolSize,2> pool_sizes;
 
@@ -745,7 +746,7 @@ void WVulkan::Create(
     pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); //70 as max sets
 
     if (vkCreateDescriptorPool(
-            in_device.vk_device,
+            in_device,
             &pool_info,
             nullptr,
             &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
@@ -756,18 +757,11 @@ void WVulkan::Create(
 
 void WVulkan::Create(
     WVkDescriptorSetInfo & out_descriptor_set_info,
-    const WVkDeviceInfo & device,
+    const VkDevice & in_device,
     const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
     const WVkDescriptorPoolInfo & descriptor_pool_info
     )
 {
-    // std::array<VkDescriptorSetLayout, WENG_MAX_FRAMES_IN_FLIGHT> layouts;
-
-    // for (size_t i = 0; i < WENG_MAX_FRAMES_IN_FLIGHT; i++)
-    // {
-    //     layouts[i] = descriptor_set_layout_info.descriptor_set_layout;
-    // }
-
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
@@ -775,7 +769,7 @@ void WVulkan::Create(
     alloc_info.pSetLayouts = &descriptor_set_layout_info.descset_layout;
 
     if (vkAllocateDescriptorSets(
-            device.vk_device,
+            in_device,
             &alloc_info,
             &out_descriptor_set_info.descriptor_set
             ) != VK_SUCCESS)
@@ -870,14 +864,14 @@ void WVulkan::DestroyImageView(WVkSwapChainInfo &swap_chain_info, const WVkDevic
 
 void WVulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
-    const WVkDeviceInfo & device
+    const VkDevice & in_device
     )
 {
     if (pipeline_info.pipeline_layout)
     {
         // destroy pipeline layout
         vkDestroyPipelineLayout(
-            device.vk_device,
+            in_device,
             pipeline_info.pipeline_layout,
             nullptr);
 
@@ -888,7 +882,7 @@ void WVulkan::Destroy(
     {
         // destroy pipeline
         vkDestroyPipeline(
-            device.vk_device,
+            in_device,
             pipeline_info.pipeline,
             nullptr
 	    );
@@ -899,12 +893,12 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const WVkDeviceInfo & device
+    const VkDevice & in_device
     )
 {
     // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(
-        device.vk_device,
+        in_device,
         descriptor_set_layout_info.descset_layout,
         nullptr
         );
@@ -912,11 +906,11 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
-    const WVkDeviceInfo & in_device
+    const VkDevice & in_device
     )
 {
     vkDestroyDescriptorPool(
-        in_device.vk_device,
+        in_device,
         out_descriptor_pool_info.descriptor_pool,
         nullptr
         );
@@ -995,22 +989,22 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     WVkUBOInfo & out_ubo_info,
-    const WVkDeviceInfo & in_device_info
+    const VkDevice & in_device
     ) {
 
     if (out_ubo_info.mapped_memory) {
-        vkUnmapMemory(in_device_info.vk_device, out_ubo_info.buffer_memory);
+        vkUnmapMemory(in_device, out_ubo_info.buffer_memory);
         out_ubo_info.mapped_memory = nullptr;
     }
     
     vkDestroyBuffer(
-        in_device_info.vk_device,
+        in_device,
         out_ubo_info.buffer,
         nullptr
         );
 
     vkFreeMemory(
-        in_device_info.vk_device,
+        in_device,
         out_ubo_info.buffer_memory,
         nullptr
         );

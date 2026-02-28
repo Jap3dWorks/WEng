@@ -54,7 +54,8 @@ namespace WVkRenderUtils {
     
     template<CIterable<WVkPostprocessRenderStruct> T>
     void CreatePostprocessRenderTargets(T & postprocess_structs,
-                                        const WVkDeviceInfo & in_device_info,
+                                        const VkDevice & in_device,
+                                        const VkPhysicalDevice & in_physical_device,
                                         const std::uint32_t & in_width,
                                         const std::uint32_t & in_height,
                                         const VkFormat & in_color_format) {
@@ -65,8 +66,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 pstrnd.color.image,
                 pstrnd.color.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 pstrnd.extent.width, pstrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -83,7 +84,7 @@ namespace WVkRenderUtils {
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
         }
     }
@@ -91,7 +92,9 @@ namespace WVkRenderUtils {
     template<CIterable<WVkTonemappingRenderStruct> T>
     inline void CreateTonemappingRenderTargets(
         T & out_tonemapping_targets,
-        const WVkDeviceInfo & in_device_info,
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        // const WVkDeviceInfo & in_device_info,
         const std::uint32_t & in_width,
         const std::uint32_t & in_height,
         const VkFormat & in_color_format
@@ -103,8 +106,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 tmprt.color.image,
                 tmprt.color.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 tmprt.extent.width, tmprt.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -121,7 +124,7 @@ namespace WVkRenderUtils {
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
         }
     }
@@ -129,7 +132,9 @@ namespace WVkRenderUtils {
     template<CIterable<WVkGBuffersRenderStruct> T>
     inline void CreateGBuffersRenderTargets(
         T & in_gbuffers_structs,
-        const WVkDeviceInfo & in_device_info,
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        // const WVkDeviceInfo & in_device_info,
         const std::uint32_t & in_width,
         const std::uint32_t & in_height,
         const VkFormat & in_color_format,
@@ -150,8 +155,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.albedo.image,
                 offrnd.albedo.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -168,7 +173,7 @@ namespace WVkRenderUtils {
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
 
             // normal
@@ -176,8 +181,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.normal.image,
                 offrnd.normal.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -193,7 +198,7 @@ namespace WVkRenderUtils {
                 in_normal_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
 
             // ws_position
@@ -201,8 +206,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.ws_position.image,
                 offrnd.ws_position.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -218,7 +223,7 @@ namespace WVkRenderUtils {
                 in_ws_position_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
 
             // mrAO
@@ -226,8 +231,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.mrAO.image,
                 offrnd.mrAO.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -243,7 +248,7 @@ namespace WVkRenderUtils {
                 in_mrAO_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
             
             // emission
@@ -251,8 +256,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.emission.image,
                 offrnd.emission.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -268,7 +273,7 @@ namespace WVkRenderUtils {
                 in_emission_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
 
             // extra01
@@ -276,8 +281,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.extra01.image,
                 offrnd.extra01.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -293,7 +298,7 @@ namespace WVkRenderUtils {
                 in_extra01_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
 
             // extra2
@@ -326,8 +331,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.depth.image,
                 offrnd.depth.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -343,17 +348,19 @@ namespace WVkRenderUtils {
                 in_depth_format,
                 VK_IMAGE_ASPECT_DEPTH_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
         }
     }
 
     template<CIterable<WVkOffscreenRenderStruct> T>
     inline void CreateOffscreenRenderTargets(T & in_offscreen_structs,
-                                      const WVkDeviceInfo & in_device_info,
-                                      const std::uint32_t & in_width,
-                                      const std::uint32_t & in_height,
-                                      const VkFormat & in_color_format)
+                                             const VkDevice & in_device,
+                                             const VkPhysicalDevice & in_physical_device,
+                                             // const WVkDeviceInfo & in_device_info,
+                                             const std::uint32_t & in_width,
+                                             const std::uint32_t & in_height,
+                                             const VkFormat & in_color_format)
     {
         for(auto& offrnd : in_offscreen_structs) {
             
@@ -363,8 +370,8 @@ namespace WVkRenderUtils {
             WVulkan::CreateImage(
                 offrnd.color.image,
                 offrnd.color.memory,
-                in_device_info.vk_device,
-                in_device_info.vk_physical_device,
+                in_device,
+                in_physical_device,
                 offrnd.extent.width, offrnd.extent.height,
                 1,
                 VK_SAMPLE_COUNT_1_BIT,
@@ -381,7 +388,7 @@ namespace WVkRenderUtils {
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                in_device_info.vk_device
+                in_device
                 );
         }
     }
