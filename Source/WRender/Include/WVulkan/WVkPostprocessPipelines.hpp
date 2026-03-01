@@ -22,8 +22,19 @@ public:
 
 public:
 
-    void Initialize(const VkDevice & in_device,
-                    const VkPhysicalDevice & in_physical_device) override;
+    WVkPostprocessPipelines()=default;
+
+    WVkPostprocessPipelines(const VkDevice & in_device,
+                            const VkPhysicalDevice & in_physical_device);
+
+    virtual ~WVkPostprocessPipelines() override;
+
+    WVkPostprocessPipelines(const WVkPostprocessPipelines &)=delete;
+    WVkPostprocessPipelines & operator=(const WVkPostprocessPipelines &)=delete;
+
+    WVkPostprocessPipelines(WVkPostprocessPipelines && other) noexcept;
+
+    WVkPostprocessPipelines & operator=(WVkPostprocessPipelines && other) noexcept;
 
     void CreatePipeline(const WAssetId & in_id,
                         const WRenderPipelineStruct & in_pipeline_struct);
@@ -47,8 +58,6 @@ public:
                               {});
     }
 
-    void Destroy();
-
     void CalcBindingOrder();
 
     auto IterBindingOrder() const {
@@ -59,17 +68,16 @@ public:
     }
 
 private:
-
-    // void Initialize(const VkDevice & in_device,
-    //                 const VkPhysicalDevice & in_physical_device) override {}
+    
+    void Destroy();
 
     void Initialize_GlobalResources();
 
     void Destroy_GlobalResources();
 
-    std::vector<WEntityComponentId> binding_order_{};
-
     GlobalPostprocessResources global_resources_{};
+
+    std::vector<WEntityComponentId> binding_order_{};
 
 };
 

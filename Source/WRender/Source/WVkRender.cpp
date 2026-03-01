@@ -1,6 +1,10 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#include "WVulkan/WVkOffscreenPipeline.hpp"
+#include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
+#include "WVulkan/WVkSwapChainPipeline.hpp"
+#include "WVulkan/WVkTonemappingPipeline.hpp"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -31,78 +35,6 @@
 
 // WVkRender
 // -------
-
-WVkRender::WVkRender() noexcept :
-    window_(),
-    render_size_(),
-    instance_(),
-    surface_(),
-    device_(),
-    swapchain_(),
-    
-    render_resources_(),
-    swap_chain_pipeline_(),
-    gbuffers_rtargets_(),
-    postprocess_rtargets_(),
-    render_command_pool_(),
-    render_command_buffer_(),
-    gbuffers_pipelines_(),
-    sync_semaphores_(),
-    semaphore_index_(0),
-    sync_fences_(),
-    frame_index_(0)
-{
-}
-
-WVkRender::WVkRender(WVkRender && other) noexcept :
-    window_(std::move(other.window_)),
-    instance_(std::move(other.instance_)),
-    surface_(std::move(other.surface_)),
-    device_(std::move(other.device_)),
-    swapchain_(std::move(other.swapchain_)),
-
-    render_size_(std::move(other.render_size_)),
-    render_resources_(std::move(other.render_resources_)),
-    swap_chain_pipeline_(std::move(other.swap_chain_pipeline_)),
-    swap_chain_input_imgview_ref(std::move(other.swap_chain_input_imgview_ref)),
-    gbuffers_rtargets_(std::move(other.gbuffers_rtargets_)),
-    postprocess_rtargets_(std::move(other.postprocess_rtargets_)),
-    render_command_pool_(std::move(other.render_command_pool_)),
-    render_command_buffer_(std::move(other.render_command_buffer_)),
-    gbuffers_pipelines_(std::move(other.gbuffers_pipelines_)),
-    sync_semaphores_(std::move(other.sync_semaphores_)),
-    semaphore_index_(std::move(other.semaphore_index_)),
-    sync_fences_(std::move(other.sync_fences_)),
-    frame_index_(std::move(other.frame_index_))
-{
-}
-
-WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
-    if (this != &other) {
-
-        window_ = std::move(other.window_);
-        instance_ = std::move(other.instance_);
-        surface_ = std::move(other.surface_);
-        device_ = std::move(other.device_);
-        swapchain_ = std::move(other.swapchain_);
-
-        render_size_ = std::move(other.render_size_);
-        render_resources_ = std::move(other.render_resources_);
-        swap_chain_pipeline_ = std::move(other.swap_chain_pipeline_);
-        swap_chain_input_imgview_ref = std::move(other.swap_chain_input_imgview_ref);
-        gbuffers_rtargets_ = std::move(other.gbuffers_rtargets_);
-        postprocess_rtargets_ = std::move(other.postprocess_rtargets_);
-        render_command_pool_ = std::move(other.render_command_pool_);
-        render_command_buffer_ = std::move(other.render_command_buffer_);
-        gbuffers_pipelines_ = std::move(other.gbuffers_pipelines_);
-        sync_semaphores_ = std::move(other.sync_semaphores_);
-        semaphore_index_ = std::move(other.semaphore_index_);
-        sync_fences_ = std::move(other.sync_fences_);
-        frame_index_ = std::move(other.frame_index_);
-    }
-
-    return *this;
-}
 
 WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
     Window(in_window);
@@ -143,25 +75,11 @@ void WVkRender::Initialize()
         render_debug_info.debug_messenger
         );
 
-    // WVulkan::Create(
-    //     instance_info_.instance,
-    //     render_debug_info.enable_validation_layers,
-    //     render_debug_info.validation_layers,
-    //     render_debug_info.debug_callback,
-    //     render_debug_info.debug_messenger
-    //     );
-
     // Create Vulkan Window Surface
     surface_ = WVkSurfaceRAII(
         instance_.Instance(),
         window_.window
         );
-
-    // WVulkan::Create(
-    //     surface_info_.surface,
-    //     instance_info_.instance, 
-    //     window_.window
-    //     );
 
     // Create Vulkan Device
     device_ = WVkDeviceRAII(
@@ -175,19 +93,6 @@ void WVkRender::Initialize()
         render_debug_info.validation_layers
         );
 
-    // WVulkan::Create(
-    //     device_info_.vk_device,
-    //     device_info_.vk_physical_device,
-    //     device_info_.msaa_samples,
-    //     device_info_.vk_graphics_queue,
-    //     device_info_.vk_present_queue,
-    //     device_info_.device_extensions,
-    //     instance_info_.instance,
-    //     surface_info_.surface,
-    //     render_debug_info.enable_validation_layers,
-    //     render_debug_info.validation_layers
-    //     );
-
     swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
@@ -195,22 +100,6 @@ void WVkRender::Initialize()
         dimensions[0],
         dimensions[1]
         );
-
-    // // Create Vulkan Swap Chain
-    // // TODO RAII
-    // WVulkan::Create(
-    //     swap_chain_info_.swap_chain,
-    //     swap_chain_info_.format,
-    //     swap_chain_info_.extent,
-    //     swap_chain_info_.images,
-    //     swap_chain_info_.views,
-    //     swap_chain_info_.memory,
-    //     device_.Device(),
-    //     device_.PhysicalDevice(),
-    //     surface_.Surface(),
-    //     dimensions[0],
-    //     dimensions[1]
-    //     );
 
     // GBuffers render targets
 
@@ -275,34 +164,38 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
 
-    gbuffers_pipelines_.Initialize(device_.Device(), device_.PhysicalDevice());
+    gbuffers_pipelines_ = WVkGBuffersPipelines(
+        device_.Device(),
+        device_.PhysicalDevice()
+        );
+    // gbuffers_pipelines_.Initialize(device_.Device(), device_.PhysicalDevice());
 
-    WFLOG("[DEBUG] Initialize Offscreen Pipeline.")
+    WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
 
-    offscreen_pipeline_.Initialize(device_.Device());
+    offscreen_pipeline_ = WVkOffscreenPipeline(
+        device_.Device()
+        );
+    // offscreen_pipeline_.Initialize(device_.Device());
 
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
 
-    ppcss_pipelines_.Initialize(
+    ppcss_pipelines_ = WVkPostprocessPipelines(
         device_.Device(),
-        device_.PhysicalDevice() // ,
-        // render_command_pool_.CommandPoolInfo()
+        device_.PhysicalDevice()
         );
 
     WFLOG("[DEBUG] Initialize tonemapping pipeline");
 
-    tonemapping_pipeline_.Initialize(
+    tonemapping_pipeline_ = WVkTonemappingPipeline(
         device_.Device(),
         swapchain_.Format()
-        // swap_chain_info_.format        
         );
     
-    WFLOG("[DEBUG] Initialize swap chain pipeline")
+    WFLOG("[DEBUG] Initialize swap chain pipeline");
 
-    swap_chain_pipeline_.Initialize(
+    swap_chain_pipeline_ = WVkSwapChainPipeline(
         device_.Device(),
         swapchain_.Format()
-        // swap_chain_info_.format
         );
 
     pipeline_resources_ = WVkPipelineResources(
@@ -311,11 +204,6 @@ void WVkRender::Initialize()
         device_.GraphicsQueue(),
         render_command_pool_.CommandPoolInfo()
         );
-
-    // pipeline_resources_.Initialize(
-    //     device_,
-    //     render_command_pool_.CommandPoolInfo()
-    //     );
 
     render_command_buffer_ =
         render_command_pool_.
@@ -347,10 +235,10 @@ void WVkRender::Destroy() {
     WFLOG("Destroy Render Pipelines.");
     swap_chain_input_imgview_ref = VK_NULL_HANDLE;
     
-    gbuffers_pipelines_.Destroy();
-    offscreen_pipeline_.Destroy();
-    ppcss_pipelines_.Destroy();
-    tonemapping_pipeline_.Destroy();
+    gbuffers_pipelines_={};
+    offscreen_pipeline_={};
+    ppcss_pipelines_={};
+    tonemapping_pipeline_={};
 
     WFLOG("Destroy Fences and Semaphores.");
 
@@ -386,7 +274,7 @@ void WVkRender::Destroy() {
         device_.Device()
         );
 
-    swap_chain_pipeline_.Destroy();
+    swap_chain_pipeline_={};
 
     pipeline_resources_ = {}; // .Destroy();
 
@@ -404,7 +292,6 @@ void WVkRender::Destroy() {
     device_ = WVkDeviceRAII{};
     surface_ = WVkSurfaceRAII{};
     instance_ = WVkInstanceRAII{};
-
 }
 
 void WVkRender::Draw()

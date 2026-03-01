@@ -21,35 +21,58 @@ public:
 
     WVkOffscreenPipeline() noexcept = default;
 
-    virtual ~WVkOffscreenPipeline() = default;
+    WVkOffscreenPipeline(const VkDevice & in_device) :
+        device_(in_device)
+        {
+            InitializeDescSetLayout();
+
+            InitializeDescPool();
+
+            InitializeRenderPipeline();
+        }
+
+    ~WVkOffscreenPipeline() {
+        Destroy();
+    }
+
+    WVkOffscreenPipeline(const WVkOffscreenPipeline &)=delete;
+    WVkOffscreenPipeline & operator=(const WVkOffscreenPipeline &)=delete;
+
+    WVkOffscreenPipeline(WVkOffscreenPipeline && other) noexcept :
+        device_(std::move(other.device_)),
+        descpool_info_(std::move(other.descpool_info_)),
+        descset_layout_(std::move(other.descset_layout_)),
+        pipeline_(std::move(other.pipeline_)),
+        pipeline_layout_(std::move(other.pipeline_layout_))
+        {
+            other.device_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+        }
+
+    WVkOffscreenPipeline & operator=(WVkOffscreenPipeline && other) noexcept {
+        if (this != &other) {
+            Destroy();
+
+            device_=std::move(other.device_);
+            descpool_info_=std::move(other.descpool_info_);
+            descset_layout_=std::move(other.descset_layout_);
+            pipeline_=std::move(other.pipeline_);
+            pipeline_layout_=std::move(other.pipeline_layout_);
+
+            other.device_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+
+        }
+        return *this;
+    }
 
 public:
 
-    void Initialize(const VkDevice & in_device) {
-        
-        device_ = in_device;
-
-        InitializeDescSetLayout();
-
-        InitializeDescPool();
-
-        InitializeRenderPipeline();
-    }
-
-    void Destroy() {
-        if (device_ != VK_NULL_HANDLE) {
-            DestroyRenderPipeline();
-
-            WVulkan::DestroyDescPools(
-                descpool_info_,
-                device_);
-
-            DestroyDescSetLayout();
-
-            device_ = {};
-        }
-    }
-
+    
     const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
         return descpool_info_[in_frame_index];
     }
@@ -73,6 +96,31 @@ public:
     }
 
 private:
+
+    // void Initialize(const VkDevice & in_device) {
+        
+    //     device_ = in_device;
+
+    //     InitializeDescSetLayout();
+
+    //     InitializeDescPool();
+
+    //     InitializeRenderPipeline();
+    // }
+
+    void Destroy() {
+        if (device_ != VK_NULL_HANDLE) {
+            DestroyRenderPipeline();
+
+            WVulkan::DestroyDescPools(
+                descpool_info_,
+                device_);
+
+            DestroyDescSetLayout();
+
+            device_ = VK_NULL_HANDLE;
+        }
+    }
 
     void InitializeDescPool() {
         for(auto & descpool : descpool_info_) {
@@ -261,10 +309,10 @@ private:
     VkDevice device_{VK_NULL_HANDLE};
 
     std::array<VkDescriptorPool, FramesInFlight> descpool_info_{};
-    VkDescriptorSetLayout descset_layout_{};
+    VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
 
-    VkPipeline pipeline_{};
-    VkPipelineLayout pipeline_layout_{};
+    VkPipeline pipeline_{VK_NULL_HANDLE};
+    VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
 
     const std::string_view shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
 

@@ -13,7 +13,9 @@
 /**
  * @brief Graphics Pipelines outputs the GBuffers.
  */
-class WVkGBuffersPipelines : public WVkPipelinesBase<WAssetId, WEntityComponentId, WENG_MAX_FRAMES_IN_FLIGHT>
+class WVkGBuffersPipelines : public WVkPipelinesBase<WAssetId,
+                                                     WEntityComponentId,
+                                                     WENG_MAX_FRAMES_IN_FLIGHT>
 {
 
 private:
@@ -23,6 +25,7 @@ private:
      */
     struct GlobalGraphicsResources {
         WVkDescriptorPoolInfo descpool_info{};
+        // TODO : VkDescriptorPool descpool_{VK_NULL_HANDLE} ;
         WVkDescriptorSetLayoutInfo descset_layout_info{};
 
         std::array<WVkDescriptorSetInfo, frames_in_flight> descset_info{};
@@ -31,21 +34,28 @@ private:
 
 public:
 
-    using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
+    using Super = WVkPipelinesBase<WAssetId,
+                                   WEntityComponentId,
+                                   frames_in_flight>;
 
-    WVkGBuffersPipelines() noexcept = default;
+    WVkGBuffersPipelines() noexcept=default;
+
+    WVkGBuffersPipelines(
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device
+        );
 
     virtual ~WVkGBuffersPipelines() override;
 
     WVkGBuffersPipelines(const WVkGBuffersPipelines & other)=delete;
 
-    WVkGBuffersPipelines(
-        WVkGBuffersPipelines && other
-        ) noexcept;
-
     WVkGBuffersPipelines & operator=(
         const WVkGBuffersPipelines & other
         ) = delete;
+
+    WVkGBuffersPipelines(
+        WVkGBuffersPipelines && other
+        ) noexcept;
 
     WVkGBuffersPipelines & operator=(
         WVkGBuffersPipelines && other
@@ -59,12 +69,12 @@ public:
 
 public:
 
-    void Initialize(const VkDevice & in_device,
-                    const VkPhysicalDevice & in_physical_device) override {
-        Super::Initialize(in_device,
-                          in_physical_device);
-        Initialize_GlobalResources();
-    }
+    // void Initialize(const VkDevice & in_device,
+    //                 const VkPhysicalDevice & in_physical_device) override {
+    //     Super::Initialize(in_device,
+    //                       in_physical_device);
+    //     Initialize_GlobalResources();
+    // }
 
     WEntityComponentId CreateBinding(
         const WEntityComponentId & in_binding_id,
@@ -86,12 +96,9 @@ public:
         return global_graphics_descsets_.descset_info[in_frame_index];
     }
 
-    /**
-     * @brief destroy the obejct, resulting instance is useless.
-     */
-    void Destroy();
-
 private:
+
+    void Destroy();
 
     void Initialize_GlobalResources();
 

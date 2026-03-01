@@ -19,9 +19,17 @@
 // WRenderPipelinesManager
 // -------------------
 
+WVkGBuffersPipelines::WVkGBuffersPipelines(
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device
+    ) : Super(in_device, in_physical_device) {
+    Initialize_GlobalResources();
+}
+
 WVkGBuffersPipelines::~WVkGBuffersPipelines()
 {
     Destroy();
+    Super::~Super();
 }
 
 WVkGBuffersPipelines::WVkGBuffersPipelines(
@@ -36,6 +44,8 @@ WVkGBuffersPipelines::WVkGBuffersPipelines(
 WVkGBuffersPipelines & WVkGBuffersPipelines::operator=(WVkGBuffersPipelines && other) noexcept
 {
     if (this != &other) {
+        Destroy();
+
         Super::operator=(std::move(other));
 
         global_graphics_descsets_ = std::move(other.global_graphics_descsets_);
@@ -60,14 +70,14 @@ void WVkGBuffersPipelines::CreatePipeline(
     // one Ubo should be required as first binding (0)
     pipelines_db_.CreateDescSetLayout(
         in_id,
-        device_,
+        Device(),
         in_pipeline_struct.params_descriptor,
         WVulkanUtils::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(
         in_id,
-        device_,
+        Device(),
         in_id,
         shaders,
         [this, &in_pipeline_struct]
@@ -88,7 +98,7 @@ void WVkGBuffersPipelines::CreatePipeline(
 
     pipelines_db_.CreateDescSetPool(
         in_id,
-        device_,
+        Device(),
         WVkGBuffersPipelinesUtils::CreateDescSetPool);
 
     pipeline_bindings_[in_id] = {};
@@ -120,12 +130,7 @@ WId WVkGBuffersPipelines::CreateBinding(
 }
 
 void WVkGBuffersPipelines::Destroy() {
-
-    ClearPipelinesDb();
-    
     Destroy_GlobalResources();
-
-    device_ = VK_NULL_HANDLE;
 }
 
 void WVkGBuffersPipelines::Initialize_GlobalResources() {
@@ -136,19 +141,19 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
 
     WVulkan::Create(
         global_graphics_descsets_.descset_layout_info,
-        device_
+        Device()
         );
 
     // TODO CreateGlobalDescPool (camera and lights)
     WVulkan::Create(
         global_graphics_descsets_.descpool_info,
-        device_
+        Device()
         );
 
     for (std::uint32_t i=0; i<frames_in_flight; i++) {
         WVulkan::Create(
             global_graphics_descsets_.descset_info[i],
-            device_,
+            Device(),
             global_graphics_descsets_.descset_layout_info,
             global_graphics_descsets_.descpool_info
             );        
@@ -156,12 +161,13 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
 
     for(uint32_t i=0; i < frames_in_flight; i++) {
         
-        global_graphics_descsets_.camera_ubo[i].range = sizeof(WUBOCameraStruct);
+        global_graphics_descsets_.camera_ubo[i].range =
+            sizeof(WUBOCameraStruct);
 
         WVulkan::CreateUBO(
             global_graphics_descsets_.camera_ubo[i],
-            device_,
-            physical_device_
+            Device(),
+            PhysicalDevice()
             );
 
         VkWriteDescriptorSet ws = {};
@@ -179,7 +185,7 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
             );
 
         vkUpdateDescriptorSets(
-            device_,
+            Device(),
             1,
             &ws,
             0,
@@ -190,7 +196,8 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
 
 void WVkGBuffersPipelines::Destroy_GlobalResources() {
 
-    if (device_) {
+    if (global_graphics_descsets_.descpool_info.descriptor_pool !=
+        VK_NULL_HANDLE) {
 
         WVulkan::Destroy(global_graphics_descsets_.descpool_info,
                          device_);

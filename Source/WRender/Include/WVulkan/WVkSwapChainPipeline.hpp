@@ -26,9 +26,24 @@ public:
     
     WVkSwapChainPipeline() noexcept = default;
     
-    virtual ~WVkSwapChainPipeline() noexcept = default;
+    WVkSwapChainPipeline(
+        const VkDevice & in_device,
+        const VkFormat & in_format
+        ) : device_(in_device)
+        {
+            InitializeDescSetLayout();
+
+            InitializeRenderPipeline(in_format);
+
+            InitializeDescriptorPool();
+        }
+
+    virtual ~WVkSwapChainPipeline() noexcept {
+        Destroy();
+    }
 
     WVkSwapChainPipeline(const WVkSwapChainPipeline & other) = delete;
+    WVkSwapChainPipeline & operator=(const WVkSwapChainPipeline & other) = delete;
 
     WVkSwapChainPipeline(WVkSwapChainPipeline && other) noexcept :
         device_(std::move(other.device_)),
@@ -48,10 +63,10 @@ public:
             }
         }
 
-    WVkSwapChainPipeline & operator=(const WVkSwapChainPipeline & other) = delete;
-
     WVkSwapChainPipeline & operator=(WVkSwapChainPipeline && other) noexcept {
         if (this != &other) {
+            Destroy();
+
             device_ = std::move(other.device_);
             descset_layout_ = std::move(other.descset_layout_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
@@ -71,56 +86,20 @@ public:
         return *this;
     }
 
-    void Initialize(const VkDevice & in_device,
-                    VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
+    // void Initialize(const VkDevice & in_device,
+    //                 VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
 
-        assert(device_ == VK_NULL_HANDLE);
+    //     assert(device_ == VK_NULL_HANDLE);
 
-        device_ = in_device;
+    //     device_ = in_device;
 
-        InitializeDescSetLayout();
+    //     InitializeDescSetLayout();
 
-        InitializeRenderPipeline(in_swap_chain_format);
+    //     InitializeRenderPipeline(in_swap_chain_format);
 
-        InitializeDescriptorPool();
+    //     InitializeDescriptorPool();
 
-    }
-
-    void Destroy() {
-        if (device_ != VK_NULL_HANDLE) {
-            return;
-        }
-
-        WVulkan::DestroyDescPools(descriptor_pool_, device_);
-        
-        if (pipeline_) {
-            vkDestroyPipeline(device_,
-                              pipeline_,
-                              nullptr);
-
-            pipeline_=VK_NULL_HANDLE;
-        }
-
-
-        if (pipeline_layout_) {
-            vkDestroyPipelineLayout(device_,
-                                    pipeline_layout_,
-                                    nullptr);
-
-            pipeline_layout_ = VK_NULL_HANDLE;
-        }
-
-        
-        if (descset_layout_) {
-            vkDestroyDescriptorSetLayout(device_,
-                                         descset_layout_,
-                                         nullptr);
-
-            descset_layout_ = VK_NULL_HANDLE;
-        }
-
-        device_ = VK_NULL_HANDLE;
-    }
+    // }
 
     const VkPipeline & Pipeline() const noexcept { return pipeline_; }
 
@@ -143,6 +122,41 @@ public:
     }
 
 private:
+
+    void Destroy() {
+        if (device_ != VK_NULL_HANDLE) {
+
+            WVulkan::DestroyDescPools(descriptor_pool_, device_);
+        
+            if (pipeline_) {
+                vkDestroyPipeline(device_,
+                                  pipeline_,
+                                  nullptr);
+
+                pipeline_=VK_NULL_HANDLE;
+            }
+
+
+            if (pipeline_layout_) {
+                vkDestroyPipelineLayout(device_,
+                                        pipeline_layout_,
+                                        nullptr);
+
+                pipeline_layout_ = VK_NULL_HANDLE;
+            }
+
+        
+            if (descset_layout_) {
+                vkDestroyDescriptorSetLayout(device_,
+                                             descset_layout_,
+                                             nullptr);
+
+                descset_layout_ = VK_NULL_HANDLE;
+            }
+
+            device_ = VK_NULL_HANDLE;
+        }
+    }
 
     void InitializeDescSetLayout() {
         

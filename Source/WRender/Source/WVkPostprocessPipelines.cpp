@@ -6,14 +6,52 @@
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
-void WVkPostprocessPipelines::Initialize(const VkDevice & in_device,
-                                         const VkPhysicalDevice & in_physical_device) {
-    Super::Initialize(in_device, in_physical_device);
+
+WVkPostprocessPipelines::WVkPostprocessPipelines(
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device
+    ) : Super(in_device, in_physical_device)
+{
     Initialize_GlobalResources();
 }
 
-void WVkPostprocessPipelines::CreatePipeline(const WAssetId & in_id,
-                                             const WRenderPipelineStruct & in_pipeline_struct) {
+WVkPostprocessPipelines::~WVkPostprocessPipelines() {
+    Destroy();
+    Super::~Super();
+}
+
+WVkPostprocessPipelines::WVkPostprocessPipelines(
+    WVkPostprocessPipelines && other
+    ) noexcept  :
+    Super(std::move(other)),
+    global_resources_(std::move(other.global_resources_)),
+    binding_order_(std::move(other.binding_order_))
+{
+    other.global_resources_ = {};
+}
+
+WVkPostprocessPipelines & WVkPostprocessPipelines::operator=(
+    WVkPostprocessPipelines && other
+    ) noexcept {
+    if (this != &other) {
+        Destroy();
+        
+        Super::operator=(std::move(other));
+
+        global_resources_ = std::move(other.global_resources_);
+        binding_order_ = std::move(other.binding_order_);
+
+        other.global_resources_ = {};
+    }
+
+    return *this;
+}
+
+
+void WVkPostprocessPipelines::CreatePipeline(
+    const WAssetId & in_id,
+    const WRenderPipelineStruct & in_pipeline_struct
+    ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
         in_pipeline_struct.shaders,
@@ -83,13 +121,11 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
 }
 
 void WVkPostprocessPipelines::Destroy() {
-    if(device_ != VK_NULL_HANDLE) {
-        ClearPipelinesDb();  // Super
+    if (global_resources_.descset_layout_info.descset_layout !=
+        VK_NULL_HANDLE) {
 
         Destroy_GlobalResources();
 
-        device_ = VK_NULL_HANDLE;
-        physical_device_ = VK_NULL_HANDLE;
     }
 
 }
@@ -141,4 +177,7 @@ void WVkPostprocessPipelines::Destroy_GlobalResources() {
     for(auto & descpool : global_resources_.descpool_info) {
         WVulkan::Destroy(descpool, device_);
     }
+
+    global_resources_ = {};
+    binding_order_.clear();
 }

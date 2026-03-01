@@ -19,7 +19,19 @@ public:
 
     WVkTonemappingPipeline() = default;
 
-    virtual ~WVkTonemappingPipeline()=default;
+    WVkTonemappingPipeline(
+        const VkDevice & in_device,
+        const VkFormat & in_color_format) :
+        device_(in_device)
+        {
+            InitializeDescSetLayout();
+            InitializeDescriptorPool();
+            InitializePipeline(in_color_format);
+        }
+
+    virtual ~WVkTonemappingPipeline() {
+        Destroy();
+    }
 
     WVkTonemappingPipeline(const WVkTonemappingPipeline &) = delete;
 
@@ -45,6 +57,8 @@ public:
 
     WVkTonemappingPipeline & operator=(WVkTonemappingPipeline && other) noexcept {
         if (this != &other) {
+            Destroy();
+            
             pipeline_ = std::move(other.pipeline_);
             pipeline_layout_ = std::move(other.pipeline_layout_);
             descset_layout_ = std::move(other.descset_layout_);
@@ -54,63 +68,26 @@ public:
             other.pipeline_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
-            other.descriptor_pool_ = {};
             other.device_ = VK_NULL_HANDLE;
         }
 
         return *this;
     }
 
-    void Initialize(const VkDevice & in_device,
-                    const VkFormat & in_color_format) {
-        // TODO constructor
-        assert(device_ == VK_NULL_HANDLE);
+    // void Initialize(const VkDevice & in_device,
+    //                 const VkFormat & in_color_format) {
+    //     // TODO constructor
+    //     assert(device_ == VK_NULL_HANDLE);
 
-        device_ = in_device;
+    //     device_ = in_device;
 
-        InitializeDescSetLayout();
+    //     InitializeDescSetLayout();
 
-        InitializeDescriptorPool();
+    //     InitializeDescriptorPool();
 
-        InitializePipeline(in_color_format);
+    //     InitializePipeline(in_color_format);
 
-    }
-
-    void Destroy() {
-        // TODO private and use destructor
-        if (device_ != VK_NULL_HANDLE) {
-            return;
-        }
-
-        WVulkan::DestroyDescPools(descriptor_pool_, device_);
-
-        if (pipeline_) {
-            vkDestroyPipeline(device_,
-                              pipeline_,
-                              nullptr);
-
-            pipeline_=VK_NULL_HANDLE;
-        }
-
-
-        if (pipeline_layout_) {
-            vkDestroyPipelineLayout(device_,
-                                    pipeline_layout_,
-                                    nullptr);
-            
-            pipeline_layout_ = VK_NULL_HANDLE;
-        }
-
-        if (descset_layout_) {
-            vkDestroyDescriptorSetLayout(device_,
-                                         descset_layout_,
-                                         nullptr);
-
-            descset_layout_ = VK_NULL_HANDLE;
-        }
-
-        device_ = VK_NULL_HANDLE;
-    }
+    // }
 
     const VkPipeline & Pipeline() const noexcept { return pipeline_; }
 
@@ -133,6 +110,41 @@ public:
     }
 
 private:
+
+    void Destroy() {
+        // TODO private and use destructor
+        if (device_ != VK_NULL_HANDLE) {
+
+            WVulkan::DestroyDescPools(descriptor_pool_, device_);
+
+            if (pipeline_) {
+                vkDestroyPipeline(device_,
+                                  pipeline_,
+                                  nullptr);
+
+                pipeline_=VK_NULL_HANDLE;
+            }
+
+
+            if (pipeline_layout_) {
+                vkDestroyPipelineLayout(device_,
+                                        pipeline_layout_,
+                                        nullptr);
+            
+                pipeline_layout_ = VK_NULL_HANDLE;
+            }
+
+            if (descset_layout_) {
+                vkDestroyDescriptorSetLayout(device_,
+                                             descset_layout_,
+                                             nullptr);
+
+                descset_layout_ = VK_NULL_HANDLE;
+            }
+
+            device_ = VK_NULL_HANDLE;
+        }
+    }
 
     void InitializeDescSetLayout() {
 

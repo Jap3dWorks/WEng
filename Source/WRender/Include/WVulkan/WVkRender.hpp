@@ -37,15 +37,18 @@ class WRENDER_API WVkRender : public IRender
 {
 public:
 
-    WVkRender() noexcept;
-
-    WVkRender(WVkRender && other) noexcept;
-
-    WVkRender & operator=(WVkRender && other) noexcept;
+    WVkRender() noexcept=default;
 
     WVkRender(GLFWwindow * in_window);
 
     ~WVkRender() override;
+
+    WVkRender(const WVkRender &)=delete;
+    WVkRender& operator=(const WVkRender&)=delete;
+
+    WVkRender(WVkRender && other) noexcept = default;
+
+    WVkRender & operator=(WVkRender && other) noexcept=default;
 
     void Initialize() override;
 
@@ -175,10 +178,6 @@ private:
         GLFWwindow * window{nullptr};
     } window_{};
 
-    WRenderSize render_size_{
-        800, 600
-    };
-
     WVkAssetResources render_resources_{};
 
     std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
@@ -215,6 +214,11 @@ private:
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> sync_fences_{};
 
     uint32_t frame_index_{0};
+    
+    WRenderSize render_size_{
+        800, 600
+    };
+
 
 };
 

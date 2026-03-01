@@ -25,7 +25,9 @@ public:
     WVkPipelinesBase(
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device
-        ) : device_(in_device), physical_device_(in_physical_device) {}
+        ) : device_(in_device),
+            physical_device_(in_physical_device)
+        {}
 
     virtual ~WVkPipelinesBase() {
         Destroy();
@@ -34,9 +36,7 @@ public:
     WVkPipelinesBase(const WVkPipelinesBase & other)=delete;
     WVkPipelinesBase & operator=(const WVkPipelinesBase & other)=delete;
 
-    WVkPipelinesBase(
-        WVkPipelinesBase && other
-        ) noexcept :
+    WVkPipelinesBase(WVkPipelinesBase && other) noexcept :
         pipelines_db_(std::move(other.pipelines_db_)),
         device_(std::move(other.device_)),
         physical_device_(std::move(other.physical_device_)),
@@ -46,10 +46,7 @@ public:
             other.physical_device_ = VK_NULL_HANDLE;
         }
 
-
-    WVkPipelinesBase & operator=(
-        WVkPipelinesBase && other
-        ) noexcept {
+    WVkPipelinesBase & operator=(WVkPipelinesBase && other) noexcept {
         if (this != &other) {
             Destroy();
             
@@ -67,16 +64,9 @@ public:
 
 public:
 
-    // TODO remove this function (RAII)
-    virtual constexpr void Initialize(
-        const VkDevice & in_device, const VkPhysicalDevice & in_physical_device) {
-
-        device_ = in_device;
-        physical_device_ = in_physical_device;
-    }
-
     /**
-     * @brief Remove current active pipelines and bindings, resulting instance can be used.
+     * @brief Remove current active pipelines and bindings,
+     *  resulting instance can be used.
      */
     void ClearPipelinesDb() {
         pipelines_db_.Clear(device_);
@@ -223,7 +213,15 @@ public:
     }
 
 protected:
+
+    VkDevice Device() const {
+        return device_;
+    }
     
+    VkPhysicalDevice PhysicalDevice() const {
+        return physical_device_;
+    }
+
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
         const WPipeParamDescriptorList & in_param_descriptors,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
