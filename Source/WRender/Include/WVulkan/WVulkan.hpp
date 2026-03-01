@@ -186,6 +186,12 @@ namespace WVulkan
             return result;
         }
 
+        inline constexpr VkCommandPoolCreateInfo CreateVkCommandPoolCreateInfo() noexcept {
+            VkCommandPoolCreateInfo result{};
+            result.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            result.pNext = VK_NULL_HANDLE;
+            return result;
+        }
     }
 
     /**
@@ -202,35 +208,35 @@ namespace WVulkan
     // Create functions
     // ----------------
 
-    // TODO, use pure vulkan classes as inputs
-    /**
-     * Creates a Vulkan Instance.
-     */
-    void Create(VkInstance & out_instance,
-                bool in_enable_validation_layers,
-                const std::vector<std::string_view>& in_validation_layers,
-                const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
-                const VkDebugUtilsMessengerEXT & in_debug_messenger
-        );
+    // // TODO, use pure vulkan classes as inputs
+    // /**
+    //  * Creates a Vulkan Instance.
+    //  */
+    // void Create(VkInstance & out_instance,
+    //             bool in_enable_validation_layers,
+    //             const std::vector<std::string_view>& in_validation_layers,
+    //             const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
+    //             const VkDebugUtilsMessengerEXT & in_debug_messenger
+    //     );
 
-    /**
-     * Creates a Vulkan Surface.
-     */
-    void Create(VkSurfaceKHR & surface_info, const VkInstance & instance, GLFWwindow * window);
+    // /**
+    //  * Creates a Vulkan Surface.
+    //  */
+    // void Create(VkSurfaceKHR & surface_info, const VkInstance & instance, GLFWwindow * window);
 
-    /**
-     * Creates a Vulkan Device.
-     */
-    void Create(VkDevice & out_device,
-                VkPhysicalDevice & out_physical_device,
-                VkSampleCountFlagBits & out_max_msaa_samples,
-                VkQueue & out_graphics_queue,
-                VkQueue & out_present_queue,
-                const std::vector<std::string_view> & in_device_extensions,
-                const VkInstance & in_instance,
-                const VkSurfaceKHR & in_surface,
-                bool in_enable_validation_layers,
-                const std::vector<std::string_view> & validation_layers);
+    // /**
+    //  * Creates a Vulkan Device.
+    //  */
+    // void Create(VkDevice & out_device,
+    //             VkPhysicalDevice & out_physical_device,
+    //             VkSampleCountFlagBits & out_max_msaa_samples,
+    //             VkQueue & out_graphics_queue,
+    //             VkQueue & out_present_queue,
+    //             const std::vector<std::string_view> & in_device_extensions,
+    //             const VkInstance & in_instance,
+    //             const VkSurfaceKHR & in_surface,
+    //             bool in_enable_validation_layers,
+    //             const std::vector<std::string_view> & validation_layers);
 
     /**
      * Creates a Vulkan Swap Chain.
@@ -249,20 +255,22 @@ namespace WVulkan
         const std::uint32_t & in_height
         );
 
-    /**
-     * @brief Creates a Vulkan Command Pool.
-     */
-    void Create(
-        WVkCommandPoolInfo & command_pool_info,
-        const WVkDeviceInfo & device_info,
-        const WVkSurfaceInfo & surface_info
-        );
+    // /**
+    //  * @brief Creates a Vulkan Command Pool.
+    //  */
+    // void Create(
+    //     WVkCommandPoolInfo & command_pool_info,
+    //     const WVkDeviceInfo & device_info,
+    //     const WVkSurfaceInfo & surface_info
+    //     );
 
     void CreateTexture(
         WVkTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
-        const WVkDeviceInfo& device_info,
-        const WVkCommandPoolInfo& command_pool_info
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device,
+        const VkQueue & in_graphics_queue,
+        const VkCommandPool &in_command_pool
         );
 
     void Create(
@@ -280,8 +288,10 @@ namespace WVulkan
         const void * index_buffer,
         const std::uint32_t & index_buffer_size,
         const std::uint32_t & index_count,
-        const WVkDeviceInfo & device,
-        const WVkCommandPoolInfo & command_pool_info
+        const VkDevice & device,
+        const VkPhysicalDevice & in_physical_device,
+        const VkQueue & in_queue,
+        const VkCommandPool & command_pool_info
         );
 
     void CreateUBO(
@@ -393,7 +403,7 @@ namespace WVulkan
     void Destroy(WVkDeviceInfo & device_info);
 
     void Destroy(WVkSwapChainInfo & swap_chain_info,
-                 const WVkDeviceInfo & device_info);
+                 const VkDevice & device_info);
 
     void DestroyImageView(WVkSwapChainInfo & swap_chain_info,
                           const WVkDeviceInfo & device_info);
@@ -412,6 +422,7 @@ namespace WVulkan
         const VkDevice & in_device
         );
 
+    // TODO REMOVE
     void Destroy(
         WVkCommandPoolInfo & out_command_pool,
         const WVkDeviceInfo & in_device_info
@@ -419,12 +430,12 @@ namespace WVulkan
 
     void Destroy(
         WVkTextureInfo & out_texture_info,
-        const WVkDeviceInfo & in_device_info
+        const VkDevice & in_device_info
         );
 
     void Destroy(
         WVkMeshInfo & out_mesh_info,
-        const WVkDeviceInfo & in_device_info
+        const VkDevice & in_device_info
         );
 
     void Destroy(
@@ -434,16 +445,16 @@ namespace WVulkan
 
     void Destroy(
         VkSampler & out_sampler,
-        const WVkDeviceInfo & in_device_info
+        const VkDevice & in_device_info
         );
 
     template<std::size_t N>
     void DestroyDescPools(std::array<VkDescriptorPool, N> & out_desc_pools,
-                          const WVkDeviceInfo & in_device_info) {
+                          const VkDevice & in_device) {
         for (std::uint32_t i=0; i<N; i++) {
             if(out_desc_pools[i]) {
                 vkDestroyDescriptorPool(
-                    in_device_info.vk_device,
+                    in_device,
                     out_desc_pools[i],
                     nullptr
                     );

@@ -3,7 +3,8 @@
 #include "WVulkan/WVulkan.hpp"
 
 #include <vulkan/vulkan_core.h>
-#include <GLFW/glfw3.h>
+
+struct GLFWwindow;
 
 class WVkSurfaceRAII {
 public:
@@ -11,18 +12,7 @@ public:
     WVkSurfaceRAII() = default;
 
     WVkSurfaceRAII(const VkInstance & in_instance,
-                   GLFWwindow * in_window) :
-        vk_instance_(in_instance)
-        {
-            WVulkan::ExecVkProcChecked(
-                glfwCreateWindowSurface,
-                "Failed to create window surface!",
-                vk_instance_,
-                in_window,
-                nullptr,
-                &vk_surface_
-                );
-        }
+                   GLFWwindow * in_window);
 
     ~WVkSurfaceRAII() {
         Destroy();

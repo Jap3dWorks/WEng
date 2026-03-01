@@ -5,37 +5,53 @@
 
 WVkAssetResources::WVkAssetResources()=default;
 
-WVkAssetResources::~WVkAssetResources()=default;
+WVkAssetResources::~WVkAssetResources() {
+    Destroy();
+}
 
 WVkAssetResources::WVkAssetResources(
-    const WVkDeviceInfo & in_device_info,
-    const WVkCommandPoolInfo & in_command_pool_info
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkQueue & in_graphics_queue,
+    const VkCommandPool & in_command_pool
     )  :
-    device_info_(in_device_info),
-    command_pool_info_(in_command_pool_info),
+    device_(in_device),
+    physical_device_(in_physical_device),
+    graphics_queue_(in_graphics_queue),
+    command_pool_(in_command_pool),
     texture_collection_(),
     static_mesh_collection_()
 {}
 
 WVkAssetResources::WVkAssetResources(WVkAssetResources && other) :
-    device_info_(std::move(other.device_info_)),
-    command_pool_info_(std::move(other.command_pool_info_)),
+    device_(std::move(other.device_)),
+    physical_device_(std::move(other.physical_device_)),
+    graphics_queue_(std::move(other.graphics_queue_)),
+    command_pool_(std::move(other.command_pool_)),
     texture_collection_(std::move(other.texture_collection_)),
     static_mesh_collection_(std::move(other.static_mesh_collection_))
 {
-    other.device_info_ = {};
-    other.command_pool_info_ = {};
+    other.device_ = VK_NULL_HANDLE;
+    other.physical_device_ = VK_NULL_HANDLE;
+    other.graphics_queue_ = VK_NULL_HANDLE;
+    other.command_pool_ = VK_NULL_HANDLE;
 }
 
 WVkAssetResources & WVkAssetResources::operator=(WVkAssetResources && other) {
     if (this != &other) {
-        device_info_ = std::move(other.device_info_);
-        command_pool_info_ = std::move(other.command_pool_info_);
+        Destroy();
+
+        device_ = std::move(other.device_);
+        physical_device_ = std::move(other.physical_device_);
+        graphics_queue_ = std::move(other.graphics_queue_);
+        command_pool_ = std::move(other.command_pool_);
         texture_collection_ = std::move(other.texture_collection_);
         static_mesh_collection_ = std::move(other.static_mesh_collection_);
         
-        other.device_info_ = {};
-        other.command_pool_info_ = {};
+        other.device_ = VK_NULL_HANDLE;
+        other.physical_device_ = VK_NULL_HANDLE;
+        other.graphics_queue_ = VK_NULL_HANDLE;
+        other.command_pool_ = VK_NULL_HANDLE;
     }
 
     return *this;
@@ -47,7 +63,7 @@ void WVkAssetResources::UnloadTexture(const WAssetId & in_id) {
         [this](WVkTextureInfo & in_texture_info) -> void {
             WVulkan::Destroy(
                 in_texture_info,
-                device_info_
+                device_
                 );
         }
         );
@@ -60,7 +76,7 @@ void WVkAssetResources::UnloadStaticMesh(const WAssetIndexId & in_id) {
         [this] (WVkMeshInfo & in_mesh_info) -> void {
             WVulkan::Destroy(
                 in_mesh_info,
-                device_info_
+                device_
                 );
         });    
 }
@@ -74,20 +90,33 @@ const WVkMeshInfo & WVkAssetResources::StaticMeshInfo(const WAssetIndexId & in_i
 }
 
 void WVkAssetResources::Clear() {
-    texture_collection_.Clear(
-        [this](WVkTextureInfo & in_texture_info) -> void {
-            WVulkan::Destroy(
-                in_texture_info,
-                device_info_
-                );
-        }
-        );
+    if (device_ != VK_NULL_HANDLE) {
+        texture_collection_.Clear(
+            [this](WVkTextureInfo & in_texture_info) -> void {
+                WVulkan::Destroy(
+                    in_texture_info,
+                    device_
+                    );
+            }
+            );
 
-    static_mesh_collection_.Clear(
-        [this] (WVkMeshInfo & in_mesh_info) -> void {
-            WVulkan::Destroy(
-                in_mesh_info,
-                device_info_
-                );
-        });    
+        static_mesh_collection_.Clear(
+            [this] (WVkMeshInfo & in_mesh_info) -> void {
+                WVulkan::Destroy(
+                    in_mesh_info,
+                    device_
+                    );
+            });            
+    }
+}
+
+void WVkAssetResources::Destroy() {
+    if (device_ != VK_NULL_HANDLE) {
+        Clear();
+
+        device_ = VK_NULL_HANDLE;
+        physical_device_ = VK_NULL_HANDLE;
+        graphics_queue_ = VK_NULL_HANDLE;
+        command_pool_ = VK_NULL_HANDLE;
+    }
 }

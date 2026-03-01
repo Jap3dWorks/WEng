@@ -14,11 +14,10 @@ public:
     WVkRenderCommandPool();
 
     WVkRenderCommandPool(
-        WVkCommandPoolInfo in_command_pool_info,
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkSurfaceKHR & in_surface
-	);
+        );
 
     ~WVkRenderCommandPool();
 

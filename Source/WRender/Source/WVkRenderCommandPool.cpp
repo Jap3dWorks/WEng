@@ -5,26 +5,22 @@
 
 WVkRenderCommandPool::WVkRenderCommandPool() :
     device_(VK_NULL_HANDLE),
-    command_pool_info_(),
+    command_pool_(VK_NULL_HANDLE),
     command_buffers_()
 {}
 
 WVkRenderCommandPool::WVkRenderCommandPool(
-    WVkCommandPoolInfo in_command_pool_info,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkSurfaceKHR & in_surface
     ) :
     device_(in_device),
-    command_pool_info_(in_command_pool_info),
     command_buffers_()
 {
     WVulkan::QueueFamilyIndices queue_family_indices =
         WVulkan::FindQueueFamilies(in_physical_device, in_surface);
 
-    VkCommandPoolCreateInfo pool_info{};
-
-    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    VkCommandPoolCreateInfo pool_info = WVulkan::VkStructs::CreateVkCommandPoolCreateInfo();
     pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 
@@ -108,3 +104,4 @@ void WVkRenderCommandPool::Destroy()
         command_buffers_.clear();
     }
 }
+

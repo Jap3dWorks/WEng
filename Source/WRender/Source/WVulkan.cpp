@@ -28,98 +28,98 @@
 // Create functions
 // ----------------
 
-void WVulkan::Create(VkInstance & out_instance,
-                     bool in_enable_validation_layers,
-                     const std::vector<std::string_view>& in_validation_layers,
-                     const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
-                     const VkDebugUtilsMessengerEXT & in_debug_messenger
-    )
-{
-    if (in_enable_validation_layers && !CheckValidationLayerSupport(in_validation_layers))
-    {
-        throw std::runtime_error("Validation layers requested, but not available!");
-    }
+// void WVulkan::Create(VkInstance & out_instance,
+//                      bool in_enable_validation_layers,
+//                      const std::vector<std::string_view>& in_validation_layers,
+//                      const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
+//                      const VkDebugUtilsMessengerEXT & in_debug_messenger
+//     )
+// {
+//     if (in_enable_validation_layers && !CheckValidationLayerSupport(in_validation_layers))
+//     {
+//         throw std::runtime_error("Validation layers requested, but not available!");
+//     }
 
-    VkApplicationInfo app_info =
-        VkStructs::CreateVkApplicationInfo();
-    app_info.pApplicationName = "WEngine";
-    app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-    app_info.pEngineName = "WEngine";
-    app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    app_info.apiVersion = VK_API_VERSION_1_3;
+//     VkApplicationInfo app_info =
+//         VkStructs::CreateVkApplicationInfo();
+//     app_info.pApplicationName = "WEngine";
+//     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+//     app_info.pEngineName = "WEngine";
+//     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+//     app_info.apiVersion = VK_API_VERSION_1_3;
 
-    VkInstanceCreateInfo create_info =
-        VkStructs::CreateVkInstanceCreateInfo();
-    create_info.pApplicationInfo = &app_info;
+//     VkInstanceCreateInfo create_info =
+//         VkStructs::CreateVkInstanceCreateInfo();
+//     create_info.pApplicationInfo = &app_info;
 
-    auto extensions = GetRequiredExtensions(in_enable_validation_layers);
+//     auto extensions = GetRequiredExtensions(in_enable_validation_layers);
     
-    create_info.enabledExtensionCount = static_cast<std::uint32_t>(extensions.size());
-    create_info.ppEnabledExtensionNames = extensions.data();
+//     create_info.enabledExtensionCount = static_cast<std::uint32_t>(extensions.size());
+//     create_info.ppEnabledExtensionNames = extensions.data();
 
-    VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
-        VkStructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
+//     VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
+//         VkStructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
 
-    std::vector<const char*> enabled_layers_names{};
-    if (in_enable_validation_layers)
-    {
-        create_info.enabledLayerCount = static_cast<std::uint32_t>(in_validation_layers.size());
+//     std::vector<const char*> enabled_layers_names{};
+//     if (in_enable_validation_layers)
+//     {
+//         create_info.enabledLayerCount = static_cast<std::uint32_t>(in_validation_layers.size());
         
-        WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
+//         WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
 
-        create_info.ppEnabledLayerNames = enabled_layers_names.data();
+//         create_info.ppEnabledLayerNames = enabled_layers_names.data();
 
-        debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+//         debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+//                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+//                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 
-        debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT      |
-                                        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT   |
-                                        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-        if (in_debug_callback)
-        {
-            debug_create_info.pfnUserCallback = in_debug_callback;
-        }
-        else
-        {
-            debug_create_info.pfnUserCallback = &DebugCallback;
-        }
+//         debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT      |
+//                                         VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT   |
+//                                         VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+//         if (in_debug_callback)
+//         {
+//             debug_create_info.pfnUserCallback = in_debug_callback;
+//         }
+//         else
+//         {
+//             debug_create_info.pfnUserCallback = &DebugCallback;
+//         }
 
-        debug_create_info.flags = 0;
+//         debug_create_info.flags = 0;
 
-        create_info.pNext = &debug_create_info;
-    }
-    else
-    {
-        create_info.enabledLayerCount = 0;
-    }
+//         create_info.pNext = &debug_create_info;
+//     }
+//     else
+//     {
+//         create_info.enabledLayerCount = 0;
+//     }
 
-    ExecVkProcChecked(
-        vkCreateInstance,
-        "Failed to create instance!",
-        &create_info,
-        nullptr,
-        &out_instance
-        );
-}
+//     ExecVkProcChecked(
+//         vkCreateInstance,
+//         "Failed to create instance!",
+//         &create_info,
+//         nullptr,
+//         &out_instance
+//         );
+// }
 
-void WVulkan::Create(VkSurfaceKHR & surface,
-                     const VkInstance & in_instance,
-                     GLFWwindow * in_window)
-{
-    VkResult result =
-        glfwCreateWindowSurface(
-            in_instance,
-            in_window,
-            nullptr,
-            &surface
-            );
+// void WVulkan::Create(VkSurfaceKHR & surface,
+//                      const VkInstance & in_instance,
+//                      GLFWwindow * in_window)
+// {
+//     VkResult result =
+//         glfwCreateWindowSurface(
+//             in_instance,
+//             in_window,
+//             nullptr,
+//             &surface
+//             );
     
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create window surface!");
-    }
-}
+//     if (result != VK_SUCCESS)
+//     {
+//         throw std::runtime_error("Failed to create window surface!");
+//     }
+// }
 
 void WVulkan::Create(
     VkSwapchainKHR & out_swap_chain,
@@ -233,159 +233,161 @@ void WVulkan::Create(
 
 }
 
-void WVulkan::Create(
-    WVkCommandPoolInfo & command_pool_info,
-    const WVkDeviceInfo & device_info,
-    const WVkSurfaceInfo & surface_info
-    )
-{
-    QueueFamilyIndices queue_family_indices =
-	FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
+// void WVulkan::Create(
+//     WVkCommandPoolInfo & command_pool_info,
+//     const WVkDeviceInfo & device_info,
+//     const WVkSurfaceInfo & surface_info
+//     )
+// {
+//     QueueFamilyIndices queue_family_indices =
+// 	FindQueueFamilies(device_info.vk_physical_device, surface_info.surface);
 
-    VkCommandPoolCreateInfo pool_info{};
+//     VkCommandPoolCreateInfo pool_info{};
 
-    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+//     pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+//     pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+//     pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 
-    if (
-	vkCreateCommandPool(
-	    device_info.vk_device,
-	    &pool_info,
-	    nullptr,
-	    &command_pool_info.vk_command_pool) != VK_SUCCESS
-	)
-    {
-        throw std::runtime_error("Failed to create command pool!");
-    }
-}
+//     if (
+// 	vkCreateCommandPool(
+// 	    device_info.vk_device,
+// 	    &pool_info,
+// 	    nullptr,
+// 	    &command_pool_info.vk_command_pool) != VK_SUCCESS
+// 	)
+//     {
+//         throw std::runtime_error("Failed to create command pool!");
+//     }
+// }
 
-void WVulkan::Create(VkDevice & out_device,
-                     VkPhysicalDevice & out_physical_device,
-                     VkSampleCountFlagBits & out_max_msaa_samples,
-                     VkQueue & out_graphics_queue,
-                     VkQueue & out_present_queue,
-                     const std::vector<std::string_view> & in_device_extensions,
-                     const VkInstance & in_instance,
-                     const VkSurfaceKHR & in_surface,
-                     bool in_enable_validation_layers,
-                     const std::vector<std::string_view>& in_validation_layers)
-{
-    // Pick Physical Device
+// void WVulkan::Create(VkDevice & out_device,
+//                      VkPhysicalDevice & out_physical_device,
+//                      VkSampleCountFlagBits & out_max_msaa_samples,
+//                      VkQueue & out_graphics_queue,
+//                      VkQueue & out_present_queue,
+//                      const std::vector<std::string_view> & in_device_extensions,
+//                      const VkInstance & in_instance,
+//                      const VkSurfaceKHR & in_surface,
+//                      bool in_enable_validation_layers,
+//                      const std::vector<std::string_view>& in_validation_layers)
+// {
+//     // Pick Physical Device
     
-    uint32_t device_count = 0;
-    vkEnumeratePhysicalDevices(in_instance, &device_count, nullptr);
-    if (device_count == 0)
-    {
-        throw std::runtime_error("Failed to find GPUs with Vulkan support!");
-    }
+//     uint32_t device_count = 0;
+//     vkEnumeratePhysicalDevices(in_instance, &device_count, nullptr);
+//     if (device_count == 0)
+//     {
+//         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+//     }
     
-    std::vector<VkPhysicalDevice> devices(device_count);
-    vkEnumeratePhysicalDevices(in_instance, &device_count, devices.data());
+//     std::vector<VkPhysicalDevice> devices(device_count);
+//     vkEnumeratePhysicalDevices(in_instance, &device_count, devices.data());
 
-    for (const auto &device : devices)
-    {
-        if (IsDeviceSuitable(device, in_surface, in_device_extensions))
-        {
-            // TODO device checks
-            out_physical_device = device;
-            out_max_msaa_samples = GetMaxUsableSampleCount(device);
-            break;
-        }
-    }
+//     for (const auto &device : devices)
+//     {
+//         if (IsDeviceSuitable(device, in_surface, in_device_extensions))
+//         {
+//             // TODO device checks
+//             out_physical_device = device;
+//             out_max_msaa_samples = GetMaxUsableSampleCount(device);
+//             break;
+//         }
+//     }
 
-    if (out_physical_device == VK_NULL_HANDLE)
-    {
-        throw std::runtime_error("Failed to find a suitable GPU!");
-    }
+//     if (out_physical_device == VK_NULL_HANDLE)
+//     {
+//         throw std::runtime_error("Failed to find a suitable GPU!");
+//     }
 
-    // Create Logical Device
+//     // Create Logical Device
 
-    QueueFamilyIndices indices =
-        FindQueueFamilies(out_physical_device, in_surface);
-    std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-    std::set<uint32_t> unique_queue_families = {
-        indices.graphics_family.value(),
-        indices.present_family.value()
-    };
+//     QueueFamilyIndices indices =
+//         FindQueueFamilies(out_physical_device, in_surface);
+//     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+//     std::set<uint32_t> unique_queue_families = {
+//         indices.graphics_family.value(),
+//         indices.present_family.value()
+//     };
 
-    float queue_priority = 1.0f;
-    for (uint32_t queue_family : unique_queue_families)
-    {
-        VkDeviceQueueCreateInfo queue_create_info{};
-        queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_create_info.queueFamilyIndex = queue_family;
-        queue_create_info.queueCount = 1;
-        queue_create_info.pQueuePriorities = &queue_priority;
-        queue_create_infos.push_back(queue_create_info);
-    }
+//     float queue_priority = 1.0f;
+//     for (uint32_t queue_family : unique_queue_families)
+//     {
+//         VkDeviceQueueCreateInfo queue_create_info{};
+//         queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+//         queue_create_info.queueFamilyIndex = queue_family;
+//         queue_create_info.queueCount = 1;
+//         queue_create_info.pQueuePriorities = &queue_priority;
+//         queue_create_infos.push_back(queue_create_info);
+//     }
 
-    // device features
+//     // device features
 
-    VkPhysicalDeviceFeatures2 vk2_features{};
-    vk2_features.sType= VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    vk2_features.features.samplerAnisotropy = VK_TRUE;
+//     VkPhysicalDeviceFeatures2 vk2_features{};
+//     vk2_features.sType= VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+//     vk2_features.features.samplerAnisotropy = VK_TRUE;
 
-    VkPhysicalDeviceVulkan13Features vk13_features{};
-    vk13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-    vk13_features.dynamicRendering = VK_TRUE;
-    vk13_features.synchronization2 = VK_TRUE;
+//     VkPhysicalDeviceVulkan13Features vk13_features{};
+//     vk13_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+//     vk13_features.dynamicRendering = VK_TRUE;
+//     vk13_features.synchronization2 = VK_TRUE;
 
-    VkPhysicalDeviceExtendedDynamicStateFeaturesEXT vkext_features={};
-    vkext_features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
-    vkext_features.extendedDynamicState = VK_TRUE;
+//     VkPhysicalDeviceExtendedDynamicStateFeaturesEXT vkext_features={};
+//     vkext_features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT;
+//     vkext_features.extendedDynamicState = VK_TRUE;
 
-    vkext_features.pNext = nullptr;
-    vk13_features.pNext = &vkext_features;
-    vk2_features.pNext = &vk13_features;
+//     vkext_features.pNext = nullptr;
+//     vk13_features.pNext = &vkext_features;
+//     vk2_features.pNext = &vk13_features;
 
-    // Start device creation
+//     // Start device creation
 
-    VkDeviceCreateInfo create_info{};
-    create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+//     VkDeviceCreateInfo create_info{};
+//     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-    create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
-    create_info.pQueueCreateInfos = queue_create_infos.data();
+//     create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
+//     create_info.pQueueCreateInfos = queue_create_infos.data();
 
-    create_info.pEnabledFeatures = nullptr;
+//     create_info.pEnabledFeatures = nullptr;
 
-    create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
+//     create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
     
-    std::vector<const char *> enable_extension_names{};
-    WStringUtils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
+//     std::vector<const char *> enable_extension_names{};
+//     WStringUtils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
     
-    create_info.ppEnabledExtensionNames = enable_extension_names.data();
+//     create_info.ppEnabledExtensionNames = enable_extension_names.data();
     
-    create_info.pNext = &vk2_features;
+//     create_info.pNext = &vk2_features;
 
-    std::vector<const char *> enabled_layer_names{};
-    if (in_enable_validation_layers)
-    {
-        create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
-        WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
-        create_info.ppEnabledLayerNames = enabled_layer_names.data();
-    }
-    else
-    {
-        create_info.enabledLayerCount = 0;
-    }
+//     std::vector<const char *> enabled_layer_names{};
+//     if (in_enable_validation_layers)
+//     {
+//         create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
+//         WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
+//         create_info.ppEnabledLayerNames = enabled_layer_names.data();
+//     }
+//     else
+//     {
+//         create_info.enabledLayerCount = 0;
+//     }
 
-    ExecVkProcChecked(vkCreateDevice,
-                      "Failed to create logical device!",
-                      out_physical_device,
-                      &create_info,
-                      nullptr,
-                      &out_device);
+//     ExecVkProcChecked(vkCreateDevice,
+//                       "Failed to create logical device!",
+//                       out_physical_device,
+//                       &create_info,
+//                       nullptr,
+//                       &out_device);
     
-    vkGetDeviceQueue(out_device, indices.graphics_family.value(), 0, &out_graphics_queue);
-    vkGetDeviceQueue(out_device, indices.present_family.value(), 0, &out_present_queue);
-}
+//     vkGetDeviceQueue(out_device, indices.graphics_family.value(), 0, &out_graphics_queue);
+//     vkGetDeviceQueue(out_device, indices.present_family.value(), 0, &out_present_queue);
+// }
 
 void WVulkan::CreateTexture(
     WVkTextureInfo &out_texture_info,
     const WTextureStruct &texture_struct,
-    const WVkDeviceInfo &device_info,
-    const WVkCommandPoolInfo &command_pool_info
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkQueue & in_graphics_queue,
+    const VkCommandPool &in_command_pool
     )
 {
     
@@ -420,27 +422,27 @@ void WVulkan::CreateTexture(
     CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
-        device_info.vk_device,
-        device_info.vk_physical_device,
+        in_device,
+        in_physical_device,
         image_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
     void * data;
-    vkMapMemory(device_info.vk_device, staging_buffer_memory, 0, image_size, 0, &data);
+    vkMapMemory(in_device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(
         data,
         texture_ptr->data.data(),
         std::min(texture_ptr->data.size(), static_cast<size_t>(image_size))
         );
-    vkUnmapMemory(device_info.vk_device, staging_buffer_memory);
+    vkUnmapMemory(in_device, staging_buffer_memory);
 
     CreateImage(
         out_texture_info.image,
         out_texture_info.memory,
-        device_info.vk_device,
-        device_info.vk_physical_device,
+        in_device,
+        in_physical_device,
         texture_ptr->width,
         texture_ptr->height,
         out_texture_info.mip_levels,
@@ -452,9 +454,9 @@ void WVulkan::CreateTexture(
         );
 
     TransitionTextureImageLayout(
-        device_info.vk_device,
-        command_pool_info.vk_command_pool,
-        device_info.vk_graphics_queue,
+        in_device,
+        in_command_pool,
+        in_graphics_queue,
         out_texture_info.image,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -466,9 +468,9 @@ void WVulkan::CreateTexture(
         out_texture_info.image,
         texture_ptr->width,
         texture_ptr->height,
-        device_info.vk_device,
-        command_pool_info.vk_command_pool,
-        device_info.vk_graphics_queue
+        in_device,
+        in_command_pool,
+        in_graphics_queue
         );
 
     GenerateMipmaps(
@@ -477,10 +479,10 @@ void WVulkan::CreateTexture(
         texture_ptr->width,
         texture_ptr->height,
         out_texture_info.mip_levels,
-        device_info.vk_device,
-        device_info.vk_physical_device,
-        command_pool_info.vk_command_pool,
-        device_info.vk_graphics_queue
+        in_device,
+        in_physical_device,
+        in_command_pool,
+        in_graphics_queue
         );
 
     // Image view
@@ -489,19 +491,18 @@ void WVulkan::CreateTexture(
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
         out_texture_info.mip_levels,
-        device_info.vk_device
+        in_device
         );
 
     // Sampler
     out_texture_info.sampler = CreateTextureSampler(
-        device_info.vk_device,
-        device_info.vk_physical_device,
+        in_device,
+        in_physical_device,
         out_texture_info.mip_levels
         );
 
-    vkFreeMemory(device_info.vk_device, staging_buffer_memory, nullptr);
-    vkDestroyBuffer(device_info.vk_device, staging_buffer, nullptr);
-
+    vkFreeMemory(in_device, staging_buffer_memory, nullptr);
+    vkDestroyBuffer(in_device, staging_buffer, nullptr);
 }
 
 void WVulkan::Create(
@@ -592,8 +593,10 @@ void WVulkan::CreateMeshBuffers(
     const void * index_buffer,
     const std::uint32_t & index_buffer_size,
     const std::uint32_t & index_count,
-    const WVkDeviceInfo & device,
-    const WVkCommandPoolInfo & command_pool_info
+    const VkDevice & in_device,
+    const VkPhysicalDevice & in_physical_device,
+    const VkQueue & in_graphics_queue,
+    const VkCommandPool & in_command_pool
     )
 {
     VkBuffer staging_buffer;
@@ -606,60 +609,60 @@ void WVulkan::CreateMeshBuffers(
     CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
-        device.vk_device,
-        device.vk_physical_device,
+        in_device,
+        in_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
     void * data;
-    vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
+    vkMapMemory(in_device, staging_buffer_memory, 0, buffer_size, 0, &data);
     memcpy(data, vertex_buffer, static_cast<size_t>(buffer_size));
-    vkUnmapMemory(device.vk_device, staging_buffer_memory);
+    vkUnmapMemory(in_device, staging_buffer_memory);
 
     CreateVkBuffer(
         out_mesh_info.vertex_buffer,
         out_mesh_info.vertex_buffer_memory,
-        device.vk_device,
-        device.vk_physical_device,
+        in_device,
+        in_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
     WVulkanUtils::CopyVkBuffer(
-        device.vk_device,
-        command_pool_info.vk_command_pool,
-        device.vk_graphics_queue,
+        in_device,
+        in_command_pool,
+        in_graphics_queue,
         staging_buffer,
         out_mesh_info.vertex_buffer,
         buffer_size);
 
-    vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
-    vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
+    vkDestroyBuffer(in_device, staging_buffer, nullptr);
+    vkFreeMemory(in_device, staging_buffer_memory, nullptr);
 
     // index buffer
 
     CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
-        device.vk_device,
-        device.vk_physical_device,
+        in_device,
+        in_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
-    vkMapMemory(device.vk_device, staging_buffer_memory, 0, buffer_size, 0, &data);
+    vkMapMemory(in_device, staging_buffer_memory, 0, buffer_size, 0, &data);
     memcpy(data, index_buffer, static_cast<size_t>(buffer_size));
-    vkUnmapMemory(device.vk_device, staging_buffer_memory);
+    vkUnmapMemory(in_device, staging_buffer_memory);
 
     CreateVkBuffer(
         out_mesh_info.index_buffer,
         out_mesh_info.index_buffer_memory,
-        device.vk_device,
-        device.vk_physical_device,
+        in_device,
+        in_physical_device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT |
         VK_BUFFER_USAGE_INDEX_BUFFER_BIT, // |
@@ -668,15 +671,15 @@ void WVulkan::CreateMeshBuffers(
         );
 
     WVulkanUtils::CopyVkBuffer(
-        device.vk_device,
-        command_pool_info.vk_command_pool,
-        device.vk_graphics_queue,
+        in_device,
+        in_command_pool,
+        in_graphics_queue,
         staging_buffer,
         out_mesh_info.index_buffer,
         buffer_size);
 
-    vkDestroyBuffer(device.vk_device, staging_buffer, nullptr);
-    vkFreeMemory(device.vk_device, staging_buffer_memory, nullptr);
+    vkDestroyBuffer(in_device, staging_buffer, nullptr);
+    vkFreeMemory(in_device, staging_buffer_memory, nullptr);
 
     out_mesh_info.index_count = index_count;
 }
@@ -839,17 +842,18 @@ void WVulkan::Destroy(WVkDeviceInfo &device_info)
     device_info = {};
 }
 
-void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info, const WVkDeviceInfo &device_info)
+void WVulkan::Destroy(WVkSwapChainInfo &swap_chain_info,
+                      const VkDevice &in_device)
 {
     for (auto & view: swap_chain_info.views) {
-        vkDestroyImageView(device_info.vk_device, view, nullptr);
+        vkDestroyImageView(in_device, view, nullptr);
     }
 
     for (auto & mem : swap_chain_info.memory) {
-        vkFreeMemory(device_info.vk_device, mem, nullptr);
+        vkFreeMemory(in_device, mem, nullptr);
     }
 
-    vkDestroySwapchainKHR(device_info.vk_device, swap_chain_info.swap_chain, nullptr);
+    vkDestroySwapchainKHR(in_device, swap_chain_info.swap_chain, nullptr);
     
     swap_chain_info = {};
 }
@@ -935,28 +939,28 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     WVkTextureInfo & in_texture_info,
-    const WVkDeviceInfo & in_device_info
+    const VkDevice & in_device
     ) {
     
-    vkDestroySampler(in_device_info.vk_device,
+    vkDestroySampler(in_device,
                      in_texture_info.sampler,
                      nullptr);
 
     in_texture_info.sampler = VK_NULL_HANDLE;
 
-    vkDestroyImageView(in_device_info.vk_device,
+    vkDestroyImageView(in_device,
                        in_texture_info.view,
                        nullptr);
 
     in_texture_info.view = VK_NULL_HANDLE;
 
-    vkDestroyImage(in_device_info.vk_device,
+    vkDestroyImage(in_device,
                    in_texture_info.image,
                    nullptr);
 
     in_texture_info.image = VK_NULL_HANDLE;
 
-    vkFreeMemory(in_device_info.vk_device,
+    vkFreeMemory(in_device,
                  in_texture_info.memory,
                  nullptr);
 
@@ -966,22 +970,22 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     WVkMeshInfo & out_mesh_info,
-    const WVkDeviceInfo & in_device_info
+    const VkDevice & in_device
     ) {
     
-    vkDestroyBuffer(in_device_info.vk_device,
+    vkDestroyBuffer(in_device,
                     out_mesh_info.index_buffer,
                     nullptr);
     
-    vkFreeMemory(in_device_info.vk_device,
+    vkFreeMemory(in_device,
                  out_mesh_info.index_buffer_memory,
                  nullptr);
 
-    vkDestroyBuffer(in_device_info.vk_device,
+    vkDestroyBuffer(in_device,
                     out_mesh_info.vertex_buffer,
                     nullptr);
     
-    vkFreeMemory(in_device_info.vk_device,
+    vkFreeMemory(in_device,
                  out_mesh_info.vertex_buffer_memory,
                  nullptr);
 
@@ -1016,9 +1020,9 @@ void WVulkan::Destroy(
 
 void WVulkan::Destroy(
     VkSampler & out_sampler,
-    const WVkDeviceInfo & in_device_info
+    const VkDevice & in_device
     ) {
-    vkDestroySampler(in_device_info.vk_device, out_sampler, nullptr);
+    vkDestroySampler(in_device, out_sampler, nullptr);
     out_sampler = VK_NULL_HANDLE;
 }
 

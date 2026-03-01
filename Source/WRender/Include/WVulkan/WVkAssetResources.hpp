@@ -25,8 +25,10 @@ public:
     WVkAssetResources();
 
     WVkAssetResources(
-        const WVkDeviceInfo & in_device_info,
-        const WVkCommandPoolInfo & in_command_pool_info
+        const VkDevice & in_device_info,
+        const VkPhysicalDevice & in_physical_device,
+        const VkQueue & in_graphics_queue,
+        const VkCommandPool & in_command_pool_info
         );
 
     virtual ~WVkAssetResources();
@@ -49,8 +51,10 @@ public:
                 WVulkan::CreateTexture(
                     result,
                     in_texture,
-                    device_info_,
-                    command_pool_info_
+                    device_,
+                    physical_device_,
+                    graphics_queue_,
+                    command_pool_
                     );
                 return result;
             });
@@ -75,8 +79,10 @@ public:
                     in_mesh.indices.data(),
                     sizeof(decltype(in_mesh.indices)::value_type) * in_mesh.indices.size(),
                     in_mesh.indices.size(),
-                    device_info_,
-                    command_pool_info_
+                    device_,
+                    physical_device_,
+                    graphics_queue_,
+                    command_pool_
                     );
                 
                 return result;
@@ -91,15 +97,19 @@ public:
     void Clear();
 
 private:
+
+    void Destroy();
     
+    VkDevice device_;
+    VkPhysicalDevice physical_device_;
+    VkQueue graphics_queue_;
+    VkCommandPool command_pool_;
+
     WVkTextureDb texture_collection_;
              
     WVkAssetDb static_mesh_collection_;
 
     std::unordered_map<WAssetId, std::vector<WSubIdxId>> mesh_indexes_;
 
-    WVkDeviceInfo device_info_;
-    WVkCommandPoolInfo command_pool_info_;
-    
 };
 

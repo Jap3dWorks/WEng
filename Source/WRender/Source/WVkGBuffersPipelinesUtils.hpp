@@ -16,7 +16,7 @@ namespace WVkGBuffersPipelinesUtils {
     
     inline void CreateDescSetPool(
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const WVkDeviceInfo & device
+        const VkDevice & in_device
         ) {
         
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
@@ -34,14 +34,14 @@ namespace WVkGBuffersPipelinesUtils {
         
         pool_info.maxSets = 60;
 
-        if (vkCreateDescriptorPool(
-                device.vk_device,
-                &pool_info,
-                nullptr,
-                &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create descriptor pool!");
-        }
+        WVulkan::ExecVkProcChecked(
+            vkCreateDescriptorPool,
+            "Failed to create descriptor pool!",
+            in_device,
+            &pool_info,
+            nullptr,
+            &out_descriptor_pool_info.descriptor_pool
+            );
     }
 
     inline WVkShaderStageInfo BuildShaderStageInfo(

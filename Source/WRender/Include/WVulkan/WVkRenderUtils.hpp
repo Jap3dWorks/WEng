@@ -663,14 +663,14 @@ namespace WVkRenderUtils {
     }
 
     inline void DestroyRenderTarget(WVkRenderTarget & in_render_target,
-                             const WVkDeviceInfo & in_device_info) {
-        vkDestroyImageView(in_device_info.vk_device,
+                                    const VkDevice & in_device_info) {
+        vkDestroyImageView(in_device_info,
                            in_render_target.view,
                            nullptr);
-        vkDestroyImage(in_device_info.vk_device,
+        vkDestroyImage(in_device_info,
                        in_render_target.image,
                        nullptr);
-        vkFreeMemory(in_device_info.vk_device,
+        vkFreeMemory(in_device_info,
                      in_render_target.memory,
                      nullptr);
 
@@ -681,7 +681,7 @@ namespace WVkRenderUtils {
 
     template<CIterable<WVkGBuffersRenderStruct> T>
     void DestroyGBuffersRender(T & in_gbuffers_structs,
-                               const WVkDeviceInfo & in_device_info) {
+                               const VkDevice & in_device_info) {
         for(auto& gbffr : in_gbuffers_structs) {
             DestroyRenderTarget(gbffr.albedo, in_device_info);
             DestroyRenderTarget(gbffr.normal, in_device_info);
@@ -696,7 +696,7 @@ namespace WVkRenderUtils {
 
     template<CIterable<WVkOffscreenRenderStruct> T>
     void DestroyOffscreenRender(T & out_offscreen_structs,
-                                const WVkDeviceInfo & in_device_info) {
+                                const VkDevice & in_device_info) {
         
         for(auto& offrnd : out_offscreen_structs) {
             DestroyRenderTarget(offrnd.color, in_device_info);
@@ -705,7 +705,7 @@ namespace WVkRenderUtils {
 
     template<CIterable<WVkPostprocessRenderStruct> T>
     void DestroyPostprocessRender(T & out_postprocess_render,
-                                  const WVkDeviceInfo & in_device_info) {
+                                  const VkDevice & in_device_info) {
         for (auto & pstrnd : out_postprocess_render) {
             DestroyRenderTarget(pstrnd.color, in_device_info);
         }
@@ -713,7 +713,7 @@ namespace WVkRenderUtils {
 
     template<CIterable<WVkTonemappingRenderStruct> T>
     void DestroyTonemappingRender(T & out_tonemapping_render,
-                                  const WVkDeviceInfo & in_device_info) {
+                                  const VkDevice & in_device_info) {
         for (auto & tnrnd : out_tonemapping_render) {
             DestroyRenderTarget(tnrnd.color, in_device_info);
         }

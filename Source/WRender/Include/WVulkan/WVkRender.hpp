@@ -117,13 +117,13 @@ public:
         return gbuffers_pipelines_;
     }
 
-    WNODISCARD const WVkDeviceInfo & DeviceInfo() const noexcept
-    { return device_info_; }
+    WNODISCARD VkDevice Device() const noexcept
+    { return device_.Device(); }
 
     WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
     { return swap_chain_info_; }
 
-    WNODISCARD const size_t FramesInFlight() const noexcept
+    WNODISCARD constexpr size_t FramesInFlight() const noexcept
     { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
     WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
