@@ -22,39 +22,41 @@ public:
 
     WVkPipelinesBase() noexcept = default;
 
-    virtual ~WVkPipelinesBase()=default;
-
     WVkPipelinesBase(
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device
         ) : device_(in_device), physical_device_(in_physical_device) {}
 
+    virtual ~WVkPipelinesBase() {
+        Destroy();
+    }
+
     WVkPipelinesBase(const WVkPipelinesBase & other)=delete;
+    WVkPipelinesBase & operator=(const WVkPipelinesBase & other)=delete;
 
     WVkPipelinesBase(
         WVkPipelinesBase && other
         ) noexcept :
         pipelines_db_(std::move(other.pipelines_db_)),
         device_(std::move(other.device_)),
-        physical_device_(std::move(other.physical_device_))
+        physical_device_(std::move(other.physical_device_)),
+        pipeline_bindings_(std::move(other.pipeline_bindings_))
         {
             other.device_ = VK_NULL_HANDLE;
             other.physical_device_ = VK_NULL_HANDLE;
         }
 
-    WVkPipelinesBase & operator=(
-        const WVkPipelinesBase & other
-        )=delete;
 
     WVkPipelinesBase & operator=(
         WVkPipelinesBase && other
         ) noexcept {
         if (this != &other) {
-            ClearPipelinesDb();
+            Destroy();
             
             pipelines_db_ = std::move(other.pipelines_db_);
             device_ = std::move(other.device_);
             physical_device_ = std::move(other.physical_device_);
+            pipeline_bindings_ = std::move(other.pipeline_bindings_);
 
             other.device_ = VK_NULL_HANDLE;
             other.physical_device_ = VK_NULL_HANDLE;
@@ -64,7 +66,8 @@ public:
     }
 
 public:
-    
+
+    // TODO remove this function (RAII)
     virtual constexpr void Initialize(
         const VkDevice & in_device, const VkPhysicalDevice & in_physical_device) {
 
@@ -77,6 +80,7 @@ public:
      */
     void ClearPipelinesDb() {
         pipelines_db_.Clear(device_);
+        pipeline_bindings_.clear();
     }
 
     void DeletePipeline(
@@ -87,6 +91,7 @@ public:
             pipelines_db_.RemoveBinding(bid, device_);
         }
 
+        // remove pipeline binding track
         pipeline_bindings_.erase(in_id);
 
         pipelines_db_.RemoveDescPool(in_id, device_);
@@ -344,6 +349,17 @@ protected:
 
     }
 
+private:
+
+    void Destroy() {
+        if (device_ != VK_NULL_HANDLE) {
+            ClearPipelinesDb();
+            
+            device_ = VK_NULL_HANDLE;
+            physical_device_ = VK_NULL_HANDLE;
+        }
+    }
+
 protected:
 
     VkDevice device_{VK_NULL_HANDLE};
@@ -351,6 +367,7 @@ protected:
 
     WVkPipelinesDb<WPipelineIdType, WBindingIdType, FramesInFlight> pipelines_db_{};
 
+    // pipline_id binding_id tracks
     std::unordered_map<WPipelineIdType, TSparseSet<WBindingIdType>> pipeline_bindings_{};
 
   

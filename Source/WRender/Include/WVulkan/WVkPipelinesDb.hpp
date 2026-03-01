@@ -215,6 +215,6 @@ public:
     WVkPipelineDb pipelines{};
     WVkDescSetLayoutDb descriptor_set_layouts{};
     WVkDescriptorPoolDb descriptor_pools{};
-    WVkPipelineBindingDb bindings{};
+    WVkPipelineBindingDb bindings{};  // TODO : is this being used?
 
 };
