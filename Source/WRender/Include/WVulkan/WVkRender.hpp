@@ -5,6 +5,7 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
+#include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkPipelineResources.hpp"
@@ -120,8 +121,8 @@ public:
     WNODISCARD VkDevice Device() const noexcept
     { return device_.Device(); }
 
-    WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
-    { return swap_chain_info_; }
+    // WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
+    // { return swap_chain_info_; }
 
     WNODISCARD constexpr size_t FramesInFlight() const noexcept
     { return WENG_MAX_FRAMES_IN_FLIGHT; }
@@ -165,15 +166,10 @@ private:
         const std::uint32_t & in_image_index
         );
 
-    // TODO remove
-    // WVkInstanceInfo instance_info_{};
-    // WVkSurfaceInfo surface_info_{};
-    // WVkDeviceInfo device_info_{};
-    // --
-
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};
     WVkDeviceRAII device_{};
+    WVkSwapchainRAII swapchain_{};
 
     struct WVkRenderWindow {
         GLFWwindow * window{nullptr};
@@ -190,7 +186,6 @@ private:
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};
     std::array<WVkTonemappingRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_rtargets_{};
 
-    WVkSwapChainInfo swap_chain_info_{};
     WVkSwapChainPipeline<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 

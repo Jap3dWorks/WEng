@@ -24,6 +24,11 @@ public:
 
     virtual ~WVkPipelinesBase()=default;
 
+    WVkPipelinesBase(
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device
+        ) : device_(in_device), physical_device_(in_physical_device) {}
+
     WVkPipelinesBase(const WVkPipelinesBase & other)=delete;
 
     WVkPipelinesBase(
@@ -32,11 +37,9 @@ public:
         pipelines_db_(std::move(other.pipelines_db_)),
         device_(std::move(other.device_)),
         physical_device_(std::move(other.physical_device_))
-        // device_info_(std::move(other.device_info_))
         {
             other.device_ = VK_NULL_HANDLE;
             other.physical_device_ = VK_NULL_HANDLE;
-            // other.device_info_ = {};
         }
 
     WVkPipelinesBase & operator=(
@@ -343,11 +346,12 @@ protected:
 
 protected:
 
+    VkDevice device_{VK_NULL_HANDLE};
+    VkPhysicalDevice physical_device_{VK_NULL_HANDLE};
+
     WVkPipelinesDb<WPipelineIdType, WBindingIdType, FramesInFlight> pipelines_db_{};
 
     std::unordered_map<WPipelineIdType, TSparseSet<WBindingIdType>> pipeline_bindings_{};
 
-    VkDevice device_{VK_NULL_HANDLE};
-    VkPhysicalDevice physical_device_{VK_NULL_HANDLE};
   
 };

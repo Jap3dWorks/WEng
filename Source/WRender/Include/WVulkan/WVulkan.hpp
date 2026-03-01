@@ -208,62 +208,6 @@ namespace WVulkan
     // Create functions
     // ----------------
 
-    // // TODO, use pure vulkan classes as inputs
-    // /**
-    //  * Creates a Vulkan Instance.
-    //  */
-    // void Create(VkInstance & out_instance,
-    //             bool in_enable_validation_layers,
-    //             const std::vector<std::string_view>& in_validation_layers,
-    //             const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
-    //             const VkDebugUtilsMessengerEXT & in_debug_messenger
-    //     );
-
-    // /**
-    //  * Creates a Vulkan Surface.
-    //  */
-    // void Create(VkSurfaceKHR & surface_info, const VkInstance & instance, GLFWwindow * window);
-
-    // /**
-    //  * Creates a Vulkan Device.
-    //  */
-    // void Create(VkDevice & out_device,
-    //             VkPhysicalDevice & out_physical_device,
-    //             VkSampleCountFlagBits & out_max_msaa_samples,
-    //             VkQueue & out_graphics_queue,
-    //             VkQueue & out_present_queue,
-    //             const std::vector<std::string_view> & in_device_extensions,
-    //             const VkInstance & in_instance,
-    //             const VkSurfaceKHR & in_surface,
-    //             bool in_enable_validation_layers,
-    //             const std::vector<std::string_view> & validation_layers);
-
-    /**
-     * Creates a Vulkan Swap Chain.
-     */
-    void Create(
-        VkSwapchainKHR & out_swap_chain,
-        VkFormat & out_format,
-        VkExtent2D & out_extent,
-        std::vector<VkImage> & out_images,
-        std::vector<VkImageView> & out_views,
-        std::vector<VkDeviceMemory> & out_memory,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device,
-        const VkSurfaceKHR & in_surface,
-        const std::uint32_t & in_width,
-        const std::uint32_t & in_height
-        );
-
-    // /**
-    //  * @brief Creates a Vulkan Command Pool.
-    //  */
-    // void Create(
-    //     WVkCommandPoolInfo & command_pool_info,
-    //     const WVkDeviceInfo & device_info,
-    //     const WVkSurfaceInfo & surface_info
-    //     );
-
     void CreateTexture(
         WVkTextureInfo& out_texture_info, 
         const WTextureStruct& texture_struct,
@@ -322,8 +266,6 @@ namespace WVulkan
         const WVkDescriptorPoolInfo& descriptor_pool_info
         );
 
-    
- 
     // ----------------
  
     struct WVkWriteDescriptorSetUBOStruct
@@ -395,18 +337,8 @@ namespace WVulkan
     // Destroy functions
     // -----------------
 
-    void Destroy(WVkInstanceInfo & instance_info);
-
-    void Destroy(WVkSurfaceInfo & surface_info,
-                 const WVkInstanceInfo & instance_info);
-
-    void Destroy(WVkDeviceInfo & device_info);
-
     void Destroy(WVkSwapChainInfo & swap_chain_info,
                  const VkDevice & device_info);
-
-    void DestroyImageView(WVkSwapChainInfo & swap_chain_info,
-                          const WVkDeviceInfo & device_info);
 
     void Destroy(
         WVkRenderPipelineInfo &pipeline_info,
@@ -422,11 +354,11 @@ namespace WVulkan
         const VkDevice & in_device
         );
 
-    // TODO REMOVE
-    void Destroy(
-        WVkCommandPoolInfo & out_command_pool,
-        const WVkDeviceInfo & in_device_info
-        );
+    // // TODO REMOVE
+    // void Destroy(
+    //     WVkCommandPoolInfo & out_command_pool,
+    //     const WVkDeviceInfo & in_device_info
+    //     );
 
     void Destroy(
         WVkTextureInfo & out_texture_info,

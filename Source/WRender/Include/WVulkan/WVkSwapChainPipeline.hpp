@@ -74,7 +74,7 @@ public:
     void Initialize(const VkDevice & in_device,
                     VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
 
-        assert(device_info_.vk_device == VK_NULL_HANDLE);
+        assert(device_ == VK_NULL_HANDLE);
 
         device_ = in_device;
 

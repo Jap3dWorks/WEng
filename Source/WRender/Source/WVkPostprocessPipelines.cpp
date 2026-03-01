@@ -84,11 +84,11 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
 
 void WVkPostprocessPipelines::Destroy() {
     if(device_ != VK_NULL_HANDLE) {
-        ClearPipelinesDb();
+        ClearPipelinesDb();  // Super
 
         Destroy_GlobalResources();
 
-        device_=VK_NULL_HANDLE;
+        device_ = VK_NULL_HANDLE;
         physical_device_ = VK_NULL_HANDLE;
     }
 

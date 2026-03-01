@@ -1,5 +1,6 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -32,13 +33,14 @@
 // -------
 
 WVkRender::WVkRender() noexcept :
-    // instance_info_(),
     window_(),
     render_size_(),
-    // surface_info_(),
-    // device_info_(),
+    instance_(),
+    surface_(),
+    device_(),
+    swapchain_(),
+    
     render_resources_(),
-    swap_chain_info_(),
     swap_chain_pipeline_(),
     gbuffers_rtargets_(),
     postprocess_rtargets_(),
@@ -53,13 +55,14 @@ WVkRender::WVkRender() noexcept :
 }
 
 WVkRender::WVkRender(WVkRender && other) noexcept :
-    // instance_info_(std::move(other.instance_info_)),
     window_(std::move(other.window_)),
+    instance_(std::move(other.instance_)),
+    surface_(std::move(other.surface_)),
+    device_(std::move(other.device_)),
+    swapchain_(std::move(other.swapchain_)),
+
     render_size_(std::move(other.render_size_)),
-    // surface_info_(std::move(other.surface_info_)),
-    // device_info_(std::move(other.device_info_)),
     render_resources_(std::move(other.render_resources_)),
-    swap_chain_info_(std::move(other.swap_chain_info_)),
     swap_chain_pipeline_(std::move(other.swap_chain_pipeline_)),
     swap_chain_input_imgview_ref(std::move(other.swap_chain_input_imgview_ref)),
     gbuffers_rtargets_(std::move(other.gbuffers_rtargets_)),
@@ -76,13 +79,15 @@ WVkRender::WVkRender(WVkRender && other) noexcept :
 
 WVkRender & WVkRender::operator=(WVkRender && other) noexcept {
     if (this != &other) {
-        // instance_info_ = std::move(other.instance_info_);
+
         window_ = std::move(other.window_);
+        instance_ = std::move(other.instance_);
+        surface_ = std::move(other.surface_);
+        device_ = std::move(other.device_);
+        swapchain_ = std::move(other.swapchain_);
+
         render_size_ = std::move(other.render_size_);
-        // surface_info_ = std::move(other.surface_info_);
-        // device_info_ = std::move(other.device_info_);
         render_resources_ = std::move(other.render_resources_);
-        swap_chain_info_ = std::move(other.swap_chain_info_);
         swap_chain_pipeline_ = std::move(other.swap_chain_pipeline_);
         swap_chain_input_imgview_ref = std::move(other.swap_chain_input_imgview_ref);
         gbuffers_rtargets_ = std::move(other.gbuffers_rtargets_);
@@ -105,6 +110,7 @@ WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
 
 WVkRender::~WVkRender()
 {
+    // TODO 
     // if (device_info_.vk_device) {
     //     Destroy();
     // }
@@ -182,21 +188,29 @@ void WVkRender::Initialize()
     //     render_debug_info.validation_layers
     //     );
 
-    // Create Vulkan Swap Chain
-    // TODO RAII
-    WVulkan::Create(
-        swap_chain_info_.swap_chain,
-        swap_chain_info_.format,
-        swap_chain_info_.extent,
-        swap_chain_info_.images,
-        swap_chain_info_.views,
-        swap_chain_info_.memory,
+    swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Surface(),
         dimensions[0],
         dimensions[1]
         );
+
+    // // Create Vulkan Swap Chain
+    // // TODO RAII
+    // WVulkan::Create(
+    //     swap_chain_info_.swap_chain,
+    //     swap_chain_info_.format,
+    //     swap_chain_info_.extent,
+    //     swap_chain_info_.images,
+    //     swap_chain_info_.views,
+    //     swap_chain_info_.memory,
+    //     device_.Device(),
+    //     device_.PhysicalDevice(),
+    //     surface_.Surface(),
+    //     dimensions[0],
+    //     dimensions[1]
+    //     );
 
     // GBuffers render targets
 
@@ -247,7 +261,8 @@ void WVkRender::Initialize()
         // device_info_,
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
+        swapchain_.Format()
+        // swap_chain_info_.format
         );
 
     // Create Render Command Pool
@@ -278,14 +293,16 @@ void WVkRender::Initialize()
 
     tonemapping_pipeline_.Initialize(
         device_.Device(),
-        swap_chain_info_.format        
+        swapchain_.Format()
+        // swap_chain_info_.format        
         );
     
     WFLOG("[DEBUG] Initialize swap chain pipeline")
 
     swap_chain_pipeline_.Initialize(
         device_.Device(),
-        swap_chain_info_.format
+        swapchain_.Format()
+        // swap_chain_info_.format
         );
 
     pipeline_resources_ = WVkPipelineResources(
@@ -305,7 +322,8 @@ void WVkRender::Initialize()
         CreateCommandBuffer();
 
     sync_semaphores_ = WVkRenderUtils::CreateSyncSemaphore<SyncSemaphores>(
-        swap_chain_info_.images.size(),
+        swapchain_.Images().size(),
+        // swap_chain_info_.images.size(),
         device_.Device()
         );
 
@@ -328,6 +346,7 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy Render Pipelines.");
     swap_chain_input_imgview_ref = VK_NULL_HANDLE;
+    
     gbuffers_pipelines_.Destroy();
     offscreen_pipeline_.Destroy();
     ppcss_pipelines_.Destroy();
@@ -338,13 +357,11 @@ void WVkRender::Destroy() {
     WVkRenderUtils::DestroySyncSemaphores(
         sync_semaphores_,
         device_.Device()
-        // device_info_.vk_device
         );
 
     WVkRenderUtils::DestroySyncFences(
         sync_fences_,
         device_.Device()
-        // device_info_.vk_device
         );
 
     WFLOG("Destroy render targets.")
@@ -352,7 +369,6 @@ void WVkRender::Destroy() {
     WVkRenderUtils::DestroyGBuffersRender(
         gbuffers_rtargets_,
         device_.Device()
-        // device_info_
         );
     
     WVkRenderUtils::DestroyOffscreenRender(
@@ -370,11 +386,6 @@ void WVkRender::Destroy() {
         device_.Device()
         );
 
-    WFLOG("Destroy Swap Chain Info.");
-
-    WVulkan::Destroy(swap_chain_info_,
-                     device_.Device());
-
     swap_chain_pipeline_.Destroy();
 
     pipeline_resources_ = {}; // .Destroy();
@@ -383,33 +394,23 @@ void WVkRender::Destroy() {
 
     render_command_pool_ = {};
 
-    // render_command_pool_.Destroy();
-    // render_command_pool_ = {};
-    
     render_command_buffer_ = {};
 
     WFLOG("Destroy Render Resources.");
 
     render_resources_ = {};
-    // render_resources_.Clear();
 
-    WFLOG("Destroy Vulkan Device.");
+    swapchain_ = WVkSwapchainRAII{};
+    device_ = WVkDeviceRAII{};
+    surface_ = WVkSurfaceRAII{};
+    instance_ = WVkInstanceRAII{};
 
-    // Destroy Vulkan Device
-    // WVulkan::Destroy(device_info_);
-
-    // // Destroy Vulkan Surface
-    // WVulkan::Destroy(surface_info_, instance_info_);
-
-    // // Destroy Vulkan Instance
-    // WVulkan::Destroy(instance_info_);
 }
 
 void WVkRender::Draw()
 {
     vkWaitForFences(
         device_.Device(),
-        // device_info_.vk_device,
         1,
         &sync_fences_[frame_index_],
         VK_TRUE,
@@ -420,8 +421,7 @@ void WVkRender::Draw()
 
     VkResult result = vkAcquireNextImageKHR(
         device_.Device(),
-        // device_info_.vk_device,
-        swap_chain_info_.swap_chain,
+        swapchain_.Swapchain(),
         UINT64_MAX,
         sync_semaphores_[semaphore_index_].image_available,
         VK_NULL_HANDLE,
@@ -513,7 +513,8 @@ void WVkRender::Draw()
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;
-    present_info.pSwapchains = &swap_chain_info_.swap_chain;
+    // present_info.pSwapchains = &swap_chain_info_.swap_chain;
+    present_info.pSwapchains = &swapchain_.Swapchain();
     present_info.pImageIndices = &image_index;
     present_info.pResults = VK_NULL_HANDLE;
 
@@ -794,10 +795,12 @@ void WVkRender::RecreateSwapChain() {
 
     // Destroy swap chain and other render targets
 
-    WVulkan::Destroy(
-        swap_chain_info_,
-        device_.Device()
-        );
+    // WVulkan::Destroy(
+    //     swap_chain_info_,
+    //     device_.Device()
+    //     );
+
+    
 
     WVkRenderUtils::DestroyGBuffersRender(
         gbuffers_rtargets_,
@@ -821,19 +824,27 @@ void WVkRender::RecreateSwapChain() {
 
     // Recreate swap chain and other reder targets
 
-    WVulkan::Create(
-        swap_chain_info_.swap_chain,
-        swap_chain_info_.format,
-        swap_chain_info_.extent,
-        swap_chain_info_.images,
-        swap_chain_info_.views,
-        swap_chain_info_.memory,
+    swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Surface(),
         dimensions[0],
         dimensions[1]
         );
+
+    // WVulkan::Create(
+    //     swap_chain_info_.swap_chain,
+    //     swap_chain_info_.format,
+    //     swap_chain_info_.extent,
+    //     swap_chain_info_.images,
+    //     swap_chain_info_.views,
+    //     swap_chain_info_.memory,
+    //     device_.Device(),
+    //     device_.PhysicalDevice(),
+    //     surface_.Surface(),
+    //     dimensions[0],
+    //     dimensions[1]
+    //     );
 
     WVkRenderUtils::CreateGBuffersRenderTargets(
         gbuffers_rtargets_,
@@ -874,7 +885,7 @@ void WVkRender::RecreateSwapChain() {
         device_.PhysicalDevice(),
         dimensions[0],
         dimensions[1],
-        swap_chain_info_.format
+        swapchain_.Format()
         );
 }
 
@@ -1286,8 +1297,8 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
     const std::uint32_t & in_frame_index,
     const std::uint32_t & in_image_index
     ) {
-    VkImage swapchain_image = swap_chain_info_.images[in_image_index];
-    VkImageView swapchain_imageview = swap_chain_info_.views[in_image_index];
+    VkImage swapchain_image = swapchain_.Images()[in_image_index];
+    VkImageView swapchain_imageview = swapchain_.Views()[in_image_index];
 
     // swap chain image layout to render into it
     WVkRenderUtils::RndCmd_TransitionRenderImageLayout(
@@ -1305,7 +1316,7 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
         in_command_buffer,
         swapchain_imageview,
         swapchain_imageview,
-        swap_chain_info_.extent
+        swapchain_.Extent()
         );
 
     swap_chain_pipeline_.ResetDescriptorPool(in_frame_index);
@@ -1321,7 +1332,7 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
 
     WVkRenderUtils::RndCmd_SetViewportAndScissor(
         in_command_buffer,
-        swap_chain_info_.extent
+        swapchain_.Extent()
         );
 
     VkDescriptorSet descriptor = WVkRenderUtils::CreateInputRenderDescriptor(

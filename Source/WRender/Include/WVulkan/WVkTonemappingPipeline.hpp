@@ -64,7 +64,7 @@ public:
     void Initialize(const VkDevice & in_device,
                     const VkFormat & in_color_format) {
         // TODO constructor
-        assert(device_info_.vk_device == VK_NULL_HANDLE);
+        assert(device_ == VK_NULL_HANDLE);
 
         device_ = in_device;
 
