@@ -1,6 +1,6 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
-#include "WVulkan/WVkOffscreenPipeline.hpp"
+#include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkSwapChainPipeline.hpp"
@@ -20,7 +20,7 @@
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkGBuffersPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
@@ -147,11 +147,9 @@ void WVkRender::Initialize()
         tonemapping_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
-        // device_info_,
         dimensions[0],
         dimensions[1],
         swapchain_.Format()
-        // swap_chain_info_.format
         );
 
     // Create Render Command Pool
@@ -164,18 +162,16 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
 
-    gbuffers_pipelines_ = WVkGBuffersPipelines(
+    gbuffers_pipelines_ = WVkGBuffersPipelinesRAII(
         device_.Device(),
         device_.PhysicalDevice()
         );
-    // gbuffers_pipelines_.Initialize(device_.Device(), device_.PhysicalDevice());
 
     WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
 
-    offscreen_pipeline_ = WVkOffscreenPipeline(
+    offscreen_pipeline_ = WVkOffscreenPipelineRAII(
         device_.Device()
         );
-    // offscreen_pipeline_.Initialize(device_.Device());
 
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
 

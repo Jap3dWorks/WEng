@@ -15,13 +15,13 @@
  * @brief Offsccreen pipeline outputs the render using GBuffers.
  */
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkOffscreenPipeline {
+class WVkOffscreenPipelineRAII {
 
 public:
 
-    WVkOffscreenPipeline() noexcept = default;
+    WVkOffscreenPipelineRAII() noexcept = default;
 
-    WVkOffscreenPipeline(const VkDevice & in_device) :
+    WVkOffscreenPipelineRAII(const VkDevice & in_device) :
         device_(in_device)
         {
             InitializeDescSetLayout();
@@ -31,14 +31,14 @@ public:
             InitializeRenderPipeline();
         }
 
-    ~WVkOffscreenPipeline() {
+    ~WVkOffscreenPipelineRAII() {
         Destroy();
     }
 
-    WVkOffscreenPipeline(const WVkOffscreenPipeline &)=delete;
-    WVkOffscreenPipeline & operator=(const WVkOffscreenPipeline &)=delete;
+    WVkOffscreenPipelineRAII(const WVkOffscreenPipelineRAII &)=delete;
+    WVkOffscreenPipelineRAII & operator=(const WVkOffscreenPipelineRAII &)=delete;
 
-    WVkOffscreenPipeline(WVkOffscreenPipeline && other) noexcept :
+    WVkOffscreenPipelineRAII(WVkOffscreenPipelineRAII && other) noexcept :
         device_(std::move(other.device_)),
         descpool_info_(std::move(other.descpool_info_)),
         descset_layout_(std::move(other.descset_layout_)),
@@ -51,7 +51,7 @@ public:
             other.pipeline_layout_ = VK_NULL_HANDLE;
         }
 
-    WVkOffscreenPipeline & operator=(WVkOffscreenPipeline && other) noexcept {
+    WVkOffscreenPipelineRAII & operator=(WVkOffscreenPipelineRAII && other) noexcept {
         if (this != &other) {
             Destroy();
 
@@ -96,17 +96,6 @@ public:
     }
 
 private:
-
-    // void Initialize(const VkDevice & in_device) {
-        
-    //     device_ = in_device;
-
-    //     InitializeDescSetLayout();
-
-    //     InitializeDescPool();
-
-    //     InitializeRenderPipeline();
-    // }
 
     void Destroy() {
         if (device_ != VK_NULL_HANDLE) {

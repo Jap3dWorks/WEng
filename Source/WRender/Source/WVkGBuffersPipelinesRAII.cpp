@@ -1,4 +1,4 @@
-#include "WVulkan/WVkGBuffersPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
@@ -19,21 +19,21 @@
 // WRenderPipelinesManager
 // -------------------
 
-WVkGBuffersPipelines::WVkGBuffersPipelines(
+WVkGBuffersPipelinesRAII::WVkGBuffersPipelinesRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device
     ) : Super(in_device, in_physical_device) {
     Initialize_GlobalResources();
 }
 
-WVkGBuffersPipelines::~WVkGBuffersPipelines()
+WVkGBuffersPipelinesRAII::~WVkGBuffersPipelinesRAII()
 {
     Destroy();
     Super::~Super();
 }
 
-WVkGBuffersPipelines::WVkGBuffersPipelines(
-    WVkGBuffersPipelines && other
+WVkGBuffersPipelinesRAII::WVkGBuffersPipelinesRAII(
+    WVkGBuffersPipelinesRAII && other
     ) noexcept :
     Super(std::move(other)),
     global_graphics_descsets_(std::move(other.global_graphics_descsets_))
@@ -41,7 +41,7 @@ WVkGBuffersPipelines::WVkGBuffersPipelines(
     other.global_graphics_descsets_ = {};
 }
 
-WVkGBuffersPipelines & WVkGBuffersPipelines::operator=(WVkGBuffersPipelines && other) noexcept
+WVkGBuffersPipelinesRAII & WVkGBuffersPipelinesRAII::operator=(WVkGBuffersPipelinesRAII && other) noexcept
 {
     if (this != &other) {
         Destroy();
@@ -56,7 +56,7 @@ WVkGBuffersPipelines & WVkGBuffersPipelines::operator=(WVkGBuffersPipelines && o
     return *this;
 }
 
-void WVkGBuffersPipelines::CreatePipeline(
+void WVkGBuffersPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
     const WRenderPipelineStruct & in_pipeline_struct
     ) {
@@ -104,7 +104,7 @@ void WVkGBuffersPipelines::CreatePipeline(
     pipeline_bindings_[in_id] = {};
 }
 
-WId WVkGBuffersPipelines::CreateBinding(
+WId WVkGBuffersPipelinesRAII::CreateBinding(
     const WEntityComponentId & component_id,
     const WAssetId & in_pipeline_id,
     const WAssetIndexId & in_mesh_asset_id,
@@ -129,11 +129,11 @@ WId WVkGBuffersPipelines::CreateBinding(
     return component_id;
 }
 
-void WVkGBuffersPipelines::Destroy() {
+void WVkGBuffersPipelinesRAII::Destroy() {
     Destroy_GlobalResources();
 }
 
-void WVkGBuffersPipelines::Initialize_GlobalResources() {
+void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
     
     WVkGBuffersPipelinesUtils::UpdateDSL_DefaultGlobalGraphicBindings(
         global_graphics_descsets_.descset_layout_info
@@ -194,7 +194,7 @@ void WVkGBuffersPipelines::Initialize_GlobalResources() {
     }
 }
 
-void WVkGBuffersPipelines::Destroy_GlobalResources() {
+void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
 
     if (global_graphics_descsets_.descpool_info.descriptor_pool !=
         VK_NULL_HANDLE) {
@@ -222,7 +222,7 @@ void WVkGBuffersPipelines::Destroy_GlobalResources() {
     global_graphics_descsets_ = GlobalGraphicsResources();
 }
 
-void WVkGBuffersPipelines::UpdateGlobalGraphicsDescriptorSet(
+void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {

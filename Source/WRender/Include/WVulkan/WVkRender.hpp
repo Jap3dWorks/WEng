@@ -9,9 +9,9 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkPipelineResourcesRAII.hpp"
-#include "WVulkan/WVkGBuffersPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
-#include "WVulkan/WVkOffscreenPipeline.hpp"
+#include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkTonemappingPipeline.hpp"
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -113,7 +113,7 @@ public:
 
     void RenderSize(const WRenderSize & in_render_size) override { render_size_ = in_render_size; }
 
-    WNODISCARD WVkGBuffersPipelines & RenderPipelinesManager()
+    WNODISCARD WVkGBuffersPipelinesRAII & RenderPipelinesManager()
     {
         return gbuffers_pipelines_;
     }
@@ -190,8 +190,8 @@ private:
 
     WVkPipelineResourcesRAII pipeline_resources_{};
 
-    WVkGBuffersPipelines gbuffers_pipelines_{};
-    WVkOffscreenPipeline<> offscreen_pipeline_{};
+    WVkGBuffersPipelinesRAII gbuffers_pipelines_{};
+    WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     WVkTonemappingPipeline<> tonemapping_pipeline_{};
 

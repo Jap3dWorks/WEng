@@ -13,7 +13,7 @@
 /**
  * @brief Graphics Pipelines outputs the GBuffers.
  */
-class WVkGBuffersPipelines : public WVkPipelinesBase<WAssetId,
+class WVkGBuffersPipelinesRAII : public WVkPipelinesBase<WAssetId,
                                                      WEntityComponentId,
                                                      WENG_MAX_FRAMES_IN_FLIGHT>
 {
@@ -38,27 +38,27 @@ public:
                                    WEntityComponentId,
                                    frames_in_flight>;
 
-    WVkGBuffersPipelines() noexcept=default;
+    WVkGBuffersPipelinesRAII() noexcept=default;
 
-    WVkGBuffersPipelines(
+    WVkGBuffersPipelinesRAII(
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device
         );
 
-    virtual ~WVkGBuffersPipelines() override;
+    virtual ~WVkGBuffersPipelinesRAII() override;
 
-    WVkGBuffersPipelines(const WVkGBuffersPipelines & other)=delete;
+    WVkGBuffersPipelinesRAII(const WVkGBuffersPipelinesRAII & other)=delete;
 
-    WVkGBuffersPipelines & operator=(
-        const WVkGBuffersPipelines & other
+    WVkGBuffersPipelinesRAII & operator=(
+        const WVkGBuffersPipelinesRAII & other
         ) = delete;
 
-    WVkGBuffersPipelines(
-        WVkGBuffersPipelines && other
+    WVkGBuffersPipelinesRAII(
+        WVkGBuffersPipelinesRAII && other
         ) noexcept;
 
-    WVkGBuffersPipelines & operator=(
-        WVkGBuffersPipelines && other
+    WVkGBuffersPipelinesRAII & operator=(
+        WVkGBuffersPipelinesRAII && other
         ) noexcept;
 
     // Create Graphics Render Pipeline
