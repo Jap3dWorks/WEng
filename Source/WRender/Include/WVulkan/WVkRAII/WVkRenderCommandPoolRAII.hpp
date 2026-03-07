@@ -2,30 +2,34 @@
 
 #include "WCore/WCoreMacros.hpp"
 #include "WCore/WCore.hpp"
+#include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 #include <vulkan/vulkan_core.h>
 
-class WRENDER_API WVkRenderCommandPool
+using WVkCommandBufferInfo =
+    std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT>;
+
+class WRENDER_API WVkRenderCommandPoolRAII
 {
 
 public:
 
-    WVkRenderCommandPool();
+    WVkRenderCommandPoolRAII();
 
-    WVkRenderCommandPool(
+    WVkRenderCommandPoolRAII(
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkSurfaceKHR & in_surface
         );
 
-    ~WVkRenderCommandPool();
+    ~WVkRenderCommandPoolRAII();
 
-    WVkRenderCommandPool(WVkRenderCommandPool&& other) noexcept;
-    WVkRenderCommandPool & operator=(WVkRenderCommandPool&& other) noexcept;
+    WVkRenderCommandPoolRAII(WVkRenderCommandPoolRAII&& other) noexcept;
+    WVkRenderCommandPoolRAII & operator=(WVkRenderCommandPoolRAII&& other) noexcept;
 
-    WVkRenderCommandPool(const WVkRenderCommandPool & in_other) = delete;
-    WVkRenderCommandPool & operator=(const WVkRenderCommandPool & in_other) = delete;
+    WVkRenderCommandPoolRAII(const WVkRenderCommandPoolRAII & in_other) = delete;
+    WVkRenderCommandPoolRAII & operator=(const WVkRenderCommandPoolRAII & in_other) = delete;
 
     WVkCommandBufferInfo CreateCommandBuffer();
 

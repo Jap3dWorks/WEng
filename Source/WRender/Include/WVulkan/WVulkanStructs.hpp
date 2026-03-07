@@ -13,31 +13,6 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
-struct WVkDeviceInfo
-{
-    VkPhysicalDevice vk_physical_device { VK_NULL_HANDLE };
-    VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
-
-    std::vector<std::string_view> device_extensions {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
-    };
-
-    VkQueue vk_graphics_queue {VK_NULL_HANDLE};
-    VkQueue vk_present_queue {VK_NULL_HANDLE};
-    VkDevice vk_device {VK_NULL_HANDLE};
-};
-
-struct WVkInstanceInfo
-{
-    VkInstance instance {nullptr};
-};
-
-struct WVkSurfaceInfo
-{
-    VkSurfaceKHR surface{nullptr};
-};
-
 struct WVkRenderDebugInfo
 {
     bool enable_validation_layers{false};
@@ -47,11 +22,6 @@ struct WVkRenderDebugInfo
 
     PFN_vkDebugUtilsMessengerCallbackEXT debug_callback{VK_NULL_HANDLE};
     VkDebugUtilsMessengerEXT debug_messenger{VK_NULL_HANDLE};
-};
-
-struct WVkCommandPoolInfo
-{
-    VkCommandPool vk_command_pool{ VK_NULL_HANDLE };
 };
 
 struct WVkTextureInfo
@@ -189,14 +159,6 @@ struct WVkRenderPipelineInfo
     WPipeParamDescriptorList params_descriptor{};
 };
 
-/**
- * @brief Helper struct to store command buffer data
- */
-struct WVkCommandBufferInfo
-{
-    std::array<VkCommandBuffer, WENG_MAX_FRAMES_IN_FLIGHT> command_buffers {VK_NULL_HANDLE};
-};
-
 // Pipeline Bindings
 // -----------------
 
@@ -242,6 +204,5 @@ struct WVkPipelineBindingInfo
 
     std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescriptorSetTextureBinding> textures{};
-
 };
 

@@ -8,14 +8,14 @@
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkPipelineResources.hpp"
+#include "WVulkan/WVkRAII/WVkPipelineResourcesRAII.hpp"
 #include "WVulkan/WVkGBuffersPipelines.hpp"
 #include "WVulkan/WVkPostprocessPipelines.hpp"
 #include "WVulkan/WVkOffscreenPipeline.hpp"
 #include "WVulkan/WVkTonemappingPipeline.hpp"
-#include "WVulkan/WVkRenderCommandPool.hpp"
+#include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
-#include "WVulkan/WVkAssetResources.hpp"
+#include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WVkSwapChainPipeline.hpp"
 
 #include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
@@ -26,9 +26,6 @@
 #include <vulkan/vulkan_core.h>
 
 struct GLFWwindow;
-// class WVkSurfaceRAII;
-// class WVkDeviceRAII;
-// class WVkInstanceRAII;
 
 /**
  * @brief Default Rendere class
@@ -130,7 +127,7 @@ public:
     WNODISCARD constexpr size_t FramesInFlight() const noexcept
     { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
-    WNODISCARD const WVkRenderCommandPool & RenderCommandPool() const noexcept
+    WNODISCARD const WVkRenderCommandPoolRAII & RenderCommandPool() const noexcept
     { return render_command_pool_; }
 
     void ClearPipelines() override;
@@ -178,7 +175,7 @@ private:
         GLFWwindow * window{nullptr};
     } window_{};
 
-    WVkAssetResources render_resources_{};
+    WVkAssetResourcesRAII render_resources_{};
 
     std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
     std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
@@ -188,15 +185,16 @@ private:
     WVkSwapChainPipeline<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 
-    WVkRenderCommandPool render_command_pool_{};
+    WVkRenderCommandPoolRAII render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};
 
-    // Pipelines, Maybe I should create a container class/struct.
-    WVkPipelineResources pipeline_resources_{};
+    WVkPipelineResourcesRAII pipeline_resources_{};
+
     WVkGBuffersPipelines gbuffers_pipelines_{};
     WVkOffscreenPipeline<> offscreen_pipeline_{};
     WVkPostprocessPipelines ppcss_pipelines_{};
     WVkTonemappingPipeline<> tonemapping_pipeline_{};
+
     struct PipelinesTrack {
         std::unordered_map<WAssetId, EPipelineType> pipeline_pipetype{};
         std::unordered_map<WEntityComponentId, EPipelineType> binding_pipetype{};
@@ -218,7 +216,6 @@ private:
     WRenderSize render_size_{
         800, 600
     };
-
 
 };
 

@@ -1,15 +1,15 @@
-#include "WVulkan/WVkRenderCommandPool.hpp"
+#include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
-WVkRenderCommandPool::WVkRenderCommandPool() :
+WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII() :
     device_(VK_NULL_HANDLE),
     command_pool_(VK_NULL_HANDLE),
     command_buffers_()
 {}
 
-WVkRenderCommandPool::WVkRenderCommandPool(
+WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkSurfaceKHR & in_surface
@@ -34,12 +34,12 @@ WVkRenderCommandPool::WVkRenderCommandPool(
         );
 }
 
-WVkRenderCommandPool::~WVkRenderCommandPool()
+WVkRenderCommandPoolRAII::~WVkRenderCommandPoolRAII()
 {
     Destroy();
 }
 
-WVkRenderCommandPool::WVkRenderCommandPool(WVkRenderCommandPool && other) noexcept :
+WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(WVkRenderCommandPoolRAII && other) noexcept :
     device_(std::move(other.device_)),
     command_pool_(std::move(other.command_pool_)),
     command_buffers_(std::move(other.command_buffers_))
@@ -49,7 +49,7 @@ WVkRenderCommandPool::WVkRenderCommandPool(WVkRenderCommandPool && other) noexce
     other.command_buffers_={};
 }
 
-WVkRenderCommandPool& WVkRenderCommandPool::operator=(WVkRenderCommandPool && other) noexcept
+WVkRenderCommandPoolRAII& WVkRenderCommandPoolRAII::operator=(WVkRenderCommandPoolRAII && other) noexcept
 {
     if (this != &other) {
         Destroy();
@@ -66,7 +66,7 @@ WVkRenderCommandPool& WVkRenderCommandPool::operator=(WVkRenderCommandPool && ot
     return *this;
 }
 
-WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer() {
+WVkCommandBufferInfo WVkRenderCommandPoolRAII::CreateCommandBuffer() {
     command_buffers_.push_back({});
 
     VkCommandBufferAllocateInfo alloc_info{};
@@ -74,7 +74,7 @@ WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer() {
     alloc_info.commandPool = command_pool_;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     alloc_info.commandBufferCount = static_cast<uint32_t>(
-        command_buffers_.back().command_buffers.size()
+        command_buffers_.back().size()
         );
 
     WVulkan::ExecVkProcChecked(
@@ -82,13 +82,13 @@ WVkCommandBufferInfo WVkRenderCommandPool::CreateCommandBuffer() {
         "Failed to allocate command buffers!",
         device_,
         &alloc_info,
-        command_buffers_.back().command_buffers.data()
+        command_buffers_.back().data()
         );
 
     return command_buffers_.back();
 }
 
-void WVkRenderCommandPool::Destroy()
+void WVkRenderCommandPoolRAII::Destroy()
 {
     if (device_ != VK_NULL_HANDLE) {
         WFLOG("Destroy Command Pool");

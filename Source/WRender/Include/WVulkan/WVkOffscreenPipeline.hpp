@@ -5,7 +5,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVkPipelineHelper.hpp"
+#include "WVulkan/WVkPipelineUtils.hpp"
 
 #include "WShaderUtils.hpp"
 #include "WUtils/WStringUtils.hpp"
@@ -194,61 +194,61 @@ private:
             );
 
         std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages;
-        WVkPipelineHelper::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
+        WVkPipelineUtils::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
             shader_stages.data(),
             shader_module
             );
 
         std::array<VkVertexInputAttributeDescription, 2> attr_desc;
-        WVkPipelineHelper::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
+        WVkPipelineUtils::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
 
         VkVertexInputBindingDescription binding_desc =
-            WVkPipelineHelper::RenderPlane_VertBindingDescrpt();
+            WVkPipelineUtils::RenderPlane_VertBindingDescrpt();
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            WVkPipelineHelper::RenderPlane_VkPipelineVertexInputStateCreateInfo(
+            WVkPipelineUtils::RenderPlane_VkPipelineVertexInputStateCreateInfo(
                 binding_desc,
                 attr_desc.data(),
                 static_cast<std::uint32_t>(attr_desc.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            WVkPipelineHelper::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
+            WVkPipelineUtils::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
 
         VkPipelineViewportStateCreateInfo viewport_state =
-            WVkPipelineHelper::RenderPlane_VkPipelineViewportStateCreateInfo();
+            WVkPipelineUtils::RenderPlane_VkPipelineViewportStateCreateInfo();
 
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            WVkPipelineHelper::RenderPlane_VkPipelineRasterizationStateCreateInfo();
+            WVkPipelineUtils::RenderPlane_VkPipelineRasterizationStateCreateInfo();
 
         VkPipelineMultisampleStateCreateInfo multisampling =
-            WVkPipelineHelper::RenderPlane_VkPipelineMultisampleStateCreateInfo();
+            WVkPipelineUtils::RenderPlane_VkPipelineMultisampleStateCreateInfo();
         
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            WVkPipelineHelper::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
+            WVkPipelineUtils::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
 
         VkPipelineColorBlendAttachmentState color_blend_attachment =
-            WVkPipelineHelper::RenderPlane_VkPipelineColorBlendAttachmentState();
+            WVkPipelineUtils::RenderPlane_VkPipelineColorBlendAttachmentState();
 
         VkPipelineColorBlendStateCreateInfo color_blending =
-            WVkPipelineHelper::RenderPlane_VkPipelineColorBlendStateCreateInfo(
+            WVkPipelineUtils::RenderPlane_VkPipelineColorBlendStateCreateInfo(
                 color_blend_attachment
                 );
 
         std::vector<VkDynamicState> dynamic_states;
         
         VkPipelineDynamicStateCreateInfo dynamic_state =
-            WVkPipelineHelper::RenderPlane_VkPipelineDynamicStateCreateInfo(
+            WVkPipelineUtils::RenderPlane_VkPipelineDynamicStateCreateInfo(
                 dynamic_states
                 );
 
-        pipeline_layout_ = WVkPipelineHelper::RenderPlane_VkPipelineLayout(
+        pipeline_layout_ = WVkPipelineUtils::RenderPlane_VkPipelineLayout(
             device_,
             descset_layout_
             );
 
         VkGraphicsPipelineCreateInfo graphics_pipeline_info =
-            WVkPipelineHelper::RenderPlane_VkGraphicsPipelineCreateInfo(
+            WVkPipelineUtils::RenderPlane_VkGraphicsPipelineCreateInfo(
                 static_cast<std::uint32_t>(shader_stages.size()),
                 shader_stages.data(),
                 &vertex_input_info,
@@ -266,7 +266,7 @@ private:
 
         VkFormat color_format = WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT;
 
-        pipeline_ = WVkPipelineHelper::RenderPlane_VkPipeline(
+        pipeline_ = WVkPipelineUtils::RenderPlane_VkPipeline(
             &color_format,
             1,
             graphics_pipeline_info,

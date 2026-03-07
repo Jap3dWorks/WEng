@@ -5,7 +5,7 @@
 #include "WVulkan/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
-namespace WVkPipelineHelper {
+namespace WVkPipelineUtils {
     /**
      * helper function to config VkPipelineShaderStageCreateInfo.
      */

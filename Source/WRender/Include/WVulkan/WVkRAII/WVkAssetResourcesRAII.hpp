@@ -13,7 +13,7 @@
 /**
  * @brief Manage the lifetime of asset render resources like geometries or textures.
  */
-class WRENDER_API WVkAssetResources {
+class WRENDER_API WVkAssetResourcesRAII {
 private:
 
 using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId>;
@@ -22,24 +22,24 @@ using WVkAssetDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId>;
 
 public:
 
-    WVkAssetResources();
+    WVkAssetResourcesRAII();
 
-    WVkAssetResources(
+    WVkAssetResourcesRAII(
         const VkDevice & in_device_info,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,
         const VkCommandPool & in_command_pool_info
         );
 
-    virtual ~WVkAssetResources();
+    virtual ~WVkAssetResourcesRAII();
 
-    WVkAssetResources(const WVkAssetResources & other) = delete;
+    WVkAssetResourcesRAII(const WVkAssetResourcesRAII & other) = delete;
 
-    WVkAssetResources(WVkAssetResources && other);
+    WVkAssetResourcesRAII(WVkAssetResourcesRAII && other);
 
-    WVkAssetResources & operator=(const WVkAssetResources & other) = delete;
+    WVkAssetResourcesRAII & operator=(const WVkAssetResourcesRAII & other) = delete;
 
-    WVkAssetResources & operator=(WVkAssetResources && other);
+    WVkAssetResourcesRAII & operator=(WVkAssetResourcesRAII && other);
 
     // Texture
 

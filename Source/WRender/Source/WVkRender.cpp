@@ -17,11 +17,11 @@
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVkRenderCommandPool.hpp"
+#include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkGBuffersPipelines.hpp"
-#include "WVulkan/WVkAssetResources.hpp"
+#include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderUtils.hpp"
@@ -156,7 +156,7 @@ void WVkRender::Initialize()
 
     // Create Render Command Pool
 
-    render_command_pool_ = WVkRenderCommandPool( 
+    render_command_pool_ = WVkRenderCommandPoolRAII( 
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Surface()
@@ -198,7 +198,7 @@ void WVkRender::Initialize()
         swapchain_.Format()
         );
 
-    pipeline_resources_ = WVkPipelineResources(
+    pipeline_resources_ = WVkPipelineResourcesRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
@@ -211,7 +211,6 @@ void WVkRender::Initialize()
 
     sync_semaphores_ = WVkRenderUtils::CreateSyncSemaphore<SyncSemaphores>(
         swapchain_.Images().size(),
-        // swap_chain_info_.images.size(),
         device_.Device()
         );
 
@@ -219,7 +218,7 @@ void WVkRender::Initialize()
         device_.Device()
         );
 
-    render_resources_ = WVkAssetResources(
+    render_resources_ = WVkAssetResourcesRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
@@ -333,31 +332,31 @@ void WVkRender::Draw()
     // Begin command buffer
 
     WVkRenderUtils::BeginRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_]
+        render_command_buffer_[frame_index_]
         );
 
     RecordGBuffersRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
+        render_command_buffer_[frame_index_],
         frame_index_);
 
     RecordOffscreenRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
+        render_command_buffer_[frame_index_],
         frame_index_);
 
     RecordPostprocessRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
+        render_command_buffer_[frame_index_],
         frame_index_,
         image_index
         );
 
     RecordTonemappingRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
+        render_command_buffer_[frame_index_],
         frame_index_,
         image_index
         );
 
     RecordSwapChainRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_],
+        render_command_buffer_[frame_index_],
         frame_index_,
         image_index
         );
@@ -365,7 +364,7 @@ void WVkRender::Draw()
     // End Command buffer
 
     WVkRenderUtils::EndRenderCommandBuffer(
-        render_command_buffer_.command_buffers[frame_index_]
+        render_command_buffer_[frame_index_]
         );
 
     VkSubmitInfo submit_info = WVulkan::VkStructs::CreateVkSubmitInfo();
@@ -380,7 +379,7 @@ void WVkRender::Draw()
 
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers =
-        &render_command_buffer_.command_buffers[frame_index_];
+        &render_command_buffer_[frame_index_];
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores =
@@ -812,7 +811,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         const WVkRenderPipelineInfo & render_pipeline =
             gbuffers_pipelines_.Pipeline(pipeline_id);
 
-        vkCmdBindPipeline(render_command_buffer_.command_buffers[in_frame_index],
+        vkCmdBindPipeline(render_command_buffer_[in_frame_index],
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           render_pipeline.pipeline);
 

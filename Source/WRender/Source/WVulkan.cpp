@@ -428,42 +428,42 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::UpdateDescriptorSets(
-    const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
-    const WVkDeviceInfo & in_device_info
-    )
-{
-    vkUpdateDescriptorSets(
-        in_device_info.vk_device,
-        static_cast<std::uint32_t>(in_write_descriptor_sets.size()),
-        in_write_descriptor_sets.data(),
-        0,
-        nullptr
-        );
-}
+// void WVulkan::UpdateDescriptorSets(
+//     const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
+//     const WVkDeviceInfo & in_device_info
+//     )
+// {
+//     vkUpdateDescriptorSets(
+//         in_device_info.vk_device,
+//         static_cast<std::uint32_t>(in_write_descriptor_sets.size()),
+//         in_write_descriptor_sets.data(),
+//         0,
+//         nullptr
+//         );
+// }
 
-void WVulkan::Create(
-    WVkCommandBufferInfo & out_command_buffer_info,
-    const WVkDeviceInfo & device,
-    const WVkCommandPoolInfo & command_pool_info
-    )
-{
-    VkCommandBufferAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info.commandPool = command_pool_info.vk_command_pool;
-    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandBufferCount = static_cast<uint32_t>(
-        out_command_buffer_info.command_buffers.size()
-        );
+// void WVulkan::Create(
+//     WVkCommandBufferInfo & out_command_buffer_info,
+//     const WVkDeviceInfo & device,
+//     const WVkCommandPoolInfo & command_pool_info
+//     )
+// {
+//     VkCommandBufferAllocateInfo alloc_info{};
+//     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+//     alloc_info.commandPool = command_pool_info.vk_command_pool;
+//     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+//     alloc_info.commandBufferCount = static_cast<uint32_t>(
+//         out_command_buffer_info.command_buffers.size()
+//         );
 
-    if (vkAllocateCommandBuffers(
-            device.vk_device,
-            &alloc_info,
-            out_command_buffer_info.command_buffers.data()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate command buffers!");
-    }
-}
+//     if (vkAllocateCommandBuffers(
+//             device.vk_device,
+//             &alloc_info,
+//             out_command_buffer_info.command_buffers.data()) != VK_SUCCESS)
+//     {
+//         throw std::runtime_error("Failed to allocate command buffers!");
+//     }
+// }
 
 // Destroy functions
 // -----------------
