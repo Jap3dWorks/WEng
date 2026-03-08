@@ -20,9 +20,9 @@ struct WEngineCycleStruct {
     std::uint32_t fps{60};
 };
 
+// TODO Move window related objets into a WDesktop/WApplication or WRender Module.
 struct WWindowStruct
 {
-
     std::string title {"WEngine"};
     uint32_t width {800};
     uint32_t height {600};
@@ -31,7 +31,6 @@ struct WWindowStruct
     void * user_pointer {nullptr};
 
     GLFWwindow * window {nullptr};
-
 };
 
 enum class EInputKey : std::uint8_t{

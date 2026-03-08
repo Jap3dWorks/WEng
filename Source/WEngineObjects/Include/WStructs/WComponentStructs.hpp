@@ -33,6 +33,7 @@ struct WRenderPipelineAssignmentStruct {
 
 using WRenderPipelineAssignments = std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS>;
 
+
 // struct WRenderPipelineAssignmentsStruct {
 //     // postprocess pipelines
 //     std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS> assignments{};
