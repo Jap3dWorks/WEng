@@ -1,10 +1,10 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
-#include "WVulkan/WVkPostprocessPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
-#include "WVulkan/WVkSwapChainPipeline.hpp"
-#include "WVulkan/WVkTonemappingPipeline.hpp"
+#include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #endif
 
 #include <GLFW/glfw3.h>
@@ -175,21 +175,21 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
 
-    ppcss_pipelines_ = WVkPostprocessPipelines(
+    ppcss_pipelines_ = WVkPostprocessPipelinesRAII(
         device_.Device(),
         device_.PhysicalDevice()
         );
 
     WFLOG("[DEBUG] Initialize tonemapping pipeline");
 
-    tonemapping_pipeline_ = WVkTonemappingPipeline(
+    tonemapping_pipeline_ = WVkTonemappingPipelineRAII(
         device_.Device(),
         swapchain_.Format()
         );
     
     WFLOG("[DEBUG] Initialize swap chain pipeline");
 
-    swap_chain_pipeline_ = WVkSwapChainPipeline(
+    swap_chain_pipeline_ = WVkSwapchainPipelineRAII(
         device_.Device(),
         swapchain_.Format()
         );

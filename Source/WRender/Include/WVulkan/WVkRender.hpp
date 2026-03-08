@@ -10,13 +10,13 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkPipelineResourcesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
-#include "WVulkan/WVkPostprocessPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
-#include "WVulkan/WVkTonemappingPipeline.hpp"
+#include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
-#include "WVkSwapChainPipeline.hpp"
+#include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
 
 #include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
 #include "WVulkan/WVkRAII/WVkInstanceRAII.hpp"
@@ -182,7 +182,7 @@ private:
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};
     std::array<WVkTonemappingRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_rtargets_{};
 
-    WVkSwapChainPipeline<> swap_chain_pipeline_{};
+    WVkSwapchainPipelineRAII<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 
     WVkRenderCommandPoolRAII render_command_pool_{};
@@ -192,8 +192,8 @@ private:
 
     WVkGBuffersPipelinesRAII gbuffers_pipelines_{};
     WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
-    WVkPostprocessPipelines ppcss_pipelines_{};
-    WVkTonemappingPipeline<> tonemapping_pipeline_{};
+    WVkPostprocessPipelinesRAII ppcss_pipelines_{};
+    WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
     struct PipelinesTrack {
         std::unordered_map<WAssetId, EPipelineType> pipeline_pipetype{};

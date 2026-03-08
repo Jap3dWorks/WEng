@@ -1,49 +1,59 @@
 #pragma once
 
+#include "WUtils/WStringUtils.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
-#include "WShaderUtils.hpp"
 #include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVulkanUtils.hpp"
 #include "WVulkan/WVkPipelineUtils.hpp"
+#include "WShaderUtils.hpp"
 
-#include <cstdint>
-#include <stdexcept>
+#include <glm/fwd.hpp>
+#include <string_view>
 #include <vulkan/vulkan_core.h>
+#include <cstdint>
+#include <array>
+#include <glm/glm.hpp>
 
-// TODO: move to RAII
+#include <stdexcept>
+
+// TODO move to RAII
+
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkTonemappingPipeline {
-
+class WVkSwapchainPipelineRAII {
+    
 public:
-
-    WVkTonemappingPipeline() = default;
-
-    WVkTonemappingPipeline(
+    
+    WVkSwapchainPipelineRAII() noexcept = default;
+    
+    WVkSwapchainPipelineRAII(
         const VkDevice & in_device,
-        const VkFormat & in_color_format) :
-        device_(in_device)
+        const VkFormat & in_format
+        ) : device_(in_device)
         {
             InitializeDescSetLayout();
+
+            InitializeRenderPipeline(in_format);
+
             InitializeDescriptorPool();
-            InitializePipeline(in_color_format);
         }
 
-    virtual ~WVkTonemappingPipeline() {
+    virtual ~WVkSwapchainPipelineRAII() noexcept {
         Destroy();
     }
 
-    WVkTonemappingPipeline(const WVkTonemappingPipeline &) = delete;
+    WVkSwapchainPipelineRAII(const WVkSwapchainPipelineRAII & other) = delete;
+    WVkSwapchainPipelineRAII & operator=(const WVkSwapchainPipelineRAII & other) = delete;
 
-    WVkTonemappingPipeline(WVkTonemappingPipeline && other) noexcept :
+    WVkSwapchainPipelineRAII(WVkSwapchainPipelineRAII && other) noexcept :
         device_(std::move(other.device_)),
         pipeline_layout_(std::move(other.pipeline_layout_)),
         pipeline_(std::move(other.pipeline_)),
         descset_layout_(std::move(other.descset_layout_)),
         descriptor_pool_(std::move(other.descriptor_pool_))
         {
-            other.device_ = VK_NULL_HANDLE;
-
+            other.device_ = {};
+            
             other.pipeline_layout_ = VK_NULL_HANDLE;
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
@@ -53,39 +63,41 @@ public:
             }
         }
 
-    WVkTonemappingPipeline & operator=(const WVkTonemappingPipeline & other) = delete;
-
-    WVkTonemappingPipeline & operator=(WVkTonemappingPipeline && other) noexcept {
+    WVkSwapchainPipelineRAII & operator=(WVkSwapchainPipelineRAII && other) noexcept {
         if (this != &other) {
             Destroy();
-            
-            pipeline_ = std::move(other.pipeline_);
-            pipeline_layout_ = std::move(other.pipeline_layout_);
-            descset_layout_ = std::move(other.descset_layout_);
-            descriptor_pool_ = std::move(other.descriptor_pool_);
+
             device_ = std::move(other.device_);
+            descset_layout_ = std::move(other.descset_layout_);
+            pipeline_layout_ = std::move(other.pipeline_layout_);
+            pipeline_ = std::move(other.pipeline_);
 
-            other.pipeline_ = VK_NULL_HANDLE;
-            other.pipeline_layout_ = VK_NULL_HANDLE;
-            other.descset_layout_ = VK_NULL_HANDLE;
+            descriptor_pool_ = std::move(other.descriptor_pool_);
+
             other.device_ = VK_NULL_HANDLE;
-        }
+            other.descset_layout_ = VK_NULL_HANDLE;
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
 
+            for(std::uint32_t i=0; i<FramesInFlight; i++) {
+                other.descriptor_pool_[i] = VK_NULL_HANDLE;
+            }
+        }
         return *this;
     }
 
     // void Initialize(const VkDevice & in_device,
-    //                 const VkFormat & in_color_format) {
-    //     // TODO constructor
+    //                 VkFormat in_swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
+
     //     assert(device_ == VK_NULL_HANDLE);
 
     //     device_ = in_device;
 
     //     InitializeDescSetLayout();
 
-    //     InitializeDescriptorPool();
+    //     InitializeRenderPipeline(in_swap_chain_format);
 
-    //     InitializePipeline(in_color_format);
+    //     InitializeDescriptorPool();
 
     // }
 
@@ -112,11 +124,10 @@ public:
 private:
 
     void Destroy() {
-        // TODO private and use destructor
         if (device_ != VK_NULL_HANDLE) {
 
             WVulkan::DestroyDescPools(descriptor_pool_, device_);
-
+        
             if (pipeline_) {
                 vkDestroyPipeline(device_,
                                   pipeline_,
@@ -130,10 +141,11 @@ private:
                 vkDestroyPipelineLayout(device_,
                                         pipeline_layout_,
                                         nullptr);
-            
+
                 pipeline_layout_ = VK_NULL_HANDLE;
             }
 
+        
             if (descset_layout_) {
                 vkDestroyDescriptorSetLayout(device_,
                                              descset_layout_,
@@ -147,8 +159,7 @@ private:
     }
 
     void InitializeDescSetLayout() {
-
-        // input render image descriptor
+        
         VkDescriptorSetLayoutBinding sampler_binding{};
         sampler_binding.binding = 0;
         sampler_binding.descriptorCount = 1;
@@ -167,35 +178,11 @@ private:
                                         &descset_layout_) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create Descriptor Set Layout!");
         }
+
     }
 
-    void InitializeDescriptorPool() {
-        std::array<VkDescriptorPoolSize, 1> pool_sizes;
-        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        pool_sizes[0].descriptorCount = 1;
-
-        VkDescriptorPoolCreateInfo pool_info{};
-        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.poolSizeCount = static_cast<std::uint32_t>(
-            pool_sizes.size()
-            );
-        pool_info.pPoolSizes = pool_sizes.data();
-        pool_info.maxSets = 1;
-
-        for (std::uint32_t i=0; i<FramesInFlight; i++) {
-            if (vkCreateDescriptorPool(
-                    device_,
-                    &pool_info,
-                    nullptr,
-                    &descriptor_pool_[i]
-                    )) {
-                throw std::runtime_error("Failed to create descriptor pool!");
-            }
-        }
-    }
-
-    void InitializePipeline(VkFormat color_format) {
-
+    void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
+        // shader modules
         std::vector<char> shadercode = WShaderUtils::ReadShader(
             WStringUtils::SystemPath(std::string(shader_path))
             );
@@ -212,7 +199,7 @@ private:
             shader_module
             );
 
-        std::array<VkVertexInputAttributeDescription,2> attr_desc;
+        std::array<VkVertexInputAttributeDescription, 2> attr_desc;
         WVkPipelineUtils::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
 
         VkVertexInputBindingDescription binding_desc =
@@ -236,7 +223,7 @@ private:
 
         VkPipelineMultisampleStateCreateInfo multisampling =
             WVkPipelineUtils::RenderPlane_VkPipelineMultisampleStateCreateInfo();
-
+        
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
             WVkPipelineUtils::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
 
@@ -249,7 +236,6 @@ private:
                 );
 
         std::vector<VkDynamicState> dynamic_states;
-
         VkPipelineDynamicStateCreateInfo dynamic_state =
             WVkPipelineUtils::RenderPlane_VkPipelineDynamicStateCreateInfo(
                 dynamic_states
@@ -273,10 +259,10 @@ private:
                 &color_blending,
                 &dynamic_state,
                 pipeline_layout_
-                );
+            );
 
         pipeline_ = WVkPipelineUtils::RenderPlane_VkPipeline(
-            &color_format,
+            &swap_chain_format,
             1,
             graphics_pipeline_info,
             device_
@@ -287,18 +273,44 @@ private:
                               nullptr);
     }
 
-private:
+    void InitializeDescriptorPool() {
+        std::array<VkDescriptorPoolSize, 2> pool_sizes;
+        // uniformbuffer?
+        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        pool_sizes[0].descriptorCount = 1;
+        pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[1].descriptorCount = 1;
 
-    VkDevice device_{};
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.poolSizeCount = static_cast<std::uint32_t>(
+            pool_sizes.size()
+            );
+        pool_info.pPoolSizes = pool_sizes.data();
+        pool_info.maxSets = 2;
+
+        for (std::uint32_t i=0; i<FramesInFlight; i++) {
+
+            if (vkCreateDescriptorPool(
+                    device_,
+                    &pool_info,
+                    nullptr,
+                    &descriptor_pool_[i]
+                    )) {
+                throw std::runtime_error("Failed to create descriptor pool!");
+            }
+        }
+    }
+
+    VkDevice device_{VK_NULL_HANDLE};
 
     VkPipeline pipeline_{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
-    
+
     VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
 
     std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
-    
-    const std::string_view shader_path{WENG_VK_TONEMAPPING_SHADER_PATH};
 
+    const std::string_view shader_path{WENG_VK_SWAPCHAIN_SHADER_PATH};
 
 };

@@ -1,4 +1,4 @@
-#include "WVulkan/WVkPostprocessPipelines.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
 #include "WVulkan/WVulkan.hpp"
@@ -7,7 +7,7 @@
 #include <vulkan/vulkan_core.h>
 
 
-WVkPostprocessPipelines::WVkPostprocessPipelines(
+WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device
     ) : Super(in_device, in_physical_device)
@@ -15,13 +15,13 @@ WVkPostprocessPipelines::WVkPostprocessPipelines(
     Initialize_GlobalResources();
 }
 
-WVkPostprocessPipelines::~WVkPostprocessPipelines() {
+WVkPostprocessPipelinesRAII::~WVkPostprocessPipelinesRAII() {
     Destroy();
     Super::~Super();
 }
 
-WVkPostprocessPipelines::WVkPostprocessPipelines(
-    WVkPostprocessPipelines && other
+WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
+    WVkPostprocessPipelinesRAII && other
     ) noexcept  :
     Super(std::move(other)),
     global_resources_(std::move(other.global_resources_)),
@@ -30,8 +30,8 @@ WVkPostprocessPipelines::WVkPostprocessPipelines(
     other.global_resources_ = {};
 }
 
-WVkPostprocessPipelines & WVkPostprocessPipelines::operator=(
-    WVkPostprocessPipelines && other
+WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
+    WVkPostprocessPipelinesRAII && other
     ) noexcept {
     if (this != &other) {
         Destroy();
@@ -48,7 +48,7 @@ WVkPostprocessPipelines & WVkPostprocessPipelines::operator=(
 }
 
 
-void WVkPostprocessPipelines::CreatePipeline(
+void WVkPostprocessPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
     const WRenderPipelineStruct & in_pipeline_struct
     ) {
@@ -95,7 +95,7 @@ void WVkPostprocessPipelines::CreatePipeline(
     pipeline_bindings_[in_id] = {};
 }
 
-WEntityComponentId WVkPostprocessPipelines::CreateBinding(
+WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
     const WEntityComponentId & in_binding_id,
     const WAssetId & in_pipeline_id,
     const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
@@ -120,7 +120,7 @@ WEntityComponentId WVkPostprocessPipelines::CreateBinding(
     return in_binding_id;
 }
 
-void WVkPostprocessPipelines::Destroy() {
+void WVkPostprocessPipelinesRAII::Destroy() {
     if (global_resources_.descset_layout_info.descset_layout !=
         VK_NULL_HANDLE) {
 
@@ -130,7 +130,7 @@ void WVkPostprocessPipelines::Destroy() {
 
 }
 
-void WVkPostprocessPipelines::CalcBindingOrder() {
+void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
     binding_order_.clear();
     binding_order_.resize(pipelines_db_.bindings.Count());
 
@@ -143,7 +143,7 @@ void WVkPostprocessPipelines::CalcBindingOrder() {
     std::sort(binding_order_.begin(), binding_order_.end());
 }
 
-void WVkPostprocessPipelines::Initialize_GlobalResources() {
+void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
     auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
     auto plane_index = WVulkanUtils::RenderPlaneIndexes();
 
@@ -167,7 +167,7 @@ void WVkPostprocessPipelines::Initialize_GlobalResources() {
 
 }
 
-void WVkPostprocessPipelines::Destroy_GlobalResources() {
+void WVkPostprocessPipelinesRAII::Destroy_GlobalResources() {
 
     WVulkan::Destroy(
         global_resources_.descset_layout_info,

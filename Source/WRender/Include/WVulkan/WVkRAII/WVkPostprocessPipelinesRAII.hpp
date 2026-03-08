@@ -7,7 +7,7 @@
 #include "WVulkan/WVkPipelinesBase.hpp"
 #include <vulkan/vulkan_core.h>
 
-class WVkPostprocessPipelines :
+class WVkPostprocessPipelinesRAII :
     public WVkPipelinesBase<WAssetId,
                             WEntityComponentId,
                             WENG_MAX_FRAMES_IN_FLIGHT>
@@ -22,19 +22,19 @@ public:
 
 public:
 
-    WVkPostprocessPipelines()=default;
+    WVkPostprocessPipelinesRAII()=default;
 
-    WVkPostprocessPipelines(const VkDevice & in_device,
+    WVkPostprocessPipelinesRAII(const VkDevice & in_device,
                             const VkPhysicalDevice & in_physical_device);
 
-    virtual ~WVkPostprocessPipelines() override;
+    virtual ~WVkPostprocessPipelinesRAII() override;
 
-    WVkPostprocessPipelines(const WVkPostprocessPipelines &)=delete;
-    WVkPostprocessPipelines & operator=(const WVkPostprocessPipelines &)=delete;
+    WVkPostprocessPipelinesRAII(const WVkPostprocessPipelinesRAII &)=delete;
+    WVkPostprocessPipelinesRAII & operator=(const WVkPostprocessPipelinesRAII &)=delete;
 
-    WVkPostprocessPipelines(WVkPostprocessPipelines && other) noexcept;
+    WVkPostprocessPipelinesRAII(WVkPostprocessPipelinesRAII && other) noexcept;
 
-    WVkPostprocessPipelines & operator=(WVkPostprocessPipelines && other) noexcept;
+    WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
     void CreatePipeline(const WAssetId & in_id,
                         const WRenderPipelineStruct & in_pipeline_struct);
