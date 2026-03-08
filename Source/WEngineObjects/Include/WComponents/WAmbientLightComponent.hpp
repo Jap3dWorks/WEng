@@ -5,11 +5,11 @@
 
 #include <glm/glm.hpp>
 
-#include "WPointLightComponent.WEngine.hpp"
+#include "WAmbientLightComponent.WEngine.hpp"
 
-class WENGINEOBJECTS_API WPointLightComponent : public WComponent {
+class WENGINEOBJECTS_API WAmbientLightComponent : public WComponent {
 
-    WOBJECT_BODY(WPointLightComponent)
+    WOBJECT_BODY(WAmbientLightComponent);
 
 public:
 
@@ -37,18 +37,12 @@ public:
         color_ = in_color;
     }
 
-    float Radius() const noexcept {
-        return radius_;
-    }
-
-    void Radius(const float & in_radius) noexcept {
-        radius_ = in_radius;
-    }
 
 private:
 
     bool active_{true};
     float intensity_{1.f};
-    glm::vec4 color_{0.5, 0.5, 0.5, 1.f};
-    float radius_{10.f};
+    glm::vec4 color_{0.5,0.5,0.5,1.f};
+        
 };
+
