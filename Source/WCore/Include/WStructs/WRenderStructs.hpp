@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#define WENG_MAX_PIPELINE_SHADERS 8
+inline constexpr std::uint8_t WENG_MAX_PIPELINE_SHADERS=8;
 
 /**
  * @brief Uniform buffer data structure.
@@ -114,11 +114,20 @@ struct WRenderPipelineStruct {
 // Pipeline Parameters Structs
 // ---------------------------
 
+/** Render Pipeline Param Ubo Struct */
 struct WRPParamUboStruct {
     std::uint16_t binding{0};
-    std::vector<char> databuffer{};
+    std::vector<char> databuffer{};  // TODO: std::span
     std::size_t offset{0};
 };
+
+// TODO : use std::spam for WRPParamUboStruct (avoiding vector storage)
+//  So storage could be either static or dynamic.
+// struct WRPParamUboStruct {
+//     std::uint16_t binding{0};              // shader parameter binding
+//     std::spam<std::uint8_t> databuffer{};
+//     std::size_t offset{0};
+// };
 
 template<typename T>
 struct TRPParamStruct {
@@ -166,3 +175,26 @@ namespace WRenderUtils {
     
 }
 
+// Lighting structs
+// ----------------
+
+struct WPointLightStruct {
+    glm::vec4 color{0.5, 0.5, 0.5, 1.f};
+    glm::vec4 position{};
+    float intensity{1.f};
+    float radius{10.f};
+    bool active{false};
+};
+
+struct WDirectionalLightStruct {
+    glm::vec4 color{0.5, 0.5, 0.5, 1.f};
+    glm::vec4 direction{0.f, 0.f, 0.f, 0.f};
+    float intensity{1.f};
+    bool active{false};
+};
+
+struct WAmbientLightStruct {
+    glm::vec4 color{0.5, 0.5, 0.5, 1.f};
+    float intensity{1.f};
+    bool active{false};
+};

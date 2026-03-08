@@ -5,6 +5,7 @@
 #include "WStructs/WRenderStructs.hpp"
 
 #include <vector>
+#include <span>
 
 class WRenderPipelineAsset;
 // class WTextureAsset;
@@ -12,8 +13,6 @@ class WRenderPipelineAsset;
 struct WTextureStruct;
 struct WMeshStruct;
 struct WTransformStruct;
-struct WCameraPropertiesStruct;
-
 
 struct GLFWwindow;
 
@@ -91,9 +90,17 @@ public:
         const WUBOCameraStruct & in_ubo
         )=0;
 
+    /**
+     * @brief Updates only for current frame in flight.
+     *        Storage inside ubo_write will be consumed in the current call.
+     */
     virtual void UpdateParameterDynamic(const WEntityComponentId & in_id,
                                         const WRPParamUboStruct & ubo_write)=0;
 
+    /**
+     * @brief Updates for all frames in flight.
+     *        Storage inside ubo_write will be in the current call.
+     */
     virtual void UpdateParameterStatic(const WEntityComponentId & in_id,
                                        const WRPParamUboStruct & ubo_write)=0;
 
@@ -106,7 +113,7 @@ public:
     // ------
 
     /**
-     * Returns current render window.
+     * @brief Returns current render window.
      */
     virtual void Window(GLFWwindow * in_window)=0;
 
@@ -116,5 +123,54 @@ public:
     virtual WRenderSize RenderSize() const =0;
     virtual void RenderSize(const WRenderSize & in_render_size)=0;
     virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
+
+    // Lighting
+    // --------
+    /**
+     * @brief Initialize point lights data.
+     *        If point lights data is already initializated removes it and
+     *        reinitializes again.
+     *        This method is more efficient to update all scene point lights in one time.
+     */
+    virtual void InitializePointLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_point_lights_structs
+        )=0;
+
+    /**
+     * @brief Updates each point light inside in_ids list.
+     *        This method can update selective lights in the render data.
+     *        Each point light can be located by its WEntityComponentId.
+     */
+    virtual void UpdatePointLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_point_lights_structs
+        )=0;
+
+    /**
+     * @brief Initialize directional lights data.
+     *        Same functionality than InitializePointLights.
+     */
+    virtual void InitializaDirectionalLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_directional_lights_structs
+        )=0;
+
+    /**
+     * @brief Updates each directional light inside in_ids list.
+     *        Same functionality than UpdatePointLights
+     */
+    virtual void UpdateDirectionalLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_directional_light_structs
+        )=0;
+
+    /**
+     * @brief Updates ambient light.
+     *        Only one ambient light is suported.
+     */
+    virtual void UpdateAmbientLight(
+        const WAmbientLightStruct & in_ambient_light
+        )=0;
 
 };

@@ -92,11 +92,17 @@ public:
         const WUBOCameraStruct & in_ubo
         ) override;
 
+    /**
+     * @brief Updates only for current frame in flight
+     */
     void UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
         const WRPParamUboStruct & ubo_write
         ) override;
 
+    /**
+     * @brief Updates for all frames in flight
+     */
     void UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
         const WRPParamUboStruct & ubo_write
@@ -121,9 +127,6 @@ public:
     WNODISCARD VkDevice Device() const noexcept
     { return device_.Device(); }
 
-    // WNODISCARD const WVkSwapChainInfo & SwapChainInfo() const noexcept
-    // { return swap_chain_info_; }
-
     WNODISCARD constexpr size_t FramesInFlight() const noexcept
     { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
@@ -131,6 +134,33 @@ public:
     { return render_command_pool_; }
 
     void ClearPipelines() override;
+
+    // Lights
+    // ------
+
+    void InitializePointLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_point_lights_structs
+        ) override { /* TODO .cpp */ }
+
+    void UpdatePointLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_point_lights_structs
+        ) override { /* TODO .cpp */ }
+
+    void InitializaDirectionalLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_directional_lights_structs
+        ) override { /* TODO .cpp */ }
+
+    void UpdateDirectionalLights(
+        std::span<WEntityComponentId> in_ids,
+        std::span<WPointLightStruct> in_directional_light_structs
+        ) override { /* TODO .cpp */ }
+
+    void UpdateAmbientLight(
+        const WAmbientLightStruct & in_ambient_light
+        ) override { /* TODO .cpp */ }
 
 private:
 

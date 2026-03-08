@@ -37,7 +37,6 @@ public:
         color_ = in_color;
     }
 
-
 private:
 
     bool active_{true};
