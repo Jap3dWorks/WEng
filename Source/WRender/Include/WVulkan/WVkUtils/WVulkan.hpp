@@ -18,7 +18,7 @@ namespace WVulkan
 {
     // TODO this file should be more WENG agnostic
     //  try to use only vulkan types.
-    //  No WENG dependent functions move to WVulkanUtils.
+    //  No WENG dependent functions move to WVkWengUtils.
 
     // WVulkan Create Structs
     // ---------------
@@ -286,15 +286,6 @@ namespace WVulkan
         VkDescriptorImageInfo image_info{};
     };
 
-    // /**
-    //  * @brief Create a WCommandBufferInfo.
-    //  */
-    // void Create(
-    //     WVkCommandBufferInfo & out_command_buffer_info,
-    //     const WVkDeviceInfo & device,
-    //     const WVkCommandPoolInfo & command_pool_info
-    //     );
-
     void CreateImage(
         VkImage& out_image,
         VkDeviceMemory& out_image_memory,
@@ -353,12 +344,6 @@ namespace WVulkan
         WVkDescriptorPoolInfo & out_descriptor_pool_info,
         const VkDevice & in_device
         );
-
-    // // TODO REMOVE
-    // void Destroy(
-    //     WVkCommandPoolInfo & out_command_pool,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
 
     void Destroy(
         WVkTextureInfo & out_texture_info,
@@ -435,25 +420,6 @@ namespace WVulkan
         out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
-    // void UpdateDescriptorSets(
-    //     const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
-    //     const WVkDeviceInfo & in_device_info
-    //     );
-
-    // template<size_t N>
-    // void UpdateDescriptorSets(
-    //     const std::array<VkWriteDescriptorSet, N> & in_write_descriptor_sets,
-    //     const WVkDeviceInfo & in_device_info
-    //     ) {
-    //     vkUpdateDescriptorSets(
-    //         in_device_info.vk_device,
-    //         static_cast<uint32_t>(N),
-    //         in_write_descriptor_sets.data(),
-    //         0,
-    //         nullptr
-    //         );
-    // }
-
     inline bool UpdateUBO(
         WVkUBOInfo & in_ubo_info,
         const void * in_data,
@@ -497,7 +463,7 @@ namespace WVulkan
         return true;
     }
 
-    // Helper Functions TODO: move to WVulkanUtils
+    // Helper Functions TODO: move to WVkWengUtils.
     // ----------------
 
     /**

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 
 #include <stdatomic.h>
 #include <vulkan/vulkan_core.h>

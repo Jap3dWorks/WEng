@@ -4,8 +4,8 @@
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
 #include "WStructs/WGeometryStructs.hpp"
 #include "WShaderUtils.hpp"
 #include <stdexcept>
@@ -120,7 +120,7 @@ namespace WVkGBuffersPipelinesUtils {
         WVkShaderStageInfo wvertex_stage_info;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     
-        std::vector<VkShaderModule> shader_modules = WVulkanUtils::CreateShaderModules(
+        std::vector<VkShaderModule> shader_modules = WVkWengUtils::CreateShaderModules(
             wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
             );
 

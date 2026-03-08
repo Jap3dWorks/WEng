@@ -2,7 +2,7 @@
 
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace WVkPipelineUtils {

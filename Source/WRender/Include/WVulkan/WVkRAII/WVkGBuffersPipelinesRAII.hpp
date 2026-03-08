@@ -8,7 +8,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include <vector>
-#include "WVulkan/WVkPipelinesBase.hpp"
+#include "WVulkan/WVkUtils/WVkPipelinesBase.hpp"
 
 /**
  * @brief Graphics Pipelines outputs the GBuffers.

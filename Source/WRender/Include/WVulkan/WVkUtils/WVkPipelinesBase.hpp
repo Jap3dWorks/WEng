@@ -3,8 +3,8 @@
 #include "WCore/WCore.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVkPipelinesDb.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVkPipelinesDb.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 #include <cstdint>

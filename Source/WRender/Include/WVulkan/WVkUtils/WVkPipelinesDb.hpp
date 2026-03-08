@@ -6,7 +6,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WUtils/WStringUtils.hpp"
 

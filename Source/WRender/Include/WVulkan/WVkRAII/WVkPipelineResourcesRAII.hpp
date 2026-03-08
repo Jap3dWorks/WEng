@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
@@ -85,7 +85,7 @@ private:
                               in_graphics_queue,
                               in_command_pool);
 
-        sampler_ = WVulkanUtils::CreateRenderPlaneSampler(device_);
+        sampler_ = WVkWengUtils::CreateRenderPlaneSampler(device_);
     }
 
     void Destroy() {
@@ -104,8 +104,8 @@ private:
                                const VkPhysicalDevice & in_physical_device,
                                const VkQueue & in_graphics_queue,
                                const VkCommandPool & in_command_pool) {
-        auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
-        auto plane_index = WVulkanUtils::RenderPlaneIndexes();
+        auto plane_vertex = WVkWengUtils::RenderPlaneVertex();
+        auto plane_index = WVkWengUtils::RenderPlaneIndexes();
 
         WVulkan::CreateMeshBuffers(
             render_plane_,

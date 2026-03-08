@@ -3,9 +3,9 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WShaderUtils.hpp"
-#include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
-#include "WVulkan/WVkPipelineUtils.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVkUtils/WVkPipelineUtils.hpp"
 
 #include <cstdint>
 #include <stdexcept>
@@ -199,7 +199,7 @@ private:
             WStringUtils::SystemPath(std::string(shader_path))
             );
 
-        VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
+        VkShaderModule shader_module = WVkWengUtils::CreateShaderModule(
             device_,
             shadercode.data(),
             shadercode.size()

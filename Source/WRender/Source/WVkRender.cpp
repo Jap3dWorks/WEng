@@ -16,7 +16,7 @@
 #include "WRenderUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -24,7 +24,7 @@
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
-#include "WVulkan/WVkRenderUtils.hpp"
+#include "WVulkan/WVkUtils/WVkRenderUtils.hpp"
 #include "WLog.hpp"
 
 #include <cstdint>

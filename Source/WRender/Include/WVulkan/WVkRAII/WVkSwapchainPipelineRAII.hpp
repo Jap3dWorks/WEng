@@ -2,10 +2,10 @@
 
 #include "WUtils/WStringUtils.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
-#include "WVulkan/WVkPipelineUtils.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVkUtils/WVkPipelineUtils.hpp"
 #include "WShaderUtils.hpp"
 
 #include <glm/fwd.hpp>
@@ -187,7 +187,7 @@ private:
             WStringUtils::SystemPath(std::string(shader_path))
             );
 
-        VkShaderModule shader_module = WVulkanUtils::CreateShaderModule(
+        VkShaderModule shader_module = WVkWengUtils::CreateShaderModule(
             device_,
             shadercode.data(),
             shadercode.size()

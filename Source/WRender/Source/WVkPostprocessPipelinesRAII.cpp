@@ -1,8 +1,8 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
-#include "WVulkan/WVulkan.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
@@ -63,7 +63,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
         in_id,
         device_,
         in_pipeline_struct.params_descriptor,
-        WVulkanUtils::UpdateDescriptorSetLayout
+        WVkWengUtils::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(
@@ -144,8 +144,8 @@ void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
 }
 
 void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
-    auto plane_vertex = WVulkanUtils::RenderPlaneVertex();
-    auto plane_index = WVulkanUtils::RenderPlaneIndexes();
+    auto plane_vertex = WVkWengUtils::RenderPlaneVertex();
+    auto plane_index = WVkWengUtils::RenderPlaneIndexes();
 
     global_resources_.descset_layout_info = {};
     WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(

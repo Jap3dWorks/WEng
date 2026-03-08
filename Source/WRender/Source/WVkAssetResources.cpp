@@ -1,7 +1,7 @@
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 
 WVkAssetResourcesRAII::WVkAssetResourcesRAII()=default;
 

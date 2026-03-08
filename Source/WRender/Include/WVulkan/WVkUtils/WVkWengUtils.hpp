@@ -2,7 +2,7 @@
 
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace WVulkanUtils {
+namespace WVkWengUtils {
 
     // TODO This file should contain more WEng based vulkan functions and procedures
 
@@ -152,7 +152,7 @@ namespace WVulkanUtils {
                 vertex_shader_stage = &stage_infos[i];
             }
 
-            shader_modules[i] = WVulkanUtils::CreateShaderModule(in_device,
+            shader_modules[i] = WVkWengUtils::CreateShaderModule(in_device,
                                                                  stage_infos[i].code.data(),
                                                                  stage_infos[i].code.size());
 

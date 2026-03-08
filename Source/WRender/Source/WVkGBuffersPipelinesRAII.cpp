@@ -3,11 +3,11 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
 #include "WVkGBuffersPipelinesUtils.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -72,7 +72,7 @@ void WVkGBuffersPipelinesRAII::CreatePipeline(
         in_id,
         Device(),
         in_pipeline_struct.params_descriptor,
-        WVulkanUtils::UpdateDescriptorSetLayout
+        WVkWengUtils::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(

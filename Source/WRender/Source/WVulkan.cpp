@@ -1,6 +1,6 @@
-#include "WVulkan/WVulkan.hpp"
+#include "WVulkan/WVkUtils/WVulkan.hpp"
 #include "WLog.hpp"
-#include "WVulkan/WVulkanUtils.hpp"
+#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
 #include "WShaderUtils.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
@@ -278,7 +278,7 @@ void WVulkan::CreateMeshBuffers(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    WVulkanUtils::CopyVkBuffer(
+    WVkWengUtils::CopyVkBuffer(
         in_device,
         in_command_pool,
         in_graphics_queue,
@@ -317,7 +317,7 @@ void WVulkan::CreateMeshBuffers(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    WVulkanUtils::CopyVkBuffer(
+    WVkWengUtils::CopyVkBuffer(
         in_device,
         in_command_pool,
         in_graphics_queue,
