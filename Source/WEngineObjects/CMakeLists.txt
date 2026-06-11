@@ -79,7 +79,7 @@ install(
 
 # Unittest
 # --------
-
+# TODO remove the ENV option.
 if (DEFINED WUNITTEST OR DEFINED ENV{WUNITTEST})
 
     message("BUILD WEngineObjects unittests.")

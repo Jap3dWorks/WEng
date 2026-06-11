@@ -1,21 +1,34 @@
+slang_DIR?=../slang/install/lib64/cmake/slang
+WENG_WLOG_ENABLE?=1
+CMAKE_C_COMPILER?=clang
+CMAKE_CXX_COMPILER?=clang++
+
 all: compile-release
 
 generate-release:
-	@cmake --preset -release
+	@cmake --preset Release \
+		-Dslang_DIR=$(realpath ${slang_DIR}) \
+		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE} \
+		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 
 generate-debug:
-	@cmake --preset debug
+	@cmake --preset Debug \
+		-DWUNITTEST=1 \
+		-Dslang_DIR=$(realpath ${slang_DIR}) \
+		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE} \
+		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 
 compile-release: generate-release
-	@cmake --build --preset release
-	@cmake --install build/release --prefix install/release -v
+	@cmake --build --preset Release 
+	@cmake --install Build/Release --prefix Install/Release -v
 
 compile-debug: generate-debug
-	@cmake --build --preset debug
-	@cmake --install build/debug --prefix install/debug -v
+	export WUNITTEST=1
+	@cmake --build --preset Debug
+	@cmake --install Build/Debug --prefix Install/Debug -v
 
 clean:
-	@rm -rf build install
+	@rm -rf Build Install
 
 help:
 

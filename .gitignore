@@ -32,3 +32,5 @@ hx.sh
 *.tmp
 *.ORIG
 .aider*
+/CMakeCache.txt
+/CMakeFiles/
