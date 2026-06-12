@@ -715,20 +715,6 @@ void WVkRender::RecreateSwapChain() {
         dimensions[1]
         );
 
-    // WVulkan::Create(
-    //     swap_chain_info_.swap_chain,
-    //     swap_chain_info_.format,
-    //     swap_chain_info_.extent,
-    //     swap_chain_info_.images,
-    //     swap_chain_info_.views,
-    //     swap_chain_info_.memory,
-    //     device_.Device(),
-    //     device_.PhysicalDevice(),
-    //     surface_.Surface(),
-    //     dimensions[0],
-    //     dimensions[1]
-    //     );
-
     WVkRenderUtils::CreateGBuffersRenderTargets(
         gbuffers_rtargets_,
         device_.Device(),

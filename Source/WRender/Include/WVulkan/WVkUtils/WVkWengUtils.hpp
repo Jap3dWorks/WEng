@@ -12,6 +12,8 @@
 #include <stdexcept>
 #include <vector>
 
+// TODO refactor namespaces weng::vk::texture weng::vk::image etc
+//  namespaces to sneaky_case
 namespace WVkWengUtils {
 
     // TODO This file should contain more WEng based vulkan functions and procedures

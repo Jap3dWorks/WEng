@@ -6,6 +6,9 @@
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
 
+/**
+ * @brief RAII class to manage the lifetime of the swapchain vulkan resources.
+ */
 class WVkSwapchainRAII {
 public:
 
@@ -120,6 +123,7 @@ public:
     }
 
     WVkSwapchainRAII(const WVkSwapchainRAII & other) = delete;
+    
     WVkSwapchainRAII & operator=(const WVkSwapchainRAII & other) = delete;
 
     WVkSwapchainRAII(WVkSwapchainRAII && other) noexcept :

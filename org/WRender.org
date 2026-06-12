@@ -8,6 +8,9 @@ If texture upload task is done in batch I can take advantatge of the DMA access.
 [[../Source/WRender/Source/WVulkan.cpp::*CreateTexture][WVulkan::CreateTexture]]
 
 
+*** BC formats (compresions) for input textures
+
+
 *** Pass Texture format as param when CreateTexture
 Current texture creation is always SRGB, but other textures could require linear interpretation.
 VK_FORMAT_R8G8B8A8_UNORM  // Roughness (R), Metalness (G), AO (B) packed

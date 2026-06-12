@@ -3,62 +3,86 @@
 #include <cstdint>
 #include <vector>
 
+/**
+ * 8 bits, significative bit to left
+ *   8765 - 4321
+ *
+ * [16bit] = 128(bit 8) (high range)
+ * IF bit 8 active THEN
+ *    [32bit]=64 (bit 7)
+ * ELSE
+ *    [SNORM]= 64 (bit 6)
+ *    [sRGB] = 32 (bit 7)
+ *
+ * [R channel]=8 (bit 4), [G channel]=4 (bit 3),
+ * [B channel]=2 (bit 2), [A channel]=1 (bit 1)
+ */
+enum class ETextureFormat : uint8_t {
 
-enum class ETextureChannels : uint8_t
-{
-    // 8 bit
-    // R=1,G=2,B=4,A=8
-    kR=1,
-    kRG=3,
-    kRGB=7,
-    kRGBA=15,
+    // 8 bit UNORM, good for linear textures like roughness, clamp range is [0,1]
+    R_UNORM=8,
+    RG_UNORM=8+4,
+    RGB_UNORM=8+4+2,
+    RGBA_UNORM=8+4+2+1,
+
+    // 8 bit SNORM, good for normal maps (color*2 - 1 tansform), clamp range is [-1,1]
+    R_SNORM=64 + 8,
+    RG_SNORM=64 + 8 + 4,
+    RGB_SNORM=64 + 8 + 4 + 2,
+    RGBA_SNORM=64 + 8 + 4 + 2 + 1,
+    
+    // 8 bit sRGB, good for albedo textures 
+    R_SRGB=32 + 8,
+    RG_SRGB=32 + 8 + 4,
+    RGB_SRGB=32 + 8 + 4 + 2,
+    RGBA_SRGB=32 + 8 + 4 + 2 + 1,
+
     // 16 bit
-    // d_16=16,
-    kR16=17,
-    kRG16=19,
-    kRGB16=23,
-    kRGBA16=31,
+    R16_SFLOAT=128 + 8,
+    RG16_SFLOAT=128 + 8 + 4,
+    RGB16_SFLOAT=128 + 8 + 4 + 2,
+    RGBA16_SFLOAT=128 + 8 + 4 + 2 + 1,
+
     // 32 bit
-    // d_32=32,
-    kR32=33,
-    kRG32=35,
-    kRGB32=39,
-    kRGBA32=47,
+    R32_SFLOAT=128 + 64 + 8,
+    RG32_SFLOAT=128 + 64 + 8 + 4,
+    RGB32_SFLOAT=128 + 64 + 8 + 4 + 2,
+    RGBA32_SFLOAT=128 + 64 + 8 + 4 + 2 + 1,
 };
 
-inline ETextureChannels operator|(ETextureChannels a, ETextureChannels b)
+inline ETextureFormat operator|(ETextureFormat a, ETextureFormat b)
 {
-    return static_cast<ETextureChannels>(
+    return static_cast<ETextureFormat>(
         static_cast<uint8_t>(a) | static_cast<uint8_t>(b)
     );
 }
 
-inline ETextureChannels operator&(ETextureChannels a, ETextureChannels b)
+inline ETextureFormat operator&(ETextureFormat a, ETextureFormat b)
 {
-    return static_cast<ETextureChannels>(
+    return static_cast<ETextureFormat>(
         static_cast<uint8_t>(a) & static_cast<uint8_t>(b)
     );
 }
 
-inline uint8_t NumOfChannels(ETextureChannels channels)
+inline uint8_t NumOfChannels(ETextureFormat in_format)
 {
-    switch(channels) {
-    case ETextureChannels::kR:
+    switch(static_cast<uint8_t>(in_format) & (8 + 4 + 2 + 1)) {
+    case 8:
         return 1;
-    case ETextureChannels::kRG:
+    case 8 + 4:
         return 2;
-    case ETextureChannels::kRGB:
+    case 8 + 4 + 2:
         return 3;
-    case ETextureChannels::kRGBA:
+    case 8 + 4 + 2 + 1:
         return 4;
     default:
         return 0;
     }
 }
 
-struct WTextureStruct{
+struct WTextureStruct {
     std::vector<uint8_t> data;
-    ETextureChannels channels;  // TODO FORMAT (sRGB linear etc)
+    ETextureFormat format;
     uint32_t width;
     uint32_t height;
 };

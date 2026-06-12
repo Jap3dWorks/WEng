@@ -42,7 +42,7 @@ void WVulkan::CreateTexture(
     const WTextureStruct * texture_ptr;
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
-    if (texture_struct.channels == ETextureChannels::kRGBA) {
+    if (texture_struct.format == ETextureFormat::kRGBA) {
         texture_ptr = &texture_struct;
     }
     else
@@ -1311,16 +1311,16 @@ void WVulkan::GenerateMipmaps(
 
 VkFormat WVulkan::GetImageFormat(uint8_t in_texture_channels)
 {
-    ETextureChannels value = static_cast<ETextureChannels>(in_texture_channels);
+    ETextureFormat value = static_cast<ETextureFormat>(in_texture_channels);
     
     switch(value) {
-    case ETextureChannels::kR:
+    case ETextureFormat::kR:
         return VK_FORMAT_R8_SRGB;
-    case ETextureChannels::kRG:
+    case ETextureFormat::kRG:
         return VK_FORMAT_R8G8_SRGB;
-    case ETextureChannels::kRGB:
+    case ETextureFormat::kRGB:
         return VK_FORMAT_R8G8B8_SRGB;
-    case ETextureChannels::kRGBA:
+    case ETextureFormat::kRGBA:
         return VK_FORMAT_R8G8B8A8_SRGB;
     default:
         return VK_FORMAT_R8G8B8A8_SRGB;
@@ -1331,7 +1331,7 @@ WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
 {
     WTextureStruct result;
     
-    result.channels = ETextureChannels::kRGBA;
+    result.format = ETextureFormat::kRGBA;
     result.height = in_texture.height;
     result.width = in_texture.width;
 
@@ -1341,7 +1341,7 @@ WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
 
     result.data.resize(result.height * result.width * 4, 255);
 
-    int num_channels = NumOfChannels(in_texture.channels);
+    int num_channels = NumOfChannels(in_texture.format);
 
     for (int i=num_channels; i < 4; i++) {
         std::memcpy(
