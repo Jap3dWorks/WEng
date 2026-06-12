@@ -114,7 +114,7 @@ private:
         // TODO private and use destructor
         if (device_ != VK_NULL_HANDLE) {
 
-            WVulkan::DestroyDescPools(descriptor_pool_, device_);
+            weng::vk::vulkan::DestroyDescPools(descriptor_pool_, device_);
 
             if (pipeline_) {
                 vkDestroyPipeline(device_,
@@ -206,61 +206,61 @@ private:
             );
 
         std::array<VkPipelineShaderStageCreateInfo,2> shader_stages;
-        WVkPipelineUtils::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
+        weng::vk::pipeline::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
             shader_stages.data(),
             shader_module
             );
 
         std::array<VkVertexInputAttributeDescription,2> attr_desc;
-        WVkPipelineUtils::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
+        weng::vk::pipeline::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
 
         VkVertexInputBindingDescription binding_desc =
-            WVkPipelineUtils::RenderPlane_VertBindingDescrpt();
+            weng::vk::pipeline::RenderPlane_VertBindingDescrpt();
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            WVkPipelineUtils::RenderPlane_VkPipelineVertexInputStateCreateInfo(
+            weng::vk::pipeline::RenderPlane_VkPipelineVertexInputStateCreateInfo(
                 binding_desc,
                 attr_desc.data(),
                 static_cast<std::uint32_t>(attr_desc.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            WVkPipelineUtils::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
+            weng::vk::pipeline::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
 
         VkPipelineViewportStateCreateInfo viewport_state =
-            WVkPipelineUtils::RenderPlane_VkPipelineViewportStateCreateInfo();
+            weng::vk::pipeline::RenderPlane_VkPipelineViewportStateCreateInfo();
 
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            WVkPipelineUtils::RenderPlane_VkPipelineRasterizationStateCreateInfo();
+            weng::vk::pipeline::RenderPlane_VkPipelineRasterizationStateCreateInfo();
 
         VkPipelineMultisampleStateCreateInfo multisampling =
-            WVkPipelineUtils::RenderPlane_VkPipelineMultisampleStateCreateInfo();
+            weng::vk::pipeline::RenderPlane_VkPipelineMultisampleStateCreateInfo();
 
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            WVkPipelineUtils::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
+            weng::vk::pipeline::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
 
         VkPipelineColorBlendAttachmentState color_blend_attachment =
-            WVkPipelineUtils::RenderPlane_VkPipelineColorBlendAttachmentState();
+            weng::vk::pipeline::RenderPlane_VkPipelineColorBlendAttachmentState();
 
         VkPipelineColorBlendStateCreateInfo color_blending =
-            WVkPipelineUtils::RenderPlane_VkPipelineColorBlendStateCreateInfo(
+            weng::vk::pipeline::RenderPlane_VkPipelineColorBlendStateCreateInfo(
                 color_blend_attachment
                 );
 
         std::vector<VkDynamicState> dynamic_states;
 
         VkPipelineDynamicStateCreateInfo dynamic_state =
-            WVkPipelineUtils::RenderPlane_VkPipelineDynamicStateCreateInfo(
+            weng::vk::pipeline::RenderPlane_VkPipelineDynamicStateCreateInfo(
                 dynamic_states
                 );
 
-        pipeline_layout_ = WVkPipelineUtils::RenderPlane_VkPipelineLayout(
+        pipeline_layout_ = weng::vk::pipeline::RenderPlane_VkPipelineLayout(
             device_,
             descset_layout_
             );
 
         VkGraphicsPipelineCreateInfo graphics_pipeline_info =
-            WVkPipelineUtils::RenderPlane_VkGraphicsPipelineCreateInfo(
+            weng::vk::pipeline::RenderPlane_VkGraphicsPipelineCreateInfo(
                 static_cast<std::uint32_t>(shader_stages.size()),
                 shader_stages.data(),
                 &vertex_input_info,
@@ -274,7 +274,7 @@ private:
                 pipeline_layout_
                 );
 
-        pipeline_ = WVkPipelineUtils::RenderPlane_VkPipeline(
+        pipeline_ = weng::vk::pipeline::RenderPlane_VkPipeline(
             &color_format,
             1,
             graphics_pipeline_info,

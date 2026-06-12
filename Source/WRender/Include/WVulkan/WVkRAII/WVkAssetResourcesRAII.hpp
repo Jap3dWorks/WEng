@@ -48,7 +48,7 @@ public:
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
                 WVkTextureInfo result;
-                WVulkan::CreateTexture(
+                weng::vk::texture::CreateTexture(
                     result,
                     in_texture,
                     device_,
@@ -72,7 +72,7 @@ public:
             in_id,
             [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
-                WVulkan::CreateMeshBuffers(
+                weng::vk::vulkan::CreateMeshBuffers(
                     result,
                     in_mesh.vertices.data(),
                     sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),

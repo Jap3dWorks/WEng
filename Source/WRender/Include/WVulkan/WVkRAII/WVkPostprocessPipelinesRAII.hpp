@@ -4,7 +4,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVkPipelinesBase.hpp"
+#include "WVkPipelinesBase.hpp"
 #include <vulkan/vulkan_core.h>
 
 class WVkPostprocessPipelinesRAII :

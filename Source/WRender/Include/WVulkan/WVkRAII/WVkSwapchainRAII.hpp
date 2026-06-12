@@ -20,17 +20,17 @@ public:
                      const std::uint32_t & in_width,
                      const std::uint32_t & in_height) :
         device_(in_device) {
-        WVulkan::SwapChainSupportDetails swap_chain_support = WVulkan::QuerySwapChainSupport(
+        weng::vk::vulkan::SwapChainSupportDetails swap_chain_support = weng::vk::vulkan::QuerySwapChainSupport(
             in_physical_device,
             in_surface
             );
 
         VkSurfaceFormatKHR surface_format =
-            WVulkan::ChooseSwapSurfaceFormat(swap_chain_support.formats);
+            weng::vk::vulkan::ChooseSwapSurfaceFormat(swap_chain_support.formats);
         VkPresentModeKHR present_mode =
-            WVulkan::ChooseSwapPresentMode(swap_chain_support.present_modes);
+            weng::vk::vulkan::ChooseSwapPresentMode(swap_chain_support.present_modes);
         VkExtent2D extent =
-            WVulkan::ChooseSwapExtent(swap_chain_support.capabilities,
+            weng::vk::vulkan::ChooseSwapExtent(swap_chain_support.capabilities,
                              in_width,
                              in_height);
 
@@ -43,7 +43,7 @@ public:
         }
 
         VkSwapchainCreateInfoKHR create_info =
-            WVulkan::VkStructs::CreateVkSwapchainCreateInfoKHR();
+            weng::vk::vkstructs::CreateVkSwapchainCreateInfoKHR();
     
         create_info.surface = in_surface;
         create_info.minImageCount = image_count;
@@ -54,8 +54,8 @@ public:
         // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
         create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        WVulkan::QueueFamilyIndices indices =
-            WVulkan::FindQueueFamilies(in_physical_device, in_surface);
+        weng::vk::vulkan::QueueFamilyIndices indices =
+            weng::vk::vulkan::FindQueueFamilies(in_physical_device, in_surface);
 
         uint32_t queue_family_indices[] = {
             indices.graphics_family.value(),
@@ -78,7 +78,7 @@ public:
         create_info.presentMode = present_mode;
         create_info.clipped = VK_TRUE;
 
-        WVulkan::ExecVkProcChecked(vkCreateSwapchainKHR,
+        weng::vk::vulkan::ExecVkProcChecked(vkCreateSwapchainKHR,
                                    "Failed to create swap chain!",
                                    in_device,
                                    &create_info,
@@ -109,7 +109,7 @@ public:
 
         for (size_t i = 0; i < images_.size(); i++)
         {
-            views_[i] = WVulkan::CreateImageView(images_[i],
+            views_[i] = weng::vk::vulkan::CreateImageView(images_[i],
                                                  format_,
                                                  VK_IMAGE_ASPECT_COLOR_BIT,
                                                  1,

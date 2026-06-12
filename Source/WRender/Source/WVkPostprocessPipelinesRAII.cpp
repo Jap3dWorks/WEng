@@ -152,7 +152,7 @@ void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
         global_resources_.descset_layout_info
         );
 
-    WVulkan::Create(
+    weng::vk::vulkan::Create(
         global_resources_.descset_layout_info,
         device_
         );
@@ -169,13 +169,13 @@ void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
 
 void WVkPostprocessPipelinesRAII::Destroy_GlobalResources() {
 
-    WVulkan::Destroy(
+    weng::vk::vulkan::Destroy(
         global_resources_.descset_layout_info,
         device_
         );
 
     for(auto & descpool : global_resources_.descpool_info) {
-        WVulkan::Destroy(descpool, device_);
+        weng::vk::vulkan::Destroy(descpool, device_);
     }
 
     global_resources_ = {};

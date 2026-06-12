@@ -18,28 +18,28 @@ public:
                     const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
                     const VkDebugUtilsMessengerEXT & in_debug_messenger) {
         if (in_enable_validation_layers &&
-            !WVulkan::CheckValidationLayerSupport(in_validation_layers))
+            !weng::vk::vulkan::CheckValidationLayerSupport(in_validation_layers))
         {
             throw std::runtime_error("Validation layers requested, but not available!");
         }
 
-        VkApplicationInfo app_info = WVulkan::VkStructs::CreateVkApplicationInfo();
+        VkApplicationInfo app_info = weng::vk::vkstructs::CreateVkApplicationInfo();
         app_info.pApplicationName = "WEngine";
         app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         app_info.pEngineName = "WEngine";
         app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         app_info.apiVersion = VK_API_VERSION_1_3;
 
-        VkInstanceCreateInfo create_info = WVulkan::VkStructs::CreateVkInstanceCreateInfo();
+        VkInstanceCreateInfo create_info = weng::vk::vkstructs::CreateVkInstanceCreateInfo();
         create_info.pApplicationInfo = &app_info;
 
-        auto extensions = WVulkan::GetRequiredExtensions(in_enable_validation_layers);
+        auto extensions = weng::vk::vulkan::GetRequiredExtensions(in_enable_validation_layers);
     
         create_info.enabledExtensionCount = static_cast<std::uint32_t>(extensions.size());
         create_info.ppEnabledExtensionNames = extensions.data();
 
         VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
-            WVulkan::VkStructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
+            weng::vk::vkstructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
 
         std::vector<const char*> enabled_layers_names{};
         if (in_enable_validation_layers)
@@ -63,7 +63,7 @@ public:
             }
             else
             {
-                debug_create_info.pfnUserCallback = &WVulkan::DebugCallback;
+                debug_create_info.pfnUserCallback = &weng::vk::vulkan::DebugCallback;
             }
 
             debug_create_info.flags = 0;
@@ -75,7 +75,7 @@ public:
             create_info.enabledLayerCount = 0;
         }
 
-        WVulkan::ExecVkProcChecked(
+        weng::vk::vulkan::ExecVkProcChecked(
             vkCreateInstance,
             "Failed to create instance!",
             &create_info,

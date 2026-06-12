@@ -90,10 +90,10 @@ private:
 
     void Destroy() {
         if (device_ != VK_NULL_HANDLE) {
-            WVulkan::Destroy(render_plane_, device_);
+            weng::vk::vulkan::Destroy(render_plane_, device_);
             render_plane_ = {};
 
-            WVulkan::Destroy(sampler_, device_);
+            weng::vk::vulkan::Destroy(sampler_, device_);
             sampler_ = VK_NULL_HANDLE;
 
             device_ = VK_NULL_HANDLE;
@@ -107,7 +107,7 @@ private:
         auto plane_vertex = WVkWengUtils::RenderPlaneVertex();
         auto plane_index = WVkWengUtils::RenderPlaneIndexes();
 
-        WVulkan::CreateMeshBuffers(
+        weng::vk::vulkan::CreateMeshBuffers(
             render_plane_,
             plane_vertex.data(),
             sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),

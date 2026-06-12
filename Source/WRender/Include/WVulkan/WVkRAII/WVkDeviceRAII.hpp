@@ -35,11 +35,11 @@ public:
 
         for (const auto &device : devices)
         {
-            if (WVulkan::IsDeviceSuitable(device, in_surface, in_device_extensions))
+            if (weng::vk::vulkan::IsDeviceSuitable(device, in_surface, in_device_extensions))
             {
                 // TODO device checks
                 vk_physical_device = device;
-                msaa_samples = WVulkan::GetMaxUsableSampleCount(device);
+                msaa_samples = weng::vk::vulkan::GetMaxUsableSampleCount(device);
                 break;
             }
         }
@@ -51,8 +51,8 @@ public:
 
         // Create Logical Device
 
-        WVulkan::QueueFamilyIndices indices =
-            WVulkan::FindQueueFamilies(vk_physical_device, in_surface);
+        weng::vk::vulkan::QueueFamilyIndices indices =
+            weng::vk::vulkan::FindQueueFamilies(vk_physical_device, in_surface);
         std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
         std::set<uint32_t> unique_queue_families = {
             indices.graphics_family.value(),
@@ -120,7 +120,7 @@ public:
             create_info.enabledLayerCount = 0;
         }
 
-        WVulkan::ExecVkProcChecked(vkCreateDevice,
+        weng::vk::vulkan::ExecVkProcChecked(vkCreateDevice,
                                    "Failed to create logical device!",
                                    vk_physical_device,
                                    &create_info,

@@ -139,19 +139,19 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         global_graphics_descsets_.descset_layout_info
         );
 
-    WVulkan::Create(
+    weng::vk::vulkan::Create(
         global_graphics_descsets_.descset_layout_info,
         Device()
         );
 
     // TODO CreateGlobalDescPool (camera and lights)
-    WVulkan::Create(
+    weng::vk::vulkan::Create(
         global_graphics_descsets_.descpool_info,
         Device()
         );
 
     for (std::uint32_t i=0; i<frames_in_flight; i++) {
-        WVulkan::Create(
+        weng::vk::vulkan::Create(
             global_graphics_descsets_.descset_info[i],
             Device(),
             global_graphics_descsets_.descset_layout_info,
@@ -164,7 +164,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         global_graphics_descsets_.camera_ubo[i].range =
             sizeof(WUBOCameraStruct);
 
-        WVulkan::CreateUBO(
+        weng::vk::vulkan::CreateUBO(
             global_graphics_descsets_.camera_ubo[i],
             Device(),
             PhysicalDevice()
@@ -177,7 +177,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         buffer_info.offset = 0;
         buffer_info.range = global_graphics_descsets_.camera_ubo[i].range;
 
-        WVulkan::UpdateWriteDescriptorSet_UBO(
+        weng::vk::vulkan::UpdateWriteDescriptorSet_UBO(
             ws,
             0,
             buffer_info,
@@ -199,11 +199,11 @@ void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
     if (global_graphics_descsets_.descpool_info.descriptor_pool !=
         VK_NULL_HANDLE) {
 
-        WVulkan::Destroy(global_graphics_descsets_.descpool_info,
+        weng::vk::vulkan::Destroy(global_graphics_descsets_.descpool_info,
                          device_);
 
         for(uint32_t i=0; i<global_graphics_descsets_.camera_ubo.size(); i++) {
-            WVulkan::Destroy(
+            weng::vk::vulkan::Destroy(
                 global_graphics_descsets_.camera_ubo[i],
                 device_);
         }
@@ -212,7 +212,7 @@ void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
             .descset_layout_info
             .descset_layout)
         {
-            WVulkan::Destroy(
+            weng::vk::vulkan::Destroy(
                 global_graphics_descsets_.descset_layout_info,
                 device_
                 );
@@ -226,7 +226,7 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
-    WVulkan::MapUBO(
+    weng::vk::vulkan::MapUBO(
         global_graphics_descsets_.camera_ubo[in_frame_index],
         device_
         );
@@ -237,7 +237,7 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
         sizeof(WUBOCameraStruct)
         );
     
-    WVulkan::UnmapUBO(
+    weng::vk::vulkan::UnmapUBO(
         global_graphics_descsets_.camera_ubo[in_frame_index],
         device_
         );

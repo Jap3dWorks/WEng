@@ -10,7 +10,7 @@ WVkSurfaceRAII::WVkSurfaceRAII(const VkInstance & in_instance,
                                GLFWwindow * in_window) :
     vk_instance_(in_instance)
 {
-    WVulkan::ExecVkProcChecked(
+    weng::vk::vulkan::ExecVkProcChecked(
         glfwCreateWindowSurface,
         "Failed to create window surface!",
         vk_instance_,

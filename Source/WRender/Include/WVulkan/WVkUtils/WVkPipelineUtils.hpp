@@ -5,7 +5,7 @@
 #include "WVulkan/WVkUtils/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
-namespace WVkPipelineUtils {
+namespace weng::vk::pipeline {
     /**
      * helper function to config VkPipelineShaderStageCreateInfo.
      */
@@ -15,12 +15,12 @@ namespace WVkPipelineUtils {
         ) {
 
         // VkShaderStageFlagBits
-        in_data[0] = WVulkan::VkStructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[0] = weng::vk::vkstructs::CreateVkPipelineShaderStageCreateInfo();
         in_data[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
         in_data[0].module=in_shader_module;
         in_data[0].pName="vsMain";
 
-        in_data[1] = WVulkan::VkStructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[1] = weng::vk::vkstructs::CreateVkPipelineShaderStageCreateInfo();
         in_data[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         in_data[1].module=in_shader_module;
         in_data[1].pName="fsMain";
@@ -59,7 +59,7 @@ namespace WVkPipelineUtils {
     {
         
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            WVulkan::VkStructs::CreateVkPipelineVertexInputStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount=1;
         vertex_input_info.pVertexBindingDescriptions = &in_binding_desc;
         vertex_input_info.vertexAttributeDescriptionCount=in_attr_desc_count;
@@ -70,7 +70,7 @@ namespace WVkPipelineUtils {
 
     inline VkPipelineInputAssemblyStateCreateInfo RenderPlane_VkPipelineInputAssemblyStateCreateInfo() {
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            WVulkan::VkStructs::CreateVkPipelineInputAssemblyStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
         
@@ -80,7 +80,7 @@ namespace WVkPipelineUtils {
     inline VkPipelineViewportStateCreateInfo RenderPlane_VkPipelineViewportStateCreateInfo()
     {
         VkPipelineViewportStateCreateInfo viewport_state =
-            WVulkan::VkStructs::CreateVkPipelineViewportStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount=1;
         viewport_state.scissorCount=1;
         
@@ -89,7 +89,7 @@ namespace WVkPipelineUtils {
 
     inline VkPipelineRasterizationStateCreateInfo RenderPlane_VkPipelineRasterizationStateCreateInfo() {
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            WVulkan::VkStructs::CreateVkPipelineRasterizationStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -104,7 +104,7 @@ namespace WVkPipelineUtils {
 
     inline VkPipelineMultisampleStateCreateInfo RenderPlane_VkPipelineMultisampleStateCreateInfo() {
         VkPipelineMultisampleStateCreateInfo multisampling =
-            WVulkan::VkStructs::CreateVkPipelineMultisampleStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;  // no msaa
         
@@ -113,7 +113,7 @@ namespace WVkPipelineUtils {
 
     inline VkPipelineDepthStencilStateCreateInfo RenderPlane_VkPipelineDepthStencilStateCreateInfo() {
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            WVulkan::VkStructs::CreateVkPipelineDepthStencilStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_FALSE;
         depth_stencil.depthWriteEnable = VK_FALSE;
         
@@ -138,7 +138,7 @@ namespace WVkPipelineUtils {
         )
     {
         VkPipelineColorBlendStateCreateInfo color_blending =
-            WVulkan::VkStructs::CreateVkPipelineColorBlendStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineColorBlendStateCreateInfo();
         color_blending.logicOpEnable = VK_FALSE;
         color_blending.logicOp = VK_LOGIC_OP_COPY;
         color_blending.attachmentCount = 1;
@@ -161,7 +161,7 @@ namespace WVkPipelineUtils {
         };
 
         VkPipelineDynamicStateCreateInfo dynamic_state =
-            WVulkan::VkStructs::CreateVkPipelineDynamicStateCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineDynamicStateCreateInfo();
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(out_dyn_states.size());
         dynamic_state.pDynamicStates = out_dyn_states.data();
 
@@ -176,14 +176,14 @@ namespace WVkPipelineUtils {
         VkPipelineLayout result;
         
         VkPipelineLayoutCreateInfo pipeline_layout_info =
-            WVulkan::VkStructs::CreateVkPipelineLayoutCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineLayoutCreateInfo();
 
         // Only one desc set, in the future I could need more (some global parameters).
 
         pipeline_layout_info.setLayoutCount = 1;         // slayouts.size();
         pipeline_layout_info.pSetLayouts = &in_desc_lay; // slayouts.data();
 
-        WVulkan::ExecVkProcChecked(vkCreatePipelineLayout,
+        weng::vk::vulkan::ExecVkProcChecked(vkCreatePipelineLayout,
                                    "Failed to create pipeline layout!",
                                    in_device,
                                    &pipeline_layout_info,
@@ -209,7 +209,7 @@ namespace WVkPipelineUtils {
         )
     {
         VkGraphicsPipelineCreateInfo pipeline_info =
-            WVulkan::VkStructs::CreateVkGraphicsPipelineCreateInfo();
+            weng::vk::vkstructs::CreateVkGraphicsPipelineCreateInfo();
         pipeline_info.stageCount = in_shader_stages_count;
         pipeline_info.pStages = in_shader_stages;
         pipeline_info.pVertexInputState = in_vertex_input_info;
@@ -237,7 +237,7 @@ namespace WVkPipelineUtils {
         )
     {
         VkPipelineRenderingCreateInfo rendering_info =
-            WVulkan::VkStructs::CreateVkPipelineRenderingCreateInfo();
+            weng::vk::vkstructs::CreateVkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = in_color_attachment_count;
         rendering_info.pColorAttachmentFormats = in_color_attachment_format;
 
@@ -245,7 +245,7 @@ namespace WVkPipelineUtils {
 
         VkPipeline result;
 
-        WVulkan::ExecVkProcChecked(
+        weng::vk::vulkan::ExecVkProcChecked(
             vkCreateGraphicsPipelines,
             "Failed to create graphics pipeline!",
             in_device,

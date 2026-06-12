@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <vector>
 
-// TODO refactor namespaces weng::vk::texture:: weng::vk::image:: weng::vk:vulkan:: etc
+// TODO refactor namespaces weng::vk::texture:: weng::vk::image:: weng::vk::vulkan:: etc
 //  namespaces to sneaky_case
 namespace WVkWengUtils {
 
@@ -101,11 +101,11 @@ namespace WVkWengUtils {
         VkShaderModule result;
 
         VkShaderModuleCreateInfo shader_module_create_info =
-            WVulkan::VkStructs::CreateVkShaderModuleCreateInfo();
+            weng::vk::vkstructs::CreateVkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
         shader_module_create_info.pCode = in_code;
 
-        WVulkan::ExecVkProcChecked(
+        weng::vk::vulkan::ExecVkProcChecked(
             vkCreateShaderModule,
             "Failed to create shader module!",
             in_device, 

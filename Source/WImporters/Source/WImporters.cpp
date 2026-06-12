@@ -166,19 +166,19 @@ std::vector<WAssetId> WImportTexture::Import(
 
     switch(num_channels) {
     case 1:
-        texture_struct.format = ETextureFormat::kR;
+        texture_struct.format = ETextureFormat::R8_UNORM;
         break;
     case 2:
-        texture_struct.format = ETextureFormat::kRG;
+        texture_struct.format = ETextureFormat::RG8_UNORM;
         break;
     case 3:
-        texture_struct.format = ETextureFormat::kRGB;
+        texture_struct.format = ETextureFormat::RGB8_UNORM;
         break;
     case 4:
-        texture_struct.format = ETextureFormat::kRGBA;
+        texture_struct.format = ETextureFormat::RGBA8_SRGB;
         break;
     default:
-        texture_struct.format = ETextureFormat::kRGBA;
+        texture_struct.format = ETextureFormat::RGBA8_SRGB;
     }
 
     size_t csize = width * height;

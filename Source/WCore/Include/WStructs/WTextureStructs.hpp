@@ -20,22 +20,22 @@
 enum class ETextureFormat : uint8_t {
 
     // 8 bit UNORM, good for linear textures like roughness, clamp range is [0,1]
-    R_UNORM=8,
-    RG_UNORM=8+4,
-    RGB_UNORM=8+4+2,
-    RGBA_UNORM=8+4+2+1,
+    R8_UNORM=8,
+    RG8_UNORM=8+4,
+    RGB8_UNORM=8+4+2,
+    RGBA8_UNORM=8+4+2+1,
 
     // 8 bit SNORM, good for normal maps (color*2 - 1 tansform), clamp range is [-1,1]
-    R_SNORM=64 + 8,
-    RG_SNORM=64 + 8 + 4,
-    RGB_SNORM=64 + 8 + 4 + 2,
-    RGBA_SNORM=64 + 8 + 4 + 2 + 1,
+    R8_SNORM=64 + 8,
+    RG8_SNORM=64 + 8 + 4,
+    RGB8_SNORM=64 + 8 + 4 + 2,
+    RGBA8_SNORM=64 + 8 + 4 + 2 + 1,
     
     // 8 bit sRGB, good for albedo textures 
-    R_SRGB=32 + 8,
-    RG_SRGB=32 + 8 + 4,
-    RGB_SRGB=32 + 8 + 4 + 2,
-    RGBA_SRGB=32 + 8 + 4 + 2 + 1,
+    R8_SRGB=32 + 8,
+    RG8_SRGB=32 + 8 + 4,
+    RGB8_SRGB=32 + 8 + 4 + 2,
+    RGBA8_SRGB=32 + 8 + 4 + 2 + 1,
 
     // 16 bit
     R16_SFLOAT=128 + 8,

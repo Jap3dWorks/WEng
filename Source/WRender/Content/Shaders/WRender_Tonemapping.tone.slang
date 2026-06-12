@@ -32,7 +32,7 @@ float4 fsMain(VSOutput vert_out) : SV_TARGET
     //           float3(1.f)),
     //     1.f);
     
-    // float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
+    float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
 
     // // exposure
     // // hdr *= 1.f;

@@ -28,133 +28,134 @@
 // Create functions
 // ----------------
 
-void WVulkan::CreateTexture(
-    WVkTextureInfo &out_texture_info,
-    const WTextureStruct &texture_struct,
-    const VkDevice & in_device,
-    const VkPhysicalDevice & in_physical_device,
-    const VkQueue & in_graphics_queue,
-    const VkCommandPool &in_command_pool
-    )
-{
+// void weng::vk::vulkan::CreateTexture(
+//     WVkTextureInfo &out_texture_info,
+//     const WTextureStruct &texture_struct,
+//     const VkDevice & in_device,
+//     const VkPhysicalDevice & in_physical_device,
+//     const VkQueue & in_graphics_queue,
+//     const VkCommandPool &in_command_pool
+//     )
+// {
     
-    WTextureStruct texture_rgba;
-    const WTextureStruct * texture_ptr;
+//     WTextureStruct texture_rgba;
+//     const WTextureStruct * texture_ptr;
 
-    // Textures must be RGBA, graphic cards prefer RGBA padding.
-    if (texture_struct.format == ETextureFormat::kRGBA) {
-        texture_ptr = &texture_struct;
-    }
-    else
-    {
-        texture_rgba = AddRGBAPadding(texture_struct);
-        texture_ptr = &texture_rgba;
-    }
+//     // Textures must be RGBA, graphic cards prefer RGBA padding.
+//     auto num_channels = NumOfChannels(texture_struct.format);
+//     if (4==num_channels) {
+//         texture_ptr = &texture_struct;
+//     }
+//     else
+//     {
+//         texture_rgba = AddRGBAPadding(texture_struct);
+//         texture_ptr = &texture_rgba;
+//     }
 
-    assert(
-        texture_ptr->data.size() ==
-        (texture_ptr->width * texture_ptr->height * NumOfChannels(texture_ptr->channels))
-        );
+//     assert(
+//         texture_ptr->data.size() ==
+//         (texture_ptr->width * texture_ptr->height * NumOfChannels(texture_ptr->channels))
+//         );
 
-    out_texture_info.mip_levels =
-        static_cast<uint32_t>(
-            std::floor(
-                std::log2(
-                    std::max(texture_ptr->width, texture_ptr->height)))) + 1;
+//     out_texture_info.mip_levels =
+//         static_cast<uint32_t>(
+//             std::floor(
+//                 std::log2(
+//                     std::max(texture_ptr->width, texture_ptr->height)))) + 1;
 
-    VkDeviceSize image_size = texture_ptr->height * texture_ptr->width * 4;
+//     VkDeviceSize image_size = texture_ptr->height * texture_ptr->width * 4;
 
-    // staging buffers are host accesible ram
-    VkBuffer staging_buffer;
-    VkDeviceMemory staging_buffer_memory;
-    CreateVkBuffer(
-        staging_buffer,
-        staging_buffer_memory,
-        in_device,
-        in_physical_device,
-        image_size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-        );
+//     // staging buffers are host accesible ram
+//     VkBuffer staging_buffer;
+//     VkDeviceMemory staging_buffer_memory;
+//     CreateVkBuffer(
+//         staging_buffer,
+//         staging_buffer_memory,
+//         in_device,
+//         in_physical_device,
+//         image_size,
+//         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+//         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+//         );
 
-    void * data;
-    vkMapMemory(in_device, staging_buffer_memory, 0, image_size, 0, &data);
-    memcpy(
-        data,
-        texture_ptr->data.data(),
-        std::min(texture_ptr->data.size(), static_cast<size_t>(image_size))
-        );
-    vkUnmapMemory(in_device, staging_buffer_memory);
+//     void * data;
+//     vkMapMemory(in_device, staging_buffer_memory, 0, image_size, 0, &data);
+//     memcpy(
+//         data,
+//         texture_ptr->data.data(),
+//         std::min(texture_ptr->data.size(), static_cast<size_t>(image_size))
+//         );
+//     vkUnmapMemory(in_device, staging_buffer_memory);
 
-    CreateImage(
-        out_texture_info.image,
-        out_texture_info.memory,
-        in_device,
-        in_physical_device,
-        texture_ptr->width,
-        texture_ptr->height,
-        out_texture_info.mip_levels,
-        VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO image format as a param
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
+//     CreateImage(
+//         out_texture_info.image,
+//         out_texture_info.memory,
+//         in_device,
+//         in_physical_device,
+//         texture_ptr->width,
+//         texture_ptr->height,
+//         out_texture_info.mip_levels,
+//         VK_SAMPLE_COUNT_1_BIT,
+//         VK_FORMAT_R8G8B8A8_SRGB,  // TODO image format as a param
+//         VK_IMAGE_TILING_OPTIMAL,
+//         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+//         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+//         );
 
-    TransitionTextureImageLayout(
-        in_device,
-        in_command_pool,
-        in_graphics_queue,
-        out_texture_info.image,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        out_texture_info.mip_levels
-        );
+//     TransitionTextureImageLayout(
+//         in_device,
+//         in_command_pool,
+//         in_graphics_queue,
+//         out_texture_info.image,
+//         VK_IMAGE_LAYOUT_UNDEFINED,
+//         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+//         out_texture_info.mip_levels
+//         );
 
-    // This operation is using DMA.
-    CopyBufferToImage(
-        staging_buffer,
-        out_texture_info.image,
-        texture_ptr->width,
-        texture_ptr->height,
-        in_device,
-        in_command_pool,
-        in_graphics_queue
-        );
+//     // This operation is using DMA.
+//     CopyBufferToImage(
+//         staging_buffer,
+//         out_texture_info.image,
+//         texture_ptr->width,
+//         texture_ptr->height,
+//         in_device,
+//         in_command_pool,
+//         in_graphics_queue
+//         );
 
-    GenerateMipmaps(
-        out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
-        texture_ptr->width,
-        texture_ptr->height,
-        out_texture_info.mip_levels,
-        in_device,
-        in_physical_device,
-        in_command_pool,
-        in_graphics_queue
-        );
+//     GenerateMipmaps(
+//         out_texture_info.image,
+//         VK_FORMAT_R8G8B8A8_SRGB,
+//         texture_ptr->width,
+//         texture_ptr->height,
+//         out_texture_info.mip_levels,
+//         in_device,
+//         in_physical_device,
+//         in_command_pool,
+//         in_graphics_queue
+//         );
 
-    // Image view
-    out_texture_info.view = CreateImageView(
-        out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
-        VK_IMAGE_ASPECT_COLOR_BIT,
-        out_texture_info.mip_levels,
-        in_device
-        );
+//     // Image view
+//     out_texture_info.view = CreateImageView(
+//         out_texture_info.image,
+//         VK_FORMAT_R8G8B8A8_SRGB,
+//         VK_IMAGE_ASPECT_COLOR_BIT,
+//         out_texture_info.mip_levels,
+//         in_device
+//         );
 
-    // Sampler
-    out_texture_info.sampler = CreateTextureSampler(
-        in_device,
-        in_physical_device,
-        out_texture_info.mip_levels
-        );
+//     // Sampler
+//     out_texture_info.sampler = CreateTextureSampler(
+//         in_device,
+//         in_physical_device,
+//         out_texture_info.mip_levels
+//         );
 
-    vkFreeMemory(in_device, staging_buffer_memory, nullptr);
-    vkDestroyBuffer(in_device, staging_buffer, nullptr);
-}
+//     vkFreeMemory(in_device, staging_buffer_memory, nullptr);
+//     vkDestroyBuffer(in_device, staging_buffer, nullptr);
+// }
 
-void WVulkan::Create(
+void weng::vk::vulkan::Create(
     WVkDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
     const VkDevice & in_device
     )
@@ -181,7 +182,7 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::CreateImage(
+void weng::vk::vulkan::CreateImage(
     VkImage &out_image,
     VkDeviceMemory &out_image_memory,
     const VkDevice &device,
@@ -235,7 +236,7 @@ void WVulkan::CreateImage(
     vkBindImageMemory(device, out_image, out_image_memory, 0);
 }
 
-void WVulkan::CreateMeshBuffers(
+void weng::vk::vulkan::CreateMeshBuffers(
     WVkMeshInfo & out_mesh_info,
     const void * vertex_buffer,
     const std::uint32_t & vertex_buffer_size,
@@ -333,7 +334,7 @@ void WVulkan::CreateMeshBuffers(
     out_mesh_info.index_count = index_count;
 }
 
-void WVulkan::CreateUBO(
+void weng::vk::vulkan::CreateUBO(
     WVkUBOInfo & out_ubo_info,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device)
@@ -349,7 +350,7 @@ void WVulkan::CreateUBO(
         );
 }
 
-void WVulkan::MapUBO(
+void weng::vk::vulkan::MapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
     const VkDevice & in_device
     )
@@ -364,7 +365,7 @@ void WVulkan::MapUBO(
         );
 }
 
-void WVulkan::UnmapUBO(
+void weng::vk::vulkan::UnmapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
     const VkDevice & in_device
     ) {
@@ -376,7 +377,7 @@ void WVulkan::UnmapUBO(
     out_uniform_buffer_info.mapped_memory = nullptr;
 }
 
-void WVulkan::Create(
+void weng::vk::vulkan::Create(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const VkDevice & in_device)
 {
@@ -407,7 +408,7 @@ void WVulkan::Create(
     }
 }
 
-void WVulkan::Create(
+void weng::vk::vulkan::Create(
     WVkDescriptorSetInfo & out_descriptor_set_info,
     const VkDevice & in_device,
     const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
@@ -430,7 +431,7 @@ void WVulkan::Create(
     }
 }
 
-// void WVulkan::UpdateDescriptorSets(
+// void weng::vk::vulkan::UpdateDescriptorSets(
 //     const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
 //     const WVkDeviceInfo & in_device_info
 //     )
@@ -444,7 +445,7 @@ void WVulkan::Create(
 //         );
 // }
 
-// void WVulkan::Create(
+// void weng::vk::vulkan::Create(
 //     WVkCommandBufferInfo & out_command_buffer_info,
 //     const WVkDeviceInfo & device,
 //     const WVkCommandPoolInfo & command_pool_info
@@ -470,7 +471,7 @@ void WVulkan::Create(
 // Destroy functions
 // -----------------
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
     const VkDevice & in_device
     )
@@ -499,7 +500,7 @@ void WVulkan::Destroy(
     }
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
     const VkDevice & in_device
     )
@@ -512,7 +513,7 @@ void WVulkan::Destroy(
         );
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const VkDevice & in_device
     )
@@ -526,7 +527,7 @@ void WVulkan::Destroy(
     out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkTextureInfo & in_texture_info,
     const VkDevice & in_device
     ) {
@@ -557,7 +558,7 @@ void WVulkan::Destroy(
     
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkMeshInfo & out_mesh_info,
     const VkDevice & in_device
     ) {
@@ -580,7 +581,7 @@ void WVulkan::Destroy(
 
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     WVkUBOInfo & out_ubo_info,
     const VkDevice & in_device
     ) {
@@ -607,7 +608,7 @@ void WVulkan::Destroy(
     out_ubo_info.range = 0;
 }
 
-void WVulkan::Destroy(
+void weng::vk::vulkan::Destroy(
     VkSampler & out_sampler,
     const VkDevice & in_device
     ) {
@@ -621,7 +622,7 @@ void WVulkan::Destroy(
 // Helper functions
 // ----------------
 
-bool WVulkan::CheckValidationLayerSupport(
+bool weng::vk::vulkan::CheckValidationLayerSupport(
     const std::vector<std::string_view>& in_validation_layers
     )
 {
@@ -653,7 +654,7 @@ bool WVulkan::CheckValidationLayerSupport(
     return true;
 }
 
-std::vector<const char *> WVulkan::GetRequiredExtensions(bool enable_validation_layers)
+std::vector<const char *> weng::vk::vulkan::GetRequiredExtensions(bool enable_validation_layers)
 {
     uint32_t glfw_extension_count = 0;
     const char ** glfw_extensions;
@@ -672,7 +673,7 @@ std::vector<const char *> WVulkan::GetRequiredExtensions(bool enable_validation_
     return extensions;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL weng::vk::vulkan::DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT InMessageType,
     const VkDebugUtilsMessengerCallbackDataEXT *InCallbackData,
@@ -682,7 +683,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL WVulkan::DebugCallback(
     return VK_FALSE;
 }
 
-bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
+bool weng::vk::vulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
                                const VkSurfaceKHR & surface,
                                const std::vector<std::string_view> & device_extensions)
 {
@@ -704,7 +705,7 @@ bool WVulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
     return indices.IsComplete() && extensions_supported && swap_chain_adequate && supported_features.samplerAnisotropy;
 }
 
-bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
+bool weng::vk::vulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
                                           const std::vector<std::string_view> & device_extensions)
 {
     uint32_t extension_count;
@@ -723,7 +724,7 @@ bool WVulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
     return required_extensions.empty();
 }
 
-WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
+weng::vk::vulkan::QueueFamilyIndices weng::vk::vulkan::FindQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     QueueFamilyIndices indices;
 
@@ -758,7 +759,7 @@ WVulkan::QueueFamilyIndices WVulkan::FindQueueFamilies(const VkPhysicalDevice &d
     return indices;
 }
 
-WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
+weng::vk::vulkan::SwapChainSupportDetails weng::vk::vulkan::QuerySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     SwapChainSupportDetails details;
 
@@ -783,7 +784,7 @@ WVulkan::SwapChainSupportDetails WVulkan::QuerySwapChainSupport(const VkPhysical
     return details;
 }
 
-VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
+VkSurfaceFormatKHR weng::vk::vulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
 {
     for (const auto &available_format : available_formats)
     {
@@ -796,7 +797,7 @@ VkSurfaceFormatKHR WVulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceF
     return available_formats[0];
 }
 
-VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & available_present_modes)
+VkPresentModeKHR weng::vk::vulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & available_present_modes)
 {
     for (const auto &available_present_mode : available_present_modes)
     {
@@ -808,7 +809,7 @@ VkPresentModeKHR WVulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeK
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities,
+VkExtent2D weng::vk::vulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities,
                                      const std::uint32_t & in_width,
                                      const std::uint32_t & in_height)
 {
@@ -838,7 +839,7 @@ VkExtent2D WVulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabil
     }
 }
 
-VkImageView WVulkan::CreateImageView(
+VkImageView weng::vk::vulkan::CreateImageView(
     const VkImage & in_image,
     const VkFormat & in_format,
     const VkImageAspectFlags & in_aspect_flags,
@@ -866,7 +867,7 @@ VkImageView WVulkan::CreateImageView(
     return image_view;
 }
 
-void WVulkan::CreateVkBuffer(
+void weng::vk::vulkan::CreateVkBuffer(
     VkBuffer &out_buffer,
     VkDeviceMemory &out_buffer_memory,
     const VkDevice &device,
@@ -908,7 +909,7 @@ void WVulkan::CreateVkBuffer(
     // WFLOG("Create new Buffer {}", static_cast<void*>(out_buffer));
 }
 
-VkFormat WVulkan::FindSupportedFormat(
+VkFormat weng::vk::vulkan::FindSupportedFormat(
     const VkPhysicalDevice & device,
     const std::vector<VkFormat> & candidates,
     VkImageTiling tiling,
@@ -932,7 +933,7 @@ VkFormat WVulkan::FindSupportedFormat(
     throw std::runtime_error("Failed to find supported format!");
 }
 
-VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice & device)
+VkFormat weng::vk::vulkan::FindDepthFormat(const VkPhysicalDevice & device)
 {
     return FindSupportedFormat(
         device,
@@ -945,7 +946,7 @@ VkFormat WVulkan::FindDepthFormat(const VkPhysicalDevice & device)
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_filter, VkMemoryPropertyFlags properties)
+uint32_t weng::vk::vulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_filter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties mem_properties;
     vkGetPhysicalDeviceMemoryProperties(device, &mem_properties);
@@ -960,7 +961,7 @@ uint32_t WVulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_f
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
-void WVulkan::TransitionTextureImageLayout(
+void weng::vk::vulkan::TransitionTextureImageLayout(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
@@ -1036,7 +1037,7 @@ void WVulkan::TransitionTextureImageLayout(
         command_buffer);
 }
 
-VkCommandBuffer WVulkan::BeginSingleTimeCommands(const VkDevice &device, const VkCommandPool &command_pool)
+VkCommandBuffer weng::vk::vulkan::BeginSingleTimeCommands(const VkDevice &device, const VkCommandPool &command_pool)
 {
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1055,7 +1056,7 @@ VkCommandBuffer WVulkan::BeginSingleTimeCommands(const VkDevice &device, const V
     return command_buffer;
 }
 
-void WVulkan::EndSingleTimeCommands(
+void weng::vk::vulkan::EndSingleTimeCommands(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
@@ -1074,7 +1075,7 @@ void WVulkan::EndSingleTimeCommands(
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-VkSampler WVulkan::CreateTextureSampler(
+VkSampler weng::vk::vulkan::CreateTextureSampler(
     const VkDevice &device,
     const VkPhysicalDevice &physical_device,
     const uint32_t &mip_levels)
@@ -1109,7 +1110,7 @@ VkSampler WVulkan::CreateTextureSampler(
     return texture_sampler;
 }
 
-void WVulkan::CopyBufferToImage(
+void weng::vk::vulkan::CopyBufferToImage(
     VkBuffer in_buffer,
     VkImage in_image,
     uint32_t in_width,
@@ -1158,7 +1159,7 @@ void WVulkan::CopyBufferToImage(
         );
 }
 
-VkSampleCountFlagBits WVulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device)
+VkSampleCountFlagBits weng::vk::vulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device)
 {
     VkPhysicalDeviceProperties PhysicalDeviceProperties;
     vkGetPhysicalDeviceProperties(
@@ -1182,7 +1183,7 @@ VkSampleCountFlagBits WVulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physi
 
 }
 
-void WVulkan::GenerateMipmaps(
+void weng::vk::vulkan::GenerateMipmaps(
     VkImage in_image,
     VkFormat in_image_format,
     int32_t in_tex_width,
@@ -1309,29 +1310,32 @@ void WVulkan::GenerateMipmaps(
 
 }
 
-VkFormat WVulkan::GetImageFormat(uint8_t in_texture_channels)
+// TODO Move to weng::vk::texture
+VkFormat weng::vk::vulkan::GetImageFormat(uint8_t in_texture_channels)
 {
     ETextureFormat value = static_cast<ETextureFormat>(in_texture_channels);
     
-    switch(value) {
-    case ETextureFormat::kR:
+    switch(in_texture_channels) {
+    case 1:
         return VK_FORMAT_R8_SRGB;
-    case ETextureFormat::kRG:
+    case 2:
         return VK_FORMAT_R8G8_SRGB;
-    case ETextureFormat::kRGB:
+    case 3:
         return VK_FORMAT_R8G8B8_SRGB;
-    case ETextureFormat::kRGBA:
+    case 4:
         return VK_FORMAT_R8G8B8A8_SRGB;
     default:
         return VK_FORMAT_R8G8B8A8_SRGB;
     }
 }
 
-WTextureStruct WVulkan::AddRGBAPadding(const WTextureStruct & in_texture)
+WTextureStruct weng::vk::vulkan::AddRGBAPadding(const WTextureStruct & in_texture)
 {
     WTextureStruct result;
     
-    result.format = ETextureFormat::kRGBA;
+    // result.format = ETextureFormat::kRGBA;
+    // TODO better control of file format.
+    result.format = ETextureFormat::RGBA8_SRGB;
     result.height = in_texture.height;
     result.width = in_texture.width;
 
