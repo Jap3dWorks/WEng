@@ -64,6 +64,7 @@ void WVulkan::CreateTexture(
 
     VkDeviceSize image_size = texture_ptr->height * texture_ptr->width * 4;
 
+    // staging buffers are host accesible ram
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
     CreateVkBuffer(
@@ -94,7 +95,7 @@ void WVulkan::CreateTexture(
         texture_ptr->height,
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        VK_FORMAT_R8G8B8A8_SRGB,  // TODO image format as a param
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -110,6 +111,7 @@ void WVulkan::CreateTexture(
         out_texture_info.mip_levels
         );
 
+    // This operation is using DMA.
     CopyBufferToImage(
         staging_buffer,
         out_texture_info.image,

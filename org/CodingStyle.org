@@ -1,9 +1,0 @@
-#+title: Coding Style
-
-* Classes Initial letter
-
-- T -> templates
-- B -> Base Clases not Interfaces
-- I -> Interfaces
-- W -> WEng Object | Engine modules | Engine classes
-

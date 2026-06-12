@@ -58,7 +58,7 @@ inline uint8_t NumOfChannels(ETextureChannels channels)
 
 struct WTextureStruct{
     std::vector<uint8_t> data;
-    ETextureChannels channels;
+    ETextureChannels channels;  // TODO FORMAT (sRGB linear etc)
     uint32_t width;
     uint32_t height;
 };

@@ -111,7 +111,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     params[0].stage_flags=EShaderStageFlag::Vertex;
     params[0].range=sizeof(WUBOGraphicsStruct);
     params[1].binding=1;
-    params[1].type=EPipeParamType::Texture;
+    params[1].type=EPipeParamType::Texture;  // TODO texture color management
     params[1].stage_flags=EShaderStageFlag::Fragment;
 
     // Create Pipeline Parameter Asset

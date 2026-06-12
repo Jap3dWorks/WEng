@@ -184,7 +184,8 @@ void WVkRender::Initialize()
 
     tonemapping_pipeline_ = WVkTonemappingPipelineRAII(
         device_.Device(),
-        swapchain_.Format()
+        VK_FORMAT_B8G8R8A8_UNORM
+        // swapchain_.Format()
         );
     
     WFLOG("[DEBUG] Initialize swap chain pipeline");

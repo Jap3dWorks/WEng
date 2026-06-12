@@ -9,7 +9,7 @@ add_library(
 	    Source/WVkRenderCommandPoolRAII.cpp
         Source/WVkAssetResources.cpp
         Source/WVkPostprocessPipelinesRAII.cpp
-        Source/WVkRAII/WVkSurfaceRAII.cpp
+        Source/WVkSurfaceRAII.cpp
     )
 
 find_package(glm REQUIRED)

@@ -943,7 +943,8 @@ namespace WVkRenderUtils {
         color_attachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        color_attachments[0].clearValue = {0.5, 0.5, 0.5, 1.f};
+        // TODO WENG_ALBEDO_CLEAR_VALUE
+        color_attachments[0].clearValue = {0.18, 0.18, 0.18, 1.f};
 
         // Normal Attachment
         color_attachments[1] = WVulkan::VkStructs::CreateVkRenderingAttachmentInfo();

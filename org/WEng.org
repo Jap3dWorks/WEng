@@ -1,11 +1,9 @@
-* Modules structure
+#+title: WEng
 
-** Introduction
+* Project Structure
 
-Modules structures will be explained next.
-
-** Tree
-
+* Module Structure
+** Directory Tree
 *** Modules (PascalCase)
 
     - ModulesNames _(PascalCase)_
@@ -16,7 +14,7 @@ Modules structures will be explained next.
             - ModuleHeader.h _(PascalCase)_
     - ...
 
-*** Source (camelCase)
+*** Source (PascalCase)
 
     - WSourceModules _(PascalCase)_
         - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
@@ -27,7 +25,6 @@ Modules structures will be explained next.
     - ...
 
 ** Source modules _In progress_
-
 *** Objectives
 
 Modules should be linkable between them and dinamically linkable with the core application.
@@ -60,4 +57,16 @@ WEngine will also load each module dinamically, this way the application can be 
 modules for ours.
 
 The engine class will reference to other modules in the aplication.
+
+
+
+* Coding Style
+
+** Classes Initial letter
+
+- T -> templates
+- B -> Base Clases not Interfaces
+- I -> Interfaces
+- W -> WEng Object | Engine modules | Engine classes
+
 

@@ -1,7 +1,0 @@
-#+title: Project Structure
-
-Inside the directory ./Source each folder is a library or an executable. Each one of this folders contains a CMakeLists.txt file to config the build.
-
-Each library should create an Alias at compile time like WModuleName::WModuleName that can be used to include and link in other module compilations. You can check some of the CMakeLists.txt files.
-
-The Idea is that once the engine is compiled, you can use this libraries to create an executable.

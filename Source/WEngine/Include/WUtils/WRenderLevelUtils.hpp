@@ -17,6 +17,8 @@
 #include "WStructs/WComponentStructs.hpp"
 #include "WUtils/WMathUtils.hpp"
 
+// TODO rename this module, do not use Utils, use something more descriptive.
+
 namespace WRenderLevelUtils {
 
     inline void InitializeResources(
