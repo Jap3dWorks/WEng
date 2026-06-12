@@ -28,7 +28,6 @@
                                                        "/Install/Release ; "
                                                        "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib bin/WSpacers'"))))
 
-                   ;; (setenv "LD_LIBRARY_PATH" "lib")
                    (with-eval-after-load 'dap-mode
                        (progn
                          (dap-register-debug-template
@@ -50,7 +49,7 @@
                                 :env '(("LD_LIBRARY_PATH" . "lib"))))
 
                          (dap-register-debug-template
-                          "[LLDB][unittest] WEngineObjects"
+                          "[LLDB][WEngineObjects] unittests"
                           (list :type "lldb-vscode"
                                 :cwd "${workspaceFolder}/Install/Debug"
                                 :request "launch"
@@ -59,7 +58,7 @@
                                 :env '(("LD_LIBRARY_PATH" . "lib"))))
 
                          (dap-register-debug-template
-                          "[LLDB][unittest] WCore"
+                          "[LLDB][WCore] unittests"
                           (list :type "lldb-vscode"
                                 :cwd "${workspaceFolder}/Install/Debug"
                                 :request "launch"
