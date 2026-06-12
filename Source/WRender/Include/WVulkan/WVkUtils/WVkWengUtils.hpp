@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <vector>
 
-// TODO refactor namespaces weng::vk::texture weng::vk::image etc
+// TODO refactor namespaces weng::vk::texture:: weng::vk::image:: weng::vk:vulkan:: etc
 //  namespaces to sneaky_case
 namespace WVkWengUtils {
 
