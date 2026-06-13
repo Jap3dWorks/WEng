@@ -7,6 +7,7 @@
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVkTexture.hpp"
 
 #include "WVulkan/WVulkanStructs.hpp"
 
