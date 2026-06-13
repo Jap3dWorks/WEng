@@ -6,8 +6,8 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
-#include "WVulkan/WVkTexture.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkTexture.hpp"
 
 #include "WVulkan/WVulkanStructs.hpp"
 
@@ -49,7 +49,7 @@ public:
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
                 WVkTextureInfo result;
-                weng::vk::texture::CreateTexture(
+                wvk::texture::CreateTexture(
                     result,
                     in_texture,
                     device_,
@@ -73,7 +73,7 @@ public:
             in_id,
             [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
-                weng::vk::vulkan::CreateMeshBuffers(
+                wvk::vulkan::CreateMeshBuffers(
                     result,
                     in_mesh.vertices.data(),
                     sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),

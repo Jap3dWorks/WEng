@@ -3,11 +3,11 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
 #include "WVkGBuffersPipelinesUtils.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -139,19 +139,19 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         global_graphics_descsets_.descset_layout_info
         );
 
-    weng::vk::vulkan::Create(
+    wvk::vulkan::Create(
         global_graphics_descsets_.descset_layout_info,
         Device()
         );
 
     // TODO CreateGlobalDescPool (camera and lights)
-    weng::vk::vulkan::Create(
+    wvk::vulkan::Create(
         global_graphics_descsets_.descpool_info,
         Device()
         );
 
     for (std::uint32_t i=0; i<frames_in_flight; i++) {
-        weng::vk::vulkan::Create(
+        wvk::vulkan::Create(
             global_graphics_descsets_.descset_info[i],
             Device(),
             global_graphics_descsets_.descset_layout_info,
@@ -164,7 +164,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         global_graphics_descsets_.camera_ubo[i].range =
             sizeof(WUBOCameraStruct);
 
-        weng::vk::vulkan::CreateUBO(
+        wvk::vulkan::CreateUBO(
             global_graphics_descsets_.camera_ubo[i],
             Device(),
             PhysicalDevice()
@@ -177,7 +177,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         buffer_info.offset = 0;
         buffer_info.range = global_graphics_descsets_.camera_ubo[i].range;
 
-        weng::vk::vulkan::UpdateWriteDescriptorSet_UBO(
+        wvk::vulkan::UpdateWriteDescriptorSet_UBO(
             ws,
             0,
             buffer_info,
@@ -199,11 +199,11 @@ void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
     if (global_graphics_descsets_.descpool_info.descriptor_pool !=
         VK_NULL_HANDLE) {
 
-        weng::vk::vulkan::Destroy(global_graphics_descsets_.descpool_info,
+        wvk::vulkan::Destroy(global_graphics_descsets_.descpool_info,
                          device_);
 
         for(uint32_t i=0; i<global_graphics_descsets_.camera_ubo.size(); i++) {
-            weng::vk::vulkan::Destroy(
+            wvk::vulkan::Destroy(
                 global_graphics_descsets_.camera_ubo[i],
                 device_);
         }
@@ -212,7 +212,7 @@ void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
             .descset_layout_info
             .descset_layout)
         {
-            weng::vk::vulkan::Destroy(
+            wvk::vulkan::Destroy(
                 global_graphics_descsets_.descset_layout_info,
                 device_
                 );
@@ -226,7 +226,7 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
     const WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
-    weng::vk::vulkan::MapUBO(
+    wvk::vulkan::MapUBO(
         global_graphics_descsets_.camera_ubo[in_frame_index],
         device_
         );
@@ -237,7 +237,7 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
         sizeof(WUBOCameraStruct)
         );
     
-    weng::vk::vulkan::UnmapUBO(
+    wvk::vulkan::UnmapUBO(
         global_graphics_descsets_.camera_ubo[in_frame_index],
         device_
         );

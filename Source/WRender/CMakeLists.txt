@@ -10,6 +10,7 @@ add_library(
         Source/WVkAssetResources.cpp
         Source/WVkPostprocessPipelinesRAII.cpp
         Source/WVkSurfaceRAII.cpp
+        Source/WVkTexture.cpp
     )
 
 find_package(glm REQUIRED)
@@ -38,10 +39,10 @@ target_link_libraries(
         Vulkan::Vulkan
         dl
         pthread
-        X11
-        Xxf86vm 
-        Xrandr 
-        Xi
+        # X11
+        # Xxf86vm 
+        # Xrandr 
+        # Xi
 )
 
 add_library(WRender::WRender ALIAS WRender)

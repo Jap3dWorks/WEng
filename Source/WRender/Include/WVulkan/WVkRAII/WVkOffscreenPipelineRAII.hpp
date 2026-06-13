@@ -3,9 +3,9 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
-#include "WVulkan/WVkUtils/WVkPipelineUtils.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkRenderPlane.hpp"
 
 #include "WShaderUtils.hpp"
 #include "WUtils/WStringUtils.hpp"
@@ -101,7 +101,7 @@ private:
         if (device_ != VK_NULL_HANDLE) {
             DestroyRenderPipeline();
 
-            weng::vk::vulkan::DestroyDescPools(
+            wvk::vulkan::DestroyDescPools(
                 descpool_info_,
                 device_);
 
@@ -150,7 +150,7 @@ private:
         // albedo,normal,ws_position,mrAO,emission,extra01,depth
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
         for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
-            sampler_bindings[i]=weng::vk::vkstructs::CreateVkDescriptorSetLayoutBinding();
+            sampler_bindings[i]=wvk::vkstructs::CreateVkDescriptorSetLayoutBinding();
             sampler_bindings[i].binding = i;
             sampler_bindings[i].descriptorCount = 1;
             sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -183,61 +183,61 @@ private:
             );
 
         std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages;
-        weng::vk::pipeline::RenderPlane_UpdateVkPipelineShaderStageCreateInfo(
+        wvk::render_plane::UpdateVkPipelineShaderStageCreateInfo(
             shader_stages.data(),
             shader_module
             );
 
         std::array<VkVertexInputAttributeDescription, 2> attr_desc;
-        weng::vk::pipeline::RenderPlane_UpdateVertexInputAttributeDescriptor(attr_desc.data());
+        wvk::render_plane::UpdateVertexInputAttributeDescriptor(attr_desc.data());
 
         VkVertexInputBindingDescription binding_desc =
-            weng::vk::pipeline::RenderPlane_VertBindingDescrpt();
+            wvk::render_plane::VertBindingDescrpt();
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            weng::vk::pipeline::RenderPlane_VkPipelineVertexInputStateCreateInfo(
+            wvk::render_plane::VkPipelineVertexInputStateCreateInfo(
                 binding_desc,
                 attr_desc.data(),
                 static_cast<std::uint32_t>(attr_desc.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            weng::vk::pipeline::RenderPlane_VkPipelineInputAssemblyStateCreateInfo();
+            wvk::render_plane::VkPipelineInputAssemblyStateCreateInfo();
 
         VkPipelineViewportStateCreateInfo viewport_state =
-            weng::vk::pipeline::RenderPlane_VkPipelineViewportStateCreateInfo();
+            wvk::render_plane::VkPipelineViewportStateCreateInfo();
 
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            weng::vk::pipeline::RenderPlane_VkPipelineRasterizationStateCreateInfo();
+            wvk::render_plane::VkPipelineRasterizationStateCreateInfo();
 
         VkPipelineMultisampleStateCreateInfo multisampling =
-            weng::vk::pipeline::RenderPlane_VkPipelineMultisampleStateCreateInfo();
+            wvk::render_plane::VkPipelineMultisampleStateCreateInfo();
         
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            weng::vk::pipeline::RenderPlane_VkPipelineDepthStencilStateCreateInfo();
+            wvk::render_plane::VkPipelineDepthStencilStateCreateInfo();
 
         VkPipelineColorBlendAttachmentState color_blend_attachment =
-            weng::vk::pipeline::RenderPlane_VkPipelineColorBlendAttachmentState();
+            wvk::render_plane::VkPipelineColorBlendAttachmentState();
 
         VkPipelineColorBlendStateCreateInfo color_blending =
-            weng::vk::pipeline::RenderPlane_VkPipelineColorBlendStateCreateInfo(
+            wvk::render_plane::VkPipelineColorBlendStateCreateInfo(
                 color_blend_attachment
                 );
 
         std::vector<VkDynamicState> dynamic_states;
         
         VkPipelineDynamicStateCreateInfo dynamic_state =
-            weng::vk::pipeline::RenderPlane_VkPipelineDynamicStateCreateInfo(
+            wvk::render_plane::VkPipelineDynamicStateCreateInfo(
                 dynamic_states
                 );
 
-        pipeline_layout_ = weng::vk::pipeline::RenderPlane_VkPipelineLayout(
+        pipeline_layout_ = wvk::render_plane::VkPipelineLayout(
             device_,
             descset_layout_
             );
 
         VkGraphicsPipelineCreateInfo graphics_pipeline_info =
-            weng::vk::pipeline::RenderPlane_VkGraphicsPipelineCreateInfo(
+            wvk::render_plane::VkGraphicsPipelineCreateInfo(
                 static_cast<std::uint32_t>(shader_stages.size()),
                 shader_stages.data(),
                 &vertex_input_info,
@@ -255,7 +255,7 @@ private:
 
         VkFormat color_format = WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT;
 
-        pipeline_ = weng::vk::pipeline::RenderPlane_VkPipeline(
+        pipeline_ = wvk::render_plane::VkPipeline(
             &color_format,
             1,
             graphics_pipeline_info,

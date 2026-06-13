@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 
 #include <vulkan/vulkan_core.h>
 

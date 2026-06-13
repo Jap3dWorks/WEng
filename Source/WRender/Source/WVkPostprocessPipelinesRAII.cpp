@@ -1,8 +1,9 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
@@ -144,15 +145,15 @@ void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
 }
 
 void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
-    auto plane_vertex = WVkWengUtils::RenderPlaneVertex();
-    auto plane_index = WVkWengUtils::RenderPlaneIndexes();
+    auto plane_vertex = wvk::render_plane::RenderPlaneVertex();
+    auto plane_index = wvk::render_plane::RenderPlaneIndexes();
 
     global_resources_.descset_layout_info = {};
     WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(
         global_resources_.descset_layout_info
         );
 
-    weng::vk::vulkan::Create(
+    wvk::vulkan::Create(
         global_resources_.descset_layout_info,
         device_
         );
@@ -169,13 +170,13 @@ void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
 
 void WVkPostprocessPipelinesRAII::Destroy_GlobalResources() {
 
-    weng::vk::vulkan::Destroy(
+    wvk::vulkan::Destroy(
         global_resources_.descset_layout_info,
         device_
         );
 
     for(auto & descpool : global_resources_.descpool_info) {
-        weng::vk::vulkan::Destroy(descpool, device_);
+        wvk::vulkan::Destroy(descpool, device_);
     }
 
     global_resources_ = {};

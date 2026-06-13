@@ -1,8 +1,9 @@
 #pragma once
 
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
@@ -85,15 +86,15 @@ private:
                               in_graphics_queue,
                               in_command_pool);
 
-        sampler_ = WVkWengUtils::CreateRenderPlaneSampler(device_);
+        sampler_ = wvk::render_plane::CreateRenderPlaneSampler(device_);
     }
 
     void Destroy() {
         if (device_ != VK_NULL_HANDLE) {
-            weng::vk::vulkan::Destroy(render_plane_, device_);
+            wvk::vulkan::Destroy(render_plane_, device_);
             render_plane_ = {};
 
-            weng::vk::vulkan::Destroy(sampler_, device_);
+            wvk::vulkan::Destroy(sampler_, device_);
             sampler_ = VK_NULL_HANDLE;
 
             device_ = VK_NULL_HANDLE;
@@ -104,10 +105,10 @@ private:
                                const VkPhysicalDevice & in_physical_device,
                                const VkQueue & in_graphics_queue,
                                const VkCommandPool & in_command_pool) {
-        auto plane_vertex = WVkWengUtils::RenderPlaneVertex();
-        auto plane_index = WVkWengUtils::RenderPlaneIndexes();
+        auto plane_vertex = wvk::render_plane::RenderPlaneVertex();
+        auto plane_index = wvk::render_plane::RenderPlaneIndexes();
 
-        weng::vk::vulkan::CreateMeshBuffers(
+        wvk::vulkan::CreateMeshBuffers(
             render_plane_,
             plane_vertex.data(),
             sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),

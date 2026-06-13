@@ -16,7 +16,7 @@
 #include "WRenderUtils.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -24,7 +24,7 @@
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WStructs/WComponentStructs.hpp"
 #include "WStructs/WRenderStructs.hpp"
-#include "WVulkan/WVkUtils/WVkRenderUtils.hpp"
+#include "WVulkan/WVk/WVkRender.hpp"
 #include "WLog.hpp"
 
 #include <cstdint>
@@ -60,7 +60,7 @@ void WVkRender::Window(GLFWwindow * in_window) {
 void WVkRender::Initialize()
 {
     WVkRenderDebugInfo render_debug_info =
-        weng::vk::render::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
+        wvk::render::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
 
     std::array<std::uint32_t,2> dimensions = {
         render_size_.width,
@@ -103,7 +103,7 @@ void WVkRender::Initialize()
 
     // GBuffers render targets
 
-    weng::vk::render::CreateGBuffersRenderTargets(
+    wvk::render::CreateGBuffersRenderTargets(
         gbuffers_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -120,7 +120,7 @@ void WVkRender::Initialize()
 
     // Offscreen render targets
 
-    weng::vk::render::CreateOffscreenRenderTargets(
+    wvk::render::CreateOffscreenRenderTargets(
         offscreen_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -131,7 +131,7 @@ void WVkRender::Initialize()
 
     // Postprocess render targets
 
-    weng::vk::render::CreatePostprocessRenderTargets(
+    wvk::render::CreatePostprocessRenderTargets(
         postprocess_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -143,7 +143,7 @@ void WVkRender::Initialize()
 
     // tonemapping render targets
     
-    weng::vk::render::CreateTonemappingRenderTargets(
+    wvk::render::CreateTonemappingRenderTargets(
         tonemapping_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -206,12 +206,12 @@ void WVkRender::Initialize()
         render_command_pool_.
         CreateCommandBuffer();
 
-    sync_semaphores_ = weng::vk::render::CreateSyncSemaphore<SyncSemaphores>(
+    sync_semaphores_ = wvk::render::CreateSyncSemaphore<SyncSemaphores>(
         swapchain_.Images().size(),
         device_.Device()
         );
 
-    sync_fences_ = weng::vk::render::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
+    sync_fences_ = wvk::render::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
         device_.Device()
         );
 
@@ -238,34 +238,34 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy Fences and Semaphores.");
 
-    weng::vk::render::DestroySyncSemaphores(
+    wvk::render::DestroySyncSemaphores(
         sync_semaphores_,
         device_.Device()
         );
 
-    weng::vk::render::DestroySyncFences(
+    wvk::render::DestroySyncFences(
         sync_fences_,
         device_.Device()
         );
 
     WFLOG("Destroy render targets.")
 
-    weng::vk::render::DestroyGBuffersRender(
+    wvk::render::DestroyGBuffersRender(
         gbuffers_rtargets_,
         device_.Device()
         );
     
-    weng::vk::render::DestroyOffscreenRender(
+    wvk::render::DestroyOffscreenRender(
         offscreen_rtargets_,
         device_.Device()
         );
 
-    weng::vk::render::DestroyPostprocessRender(
+    wvk::render::DestroyPostprocessRender(
         postprocess_rtargets_,
         device_.Device()
         );
 
-    weng::vk::render::DestroyTonemappingRender(
+    wvk::render::DestroyTonemappingRender(
         tonemapping_rtargets_,
         device_.Device()
         );
@@ -328,7 +328,7 @@ void WVkRender::Draw()
 
     // Begin command buffer
 
-    weng::vk::render::BeginRenderCommandBuffer(
+    wvk::render::BeginRenderCommandBuffer(
         render_command_buffer_[frame_index_]
         );
 
@@ -360,11 +360,11 @@ void WVkRender::Draw()
 
     // End Command buffer
 
-    weng::vk::render::EndRenderCommandBuffer(
+    wvk::render::EndRenderCommandBuffer(
         render_command_buffer_[frame_index_]
         );
 
-    VkSubmitInfo submit_info = weng::vk::vkstructs::CreateVkSubmitInfo();
+    VkSubmitInfo submit_info = wvk::vkstructs::CreateVkSubmitInfo();
 
     VkPipelineStageFlags wait_stages[] =
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -382,7 +382,7 @@ void WVkRender::Draw()
     submit_info.pSignalSemaphores =
         &sync_semaphores_[image_index].render_finished;
 
-    weng::vk::vulkan::ExecVkProcChecked(
+    wvk::vulkan::ExecVkProcChecked(
         vkQueueSubmit,
         "Failed to submit draw command buffer",
         device_.GraphicsQueue(),
@@ -392,7 +392,7 @@ void WVkRender::Draw()
         sync_fences_[frame_index_]
         );
 
-    VkPresentInfoKHR present_info = weng::vk::vkstructs::CreateVkPresentInfoKHR();
+    VkPresentInfoKHR present_info = wvk::vkstructs::CreateVkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;
@@ -678,29 +678,29 @@ void WVkRender::RecreateSwapChain() {
 
     // Destroy swap chain and other render targets
 
-    // weng::vk::vulkan::Destroy(
+    // wvk::vulkan::Destroy(
     //     swap_chain_info_,
     //     device_.Device()
     //     );
 
     
 
-    weng::vk::render::DestroyGBuffersRender(
+    wvk::render::DestroyGBuffersRender(
         gbuffers_rtargets_,
         device_.Device()
         );
 
-    weng::vk::render::DestroyOffscreenRender(
+    wvk::render::DestroyOffscreenRender(
         offscreen_rtargets_,
         device_.Device()
         );
 
-    weng::vk::render::DestroyPostprocessRender(
+    wvk::render::DestroyPostprocessRender(
         postprocess_rtargets_,
         device_.Device()
         );
 
-    weng::vk::render::DestroyTonemappingRender(
+    wvk::render::DestroyTonemappingRender(
         tonemapping_rtargets_,
         device_.Device()
         );
@@ -715,7 +715,7 @@ void WVkRender::RecreateSwapChain() {
         dimensions[1]
         );
 
-    weng::vk::render::CreateGBuffersRenderTargets(
+    wvk::render::CreateGBuffersRenderTargets(
         gbuffers_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -730,7 +730,7 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
         );
 
-    weng::vk::render::CreateOffscreenRenderTargets(
+    wvk::render::CreateOffscreenRenderTargets(
         offscreen_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -739,7 +739,7 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
         );
 
-    weng::vk::render::CreatePostprocessRenderTargets(
+    wvk::render::CreatePostprocessRenderTargets(
         postprocess_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -748,7 +748,7 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
         );
 
-    weng::vk::render::CreateTonemappingRenderTargets(
+    wvk::render::CreateTonemappingRenderTargets(
         tonemapping_rtargets_,
         device_.Device(),
         device_.PhysicalDevice(),
@@ -764,7 +764,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
     )
 {
 
-    weng::vk::render::RndCmd_TransitionGBufferWriteLayout(
+    wvk::render::RndCmd_TransitionGBufferWriteLayout(
         in_command_buffer,
         gbuffers_rtargets_[in_frame_index].albedo.image,
         gbuffers_rtargets_[in_frame_index].normal.image,
@@ -775,7 +775,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_rtargets_[in_frame_index].depth.image
         );
 
-    weng::vk::render::RndCmd_BeginGBuffersRendering(
+    wvk::render::RndCmd_BeginGBuffersRendering(
         in_command_buffer,
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
@@ -798,7 +798,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           render_pipeline.pipeline);
 
-        weng::vk::render::RndCmd_SetViewportAndScissor(
+        wvk::render::RndCmd_SetViewportAndScissor(
             in_command_buffer,
             gbuffers_rtargets_[in_frame_index].extent
             );
@@ -808,7 +808,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
             auto& binding = gbuffers_pipelines_.Binding(bid);
 
             // Create descriptor
-            VkDescriptorSet descriptorset = weng::vk::render::CreateRenderDescriptor(
+            VkDescriptorSet descriptorset = wvk::render::CreateRenderDescriptor(
                 device_.Device(),
                 gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
                 gbuffers_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
@@ -866,7 +866,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
     
     vkCmdEndRendering(in_command_buffer);
 
-    weng::vk::render::RndCmd_TransitionGBufferReadLayout(
+    wvk::render::RndCmd_TransitionGBufferReadLayout(
         in_command_buffer,
         gbuffers_rtargets_[in_frame_index].albedo.image,
         gbuffers_rtargets_[in_frame_index].normal.image,
@@ -883,12 +883,12 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     const std::uint32_t & in_frame_index
     ) {
     
-    weng::vk::render::RndCmd_TransitionOffscreenWriteLayout(
+    wvk::render::RndCmd_TransitionOffscreenWriteLayout(
         in_command_buffer,
         offscreen_rtargets_[in_frame_index].color.image
         );
 
-    weng::vk::render::RndCmd_BeginOffscreenRendering(
+    wvk::render::RndCmd_BeginOffscreenRendering(
         in_command_buffer,
         offscreen_rtargets_[in_frame_index].color.view,
         offscreen_rtargets_[in_frame_index].extent
@@ -905,13 +905,13 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         pipeline
         );
 
-    weng::vk::render::RndCmd_SetViewportAndScissor(
+    wvk::render::RndCmd_SetViewportAndScissor(
         in_command_buffer,
         offscreen_rtargets_[in_frame_index].extent
         );
 
     // DescriptorSet
-    VkDescriptorSet descriptorset = weng::vk::render::CreateOffscreenRenderDescriptor(
+    VkDescriptorSet descriptorset = wvk::render::CreateOffscreenRenderDescriptor(
         device_.Device(),
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
@@ -968,7 +968,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
 
     vkCmdEndRendering(in_command_buffer);
     
-    weng::vk::render::RndCmd_TransitionOffscreenReadLayout(
+    wvk::render::RndCmd_TransitionOffscreenReadLayout(
         in_command_buffer,
         offscreen_rtargets_[in_frame_index].color.image
         );
@@ -1006,7 +1006,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         ppcss_pipelines_.ResetGlobalDescriptorPool(in_frame_index);
 
         // render into layout
-        weng::vk::render::RndCmd_TransitionRenderImageLayout(
+        wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             dst_img,
             VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1017,7 +1017,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
             );
 
-        weng::vk::render::RndCmd_BeginPostprocessRendering(
+        wvk::render::RndCmd_BeginPostprocessRendering(
             in_command_buffer,
             dst_view,
             postprocess_rtargets_[in_frame_index].extent
@@ -1029,14 +1029,14 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             pipeline.pipeline
             );
 
-        weng::vk::render::RndCmd_SetViewportAndScissor(
+        wvk::render::RndCmd_SetViewportAndScissor(
             in_command_buffer,
             postprocess_rtargets_[in_frame_index].extent
             );
 
         // TODO also pass GBuffers in the global descriptor
 
-        VkDescriptorSet input_render_descriptor = weng::vk::render::CreateInputRenderDescriptor(
+        VkDescriptorSet input_render_descriptor = wvk::render::CreateInputRenderDescriptor(
             device_.Device(),
             ppcss_pipelines_.GlobalDescriptorPool(in_frame_index).descriptor_pool,
             ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
@@ -1044,7 +1044,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             pipeline_resources_.Sampler()
             );
 
-        VkDescriptorSet pp_descriptor = weng::vk::render::CreateRenderDescriptor(
+        VkDescriptorSet pp_descriptor = wvk::render::CreateRenderDescriptor(
             device_.Device(),
             dpool.descriptor_pool,
             dsetlay.descset_layout,
@@ -1055,7 +1055,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
         const WVkMeshInfo & render_plane = pipeline_resources_.RenderPlane();
 
-        weng::vk::render::RndCmd_PostprocessDrawCommands(
+        wvk::render::RndCmd_PostprocessDrawCommands(
             device_.Device(), in_command_buffer,
             render_plane.vertex_buffer, render_plane.index_buffer,
             render_plane.index_count,
@@ -1074,7 +1074,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         dst_img = pp_images[(idx + 1) % 2];
 
         // render from layout
-        weng::vk::render::RndCmd_TransitionRenderImageLayout(
+        wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             input_img,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -1096,12 +1096,12 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     const std::uint32_t & in_image_index
     ) {
     
-    weng::vk::render::RndCmd_TransitionTonemappingWriteLayout(
+    wvk::render::RndCmd_TransitionTonemappingWriteLayout(
         in_command_buffer,
         tonemapping_rtargets_[in_frame_index].color.image
         );
 
-    weng::vk::render::RndCmd_BeginTonemappingRendering(
+    wvk::render::RndCmd_BeginTonemappingRendering(
         in_command_buffer,
         tonemapping_rtargets_[in_frame_index].color.view,
         tonemapping_rtargets_[in_frame_index].extent
@@ -1117,13 +1117,13 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
         pipeline
         );
 
-    weng::vk::render::RndCmd_SetViewportAndScissor(
+    wvk::render::RndCmd_SetViewportAndScissor(
         in_command_buffer,
         tonemapping_rtargets_[in_frame_index].extent
         );
 
     VkDescriptorSet descriptorset =
-        weng::vk::render::CreateTonemappingDescriptor(
+        wvk::render::CreateTonemappingDescriptor(
             device_.Device(),
             tonemapping_pipeline_.DescriptorPool(in_frame_index),
             tonemapping_pipeline_.DescriptorSetLayout(),
@@ -1134,7 +1134,7 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     const WVkMeshInfo & rplane = pipeline_resources_. RenderPlane();
     VkDeviceSize offsets = 0;
 
-    weng::vk::render::TonemappingBindings(
+    wvk::render::TonemappingBindings(
         in_command_buffer,
         rplane.vertex_buffer,
         rplane.index_buffer,
@@ -1152,7 +1152,7 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
 
     vkCmdEndRendering(in_command_buffer);
 
-    weng::vk::render::RndCmd_TransitionTonemappingReadLayout(
+    wvk::render::RndCmd_TransitionTonemappingReadLayout(
         in_command_buffer,
         tonemapping_rtargets_[in_frame_index].color.image
         );
@@ -1170,7 +1170,7 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
     VkImageView swapchain_imageview = swapchain_.Views()[in_image_index];
 
     // swap chain image layout to render into it
-    weng::vk::render::RndCmd_TransitionRenderImageLayout(
+    wvk::render::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
         swapchain_image,
         VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1181,7 +1181,7 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         );
 
-    weng::vk::render::RndCmd_BeginSwapchainRendering(
+    wvk::render::RndCmd_BeginSwapchainRendering(
         in_command_buffer,
         swapchain_imageview,
         swapchain_imageview,
@@ -1199,12 +1199,12 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
         pipeline
         );
 
-    weng::vk::render::RndCmd_SetViewportAndScissor(
+    wvk::render::RndCmd_SetViewportAndScissor(
         in_command_buffer,
         swapchain_.Extent()
         );
 
-    VkDescriptorSet descriptor = weng::vk::render::CreateInputRenderDescriptor(
+    VkDescriptorSet descriptor = wvk::render::CreateInputRenderDescriptor(
         device_.Device(),
         swap_chain_pipeline_.DescriptorPool(in_frame_index),
         dslay,
@@ -1243,7 +1243,7 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
     vkCmdEndRendering(in_command_buffer);
 
     // Prepare swapchain images for present
-    weng::vk::render::RndCmd_TransitionRenderImageLayout(
+    wvk::render::RndCmd_TransitionRenderImageLayout(
         in_command_buffer,
         swapchain_image,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,

@@ -4,7 +4,7 @@
 #include "WLog.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
 #include "WShaderUtils.hpp"
 
 #include <cstddef>

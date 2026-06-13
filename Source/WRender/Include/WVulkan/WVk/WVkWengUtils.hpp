@@ -2,7 +2,7 @@
 
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
@@ -12,7 +12,9 @@
 #include <stdexcept>
 #include <vector>
 
-// TODO refactor namespaces weng::vk::texture:: weng::vk::image:: weng::vk::vulkan:: etc
+// WVkWengUtils.hpp
+
+// TODO refactor namespaces wvk::texture:: wvk::image:: wvk::vulkan:: etc
 //  namespaces to sneaky_case
 namespace WVkWengUtils {
 
@@ -101,11 +103,11 @@ namespace WVkWengUtils {
         VkShaderModule result;
 
         VkShaderModuleCreateInfo shader_module_create_info =
-            weng::vk::vkstructs::CreateVkShaderModuleCreateInfo();
+            wvk::vkstructs::CreateVkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
         shader_module_create_info.pCode = in_code;
 
-        weng::vk::vulkan::ExecVkProcChecked(
+        wvk::vulkan::ExecVkProcChecked(
             vkCreateShaderModule,
             "Failed to create shader module!",
             in_device, 
@@ -211,46 +213,6 @@ namespace WVkWengUtils {
         vkQueueWaitIdle(graphics_queue);
 
         vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
-    }
-
-    inline std::array<float, 16> RenderPlaneVertex() noexcept {
-        return {
-            -1.f, -1.f, 0.f, 0.f,
-            1.f, -1.f, 1.f, 0.f,
-            1.f, 1.f, 1.f, 1.f,
-            -1.f, 1.f, 0.f, 1.f
-        };
-    }
-
-    inline std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
-        return { 2,1,0,0,3,2 };
-    }
-
-    WNODISCARD inline VkSampler CreateRenderPlaneSampler(const VkDevice & in_device) {
-        VkSampler result;
-        VkSamplerCreateInfo sampler_info{};
-        sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        sampler_info.magFilter = VK_FILTER_LINEAR;
-        sampler_info.minFilter = VK_FILTER_LINEAR;
-        sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        sampler_info.anisotropyEnable = VK_FALSE;
-        sampler_info.maxAnisotropy = 0;
-        sampler_info.compareEnable = VK_FALSE;
-        sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
-        sampler_info.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-        sampler_info.unnormalizedCoordinates = VK_FALSE;
-
-        if(vkCreateSampler(in_device,
-                           &sampler_info,
-                           nullptr,
-                           &result) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create sampler!");
-        }
-
-        return result;
     }
 
     inline VkShaderStageFlags ToVkShaderStageFlag(const EShaderStageFlag & in_pipe_flags) {

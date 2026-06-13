@@ -1,6 +1,6 @@
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 #include "WLog.hpp"
-#include "WVulkan/WVkUtils/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkWengUtils.hpp"
 #include "WShaderUtils.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
@@ -28,7 +28,7 @@
 // Create functions
 // ----------------
 
-// void weng::vk::vulkan::CreateTexture(
+// void wvk::vulkan::CreateTexture(
 //     WVkTextureInfo &out_texture_info,
 //     const WTextureStruct &texture_struct,
 //     const VkDevice & in_device,
@@ -155,7 +155,7 @@
 //     vkDestroyBuffer(in_device, staging_buffer, nullptr);
 // }
 
-void weng::vk::vulkan::Create(
+void wvk::vulkan::Create(
     WVkDescriptorSetLayoutInfo & out_descriptor_set_layout_info,
     const VkDevice & in_device
     )
@@ -182,7 +182,7 @@ void weng::vk::vulkan::Create(
     }
 }
 
-void weng::vk::vulkan::CreateImage(
+void wvk::vulkan::CreateImage(
     VkImage &out_image,
     VkDeviceMemory &out_image_memory,
     const VkDevice &device,
@@ -236,7 +236,7 @@ void weng::vk::vulkan::CreateImage(
     vkBindImageMemory(device, out_image, out_image_memory, 0);
 }
 
-void weng::vk::vulkan::CreateMeshBuffers(
+void wvk::vulkan::CreateMeshBuffers(
     WVkMeshInfo & out_mesh_info,
     const void * vertex_buffer,
     const std::uint32_t & vertex_buffer_size,
@@ -334,7 +334,7 @@ void weng::vk::vulkan::CreateMeshBuffers(
     out_mesh_info.index_count = index_count;
 }
 
-void weng::vk::vulkan::CreateUBO(
+void wvk::vulkan::CreateUBO(
     WVkUBOInfo & out_ubo_info,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device)
@@ -350,7 +350,7 @@ void weng::vk::vulkan::CreateUBO(
         );
 }
 
-void weng::vk::vulkan::MapUBO(
+void wvk::vulkan::MapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
     const VkDevice & in_device
     )
@@ -365,7 +365,7 @@ void weng::vk::vulkan::MapUBO(
         );
 }
 
-void weng::vk::vulkan::UnmapUBO(
+void wvk::vulkan::UnmapUBO(
     WVkUBOInfo & out_uniform_buffer_info,
     const VkDevice & in_device
     ) {
@@ -377,7 +377,7 @@ void weng::vk::vulkan::UnmapUBO(
     out_uniform_buffer_info.mapped_memory = nullptr;
 }
 
-void weng::vk::vulkan::Create(
+void wvk::vulkan::Create(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const VkDevice & in_device)
 {
@@ -408,7 +408,7 @@ void weng::vk::vulkan::Create(
     }
 }
 
-void weng::vk::vulkan::Create(
+void wvk::vulkan::Create(
     WVkDescriptorSetInfo & out_descriptor_set_info,
     const VkDevice & in_device,
     const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
@@ -431,7 +431,7 @@ void weng::vk::vulkan::Create(
     }
 }
 
-// void weng::vk::vulkan::UpdateDescriptorSets(
+// void wvk::vulkan::UpdateDescriptorSets(
 //     const std::vector<VkWriteDescriptorSet> & in_write_descriptor_sets,
 //     const WVkDeviceInfo & in_device_info
 //     )
@@ -445,7 +445,7 @@ void weng::vk::vulkan::Create(
 //         );
 // }
 
-// void weng::vk::vulkan::Create(
+// void wvk::vulkan::Create(
 //     WVkCommandBufferInfo & out_command_buffer_info,
 //     const WVkDeviceInfo & device,
 //     const WVkCommandPoolInfo & command_pool_info
@@ -471,7 +471,7 @@ void weng::vk::vulkan::Create(
 // Destroy functions
 // -----------------
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkRenderPipelineInfo & pipeline_info,
     const VkDevice & in_device
     )
@@ -500,7 +500,7 @@ void weng::vk::vulkan::Destroy(
     }
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
     const VkDevice & in_device
     )
@@ -513,7 +513,7 @@ void weng::vk::vulkan::Destroy(
         );
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkDescriptorPoolInfo & out_descriptor_pool_info,
     const VkDevice & in_device
     )
@@ -527,7 +527,7 @@ void weng::vk::vulkan::Destroy(
     out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkTextureInfo & in_texture_info,
     const VkDevice & in_device
     ) {
@@ -558,7 +558,7 @@ void weng::vk::vulkan::Destroy(
     
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkMeshInfo & out_mesh_info,
     const VkDevice & in_device
     ) {
@@ -581,7 +581,7 @@ void weng::vk::vulkan::Destroy(
 
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     WVkUBOInfo & out_ubo_info,
     const VkDevice & in_device
     ) {
@@ -608,7 +608,7 @@ void weng::vk::vulkan::Destroy(
     out_ubo_info.range = 0;
 }
 
-void weng::vk::vulkan::Destroy(
+void wvk::vulkan::Destroy(
     VkSampler & out_sampler,
     const VkDevice & in_device
     ) {
@@ -622,7 +622,7 @@ void weng::vk::vulkan::Destroy(
 // Helper functions
 // ----------------
 
-bool weng::vk::vulkan::CheckValidationLayerSupport(
+bool wvk::vulkan::CheckValidationLayerSupport(
     const std::vector<std::string_view>& in_validation_layers
     )
 {
@@ -654,7 +654,7 @@ bool weng::vk::vulkan::CheckValidationLayerSupport(
     return true;
 }
 
-std::vector<const char *> weng::vk::vulkan::GetRequiredExtensions(bool enable_validation_layers)
+std::vector<const char *> wvk::vulkan::GetRequiredExtensions(bool enable_validation_layers)
 {
     uint32_t glfw_extension_count = 0;
     const char ** glfw_extensions;
@@ -673,7 +673,7 @@ std::vector<const char *> weng::vk::vulkan::GetRequiredExtensions(bool enable_va
     return extensions;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL weng::vk::vulkan::DebugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL wvk::vulkan::DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT InMessageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT InMessageType,
     const VkDebugUtilsMessengerCallbackDataEXT *InCallbackData,
@@ -683,7 +683,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL weng::vk::vulkan::DebugCallback(
     return VK_FALSE;
 }
 
-bool weng::vk::vulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
+bool wvk::vulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
                                const VkSurfaceKHR & surface,
                                const std::vector<std::string_view> & device_extensions)
 {
@@ -705,7 +705,7 @@ bool weng::vk::vulkan::IsDeviceSuitable(const VkPhysicalDevice & device,
     return indices.IsComplete() && extensions_supported && swap_chain_adequate && supported_features.samplerAnisotropy;
 }
 
-bool weng::vk::vulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
+bool wvk::vulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & device,
                                           const std::vector<std::string_view> & device_extensions)
 {
     uint32_t extension_count;
@@ -724,7 +724,7 @@ bool weng::vk::vulkan::CheckDeviceExtensionSupport(const VkPhysicalDevice & devi
     return required_extensions.empty();
 }
 
-weng::vk::vulkan::QueueFamilyIndices weng::vk::vulkan::FindQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
+wvk::vulkan::QueueFamilyIndices wvk::vulkan::FindQueueFamilies(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     QueueFamilyIndices indices;
 
@@ -759,7 +759,7 @@ weng::vk::vulkan::QueueFamilyIndices weng::vk::vulkan::FindQueueFamilies(const V
     return indices;
 }
 
-weng::vk::vulkan::SwapChainSupportDetails weng::vk::vulkan::QuerySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
+wvk::vulkan::SwapChainSupportDetails wvk::vulkan::QuerySwapChainSupport(const VkPhysicalDevice &device, const VkSurfaceKHR &surface)
 {
     SwapChainSupportDetails details;
 
@@ -784,7 +784,7 @@ weng::vk::vulkan::SwapChainSupportDetails weng::vk::vulkan::QuerySwapChainSuppor
     return details;
 }
 
-VkSurfaceFormatKHR weng::vk::vulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
+VkSurfaceFormatKHR wvk::vulkan::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats)
 {
     for (const auto &available_format : available_formats)
     {
@@ -797,7 +797,7 @@ VkSurfaceFormatKHR weng::vk::vulkan::ChooseSwapSurfaceFormat(const std::vector<V
     return available_formats[0];
 }
 
-VkPresentModeKHR weng::vk::vulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & available_present_modes)
+VkPresentModeKHR wvk::vulkan::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> & available_present_modes)
 {
     for (const auto &available_present_mode : available_present_modes)
     {
@@ -809,7 +809,7 @@ VkPresentModeKHR weng::vk::vulkan::ChooseSwapPresentMode(const std::vector<VkPre
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D weng::vk::vulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities,
+VkExtent2D wvk::vulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & in_capabilities,
                                      const std::uint32_t & in_width,
                                      const std::uint32_t & in_height)
 {
@@ -839,7 +839,7 @@ VkExtent2D weng::vk::vulkan::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR & i
     }
 }
 
-VkImageView weng::vk::vulkan::CreateImageView(
+VkImageView wvk::vulkan::CreateImageView(
     const VkImage & in_image,
     const VkFormat & in_format,
     const VkImageAspectFlags & in_aspect_flags,
@@ -867,7 +867,7 @@ VkImageView weng::vk::vulkan::CreateImageView(
     return image_view;
 }
 
-void weng::vk::vulkan::CreateVkBuffer(
+void wvk::vulkan::CreateVkBuffer(
     VkBuffer &out_buffer,
     VkDeviceMemory &out_buffer_memory,
     const VkDevice &device,
@@ -909,7 +909,7 @@ void weng::vk::vulkan::CreateVkBuffer(
     // WFLOG("Create new Buffer {}", static_cast<void*>(out_buffer));
 }
 
-VkFormat weng::vk::vulkan::FindSupportedFormat(
+VkFormat wvk::vulkan::FindSupportedFormat(
     const VkPhysicalDevice & device,
     const std::vector<VkFormat> & candidates,
     VkImageTiling tiling,
@@ -933,7 +933,7 @@ VkFormat weng::vk::vulkan::FindSupportedFormat(
     throw std::runtime_error("Failed to find supported format!");
 }
 
-VkFormat weng::vk::vulkan::FindDepthFormat(const VkPhysicalDevice & device)
+VkFormat wvk::vulkan::FindDepthFormat(const VkPhysicalDevice & device)
 {
     return FindSupportedFormat(
         device,
@@ -946,7 +946,7 @@ VkFormat weng::vk::vulkan::FindDepthFormat(const VkPhysicalDevice & device)
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-uint32_t weng::vk::vulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_filter, VkMemoryPropertyFlags properties)
+uint32_t wvk::vulkan::FindMemoryType(const VkPhysicalDevice &device, uint32_t type_filter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties mem_properties;
     vkGetPhysicalDeviceMemoryProperties(device, &mem_properties);
@@ -961,7 +961,7 @@ uint32_t weng::vk::vulkan::FindMemoryType(const VkPhysicalDevice &device, uint32
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
-void weng::vk::vulkan::TransitionTextureImageLayout(
+void wvk::vulkan::TransitionTextureImageLayout(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
@@ -1037,7 +1037,7 @@ void weng::vk::vulkan::TransitionTextureImageLayout(
         command_buffer);
 }
 
-VkCommandBuffer weng::vk::vulkan::BeginSingleTimeCommands(const VkDevice &device, const VkCommandPool &command_pool)
+VkCommandBuffer wvk::vulkan::BeginSingleTimeCommands(const VkDevice &device, const VkCommandPool &command_pool)
 {
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1056,7 +1056,7 @@ VkCommandBuffer weng::vk::vulkan::BeginSingleTimeCommands(const VkDevice &device
     return command_buffer;
 }
 
-void weng::vk::vulkan::EndSingleTimeCommands(
+void wvk::vulkan::EndSingleTimeCommands(
     const VkDevice &device,
     const VkCommandPool &command_pool,
     const VkQueue &graphics_queue,
@@ -1075,42 +1075,7 @@ void weng::vk::vulkan::EndSingleTimeCommands(
     vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
 
-VkSampler weng::vk::vulkan::CreateTextureSampler(
-    const VkDevice &device,
-    const VkPhysicalDevice &physical_device,
-    const uint32_t &mip_levels)
-{
-    VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(physical_device, &properties);
-
-    VkSamplerCreateInfo sampler_info{};
-    sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    sampler_info.magFilter = VK_FILTER_LINEAR;
-    sampler_info.minFilter = VK_FILTER_LINEAR;
-    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.anisotropyEnable = VK_TRUE;
-    sampler_info.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-    sampler_info.unnormalizedCoordinates = VK_FALSE;
-    sampler_info.compareEnable = VK_FALSE;
-    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
-    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    sampler_info.minLod = 0.f;
-    sampler_info.maxLod = static_cast<float>(mip_levels);
-    sampler_info.mipLodBias = 0.f;
-
-    VkSampler texture_sampler;
-    if (vkCreateSampler(device, &sampler_info, nullptr, &texture_sampler) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create texture sampler!");
-    }
-
-    return texture_sampler;
-}
-
-void weng::vk::vulkan::CopyBufferToImage(
+void wvk::vulkan::CopyBufferToImage(
     VkBuffer in_buffer,
     VkImage in_image,
     uint32_t in_width,
@@ -1159,7 +1124,7 @@ void weng::vk::vulkan::CopyBufferToImage(
         );
 }
 
-VkSampleCountFlagBits weng::vk::vulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device)
+VkSampleCountFlagBits wvk::vulkan::GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device)
 {
     VkPhysicalDeviceProperties PhysicalDeviceProperties;
     vkGetPhysicalDeviceProperties(
@@ -1183,7 +1148,7 @@ VkSampleCountFlagBits weng::vk::vulkan::GetMaxUsableSampleCount(VkPhysicalDevice
 
 }
 
-void weng::vk::vulkan::GenerateMipmaps(
+void wvk::vulkan::GenerateMipmaps(
     VkImage in_image,
     VkFormat in_image_format,
     int32_t in_tex_width,
@@ -1310,8 +1275,8 @@ void weng::vk::vulkan::GenerateMipmaps(
 
 }
 
-// TODO Move to weng::vk::texture
-VkFormat weng::vk::vulkan::GetImageFormat(uint8_t in_texture_channels)
+// TODO Move to wvk::texture
+VkFormat wvk::vulkan::GetImageFormat(uint8_t in_texture_channels)
 {
     ETextureFormat value = static_cast<ETextureFormat>(in_texture_channels);
     
@@ -1329,7 +1294,7 @@ VkFormat weng::vk::vulkan::GetImageFormat(uint8_t in_texture_channels)
     }
 }
 
-WTextureStruct weng::vk::vulkan::AddRGBAPadding(const WTextureStruct & in_texture)
+WTextureStruct wvk::vulkan::AddRGBAPadding(const WTextureStruct & in_texture)
 {
     WTextureStruct result;
     

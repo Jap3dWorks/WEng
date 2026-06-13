@@ -20,7 +20,7 @@ struct GLFWwindow;
 
 // WVulkan Create Structs
 // ---------------
-namespace weng::vk::vkstructs {
+namespace wvk::vkstructs {
 
     inline constexpr VkApplicationInfo CreateVkApplicationInfo() noexcept {
         VkApplicationInfo result{};
@@ -192,7 +192,7 @@ namespace weng::vk::vkstructs {
     }
 }
 
-namespace weng::vk::vulkan
+namespace wvk::vulkan
 {
     /**
      * @brief Execute and check if the result is differrent to VK_SUCCESS.
@@ -307,12 +307,6 @@ namespace weng::vk::vulkan
         const VkImageAspectFlags& aspect_flags, 
         const uint32_t& mip_levels,
         const VkDevice& device 
-        );
-
-    VkSampler CreateTextureSampler(
-        const VkDevice& device, 
-        const VkPhysicalDevice& physical_device,
-        const uint32_t& mip_levels
         );
 
     void CreateVkBuffer(

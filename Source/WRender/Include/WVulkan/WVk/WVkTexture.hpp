@@ -4,7 +4,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include <vulkan/vulkan_core.h>
 
-namespace weng::vk::texture {
+namespace wvk::texture {
 
     void CreateTexture(
         WVkTextureInfo& out_texture_info, 
@@ -15,4 +15,11 @@ namespace weng::vk::texture {
         const VkCommandPool &in_command_pool
         );
 
+    VkSampler CreateTextureSampler(
+        const VkDevice& device, 
+        const VkPhysicalDevice& physical_device,
+        const uint32_t& mip_levels
+        );
 }
+
+

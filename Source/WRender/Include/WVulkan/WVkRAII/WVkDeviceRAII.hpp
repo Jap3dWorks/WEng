@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 #include "WUtils/WStringUtils.hpp"
 
 #include <vector>
@@ -35,11 +35,11 @@ public:
 
         for (const auto &device : devices)
         {
-            if (weng::vk::vulkan::IsDeviceSuitable(device, in_surface, in_device_extensions))
+            if (wvk::vulkan::IsDeviceSuitable(device, in_surface, in_device_extensions))
             {
                 // TODO device checks
                 vk_physical_device = device;
-                msaa_samples = weng::vk::vulkan::GetMaxUsableSampleCount(device);
+                msaa_samples = wvk::vulkan::GetMaxUsableSampleCount(device);
                 break;
             }
         }
@@ -51,8 +51,8 @@ public:
 
         // Create Logical Device
 
-        weng::vk::vulkan::QueueFamilyIndices indices =
-            weng::vk::vulkan::FindQueueFamilies(vk_physical_device, in_surface);
+        wvk::vulkan::QueueFamilyIndices indices =
+            wvk::vulkan::FindQueueFamilies(vk_physical_device, in_surface);
         std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
         std::set<uint32_t> unique_queue_families = {
             indices.graphics_family.value(),
@@ -120,7 +120,7 @@ public:
             create_info.enabledLayerCount = 0;
         }
 
-        weng::vk::vulkan::ExecVkProcChecked(vkCreateDevice,
+        wvk::vulkan::ExecVkProcChecked(vkCreateDevice,
                                    "Failed to create logical device!",
                                    vk_physical_device,
                                    &create_info,

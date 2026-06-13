@@ -1,7 +1,7 @@
-#include "WVulkan/WVkTexture.hpp"
-#include "WVulkan/WVkUtils/WVulkan.hpp"
+#include "WVulkan/WVk/WVkTexture.hpp"
+#include "WVulkan/WVk/WVulkan.hpp"
 
-void weng::vk::texture::CreateTexture(
+void wvk::texture::CreateTexture(
     WVkTextureInfo &out_texture_info,
     const WTextureStruct &texture_struct,
     const VkDevice & in_device,
@@ -21,7 +21,7 @@ void weng::vk::texture::CreateTexture(
     }
     else
     {
-        texture_rgba = weng::vk::vulkan::AddRGBAPadding(texture_struct);
+        texture_rgba = wvk::vulkan::AddRGBAPadding(texture_struct);
         texture_ptr = &texture_rgba;
     }
 
@@ -41,7 +41,7 @@ void weng::vk::texture::CreateTexture(
     // staging buffers are host accesible ram
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
-    CreateVkBuffer(
+    vulkan::CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
         in_device,
@@ -60,7 +60,7 @@ void weng::vk::texture::CreateTexture(
         );
     vkUnmapMemory(in_device, staging_buffer_memory);
 
-    CreateImage(
+    vulkan::CreateImage(
         out_texture_info.image,
         out_texture_info.memory,
         in_device,
@@ -75,7 +75,7 @@ void weng::vk::texture::CreateTexture(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    TransitionTextureImageLayout(
+    vulkan::TransitionTextureImageLayout(
         in_device,
         in_command_pool,
         in_graphics_queue,
@@ -86,7 +86,7 @@ void weng::vk::texture::CreateTexture(
         );
 
     // This operation is using DMA.
-    CopyBufferToImage(
+    vulkan::CopyBufferToImage(
         staging_buffer,
         out_texture_info.image,
         texture_ptr->width,
@@ -96,7 +96,7 @@ void weng::vk::texture::CreateTexture(
         in_graphics_queue
         );
 
-    GenerateMipmaps(
+    vulkan::GenerateMipmaps(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         texture_ptr->width,
@@ -109,7 +109,7 @@ void weng::vk::texture::CreateTexture(
         );
 
     // Image view
-    out_texture_info.view = CreateImageView(
+    out_texture_info.view = vulkan::CreateImageView(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
@@ -129,4 +129,37 @@ void weng::vk::texture::CreateTexture(
 }
 
 
+VkSampler wvk::texture::CreateTextureSampler(
+    const VkDevice& device, 
+    const VkPhysicalDevice& physical_device,
+    const uint32_t& mip_levels
+    ) {
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(physical_device, &properties);
 
+    VkSamplerCreateInfo sampler_info{};
+    sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sampler_info.magFilter = VK_FILTER_LINEAR;
+    sampler_info.minFilter = VK_FILTER_LINEAR;
+    sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.anisotropyEnable = VK_TRUE;
+    sampler_info.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    sampler_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    sampler_info.unnormalizedCoordinates = VK_FALSE;
+    sampler_info.compareEnable = VK_FALSE;
+    sampler_info.compareOp = VK_COMPARE_OP_ALWAYS;
+    sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    sampler_info.minLod = 0.f;
+    sampler_info.maxLod = static_cast<float>(mip_levels);
+    sampler_info.mipLodBias = 0.f;
+
+    VkSampler texture_sampler;
+    if (vkCreateSampler(device, &sampler_info, nullptr, &texture_sampler) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create texture sampler!");
+    }
+
+    return texture_sampler;
+}
