@@ -4,6 +4,7 @@
 #include "WLog.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkWengUtils.hpp"
 #include "WShaderUtils.hpp"
 
@@ -62,7 +63,7 @@ namespace WVkPostprocessPipeUtils {
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     
         std::vector<VkShaderModule> shader_modules =
-            WVkWengUtils::CreateShaderModules(
+            wvk::shader::CreateShaderModules(
                 wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
                 );
 

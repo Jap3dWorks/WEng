@@ -5,6 +5,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkWengUtils.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 
 #include "WShaderUtils.hpp"
@@ -176,7 +177,7 @@ private:
             WStringUtils::SystemPath(std::string(shader_path_))
             );
 
-        VkShaderModule shader_module = WVkWengUtils::CreateShaderModule(
+        VkShaderModule shader_module = wvk::shader::CreateShaderModule(
             device_,
             shadercode.data(),
             shadercode.size()
