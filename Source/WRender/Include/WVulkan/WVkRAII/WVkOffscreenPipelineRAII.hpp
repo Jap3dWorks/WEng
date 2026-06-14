@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
@@ -151,7 +151,7 @@ private:
         // albedo,normal,ws_position,mrAO,emission,extra01,depth
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
         for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
-            sampler_bindings[i]=wvk::vkstructs::CreateVkDescriptorSetLayoutBinding();
+            sampler_bindings[i]=wvk::types::CreateVkDescriptorSetLayoutBinding();
             sampler_bindings[i].binding = i;
             sampler_bindings[i].descriptorCount = 1;
             sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

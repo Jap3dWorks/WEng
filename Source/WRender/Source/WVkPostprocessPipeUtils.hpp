@@ -5,7 +5,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 #include "WShaderUtils.hpp"
 
 #include <cstddef>

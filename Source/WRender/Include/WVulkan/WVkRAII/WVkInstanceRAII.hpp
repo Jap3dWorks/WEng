@@ -23,14 +23,14 @@ public:
             throw std::runtime_error("Validation layers requested, but not available!");
         }
 
-        VkApplicationInfo app_info = wvk::vkstructs::CreateVkApplicationInfo();
+        VkApplicationInfo app_info = wvk::types::CreateVkApplicationInfo();
         app_info.pApplicationName = "WEngine";
         app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         app_info.pEngineName = "WEngine";
         app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         app_info.apiVersion = VK_API_VERSION_1_3;
 
-        VkInstanceCreateInfo create_info = wvk::vkstructs::CreateVkInstanceCreateInfo();
+        VkInstanceCreateInfo create_info = wvk::types::CreateVkInstanceCreateInfo();
         create_info.pApplicationInfo = &app_info;
 
         auto extensions = wvk::vulkan::GetRequiredExtensions(in_enable_validation_layers);
@@ -39,7 +39,7 @@ public:
         create_info.ppEnabledExtensionNames = extensions.data();
 
         VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
-            wvk::vkstructs::CreateVkDebugUtilsMessengerCreateInfoEXT();
+            wvk::types::CreateVkDebugUtilsMessengerCreateInfoEXT();
 
         std::vector<const char*> enabled_layers_names{};
         if (in_enable_validation_layers)

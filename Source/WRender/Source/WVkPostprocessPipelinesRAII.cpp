@@ -1,8 +1,10 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WStructs/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
+// #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
@@ -64,7 +66,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
         in_id,
         device_,
         in_pipeline_struct.params_descriptor,
-        WVkWengUtils::UpdateDescriptorSetLayout
+        wvk::descriptor::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(
@@ -153,7 +155,7 @@ void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
         global_resources_.descset_layout_info
         );
 
-    wvk::vulkan::Create(
+    wvk::descriptor::Create(
         global_resources_.descset_layout_info,
         device_
         );

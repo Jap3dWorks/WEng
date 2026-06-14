@@ -61,12 +61,12 @@ namespace wvk::render_plane {
         ) {
 
         // VkShaderStageFlagBits
-        in_data[0] = wvk::vkstructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[0] = wvk::types::CreateVkPipelineShaderStageCreateInfo();
         in_data[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
         in_data[0].module=in_shader_module;
         in_data[0].pName="vsMain";
 
-        in_data[1] = wvk::vkstructs::CreateVkPipelineShaderStageCreateInfo();
+        in_data[1] = wvk::types::CreateVkPipelineShaderStageCreateInfo();
         in_data[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         in_data[1].module=in_shader_module;
         in_data[1].pName="fsMain";
@@ -104,7 +104,7 @@ namespace wvk::render_plane {
     {
         
         ::VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            wvk::vkstructs::CreateVkPipelineVertexInputStateCreateInfo();
+            wvk::types::CreateVkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount=1;
         vertex_input_info.pVertexBindingDescriptions = &in_binding_desc;
         vertex_input_info.vertexAttributeDescriptionCount=in_attr_desc_count;
@@ -115,7 +115,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineInputAssemblyStateCreateInfo VkPipelineInputAssemblyStateCreateInfo() {
         ::VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            wvk::vkstructs::CreateVkPipelineInputAssemblyStateCreateInfo();
+            wvk::types::CreateVkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
         
@@ -125,7 +125,7 @@ namespace wvk::render_plane {
     inline VkPipelineViewportStateCreateInfo VkPipelineViewportStateCreateInfo()
     {
         ::VkPipelineViewportStateCreateInfo viewport_state =
-            wvk::vkstructs::CreateVkPipelineViewportStateCreateInfo();
+            wvk::types::CreateVkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount=1;
         viewport_state.scissorCount=1;
         
@@ -134,7 +134,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineRasterizationStateCreateInfo VkPipelineRasterizationStateCreateInfo() {
         ::VkPipelineRasterizationStateCreateInfo rasterizer =
-            wvk::vkstructs::CreateVkPipelineRasterizationStateCreateInfo();
+            wvk::types::CreateVkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -149,7 +149,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineMultisampleStateCreateInfo VkPipelineMultisampleStateCreateInfo() {
         ::VkPipelineMultisampleStateCreateInfo multisampling =
-            wvk::vkstructs::CreateVkPipelineMultisampleStateCreateInfo();
+            wvk::types::CreateVkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;  // no msaa
         
@@ -158,7 +158,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineDepthStencilStateCreateInfo VkPipelineDepthStencilStateCreateInfo() {
         ::VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            wvk::vkstructs::CreateVkPipelineDepthStencilStateCreateInfo();
+            wvk::types::CreateVkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_FALSE;
         depth_stencil.depthWriteEnable = VK_FALSE;
         
@@ -183,7 +183,7 @@ namespace wvk::render_plane {
         )
     {
         ::VkPipelineColorBlendStateCreateInfo color_blending =
-            wvk::vkstructs::CreateVkPipelineColorBlendStateCreateInfo();
+            wvk::types::CreateVkPipelineColorBlendStateCreateInfo();
         color_blending.logicOpEnable = VK_FALSE;
         color_blending.logicOp = VK_LOGIC_OP_COPY;
         color_blending.attachmentCount = 1;
@@ -206,7 +206,7 @@ namespace wvk::render_plane {
         };
 
         ::VkPipelineDynamicStateCreateInfo dynamic_state =
-            wvk::vkstructs::CreateVkPipelineDynamicStateCreateInfo();
+            wvk::types::CreateVkPipelineDynamicStateCreateInfo();
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(out_dyn_states.size());
         dynamic_state.pDynamicStates = out_dyn_states.data();
 
@@ -221,7 +221,7 @@ namespace wvk::render_plane {
         ::VkPipelineLayout result;
         
         VkPipelineLayoutCreateInfo pipeline_layout_info =
-            wvk::vkstructs::CreateVkPipelineLayoutCreateInfo();
+            wvk::types::CreateVkPipelineLayoutCreateInfo();
 
         // Only one desc set, in the future I could need more (some global parameters).
 
@@ -253,7 +253,7 @@ namespace wvk::render_plane {
         )
     {
         ::VkGraphicsPipelineCreateInfo pipeline_info =
-            wvk::vkstructs::CreateVkGraphicsPipelineCreateInfo();
+            wvk::types::CreateVkGraphicsPipelineCreateInfo();
         pipeline_info.stageCount = in_shader_stages_count;
         pipeline_info.pStages = in_shader_stages;
         pipeline_info.pVertexInputState = in_vertex_input_info;
@@ -281,7 +281,7 @@ namespace wvk::render_plane {
         )
     {
         VkPipelineRenderingCreateInfo rendering_info =
-            wvk::vkstructs::CreateVkPipelineRenderingCreateInfo();
+            wvk::types::CreateVkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = in_color_attachment_count;
         rendering_info.pColorAttachmentFormats = in_color_attachment_format;
 

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 
-#include <stdatomic.h>
+// #include <stdatomic.h>
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
 
@@ -43,7 +44,7 @@ public:
         }
 
         VkSwapchainCreateInfoKHR create_info =
-            wvk::vkstructs::CreateVkSwapchainCreateInfoKHR();
+            wvk::types::CreateVkSwapchainCreateInfoKHR();
     
         create_info.surface = in_surface;
         create_info.minImageCount = image_count;

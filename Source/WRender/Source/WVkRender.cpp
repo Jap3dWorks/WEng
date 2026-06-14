@@ -364,7 +364,7 @@ void WVkRender::Draw()
         render_command_buffer_[frame_index_]
         );
 
-    VkSubmitInfo submit_info = wvk::vkstructs::CreateVkSubmitInfo();
+    VkSubmitInfo submit_info = wvk::types::CreateVkSubmitInfo();
 
     VkPipelineStageFlags wait_stages[] =
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -392,7 +392,7 @@ void WVkRender::Draw()
         sync_fences_[frame_index_]
         );
 
-    VkPresentInfoKHR present_info = wvk::vkstructs::CreateVkPresentInfoKHR();
+    VkPresentInfoKHR present_info = wvk::types::CreateVkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;

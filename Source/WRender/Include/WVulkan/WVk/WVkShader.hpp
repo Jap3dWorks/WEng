@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
@@ -17,7 +17,7 @@ namespace wvk::shader {
         VkShaderModule result;
 
         VkShaderModuleCreateInfo shader_module_create_info =
-            wvk::vkstructs::CreateVkShaderModuleCreateInfo();
+            wvk::types::CreateVkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
         shader_module_create_info.pCode = in_code;
 
@@ -61,7 +61,7 @@ namespace wvk::shader {
             out_shader_stages[i] = {};
             out_shader_stages[i].pNext = VK_NULL_HANDLE;
             out_shader_stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            out_shader_stages[i].stage = WVkWengUtils::ToShaderStageFlagBits(
+            out_shader_stages[i].stage = wvk::types::ToShaderStageFlagBits(
                 stage_infos[i].type
                 );
 

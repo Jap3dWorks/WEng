@@ -11,6 +11,7 @@ add_library(
         Source/WVkPostprocessPipelinesRAII.cpp
         Source/WVkSurfaceRAII.cpp
         Source/WVkTexture.cpp
+        Source/WVkDescriptor.cpp
     )
 
 find_package(glm REQUIRED)

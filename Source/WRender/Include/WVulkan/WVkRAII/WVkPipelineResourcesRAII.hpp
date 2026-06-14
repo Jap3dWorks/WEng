@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include <vulkan/vulkan_core.h>

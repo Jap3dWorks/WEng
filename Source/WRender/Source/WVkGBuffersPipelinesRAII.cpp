@@ -3,13 +3,15 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WLog.hpp"
 #include "WVkGBuffersPipelinesUtils.hpp"
-#include "WVulkan/WVk/WVkWengUtils.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
+// #include "WVulkan/WVk/WVkTypes.hpp"
 
-#include <stdexcept>
+// #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
@@ -72,7 +74,7 @@ void WVkGBuffersPipelinesRAII::CreatePipeline(
         in_id,
         Device(),
         in_pipeline_struct.params_descriptor,
-        WVkWengUtils::UpdateDescriptorSetLayout
+        wvk::descriptor::UpdateDescriptorSetLayout
         );
 
     pipelines_db_.CreatePipeline(
@@ -139,7 +141,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         global_graphics_descsets_.descset_layout_info
         );
 
-    wvk::vulkan::Create(
+    wvk::descriptor::Create(
         global_graphics_descsets_.descset_layout_info,
         Device()
         );

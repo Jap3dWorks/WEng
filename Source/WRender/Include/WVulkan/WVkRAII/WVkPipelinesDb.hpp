@@ -6,6 +6,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WUtils/WStringUtils.hpp"
@@ -84,7 +85,7 @@ public:
             in_id,
             [this, &descriptor_set_layout_info, &in_device]
             (const WPipelineIdType & _in_id) -> auto {
-                wvk::vulkan::Create(
+                wvk::descriptor::Create(
                     descriptor_set_layout_info,
                     in_device
                     );

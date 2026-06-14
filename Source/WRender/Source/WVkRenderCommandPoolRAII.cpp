@@ -1,5 +1,6 @@
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
+// #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -20,7 +21,7 @@ WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(
     wvk::vulkan::QueueFamilyIndices queue_family_indices =
         wvk::vulkan::FindQueueFamilies(in_physical_device, in_surface);
 
-    VkCommandPoolCreateInfo pool_info = wvk::vkstructs::CreateVkCommandPoolCreateInfo();
+    VkCommandPoolCreateInfo pool_info = wvk::types::CreateVkCommandPoolCreateInfo();
     pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 
