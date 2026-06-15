@@ -4,6 +4,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
@@ -102,7 +103,7 @@ private:
         if (device_ != VK_NULL_HANDLE) {
             DestroyRenderPipeline();
 
-            wvk::vulkan::DestroyDescPools(
+            wvk::descriptor::DestroyDescPools(
                 descpool_info_,
                 device_);
 

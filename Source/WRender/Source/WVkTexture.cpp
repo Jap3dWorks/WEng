@@ -1,4 +1,7 @@
 #include "WVulkan/WVk/WVkTexture.hpp"
+#include "WStructs/WTextureStructs.hpp"
+#include "WVulkan/WVk/WVkBuffer.hpp"
+#include "WVulkan/WVk/WVkImage.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 
 void wvk::texture::CreateTexture(
@@ -21,7 +24,7 @@ void wvk::texture::CreateTexture(
     }
     else
     {
-        texture_rgba = wvk::vulkan::AddRGBAPadding(texture_struct);
+        texture_rgba = wvk::texture::AddRGBAPadding(texture_struct);
         texture_ptr = &texture_rgba;
     }
 
@@ -41,7 +44,7 @@ void wvk::texture::CreateTexture(
     // staging buffers are host accesible ram
     VkBuffer staging_buffer;
     VkDeviceMemory staging_buffer_memory;
-    vulkan::CreateVkBuffer(
+    wvk::buffer::CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
         in_device,
@@ -60,7 +63,7 @@ void wvk::texture::CreateTexture(
         );
     vkUnmapMemory(in_device, staging_buffer_memory);
 
-    vulkan::CreateImage(
+    wvk::image::CreateImage(
         out_texture_info.image,
         out_texture_info.memory,
         in_device,
@@ -75,7 +78,7 @@ void wvk::texture::CreateTexture(
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-    vulkan::TransitionTextureImageLayout(
+    wvk::image::TransitionImageLayout(
         in_device,
         in_command_pool,
         in_graphics_queue,
@@ -86,7 +89,7 @@ void wvk::texture::CreateTexture(
         );
 
     // This operation is using DMA.
-    vulkan::CopyBufferToImage(
+    wvk::image::CopyBufferToImage(
         staging_buffer,
         out_texture_info.image,
         texture_ptr->width,
@@ -96,7 +99,7 @@ void wvk::texture::CreateTexture(
         in_graphics_queue
         );
 
-    vulkan::GenerateMipmaps(
+    wvk::image::GenerateMipmaps(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         texture_ptr->width,
@@ -109,7 +112,7 @@ void wvk::texture::CreateTexture(
         );
 
     // Image view
-    out_texture_info.view = vulkan::CreateImageView(
+    out_texture_info.view = wvk::image::CreateImageView(
         out_texture_info.image,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_ASPECT_COLOR_BIT,
@@ -163,3 +166,89 @@ VkSampler wvk::texture::CreateTextureSampler(
 
     return texture_sampler;
 }
+
+void wvk::texture::DestroyTexture(
+    WVkTextureInfo & in_texture_info,
+    const VkDevice & in_device
+    ) {
+    
+    vkDestroySampler(in_device,
+                     in_texture_info.sampler,
+                     nullptr);
+
+    in_texture_info.sampler = VK_NULL_HANDLE;
+
+    vkDestroyImageView(in_device,
+                       in_texture_info.view,
+                       nullptr);
+
+    in_texture_info.view = VK_NULL_HANDLE;
+
+    vkDestroyImage(in_device,
+                   in_texture_info.image,
+                   nullptr);
+
+    in_texture_info.image = VK_NULL_HANDLE;
+
+    vkFreeMemory(in_device,
+                 in_texture_info.memory,
+                 nullptr);
+
+    in_texture_info.memory = VK_NULL_HANDLE;
+}
+
+
+void wvk::texture::DestroyVkSampler(
+    VkSampler & out_sampler,
+    const VkDevice & in_device
+    ) {
+    vkDestroySampler(in_device, out_sampler, nullptr);
+    out_sampler = VK_NULL_HANDLE;
+}
+
+
+VkFormat wvk::texture::ToVkFormat(ETextureFormat in_texture_format)
+{
+    // TODO fill with remaining formats
+
+    switch(in_texture_format) {
+    case ETextureFormat::R8_SRGB:
+        return VK_FORMAT_R8_SRGB;
+    case ETextureFormat::RG8_SRGB:
+        return VK_FORMAT_R8G8_SRGB;
+    case ETextureFormat::RGB8_SRGB:
+        return VK_FORMAT_R8G8B8_SRGB;
+    case ETextureFormat::RGBA8_SRGB:
+        return VK_FORMAT_R8G8B8A8_SRGB;
+    default:
+        return VK_FORMAT_R8G8B8A8_SRGB;
+    }
+}
+
+WTextureStruct wvk::texture::AddRGBAPadding(const WTextureStruct & in_texture)
+{
+    WTextureStruct result;
+    
+    result.format = ETextureFormat::RGBA8_SRGB;
+    result.height = in_texture.height;
+    result.width = in_texture.width;
+
+    result.data = in_texture.data;
+
+    size_t tex_size = result.height * result.width;
+
+    result.data.resize(result.height * result.width * 4, 255);
+
+    int num_channels = NumOfChannels(in_texture.format);
+
+    for (int i=num_channels; i < 4; i++) {
+        std::memcpy(
+            result.data.data() + (tex_size * i),
+            result.data.data(),
+            tex_size
+            );
+    }
+
+    return result;
+}
+

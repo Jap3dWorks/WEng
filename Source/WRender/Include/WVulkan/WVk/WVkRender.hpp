@@ -2,6 +2,7 @@
 
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
 
@@ -63,7 +64,7 @@ namespace wvk::render {
             pstrnd.extent = {in_width, in_height};
             pstrnd.color.extent = {in_width, in_height};
 
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 pstrnd.color.image,
                 pstrnd.color.memory,
                 in_device,
@@ -79,7 +80,7 @@ namespace wvk::render {
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
 
-            pstrnd.color.view = wvk::vulkan::CreateImageView(
+            pstrnd.color.view = wvk::image::CreateImageView(
                 pstrnd.color.image,
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -103,7 +104,7 @@ namespace wvk::render {
             tmprt.extent = {in_width, in_height};
             tmprt.color.extent = tmprt.extent;
 
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 tmprt.color.image,
                 tmprt.color.memory,
                 in_device,
@@ -119,7 +120,7 @@ namespace wvk::render {
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
 
-            tmprt.color.view = wvk::vulkan::CreateImageView(
+            tmprt.color.view = wvk::image::CreateImageView(
                 tmprt.color.image,
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -152,7 +153,7 @@ namespace wvk::render {
             offrnd.albedo.extent = {in_width, in_height};
 
             // albedo
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.albedo.image,
                 offrnd.albedo.memory,
                 in_device,
@@ -168,7 +169,7 @@ namespace wvk::render {
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
             
-            offrnd.albedo.view = wvk::vulkan::CreateImageView(
+            offrnd.albedo.view = wvk::image::CreateImageView(
                 offrnd.albedo.image,
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -178,7 +179,7 @@ namespace wvk::render {
 
             // normal
             offrnd.normal.extent = {in_width, in_height};
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.normal.image,
                 offrnd.normal.memory,
                 in_device,
@@ -193,7 +194,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.normal.view = wvk::vulkan::CreateImageView(
+            offrnd.normal.view = wvk::image::CreateImageView(
                 offrnd.normal.image,
                 in_normal_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -203,7 +204,7 @@ namespace wvk::render {
 
             // ws_position
             offrnd.ws_position.extent = {in_width, in_height};
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.ws_position.image,
                 offrnd.ws_position.memory,
                 in_device,
@@ -218,7 +219,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.ws_position.view = wvk::vulkan::CreateImageView(
+            offrnd.ws_position.view = wvk::image::CreateImageView(
                 offrnd.ws_position.image,
                 in_ws_position_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -228,7 +229,7 @@ namespace wvk::render {
 
             // mrAO
             offrnd.mrAO.extent = {in_width, in_height};
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.mrAO.image,
                 offrnd.mrAO.memory,
                 in_device,
@@ -243,7 +244,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.mrAO.view = wvk::vulkan::CreateImageView(
+            offrnd.mrAO.view = wvk::image::CreateImageView(
                 offrnd.mrAO.image,
                 in_mrAO_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -253,7 +254,7 @@ namespace wvk::render {
             
             // emission
             offrnd.emission.extent = {in_width, in_height};
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.emission.image,
                 offrnd.emission.memory,
                 in_device,
@@ -268,7 +269,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.emission.view = wvk::vulkan::CreateImageView(
+            offrnd.emission.view = wvk::image::CreateImageView(
                 offrnd.emission.image,
                 in_emission_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -278,7 +279,7 @@ namespace wvk::render {
 
             // extra01
             offrnd.extra01.extent = {in_width, in_height};
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.extra01.image,
                 offrnd.extra01.memory,
                 in_device,
@@ -293,7 +294,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.extra01.view = wvk::vulkan::CreateImageView(
+            offrnd.extra01.view = wvk::image::CreateImageView(
                 offrnd.extra01.image,
                 in_extra01_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -303,7 +304,7 @@ namespace wvk::render {
 
             // extra2
             // offrnd.extra02.extent = {in_width, in_height};
-            // wvk::vulkan::CreateImage(
+            // wvk::image::CreateImage(
             //     offrnd.extra02.image,
             //     offrnd.extra02.memory,
             //     in_device_info.vk_device,
@@ -318,7 +319,7 @@ namespace wvk::render {
             //     VK_IMAGE_USAGE_SAMPLED_BIT,
             //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
             //     );
-            // offrnd.extra02.view = wvk::vulkan::CreateImageView(
+            // offrnd.extra02.view = wvk::image::CreateImageView(
             //     offrnd.extra02.image,
             //     in_extra02_format,
             //     VK_IMAGE_ASPECT_COLOR_BIT,
@@ -328,7 +329,7 @@ namespace wvk::render {
 
             // depth
             offrnd.depth.extent = offrnd.extent;
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.depth.image,
                 offrnd.depth.memory,
                 in_device,
@@ -343,7 +344,7 @@ namespace wvk::render {
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            offrnd.depth.view = wvk::vulkan::CreateImageView(
+            offrnd.depth.view = wvk::image::CreateImageView(
                 offrnd.depth.image,
                 in_depth_format,
                 VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -367,7 +368,7 @@ namespace wvk::render {
             offrnd.extent = {in_width, in_height};
             offrnd.color.extent = {in_width, in_height};
 
-            wvk::vulkan::CreateImage(
+            wvk::image::CreateImage(
                 offrnd.color.image,
                 offrnd.color.memory,
                 in_device,
@@ -383,7 +384,7 @@ namespace wvk::render {
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
 
-            offrnd.color.view = wvk::vulkan::CreateImageView(
+            offrnd.color.view = wvk::image::CreateImageView(
                 offrnd.color.image,
                 in_color_format,
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -423,7 +424,7 @@ namespace wvk::render {
         for(auto & frames : ubo_binding) {
             write_ds.push_back({});
             
-            wvk::vulkan::UpdateWriteDescriptorSet_UBO(
+            wvk::descriptor::UpdateWriteDescriptorSet_UBO(
                 write_ds.back(),
                 frames[in_frame_index].binding,
                 frames[in_frame_index].buffer_info,
@@ -434,7 +435,7 @@ namespace wvk::render {
         for (auto & texbnd : in_textures_binding) {
             write_ds.push_back({});
             
-            wvk::vulkan::UpdateWriteDescriptorSet_Texture(
+            wvk::descriptor::UpdateWriteDescriptorSet_Texture(
                 write_ds.back(),
                 texbnd.binding,
                 texbnd.image_info,

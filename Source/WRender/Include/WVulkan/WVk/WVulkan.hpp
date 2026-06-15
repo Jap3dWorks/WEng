@@ -1,21 +1,15 @@
 #pragma once
 
-#include "WCore/WCore.hpp"
 #include "WLog.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
 
 #include <cstdint>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <vulkan/vulkan_core.h>
 #include <optional>
-
-struct WTextureStruct;
-struct WMeshStruct;
-struct GLFWwindow;
-
-// TODO this file should be more WENG agnostic
-//  try to use only vulkan types.
+#include <string_view>
+#include <stdexcept>
+#include <vector>
 
 namespace wvk::vulkan
 {
@@ -29,257 +23,6 @@ namespace wvk::vulkan
             throw std::runtime_error(std::string(message));
             }
     }
-
-    // Create functions
-    // ----------------
-
-    // void Create(
-    //     WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-    //     const VkDevice & device
-    //     );
-
-    /**
-     * @brief Create a vulkan  mesh
-     */
-    void CreateMeshBuffers(
-        WVkMeshInfo & out_mesh_info,
-        const void * vertex_buffer,
-        const std::uint32_t & vertes_buffer_size,
-        const void * index_buffer,
-        const std::uint32_t & index_buffer_size,
-        const std::uint32_t & index_count,
-        const VkDevice & device,
-        const VkPhysicalDevice & in_physical_device,
-        const VkQueue & in_queue,
-        const VkCommandPool & command_pool_info
-        );
-
-    void CreateUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device
-        );
-
-    void MapUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device
-        );
-
-    void UnmapUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device
-        );
-
-
-    // TODO move to WVkDescriptor
-
-    void Create(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const VkDevice & device
-        );
-
-    void Create(
-        WVkDescriptorSetInfo& out_descriptor_set_info,
-        const VkDevice &device,
-        const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const WVkDescriptorPoolInfo& descriptor_pool_info
-        );
-
-    // ---^----------------^--
-
-    // ----------------
- 
-    struct WVkWriteDescriptorSetUBOStruct
-    {
-        uint32_t binding;
-        WVkUBOInfo uniform_buffer_info;
-        VkDescriptorSet descriptor_set;
-
-        VkDescriptorBufferInfo buffer_info{};
-    };
-
-    struct WVkWriteDescriptorSetTextureStruct
-    {
-        uint32_t binding;
-        WVkTextureInfo texture_info;
-        VkDescriptorSet descriptor_set;
-
-        VkDescriptorImageInfo image_info{};
-    };
-
-    void CreateImage(
-        VkImage& out_image,
-        VkDeviceMemory& out_image_memory,
-        const VkDevice& device, 
-        const VkPhysicalDevice& physical_device,
-        const uint32_t& width,
-        const uint32_t& height, 
-        const uint32_t& mip_levels, 
-        const VkSampleCountFlagBits& samples,
-        const VkFormat& format, 
-        const VkImageTiling& tiling, 
-        const VkImageUsageFlags& usage, 
-        const VkMemoryPropertyFlags& properties
-        );
-
-    VkImageView CreateImageView(
-        const VkImage& image, 
-        const VkFormat& format, 
-        const VkImageAspectFlags& aspect_flags, 
-        const uint32_t& mip_levels,
-        const VkDevice& device 
-        );
-
-    void CreateVkBuffer(
-        VkBuffer & out_buffer, 
-        VkDeviceMemory & out_buffer_memory,
-        const VkDevice& device,
-        const VkPhysicalDevice& physical_device,
-        VkDeviceSize size, 
-        VkBufferUsageFlags usage, 
-        VkMemoryPropertyFlags properties
-        );
-
-    // Destroy functions
-    // -----------------
-
-    void Destroy(WVkSwapChainInfo & swap_chain_info,
-                 const VkDevice & device_info);
-
-    void Destroy(
-        WVkRenderPipelineInfo &pipeline_info,
-        const VkDevice & device);
-
-    void Destroy(
-        WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-        const VkDevice & device
-        );
-
-    void Destroy(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
-        const VkDevice & in_device
-        );
-
-    void Destroy(
-        WVkTextureInfo & out_texture_info,
-        const VkDevice & in_device_info
-        );
-
-    void Destroy(
-        WVkMeshInfo & out_mesh_info,
-        const VkDevice & in_device_info
-        );
-
-    void Destroy(
-        WVkUBOInfo & out_ubo_info,
-        const VkDevice & in_device
-        );
-
-    void Destroy(
-        VkSampler & out_sampler,
-        const VkDevice & in_device_info
-        );
-
-    template<std::size_t N>
-    void DestroyDescPools(std::array<VkDescriptorPool, N> & out_desc_pools,
-                          const VkDevice & in_device) {
-        for (std::uint32_t i=0; i<N; i++) {
-            if(out_desc_pools[i]) {
-                vkDestroyDescriptorPool(
-                    in_device,
-                    out_desc_pools[i],
-                    nullptr
-                    );
-            }
-
-            out_desc_pools[i] = VK_NULL_HANDLE;
-        }
-    }
-
-    // Descriptor Set Layout
-    // ---------------------
-
-    constexpr void UpdateWriteDescriptorSet_UBO(
-        VkWriteDescriptorSet & out_write_descriptor_set,
-        const uint32_t & in_binding,
-        const VkDescriptorBufferInfo & in_buffer_info,
-        const VkDescriptorSet & dst_set
-        )
-    {
-        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = in_binding;
-        out_write_descriptor_set.dstSet = dst_set;
-        out_write_descriptor_set.dstArrayElement = 0;
-        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pBufferInfo = &in_buffer_info;
-        out_write_descriptor_set.pImageInfo = VK_NULL_HANDLE;
-        out_write_descriptor_set.pNext = VK_NULL_HANDLE;
-    }
-
-    constexpr void UpdateWriteDescriptorSet_Texture(
-        VkWriteDescriptorSet & out_write_descriptor_set,
-        const uint32_t & in_binding,
-        const VkDescriptorImageInfo & in_image_info,
-        const VkDescriptorSet & dst_set
-        )
-    {
-        out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = in_binding;
-        out_write_descriptor_set.dstSet = dst_set;
-        out_write_descriptor_set.dstArrayElement = 0;
-        out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pImageInfo = &in_image_info;
-        out_write_descriptor_set.pBufferInfo = VK_NULL_HANDLE;
-        out_write_descriptor_set.pNext = VK_NULL_HANDLE;
-    }
-
-    inline bool UpdateUBO(
-        WVkUBOInfo & in_ubo_info,
-        const void * in_data,
-        const std::size_t & in_size,
-        const std::size_t & in_offset=0
-        ) {
-
-        char * mapped_mem = reinterpret_cast<char*>(in_ubo_info.mapped_memory);
-        memcpy((mapped_mem + in_offset),
-               in_data,
-               in_size               
-            );
-
-        return true;
-    }
-
-    inline bool UpdateUBOModel(
-        WVkUBOInfo & uniform_buffer_object_info_,
-        const glm::mat4 & model
-        ) {
-        WUBOGraphicsStruct ubo{};
-
-        ubo.model = model;
-        
-        memcpy(uniform_buffer_object_info_.mapped_memory,
-               &ubo,
-               sizeof(WUBOGraphicsStruct));
-
-        return true;
-    }
-
-    inline bool UpdateUBOModel(
-        WVkUBOInfo & uniform_buffer_object_info_,
-        const WUBOGraphicsStruct & in_ubo_model_struct
-        ) {
-        
-        memcpy(uniform_buffer_object_info_.mapped_memory,
-               &in_ubo_model_struct,
-               sizeof(WUBOGraphicsStruct));
-
-        return true;
-    }
-
-    // Helper Functions TODO: move to wvk::types.
-    // ----------------
 
     /**
      * @brief Checks if the requested validation layers are available.
@@ -297,26 +40,7 @@ namespace wvk::vulkan
             }
     };
 
-    struct SwapChainSupportDetails
-    {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> present_modes;
-    };
-
     QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
-
-    SwapChainSupportDetails QuerySwapChainSupport(const VkPhysicalDevice& device, const VkSurfaceKHR& surface);
-
-    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &available_formats);
-
-    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &available_present_modes);
-
-    VkExtent2D ChooseSwapExtent(
-        const VkSurfaceCapabilitiesKHR &capabilities,
-        const std::uint32_t & in_width,
-        const std::uint32_t & in_height
-        );
 
     /**
      * Return a list of required vulkan instance extensions.
@@ -340,26 +64,6 @@ namespace wvk::vulkan
 
     uint32_t FindMemoryType(const VkPhysicalDevice& device, uint32_t type_filter, VkMemoryPropertyFlags properties);
 
-    void TransitionTextureImageLayout(
-        const VkDevice & in_device, 
-        const VkCommandPool & in_command_pool, 
-        const VkQueue & in_graphics_queue, 
-        const VkImage & in_image, 
-        const VkImageLayout & in_old_layout, 
-        const VkImageLayout & in_new_layout, 
-        const uint32_t & in_mip_levels
-        );
-
-    void CopyBufferToImage(
-        VkBuffer in_buffer,
-        VkImage in_image,
-        uint32_t in_width,
-        uint32_t in_height,
-        const VkDevice & in_device,
-        const VkCommandPool & in_command_pool,
-        const VkQueue & in_graphics_queue
-        );
-
     VkCommandBuffer BeginSingleTimeCommands(
         const VkDevice & device, 
         const VkCommandPool & command_pool
@@ -373,22 +77,5 @@ namespace wvk::vulkan
         );
 
     VkSampleCountFlagBits GetMaxUsableSampleCount(VkPhysicalDevice in_physical_device);
-
-    void GenerateMipmaps(
-        VkImage in_image,
-        VkFormat in_image_format,
-        int32_t in_tex_width,
-        int32_t in_tex_height,
-        int32_t in_mip_levels,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device,
-        const VkCommandPool & in_command_pool,
-        const VkQueue & in_graphic_queue
-        );
-
-
-    VkFormat GetImageFormat(uint8_t in_texture_channels );
-
-    WTextureStruct AddRGBAPadding(const WTextureStruct & in_texture_struct);
 
 }

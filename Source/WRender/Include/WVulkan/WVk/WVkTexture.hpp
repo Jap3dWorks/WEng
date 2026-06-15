@@ -20,6 +20,22 @@ namespace wvk::texture {
         const VkPhysicalDevice& physical_device,
         const uint32_t& mip_levels
         );
+
+    void DestroyTexture(
+        WVkTextureInfo & out_texture_info,
+        const VkDevice & in_device
+        );
+
+    
+    void DestroyVkSampler(
+        VkSampler & out_sampler,
+        const VkDevice & in_device_info
+        );
+
+    VkFormat ToVkFormat(ETextureFormat in_texture_format );
+
+    WTextureStruct AddRGBAPadding(const WTextureStruct & in_texture_struct);
+
 }
 
 

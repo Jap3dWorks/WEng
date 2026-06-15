@@ -7,6 +7,8 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
+#include "WVulkan/WVk/WVkBuffer.hpp"
+#include "WVulkan/WVk/WVkPipeline.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WUtils/WStringUtils.hpp"
@@ -137,7 +139,7 @@ public:
 
     void RemovePipeline(const WPipelineIdType & in_id, const VkDevice & in_device) {
         pipelines.Remove(in_id, [&in_device](auto & rpip) {
-            wvk::vulkan::Destroy(
+            wvk::pipeline::Destroy(
                 rpip,
                 in_device);
         });
@@ -146,8 +148,8 @@ public:
     void RemoveDescSetLayout(const WPipelineIdType & in_id, const VkDevice & in_device) {
         descriptor_set_layouts.Remove(in_id,
                                       [&in_device](auto & dsetlay) {
-                                          wvk::vulkan::Destroy(dsetlay,
-                                                           in_device);
+                                          wvk::descriptor::Destroy(dsetlay,
+                                                                   in_device);
                                       });
     }
 
@@ -156,7 +158,7 @@ public:
             descriptor_pools[i].Remove(in_id,
                                        [&in_device]
                                        (auto & dpool) {
-                                           wvk::vulkan::Destroy(dpool, in_device);
+                                           wvk::descriptor::Destroy(dpool, in_device);
                                        });
         }
     }
@@ -166,7 +168,7 @@ public:
                         [di_=in_device](auto & b) {
                             for(auto& ubofrm: b.ubos) {
                                 for(auto& ubo:ubofrm) {
-                                    wvk::vulkan::Destroy(ubo.ubo_info, di_);
+                                    wvk::buffer::Destroy(ubo.ubo_info, di_);
                                 }
                             }
                         }
@@ -178,14 +180,14 @@ public:
         for(std::uint32_t i=0; i < FramesInFlight; i++) {
             descriptor_pools[i].Clear(
                 [di_=in_device](auto & b) {
-                    wvk::vulkan::Destroy(b, di_);
+                    wvk::descriptor::Destroy(b, di_);
                 }
                 );
         }
         
         pipelines.Clear(
             [di_=in_device](auto & p) {
-                wvk::vulkan::Destroy(
+                wvk::pipeline::Destroy(
                     p,
                     di_
                     );
@@ -193,7 +195,7 @@ public:
 
         descriptor_set_layouts.Clear(
             [di_=in_device](auto & d) {
-                wvk::vulkan::Destroy(
+                wvk::descriptor::Destroy(
                     d,
                     di_
                     );
@@ -203,7 +205,7 @@ public:
             [di_=in_device](auto & b) {
                 for(auto& ubofrm: b.ubos) {
                     for(auto& ubo : ubofrm) {
-                        wvk::vulkan::Destroy(ubo.ubo_info, di_);
+                        wvk::buffer::Destroy(ubo.ubo_info, di_);
                     }
                 }
             }

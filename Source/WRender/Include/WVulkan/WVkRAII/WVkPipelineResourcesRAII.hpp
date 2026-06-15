@@ -2,7 +2,9 @@
 
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkMesh.hpp"
+#include "WVulkan/WVk/WVkTexture.hpp"
+// #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -91,10 +93,10 @@ private:
 
     void Destroy() {
         if (device_ != VK_NULL_HANDLE) {
-            wvk::vulkan::Destroy(render_plane_, device_);
+            wvk::mesh::Destroy(render_plane_, device_);
             render_plane_ = {};
 
-            wvk::vulkan::Destroy(sampler_, device_);
+            wvk::texture::DestroyVkSampler(sampler_, device_);
             sampler_ = VK_NULL_HANDLE;
 
             device_ = VK_NULL_HANDLE;
@@ -108,7 +110,7 @@ private:
         auto plane_vertex = wvk::render_plane::RenderPlaneVertex();
         auto plane_index = wvk::render_plane::RenderPlaneIndexes();
 
-        wvk::vulkan::CreateMeshBuffers(
+        wvk::mesh::CreateMeshBuffers(
             render_plane_,
             plane_vertex.data(),
             sizeof(decltype(plane_vertex)::value_type) * plane_vertex.size(),

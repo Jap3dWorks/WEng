@@ -1,8 +1,39 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include "WVulkan/WVulkanStructs.hpp"
 
 namespace wvk::buffer {
+
+    void CreateVkBuffer(
+        VkBuffer & out_buffer, 
+        VkDeviceMemory & out_buffer_memory,
+        const VkDevice& device,
+        const VkPhysicalDevice& physical_device,
+        VkDeviceSize size, 
+        VkBufferUsageFlags usage, 
+        VkMemoryPropertyFlags properties
+        );
+
+    void CreateUBO(
+        WVkUBOInfo & out_uniform_buffer_info,
+        const VkDevice & in_device,
+        const VkPhysicalDevice & in_physical_device
+        );
+
+    void MapUBO(
+        WVkUBOInfo & out_uniform_buffer_info,
+        const VkDevice & in_device
+        );
+
+    void UnmapUBO(
+        WVkUBOInfo & out_uniform_buffer_info,
+        const VkDevice & in_device
+        );
+
+    void Destroy(
+        WVkUBOInfo & out_ubo_info,
+        const VkDevice & in_device
+        );
 
     inline void CopyVkBuffer(
         const VkDevice & device,
@@ -43,6 +74,50 @@ namespace wvk::buffer {
         vkQueueWaitIdle(graphics_queue);
 
         vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+    }
+
+        
+    inline bool UpdateUBO(
+        WVkUBOInfo & in_ubo_info,
+        const void * in_data,
+        const std::size_t & in_size,
+        const std::size_t & in_offset=0
+        ) {
+
+        char * mapped_mem = reinterpret_cast<char*>(in_ubo_info.mapped_memory);
+        memcpy((mapped_mem + in_offset),
+               in_data,
+               in_size               
+            );
+
+        return true;
+    }
+
+    inline bool UpdateUBOModel(
+        WVkUBOInfo & uniform_buffer_object_info_,
+        const glm::mat4 & model
+        ) {
+        WUBOGraphicsStruct ubo{};
+
+        ubo.model = model;
+        
+        memcpy(uniform_buffer_object_info_.mapped_memory,
+               &ubo,
+               sizeof(WUBOGraphicsStruct));
+
+        return true;
+    }
+
+    inline bool UpdateUBOModel(
+        WVkUBOInfo & uniform_buffer_object_info_,
+        const WUBOGraphicsStruct & in_ubo_model_struct
+        ) {
+        
+        memcpy(uniform_buffer_object_info_.mapped_memory,
+               &in_ubo_model_struct,
+               sizeof(WUBOGraphicsStruct));
+
+        return true;
     }
     
 }

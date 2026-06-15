@@ -3,6 +3,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WShaderUtils.hpp"
+#include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
@@ -115,7 +116,7 @@ private:
         // TODO private and use destructor
         if (device_ != VK_NULL_HANDLE) {
 
-            wvk::vulkan::DestroyDescPools(descriptor_pool_, device_);
+            wvk::descriptor::DestroyDescPools(descriptor_pool_, device_);
 
             if (pipeline_) {
                 vkDestroyPipeline(device_,

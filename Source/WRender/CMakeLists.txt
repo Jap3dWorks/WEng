@@ -12,6 +12,11 @@ add_library(
         Source/WVkSurfaceRAII.cpp
         Source/WVkTexture.cpp
         Source/WVkDescriptor.cpp
+        Source/WVkBuffer.cpp
+        Source/WVkMesh.cpp
+        Source/WVkImage.cpp
+        Source/WVkPipeline.cpp
+        Source/WVkSwapChain.cpp
     )
 
 find_package(glm REQUIRED)

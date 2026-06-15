@@ -6,6 +6,7 @@
 #include "WStructs/WGeometryStructs.hpp"
 #include "WStructs/WTextureStructs.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVk/WVkMesh.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkTexture.hpp"
 
@@ -73,7 +74,7 @@ public:
             in_id,
             [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
-                wvk::vulkan::CreateMeshBuffers(
+                wvk::mesh::CreateMeshBuffers(
                     result,
                     in_mesh.vertices.data(),
                     sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),

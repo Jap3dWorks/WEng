@@ -61,7 +61,7 @@ void WVkAssetResourcesRAII::UnloadTexture(const WAssetId & in_id) {
     texture_collection_.Remove(
         in_id,
         [this](WVkTextureInfo & in_texture_info) -> void {
-            wvk::vulkan::Destroy(
+            wvk::texture::DestroyTexture(
                 in_texture_info,
                 device_
                 );
@@ -74,7 +74,7 @@ void WVkAssetResourcesRAII::UnloadStaticMesh(const WAssetIndexId & in_id) {
     static_mesh_collection_.Remove(
         in_id,
         [this] (WVkMeshInfo & in_mesh_info) -> void {
-            wvk::vulkan::Destroy(
+            wvk::mesh::Destroy(
                 in_mesh_info,
                 device_
                 );
@@ -93,7 +93,7 @@ void WVkAssetResourcesRAII::Clear() {
     if (device_ != VK_NULL_HANDLE) {
         texture_collection_.Clear(
             [this](WVkTextureInfo & in_texture_info) -> void {
-                wvk::vulkan::Destroy(
+                wvk::texture::DestroyTexture(
                     in_texture_info,
                     device_
                     );
@@ -102,7 +102,7 @@ void WVkAssetResourcesRAII::Clear() {
 
         static_mesh_collection_.Clear(
             [this] (WVkMeshInfo & in_mesh_info) -> void {
-                wvk::vulkan::Destroy(
+                wvk::mesh::Destroy(
                     in_mesh_info,
                     device_
                     );

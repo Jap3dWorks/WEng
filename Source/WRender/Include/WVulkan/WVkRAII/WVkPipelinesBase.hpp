@@ -4,6 +4,7 @@
 #include "WStructs/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVkPipelinesDb.hpp"
+#include "WVulkan/WVk/WVkBuffer.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
@@ -184,9 +185,9 @@ public:
 
         if(!ubo) return;
 
-        wvk::vulkan::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
-        wvk::vulkan::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
-        wvk::vulkan::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
+        wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
+        wvk::buffer::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
+        wvk::buffer::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
     }
 
     void UpdateBinding(const WBindingIdType & in_binding_id,
@@ -206,9 +207,9 @@ public:
         if(!ubo) return;
 
         for(auto & b: (*ubo)) {
-            wvk::vulkan::MapUBO(b.ubo_info, device_);
-            wvk::vulkan::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
-            wvk::vulkan::UnmapUBO(b.ubo_info, device_);            
+            wvk::buffer::MapUBO(b.ubo_info, device_);
+            wvk::buffer::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
+            wvk::buffer::UnmapUBO(b.ubo_info, device_);            
         }
     }
 
@@ -246,7 +247,7 @@ protected:
                         bindings[ubopd.binding][frm].binding = ubopd.binding;
                         bindings[ubopd.binding][frm].ubo_info.range = ubopd.range;
 
-                        wvk::vulkan::CreateUBO(
+                        wvk::buffer::CreateUBO(
                             bindings[ubopd.binding][frm].ubo_info,
                             device_,
                             physical_device_
@@ -267,12 +268,12 @@ protected:
         
         for(auto & ubo : in_ubos) {
             for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                wvk::vulkan::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
-                wvk::vulkan::UpdateUBO(bindings[ubo.binding][frm].ubo_info,
+                wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
+                wvk::buffer::UpdateUBO(bindings[ubo.binding][frm].ubo_info,
                                    in_ubos[ubo.binding].data,
                                    in_ubos[ubo.binding].size,
                                    in_ubos[ubo.binding].offset);
-                wvk::vulkan::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
+                wvk::buffer::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
             }
         }
 

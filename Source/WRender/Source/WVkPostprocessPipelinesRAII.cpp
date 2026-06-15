@@ -172,13 +172,13 @@ void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
 
 void WVkPostprocessPipelinesRAII::Destroy_GlobalResources() {
 
-    wvk::vulkan::Destroy(
+    wvk::descriptor::Destroy(
         global_resources_.descset_layout_info,
         device_
         );
 
     for(auto & descpool : global_resources_.descpool_info) {
-        wvk::vulkan::Destroy(descpool, device_);
+        wvk::descriptor::Destroy(descpool, device_);
     }
 
     global_resources_ = {};

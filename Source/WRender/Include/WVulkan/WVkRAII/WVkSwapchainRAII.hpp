@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WVulkan/WVk/WVkTypes.hpp"
+#include "WVulkan/WVk/WVkImage.hpp"
+#include "WVulkan/WVk/WVkSwapChain.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 
 // #include <stdatomic.h>
@@ -21,17 +23,17 @@ public:
                      const std::uint32_t & in_width,
                      const std::uint32_t & in_height) :
         device_(in_device) {
-        wvk::vulkan::SwapChainSupportDetails swap_chain_support = wvk::vulkan::QuerySwapChainSupport(
+        wvk::swap_chain::SwapChainSupportDetails swap_chain_support = wvk::swap_chain::QuerySwapChainSupport(
             in_physical_device,
             in_surface
             );
 
         VkSurfaceFormatKHR surface_format =
-            wvk::vulkan::ChooseSwapSurfaceFormat(swap_chain_support.formats);
+            wvk::swap_chain::ChooseSwapSurfaceFormat(swap_chain_support.formats);
         VkPresentModeKHR present_mode =
-            wvk::vulkan::ChooseSwapPresentMode(swap_chain_support.present_modes);
+            wvk::swap_chain::ChooseSwapPresentMode(swap_chain_support.present_modes);
         VkExtent2D extent =
-            wvk::vulkan::ChooseSwapExtent(swap_chain_support.capabilities,
+            wvk::swap_chain::ChooseSwapExtent(swap_chain_support.capabilities,
                              in_width,
                              in_height);
 
@@ -110,7 +112,7 @@ public:
 
         for (size_t i = 0; i < images_.size(); i++)
         {
-            views_[i] = wvk::vulkan::CreateImageView(images_[i],
+            views_[i] = wvk::image::CreateImageView(images_[i],
                                                  format_,
                                                  VK_IMAGE_ASPECT_COLOR_BIT,
                                                  1,
