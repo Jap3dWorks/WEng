@@ -25,7 +25,7 @@ target_link_libraries(
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
-        WImporters::WImporters
+        WImporter::WImporter
         WRender::WRender
         WEngineInterfaces::WEngineInterfaces
         WLevel::WLevel

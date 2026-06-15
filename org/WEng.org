@@ -1,10 +1,9 @@
 #+title: WEng
 
 * Project Structure
-
-* Module Structure
-** Directory Tree
-*** Modules (PascalCase)
+** Module Structure
+*** Directory Tree
+**** Modules (PascalCase)
 
     - ModulesNames _(PascalCase)_
         - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
@@ -14,23 +13,13 @@
             - ModuleHeader.h _(PascalCase)_
     - ...
 
-*** Source (PascalCase)
-
-    - WSourceModules _(PascalCase)_
-        - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
-        - Source
-            - ModuleFile.cpp _(PascalCase)_
-        - Include
-            - ModuleHeader.h _(PascalCase)_
-    - ...
-
-** Namespaces
+*** Namespaces
 
 - All elements, classes, structs and free operations should be placed in a namespace.
       - Namespaces as module abstractions.
       - w<name>::<subname>
-            - w<name> : abbreviation of the external module.
-            - <subname> : abstraction that groups the operations.
+            - w<name> : two letter abbreviation of the external module.
+            - <subname> : abstraction that groups the elements.
 
 * Modules
 ** Objectives

@@ -1,15 +1,15 @@
 add_library(
-    WImporters 
+    WImporter 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WImporters.cpp
+        Source/WImporter.cpp
         Source/WImporterRegister.cpp
 )
 
 find_package(tinyobjloader REQUIRED)
 
 target_include_directories(
-    WImporters 
+    WImporter 
     PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PublicGenerated>
@@ -21,18 +21,18 @@ target_include_directories(
 )
 
 target_link_libraries(
-    WImporters 
+    WImporter 
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
         WEngineInterfaces::WEngineInterfaces
 )
 
-add_library(WImporters::WImporters ALIAS WImporters)
+add_library(WImporter::WImporter ALIAS WImporter)
 
 install(
-    TARGETS WImporters
-    EXPORT WImportersTargets
+    TARGETS WImporter
+    EXPORT WImporterTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
@@ -40,10 +40,10 @@ install(
     )
 
 install(
-    EXPORT WImportersTargets
-    FILE WImportersConfig.cmake
-    NAMESPACE WImporters::
-    DESTINATION lib/cmake/WImporters
+    EXPORT WImporterTargets
+    FILE WImporterConfig.cmake
+    NAMESPACE WImporter::
+    DESTINATION lib/cmake/WImporter
 )
 
 install(
@@ -64,13 +64,13 @@ install(
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    WImportersConfigVersion.cmake
+    WImporterConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion    
 )
 
 install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/WImportersConfigVersion.cmake
-    DESTINATION lib/cmake/WImporters
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/WImporterConfigVersion.cmake
+    DESTINATION lib/cmake/WImporter
 )
     

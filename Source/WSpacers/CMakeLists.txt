@@ -22,7 +22,7 @@ target_link_libraries(
         WEngineObjects::WEngineObjects
         WEngineInterfaces::WEngineInterfaces
         WRender::WRender
-        WImporters::WImporters
+        WImporter::WImporter
         WEngine::WEngine
         WLevel::WLevel
         
