@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WAsset.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 
 #include "WRenderPipelineAsset.WEngine.hpp"
 

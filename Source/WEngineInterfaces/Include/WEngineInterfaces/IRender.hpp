@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 
 #include <vector>
 #include <span>
@@ -10,7 +10,8 @@
 class WRenderPipelineAsset;
 // class WTextureAsset;
 // class WStaticMeshAsset;
-struct WTextureStruct;
+namespace wtp::texture { struct WTexture; }
+
 struct WMeshStruct;
 struct WTransformStruct;
 
@@ -77,7 +78,7 @@ public:
      * @brief Load the registered texture asset with id in_id.
      */
     virtual void LoadTexture(const WAssetId & in_id,
-                             const WTextureStruct & in_texture)=0;
+                             const wtp::texture::WTexture & in_texture)=0;
 
     virtual void UnloadTexture(const WAssetId & in_id)=0;
 

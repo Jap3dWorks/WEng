@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"

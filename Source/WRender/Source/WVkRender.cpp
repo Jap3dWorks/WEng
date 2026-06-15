@@ -23,7 +23,7 @@
 #include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
 #include "WStructs/WComponentStructs.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
 #include "WLog.hpp"
 

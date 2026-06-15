@@ -2,9 +2,9 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
-#include "WStructs/WGeometryStructs.hpp"
-#include "WStructs/WRenderStructs.hpp"
-#include "WStructs/WTextureStructs.hpp"
+#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -72,7 +72,9 @@ public:
 
     void RefreshPipelines() override;
 
-    void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) override {
+    void LoadTexture(const WAssetId & in_id,
+                     const wtp::texture::WTexture & in_texture) override
+    {
         render_resources_.LoadTexture(in_id, in_texture);
     }
 

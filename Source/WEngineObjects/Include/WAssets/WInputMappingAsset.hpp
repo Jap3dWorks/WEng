@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WAsset.hpp"
-#include "WStructs/WEngineStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
 #include <unordered_map>
 
 #include "WInputMappingAsset.WEngine.hpp"

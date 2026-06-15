@@ -3,8 +3,8 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 
-#include "WStructs/WGeometryStructs.hpp"
-#include "WStructs/WTextureStructs.hpp"
+#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkMesh.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
@@ -45,7 +45,7 @@ public:
 
     // Texture
 
-    void LoadTexture(const WAssetId & in_id, const WTextureStruct & in_texture) {
+    void LoadTexture(const WAssetId & in_id, const wtp::texture::WTexture & in_texture) {
         texture_collection_.CreateAt(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {

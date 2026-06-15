@@ -24,8 +24,16 @@
             - ModuleHeader.h _(PascalCase)_
     - ...
 
-** Source modules _In progress_
-*** Objectives
+** Namespaces
+
+- All elements, classes, structs and free operations should be placed in a namespace.
+      - Namespaces as module abstractions.
+      - w<name>::<subname>
+            - w<name> : abbreviation of the external module.
+            - <subname> : abstraction that groups the operations.
+
+* Modules
+** Objectives
 
 Modules should be linkable between them and dinamically linkable with the core application.
 Our source modules should avoid unneeded dependencies.
@@ -34,20 +42,40 @@ Data structure design paradigm (memory addresess sorted by component class).
 Use standard library for data types. 
 Use libraries to solve complex problems.
 
-*** WCore
+** WCore
+*** Submódulos
+**** WCoreTypes
+***** Target
+Tipos básicos del engine.
+Se claran en WCore para evitar las dependencias cruzadas entre módulos.
 
-*** WCommand
+***** Archivos
+- WTexture.hpp
+- WGeometry.hpp
+- WEngine.hpp
+- WMath.hpp
+- WRender.hpp
+
+***** Namespaces
+- wtp::texture : weng textures subprograms.
+
+
+** WCommand
 
 /Command Module/
 
 This module will contain the system for command registation, base classes and command queues. 
 each module will be responsible of its commands creation and registation in the system.
 
-*** WRender
+** WRender
 
 Vulkan Rendering related code
 
-*** WEngine
+*** Namespaces
+
+- wvk::<label> : weng vulkan subprograms.
+
+** WEngine
 
 /Main Module/
 
@@ -68,5 +96,5 @@ The engine class will reference to other modules in the aplication.
 - B -> Base Clases not Interfaces
 - I -> Interfaces
 - W -> WEng Object | Engine modules | Engine classes
-
+- E -> Enums
 

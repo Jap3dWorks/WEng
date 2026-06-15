@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
-#include "WStructs/WMathStructs.hpp"
+#include "WCoreTypes/WMathStructs.hpp"
 #include <array>
 
 #include <glm/glm.hpp>

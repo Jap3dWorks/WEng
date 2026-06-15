@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WStructs/WTextureStructs.hpp"
+#include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -8,7 +8,7 @@ namespace wvk::texture {
 
     void CreateTexture(
         WVkTextureInfo& out_texture_info, 
-        const WTextureStruct& texture_struct,
+        const wtp::texture::WTexture& texture_struct,
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,
@@ -32,9 +32,11 @@ namespace wvk::texture {
         const VkDevice & in_device_info
         );
 
-    VkFormat ToVkFormat(ETextureFormat in_texture_format );
+    VkFormat ToVkFormat(wtp::texture::ETextureFormat in_texture_format );
 
-    WTextureStruct AddRGBAPadding(const WTextureStruct & in_texture_struct);
+    wtp::texture::WTexture AddRGBAPadding(
+        const wtp::texture::WTexture & in_texture_struct
+        );
 
 }
 

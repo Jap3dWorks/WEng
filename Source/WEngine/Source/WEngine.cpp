@@ -6,7 +6,7 @@
 
 #include "WImporters.hpp"
 #include "WImporterRegister.hpp"
-#include "WStructs/WEngineStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"

@@ -7,7 +7,7 @@
 #include "WImporterRegister.hpp"
 #include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WStructs/WEngineStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
 #include "WSystems/WSystemsRegister.hpp"
 #include "WSystems/WSystemsRunner.hpp"

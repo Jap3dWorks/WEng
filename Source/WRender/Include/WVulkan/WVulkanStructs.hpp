@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 
 #include <cstdint>

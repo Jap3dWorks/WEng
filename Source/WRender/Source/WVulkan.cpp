@@ -3,7 +3,7 @@
 // #include "WLog.hpp"
 // #include "WVulkan/WVk/WVkBuffer.hpp"
 // #include "WVulkan/WVulkanStructs.hpp"
-// #include "WStructs/WTextureStructs.hpp"
+// #include "WCoreTypes/WTexture.hpp"
 // #include "WVulkan/WVkRenderConfig.hpp"
 
 // #include <algorithm>

@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
-#include "WStructs/WEngineStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
 #include "WEngineObjects/WObject.hpp"
 
 #include <cstring>

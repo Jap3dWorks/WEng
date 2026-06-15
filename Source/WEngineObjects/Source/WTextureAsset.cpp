@@ -3,17 +3,17 @@
 
 // WTextureAsset
 // -------------
-void WTextureAsset::SetTexture(const WTextureStruct& texture)
+void WTextureAsset::SetTexture(const wtp::texture::WTexture& texture)
 {
     texture_ = texture;
 }
 
-const WTextureStruct& WTextureAsset::GetTexture() const
+const wtp::texture::WTexture& WTextureAsset::GetTexture() const
 {
     return texture_;
 }
 
-void WTextureAsset::SetTexture(WTextureStruct&& texture)
+void WTextureAsset::SetTexture(wtp::texture::WTexture&& texture)
 {
     texture_ = std::move(texture);
 }

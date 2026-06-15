@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WStructs/WComponentStructs.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WUtils/WMathUtils.hpp"
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/glm.hpp>

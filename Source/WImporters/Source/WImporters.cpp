@@ -2,7 +2,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
-#include "WStructs/WTextureStructs.hpp"
+#include "WCoreTypes/WTexture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WUtils/WStringUtils.hpp"
 
@@ -160,25 +160,25 @@ std::vector<WAssetId> WImportTexture::Import(
         throw std::runtime_error("Failed to load texture image!");
     }
 
-    WTextureStruct texture_struct = {};
+    wtp::texture::WTexture texture_struct = {};
     texture_struct.width = width;
     texture_struct.height = height;
 
     switch(num_channels) {
     case 1:
-        texture_struct.format = ETextureFormat::R8_UNORM;
+        texture_struct.format = wtp::texture::ETextureFormat::R8_UNORM;
         break;
     case 2:
-        texture_struct.format = ETextureFormat::RG8_UNORM;
+        texture_struct.format = wtp::texture::ETextureFormat::RG8_UNORM;
         break;
     case 3:
-        texture_struct.format = ETextureFormat::RGB8_UNORM;
+        texture_struct.format = wtp::texture::ETextureFormat::RGB8_UNORM;
         break;
     case 4:
-        texture_struct.format = ETextureFormat::RGBA8_SRGB;
+        texture_struct.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
         break;
     default:
-        texture_struct.format = ETextureFormat::RGBA8_SRGB;
+        texture_struct.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
     }
 
     size_t csize = width * height;

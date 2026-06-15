@@ -4,7 +4,7 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WEngineObjects/WAsset.hpp"
-#include "WStructs/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometryStructs.hpp"
 #include "WCore/TIterator.hpp"
 
 #include <array>

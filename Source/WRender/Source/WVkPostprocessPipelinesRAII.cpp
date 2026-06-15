@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"

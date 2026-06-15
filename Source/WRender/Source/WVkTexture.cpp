@@ -1,12 +1,14 @@
 #include "WVulkan/WVk/WVkTexture.hpp"
-#include "WStructs/WTextureStructs.hpp"
+#include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVk/WVkBuffer.hpp"
 #include "WVulkan/WVk/WVkImage.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+// #include "WVulkan/WVk/WVulkan.hpp"
+
+#include <stdexcept>
 
 void wvk::texture::CreateTexture(
     WVkTextureInfo &out_texture_info,
-    const WTextureStruct &texture_struct,
+    const wtp::texture::WTexture &texture_struct,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkQueue & in_graphics_queue,
@@ -14,8 +16,8 @@ void wvk::texture::CreateTexture(
     )
 {
     
-    WTextureStruct texture_rgba;
-    const WTextureStruct * texture_ptr;
+    wtp::texture::WTexture texture_rgba;
+    const wtp::texture::WTexture * texture_ptr;
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
     auto num_channels = NumOfChannels(texture_struct.format);
@@ -207,29 +209,31 @@ void wvk::texture::DestroyVkSampler(
 }
 
 
-VkFormat wvk::texture::ToVkFormat(ETextureFormat in_texture_format)
+VkFormat wvk::texture::ToVkFormat(wtp::texture::ETextureFormat in_texture_format)
 {
     // TODO fill with remaining formats
 
     switch(in_texture_format) {
-    case ETextureFormat::R8_SRGB:
+    case wtp::texture::ETextureFormat::R8_SRGB:
         return VK_FORMAT_R8_SRGB;
-    case ETextureFormat::RG8_SRGB:
+    case wtp::texture::ETextureFormat::RG8_SRGB:
         return VK_FORMAT_R8G8_SRGB;
-    case ETextureFormat::RGB8_SRGB:
+    case wtp::texture::ETextureFormat::RGB8_SRGB:
         return VK_FORMAT_R8G8B8_SRGB;
-    case ETextureFormat::RGBA8_SRGB:
+    case wtp::texture::ETextureFormat::RGBA8_SRGB:
         return VK_FORMAT_R8G8B8A8_SRGB;
     default:
         return VK_FORMAT_R8G8B8A8_SRGB;
     }
 }
 
-WTextureStruct wvk::texture::AddRGBAPadding(const WTextureStruct & in_texture)
+wtp::texture::WTexture wvk::texture::AddRGBAPadding(
+    const wtp::texture::WTexture & in_texture
+    )
 {
-    WTextureStruct result;
+    wtp::texture::WTexture result;
     
-    result.format = ETextureFormat::RGBA8_SRGB;
+    result.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
     result.height = in_texture.height;
     result.width = in_texture.width;
 

@@ -13,8 +13,8 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WStructs/WComponentStructs.hpp"
-#include "WStructs/WEngineStructs.hpp"
-#include "WStructs/WGeometryStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
+#include "WCoreTypes/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WComponents/WTransformComponent.hpp"
@@ -22,8 +22,8 @@
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
-#include "WStructs/WMathStructs.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WMathStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>

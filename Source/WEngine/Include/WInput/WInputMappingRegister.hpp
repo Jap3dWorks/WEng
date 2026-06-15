@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TEvent.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WStructs/WEngineStructs.hpp"
+#include "WCoreTypes/WEngineStructs.hpp"
 #include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WActionAsset.hpp"
 #include "WCore/TStack.hpp"

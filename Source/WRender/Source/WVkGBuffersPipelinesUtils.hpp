@@ -1,13 +1,13 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WStructs/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderStructs.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
-#include "WStructs/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometryStructs.hpp"
 #include "WShaderUtils.hpp"
 #include <stdexcept>
 #include <array>
