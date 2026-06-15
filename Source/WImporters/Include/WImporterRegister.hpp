@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WImporters.hpp"
+#include "WImporter.hpp"
 #include "WCore/TClassKey.hpp"
 
 #include <utility>

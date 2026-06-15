@@ -1,4 +1,4 @@
-#include "WImporters.hpp"
+#include "WImporter.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
@@ -164,6 +164,7 @@ std::vector<WAssetId> WImportTexture::Import(
     texture_struct.width = width;
     texture_struct.height = height;
 
+    // Default formats
     switch(num_channels) {
     case 1:
         texture_struct.format = wtp::texture::ETextureFormat::R8_UNORM;
@@ -172,7 +173,7 @@ std::vector<WAssetId> WImportTexture::Import(
         texture_struct.format = wtp::texture::ETextureFormat::RG8_UNORM;
         break;
     case 3:
-        texture_struct.format = wtp::texture::ETextureFormat::RGB8_UNORM;
+        texture_struct.format = wtp::texture::ETextureFormat::RGB8_SRGB;
         break;
     case 4:
         texture_struct.format = wtp::texture::ETextureFormat::RGBA8_SRGB;

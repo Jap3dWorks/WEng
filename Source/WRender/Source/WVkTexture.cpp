@@ -5,6 +5,7 @@
 // #include "WVulkan/WVk/WVulkan.hpp"
 
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 void wvk::texture::CreateTexture(
     WVkTextureInfo &out_texture_info,
@@ -211,9 +212,23 @@ void wvk::texture::DestroyVkSampler(
 
 VkFormat wvk::texture::ToVkFormat(wtp::texture::ETextureFormat in_texture_format)
 {
-    // TODO fill with remaining formats
-
     switch(in_texture_format) {
+    case wtp::texture::ETextureFormat::R8_UNORM:
+        return VK_FORMAT_R8_UNORM;
+    case wtp::texture::ETextureFormat::RG8_UNORM:
+        return VK_FORMAT_R8G8_UNORM;
+    case wtp::texture::ETextureFormat::RGB8_UNORM:
+        return VK_FORMAT_R8G8B8_UNORM;
+    case wtp::texture::ETextureFormat::RGBA8_UNORM:
+        return VK_FORMAT_R8G8B8A8_UNORM;
+    case wtp::texture::ETextureFormat::R8_SNORM:
+        return VK_FORMAT_R8_SNORM;
+    case wtp::texture::ETextureFormat::RG8_SNORM:
+        return VK_FORMAT_R8G8_SNORM;
+    case wtp::texture::ETextureFormat::RGB8_SNORM:
+        return VK_FORMAT_R8G8B8_SNORM;
+    case wtp::texture::ETextureFormat::RGBA8_SNORM:
+        return VK_FORMAT_R8G8B8A8_SNORM;
     case wtp::texture::ETextureFormat::R8_SRGB:
         return VK_FORMAT_R8_SRGB;
     case wtp::texture::ETextureFormat::RG8_SRGB:
@@ -222,6 +237,22 @@ VkFormat wvk::texture::ToVkFormat(wtp::texture::ETextureFormat in_texture_format
         return VK_FORMAT_R8G8B8_SRGB;
     case wtp::texture::ETextureFormat::RGBA8_SRGB:
         return VK_FORMAT_R8G8B8A8_SRGB;
+    case wtp::texture::ETextureFormat::R16_SFLOAT:
+        return VK_FORMAT_R16_SFLOAT;
+    case wtp::texture::ETextureFormat::RG16_SFLOAT:
+        return VK_FORMAT_R16G16_SFLOAT;
+    case wtp::texture::ETextureFormat::RGB16_SFLOAT:
+        return VK_FORMAT_R16G16B16_SFLOAT;
+    case wtp::texture::ETextureFormat::RGBA16_SFLOAT:
+        return VK_FORMAT_R16G16B16A16_SFLOAT;
+    case wtp::texture::ETextureFormat::R32_SFLOAT:
+        return VK_FORMAT_R32_SFLOAT;
+    case wtp::texture::ETextureFormat::RG32_SFLOAT:
+        return VK_FORMAT_R32G32_SFLOAT;
+    case wtp::texture::ETextureFormat::RGB32_SFLOAT:
+        return VK_FORMAT_R32G32B32_SFLOAT;
+    case wtp::texture::ETextureFormat::RGBA32_SFLOAT:
+        return VK_FORMAT_R32G32B32A32_SFLOAT;
     default:
         return VK_FORMAT_R8G8B8A8_SRGB;
     }
@@ -232,8 +263,15 @@ wtp::texture::WTexture wvk::texture::AddRGBAPadding(
     )
 {
     wtp::texture::WTexture result;
-    
-    result.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
+
+    wtp::texture::ETextureFormat all_channels_format =
+        in_texture.format | 
+        wtp::texture::ETextureFormat::R |
+        wtp::texture::ETextureFormat::G |
+        wtp::texture::ETextureFormat::B |
+        wtp::texture::ETextureFormat::A;
+
+    result.format = all_channels_format;
     result.height = in_texture.height;
     result.width = in_texture.width;
 
@@ -241,9 +279,9 @@ wtp::texture::WTexture wvk::texture::AddRGBAPadding(
 
     size_t tex_size = result.height * result.width;
 
-    result.data.resize(result.height * result.width * 4, 255);
+    result.data.resize(tex_size * 4, 255);
 
-    int num_channels = NumOfChannels(in_texture.format);
+    int num_channels = wtp::texture::NumOfChannels(in_texture.format);
 
     for (int i=num_channels; i < 4; i++) {
         std::memcpy(

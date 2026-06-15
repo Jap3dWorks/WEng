@@ -43,23 +43,47 @@ Use standard library for data types.
 Use libraries to solve complex problems.
 
 ** WCore
-*** Submódulos
-**** WCoreTypes
-***** Target
+*** WCoreTypes
+**** Target
 Tipos básicos del engine.
 Se claran en WCore para evitar las dependencias cruzadas entre módulos.
 
-***** Archivos
+**** Files
 - WTexture.hpp
 - WGeometry.hpp
 - WEngine.hpp
 - WMath.hpp
 - WRender.hpp
 
-***** Namespaces
+**** Namespaces
 - wtp::texture : weng textures subprograms.
 
+** WImporter
+*** Target
+Módulo con las implementaciones necesarias para traducir assets externos al engine en objetos nativos del engine.
 
+*** Files
+- WImporterRegister.hpp
+
+*** Namespaces
+- wim::register : Ver WImporterRegister
+- wim::importer : Ver WImporter
+
+*** WImporterRegister
+**** Target
+- Abstracciones para registrar importadores al engine.
+- Un importador registrado puede ser invocado usando tan solo la ruta al archivo.
+
+**** Namespaces
+- wim::register
+  
+*** WImporter
+**** Target
+- Objetos Importadores para cada tipo de asset, textura, geometríam etc.
+
+**** Namespaces
+- wim::importer
+  
 ** WCommand
 
 /Command Module/

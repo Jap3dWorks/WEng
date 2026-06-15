@@ -21,35 +21,40 @@ namespace wtp::texture {
     */
     enum class ETextureFormat : uint8_t {
 
+        R=8,
+        G=4,
+        B=2,
+        A=1,
+
         // 8 bit UNORM, good for linear textures like roughness, clamp range is [0,1]
-        R8_UNORM=8,
-        RG8_UNORM=8+4,
-        RGB8_UNORM=8+4+2,
-        RGBA8_UNORM=8+4+2+1,
+        R8_UNORM=R,
+        RG8_UNORM=R+G,
+        RGB8_UNORM=R+G+B,
+        RGBA8_UNORM=R+G+B+A,
 
         // 8 bit SNORM, good for normal maps (color*2 - 1 tansform), clamp range is [-1,1]
-        R8_SNORM=64 + 8,
-        RG8_SNORM=64 + 8 + 4,
-        RGB8_SNORM=64 + 8 + 4 + 2,
-        RGBA8_SNORM=64 + 8 + 4 + 2 + 1,
+        R8_SNORM=64 + R,
+        RG8_SNORM=64 + R + G,
+        RGB8_SNORM=64 + R + G + B,
+        RGBA8_SNORM=64 + R + G + B + A,
     
         // 8 bit sRGB, good for albedo textures 
-        R8_SRGB=32 + 8,
-        RG8_SRGB=32 + 8 + 4,
-        RGB8_SRGB=32 + 8 + 4 + 2,
-        RGBA8_SRGB=32 + 8 + 4 + 2 + 1,
+        R8_SRGB=32 + R,
+        RG8_SRGB=32 + R + G,
+        RGB8_SRGB=32 + R + G + B,
+        RGBA8_SRGB=32 + R + G + B + A,
 
         // 16 bit
-        R16_SFLOAT=128 + 8,
-        RG16_SFLOAT=128 + 8 + 4,
-        RGB16_SFLOAT=128 + 8 + 4 + 2,
-        RGBA16_SFLOAT=128 + 8 + 4 + 2 + 1,
+        R16_SFLOAT=128 + R,
+        RG16_SFLOAT=128 + R + G,
+        RGB16_SFLOAT=128 + R + G + B,
+        RGBA16_SFLOAT=128 + R + G + B + A,
 
         // 32 bit
-        R32_SFLOAT=128 + 64 + 8,
-        RG32_SFLOAT=128 + 64 + 8 + 4,
-        RGB32_SFLOAT=128 + 64 + 8 + 4 + 2,
-        RGBA32_SFLOAT=128 + 64 + 8 + 4 + 2 + 1,
+        R32_SFLOAT=128 + 64 + R,
+        RG32_SFLOAT=128 + 64 + R + G,
+        RGB32_SFLOAT=128 + 64 + R + G + B,
+        RGBA32_SFLOAT=128 + 64 + R + G + B + A,
     };
 
     inline ETextureFormat operator|(ETextureFormat a, ETextureFormat b)
