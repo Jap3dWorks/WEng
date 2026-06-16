@@ -10,7 +10,7 @@
 #include <regex>
 #include <fstream>
 
-namespace WShaderUtils {
+namespace wrd::shader {
 
     inline std::vector<char> ReadShader(const std::string & in_shader_path) {
         // std::string systempath = WStringUtils::SystemPath(in_shader_path);

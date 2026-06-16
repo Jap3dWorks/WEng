@@ -1,78 +1,78 @@
 #+title: WEng
 
+#+startup: content
+
 * Project Structure
+** Paradigms
+
+- Data structure design paradigm (memory addresess sorted by component class).
+
 ** Module Structure
-*** Directory Tree
-**** Modules (PascalCase)
 
-    - ModulesNames _(PascalCase)_
-        - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
-        - Source
-            - ModuleFile.cpp _(PascalCase)_
-        - Include
-            - ModuleHeader.h _(PascalCase)_
-    - ...
-
-*** Namespaces
-
-- All elements, classes, structs and free operations should be placed in a namespace.
-      - Namespaces as module abstractions.
-      - w<name>::<subname>
-            - w<name> : two letter abbreviation of the external module.
-            - <subname> : abstraction that groups the elements.
-
-* Modules
-** Objectives
+*** Modules objective
 
 Modules should be linkable between them and dinamically linkable with the core application.
-Our source modules should avoid unneeded dependencies.
-Model controller paradigm.
-Data structure design paradigm (memory addresess sorted by component class).
-Use standard library for data types. 
-Use libraries to solve complex problems.
 
-** WCore
-*** WCoreTypes
-**** Target
-Tipos básicos del engine.
-Se claran en WCore para evitar las dependencias cruzadas entre módulos.
-
-**** Files
-- WTexture.hpp
-- WGeometry.hpp
-- WEngine.hpp
-- WMath.hpp
-- WRender.hpp
-
-**** Namespaces
-- wtp::texture : weng textures subprograms.
-
-** WImporter
-*** Target
-Módulo con las implementaciones necesarias para traducir assets externos al engine en objetos nativos del engine.
-
-*** Files
-- WImporterRegister.hpp
+*** Directory Tree
+- Source/ModuleName _(PascalCase)_
+    - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
+    - Source
+        - ModuleFile.cpp _(PascalCase)_
+    - Include
+        - ModuleHeader.h _(PascalCase)_
+- ...
 
 *** Namespaces
-- wim::register : Ver WImporterRegister
-- wim::importer : Ver WImporter
 
-*** WImporterRegister
-**** Target
-- Abstracciones para registrar importadores al engine.
-- Un importador registrado puede ser invocado usando tan solo la ruta al archivo.
+- All code elements (classes, structs, free operations, etc) should be placed in a namespace.
+- Namespaces as module abstractions.
+- w<name>::<subname>
+      - w<name> : <name> is a two letter abbreviation of the external module.
+      - <subname> : abstraction name that groups the elements.
+
+* Module List
+** WCore
+*** WCoreTypes
+**** Objective
+
+Tipos básicos del engine.
+Se declaran en WCore para evitar las dependencias cruzadas entre módulos.
+
+**** Files
+
+- WCoreTypes/WTexture.hpp
+- WCoreTypes/WGeometry.hpp
+- WCoreTypes/WEngine.hpp
+- WCoreTypes/WMath.hpp
+- WCoreTypes/WRenderTypes.hpp
 
 **** Namespaces
-- wim::register
-  
-*** WImporter
-**** Target
-- Objetos Importadores para cada tipo de asset, textura, geometríam etc.
+
+- wct::texture
+- wct::render
+      - Pipeline types (materials)
+      - Pipeline parameters types (materials)
+      - Lighting types (lights)
+
+** WImporter
+*** Objective
+
+Módulo con las implementaciones necesarias para traducir assets externos en objetos nativos del engine.
+
+**** Files
+
+- WImporter/WImporterRegister.hpp
+- WImporter/WImporter.hpp
 
 **** Namespaces
+
+- wim::imp_register
+      - Abstracciones para registrar importadores al engine.
+      - Un importador registrado puede ser invocado usando tan solo la ruta al archivo.
+
 - wim::importer
-  
+      - Objetos Importadores para cada tipo de asset, textura, geometríam etc.
+
 ** WCommand
 
 /Command Module/
@@ -81,14 +81,31 @@ This module will contain the system for command registation, base classes and co
 each module will be responsible of its commands creation and registation in the system.
 
 ** WRender
+*** WRender
+**** Objective
 
-Vulkan Rendering related code
+General Rendering related code.
 
-*** Namespaces
+**** Files
 
-- wvk::<label> : weng vulkan subprograms.
+- WRender/*
+
+**** Namespaces
+
+- wrd::render
+- wrd::shader
+
+*** WVulkan
+**** Objective
+
+**** Files
+
+**** Namespaces
+
+- wvk::<label>
 
 ** WEngine
+*** Objective
 
 /Main Module/
 
@@ -99,7 +116,51 @@ modules for ours.
 
 The engine class will reference to other modules in the aplication.
 
+*** WEngRender
+**** Objective
 
+- Setup render subprograms.
+- Subprograms are used in the ECS system.
+  
+**** Files
+- WEngRender/WEngRender.hpp
+**** Namespaces
+- wng::render
+
+** WEngineObjects
+*** Objective
+
+Módulo que contiene los objetos que forman la estructura de datos del engine.
+
+*** WComponents
+
+**** Objective
+
+Componentes almacenan los datos que definen una escena. Se puede pensar en ellos como en una base de datos.
+Los componentes están asociados a actores. formando así entidades compuestas de componentes.
+
+**** Files
+
+- WComponents/light/WAmbientLightComponent.hpp
+- WComponents/light/WDirectionalLightComponent.hpp
+- WComponents/light/WPointLightComponent.hpp
+
+**** Namespace
+
+- wcm::light
+- wcm::transform
+- wcm::geometry
+
+*** WActor
+
+
+*** WReflections
+**** Objective
+
+Código que permite comportamiento reflexivo en los objetos del engine.
+
+**** Namespaces
+- wrf::wclass
 
 * Coding Style
 

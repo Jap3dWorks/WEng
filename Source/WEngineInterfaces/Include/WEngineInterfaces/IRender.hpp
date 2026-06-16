@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include <vector>
 #include <span>
@@ -10,7 +10,7 @@
 class WRenderPipelineAsset;
 // class WTextureAsset;
 // class WStaticMeshAsset;
-namespace wtp::texture { struct WTexture; }
+namespace wct::texture { struct WTexture; }
 
 struct WMeshStruct;
 struct WTransformStruct;
@@ -39,7 +39,7 @@ public:
      * than the WRenderPipelineAsset * parameter.
      */
     virtual void CreateRenderPipeline(
-        WRenderPipelineAsset * in_pipeline_asset //TODO: avoid asset
+        WRenderPipelineAsset * in_pipeline_asset
         )=0;
 
     /**
@@ -50,7 +50,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const WRenderPipelineParametersStruct & in_parameters  // TODO Check
+        const wct::render::WRenderPipelineParametersStruct & in_parameters  // TODO Check
         )=0;
 
     /**
@@ -78,7 +78,7 @@ public:
      * @brief Load the registered texture asset with id in_id.
      */
     virtual void LoadTexture(const WAssetId & in_id,
-                             const wtp::texture::WTexture & in_texture)=0;
+                             const wct::texture::WTexture & in_texture)=0;
 
     virtual void UnloadTexture(const WAssetId & in_id)=0;
 
@@ -88,7 +88,7 @@ public:
     virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
-        const WUBOCameraStruct & in_ubo
+        const wct::render::WUBOCameraStruct & in_ubo
         )=0;
 
     /**
@@ -96,14 +96,14 @@ public:
      *        Storage inside ubo_write will be consumed in the current call.
      */
     virtual void UpdateParameterDynamic(const WEntityComponentId & in_id,
-                                        const WRPParamUboStruct & ubo_write)=0;
+                                        const wct::render::WRPParamUboStruct & ubo_write)=0;
 
     /**
      * @brief Updates for all frames in flight.
      *        Storage inside ubo_write will be in the current call.
      */
     virtual void UpdateParameterStatic(const WEntityComponentId & in_id,
-                                       const WRPParamUboStruct & ubo_write)=0;
+                                       const wct::render::WRPParamUboStruct & ubo_write)=0;
 
     /**
      * @brief Unload all render resources.
@@ -121,8 +121,8 @@ public:
     // Render Data
     // -----------
 
-    virtual WRenderSize RenderSize() const =0;
-    virtual void RenderSize(const WRenderSize & in_render_size)=0;
+    virtual wct::render::WRenderSize RenderSize() const =0;
+    virtual void RenderSize(const wct::render::WRenderSize & in_render_size)=0;
     virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
 
     // Lighting
@@ -135,7 +135,7 @@ public:
      */
     virtual void InitializePointLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_point_lights_structs
+        std::span<wct::render::WPointLight> in_point_lights_structs
         )=0;
 
     /**
@@ -145,7 +145,7 @@ public:
      */
     virtual void UpdatePointLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_point_lights_structs
+        std::span<wct::render::WPointLight> in_point_lights_structs
         )=0;
 
     /**
@@ -154,7 +154,7 @@ public:
      */
     virtual void InitializaDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_directional_lights_structs
+        std::span<wct::render::WPointLight> in_directional_lights_structs
         )=0;
 
     /**
@@ -163,7 +163,7 @@ public:
      */
     virtual void UpdateDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_directional_light_structs
+        std::span<wct::render::WPointLight> in_directional_light_structs
         )=0;
 
     /**
@@ -171,7 +171,7 @@ public:
      *        Only one ambient light is suported.
      */
     virtual void UpdateAmbientLight(
-        const WAmbientLightStruct & in_ambient_light
+        const wct::render::WAmbientLight & in_ambient_light
         )=0;
 
 };

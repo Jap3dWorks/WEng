@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+// TODO move each struct to logical object.
+
 struct WTransformStruct
 {
 public:
@@ -33,11 +35,4 @@ struct WRenderPipelineAssignmentStruct {
 
 using WRenderPipelineAssignments = std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS>;
 
-
-// struct WRenderPipelineAssignmentsStruct {
-//     // postprocess pipelines
-//     std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS> assignments{};
-//     // std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_assets{};
-//     // std::array<WAssetId, WENG_MAX_ASSET_IDS> render_pipeline_params_assets{};
-// };
 

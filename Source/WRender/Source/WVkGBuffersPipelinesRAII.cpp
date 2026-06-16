@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -60,7 +60,7 @@ WVkGBuffersPipelinesRAII & WVkGBuffersPipelinesRAII::operator=(WVkGBuffersPipeli
 
 void WVkGBuffersPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
-    const WRenderPipelineStruct & in_pipeline_struct
+    const wct::render::WRenderPipelineStruct & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
@@ -164,7 +164,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
     for(uint32_t i=0; i < frames_in_flight; i++) {
         
         global_graphics_descsets_.camera_ubo[i].range =
-            sizeof(WUBOCameraStruct);
+            sizeof(wct::render::WUBOCameraStruct);
 
         wvk::buffer::CreateUBO(
             global_graphics_descsets_.camera_ubo[i],
@@ -225,7 +225,7 @@ void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
 }
 
 void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
-    const WUBOCameraStruct & camera_struct,
+    const wct::render::WUBOCameraStruct & camera_struct,
     uint32_t in_frame_index
     ) {
     wvk::buffer::MapUBO(
@@ -236,7 +236,7 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
     memcpy(
         global_graphics_descsets_.camera_ubo[in_frame_index].mapped_memory,
         &camera_struct,
-        sizeof(WUBOCameraStruct)
+        sizeof(wct::render::WUBOCameraStruct)
         );
     
     wvk::buffer::UnmapUBO(

@@ -7,8 +7,8 @@
 #include "WEngine/WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
-#include "WImporterRegister.hpp"
-#include "WImporter.hpp"
+#include "WImporter/WImporterRegister.hpp"
+#include "WImporter/WImporter.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
@@ -22,8 +22,9 @@
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
+#include "WComponents/light/WAmbientLightComponent.hpp"
 #include "WCoreTypes/WMathStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include <exception>
 #include <glm/ext/matrix_transform.hpp>
@@ -45,8 +46,8 @@ struct ModelAssets {
 bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 {
     // Import Viking Room
-    WImportObj obj_importer =
-        engine.ImportersRegister().GetImporter<WImportObj>();
+    wim::importer::WImportObj obj_importer =
+        engine.ImportersRegister().GetImporter<wim::importer::WImportObj>();
 
     std::vector<WAssetId> geo_ids =
         obj_importer.Import(
@@ -57,8 +58,8 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     out_model.static_mesh = geo_ids[0];
 
-    WImportTexture texture_importer =
-        engine.ImportersRegister().GetImporter<WImportTexture>();
+    wim::importer::WImportTexture texture_importer =
+        engine.ImportersRegister().GetImporter<wim::importer::WImportTexture>();
 
     std::vector<WAssetId> tex_ids = texture_importer.Import(
         engine.AssetManager(),
@@ -66,7 +67,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
         "/Content/Assets/viking_texture.viking_texture"
         );
 
-    // Create Render Pipeline Asset
+    // Create Render Pipeline Asset (material)
 
     WAssetId pipelineid = engine.AssetManager()
         .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
@@ -76,11 +77,11 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     WRenderPipelineAsset * pipeline_asset = engine.AssetManager()
         .Get<WRenderPipelineAsset>(pipelineid);
 
-    pipeline_asset->RenderPipeline().type = EPipelineType::Graphics;
+    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::Graphics;
 
-    // TEMP use gbufer shader for debug
+    // Add shaders to the render pipeline
 
-    pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
+    pipeline_asset->RenderPipeline().shaders[0].type=wct::render::EShaderStageFlag::Vertex;
 
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[0].file,
@@ -92,7 +93,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
         "vsMain"
         );
 
-    pipeline_asset->RenderPipeline().shaders[1].type=EShaderStageFlag::Fragment;
+    pipeline_asset->RenderPipeline().shaders[1].type=wct::render::EShaderStageFlag::Fragment;
     
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[1].file,
@@ -107,12 +108,12 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
 
     params[0].binding=0;
-    params[0].type=EPipeParamType::Ubo;
-    params[0].stage_flags=EShaderStageFlag::Vertex;
-    params[0].range=sizeof(WUBOGraphicsStruct);
+    params[0].type=wct::render::EPipeParamType::Ubo;
+    params[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
+    params[0].range=sizeof(wct::render::WUBOGraphicsStruct);
     params[1].binding=1;
-    params[1].type=EPipeParamType::Texture;  // TODO texture color management
-    params[1].stage_flags=EShaderStageFlag::Fragment;
+    params[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
+    params[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
     // Create Pipeline Parameter Asset
 
@@ -136,23 +137,23 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
     WRenderPipelineAsset * pipeline_asset =
         engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
 
-    pipeline_asset->RenderPipeline().type = EPipelineType::Postprocess;
-    pipeline_asset->RenderPipeline().shaders[0].type=EShaderStageFlag::Vertex;
+    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::Postprocess;
+    pipeline_asset->RenderPipeline().shaders[0].type=wct::render::EShaderStageFlag::Vertex;
 
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[0].entry, "vsMain");
 
-    pipeline_asset->RenderPipeline().shaders[1].type=EShaderStageFlag::Fragment;
+    pipeline_asset->RenderPipeline().shaders[1].type=wct::render::EShaderStageFlag::Fragment;
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
     std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
 
     auto & params = pipeline_asset->RenderPipeline().params_descriptor;
     params[0].binding = 0;
-    params[0].type = EPipeParamType::Ubo;
-    params[0].stage_flags = EShaderStageFlag::Vertex;
-    params[0].range = sizeof(WUBOPostprocessStruct);
+    params[0].type = wct::render::EPipeParamType::Ubo;
+    params[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
+    params[0].range = sizeof(wct::render::WUBOPostprocessStruct);
 
     WAssetId paramid =
         engine.AssetManager().Create<WRenderPipelineParametersAsset>(
@@ -170,9 +171,9 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
 }
 
 bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_render_pipeline) {
-    WImportObj obj_importer =
+    wim::importer::WImportObj obj_importer =
         engine.ImportersRegister()
-        .GetImporter<WImportObj>();
+        .GetImporter<wim::importer::WImportObj>();
 
     std::vector<WAssetId> geo_ids =
         obj_importer.Import(
@@ -183,8 +184,8 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
     out_model.static_mesh = geo_ids[0];
 
-    WImportTexture tex_importer = engine.ImportersRegister()
-        .GetImporter<WImportTexture>();
+    wim::importer::WImportTexture tex_importer = engine.ImportersRegister()
+        .GetImporter<wim::importer::WImportTexture>();
 
     std::vector<WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
                                                         "Content/Assets/Textures/orange.png",

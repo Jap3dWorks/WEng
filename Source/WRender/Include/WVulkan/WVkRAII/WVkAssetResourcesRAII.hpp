@@ -45,7 +45,7 @@ public:
 
     // Texture
 
-    void LoadTexture(const WAssetId & in_id, const wtp::texture::WTexture & in_texture) {
+    void LoadTexture(const WAssetId & in_id, const wct::texture::WTexture & in_texture) {
         texture_collection_.CreateAt(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {

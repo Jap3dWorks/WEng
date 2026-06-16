@@ -14,13 +14,13 @@ class WCORE_API WTextureAsset : public WAsset
 
     public:
 
-        void SetTexture(const wtp::texture::WTexture& texture);
+        void SetTexture(const wct::texture::WTexture& texture);
 
-        void SetTexture(wtp::texture::WTexture&& texture);
+        void SetTexture(wct::texture::WTexture&& texture);
 
-        const wtp::texture::WTexture& GetTexture() const;
+        const wct::texture::WTexture& GetTexture() const;
 
     private:
-        wtp::texture::WTexture texture_{};
+        wct::texture::WTexture texture_{};
 };
 

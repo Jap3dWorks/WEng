@@ -65,7 +65,7 @@ namespace wvk::shader {
                 stage_infos[i].type
                 );
 
-            if (stage_infos[i].type == EShaderStageFlag::Vertex)
+            if (stage_infos[i].type == wct::render::EShaderStageFlag::Vertex)
             {
                 vertex_shader_stage = &stage_infos[i];
             }

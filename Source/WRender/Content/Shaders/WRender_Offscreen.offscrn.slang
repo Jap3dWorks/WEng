@@ -20,17 +20,19 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]] // binding 0, set 0
+[[vk::binding(0,0)]]            // binding 0, set 0
 uniform Sampler2D albedo;
-[[vk::binding(1,0)]] // binding 1, set 0
+[[vk::binding(1,0)]]            // binding 1, set 0
 uniform Sampler2D normal;
-[[vk::binding(2,0)]]
+[[vk::binding(2,0)]]            // binfing 2, set 0
 uniform Sampler2D ws_position;
 
-// rm (roughness/metallic)
-// emission
+// TODO input render textures
+//  rm (roughness/metallic)
+//  emission
+//  extras 1 and 2
 
-// extras 1 and 2
+// TODO lighting data
 
 [[vk::binding(3,0)]]
 uniform Sampler2D depth;

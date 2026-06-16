@@ -1,6 +1,6 @@
 #pragma once
 
-// #include "WCoreTypes/WRenderStructs.hpp"
+// #include "WCoreTypes/WRenderTypes.hpp"
 // #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"

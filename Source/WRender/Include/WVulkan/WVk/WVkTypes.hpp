@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 
@@ -21,38 +21,38 @@ namespace wvk::types {
     /**
      * @brief Enum representing the shader stage flags for Vulkan.
      */
-    inline VkShaderStageFlagBits ToShaderStageFlagBits(const EShaderStageFlag & type) {
+    inline VkShaderStageFlagBits ToShaderStageFlagBits(const wct::render::EShaderStageFlag & type) {
         switch (type)
         {
-        case EShaderStageFlag::Vertex:
+        case wct::render::EShaderStageFlag::Vertex:
             return VK_SHADER_STAGE_VERTEX_BIT;
-        case EShaderStageFlag::Fragment:
+        case wct::render::EShaderStageFlag::Fragment:
             return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case EShaderStageFlag::Compute:
+        case wct::render::EShaderStageFlag::Compute:
             return VK_SHADER_STAGE_COMPUTE_BIT;
         default:
             throw std::runtime_error("Invalid shader type!");
         }
     }
 
-    inline VkShaderStageFlags ToVkShaderStageFlag(const EShaderStageFlag & in_pipe_flags) {
+    inline VkShaderStageFlags ToVkShaderStageFlag(const wct::render::EShaderStageFlag & in_pipe_flags) {
 
         VkShaderStageFlags result{0};
-        for(const auto & f : WRenderUtils::SHADER_STAGE_FLAGS_LIST) {
+        for(const auto & f : wct::render::SHADER_STAGE_FLAGS_LIST) {
             
-            if ((f & in_pipe_flags) == EShaderStageFlag::None)
+            if ((f & in_pipe_flags) == wct::render::EShaderStageFlag::None)
                 continue; 
 
             VkShaderStageFlags n{0};
             
             switch(f) {
-            case EShaderStageFlag::Vertex:
+            case wct::render::EShaderStageFlag::Vertex:
                 n = VK_SHADER_STAGE_VERTEX_BIT;
                 break;
-            case EShaderStageFlag::Fragment:
+            case wct::render::EShaderStageFlag::Fragment:
                 n = VK_SHADER_STAGE_FRAGMENT_BIT;
                 break;
-            case EShaderStageFlag::Compute:
+            case wct::render::EShaderStageFlag::Compute:
                 n = VK_SHADER_STAGE_COMPUTE_BIT;
                 break;
             default:

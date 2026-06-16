@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/TObjectDataBase.hpp"
@@ -73,10 +73,10 @@ public:
         render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
-    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const WPipeParamDescriptorList &> ConfigInfoFn>
+    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::WPipeParamDescriptorList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const VkDevice & in_device,
-                             const WPipeParamDescriptorList & params,
+                             const wct::render::WPipeParamDescriptorList & params,
                              ConfigInfoFn && info_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
@@ -116,17 +116,17 @@ public:
 
     template<CCallable<WVkShaderStageInfo,
                        const char*, const char *,
-                       EShaderStageFlag> TFn>
-    std::vector<WVkShaderStageInfo> BuildShaders(const WShaderList & in_data,
+                       wct::render::EShaderStageFlag> TFn>
+    std::vector<WVkShaderStageInfo> BuildShaders(const wct::render::WShaderList & in_data,
                                                  TFn && in_fn) {
         std::vector<WVkShaderStageInfo> result;
 
         result.reserve(in_data.size());
 
-        WRenderUtils::ForEach(
+        wct::render::ForEach(
             in_data,
             [&result, &in_fn]
-            (const WShaderStruct & shd) {
+            (const wct::render::WShaderStruct & shd) {
                 result.push_back(
                     in_fn(WStringUtils::SystemPath(shd.file).c_str(),
                           shd.entry,

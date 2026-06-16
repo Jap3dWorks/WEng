@@ -1,14 +1,14 @@
 #include "WSystems/WSystems.hpp"
-#include "WRenderUtils.hpp"
+#include "WRender/WRender.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
-#include "WSystems/WSystemsRegister.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
+// #include "WSystems/WSystemsRegister.hpp"
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WLevel/WLevel.hpp"
-#include "WUtils/WRenderLevelUtils.hpp"
+#include "WEngRender/WEngRender.hpp"
 #include "WUtils/WMathUtils.hpp"
 #include "WEngine/WEngine.hpp"
 #include <glm/geometric.hpp>
@@ -27,7 +27,7 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_RenderLevelResources)
-    WRenderLevelUtils::InitializeResources(
+    wng::render::InitializeResources(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()
@@ -249,10 +249,10 @@ START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
                     cam->EntityId()
                     );
 
-            WRenderSize rsize = parameters.engine->Render()->RenderSize();
+            wct::render::WRenderSize rsize = parameters.engine->Render()->RenderSize();
 
             parameters.engine->Render()->UpdateUboCamera(
-                WRenderUtils::ToUBOCameraStruct(
+                wrd::render::ToUBOCameraStruct(
                     cam->GetCameraStruct(),
                     ts.TransformStruct(),
                     (float) rsize.width / (float) rsize.height
@@ -263,7 +263,7 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemEnd_RenderLevelResources)
-    WRenderLevelUtils::ReleaseRenderResources(
+    wng::render::ReleaseRenderResources(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()

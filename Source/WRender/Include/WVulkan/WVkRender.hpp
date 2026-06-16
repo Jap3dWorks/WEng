@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WGeometryStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -63,7 +63,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const WRenderPipelineParametersStruct & in_parameters
+        const wct::render::WRenderPipelineParametersStruct & in_parameters
         ) override;
 
     void DeleteRenderPipeline(const WAssetId & in_id) override;
@@ -73,7 +73,7 @@ public:
     void RefreshPipelines() override;
 
     void LoadTexture(const WAssetId & in_id,
-                     const wtp::texture::WTexture & in_texture) override
+                     const wct::texture::WTexture & in_texture) override
     {
         render_resources_.LoadTexture(in_id, in_texture);
     }
@@ -91,7 +91,7 @@ public:
     }
 
     void UpdateUboCamera(
-        const WUBOCameraStruct & in_ubo
+        const wct::render::WUBOCameraStruct & in_ubo
         ) override;
 
     /**
@@ -99,7 +99,7 @@ public:
      */
     void UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
-        const WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUboStruct & ubo_write
         ) override;
 
     /**
@@ -107,7 +107,7 @@ public:
      */
     void UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
-        const WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUboStruct & ubo_write
         ) override;
 
     void UnloadAllResources() override;
@@ -117,9 +117,11 @@ public:
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
 
-    WRenderSize RenderSize() const override { return render_size_; }
+    wct::render::WRenderSize RenderSize() const override { return render_size_; }
 
-    void RenderSize(const WRenderSize & in_render_size) override { render_size_ = in_render_size; }
+    void RenderSize(const wct::render::WRenderSize & in_render_size) override {
+        render_size_ = in_render_size;
+    }
 
     WNODISCARD WVkGBuffersPipelinesRAII & RenderPipelinesManager()
     {
@@ -142,26 +144,26 @@ public:
 
     void InitializePointLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_point_lights_structs
+        std::span<wct::render::WPointLight> in_point_lights_structs
         ) override { /* TODO .cpp */ }
 
     void UpdatePointLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_point_lights_structs
+        std::span<wct::render::WPointLight> in_point_lights_structs
         ) override { /* TODO .cpp */ }
 
     void InitializaDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_directional_lights_structs
+        std::span<wct::render::WPointLight> in_directional_lights_structs
         ) override { /* TODO .cpp */ }
 
     void UpdateDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<WPointLightStruct> in_directional_light_structs
+        std::span<wct::render::WPointLight> in_directional_light_structs
         ) override { /* TODO .cpp */ }
 
     void UpdateAmbientLight(
-        const WAmbientLightStruct & in_ambient_light
+        const wct::render::WAmbientLight & in_ambient_light
         ) override { /* TODO .cpp */ }
 
 private:
@@ -228,8 +230,8 @@ private:
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
     struct PipelinesTrack {
-        std::unordered_map<WAssetId, EPipelineType> pipeline_pipetype{};
-        std::unordered_map<WEntityComponentId, EPipelineType> binding_pipetype{};
+        std::unordered_map<WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
+        std::unordered_map<WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
     } pipeline_track_{};
 
     // --
@@ -245,7 +247,7 @@ private:
 
     uint32_t frame_index_{0};
     
-    WRenderSize render_size_{
+    wct::render::WRenderSize render_size_{
         800, 600
     };
 

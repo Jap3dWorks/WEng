@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 
 #include "WEngineObjects/WAsset.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WRenderPipelineParametersAsset.WEngine.hpp"
 
@@ -13,13 +13,13 @@ class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
 
 public:
 
-    WRenderPipelineParametersStruct & RenderPipelineParameters() {
+    wct::render::WRenderPipelineParametersStruct & RenderPipelineParameters() {
         return pipeline_parameters_;
     }
 
 private:
 
-    WRenderPipelineParametersStruct pipeline_parameters_{};
+    wct::render::WRenderPipelineParametersStruct pipeline_parameters_{};
 
 };
 

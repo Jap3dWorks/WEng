@@ -1,5 +1,5 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
@@ -53,7 +53,7 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
-    const WRenderPipelineStruct & in_pipeline_struct
+    const wct::render::WRenderPipelineStruct & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(

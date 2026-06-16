@@ -6,13 +6,27 @@
 
 namespace wvk::texture {
 
+    /**
+     * Uploads in vram a ready to render texture.
+     * Also create the image, imageview and sampler.
+     * Resulting vulkan objects are stored in out_texture_info out param.
+     */
     void CreateTexture(
-        WVkTextureInfo& out_texture_info, 
-        const wtp::texture::WTexture& texture_struct,
+        WVkTextureInfo & out_texture_info, 
+        const wct::texture::WTexture & texture_struct,
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,
         const VkCommandPool &in_command_pool
+        );
+
+    /**
+     * Destroys the vulkan texture objects.
+     * also frees in use texture memory.
+     */
+    void DestroyTexture(
+        WVkTextureInfo & out_texture_info,
+        const VkDevice & in_device
         );
 
     VkSampler CreateTextureSampler(
@@ -20,23 +34,13 @@ namespace wvk::texture {
         const VkPhysicalDevice& physical_device,
         const uint32_t& mip_levels
         );
-
-    void DestroyTexture(
-        WVkTextureInfo & out_texture_info,
-        const VkDevice & in_device
-        );
-
     
     void DestroyVkSampler(
         VkSampler & out_sampler,
         const VkDevice & in_device_info
         );
 
-    VkFormat ToVkFormat(wtp::texture::ETextureFormat in_texture_format );
-
-    wtp::texture::WTexture AddRGBAPadding(
-        const wtp::texture::WTexture & in_texture_struct
-        );
+    VkFormat ToVkFormat(wct::texture::ETextureFormat in_texture_format);
 
 }
 

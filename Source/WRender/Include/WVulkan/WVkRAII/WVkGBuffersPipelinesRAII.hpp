@@ -6,7 +6,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include <vector>
 #include "WVkPipelinesBase.hpp"
 
@@ -64,7 +64,7 @@ public:
     // Create Graphics Render Pipeline
     void CreatePipeline(
         const WAssetId & in_id,
-        const WRenderPipelineStruct & in_pipeline_struct
+        const wct::render::WRenderPipelineStruct & in_pipeline_struct
         );
 
 public:
@@ -85,7 +85,7 @@ public:
         );
 
     void UpdateGlobalGraphicsDescriptorSet(
-        const WUBOCameraStruct & in_camera_struct,
+        const wct::render::WUBOCameraStruct & in_camera_struct,
         uint32_t in_frame_index
         );
 

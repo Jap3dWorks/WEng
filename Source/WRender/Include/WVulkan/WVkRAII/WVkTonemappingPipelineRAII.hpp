@@ -2,7 +2,7 @@
 
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WShaderUtils.hpp"
+#include "WRender/WShader.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
@@ -197,7 +197,7 @@ private:
 
     void InitializePipeline(VkFormat color_format) {
 
-        std::vector<char> shadercode = WShaderUtils::ReadShader(
+        std::vector<char> shadercode = wrd::shader::ReadShader(
             WStringUtils::SystemPath(std::string(shader_path))
             );
 

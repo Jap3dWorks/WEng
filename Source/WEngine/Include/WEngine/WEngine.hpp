@@ -4,7 +4,7 @@
 #include "WCore/TRef.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
-#include "WImporterRegister.hpp"
+#include "WImporter/WImporterRegister.hpp"
 #include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
@@ -67,11 +67,11 @@ public:
         return level_db_;
     }
 
-    WImporterRegister & ImportersRegister() noexcept {
+    wim::imp_register::WImporterRegister & ImportersRegister() noexcept {
         return importers_register_;
     }
 
-    const WImporterRegister & ImportersRegister() const noexcept {
+    const wim::imp_register::WImporterRegister & ImportersRegister() const noexcept {
         return importers_register_;
     }
 
@@ -145,7 +145,7 @@ private:
 
     WInputMappingRegister input_mapping_register_{};
 
-    WImporterRegister importers_register_{};
+    wim::imp_register::WImporterRegister importers_register_{};
 
 };
 

@@ -13,7 +13,7 @@
 #include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
 
 #include "WVulkan/WVkRender.hpp"
-#include "WRenderUtils.hpp"
+// #include "WRender/WRender.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
@@ -22,8 +22,8 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
-#include "WStructs/WComponentStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+// #include "WStructs/WComponentStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
 #include "WLog.hpp"
 
@@ -424,14 +424,14 @@ void WVkRender::CreateRenderPipeline(
 
     switch(render_pipeline->RenderPipeline().type) {
         
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.CreatePipeline(
             render_pipeline->WID(),
             render_pipeline->RenderPipeline()
             );
         break;
         
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.CreatePipeline(
             render_pipeline->WID(),
             render_pipeline->RenderPipeline()
@@ -455,7 +455,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
 
     switch(pipeline_track_.pipeline_pipetype[in_id]) {
         
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.ForEachBinding(
             in_id, clearbindingfn
             );
@@ -466,7 +466,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
             
         break;
 
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.ForEachBinding(
             in_id, clearbindingfn
             );
@@ -489,7 +489,7 @@ void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
     const WAssetIndexId & in_assetindex_id,
-    const WRenderPipelineParametersStruct & in_parameters
+    const wct::render::WRenderPipelineParametersStruct & in_parameters
     )
 {
     assert(pipeline_track_.pipeline_pipetype.contains(pipeline_id));
@@ -527,7 +527,7 @@ void WVkRender::CreatePipelineBinding(
 
     switch(pipeline_track_.pipeline_pipetype[pipeline_id]) {
 
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.CreateBinding(component_id,
                                           pipeline_id,
                                           in_assetindex_id,
@@ -535,7 +535,7 @@ void WVkRender::CreatePipelineBinding(
                                           textures);
         break;
         
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.CreateBinding(component_id,
                                        pipeline_id,
                                        ubos,
@@ -555,11 +555,11 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 
     switch(pipeline_track_.binding_pipetype[in_id]) {
         
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.DeleteBinding(in_id);
         break;
         
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.DeleteBinding(in_id);
         break;
         
@@ -589,7 +589,7 @@ void WVkRender::UnloadAllResources() {
 }
 
 void WVkRender::UpdateUboCamera(
-    const WUBOCameraStruct & camera_ubo
+    const wct::render::WUBOCameraStruct & camera_ubo
     ) {
     gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
@@ -599,7 +599,7 @@ void WVkRender::UpdateUboCamera(
 
 void WVkRender::UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
-        const WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUboStruct & ubo_write
     ) {
 
     WVkDescriptorSetUBOWriteStruct ubowrt{
@@ -611,13 +611,13 @@ void WVkRender::UpdateParameterDynamic(
 
     switch(pipeline_track_.binding_pipetype[in_component_id]) {
 
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.UpdateBinding(in_component_id,
                                           frame_index_,
                                           ubowrt);
         break;
 
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.UpdateBinding(in_component_id,
                                        frame_index_,
                                        ubowrt);
@@ -630,7 +630,7 @@ void WVkRender::UpdateParameterDynamic(
 
 void WVkRender::UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
-        const WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUboStruct & ubo_write
     ) {
 
     WVkDescriptorSetUBOWriteStruct ubowrt{
@@ -642,13 +642,13 @@ void WVkRender::UpdateParameterStatic(
 
     switch(pipeline_track_.binding_pipetype[in_component_id]) {
         
-    case EPipelineType::Graphics:
+    case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.UpdateBinding(
             in_component_id, ubowrt
             );
         break;
 
-    case EPipelineType::Postprocess:
+    case wct::render::EPipelineType::Postprocess:
         ppcss_pipelines_.UpdateBinding(in_component_id,
                                        ubowrt);
         break;

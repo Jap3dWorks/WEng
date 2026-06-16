@@ -97,25 +97,25 @@ namespace wvk::buffer {
         WVkUBOInfo & uniform_buffer_object_info_,
         const glm::mat4 & model
         ) {
-        WUBOGraphicsStruct ubo{};
+        wct::render::WUBOGraphicsStruct ubo{};
 
         ubo.model = model;
         
         memcpy(uniform_buffer_object_info_.mapped_memory,
                &ubo,
-               sizeof(WUBOGraphicsStruct));
+               sizeof(wct::render::WUBOGraphicsStruct));
 
         return true;
     }
 
     inline bool UpdateUBOModel(
         WVkUBOInfo & uniform_buffer_object_info_,
-        const WUBOGraphicsStruct & in_ubo_model_struct
+        const wct::render::WUBOGraphicsStruct & in_ubo_model_struct
         ) {
         
         memcpy(uniform_buffer_object_info_.mapped_memory,
                &in_ubo_model_struct,
-               sizeof(WUBOGraphicsStruct));
+               sizeof(wct::render::WUBOGraphicsStruct));
 
         return true;
     }

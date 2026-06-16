@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVkPipelinesDb.hpp"
 #include "WVulkan/WVk/WVkBuffer.hpp"
@@ -224,7 +224,7 @@ protected:
     }
 
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
-        const WPipeParamDescriptorList & in_param_descriptors,
+        const wct::render::WPipeParamDescriptorList & in_param_descriptors,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
         ) {
 
@@ -236,11 +236,11 @@ protected:
         std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
         result.reserve(in_param_descriptors.size());
 
-        WRenderUtils::ForEach(
+        wct::render::ForEach(
             in_param_descriptors,
             [&bindings, &result, this]
-            (const WPipeParamDescriptorStruct & ubopd) {
-                if(ubopd.type == EPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
+            (const wct::render::WPipeParamDescriptorStruct & ubopd) {
+                if(ubopd.type == wct::render::EPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
                         bindings[ubopd.binding][frm]={};
@@ -281,20 +281,21 @@ protected:
     }
 
     std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
-        const WPipeParamDescriptorList & in_param_descriptors,
+        const wct::render::WPipeParamDescriptorList & in_param_descriptors,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {
 
-        std::vector<WPipeParamDescriptorStruct> result;
+        std::vector<wct::render::WPipeParamDescriptorStruct> result;
         result.reserve(in_param_descriptors.size());
         
         std::unordered_map<std::uint8_t, WVkDescriptorSetTextureWriteStruct> bindings{};
 
-        WRenderUtils::ForEach(
+        wct::render::ForEach(
             in_param_descriptors,
             [&bindings]
-            (const WPipeParamDescriptorStruct & _ubopd) {
-                if(_ubopd.type == EPipeParamType::Texture && !bindings.contains(_ubopd.binding)) {
+            (const wct::render::WPipeParamDescriptorStruct & _ubopd) {
+                if(_ubopd.type == wct::render::EPipeParamType::Texture &&
+                   !bindings.contains(_ubopd.binding)) {
                     bindings[_ubopd.binding]={};
                     bindings[_ubopd.binding].binding = _ubopd.binding;
                     bindings[_ubopd.binding].image_info = {}; // TODO: default image or something
@@ -318,7 +319,7 @@ protected:
     }
 
     inline bool ValidateBindingParams(
-        const WPipeParamDescriptorList & in_pipeline_params,
+        const wct::render::WPipeParamDescriptorList & in_pipeline_params,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures) {
 

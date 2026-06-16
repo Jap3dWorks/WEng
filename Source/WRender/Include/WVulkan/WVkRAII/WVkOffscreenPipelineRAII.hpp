@@ -9,7 +9,7 @@
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 
-#include "WShaderUtils.hpp"
+#include "WRender/WShader.hpp"
 #include "WUtils/WStringUtils.hpp"
 #include <vulkan/vulkan_core.h>
 
@@ -174,7 +174,7 @@ private:
     }
 
     void InitializeRenderPipeline() {
-        std::vector<char> shadercode = WShaderUtils::ReadShader(
+        std::vector<char> shadercode = wrd::shader::ReadShader(
             WStringUtils::SystemPath(std::string(shader_path_))
             );
 

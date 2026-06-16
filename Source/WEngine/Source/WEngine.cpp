@@ -4,8 +4,8 @@
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
 
-#include "WImporter.hpp"
-#include "WImporterRegister.hpp"
+#include "WImporter/WImporter.hpp"
+#include "WImporter/WImporterRegister.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WLevel/WLevelDb.hpp"
@@ -17,7 +17,7 @@
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 
-#include "WUtils/WRenderLevelUtils.hpp"
+#include "WEngRender/WEngRender.hpp"
 
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE
@@ -30,8 +30,8 @@ WEngine WEngine::DefaultCreate()
 
     result.Initialize();
 
-    result.ImportersRegister().Register<WImportObj>();
-    result.ImportersRegister().Register<WImportTexture>();
+    result.ImportersRegister().Register<wim::importer::WImportObj>();
+    result.ImportersRegister().Register<wim::importer::WImportTexture>();
 
     // Register Wengine systems
     
@@ -188,7 +188,7 @@ void WEngine::MarkLoadLevel(const WLevelId & in_level) {
 }
 
 void WEngine::LoadLevel(WLevel & in_level) {
-    // TODO: register level systems
+    // TODO register level systems
 
     WFLOG("[DEBUG] Run Engine Init Systems.");
     systems_runner_.RunInitSystems(

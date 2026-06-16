@@ -24,8 +24,9 @@ class WENGINEOBJECTS_API WClass
 public:
 
     constexpr WClass() noexcept = default;
-    
-    constexpr WClass(const char *name) noexcept :
+
+    // TODO std::string_view
+    constexpr WClass(std::string_view name) noexcept :
     name_(name)
     {}
 
@@ -75,7 +76,7 @@ public:
 public:
 
     constexpr std::string Name() const noexcept {
-        return name_;
+        return std::string(name_);
     }
 
     constexpr bool operator==(const WClass &other) const noexcept
@@ -110,12 +111,11 @@ public:
 
 protected:
 
-
-
 private:
 
-    const char * name_;
-    
+    // TODO std::string_view
+    // const char * name_;
+    std::string_view name_;
     
 };
 

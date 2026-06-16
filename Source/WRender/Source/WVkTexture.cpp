@@ -2,14 +2,13 @@
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVk/WVkBuffer.hpp"
 #include "WVulkan/WVk/WVkImage.hpp"
-// #include "WVulkan/WVk/WVulkan.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 void wvk::texture::CreateTexture(
-    WVkTextureInfo &out_texture_info,
-    const wtp::texture::WTexture &texture_struct,
+    WVkTextureInfo & out_texture_info,
+    const wct::texture::WTexture & texture_struct,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkQueue & in_graphics_queue,
@@ -17,24 +16,24 @@ void wvk::texture::CreateTexture(
     )
 {
     
-    wtp::texture::WTexture texture_rgba;
-    const wtp::texture::WTexture * texture_ptr;
+    wct::texture::WTexture texture_rgba;
+    const wct::texture::WTexture * texture_ptr;
+    VkFormat vulkan_format;
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
-    auto num_channels = NumOfChannels(texture_struct.format);
-    if (4==num_channels) {
+    //  I've experienced some render errores using RGB textures.
+    auto num_channels = wct::texture::NumOfChannels(texture_struct.format);
+    if (4==num_channels)
+    {
         texture_ptr = &texture_struct;
+        vulkan_format = wvk::texture::ToVkFormat(texture_struct.format);
     }
     else
     {
-        texture_rgba = wvk::texture::AddRGBAPadding(texture_struct);
+        texture_rgba = wct::texture::AddRGBAPadding(texture_struct);
         texture_ptr = &texture_rgba;
+        vulkan_format = wvk::texture::ToVkFormat(texture_rgba.format);
     }
-
-    assert(
-        texture_ptr->data.size() ==
-        (texture_ptr->width * texture_ptr->height * NumOfChannels(texture_ptr->channels))
-        );
 
     out_texture_info.mip_levels =
         static_cast<uint32_t>(
@@ -75,7 +74,7 @@ void wvk::texture::CreateTexture(
         texture_ptr->height,
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
-        VK_FORMAT_R8G8B8A8_SRGB,  // TODO image format as a param
+        vulkan_format,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -104,7 +103,7 @@ void wvk::texture::CreateTexture(
 
     wvk::image::GenerateMipmaps(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        vulkan_format,
         texture_ptr->width,
         texture_ptr->height,
         out_texture_info.mip_levels,
@@ -117,7 +116,7 @@ void wvk::texture::CreateTexture(
     // Image view
     out_texture_info.view = wvk::image::CreateImageView(
         out_texture_info.image,
-        VK_FORMAT_R8G8B8A8_SRGB,
+        vulkan_format,
         VK_IMAGE_ASPECT_COLOR_BIT,
         out_texture_info.mip_levels,
         in_device
@@ -133,7 +132,6 @@ void wvk::texture::CreateTexture(
     vkFreeMemory(in_device, staging_buffer_memory, nullptr);
     vkDestroyBuffer(in_device, staging_buffer, nullptr);
 }
-
 
 VkSampler wvk::texture::CreateTextureSampler(
     const VkDevice& device, 
@@ -210,87 +208,51 @@ void wvk::texture::DestroyVkSampler(
 }
 
 
-VkFormat wvk::texture::ToVkFormat(wtp::texture::ETextureFormat in_texture_format)
+VkFormat wvk::texture::ToVkFormat(wct::texture::ETextureFormat in_texture_format)
 {
     switch(in_texture_format) {
-    case wtp::texture::ETextureFormat::R8_UNORM:
+    case wct::texture::ETextureFormat::R8_UNORM:
         return VK_FORMAT_R8_UNORM;
-    case wtp::texture::ETextureFormat::RG8_UNORM:
+    case wct::texture::ETextureFormat::RG8_UNORM:
         return VK_FORMAT_R8G8_UNORM;
-    case wtp::texture::ETextureFormat::RGB8_UNORM:
+    case wct::texture::ETextureFormat::RGB8_UNORM:
         return VK_FORMAT_R8G8B8_UNORM;
-    case wtp::texture::ETextureFormat::RGBA8_UNORM:
+    case wct::texture::ETextureFormat::RGBA8_UNORM:
         return VK_FORMAT_R8G8B8A8_UNORM;
-    case wtp::texture::ETextureFormat::R8_SNORM:
+    case wct::texture::ETextureFormat::R8_SNORM:
         return VK_FORMAT_R8_SNORM;
-    case wtp::texture::ETextureFormat::RG8_SNORM:
+    case wct::texture::ETextureFormat::RG8_SNORM:
         return VK_FORMAT_R8G8_SNORM;
-    case wtp::texture::ETextureFormat::RGB8_SNORM:
+    case wct::texture::ETextureFormat::RGB8_SNORM:
         return VK_FORMAT_R8G8B8_SNORM;
-    case wtp::texture::ETextureFormat::RGBA8_SNORM:
+    case wct::texture::ETextureFormat::RGBA8_SNORM:
         return VK_FORMAT_R8G8B8A8_SNORM;
-    case wtp::texture::ETextureFormat::R8_SRGB:
+    case wct::texture::ETextureFormat::R8_SRGB:
         return VK_FORMAT_R8_SRGB;
-    case wtp::texture::ETextureFormat::RG8_SRGB:
+    case wct::texture::ETextureFormat::RG8_SRGB:
         return VK_FORMAT_R8G8_SRGB;
-    case wtp::texture::ETextureFormat::RGB8_SRGB:
+    case wct::texture::ETextureFormat::RGB8_SRGB:
         return VK_FORMAT_R8G8B8_SRGB;
-    case wtp::texture::ETextureFormat::RGBA8_SRGB:
+    case wct::texture::ETextureFormat::RGBA8_SRGB:
         return VK_FORMAT_R8G8B8A8_SRGB;
-    case wtp::texture::ETextureFormat::R16_SFLOAT:
+    case wct::texture::ETextureFormat::R16_SFLOAT:
         return VK_FORMAT_R16_SFLOAT;
-    case wtp::texture::ETextureFormat::RG16_SFLOAT:
+    case wct::texture::ETextureFormat::RG16_SFLOAT:
         return VK_FORMAT_R16G16_SFLOAT;
-    case wtp::texture::ETextureFormat::RGB16_SFLOAT:
+    case wct::texture::ETextureFormat::RGB16_SFLOAT:
         return VK_FORMAT_R16G16B16_SFLOAT;
-    case wtp::texture::ETextureFormat::RGBA16_SFLOAT:
+    case wct::texture::ETextureFormat::RGBA16_SFLOAT:
         return VK_FORMAT_R16G16B16A16_SFLOAT;
-    case wtp::texture::ETextureFormat::R32_SFLOAT:
+    case wct::texture::ETextureFormat::R32_SFLOAT:
         return VK_FORMAT_R32_SFLOAT;
-    case wtp::texture::ETextureFormat::RG32_SFLOAT:
+    case wct::texture::ETextureFormat::RG32_SFLOAT:
         return VK_FORMAT_R32G32_SFLOAT;
-    case wtp::texture::ETextureFormat::RGB32_SFLOAT:
+    case wct::texture::ETextureFormat::RGB32_SFLOAT:
         return VK_FORMAT_R32G32B32_SFLOAT;
-    case wtp::texture::ETextureFormat::RGBA32_SFLOAT:
+    case wct::texture::ETextureFormat::RGBA32_SFLOAT:
         return VK_FORMAT_R32G32B32A32_SFLOAT;
     default:
         return VK_FORMAT_R8G8B8A8_SRGB;
     }
-}
-
-wtp::texture::WTexture wvk::texture::AddRGBAPadding(
-    const wtp::texture::WTexture & in_texture
-    )
-{
-    wtp::texture::WTexture result;
-
-    wtp::texture::ETextureFormat all_channels_format =
-        in_texture.format | 
-        wtp::texture::ETextureFormat::R |
-        wtp::texture::ETextureFormat::G |
-        wtp::texture::ETextureFormat::B |
-        wtp::texture::ETextureFormat::A;
-
-    result.format = all_channels_format;
-    result.height = in_texture.height;
-    result.width = in_texture.width;
-
-    result.data = in_texture.data;
-
-    size_t tex_size = result.height * result.width;
-
-    result.data.resize(tex_size * 4, 255);
-
-    int num_channels = wtp::texture::NumOfChannels(in_texture.format);
-
-    for (int i=num_channels; i < 4; i++) {
-        std::memcpy(
-            result.data.data() + (tex_size * i),
-            result.data.data(),
-            tex_size
-            );
-    }
-
-    return result;
 }
 

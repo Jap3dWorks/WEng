@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WAsset.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WRenderPipelineAsset.WEngine.hpp"
 
@@ -12,12 +12,12 @@ class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
 
 public:
 
-    WRenderPipelineStruct & RenderPipeline() {
+    wct::render::WRenderPipelineStruct & RenderPipeline() {
         return pipeline_;
     }
 
 private:
 
-    WRenderPipelineStruct pipeline_{};
+    wct::render::WRenderPipelineStruct pipeline_{};
 
 };

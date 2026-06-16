@@ -12,9 +12,19 @@
 #undef _WENG_API
 #endif
 
+#ifdef _WCLASS_DECLARATION_
+#undef _WCLASS_DECLARATION_
+#endif
+
+#ifdef _PWCLASS_DECLARATION_
+#undef _PWCLASS_DECLARATION_
+#endif
+
+// #define _WCLASS_DECLARATION_ namespace wcm::light {class WAmbientLightComponent;}
+// #define _WCLASS_ wcm::light::WAmbientLightComponent
 #define _WCLASS_ WAmbientLightComponent
 #define _PWCLASS_ WComponent
 #define _WENG_API_ WENGINEOBJECTS_API
 
-#include "WReflections/_DECLARE_WCLASS_.hpp"
+#include "WReflections/_DECLARE_WCLASS_.inc"
 

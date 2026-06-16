@@ -1,4 +1,4 @@
-#include "WImporter.hpp"
+#include "WImporter/WImporter.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
@@ -20,15 +20,15 @@
 // WImporter
 // ---------
 
-WImporter::WImporter() noexcept {}
+wim::importer::WImporter::WImporter() noexcept {}
 
-WImporter::WImporter(const WImporter & other) noexcept :
+wim::importer::WImporter::WImporter(const WImporter & other) noexcept :
     asset_manager_(other.asset_manager_) {}
 
-WImporter::WImporter(WImporter && out_other) noexcept :
+wim::importer::WImporter::WImporter(WImporter && out_other) noexcept :
     asset_manager_(std::move(out_other.asset_manager_)) {}
 
-WImporter & WImporter::operator=(const WImporter & other)  noexcept
+wim::importer::WImporter & wim::importer::WImporter::operator=(const WImporter & other)  noexcept
 {
     if (this != &other) {
         asset_manager_ = other.asset_manager_;        
@@ -37,7 +37,7 @@ WImporter & WImporter::operator=(const WImporter & other)  noexcept
     return *this;
 }
 
-WImporter & WImporter::operator=(WImporter && other) noexcept
+wim::importer::WImporter & wim::importer::WImporter::operator=(WImporter && other) noexcept
 {
     if (this != &other) {
         asset_manager_ = std::move(other.asset_manager_);
@@ -49,9 +49,9 @@ WImporter & WImporter::operator=(WImporter && other) noexcept
 // WImportObj
 // -----------
 
-WImportObj::WImportObj() noexcept {}
+wim::importer::WImportObj::WImportObj() noexcept {}
 
-std::vector<WAssetId> WImportObj::Import(
+std::vector<WAssetId> wim::importer::WImportObj::Import(
     WAssetDb & in_asset_manager,
     const char * file_path,
     const char * asset_directory)
@@ -139,9 +139,9 @@ std::vector<WAssetId> WImportObj::Import(
 // WImportTexture
 // --------------
 
-WImportTexture::WImportTexture() noexcept {}
+wim::importer::WImportTexture::WImportTexture() noexcept {}
 
-std::vector<WAssetId> WImportTexture::Import(
+std::vector<WAssetId> wim::importer::WImportTexture::Import(
     WAssetDb & in_asset_manager,
     const char* file_path,
     const char* asset_directory)
@@ -160,26 +160,26 @@ std::vector<WAssetId> WImportTexture::Import(
         throw std::runtime_error("Failed to load texture image!");
     }
 
-    wtp::texture::WTexture texture_struct = {};
+    wct::texture::WTexture texture_struct = {};
     texture_struct.width = width;
     texture_struct.height = height;
 
     // Default formats
     switch(num_channels) {
     case 1:
-        texture_struct.format = wtp::texture::ETextureFormat::R8_UNORM;
+        texture_struct.format = wct::texture::ETextureFormat::R8_UNORM;
         break;
     case 2:
-        texture_struct.format = wtp::texture::ETextureFormat::RG8_UNORM;
+        texture_struct.format = wct::texture::ETextureFormat::RG8_UNORM;
         break;
     case 3:
-        texture_struct.format = wtp::texture::ETextureFormat::RGB8_SRGB;
+        texture_struct.format = wct::texture::ETextureFormat::RGB8_SRGB;
         break;
     case 4:
-        texture_struct.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
+        texture_struct.format = wct::texture::ETextureFormat::RGBA8_SRGB;
         break;
     default:
-        texture_struct.format = wtp::texture::ETextureFormat::RGBA8_SRGB;
+        texture_struct.format = wct::texture::ETextureFormat::RGBA8_SRGB;
     }
 
     size_t csize = width * height;

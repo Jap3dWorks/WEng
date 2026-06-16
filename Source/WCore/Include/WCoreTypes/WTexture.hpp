@@ -2,8 +2,9 @@
 
 #include <cstdint>
 #include <vector>
+#include <cstring>
 
-namespace wtp::texture {
+namespace wct::texture {
 
    /**
     * 8 bits, significative bit to left
@@ -93,5 +94,38 @@ namespace wtp::texture {
         uint32_t width;
         uint32_t height;
     };
+
+    inline WTexture AddRGBAPadding(const WTexture & in_texture) {
+        wct::texture::WTexture result;
+
+        wct::texture::ETextureFormat all_channels_format =
+            in_texture.format | 
+            wct::texture::ETextureFormat::R |
+            wct::texture::ETextureFormat::G |
+            wct::texture::ETextureFormat::B |
+            wct::texture::ETextureFormat::A;
+
+        result.format = all_channels_format;
+        result.height = in_texture.height;
+        result.width = in_texture.width;
+
+        result.data = in_texture.data;
+
+        size_t tex_size = result.height * result.width;
+
+        result.data.resize(tex_size * 4, 255);
+
+        int num_channels = wct::texture::NumOfChannels(in_texture.format);
+
+        for (int i=num_channels; i < 4; i++) {
+            std::memcpy(
+                result.data.data() + (tex_size * i),
+                result.data.data(),
+                tex_size
+                );
+        }
+
+        return result;
+    }
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 
 #include <cstdint>
@@ -42,7 +42,7 @@ struct WVkTextureInfo
 struct WVkShaderStageInfo
 {
     std::vector<char> code;
-    EShaderStageFlag type;
+    wct::render::EShaderStageFlag type;
     std::string entry_point{"main"};
     
     std::vector<VkVertexInputBindingDescription> binding_descriptors{};     // vertex size, ...
@@ -148,7 +148,7 @@ struct WVkUBOInfo
 struct WVkRenderPipelineInfo
 {
     WAssetId wid;
-    EPipelineType type{EPipelineType::Graphics};
+    wct::render::EPipelineType type{wct::render::EPipelineType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
@@ -156,7 +156,7 @@ struct WVkRenderPipelineInfo
     WAssetId descriptor_set_layout_id{0};
 
     // TODO: Pipeline layout bindings description
-    WPipeParamDescriptorList params_descriptor{};
+    wct::render::WPipeParamDescriptorList params_descriptor{};
 };
 
 // Pipeline Bindings

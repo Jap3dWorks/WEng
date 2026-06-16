@@ -1,14 +1,14 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WCoreTypes/WGeometryStructs.hpp"
-#include "WShaderUtils.hpp"
+#include "WRender/WShader.hpp"
 #include <stdexcept>
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -48,16 +48,16 @@ namespace WVkGBuffersPipelinesUtils {
     inline WVkShaderStageInfo BuildShaderStageInfo(
         const char * in_shader_file_path,
         const char * in_entry_point,
-        EShaderStageFlag in_shader_type
+        wct::render::EShaderStageFlag in_shader_type
         ) {
         WVkShaderStageInfo result;
 
-        result.code = WShaderUtils::ReadShader(in_shader_file_path);
+        result.code = wrd::shader::ReadShader(in_shader_file_path);
 
         result.entry_point = in_entry_point;
         result.type = in_shader_type;
 
-        if (in_shader_type == EShaderStageFlag::Vertex)
+        if (in_shader_type == wct::render::EShaderStageFlag::Vertex)
         {
             result.attribute_descriptors.resize(4);
 

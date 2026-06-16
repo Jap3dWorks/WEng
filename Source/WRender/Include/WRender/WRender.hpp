@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WStructs/WComponentStructs.hpp"
-#include "WCoreTypes/WRenderStructs.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WUtils/WMathUtils.hpp"
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/glm.hpp>
@@ -9,13 +9,14 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/matrix.hpp>
 
-namespace WRenderUtils {
-    inline WUBOCameraStruct ToUBOCameraStruct(
+namespace wrd::render {
+
+    inline wct::render::WUBOCameraStruct ToUBOCameraStruct(
         const WCameraPropertiesStruct & in_camera,
         const WTransformStruct & in_transform,
         float in_aspect
         ) {
-        WUBOCameraStruct ubo_camera;
+        wct::render::WUBOCameraStruct ubo_camera;
         ubo_camera.proj = glm::perspective(
             glm::radians(in_camera.angle_of_view),
             in_aspect,
@@ -36,7 +37,7 @@ namespace WRenderUtils {
         return ubo_camera;
     }
 
-    inline WUBOGraphicsStruct ToUBOGraphicsStruct(
+    inline wct::render::WUBOGraphicsStruct ToUBOGraphicsStruct(
         const WTransformStruct & in_transform
         ) {
 

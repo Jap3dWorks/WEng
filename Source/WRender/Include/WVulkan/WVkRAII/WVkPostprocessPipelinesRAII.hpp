@@ -37,7 +37,7 @@ public:
     WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
     void CreatePipeline(const WAssetId & in_id,
-                        const WRenderPipelineStruct & in_pipeline_struct);
+                        const wct::render::WRenderPipelineStruct & in_pipeline_struct);
 
     WEntityComponentId CreateBinding(const WEntityComponentId & in_binding_id,
                                      const WAssetId & in_pipeline_id,

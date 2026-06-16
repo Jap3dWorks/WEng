@@ -50,13 +50,13 @@ namespace wvk::descriptor {
 
     inline void UpdateDescriptorSetLayout(
         WVkDescriptorSetLayoutInfo & out_dsl,
-        const WPipeParamDescriptorList & in_param_list
+        const wct::render::WPipeParamDescriptorList & in_param_list
         ) {
 
         std::vector<VkDescriptorSetLayoutBinding> bindings;
         bindings.reserve(in_param_list.size());
 
-        WRenderUtils::ForEach(
+        wct::render::ForEach(
             in_param_list,
             [&bindings]
             (const auto& _prm) {
@@ -64,11 +64,11 @@ namespace wvk::descriptor {
 
                 switch(_prm.type) {
 
-                case EPipeParamType::Ubo:
+                case wct::render::EPipeParamType::Ubo:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
                     break;
 
-                case EPipeParamType::Texture:
+                case wct::render::EPipeParamType::Texture:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                     break;
                 

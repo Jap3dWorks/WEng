@@ -8,18 +8,16 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WObjectDb/WEntityComponentDb.hpp"
+// #include "WObjectDb/WEntityComponentDb.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
-#include "WRenderUtils.hpp"
+#include "WRender/WRender.hpp"
 #include "WStructs/WComponentStructs.hpp"
-#include "WUtils/WMathUtils.hpp"
+// #include "WUtils/WMathUtils.hpp"
 
-// TODO rename this module, do not use Utils, use something more descriptive.
-
-namespace WRenderLevelUtils {
+namespace wng::render {
 
     inline void InitializeResources(
         IRender * in_render,
@@ -151,8 +149,9 @@ namespace WRenderLevelUtils {
                             in_component->EntityId()
                             ).TransformStruct();
 
-                        WUBOGraphicsStruct grpubo = WRenderUtils::ToUBOGraphicsStruct(tstruct);
-                        WRPParamUboStruct ubodt{.binding=0, .offset=0};
+                        wct::render::WUBOGraphicsStruct grpubo =
+                            wrd::render::ToUBOGraphicsStruct(tstruct);
+                        wct::render::WRPParamUboStruct ubodt{.binding=0, .offset=0};
                         ubodt.databuffer.resize(sizeof(decltype(grpubo)));
 
                         std::memcpy(ubodt.databuffer.data(), &grpubo, sizeof(decltype(grpubo)));

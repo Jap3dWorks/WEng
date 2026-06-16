@@ -8,7 +8,7 @@
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
-#include "WShaderUtils.hpp"
+#include "WRender/WShader.hpp"
 
 #include <glm/fwd.hpp>
 #include <string_view>
@@ -185,7 +185,7 @@ private:
 
     void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
         // shader modules
-        std::vector<char> shadercode = WShaderUtils::ReadShader(
+        std::vector<char> shadercode = wrd::shader::ReadShader(
             WStringUtils::SystemPath(std::string(shader_path))
             );
 
