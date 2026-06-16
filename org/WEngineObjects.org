@@ -46,6 +46,15 @@
 " wclass pwclass weng-api))
 #+end_src
 
+** Compile Generated
+
+#+NAME: compile-generated
+#+begin_src elisp :var wobject-dir="WEngineObjects" :var wobject="WObject"
+(concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
+         "\n"
+         (format "#include \"WReflection/_DEFFINE_WCLASS_.inc\""))
+#+end_src
+
 * WComponents
 
 ** light
@@ -60,6 +69,13 @@
                     "WComponent",
                     "WENGINEOBJECTS_API",
                     "wcm::light")>>
+#+end_src
+
+#+NAME: WAmbientLightComponent-compilegenerated
+#+HEADER: :comments link
+#+HEADER: :noweb yes
+#+begin_src C++ :tangle ../Source/WEngingeObjects/CompileGenerated/CompileGenerated.cpp
+<<compile-generated("WComponents/Light", "WAmbientLightComponent")>>
 #+end_src
 
 * WReflection
