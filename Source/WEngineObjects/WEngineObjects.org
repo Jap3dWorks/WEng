@@ -5,7 +5,9 @@
 
 ** WObject.WEngine.hpp
 
-#+NAME: wengine-generated
+Content of wobject-wengine-hpp should be tangled inside PublicGenerated/ directory.
+
+#+NAME: wobject-wengine-hpp
 #+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS_API"
 #+HEADER: :var nmespace=""
 #+begin_src elisp
@@ -48,7 +50,9 @@
 
 ** Compile Generated
 
-#+NAME: compile-generated
+Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
+
+#+NAME: compile-generated-cpp
 #+begin_src elisp :var wobject-dir="WEngineObjects" :var wobject="WObject"
 (concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
          "\n"
@@ -56,7 +60,6 @@
 #+end_src
 
 * WComponents
-
 ** light
 *** WAmbientLightComponent
 
@@ -64,18 +67,18 @@
 #+HEADER: :main no
 #+HEADER: :comments link
 #+HEADER: :noweb yes
-#+begin_src C++ :tangle ../Source/WEngineObjects/PublicGenerated/WAmbientLightComponent.WEngine.hpp
-<<wengine-generated("WAmbientLightComponent",
-                    "WComponent",
-                    "WENGINEOBJECTS_API",
-                    "wcm::light")>>
+#+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
+<<wobject-wengine-hpp("WAmbientLightComponent",
+                      "WComponent",
+                      "WENGINEOBJECTS_API",
+                      "wcm::light")>>
 #+end_src
 
 #+NAME: WAmbientLightComponent-compilegenerated
 #+HEADER: :comments link
 #+HEADER: :noweb yes
-#+begin_src C++ :tangle ../Source/WEngingeObjects/CompileGenerated/CompileGenerated.cpp
-<<compile-generated("WComponents/Light", "WAmbientLightComponent")>>
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents/Light", "WAmbientLightComponent")>>
 #+end_src
 
 * WReflection
@@ -148,7 +151,7 @@ El archivo DECLARE_WCLASS define un WClass único para cada WObject.
 #+HEADER: :main no
 #+HEADER: :comments link
 #+HEADER: :noweb yes
-#+begin_src C++ :tangle ../Source/WEngineObjects/Include/WReflection/_DECLARE_WCLASS_.inc
+#+begin_src C++ :tangle Include/WReflection/_DECLARE_WCLASS_.inc
 
 #include "WCore/WCore.hpp"
 #include "WCore/TSingleton.hpp"
@@ -187,8 +190,7 @@ El contenido de DEFFINE_WCLASS debe ser compilado como un .cpp.
 #+HEADER: :main no
 #+HEADER: :noweb yes
 #+HEADER: :comments link
-#+begin_src C++ :tangle ../Source/WEngineObjects/Include/WReflection/_DEFFINE_WCLASS_.inc
-
+#+begin_src C++ :tangle Include/WReflection/_DEFFINE_WCLASS_.inc
 <<define-wclassname-macros>>
 
 const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
