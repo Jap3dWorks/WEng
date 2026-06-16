@@ -1,16 +1,72 @@
 #+title: WEngineObjects
+#+startup: content
 
-* WReflections
+* PublicGenerated
 
-#+NAME: DECLARE_WCLASS
-#+HEADER: :shebang -*- mode: C++ -*-
+** WObject.WEngine.hpp
+
+#+NAME: wengine-generated
+#+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS_API"
+#+HEADER: :var nmespace=""
+#+begin_src elisp
+(concat
+(format
+"#pragma once
+
+#ifdef _WCLASS_
+#undef _WCLASS_
+#endif
+
+#ifdef _PWCLASS_
+#undef _PWCLASS_
+#endif
+
+#ifdef _WENG_API
+#undef _WENG_API
+#endif
+
+#ifdef _WCLASS_NAMESPACE_
+#undef _WCLASS_NAMESPACE_
+#endif
+
+#ifdef _WCLASS_DECLARATION_
+#undef _WCLASS_DECLARATION_
+#endif
+
+#ifdef _PWCLASS_DECLARATION_
+#undef _PWCLASS_DECLARATION_
+#endif
+
+#define _WCLASS_ %s
+#define _PWCLASS_ %s
+#define _WENG_API_ %s
+#define _WCLASS_NAMESPACE_ %s
+
+#include \"WReflection/_DECLARE_WCLASS_.inc\"
+" wclass pwclass weng-api))
+#+end_src
+
+* WComponents
+
+** light
+*** WAmbientLightComponent
+
+#+NAME: WAmbienLightComponent-WEngine
+#+HEADER: :main no
 #+HEADER: :comments link
-#+begin_src C++ :tangle ../Source/WEngineObjects/Include/WReflections/_DECLARE_WCLASS_.inc
+#+HEADER: :noweb yes
+#+begin_src C++ :tangle ../Source/WEngineObjects/PublicGenerated/WAmbientLightComponent.WEngine.hpp
+<<wengine-generated("WAmbientLightComponent",
+                    "WComponent",
+                    "WENGINEOBJECTS_API",
+                    "wcm::light")>>
+#+end_src
 
-#include "WCore/WCore.hpp"
-#include "WCore/TSingleton.hpp"
-#include "WReflections/WClassFor.hpp"
+* WReflection
+** Macros
 
+#+NAME: define-wclass-macros
+#+begin_src C++
 #ifndef _WCLASS_
 #define _WCLASS_ WObject
 #endif
@@ -19,28 +75,8 @@
 #define _PWCLASS_ WObject
 #endif
 
-#ifndef WENG_DCONCAT
-#define WENG_DCONCAT(A,B) A##B
-#endif
-
-#ifndef WENG_CLASSNAME
-#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__,_CLS)
-#endif
-
-#ifndef WENG_CLASSNAME_CLSS_VAR
-#define WENG_CLASSNAME_CLSS_VAR(_CLS) WENG_DCONCAT(_VAR_, _CLS)
-#endif
-
-#ifndef WENG_MP
-#define WENG_MP(x) x
-#endif
-
-#ifndef WENG_CLASSNAME_STR
-#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
-#endif
-
-#ifndef WENG_CLASSNAME_STR_VAR
-#define WENG_CLASSNAME_STR_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
+#ifndef _WCLASS_NAMESPACE_
+#define _WCLASS_NAMESPACE_
 #endif
 
 #ifndef _WCLASS_DECLARATION_
@@ -50,6 +86,65 @@
 #ifndef _PWCLASS_DECLARATION_
 #define _PWCLASS_DECLARATION_ class _PWCLASS_;
 #endif
+#+end_src
+
+#+NAME: define-dconcat
+#+begin_src C++
+#ifndef WENG_DCONCAT
+#define WENG_DCONCAT(A,B) A##B
+#endif
+#+end_src
+
+#+NAME: define-mp
+#+begin_src C++
+#ifndef WENG_MP
+#define WENG_MP(x) x
+#endif
+#+end_src
+
+#+NAME: define-wclassname-macros
+#+begin_src C++
+#ifndef WENG_CLASSNAME
+#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_CLSS_VAR
+#define WENG_CLASSNAME_CLSS_VAR(_CLS) WENG_DCONCAT(_VAR_, _CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_STR
+#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_STR_VAR
+#define WENG_CLASSNAME_STR_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
+#endif
+#+end_src
+
+** DECLARE_WCLASS
+
+WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
+
+El archivo DECLARE_WCLASS define un WClass único para cada WObject.
+
+#+NAME: DECLARE_WCLASS
+#+HEADER: :shebang "// -*- mode: C++ -*-"
+#+HEADER: :main no
+#+HEADER: :comments link
+#+HEADER: :noweb yes
+#+begin_src C++ :tangle ../Source/WEngineObjects/Include/WReflection/_DECLARE_WCLASS_.inc
+
+#include "WCore/WCore.hpp"
+#include "WCore/TSingleton.hpp"
+#include "WReflections/WClassFor.hpp"
+
+<<define-wclass-macros>>
+
+<<define-dconcat>>
+
+<<define-mp>>
+
+<<define-wclassname-macros>>
 
 _WCLASS_DECLARATION_
 _PWCLASS_DECLARATION_
@@ -64,11 +159,23 @@ namespace wrf::wclass {
     inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
         WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
 }
+#+end_src
 
-// template<>
-// struct TSingleton<WClass, WENG_CLASSNAME(_WCLASS_)> {
-//     _WENG_API_ static WENG_CLASSNAME(_WCLASS_) & Value();
-// };
+** DEFINE_WCLASS
 
+El contenido de DEFFINE_WCLASS debe ser compilado como un .cpp.
 
+#+NAME: DEFFINE_WCLASS
+#+HEADER: :shebang "// -*- mode: C++ -*-"
+#+HEADER: :eval no
+#+HEADER: :main no
+#+HEADER: :noweb yes
+#+HEADER: :comments link
+#+begin_src C++ :tangle ../Source/WEngineObjects/Include/WReflection/_DEFFINE_WCLASS_.inc
+
+<<define-wclassname-macros>>
+
+const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
+    return & wrf::wclass::WENG_CLASSNAME_CLSS_VAR(_WCLASS_);
+}
 #+end_src

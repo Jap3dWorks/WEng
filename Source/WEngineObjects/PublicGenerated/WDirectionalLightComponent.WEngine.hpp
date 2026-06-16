@@ -16,5 +16,5 @@
 #define _PWCLASS_ WComponent
 #define _WENG_API_ WENGINEOBJECTS_API
 
-#include "WReflections/_DECLARE_WCLASS_.inc"
+#include "WReflection/_DECLARE_WCLASS_.inc"
 

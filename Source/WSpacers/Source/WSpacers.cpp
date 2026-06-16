@@ -22,7 +22,7 @@
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
-#include "WComponents/light/WAmbientLightComponent.hpp"
+#include "WComponents/Light/WAmbientLightComponent.hpp"
 #include "WCoreTypes/WMathStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 

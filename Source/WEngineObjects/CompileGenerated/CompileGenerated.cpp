@@ -2,47 +2,47 @@
 // Order is important, each class should appear below its parent class.
 
 #include "WEngineObjects/WObject.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WEngineObjects/WAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WEngineObjects/WComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WEngineObjects/WEntity.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WActionAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WInputMappingAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WStaticMeshAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WAssets/WTextureAsset.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WComponents/WCameraComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WComponents/WCameraInputComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WComponents/WMovementComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WComponents/WStaticMeshComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
 #include "WComponents/WTransformComponent.hpp"
-#include "WReflections/_DEFFINE_WCLASS_.inc"
+#include "WReflection/_DEFFINE_WCLASS_.inc"
 
