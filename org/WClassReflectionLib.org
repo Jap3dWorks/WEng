@@ -177,7 +177,6 @@ Content of compile-generated-cpp should be tangled in CompileGenerated/ director
          (format "#include \"WReflection/_DEFINE_WCLASS_.inc\""))
 #+end_src
 
-
 * WObject Body Macros
 
 #+NAME: wobject-original-body-macro

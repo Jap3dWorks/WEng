@@ -5,12 +5,13 @@
 Template to create a new WObject class.
 
 #+NAME: wobject-hpp-initial-code
-#+begin_src elisp :var module="WEngineObjects" :var name="WObject" :var parent-module="" :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
-(when (string-empty-p parent-module)
-  (setq parent-module module))
+#+begin_src elisp :results none
+(defun wobject-hpp-initial-code (module name parent-module parent namespace API)
+  (when (string-empty-p parent-module)
+    (setq parent-module module))
 
-(concat
- (format "#pragma once
+  (concat
+   (format "#pragma once
 
 #include \"WCore/WCore.hpp\"
 #include \"WEngineObjects/WObjectMacros.hpp\"
@@ -28,7 +29,7 @@ namespace %5$s {
 
     };
 
-}" module name parent-module parent namespace API))
+}" module name parent-module parent namespace API)))
 #+end_src
 
 #+NAME: create-if-not-exists-wobject-hpp
@@ -36,7 +37,18 @@ namespace %5$s {
 #+HEADER: :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
 #+begin_src elisp :noweb yes
 (let ((file-path (format "Include/%s/%s.hpp" module name)))
-(unless (f-exists-p file-path
-  (with-temp-file file-path
-    (insert <<wobject-hpp-initial-code(module, name, parent-module, parent, namespace, API)>>)))))
+  (unless (f-exists-p file-path)
+    (make-directory (file-name-directory file-path) t)
+    (with-temp-file file-path
+      (insert (wobject-hpp-initial-code
+               module
+               name
+               parent-module
+               parent
+               namespace
+               API)))))
 #+end_src
+
+
+
+

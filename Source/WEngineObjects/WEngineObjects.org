@@ -221,10 +221,7 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WAmbientLightComponent
 :END:
 
-#+NAME: create-if-not-exists-WAmbientLightComponent-hpp
-#+begin_src elisp :noweb yes
-<<create-if-not-exists-wobject-hpp("WComponent/light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")>>
-#+end_src
+#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
 #+NAME: WAmbienLightComponent-WEngine-hpp
 #+HEADER: :main no :eval no
@@ -241,12 +238,16 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 <<compile-generated-cpp("WComponents/Light", "WAmbientLightComponent")>>
 #+end_src
 
+*** WPointLightComponent
+:PROPERTIES:
+:CUSTOM_ID: WPointLightComponent
+:END:
 
-
+#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Invent", "WInventLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
 * Local Variables
 
 # Local Variables:
 # eval: (org-babel-lob-ingest "../../org/WClassReflectionLib.org")
-# eval: (org-babel-lob-ingest "../../org/WObjectTemplatesLib.org");
+# eval: (org-babel-lob-ingest "../../org/WObjectTemplatesLib.org")
 # End:
