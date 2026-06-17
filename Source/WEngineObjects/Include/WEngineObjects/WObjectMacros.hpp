@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef WOBJECT_NAME_SIZE
-#define WOBJECT_NAME_SIZE 256
-#endif
-
 #define WCLASS(...)
 
 class WClass;

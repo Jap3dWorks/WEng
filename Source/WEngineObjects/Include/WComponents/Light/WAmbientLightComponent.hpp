@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WEngineObjects/WComponent.hpp"
 #include "WEngineObjects/WObjectMacros.hpp"
+#include "WEngineObjects/WComponent.hpp"
 
 #include <glm/glm.hpp>
 

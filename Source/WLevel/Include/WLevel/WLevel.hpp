@@ -128,7 +128,7 @@ private:
     std::string ComponentPath(const WEntityId & in_entity_id,
                               const WClass * in_class) const;
 
-    char name_[WOBJECT_NAME_SIZE];
+    WObjectName name_;
 
     // WEntityId 0 is reserved for Level Components.
     WEntityComponentDb entity_component_db_;

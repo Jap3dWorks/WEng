@@ -1,5 +1,5 @@
 // -*- mode: C++ -*-
-// [[file:../../../../org/WEngineObjects.org::DECLARE_WCLASS][DECLARE_WCLASS]]
+// [[file:../../WEngineObjects.org::declare_wclass-inc][declare_wclass-inc]]
 #include "WCore/WCore.hpp"
 #include "WCore/TSingleton.hpp"
 #include "WReflection/WClassFor.hpp"
@@ -10,6 +10,10 @@
 
 #ifndef _PWCLASS_
 #define _PWCLASS_ WObject
+#endif
+
+#ifndef _WCLASS_NAMESPACE_
+#define _WCLASS_NAMESPACE_
 #endif
 
 #ifndef _WCLASS_DECLARATION_
@@ -29,7 +33,7 @@
 #endif
 
 #ifndef WENG_CLASSNAME
-#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__,_CLS)
+#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
 #endif
 
 #ifndef WENG_CLASSNAME_CLSS_VAR
@@ -48,7 +52,6 @@ _WCLASS_DECLARATION_
 _PWCLASS_DECLARATION_
 
 namespace wrf::wclass {
-
     inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
         WENG_CLASSNAME_STR(_WCLASS_);
 
@@ -57,4 +60,4 @@ namespace wrf::wclass {
     inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
         WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
 }
-// DECLARE_WCLASS ends here
+// declare_wclass-inc ends here

@@ -96,7 +96,7 @@ public:
     /**
      * @brief Create a new object of type WClass at the specified in_id.
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
-     * If your replace an existing WId for the indicated class behaviour is undeffined.
+     * If your replace an existing WId for the indicated class behaviour is undefined.
      */
     void CreateAt(const WClass * in_class,
                   const WIdClass& in_id) {

@@ -1,0 +1,25 @@
+#+title: Code Snippets
+
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output
+#include <iostream>
+
+#ifndef WCLASS
+#define WCLASS(...)
+#endif
+
+#ifndef WCLASS
+#define WCLASS(...)
+#endif
+
+
+int main() {
+    std::cout << "HI\n";
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: HI

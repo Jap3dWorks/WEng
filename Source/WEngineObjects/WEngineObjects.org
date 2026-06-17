@@ -1,199 +1,252 @@
 #+title: WEngineObjects
 #+startup: content
 
-* PublicGenerated
-
-** WObject.WEngine.hpp
-
-Content of wobject-wengine-hpp should be tangled inside PublicGenerated/ directory.
-
-#+NAME: wobject-wengine-hpp
-#+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS_API"
-#+HEADER: :var nmespace=""
-#+begin_src elisp
-(concat
-(format
-"#pragma once
-
-#ifdef _WCLASS_
-#undef _WCLASS_
-#endif
-
-#ifdef _PWCLASS_
-#undef _PWCLASS_
-#endif
-
-#ifdef _WENG_API
-#undef _WENG_API
-#endif
-
-#ifdef _WCLASS_NAMESPACE_
-#undef _WCLASS_NAMESPACE_
-#endif
-
-#ifdef _WCLASS_DECLARATION_
-#undef _WCLASS_DECLARATION_
-#endif
-
-#ifdef _PWCLASS_DECLARATION_
-#undef _PWCLASS_DECLARATION_
-#endif
-
-#define _WCLASS_ %s
-#define _PWCLASS_ %s
-#define _WENG_API_ %s
-#define _WCLASS_NAMESPACE_ %s
-
-#include \"WReflection/_DECLARE_WCLASS_.inc\"
-" wclass pwclass weng-api))
-#+end_src
-
-** Compile Generated
-
-Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
-
-#+NAME: compile-generated-cpp
-#+begin_src elisp :var wobject-dir="WEngineObjects" :var wobject="WObject"
-(concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
-         "\n"
-         (format "#include \"WReflection/_DEFFINE_WCLASS_.inc\""))
-#+end_src
-
-* WComponents
-** light
-*** WAmbientLightComponent
-
-#+NAME: WAmbienLightComponent-WEngine
-#+HEADER: :main no
-#+HEADER: :comments link
-#+HEADER: :noweb yes
-#+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
-<<wobject-wengine-hpp("WAmbientLightComponent",
-                      "WComponent",
-                      "WENGINEOBJECTS_API",
-                      "wcm::light")>>
-#+end_src
-
-#+NAME: WAmbientLightComponent-compilegenerated
-#+HEADER: :comments link
-#+HEADER: :noweb yes
-#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents/Light", "WAmbientLightComponent")>>
-#+end_src
-
 * WReflection
-** Macros
-
-#+NAME: define-wclass-macros
-#+begin_src C++
-#ifndef _WCLASS_
-#define _WCLASS_ WObject
-#endif
-
-#ifndef _PWCLASS_
-#define _PWCLASS_ WObject
-#endif
-
-#ifndef _WCLASS_NAMESPACE_
-#define _WCLASS_NAMESPACE_
-#endif
-
-#ifndef _WCLASS_DECLARATION_
-#define _WCLASS_DECLARATION_ class _WCLASS_;
-#endif
-
-#ifndef _PWCLASS_DECLARATION_
-#define _PWCLASS_DECLARATION_ class _PWCLASS_;
-#endif
-#+end_src
-
-#+NAME: define-dconcat
-#+begin_src C++
-#ifndef WENG_DCONCAT
-#define WENG_DCONCAT(A,B) A##B
-#endif
-#+end_src
-
-#+NAME: define-mp
-#+begin_src C++
-#ifndef WENG_MP
-#define WENG_MP(x) x
-#endif
-#+end_src
-
-#+NAME: define-wclassname-macros
-#+begin_src C++
-#ifndef WENG_CLASSNAME
-#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
-#endif
-
-#ifndef WENG_CLASSNAME_CLSS_VAR
-#define WENG_CLASSNAME_CLSS_VAR(_CLS) WENG_DCONCAT(_VAR_, _CLS)
-#endif
-
-#ifndef WENG_CLASSNAME_STR
-#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
-#endif
-
-#ifndef WENG_CLASSNAME_STR_VAR
-#define WENG_CLASSNAME_STR_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
-#endif
-#+end_src
-
-** DECLARE_WCLASS
+:PROPERTIES:
+:CUSTOM_ID: WReflection
+:END:
 
 WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
 
 El archivo DECLARE_WCLASS define un WClass único para cada WObject.
 
-#+NAME: DECLARE_WCLASS
+#+NAME: declare_wclass-inc
 #+HEADER: :shebang "// -*- mode: C++ -*-"
-#+HEADER: :main no
-#+HEADER: :comments link
-#+HEADER: :noweb yes
+#+HEADER: :main no :noeval 
+#+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle Include/WReflection/_DECLARE_WCLASS_.inc
 
-#include "WCore/WCore.hpp"
-#include "WCore/TSingleton.hpp"
-#include "WReflections/WClassFor.hpp"
+<<declare_wclass>>
 
-<<define-wclass-macros>>
-
-<<define-dconcat>>
-
-<<define-mp>>
-
-<<define-wclassname-macros>>
-
-_WCLASS_DECLARATION_
-_PWCLASS_DECLARATION_
-
-namespace wrf::wclass {
-
-    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
-        WENG_CLASSNAME_STR(_WCLASS_);
-
-    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
-
-    inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
-        WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
-}
 #+end_src
 
-** DEFINE_WCLASS
+El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 
-El contenido de DEFFINE_WCLASS debe ser compilado como un .cpp.
-
-#+NAME: DEFFINE_WCLASS
+#+NAME: define_wclass-inc
 #+HEADER: :shebang "// -*- mode: C++ -*-"
-#+HEADER: :eval no
-#+HEADER: :main no
-#+HEADER: :noweb yes
-#+HEADER: :comments link
-#+begin_src C++ :tangle Include/WReflection/_DEFFINE_WCLASS_.inc
-<<define-wclassname-macros>>
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle Include/WReflection/_DEFINE_WCLASS_.inc
 
-const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
-    return & wrf::wclass::WENG_CLASSNAME_CLSS_VAR(_WCLASS_);
-}
+<<define_wclass>>
+
 #+end_src
+
+* WEngineObjects
+** WObject
+:PROPERTIES:
+:CUSTOM_ID: WObject
+:END:
+
+#+NAME: wobject-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WEngineObjects", "WObject")>>
+#+end_src
+
+** WAsset
+:PROPERTIES:
+:CUSTOM_ID: WAsset
+:END:
+
+#+NAME: wasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WEngineObjects", "WAsset")>>
+#+end_src
+
+** WComponent
+:PROPERTIES:
+:CUSTOM_ID: WComponent
+:END:
+
+#+NAME: wcomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WEngineObjects", "WComponent")>>
+#+end_src
+
+** WEntity
+:PROPERTIES:
+:CUSTOM_ID: WEntity
+:END:
+
+#+NAME: wentity-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WEngineObjects", "WEntity")>>
+#+end_src
+
+* WAssets
+** WActionAsset
+:PROPERTIES:
+:CUSTOM_ID: WActionAsset
+:END:
+
+#+NAME: wactionasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WActionAsset")>>
+#+end_src
+
+** WInputMappingAsset
+:PROPERTIES:
+:CUSTOM_ID: WInputMappingAsset
+:END:
+
+#+NAME: winputmappingasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WInputMappingAsset")>>
+#+end_src
+
+** WRenderPipelineAsset
+:PROPERTIES:
+:CUSTOM_ID: WRenderPipelineAsset
+:END:
+
+#+NAME: wrenderpipelineasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WRenderPipelineAsset")>>
+#+end_src
+
+** WRenderPipelineParametersAsset
+:PROPERTIES:
+:CUSTOM_ID: WRenderPipelineParametersAsset
+:END:
+
+#+NAME: wrenderpipelineparametersasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WRenderPipelineParametersAsset")>>
+#+end_src
+
+** WStaticMeshAsset
+:PROPERTIES:
+:CUSTOM_ID: WStaticMeshAsset
+:END:
+
+#+NAME: wstaticmeshasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WStaticMeshAsset")>>
+#+end_src
+
+** WTextureAsset
+:PROPERTIES:
+:CUSTOM_ID: WTextureAsset
+:END:
+
+#+NAME: wtextureasset-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "WTextureAsset")>>
+#+end_src
+
+* WComponents
+** WCameraComponent
+:PROPERTIES:
+:CUSTOM_ID: WCameraComponent
+:END:
+
+#+NAME: wcameracomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents", "WCameraComponent")>>
+#+end_src
+
+** WCameraInputComponent
+:PROPERTIES:
+:CUSTOM_ID: WCameraInputComponent
+:END:
+
+#+NAME: wcamerainputcomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents", "WCameraInputComponent")>>
+#+end_src
+
+** WMovementComponent
+:PROPERTIES:
+:CUSTOM_ID: WMovementComponent
+:END:
+
+#+NAME: wmovementcomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents", "WMovementComponent")>>
+#+end_src
+
+** WStaticMeshComponent 
+:PROPERTIES:
+:CUSTOM_ID: WStaticMeshComponent
+:END:
+
+#+NAME: wstaticmeshcomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents", "WStaticMeshComponent")>>
+#+end_src
+
+** WTransformComponent
+:PROPERTIES:
+:CUSTOM_ID: WTransformComponent
+:END:
+
+#+NAME: wtransformcomponent-compilegenerated-cpp
+#+HEADER: :main no :noeval
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents", "WTransformComponent")>>
+#+end_src
+
+** light
+*** WAmbientLightComponent
+:PROPERTIES:
+:CUSTOM_ID: WAmbientLightComponent
+:END:
+
+#+NAME: create-if-not-exists-WAmbientLightComponent-hpp
+#+begin_src elisp :noweb yes
+<<create-if-not-exists-wobject-hpp("WComponent/light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")>>
+#+end_src
+
+#+NAME: WAmbienLightComponent-WEngine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
+<<wobject-wengine-hpp("WAmbientLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+// <<wobject-body-macro("WAmbientLightComponent")>>
+#+end_src
+
+#+NAME: WAmbientLightComponent-compilegenerated-cpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents/Light", "WAmbientLightComponent")>>
+#+end_src
+
+
+
+
+* Local Variables
+
+# Local Variables:
+# eval: (org-babel-lob-ingest "../../org/WClassReflectionLib.org")
+# eval: (org-babel-lob-ingest "../../org/WObjectTemplatesLib.org");
+# End:

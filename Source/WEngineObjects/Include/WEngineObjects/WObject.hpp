@@ -37,8 +37,6 @@ protected:
 
 private:
 
-    // WId wid_;
-    // char name_[WOBJECT_NAME_SIZE]; // TODO MOVE to WAsset WComponent WEntity
     bool remove_;                  // TODO Move to WAsset WComponent WEntity
 
 };

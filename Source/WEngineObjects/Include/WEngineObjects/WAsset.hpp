@@ -40,7 +40,7 @@ public:
 
 private:
 
-    char name_[WOBJECT_NAME_SIZE]{};
+    WObjectName name_;
 
     WAssetId wid_{};
 

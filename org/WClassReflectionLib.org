@@ -1,2 +1,237 @@
 #+title: WClassReflectionLib
 
+
+* WReflection
+** Macros
+#+NAME: define-wclass-macros
+#+begin_src C++
+#ifndef _WCLASS_
+#define _WCLASS_ WObject
+#endif
+
+#ifndef _PWCLASS_
+#define _PWCLASS_ WObject
+#endif
+
+#ifndef _WCLASS_NAMESPACE_
+#define _WCLASS_NAMESPACE_
+#endif
+
+#ifndef _WCLASS_DECLARATION_
+#define _WCLASS_DECLARATION_ class _WCLASS_;
+#endif
+
+#ifndef _PWCLASS_DECLARATION_
+#define _PWCLASS_DECLARATION_ class _PWCLASS_;
+#endif
+#+end_src
+
+#+NAME: define-dconcat
+#+begin_src C++
+#ifndef WENG_DCONCAT
+#define WENG_DCONCAT(A,B) A##B
+#endif
+#+end_src
+
+#+NAME: define-mp
+#+begin_src C++
+#ifndef WENG_MP
+#define WENG_MP(x) x
+#endif
+#+end_src
+
+#+NAME: define-wclassname-macros
+#+begin_src C++
+#ifndef WENG_CLASSNAME
+#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_CLSS_VAR
+#define WENG_CLASSNAME_CLSS_VAR(_CLS) WENG_DCONCAT(_VAR_, _CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_STR
+#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
+#endif
+
+#ifndef WENG_CLASSNAME_STR_VAR
+#define WENG_CLASSNAME_STR_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
+#endif
+#+end_src
+
+** DECLARE_WCLASS
+:PROPERTIES:
+:CUSTOM_ID: declare_wclass
+:END:
+
+WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
+
+El archivo DECLARE_WCLASS define un WClass único para cada WObject.
+
+#+NAME: declare_wclass
+#+begin_src C++ :noweb yes :main no :eval no
+
+#include "WCore/WCore.hpp"
+#include "WCore/TSingleton.hpp"
+#include "WReflection/WClassFor.hpp"
+
+<<define-wclass-macros>>
+
+<<define-dconcat>>
+
+<<define-mp>>
+
+<<define-wclassname-macros>>
+
+_WCLASS_DECLARATION_
+_PWCLASS_DECLARATION_
+
+namespace wrf::wclass {
+    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
+        WENG_CLASSNAME_STR(_WCLASS_);
+
+    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
+
+    inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
+        WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
+}
+#+end_src
+
+** DEFINE_WCLASS
+:PROPERTIES:
+:CUSTOM_ID: define_wclass
+:END:
+
+El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
+
+#+NAME: define_wclass
+#+HEADER: :noweb yes :eval no :main no
+#+begin_src C++
+<<define-wclassname-macros>>
+
+const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
+    return & wrf::wclass::WENG_CLASSNAME_CLSS_VAR(_WCLASS_);
+}
+#+end_src
+
+* PublicGenerated
+** WObject.WEngine
+:PROPERTIES:
+:CUSTOM_ID: wobject-wengine
+:END:
+
+Content of wobject-wengine-hpp should be tangled inside PublicGenerated/ directory.
+
+#+NAME: wobject-wengine-hpp
+#+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS"
+#+HEADER: :var nmespace=""
+#+begin_src elisp
+(concat
+(format
+"#pragma once
+
+#ifdef _WCLASS_
+#undef _WCLASS_
+#endif
+
+#ifdef _PWCLASS_
+#undef _PWCLASS_
+#endif
+
+#ifdef _WENG_API
+#undef _WENG_API
+#endif
+
+#ifdef _WCLASS_NAMESPACE_
+#undef _WCLASS_NAMESPACE_
+#endif
+
+#ifdef _WCLASS_DECLARATION_
+#undef _WCLASS_DECLARATION_
+#endif
+
+#ifdef _PWCLASS_DECLARATION_
+#undef _PWCLASS_DECLARATION_
+#endif
+
+#define _WCLASS_ %s
+#define _PWCLASS_ %s
+#define _WENG_API_ %s_API
+#define _WCLASS_NAMESPACE_ %s
+
+#include \"WReflection/_DECLARE_WCLASS_.inc\"
+" wclass pwclass (upcase weng-api) nmespace))
+#+end_src
+
+* CompileGenerated
+:PROPERTIES:
+:CUSTOM_ID: compile-generated
+:END:
+
+Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
+
+#+NAME: compile-generated-cpp
+#+begin_src elisp :var wobject-dir="WEngineObjects" :var wobject="WObject"
+(concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
+         "\n"
+         (format "#include \"WReflection/_DEFINE_WCLASS_.inc\""))
+#+end_src
+
+
+* WObject Body Macros
+
+#+NAME: wobject-original-body-macro
+#+HEADER: :noweb yes
+#+begin_src elisp :var wobject-name="WObject"
+(format 
+"#ifdef WOBJECT_BODY
+#undef WOBJECT_BODY
+#endif
+
+#ifndef WCLASS
+#define WCLASS(...)
+#endif
+
+class WClass;
+
+#define WOBJECT_BODY                              \\
+    public :                                      \\
+    constexpr %1$s() noexcept = default;          \\
+    constexpr %1$s(const %1$s &) = default;       \\
+    constexpr %1$s(%1$s &&) noexcept=default;     \\
+    %1$s & operator=(const %1$s &) = default;     \\
+    %1$s & operator=(%1$s &&) = default;          \\
+    virtual ~%1$s() = default;                    \\
+    static const WClass * StaticClass() noexcept; \\
+    virtual const WClass * Class() const {        \\
+        return %1$s::StaticClass();               \\
+    }" wobject-name)
+#+end_src
+
+#+NAME: wobject-body-macro
+#+begin_src elisp :var wobject-name="WObject"
+(format
+"#ifdef WOBJECT_BODY
+#undef WOBJECT_BODY
+#endif
+
+#ifndef WCLASS
+#define WCLASS(...)
+#endif
+
+class WClass;
+
+#define WOBJECT_BODY                               \\
+    public:                                        \\
+    constexpr %1$s() noexcept = default;           \\
+    constexpr %1$s(const %1$s &) = default;        \\
+    constexpr %1$s(%1$s &&) noexcept=default;      \\
+    %1$s & operator=(const %1$s &) = default;      \\
+    %1$s & operator=(%1$s &&) = default;           \\
+    ~%1$s() override = default;                    \\
+    static const WClass * StaticClass() noexcept ; \\
+    const WClass * Class() const override {        \\
+        return %1$s::StaticClass();                \\
+    }" wobject-name)
+#+end_src
+

@@ -15,11 +15,16 @@ Modules should be linkable between them and dinamically linkable with the core a
 
 *** Directory Tree
 - Source/ModuleName _(PascalCase)_
-    - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
-    - Source
-        - ModuleFile.cpp _(PascalCase)_
-    - Include
-        - ModuleHeader.h _(PascalCase)_
+      - ModuleName.org
+      - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
+      - Source
+            - ModuleFile.cpp _(PascalCase)_
+      - Include
+            - ModuleHeader.h _(PascalCase)_
+      - PublicGenerated
+      - PrivateGenerated
+            - DllDef.hpp
+      - CompileGenerated
 - ...
 
 *** Namespaces

@@ -2,6 +2,7 @@
 
 #include "DllDef.hpp"
 #include "WCore/WCoreMacros.hpp"
+#include "WCoreTypes/WCoreTypes.hpp"
 
 #include <cstring>
 #include <functional>
@@ -9,8 +10,6 @@
 #include <cstdint>
 #include <cassert>
 #include <type_traits>
-
-#include "WCore.WEngine.hpp"
 
 /**
  * @brief Basic identifier token
