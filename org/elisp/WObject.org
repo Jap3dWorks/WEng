@@ -1,0 +1,35 @@
+#+title: WObject
+
+
+* Templates
+** WObject hpp initial code
+
+Template to create a new WObject class.
+
+#+begin_src elisp :results none
+(defun wobject-hpp-template (module name parent-module parent namespace API)
+  (when (string-empty-p parent-module)
+    (setq parent-module module))
+
+  (concat
+   (format "#pragma once
+
+#include \"WCore/WCore.hpp\"
+#include \"WEngineObjects/WObjectMacros.hpp\"
+#include \"%3$s/%4$s.hpp\"
+
+#include \"%2$s.WEngine.hpp\"
+
+namespace %5$s {
+
+    class %6$s_API %2$s : public %4$s {
+
+        WOBJECT_BODY;
+
+    public:
+
+    };
+
+}" module name parent-module parent namespace API)))
+#+end_src
+

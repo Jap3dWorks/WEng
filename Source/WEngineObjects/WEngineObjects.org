@@ -223,12 +223,12 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 
 #+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
-#+NAME: WAmbienLightComponent-WEngine-hpp
+#+NAME: WAmbientLightComponent-WEngine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
 <<wobject-wengine-hpp("WAmbientLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
-// <<wobject-body-macro("WAmbientLightComponent")>>
+<<wobject-body-macro("WAmbientLightComponent")>>
 #+end_src
 
 #+NAME: WAmbientLightComponent-compilegenerated-cpp
@@ -243,11 +243,48 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WPointLightComponent
 :END:
 
-#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Invent", "WInventLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
+#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WPointLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
+
+#+NAME: WPointLightComponent-WEngine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WPointLightComponent.WEngine.hpp
+<<wobject-wengine-hpp("WPointLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+<<wobject-body-macro("WPointLightComponent")>>
+#+end_src
+
+#+NAME: WPointLightComponent-compilegenerated-cpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents/Light", "WPointLightComponent")>>
+#+end_src
+
+*** WDirectionalLightComponent
+:PROPERTIES:
+:CUSTOM_ID: WDirectionalLightComponent
+:END:
+
+#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WDirectionalLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
+
+#+NAME: WDirectionalLightComponent-WEngine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WDirectionalLightComponent.WEngine.hpp
+<<wobject-wengine-hpp("WDirectionalLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+<<wobject-body-macro("WDirectionalLightComponent")>>
+#+end_src
+
+#+NAME: WDirectionalLightComponent-compilegenerated-cpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WComponents/Light", "WDirectionalLightComponent")>>
+#+end_src
 
 * Local Variables
 
 # Local Variables:
-# eval: (org-babel-lob-ingest "../../org/WClassReflectionLib.org")
-# eval: (org-babel-lob-ingest "../../org/WObjectTemplatesLib.org")
+# eval: (org-babel-lob-ingest "../../org/templates/WClass.org")
+# eval: (org-babel-lob-ingest "../../org/templates/WObject.org")
 # End:

@@ -1,0 +1,29 @@
+# -*- eval: (org-babel-load-file "../elisp/WObject.org"); -*-
+
+#+title: WObject
+
+* WObject hpp initial code
+
+The following babel source block checks if a WObject file exists.
+If not exists creates it with a default template.
+
+#+NAME: create-if-not-exists-wobject-hpp
+#+HEADER: :var module="WEngineObjects" :var name="WObject" :var parent-module=""
+#+HEADER: :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
+#+begin_src elisp :noweb yes
+(let ((file-path (format "Include/%s/%s.hpp" module name)))
+  (unless (f-exists-p file-path)
+    (make-directory (file-name-directory file-path) t)
+    (with-temp-file file-path
+      (insert (wobject-hpp-template
+               module
+               name
+               parent-module
+               parent
+               namespace
+               API)))))
+#+end_src
+
+
+
+
