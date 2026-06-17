@@ -1,4 +1,4 @@
-#+title: WClassReflection
+#+title: WClass Templates
 
 * WReflection
 ** Macros
@@ -114,14 +114,14 @@ const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
 #+end_src
 
 * PublicGenerated
-** WObject.WEngine
+** WClass.WEngine
 :PROPERTIES:
-:CUSTOM_ID: wobject-wengine
+:CUSTOM_ID: wclass-wengine
 :END:
 
-Content of wobject-wengine-hpp should be tangled inside PublicGenerated/ directory.
+Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ directory.
 
-#+NAME: wobject-wengine-hpp
+#+NAME: wclass-wengine-hpp
 #+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS"
 #+HEADER: :var nmespace=""
 #+begin_src elisp
@@ -153,6 +153,12 @@ Content of wobject-wengine-hpp should be tangled inside PublicGenerated/ directo
 #undef _PWCLASS_DECLARATION_
 #endif
 
+#ifdef WCLASS
+#undef WCLASS
+#endif
+
+#define WCLASS(...)
+
 #define _WCLASS_ %s
 #define _PWCLASS_ %s
 #define _WENG_API_ %s_API
@@ -174,62 +180,5 @@ Content of compile-generated-cpp should be tangled in CompileGenerated/ director
 (concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
          "\n"
          (format "#include \"WReflection/_DEFINE_WCLASS_.inc\""))
-#+end_src
-
-* WObject Body Macros
-
-#+NAME: wobject-original-body-macro
-#+HEADER: :noweb yes
-#+begin_src elisp :var wobject-name="WObject"
-(format 
-"#ifdef WOBJECT_BODY
-#undef WOBJECT_BODY
-#endif
-
-#ifndef WCLASS
-#define WCLASS(...)
-#endif
-
-class WClass;
-
-#define WOBJECT_BODY                              \\
-    public :                                      \\
-    constexpr %1$s() noexcept = default;          \\
-    constexpr %1$s(const %1$s &) = default;       \\
-    constexpr %1$s(%1$s &&) noexcept=default;     \\
-    %1$s & operator=(const %1$s &) = default;     \\
-    %1$s & operator=(%1$s &&) = default;          \\
-    virtual ~%1$s() = default;                    \\
-    static const WClass * StaticClass() noexcept; \\
-    virtual const WClass * Class() const {        \\
-        return %1$s::StaticClass();               \\
-    }" wobject-name)
-#+end_src
-
-#+NAME: wobject-body-macro
-#+begin_src elisp :var wobject-name="WObject"
-(format
-"#ifdef WOBJECT_BODY
-#undef WOBJECT_BODY
-#endif
-
-#ifndef WCLASS
-#define WCLASS(...)
-#endif
-
-class WClass;
-
-#define WOBJECT_BODY                               \\
-    public:                                        \\
-    constexpr %1$s() noexcept = default;           \\
-    constexpr %1$s(const %1$s &) = default;        \\
-    constexpr %1$s(%1$s &&) noexcept=default;      \\
-    %1$s & operator=(const %1$s &) = default;      \\
-    %1$s & operator=(%1$s &&) = default;           \\
-    ~%1$s() override = default;                    \\
-    static const WClass * StaticClass() noexcept ; \\
-    const WClass * Class() const override {        \\
-        return %1$s::StaticClass();                \\
-    }" wobject-name)
 #+end_src
 

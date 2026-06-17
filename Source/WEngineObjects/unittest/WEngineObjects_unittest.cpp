@@ -1,7 +1,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
-#include "WEngineObjects/WObjectMacros.hpp"
+
 #define CATCH_CONFIG_MAIN
 
 #include <catch2/catch.hpp>

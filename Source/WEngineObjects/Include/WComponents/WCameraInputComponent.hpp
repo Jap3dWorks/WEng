@@ -7,7 +7,8 @@
 #include "WCameraInputComponent.WEngine.hpp"
 
 class WENGINEOBJECTS_API WCameraInputComponent : public WComponent {
-    WOBJECT_BODY(WCameraInputComponent)
+
+    WOBJECT_BODY
 
 public:
 

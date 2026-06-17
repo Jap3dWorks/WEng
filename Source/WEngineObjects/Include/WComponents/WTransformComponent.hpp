@@ -7,7 +7,8 @@
 
 
 class WENGINEOBJECTS_API WTransformComponent : public WComponent {
-    WOBJECT_BODY(WTransformComponent)
+
+    WOBJECT_BODY
         
 public:
 

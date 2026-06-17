@@ -8,7 +8,7 @@
 
 WCLASS()
 class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
-    WOBJECT_BODY(WRenderPipelineAsset)
+    WOBJECT_BODY
 
 public:
 

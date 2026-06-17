@@ -1,3 +1,4 @@
+// [[file:../WEngineObjects.org::WInputMappingAsset-wengine-hpp][WInputMappingAsset-wengine-hpp]]
 #pragma once
 
 #ifdef _WCLASS_
@@ -8,13 +9,51 @@
 #undef _PWCLASS_
 #endif
 
-#ifdef _WENG_API_
-#undef _WENG_API_
+#ifdef _WENG_API
+#undef _WENG_API
 #endif
 
+#ifdef _WCLASS_NAMESPACE_
+#undef _WCLASS_NAMESPACE_
+#endif
+
+#ifdef _WCLASS_DECLARATION_
+#undef _WCLASS_DECLARATION_
+#endif
+
+#ifdef _PWCLASS_DECLARATION_
+#undef _PWCLASS_DECLARATION_
+#endif
+
+#ifdef WCLASS
+#undef WCLASS
+#endif
+
+#define WCLASS(...)
+
 #define _WCLASS_ WInputMappingAsset
-#define _PWCLASS_ WAsset
+#define _PWCLASS_ WObject
 #define _WENG_API_ WENGINEOBJECTS_API
+#define _WCLASS_NAMESPACE_ 
 
 #include "WReflection/_DECLARE_WCLASS_.inc"
 
+#ifdef WOBJECT_BODY
+#undef WOBJECT_BODY
+#endif
+
+class WClass;
+
+#define WOBJECT_BODY                               \
+    public:                                        \
+    constexpr WInputMappingAsset() noexcept = default;           \
+    constexpr WInputMappingAsset(const WInputMappingAsset &) = default;        \
+    constexpr WInputMappingAsset(WInputMappingAsset &&) noexcept=default;      \
+    WInputMappingAsset & operator=(const WInputMappingAsset &) = default;      \
+    WInputMappingAsset & operator=(WInputMappingAsset &&) = default;           \
+    ~WInputMappingAsset() override = default;                    \
+    static const WClass * StaticClass() noexcept ; \
+    const WClass * Class() const override {        \
+        return WInputMappingAsset::StaticClass();                \
+    }
+// WInputMappingAsset-wengine-hpp ends here

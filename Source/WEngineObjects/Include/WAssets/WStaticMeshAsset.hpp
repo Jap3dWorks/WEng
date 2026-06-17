@@ -14,7 +14,7 @@
 WCLASS()
 class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 {
-    WOBJECT_BODY(WStaticMeshAsset)
+    WOBJECT_BODY
 
     using WMeshArray = std::array<WMeshStruct, WENG_MAX_ASSET_IDS>;
 

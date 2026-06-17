@@ -5,7 +5,6 @@
 #include "WEngineObjects/WClass.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WEngineObjects/WObjectMacros.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
 class WEngine;

@@ -9,27 +9,25 @@
 WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
 
 El archivo DECLARE_WCLASS define un WClass único para cada WObject.
+Esta WClass contiene información relevante acerca del clase que se está implementando.
 
 #+NAME: declare_wclass-inc
 #+HEADER: :shebang "// -*- mode: C++ -*-"
 #+HEADER: :main no :noeval 
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle Include/WReflection/_DECLARE_WCLASS_.inc
-
 <<declare_wclass>>
-
 #+end_src
 
 El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
+Este archivo permite definir subprogramas que devuelven información relevante acerca de la clase.
 
 #+NAME: define_wclass-inc
 #+HEADER: :shebang "// -*- mode: C++ -*-"
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle Include/WReflection/_DEFINE_WCLASS_.inc
-
 <<define_wclass>>
-
 #+end_src
 
 * WEngineObjects
@@ -38,7 +36,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WObject
 :END:
 
-#+NAME: wobject-compilegenerated-cpp
+#+NAME: WObject-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WObject.WEngine.hpp
+<<wclass-wengine-hpp("WObject", "WObject", "WENGINEOBJECTS", "")>>
+<<wobject-wobject-body-macro("WObject")>>
+#+end_src
+
+#+NAME: WObject-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -50,7 +56,16 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WAsset
 :END:
 
-#+NAME: wasset-compilegenerated-cpp
+#+NAME: WAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WAsset.WEngine.hpp
+<<wclass-wengine-hpp("WAsset", "WObject", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WAsset")>>
+#+end_src
+
+
+#+NAME: WAsset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -62,7 +77,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WComponent
 :END:
 
-#+NAME: wcomponent-compilegenerated-cpp
+#+NAME: WComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WComponent.WEngine.hpp
+<<wclass-wengine-hpp("WComponent", "WObject", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WComponent")>>
+#+end_src
+
+#+NAME: WComponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -73,6 +96,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WEntity
 :END:
+
+#+NAME: WEntity-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WEntity.WEngine.hpp
+<<wclass-wengine-hpp("WEntity", "WObject", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WEntity")>>
+#+end_src
 
 #+NAME: wentity-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -87,6 +118,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WActionAsset
 :END:
 
+#+NAME: WActionAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WActionAsset.WEngine.hpp
+<<wclass-wengine-hpp("WActionAsset", "WAsset", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WActionAsset")>>
+#+end_src
+
 #+NAME: wactionasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
@@ -98,6 +137,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WInputMappingAsset
 :END:
+
+#+NAME: WInputMappingAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WInputMappingAsset.WEngine.hpp
+<<wclass-wengine-hpp("WInputMappingAsset", "WAsset", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WInputMappingAsset")>>
+#+end_src
 
 #+NAME: winputmappingasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -111,6 +158,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WRenderPipelineAsset
 :END:
 
+#+NAME: WRenderPipelineAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WRenderPipelineAsset.WEngine.hpp
+<<wclass-wengine-hpp("WRenderPipelineAsset", "WAsset", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WRenderPipelineAsset")>>
+#+end_src
+
 #+NAME: wrenderpipelineasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
@@ -123,7 +178,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WRenderPipelineParametersAsset
 :END:
 
-#+NAME: wrenderpipelineparametersasset-compilegenerated-cpp
+#+NAME: WRenderPipelineParametersAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WRenderPipelineParametersAsset.WEngine.hpp
+<<wclass-wengine-hpp("WRenderPipelineParametersAsset", "WAsset", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WRenderPipelineParametersAsset")>>
+#+end_src
+
+#+NAME: WRenderPipelineParametersAsset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -134,6 +197,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WStaticMeshAsset
 :END:
+
+#+NAME: WStaticMeshAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WStaticMeshAsset.WEngine.hpp
+<<wclass-wengine-hpp("WStaticMeshAsset", "WAsset", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WStaticMeshAsset")>>
+#+end_src
 
 #+NAME: wstaticmeshasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -146,6 +217,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WTextureAsset
 :END:
+
+#+NAME: WTextureAsset-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WTextureAsset.WEngine.hpp
+<<wclass-wengine-hpp("WTextureAsset", "WObject", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WTextureAsset")>>
+#+end_src
 
 #+NAME: wtextureasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -160,6 +239,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WCameraComponent
 :END:
 
+#+NAME: WCameraComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WCameraComponent.WEngine.hpp
+<<wclass-wengine-hpp("WCameraComponent", "WComponent", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WCameraComponent")>>
+#+end_src
+
 #+NAME: wcameracomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
@@ -171,6 +258,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WCameraInputComponent
 :END:
+
+#+NAME: WCameraInputComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WCameraInputComponent.WEngine.hpp
+<<wclass-wengine-hpp("WCameraInputComponent", "WComponent", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WCameraInputComponent")>>
+#+end_src
 
 #+NAME: wcamerainputcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -184,6 +279,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WMovementComponent
 :END:
 
+#+NAME: WMovementComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WMovementComponent.WEngine.hpp
+<<wclass-wengine-hpp("WMovementComponent", "WComponent", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WMovementComponent")>>
+#+end_src
+
 #+NAME: wmovementcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
@@ -196,6 +299,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :CUSTOM_ID: WStaticMeshComponent
 :END:
 
+#+NAME: WStaticMeshComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WStaticMeshComponent.WEngine.hpp
+<<wclass-wengine-hpp("WStaticMeshComponent", "WComponent", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WStaticMeshComponent")>>
+#+end_src
+
 #+NAME: wstaticmeshcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
@@ -207,6 +318,14 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 :PROPERTIES:
 :CUSTOM_ID: WTransformComponent
 :END:
+
+#+NAME: WTransformComponent-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/WTransformComponent.WEngine.hpp
+<<wclass-wengine-hpp("WTransformComponent", "WComponent", "WENGINEOBJECTS", "")>>
+<<wobject-body-macro("WTransformComponent")>>
+#+end_src
 
 #+NAME: wtransformcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
@@ -223,15 +342,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 
 #+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
-#+NAME: WAmbientLightComponent-WEngine-hpp
+#+NAME: wambientlightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
-<<wobject-wengine-hpp("WAmbientLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+<<wclass-wengine-hpp("WAmbientLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
 <<wobject-body-macro("WAmbientLightComponent")>>
 #+end_src
 
-#+NAME: WAmbientLightComponent-compilegenerated-cpp
+#+NAME: wambientlightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -245,15 +364,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 
 #+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WPointLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
-#+NAME: WPointLightComponent-WEngine-hpp
+#+NAME: wpointlightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle PublicGenerated/WPointLightComponent.WEngine.hpp
-<<wobject-wengine-hpp("WPointLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+<<wclass-wengine-hpp("WPointLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
 <<wobject-body-macro("WPointLightComponent")>>
 #+end_src
 
-#+NAME: WPointLightComponent-compilegenerated-cpp
+#+NAME: wpointlightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
@@ -267,15 +386,15 @@ El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
 
 #+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WDirectionalLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
-#+NAME: WDirectionalLightComponent-WEngine-hpp
+#+NAME: wdirectionallightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle PublicGenerated/WDirectionalLightComponent.WEngine.hpp
-<<wobject-wengine-hpp("WDirectionalLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
+<<wclass-wengine-hpp("WDirectionalLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
 <<wobject-body-macro("WDirectionalLightComponent")>>
 #+end_src
 
-#+NAME: WDirectionalLightComponent-compilegenerated-cpp
+#+NAME: wdirectionallightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp

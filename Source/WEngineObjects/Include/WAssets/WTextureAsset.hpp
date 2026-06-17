@@ -10,7 +10,7 @@
 WCLASS()
 class WCORE_API WTextureAsset : public WAsset
 {
-    WOBJECT_BODY(WTextureAsset)
+    WOBJECT_BODY
 
     public:
 

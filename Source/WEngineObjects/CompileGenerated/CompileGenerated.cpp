@@ -1,17 +1,17 @@
-// [[file:../WEngineObjects.org::wobject-compilegenerated-cpp][wobject-compilegenerated-cpp]]
+// [[file:../WEngineObjects.org::WObject-compilegenerated-cpp][WObject-compilegenerated-cpp]]
 #include "WEngineObjects/WObject.hpp"
 #include "WReflection/_DEFINE_WCLASS_.inc"
-// wobject-compilegenerated-cpp ends here
+// WObject-compilegenerated-cpp ends here
 
-// [[file:../WEngineObjects.org::wasset-compilegenerated-cpp][wasset-compilegenerated-cpp]]
+// [[file:../WEngineObjects.org::WAsset-compilegenerated-cpp][WAsset-compilegenerated-cpp]]
 #include "WEngineObjects/WAsset.hpp"
 #include "WReflection/_DEFINE_WCLASS_.inc"
-// wasset-compilegenerated-cpp ends here
+// WAsset-compilegenerated-cpp ends here
 
-// [[file:../WEngineObjects.org::wcomponent-compilegenerated-cpp][wcomponent-compilegenerated-cpp]]
+// [[file:../WEngineObjects.org::WComponent-compilegenerated-cpp][WComponent-compilegenerated-cpp]]
 #include "WEngineObjects/WComponent.hpp"
 #include "WReflection/_DEFINE_WCLASS_.inc"
-// wcomponent-compilegenerated-cpp ends here
+// WComponent-compilegenerated-cpp ends here
 
 // [[file:../WEngineObjects.org::wentity-compilegenerated-cpp][wentity-compilegenerated-cpp]]
 #include "WEngineObjects/WEntity.hpp"
@@ -33,10 +33,10 @@
 #include "WReflection/_DEFINE_WCLASS_.inc"
 // wrenderpipelineasset-compilegenerated-cpp ends here
 
-// [[file:../WEngineObjects.org::wrenderpipelineparametersasset-compilegenerated-cpp][wrenderpipelineparametersasset-compilegenerated-cpp]]
+// [[file:../WEngineObjects.org::WRenderPipelineParametersAsset-compilegenerated-cpp][WRenderPipelineParametersAsset-compilegenerated-cpp]]
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WReflection/_DEFINE_WCLASS_.inc"
-// wrenderpipelineparametersasset-compilegenerated-cpp ends here
+// WRenderPipelineParametersAsset-compilegenerated-cpp ends here
 
 // [[file:../WEngineObjects.org::wstaticmeshasset-compilegenerated-cpp][wstaticmeshasset-compilegenerated-cpp]]
 #include "WAssets/WStaticMeshAsset.hpp"
@@ -73,7 +73,17 @@
 #include "WReflection/_DEFINE_WCLASS_.inc"
 // wtransformcomponent-compilegenerated-cpp ends here
 
-// [[file:../WEngineObjects.org::WAmbientLightComponent-compilegenerated-cpp][WAmbientLightComponent-compilegenerated-cpp]]
+// [[file:../WEngineObjects.org::wambientlightcomponent-compilegenerated-cpp][wambientlightcomponent-compilegenerated-cpp]]
 #include "WComponents/Light/WAmbientLightComponent.hpp"
 #include "WReflection/_DEFINE_WCLASS_.inc"
-// WAmbientLightComponent-compilegenerated-cpp ends here
+// wambientlightcomponent-compilegenerated-cpp ends here
+
+// [[file:../WEngineObjects.org::wpointlightcomponent-compilegenerated-cpp][wpointlightcomponent-compilegenerated-cpp]]
+#include "WComponents/Light/WPointLightComponent.hpp"
+#include "WReflection/_DEFINE_WCLASS_.inc"
+// wpointlightcomponent-compilegenerated-cpp ends here
+
+// [[file:../WEngineObjects.org::wdirectionallightcomponent-compilegenerated-cpp][wdirectionallightcomponent-compilegenerated-cpp]]
+#include "WComponents/Light/WDirectionalLightComponent.hpp"
+#include "WReflection/_DEFINE_WCLASS_.inc"
+// wdirectionallightcomponent-compilegenerated-cpp ends here

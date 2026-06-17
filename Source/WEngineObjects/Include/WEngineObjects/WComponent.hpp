@@ -11,7 +11,7 @@ class WCORE_API WComponent : public WObject
 
 public:
 
-    WOBJECT_BODY(WComponent)
+    WOBJECT_BODY
 
 public:
 

@@ -1,45 +1,49 @@
 #pragma once
 
 #include "WEngineObjects/WComponent.hpp"
-#include "WEngineObjects/WObjectMacros.hpp"
 
 #include <glm/glm.hpp>
 
 #include "WDirectionalLightComponent.WEngine.hpp"
 
-class WENGINEOBJECTS_API WDirectionalLightComponent : public WComponent {
-    WOBJECT_BODY(WDirectionalLightComponent);
+namespace wcm::light {
 
-public:
+    class WENGINEOBJECTS_API WDirectionalLightComponent : public WComponent {
 
-    bool Active() const noexcept {
-        return active_;
-    }
+        WOBJECT_BODY
 
-    void Active(const bool & in_active) noexcept {
-        active_ = in_active;
-    }
+    public:
 
-    float Intensity() const noexcept {
-        return intensity_;
-    }
+        bool Active() const noexcept {
+            return active_;
+        }
 
-    void Intensity(const float & in_intensity) noexcept {
-        intensity_ = in_intensity;
-    }
+        void Active(const bool & in_active) noexcept {
+            active_ = in_active;
+        }
 
-    glm::vec4 Color() const noexcept {
-        return color_;
-    }
+        float Intensity() const noexcept {
+            return intensity_;
+        }
 
-    void Color(const glm::vec4 & in_color) noexcept {
-        color_ = in_color;
-    }
+        void Intensity(const float & in_intensity) noexcept {
+            intensity_ = in_intensity;
+        }
 
-private:
+        glm::vec4 Color() const noexcept {
+            return color_;
+        }
 
-    bool active_{true};
-    float intensity_{1.f};
-    glm::vec4 color_{0.5, 0.5, 0.5, 1.f};
+        void Color(const glm::vec4 & in_color) noexcept {
+            color_ = in_color;
+        }
 
-};
+    private:
+
+        bool active_{true};
+        float intensity_{1.f};
+        glm::vec4 color_{0.5, 0.5, 0.5, 1.f};
+
+    };
+    
+}

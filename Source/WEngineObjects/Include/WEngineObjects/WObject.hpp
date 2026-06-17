@@ -2,7 +2,6 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WClass.hpp"
-#include "WEngineObjects/WObjectMacros.hpp"
 
 #include <string>
 #include <cstring>
@@ -11,9 +10,9 @@
 #include "WObject.WEngine.hpp"
 
 WCLASS()
-class WCORE_API WObject
+class WENGINEOBJECTS_API WObject
 {
-    _WOBJECT_ORIGINAL_BODY_(WObject)
+    WOBJECT_BODY
 
 public:
 

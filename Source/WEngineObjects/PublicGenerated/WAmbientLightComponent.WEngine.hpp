@@ -1,4 +1,4 @@
-// [[file:../WEngineObjects.org::WAmbienLightComponent-WEngine-hpp][WAmbienLightComponent-WEngine-hpp]]
+// [[file:../WEngineObjects.org::wambientlightcomponent-wengine-hpp][wambientlightcomponent-wengine-hpp]]
 #pragma once
 
 #ifdef _WCLASS_
@@ -25,6 +25,12 @@
 #undef _PWCLASS_DECLARATION_
 #endif
 
+#ifdef WCLASS
+#undef WCLASS
+#endif
+
+#define WCLASS(...)
+
 #define _WCLASS_ WAmbientLightComponent
 #define _PWCLASS_ WComponent
 #define _WENG_API_ WENGINEOBJECTS_API
@@ -32,26 +38,22 @@
 
 #include "WReflection/_DECLARE_WCLASS_.inc"
 
-// #ifdef WOBJECT_BODY
-// #undef WOBJECT_BODY
-// #endif
-// 
-// #ifndef WCLASS
-// #define WCLASS(...)
-// #endif
-// 
-// class WClass;
-// 
-// #define WOBJECT_BODY                               \
-//     public:                                        \
-//     constexpr WAmbientLightComponent() noexcept = default;           \
-//     constexpr WAmbientLightComponent(const WAmbientLightComponent &) = default;        \
-//     constexpr WAmbientLightComponent(WAmbientLightComponent &&) noexcept=default;      \
-//     WAmbientLightComponent & operator=(const WAmbientLightComponent &) = default;      \
-//     WAmbientLightComponent & operator=(WAmbientLightComponent &&) = default;           \
-//     ~WAmbientLightComponent() override = default;                    \
-//     static const WClass * StaticClass() noexcept ; \
-//     const WClass * Class() const override {        \
-//         return WAmbientLightComponent::StaticClass();                \
-//     }
-// WAmbienLightComponent-WEngine-hpp ends here
+#ifdef WOBJECT_BODY
+#undef WOBJECT_BODY
+#endif
+
+class WClass;
+
+#define WOBJECT_BODY                               \
+    public:                                        \
+    constexpr WAmbientLightComponent() noexcept = default;           \
+    constexpr WAmbientLightComponent(const WAmbientLightComponent &) = default;        \
+    constexpr WAmbientLightComponent(WAmbientLightComponent &&) noexcept=default;      \
+    WAmbientLightComponent & operator=(const WAmbientLightComponent &) = default;      \
+    WAmbientLightComponent & operator=(WAmbientLightComponent &&) = default;           \
+    ~WAmbientLightComponent() override = default;                    \
+    static const WClass * StaticClass() noexcept ; \
+    const WClass * Class() const override {        \
+        return WAmbientLightComponent::StaticClass();                \
+    }
+// wambientlightcomponent-wengine-hpp ends here

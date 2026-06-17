@@ -1,6 +1,5 @@
 #pragma once
 
-#include "WEngineObjects/WObjectMacros.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
 #include <glm/glm.hpp>
@@ -11,7 +10,7 @@ namespace wcm::light {
     
     class WENGINEOBJECTS_API WAmbientLightComponent : public WComponent {
 
-        WOBJECT_BODY(WAmbientLightComponent);
+        WOBJECT_BODY
 
     public:
 

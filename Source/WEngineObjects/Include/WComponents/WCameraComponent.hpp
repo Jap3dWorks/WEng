@@ -11,7 +11,8 @@
 
 
 class WENGINEOBJECTS_API WCameraComponent : public WComponent {
-    WOBJECT_BODY(WCameraComponent)
+
+    WOBJECT_BODY
         
 public:
 

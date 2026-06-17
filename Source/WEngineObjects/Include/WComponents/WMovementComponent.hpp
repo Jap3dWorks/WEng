@@ -8,7 +8,8 @@
 #include "WMovementComponent.WEngine.hpp"
 
 class WENGINEOBJECTS_API WMovementComponent : public WComponent {
-    WOBJECT_BODY(WMovementComponent)
+
+    WOBJECT_BODY
         
 public:
 

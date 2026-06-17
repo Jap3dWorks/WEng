@@ -12,7 +12,7 @@
 
 class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 
-    WOBJECT_BODY(WStaticMeshComponent)
+    WOBJECT_BODY
 
 public:
 

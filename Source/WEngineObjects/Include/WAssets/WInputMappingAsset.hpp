@@ -10,7 +10,7 @@
 WCLASS()
 class WENGINEOBJECTS_API WInputMappingAsset : public WAsset {
 
-    WOBJECT_BODY(WInputMappingAsset)
+    WOBJECT_BODY
 
 public:
 

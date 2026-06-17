@@ -6,11 +6,11 @@
 
 #include "WActionAsset.WEngine.hpp"
 
-/* WActions to be triggered as input system. */
+/** WActions to be triggered as input system. */
 WCLASS()
 class WENGINEOBJECTS_API WActionAsset : public WAsset {
 
-    WOBJECT_BODY(WActionAsset)
+    WOBJECT_BODY
 
     WActionStruct & ActionStruct() {
         return action_struct_;

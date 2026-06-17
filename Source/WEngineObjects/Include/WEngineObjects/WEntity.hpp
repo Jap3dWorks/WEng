@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WEngineObjects/WObjectMacros.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WEngineObjects/WObject.hpp"
 
@@ -17,7 +16,7 @@ WCLASS()
 class WCORE_API WEntity : public WObject
 {
 
-    WOBJECT_BODY(WEntity)
+    WOBJECT_BODY
 
 public:
 
