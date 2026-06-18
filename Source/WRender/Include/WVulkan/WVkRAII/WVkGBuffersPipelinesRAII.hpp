@@ -14,8 +14,8 @@
  * @brief Graphics Pipelines outputs the GBuffers.
  */
 class WVkGBuffersPipelinesRAII : public WVkPipelinesBase<WAssetId,
-                                                     WEntityComponentId,
-                                                     WENG_MAX_FRAMES_IN_FLIGHT>
+                                                         WEntityComponentId,
+                                                         WENG_MAX_FRAMES_IN_FLIGHT>
 {
 
 private:
