@@ -137,6 +137,17 @@ The engine class will reference to other modules in the aplication.
 
 Módulo que contiene los objetos que forman la estructura de datos del engine.
 
+*** WEngineObjects
+**** Objective
+
+This module contains all WObject base classes.
+From WObject derivates other classes like WComponent, WEntity or WAsset.
+Each WObject has a WClass associated. This WClass instance contains relevant data about the WObject class.
+
+WObject is an object that can be tracked by the engine. WObjects has a kind of reflection implemented.
+
+The WObject and WClass system has its own section.
+
 *** WComponents
 
 **** Objective
@@ -156,16 +167,31 @@ Los componentes están asociados a actores. formando así entidades compuestas d
 - wcm::transform
 - wcm::geometry
 
-*** WActor
+*** WAssets
+
+* WObject and WClass Template/Reflection
+** WPROPERTY macro
+:PROPERTIES:
+:CUSTOM_ID: WPROPERTY
+:END:
+*** Objective
+
+- Property self knowledge (type, names, ranges, etc).
+- Get_ Set_ method access.
+- Serialization.
 
 
-*** WReflections
-**** Objective
+** WClass.WEngine.hpp
 
-Código que permite comportamiento reflexivo en los objetos del engine.
+*** Objective
+WClass generation for current WObject.
 
-**** Namespaces
+*** Namespace
+
 - wrf::wclass
+
+** WOBJECT_BODY macro
+
 
 * Coding Style
 

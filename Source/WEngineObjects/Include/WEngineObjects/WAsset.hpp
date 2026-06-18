@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObject.hpp"
 #include "WInterfaces/ISerializable.hpp"
-#include "WEngineObjects/WClass.hpp"
+#include "WClass/WClass.hpp"
 
 #include <string>
 

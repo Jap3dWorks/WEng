@@ -12,12 +12,12 @@ class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
 
 public:
 
-    wct::render::WRenderPipelineStruct & RenderPipeline() {
+    wct::render::WRenderPipelineInfo & RenderPipeline() {
         return pipeline_;
     }
 
 private:
 
-    wct::render::WRenderPipelineStruct pipeline_{};
+    wct::render::WRenderPipelineInfo pipeline_{};
 
 };

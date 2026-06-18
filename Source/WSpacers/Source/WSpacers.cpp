@@ -110,7 +110,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     params[0].binding=0;
     params[0].type=wct::render::EPipeParamType::Ubo;
     params[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
-    params[0].range=sizeof(wct::render::WUBOGraphicsStruct);
+    params[0].size=sizeof(wct::render::WGraphicsUBO);
     params[1].binding=1;
     params[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
     params[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
@@ -153,7 +153,7 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
     params[0].binding = 0;
     params[0].type = wct::render::EPipeParamType::Ubo;
     params[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
-    params[0].range = sizeof(wct::render::WUBOPostprocessStruct);
+    params[0].size = sizeof(wct::render::WPostprocessUBO);
 
     WAssetId paramid =
         engine.AssetManager().Create<WRenderPipelineParametersAsset>(

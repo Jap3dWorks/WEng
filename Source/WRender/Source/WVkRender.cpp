@@ -489,7 +489,7 @@ void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
     const WAssetIndexId & in_assetindex_id,
-    const wct::render::WRenderPipelineParametersStruct & in_parameters
+    const wct::render::WRenderPipelineParameters & in_parameters
     )
 {
     assert(pipeline_track_.pipeline_pipetype.contains(pipeline_id));
@@ -589,7 +589,7 @@ void WVkRender::UnloadAllResources() {
 }
 
 void WVkRender::UpdateUboCamera(
-    const wct::render::WUBOCameraStruct & camera_ubo
+    const wct::render::WCameraUBO & camera_ubo
     ) {
     gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
@@ -599,7 +599,7 @@ void WVkRender::UpdateUboCamera(
 
 void WVkRender::UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUbo & ubo_write
     ) {
 
     WVkDescriptorSetUBOWriteStruct ubowrt{
@@ -630,7 +630,7 @@ void WVkRender::UpdateParameterDynamic(
 
 void WVkRender::UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUbo & ubo_write
     ) {
 
     WVkDescriptorSetUBOWriteStruct ubowrt{
@@ -1254,3 +1254,33 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
         );
 }
+
+// Lights
+// ------
+
+void WVkRender::InitializePointLights(
+    std::span<WEntityComponentId> in_ids,
+    std::span<wct::render::WPointLight> in_point_lights_structs
+    ) {
+    // TODO implementation
+}
+
+void WVkRender::UpdatePointLights(
+    std::span<WEntityComponentId> in_ids,
+    std::span<wct::render::WPointLight> in_point_lights_structs
+    ) { /* TODO .cpp */ }
+
+void WVkRender::InitializaDirectionalLights(
+    std::span<WEntityComponentId> in_ids,
+    std::span<wct::render::WPointLight> in_directional_lights_structs
+    ) { /* TODO .cpp */ }
+
+void WVkRender::UpdateDirectionalLights(
+    std::span<WEntityComponentId> in_ids,
+    std::span<wct::render::WPointLight> in_directional_light_structs
+    ) { /* TODO .cpp */ }
+
+void WVkRender::UpdateAmbientLight(
+    const wct::render::WAmbientLight & in_ambient_light
+    ) { /* TODO .cpp */ }
+

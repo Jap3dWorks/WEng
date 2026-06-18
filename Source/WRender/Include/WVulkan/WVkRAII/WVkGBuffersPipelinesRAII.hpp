@@ -64,7 +64,7 @@ public:
     // Create Graphics Render Pipeline
     void CreatePipeline(
         const WAssetId & in_id,
-        const wct::render::WRenderPipelineStruct & in_pipeline_struct
+        const wct::render::WRenderPipelineInfo & in_pipeline_struct
         );
 
 public:
@@ -85,7 +85,7 @@ public:
         );
 
     void UpdateGlobalGraphicsDescriptorSet(
-        const wct::render::WUBOCameraStruct & in_camera_struct,
+        const wct::render::WCameraUBO & in_camera_struct,
         uint32_t in_frame_index
         );
 

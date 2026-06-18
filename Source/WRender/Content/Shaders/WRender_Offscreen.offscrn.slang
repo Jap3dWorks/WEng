@@ -9,6 +9,66 @@ struct VSOutput
     float2 fragTexCoord;
 };
 
+
+// TODO lighting data
+// ------------------
+
+struct PointLight {
+    float4 color;
+    float4 position;
+    float intensity;
+    float radius;
+};
+
+struct DirectionalLight {
+    float4 color;
+    float4 direction;
+    float intensity;
+};
+
+struct AmbientLight {
+    float4 color;
+    float intensity;
+};
+
+// TODO lighting UBOs
+// ------------------
+
+struct LightingUBO {
+    PointLight point_lights[128];
+    DirectionalLight directional_lights[32];
+    AmbientLight ambient_light;
+
+    uint point_lights_count;
+    uint directional_lights_count;
+};
+
+// bindings
+// --------
+
+[[vk::binding(0,0)]]            // binding 0, set 0
+uniform Sampler2D albedo;
+
+[[vk::binding(1,0)]]            // binding 1, set 0
+uniform Sampler2D normal;
+
+[[vk::binding(2,0)]]            // binfing 2, set 0
+uniform Sampler2D ws_position;
+
+// TODO input render textures
+//  rm (roughness/metallic)
+//  emission
+//  extras 1 and 2
+
+[[vk::binding(3,0)]]
+uniform Sampler2D depth;
+
+[[vk::binding(0,1)]]
+ConstantBuffer<LightingUBO> lighting;
+
+// main functions
+// --------------
+
 [shader("vertex")]
 VSOutput vsMain(VSInput input)
 {
@@ -20,28 +80,22 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]]            // binding 0, set 0
-uniform Sampler2D albedo;
-[[vk::binding(1,0)]]            // binding 1, set 0
-uniform Sampler2D normal;
-[[vk::binding(2,0)]]            // binfing 2, set 0
-uniform Sampler2D ws_position;
-
-// TODO input render textures
-//  rm (roughness/metallic)
-//  emission
-//  extras 1 and 2
-
-// TODO lighting data
-
-[[vk::binding(3,0)]]
-uniform Sampler2D depth;
-
 [shader("fragment")]
 float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
-    // return ws_position.Sample(vertexOutput.fragTexCoord);
+    float2 uv = vertexOutput.fragTexCoords;
+    float3 color=float3(0.0, 0.0, 0.0);
+    float3 wspos = ws_position.Sample(uv).xyz;
+    float3 nrm = normal.Sample(uv).xyz;
+    float3 alb = albedo.Sample(uv).xyz;
+    
+    for(uint32 i=0; i < lighting.point_lights_count; i++) {
+        ws_po
+    }
+
     return albedo.Sample(vertexOutput.fragTexCoord);
+
+    
 
     // return float4(vertexOutput.fragTexCoord, 0.f, 1.f);
 

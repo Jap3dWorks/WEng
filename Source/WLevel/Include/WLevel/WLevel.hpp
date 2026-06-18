@@ -2,7 +2,7 @@
 
 #include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
-#include "WEngineObjects/WClass.hpp"
+#include "WClass/WClass.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"

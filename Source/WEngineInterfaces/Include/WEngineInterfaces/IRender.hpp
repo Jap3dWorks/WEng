@@ -50,7 +50,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const wct::render::WRenderPipelineParametersStruct & in_parameters  // TODO Check
+        const wct::render::WRenderPipelineParameters & in_parameters  // TODO Check
         )=0;
 
     /**
@@ -88,7 +88,7 @@ public:
     virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
-        const wct::render::WUBOCameraStruct & in_ubo
+        const wct::render::WCameraUBO & in_ubo
         )=0;
 
     /**
@@ -96,14 +96,14 @@ public:
      *        Storage inside ubo_write will be consumed in the current call.
      */
     virtual void UpdateParameterDynamic(const WEntityComponentId & in_id,
-                                        const wct::render::WRPParamUboStruct & ubo_write)=0;
+                                        const wct::render::WRPParamUbo & ubo_write)=0;
 
     /**
      * @brief Updates for all frames in flight.
      *        Storage inside ubo_write will be in the current call.
      */
     virtual void UpdateParameterStatic(const WEntityComponentId & in_id,
-                                       const wct::render::WRPParamUboStruct & ubo_write)=0;
+                                       const wct::render::WRPParamUbo & ubo_write)=0;
 
     /**
      * @brief Unload all render resources.

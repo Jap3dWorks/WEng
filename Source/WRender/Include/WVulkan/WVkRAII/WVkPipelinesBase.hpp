@@ -239,13 +239,13 @@ protected:
         wct::render::ForEach(
             in_param_descriptors,
             [&bindings, &result, this]
-            (const wct::render::WPipeParamDescriptorStruct & ubopd) {
+            (const wct::render::WPipeParamDescriptorInfo & ubopd) {
                 if(ubopd.type == wct::render::EPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
                         bindings[ubopd.binding][frm]={};
                         bindings[ubopd.binding][frm].binding = ubopd.binding;
-                        bindings[ubopd.binding][frm].ubo_info.range = ubopd.range;
+                        bindings[ubopd.binding][frm].ubo_info.range = ubopd.size;
 
                         wvk::buffer::CreateUBO(
                             bindings[ubopd.binding][frm].ubo_info,
@@ -285,7 +285,7 @@ protected:
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {
 
-        std::vector<wct::render::WPipeParamDescriptorStruct> result;
+        std::vector<wct::render::WPipeParamDescriptorInfo> result;
         result.reserve(in_param_descriptors.size());
         
         std::unordered_map<std::uint8_t, WVkDescriptorSetTextureWriteStruct> bindings{};
@@ -293,7 +293,7 @@ protected:
         wct::render::ForEach(
             in_param_descriptors,
             [&bindings]
-            (const wct::render::WPipeParamDescriptorStruct & _ubopd) {
+            (const wct::render::WPipeParamDescriptorInfo & _ubopd) {
                 if(_ubopd.type == wct::render::EPipeParamType::Texture &&
                    !bindings.contains(_ubopd.binding)) {
                     bindings[_ubopd.binding]={};

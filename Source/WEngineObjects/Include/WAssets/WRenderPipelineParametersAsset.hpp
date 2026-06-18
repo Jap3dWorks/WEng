@@ -13,13 +13,13 @@ class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
 
 public:
 
-    wct::render::WRenderPipelineParametersStruct & RenderPipelineParameters() {
+    wct::render::WRenderPipelineParameters & RenderPipelineParameters() {
         return pipeline_parameters_;
     }
 
 private:
 
-    wct::render::WRenderPipelineParametersStruct pipeline_parameters_{};
+    wct::render::WRenderPipelineParameters pipeline_parameters_{};
 
 };
 

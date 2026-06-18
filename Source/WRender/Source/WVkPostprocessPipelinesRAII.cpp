@@ -53,7 +53,7 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
-    const wct::render::WRenderPipelineStruct & in_pipeline_struct
+    const wct::render::WRenderPipelineInfo & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(

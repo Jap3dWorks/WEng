@@ -1,7 +1,9 @@
 #+title: WClass Templates
 
-* WReflection
-** Macros
+#+startup: content
+
+* Macros
+
 #+NAME: define-wclass-macros
 #+begin_src C++
 #ifndef _WCLASS_
@@ -58,44 +60,6 @@
 #endif
 #+end_src
 
-** DECLARE_WCLASS
-:PROPERTIES:
-:CUSTOM_ID: declare_wclass
-:END:
-
-WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
-
-El archivo DECLARE_WCLASS define un WClass único para cada WObject.
-
-#+NAME: declare_wclass
-#+begin_src C++ :noweb yes :main no :eval no
-
-#include "WCore/WCore.hpp"
-#include "WCore/TSingleton.hpp"
-#include "WReflection/WClassFor.hpp"
-
-<<define-wclass-macros>>
-
-<<define-dconcat>>
-
-<<define-mp>>
-
-<<define-wclassname-macros>>
-
-_WCLASS_DECLARATION_
-_PWCLASS_DECLARATION_
-
-namespace wrf::wclass {
-    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
-        WENG_CLASSNAME_STR(_WCLASS_);
-
-    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
-
-    inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
-        WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
-}
-#+end_src
-
 ** DEFINE_WCLASS
 :PROPERTIES:
 :CUSTOM_ID: define_wclass
@@ -121,14 +85,37 @@ const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
 
 Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ directory.
 
+- Temporal WPROPERTY solution, more info check [[file:org/WEng.hpp::#WPROPERTY]]
+
 #+NAME: wclass-wengine-hpp
 #+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS"
-#+HEADER: :var nmespace=""
+#+HEADER: :var nmespace="" :noweb yes
 #+begin_src elisp
 (concat
-(format
-"#pragma once
+"
+#pragma once
+#include \"WClass/WClassFor.hpp\"
+"
+"
+#ifdef WCLASS
+#undef WCLASS
+#endif
+#define WCLASS(...)
+"
+"
+#ifdef WPROPERTY
+#undef WPROPERTY
+#endif
 
+#define WPROPERTY(_type, _name, _value)                                      \\
+public:                                                                      \\
+    inline _type Get_ ## _name () const { return _name ; };                   \\
+    inline void Set_ ## _name (const _type & in_value) { _name = in_value; } \\
+private:                                                                     \\
+    _type _name { _value };
+"
+(format
+"
 #ifdef _WCLASS_
 #undef _WCLASS_
 #endif
@@ -145,6 +132,12 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 #undef _WCLASS_NAMESPACE_
 #endif
 
+#define _WCLASS_ %s
+#define _PWCLASS_ %s
+#define _WENG_API_ %s_API
+#define _WCLASS_NAMESPACE_ %s
+" wclass pwclass (upcase weng-api) (downcase nmespace))
+"
 #ifdef _WCLASS_DECLARATION_
 #undef _WCLASS_DECLARATION_
 #endif
@@ -153,19 +146,29 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 #undef _PWCLASS_DECLARATION_
 #endif
 
-#ifdef WCLASS
-#undef WCLASS
-#endif
+#define _WCLASS_DECLARATION_ class _WCLASS_;
+#define _PWCLASS_DECLARATION_ class _PWCLASS_;
+"
+"
+<<define-dconcat>>
+<<define-mp>>
+<<define-wclassname-macros>>
+"
+"
+_WCLASS_DECLARATION_
+_PWCLASS_DECLARATION_
 
-#define WCLASS(...)
+namespace wrf::wclass {
+    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
+        WENG_CLASSNAME_STR(_WCLASS_);
 
-#define _WCLASS_ %s
-#define _PWCLASS_ %s
-#define _WENG_API_ %s_API
-#define _WCLASS_NAMESPACE_ %s
+    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
 
-#include \"WReflection/_DECLARE_WCLASS_.inc\"
-" wclass pwclass (upcase weng-api) nmespace))
+    inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
+        WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
+}
+"
+)
 #+end_src
 
 * CompileGenerated
@@ -176,9 +179,18 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
 
 #+NAME: compile-generated-cpp
-#+begin_src elisp :var wobject-dir="WEngineObjects" :var wobject="WObject"
-(concat (format "#include \"%s/%s.hpp\"" wobject-dir wobject)
-         "\n"
-         (format "#include \"WReflection/_DEFINE_WCLASS_.inc\""))
+#+HEADER: :noweb yes
+#+begin_src elisp :var wobject-module="WEngineObjects" :var wobject="WObject"
+(concat
+(format "#include \"%s/%s.hpp\"" wobject-module wobject)
+" 
+<<define-wclassname-macros>>
+"
+"
+const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
+    return & wrf::wclass:: WENG_CLASSNAME_CLSS_VAR (_WCLASS_);
+}
+"
+)
 #+end_src
 

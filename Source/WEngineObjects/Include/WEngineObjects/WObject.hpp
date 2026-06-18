@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WEngineObjects/WClass.hpp"
+#include "WClass/WClass.hpp"
 
 #include <string>
 #include <cstring>

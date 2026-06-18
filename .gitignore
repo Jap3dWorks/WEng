@@ -35,3 +35,4 @@ hx.sh
 CMakeCache.txt
 CMakeFiles/
 *ConfigVersion.cmake
+/org/**/*.el

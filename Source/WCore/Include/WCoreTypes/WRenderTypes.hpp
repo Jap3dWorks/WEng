@@ -10,23 +10,25 @@
 
 namespace wct::render {
 
-    inline constexpr std::uint8_t WENG_MAX_PIPELINE_SHADERS=8;
+        // Uniform Buffer Objects
+    // ----------------------
 
     /**
      * @brief Uniform buffer data structure.
      */
-    struct WUBOGraphicsStruct
+    struct WGraphicsUBO
     {
         glm::mat4 model;
         glm::mat3 normal_matrix;
     
-        // TODO params here
+        // params here
+        // ...
     };
 
     /**
      * @brief parameters to use in a shader.
      */
-    struct WUBOPostprocessStruct
+    struct WPostprocessUBO
     {
         glm::vec4 param1;
         glm::vec4 param2;
@@ -37,7 +39,7 @@ namespace wct::render {
     /**
      * @brief Camera Data to be used in the shader.
      */
-    struct WUBOCameraStruct {
+    struct WCameraUBO {
         glm::mat4 proj{};
         glm::mat4 view{1};
         glm::vec3 pos{1};
@@ -48,6 +50,8 @@ namespace wct::render {
         float far_clipping{100.f};
     };
 
+    inline constexpr std::uint8_t WENG_MAX_PIPELINE_SHADERS=8;
+
     struct WRenderSize {
         std::uint32_t width{0};
         std::uint32_t height{0};
@@ -57,18 +61,33 @@ namespace wct::render {
         None=0,
         Vertex=1,
         Fragment=2,
-        // Geometry,
         Compute=4,
+        // Geometry,
         // TessellationControl,
         // TessellationEvaluation
     };
 
-    constexpr EShaderStageFlag operator|(const EShaderStageFlag & l, const EShaderStageFlag & r) noexcept {
-        return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) | static_cast<std::uint8_t>(r));
+    constexpr const std::array<EShaderStageFlag, 4> SHADER_STAGE_FLAGS_LIST =
+    {
+        EShaderStageFlag::None,
+        EShaderStageFlag::Vertex,
+        EShaderStageFlag::Fragment,
+        EShaderStageFlag::Compute
+    };
+    
+
+    constexpr EShaderStageFlag operator|(
+        const EShaderStageFlag & l,
+        const EShaderStageFlag & r) noexcept {
+        return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) |
+                                             static_cast<std::uint8_t>(r));
     }
 
-    constexpr EShaderStageFlag operator&(const EShaderStageFlag & l, const EShaderStageFlag & r) noexcept {
-        return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) & static_cast<std::uint8_t>(r));
+    constexpr EShaderStageFlag operator&(
+        const EShaderStageFlag & l,
+        const EShaderStageFlag & r) noexcept {
+        return static_cast<EShaderStageFlag>(static_cast<std::uint8_t>(l) &
+                                             static_cast<std::uint8_t>(r));
     }
 
     enum class EPipelineType : uint8_t
@@ -78,6 +97,7 @@ namespace wct::render {
         Postprocess,    // Camera shader pipelines
         Compute,        // GPU
         RayTracing,     // Ray Tracing
+        Tonemapping,    // Apply tonemapping
         Swap            // Used to write in the swap chain
     };
 
@@ -87,26 +107,26 @@ namespace wct::render {
         Ubo
     };
 
-    struct WPipeParamDescriptorStruct {
+    struct WPipeParamDescriptorInfo {
         std::uint8_t binding{0};
         EPipeParamType type{EPipeParamType::None};
         EShaderStageFlag stage_flags{EShaderStageFlag::None};
     
         /** @brief UBO range, total UBO size. */
-        std::size_t range{0};
+        std::size_t size{0};
     };
 
-    using WPipeParamDescriptorList = std::array<WPipeParamDescriptorStruct, 16>;
+    using WPipeParamDescriptorList = std::array<WPipeParamDescriptorInfo, 16>;
 
-    struct WShaderStruct {
+    struct WShaderInfo {
         EShaderStageFlag type{EShaderStageFlag::None};
         char file[128]{""};
         char entry[16]{"main"};
     };
 
-    using WShaderList = std::array<WShaderStruct, WENG_MAX_PIPELINE_SHADERS>;
+    using WShaderList = std::array<WShaderInfo, WENG_MAX_PIPELINE_SHADERS>;
 
-    struct WRenderPipelineStruct {
+    struct WRenderPipelineInfo {
         wct::render::EPipelineType type {wct::render::EPipelineType::Graphics};
         WShaderList shaders{};
 
@@ -117,37 +137,29 @@ namespace wct::render {
 // ---------------------------
 
     /** Render Pipeline Param Ubo Struct */
-    struct WRPParamUboStruct {
+    struct WRPParamUbo {
         std::uint16_t binding{0};
         std::vector<char> databuffer{};  // TODO: std::span
         std::size_t offset{0};
     };
 
-// TODO : use std::spam for WRPParamUboStruct (avoiding vector storage)
-//  So storage could be either static or dynamic.
-// struct WRPParamUboStruct {
-//     std::uint16_t binding{0};              // shader parameter binding
-//     std::spam<std::uint8_t> databuffer{};
-//     std::size_t offset{0};
-// };
-
     template<typename T>
-    struct TRPParamStruct {
+    struct TRPParam {
         std::uint16_t binding{0};
         T value{};
     };
 
-    using WRPParamAssetStruct = TRPParamStruct<WAssetId>;
+    using WRPParamAsset = TRPParam<WAssetId>;
 
-    using WRPParameterList_WAssetId = std::vector<WRPParamAssetStruct>;
-    using WRPParameterList_Ubo = std::vector<WRPParamUboStruct>;
+    using WRPParameterList_WAssetId = std::vector<WRPParamAsset>;
+    using WRPParameterList_Ubo = std::vector<WRPParamUbo>;
 
-    struct WRenderPipelineParametersStruct {
+    struct WRenderPipelineParameters {
         WRPParameterList_Ubo ubo_params{};
         WRPParameterList_WAssetId texture_params{};
     };
  
-    template<CCallable<void, const WPipeParamDescriptorStruct &> TFn>
+    template<CCallable<void, const WPipeParamDescriptorInfo &> TFn>
     inline void ForEach(const wct::render::WPipeParamDescriptorList & in_lst, TFn && in_fn) {
         for(const auto& param: in_lst) {
             if (param.type==EPipeParamType::None)
@@ -157,7 +169,7 @@ namespace wct::render {
         }
     }
 
-    template<CCallable<void, const WShaderStruct &> TFn>
+    template<CCallable<void, const WShaderInfo &> TFn>
     inline void ForEach(const WShaderList & in_lst, TFn && in_fn) {
         for(const auto& shd : in_lst) {
             if (shd.type == EShaderStageFlag::None)
@@ -167,34 +179,34 @@ namespace wct::render {
         }
     }
 
-    constexpr const std::array<EShaderStageFlag, 4> SHADER_STAGE_FLAGS_LIST =
-    {EShaderStageFlag::None,
-     EShaderStageFlag::Vertex,
-     EShaderStageFlag::Fragment,
-     EShaderStageFlag::Compute};
-    
-   // Lighting structs
-   // ----------------
+   // Lighting
+   // --------
 
     struct WPointLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         glm::vec4 position{};
         float intensity{1.f};
         float radius{10.f};
-        bool active{false};
     };
 
     struct WDirectionalLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         glm::vec4 direction{0.f, 0.f, 0.f, 0.f};
         float intensity{1.f};
-        bool active{false};
     };
 
     struct WAmbientLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         float intensity{1.f};
-        bool active{false};
+    };
+
+    struct WLightingUBO {
+        WPointLight point_lights[128];
+        WDirectionalLight directional_lights[32];
+        WAmbientLight ambient_light;
+
+        std::uint32_t point_lights_count;
+        std::uint32_t directionsl_lights_count;
     };
 
 }

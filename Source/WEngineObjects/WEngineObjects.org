@@ -1,35 +1,6 @@
 #+title: WEngineObjects
 #+startup: content
 
-* WReflection
-:PROPERTIES:
-:CUSTOM_ID: WReflection
-:END:
-
-WClass es una clase que almacena datos relativos a otra clase clase derivada de WObject.
-
-El archivo DECLARE_WCLASS define un WClass único para cada WObject.
-Esta WClass contiene información relevante acerca del clase que se está implementando.
-
-#+NAME: declare_wclass-inc
-#+HEADER: :shebang "// -*- mode: C++ -*-"
-#+HEADER: :main no :noeval 
-#+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle Include/WReflection/_DECLARE_WCLASS_.inc
-<<declare_wclass>>
-#+end_src
-
-El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
-Este archivo permite definir subprogramas que devuelven información relevante acerca de la clase.
-
-#+NAME: define_wclass-inc
-#+HEADER: :shebang "// -*- mode: C++ -*-"
-#+HEADER: :main no :noeval
-#+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle Include/WReflection/_DEFINE_WCLASS_.inc
-<<define_wclass>>
-#+end_src
-
 * WEngineObjects
 ** WObject
 :PROPERTIES:

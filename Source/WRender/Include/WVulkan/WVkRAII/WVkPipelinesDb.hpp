@@ -126,7 +126,7 @@ public:
         wct::render::ForEach(
             in_data,
             [&result, &in_fn]
-            (const wct::render::WShaderStruct & shd) {
+            (const wct::render::WShaderInfo & shd) {
                 result.push_back(
                     in_fn(WStringUtils::SystemPath(shd.file).c_str(),
                           shd.entry,

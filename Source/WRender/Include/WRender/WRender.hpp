@@ -11,12 +11,12 @@
 
 namespace wrd::render {
 
-    inline wct::render::WUBOCameraStruct ToUBOCameraStruct(
+    inline wct::render::WCameraUBO ToUBOCameraStruct(
         const WCameraPropertiesStruct & in_camera,
         const WTransformStruct & in_transform,
         float in_aspect
         ) {
-        wct::render::WUBOCameraStruct ubo_camera;
+        wct::render::WCameraUBO ubo_camera;
         ubo_camera.proj = glm::perspective(
             glm::radians(in_camera.angle_of_view),
             in_aspect,
@@ -37,7 +37,7 @@ namespace wrd::render {
         return ubo_camera;
     }
 
-    inline wct::render::WUBOGraphicsStruct ToUBOGraphicsStruct(
+    inline wct::render::WGraphicsUBO ToUBOGraphicsStruct(
         const WTransformStruct & in_transform
         ) {
 

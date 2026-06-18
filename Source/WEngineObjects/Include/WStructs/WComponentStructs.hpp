@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-// TODO move each struct to logical object.
+// TODO move each struct to its logical object.
 
 struct WTransformStruct
 {

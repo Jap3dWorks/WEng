@@ -149,9 +149,9 @@ namespace wng::render {
                             in_component->EntityId()
                             ).TransformStruct();
 
-                        wct::render::WUBOGraphicsStruct grpubo =
+                        wct::render::WGraphicsUBO grpubo =
                             wrd::render::ToUBOGraphicsStruct(tstruct);
-                        wct::render::WRPParamUboStruct ubodt{.binding=0, .offset=0};
+                        wct::render::WRPParamUbo ubodt{.binding=0, .offset=0};
                         ubodt.databuffer.resize(sizeof(decltype(grpubo)));
 
                         std::memcpy(ubodt.databuffer.data(), &grpubo, sizeof(decltype(grpubo)));

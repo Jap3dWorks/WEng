@@ -1,23 +1,17 @@
 #pragma once
 
-#include "WCore/WCore.hpp"
-#include "WCore/TObjectDataBase.hpp"
-#include "WEngineObjects/TWRef.hpp"
-#include "WCore/TWAllocator.hpp"
+// #include "WCore/WCore.hpp"
+// #include "WCore/TObjectDataBase.hpp"
+// #include "WEngineObjects/TWRef.hpp"
+// #include "WCore/TWAllocator.hpp"
 #include "WObjectDb/WDbBuilder.hpp"
-#include "WLog.hpp"
+// #include "WLog.hpp"
 
-#include <memory>
+// #include <memory>
 #include <unordered_set>
 #include <type_traits>
-#include <typeindex>
+// #include <typeindex>
 #include <cassert>
-
-class WObject;
-class WEntity;
-class WAsset;
-class WLevel;
-class WComponent;
 
 class WENGINEOBJECTS_API WClass
 {
@@ -25,7 +19,6 @@ public:
 
     constexpr WClass() noexcept = default;
 
-    // TODO std::string_view
     constexpr WClass(std::string_view name) noexcept :
     name_(name)
     {}
@@ -113,8 +106,6 @@ protected:
 
 private:
 
-    // TODO std::string_view
-    // const char * name_;
     std::string_view name_;
     
 };

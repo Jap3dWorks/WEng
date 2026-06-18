@@ -63,7 +63,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const wct::render::WRenderPipelineParametersStruct & in_parameters
+        const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
 
     void DeleteRenderPipeline(const WAssetId & in_id) override;
@@ -91,7 +91,7 @@ public:
     }
 
     void UpdateUboCamera(
-        const wct::render::WUBOCameraStruct & in_ubo
+        const wct::render::WCameraUBO & in_ubo
         ) override;
 
     /**
@@ -99,7 +99,7 @@ public:
      */
     void UpdateParameterDynamic(
         const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUbo & ubo_write
         ) override;
 
     /**
@@ -107,7 +107,7 @@ public:
      */
     void UpdateParameterStatic(
         const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUboStruct & ubo_write
+        const wct::render::WRPParamUbo & ubo_write
         ) override;
 
     void UnloadAllResources() override;
@@ -145,26 +145,26 @@ public:
     void InitializePointLights(
         std::span<WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_point_lights_structs
-        ) override { /* TODO .cpp */ }
+        ) override;
 
     void UpdatePointLights(
         std::span<WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_point_lights_structs
-        ) override { /* TODO .cpp */ }
+        ) override;
 
     void InitializaDirectionalLights(
         std::span<WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_directional_lights_structs
-        ) override { /* TODO .cpp */ }
+        ) override;
 
     void UpdateDirectionalLights(
         std::span<WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_directional_light_structs
-        ) override { /* TODO .cpp */ }
+        ) override;
 
     void UpdateAmbientLight(
         const wct::render::WAmbientLight & in_ambient_light
-        ) override { /* TODO .cpp */ }
+        ) override;
 
 private:
 

@@ -1,22 +1,20 @@
 #pragma once
 
-#include "WEngineObjects/WClass.hpp"
+#include "WClass/WClass.hpp"
 // #include "WEngineObjects/TWRef.hpp"
 // #include "WLog.hpp"
 #include <concepts>
 #include <type_traits>
 #include <string_view>
 
-#ifndef WCLASSFOR_N_SIZE
-#define WCLASSFOR_N_SIZE 32
-#endif
-
 class WObject;
+class WEntity;
+class WAsset;
+class WComponent;
 
 /**
  * @brief WClass declaration for an WObject.
  */
-// template<typename T, const char N[WCLASSFOR_N_SIZE], std::derived_from<WObject> P=WObject>
 template<typename T, std::derived_from<WObject> P=WObject>
 class WClassFor : public WClass {
     
@@ -25,10 +23,6 @@ public:
     constexpr WClassFor(std::string_view in_name) noexcept :
         WClass(in_name) {}
 
-
-    // constexpr WClassFor() noexcept :
-    //     WClass(N) {}
-    
 public:
 
     WDbBuilder DbBuilder() const override {
