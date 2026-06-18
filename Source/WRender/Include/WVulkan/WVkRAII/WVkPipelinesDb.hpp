@@ -25,7 +25,7 @@ public:
     using WVkPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WPipelineIdType>;
     using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WPipelineIdType>;
     using WVkDescriptorPoolDb = std::array<
-        TObjectDataBase<WVkDescriptorPoolInfo, void, WPipelineIdType>,
+        TObjectDataBase<VkDescriptorPool, void, WPipelineIdType>,
         FramesInFlight
         >;
     using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
@@ -91,19 +91,19 @@ public:
                     descriptor_set_layout_info,
                     in_device
                     );
-                descriptor_set_layout_info.wid = _in_id;
+                // descriptor_set_layout_info.wid = _in_id;
                 return descriptor_set_layout_info;
             });
     }
 
-    template<CCallable<void, WVkDescriptorPoolInfo & /* out */, const VkDevice&> TCreateFn>
+    template<CCallable<void, VkDescriptorPool & /* out */, const VkDevice&> TCreateFn>
     void CreateDescSetPool(const WPipelineIdType & in_id,
                            const VkDevice & in_device,
                            TCreateFn && create_fn) {
         
         for(std::uint32_t i=0; i<FramesInFlight; i++) {
             
-            WVkDescriptorPoolInfo dpoolinfo{};
+            VkDescriptorPool dpoolinfo{};
 
             // Create a descriptor pool by frame index
             create_fn(dpoolinfo, in_device);

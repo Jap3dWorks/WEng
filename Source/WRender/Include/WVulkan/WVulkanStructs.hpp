@@ -106,26 +106,9 @@ struct WVkSwapChainInfo
 
 struct WVkDescriptorSetLayoutInfo
 {
-    WAssetId wid{0};
+    // WAssetId wid{0};
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
     VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
-};
-
-/**
- * Descriptor pool is used to allocate descriptors memory, 
- * Represents the maximum number of descriptors that can be allocated.
-*/
-struct WVkDescriptorPoolInfo
-{
-    VkDescriptorPool descriptor_pool{VK_NULL_HANDLE};
-};
-
-/**
- * Descriptor set struct
-*/
-struct WVkDescriptorSetInfo
-{
-    VkDescriptorSet descriptor_set{VK_NULL_HANDLE};
 };
 
 struct WVkMeshInfo

@@ -216,7 +216,7 @@ namespace WVkPostprocessPipeUtils {
     }
 
     inline void CreateDescSetPool(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & in_device
         ) {
         std::array<VkDescriptorPoolSize, 2> pool_sizes;
@@ -238,7 +238,7 @@ namespace WVkPostprocessPipeUtils {
                 in_device,
                 &pool_info,
                 nullptr,
-                &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
+                &out_descriptor_pool_info) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create descriptor pool!");
         }
@@ -260,7 +260,7 @@ namespace WVkPostprocessPipeUtils {
     }
 
     inline void CreateGlobalResourcesDescPool(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & in_device
         ) {
 
@@ -284,7 +284,7 @@ namespace WVkPostprocessPipeUtils {
                 in_device,
                 &pool_info,
                 nullptr,
-                &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
+                &out_descriptor_pool_info) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create descriptor pool!");
         }

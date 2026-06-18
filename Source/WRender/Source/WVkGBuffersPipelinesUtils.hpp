@@ -16,7 +16,7 @@
 namespace WVkGBuffersPipelinesUtils {
     
     inline void CreateDescSetPool(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        VkDescriptorPool & out_descriptor_pool,
         const VkDevice & in_device
         ) {
         
@@ -41,7 +41,7 @@ namespace WVkGBuffersPipelinesUtils {
             in_device,
             &pool_info,
             nullptr,
-            &out_descriptor_pool_info.descriptor_pool
+            &out_descriptor_pool
             );
     }
 

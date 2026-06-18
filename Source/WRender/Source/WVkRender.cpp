@@ -810,7 +810,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
             // Create descriptor
             VkDescriptorSet descriptorset = wvk::render::CreateRenderDescriptor(
                 device_.Device(),
-                gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index).descriptor_pool,
+                gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index),
                 gbuffers_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
                 frame_index_,
                 binding.ubos,
@@ -842,7 +842,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
             std::array<VkDescriptorSet, 2> descsets =
                 {
-                    gbuffers_pipelines_.GlobalGraphicsDescriptorSet(frame_index_).descriptor_set,
+                    gbuffers_pipelines_.GlobalGraphicsDescriptorSet(frame_index_),
                     descriptorset
                 };
 
@@ -1001,7 +1001,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         WVkPipelineBindingInfo binding = ppcss_pipelines_.Binding(pbindingid);
         WVkRenderPipelineInfo pipeline = ppcss_pipelines_.Pipeline(binding.pipeline_id);
         WVkDescriptorSetLayoutInfo dsetlay = ppcss_pipelines_.DescriptorSetLayout(binding.pipeline_id);
-        WVkDescriptorPoolInfo dpool = ppcss_pipelines_.DescriptorPool(binding.pipeline_id, in_frame_index);
+        VkDescriptorPool dpool = ppcss_pipelines_.DescriptorPool(binding.pipeline_id, in_frame_index);
 
         ppcss_pipelines_.ResetGlobalDescriptorPool(in_frame_index);
 
@@ -1038,7 +1038,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
         VkDescriptorSet input_render_descriptor = wvk::render::CreateInputRenderDescriptor(
             device_.Device(),
-            ppcss_pipelines_.GlobalDescriptorPool(in_frame_index).descriptor_pool,
+            ppcss_pipelines_.GlobalDescriptorPool(in_frame_index),
             ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
             input_view,
             pipeline_resources_.Sampler()
@@ -1046,7 +1046,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
         VkDescriptorSet pp_descriptor = wvk::render::CreateRenderDescriptor(
             device_.Device(),
-            dpool.descriptor_pool,
+            dpool,
             dsetlay.descset_layout,
             frame_index_,
             binding.ubos,

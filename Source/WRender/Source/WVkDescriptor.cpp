@@ -27,7 +27,7 @@ void wvk::descriptor::Create(
 }
 
 void wvk::descriptor::Create(
-    WVkDescriptorPoolInfo & out_descriptor_pool_info,
+    VkDescriptorPool & out_descriptor_pool,
     const VkDevice & in_device)
 {
     std::array<VkDescriptorPoolSize,2> pool_sizes;
@@ -45,35 +45,35 @@ void wvk::descriptor::Create(
         pool_sizes.size()
         );
     pool_info.pPoolSizes = pool_sizes.data();
-    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); //70 as max sets
+    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); // max sets 70
 
     if (vkCreateDescriptorPool(
             in_device,
             &pool_info,
             nullptr,
-            &out_descriptor_pool_info.descriptor_pool) != VK_SUCCESS)
+            &out_descriptor_pool) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create descriptor pool!");
     }
 }
 
 void wvk::descriptor::Create(
-    WVkDescriptorSetInfo & out_descriptor_set_info,
+    VkDescriptorSet & out_descriptor_set,
     const VkDevice & in_device,
     const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const WVkDescriptorPoolInfo & descriptor_pool_info
+    const VkDescriptorPool & descriptor_pool
     )
 {
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    alloc_info.descriptorPool = descriptor_pool_info.descriptor_pool;
+    alloc_info.descriptorPool = descriptor_pool;
     alloc_info.descriptorSetCount = 1;
     alloc_info.pSetLayouts = &descriptor_set_layout_info.descset_layout;
 
     if (vkAllocateDescriptorSets(
             in_device,
             &alloc_info,
-            &out_descriptor_set_info.descriptor_set
+            &out_descriptor_set
             ) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate descriptor sets!");
@@ -94,15 +94,15 @@ void wvk::descriptor::Destroy(
 }
 
 void wvk::descriptor::Destroy(
-    WVkDescriptorPoolInfo & out_descriptor_pool_info,
+    VkDescriptorPool & out_descriptor_pool,
     const VkDevice & in_device
     )
 {
     vkDestroyDescriptorPool(
         in_device,
-        out_descriptor_pool_info.descriptor_pool,
+        out_descriptor_pool,
         nullptr
         );
 
-    out_descriptor_pool_info.descriptor_pool = VK_NULL_HANDLE;
+    out_descriptor_pool = VK_NULL_HANDLE;
 }

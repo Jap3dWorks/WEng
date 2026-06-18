@@ -13,6 +13,36 @@
 
 Modules should be linkable between them and dinamically linkable with the core application.
 
+#+BEGIN_SRC plantuml :file images/modules_dependencies_1.png
+@startuml
+
+Rectangle WEngine
+Rectangle WEngineInterfaces
+Rectangle WEngineObjects
+Rectangle WCore
+Rectangle WLevel
+Rectangle WRender
+
+WEngineInterfaces -[dashed]-> WEngineObjects
+WEngineInterfaces -[dashed]-> WCore
+
+WEngineObjects -[dashed]-> WCore
+
+WEngine -[dashed]-> WEngineObjects
+WEngine -[dashed]-> WEngineInterfaces
+WEngine -[dashed]-> WCore
+
+WLevel -[dashed]-> WEngineInterfaces
+WLevel -[dashed]-> WEngineObjects
+WLevel -[dashed]-> WCore
+
+WRender -[dashed]-> WEngineInterfaces
+WRender -[dashed]-> WEngineObjects
+WRender -[dashed]-> WCore
+
+@enduml
+#+END_SRC
+
 *** Directory Tree
 - Source/ModuleName _(PascalCase)_
       - ModuleName.org
@@ -192,6 +222,9 @@ WClass generation for current WObject.
 
 ** WOBJECT_BODY macro
 
+* Shaders
+- language *Slang*
+- [[https://docs.shader-slang.org/en/latest/external/core-module-reference/global-decls/math.html][slang functions reference]]
 
 * Coding Style
 

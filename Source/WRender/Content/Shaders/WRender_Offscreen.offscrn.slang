@@ -9,7 +9,6 @@ struct VSOutput
     float2 fragTexCoord;
 };
 
-
 // TODO lighting data
 // ------------------
 
@@ -63,8 +62,11 @@ uniform Sampler2D ws_position;
 [[vk::binding(3,0)]]
 uniform Sampler2D depth;
 
-[[vk::binding(0,1)]]
-ConstantBuffer<LightingUBO> lighting;
+// [[vk::binding(0,0)]] // camera
+// ConstantBuffer<LightingUBO> lighting;
+
+// [[vk::binding(1,0)]] // lighting
+// --
 
 // main functions
 // --------------
@@ -83,21 +85,25 @@ VSOutput vsMain(VSInput input)
 [shader("fragment")]
 float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
-    float2 uv = vertexOutput.fragTexCoords;
-    float3 color=float3(0.0, 0.0, 0.0);
-    float3 wspos = ws_position.Sample(uv).xyz;
-    float3 nrm = normal.Sample(uv).xyz;
-    float3 alb = albedo.Sample(uv).xyz;
+    float2 uv = vertexOutput.fragTexCoord;
+
+    // float3 color=float3(0.0, 0.0, 0.0);
+    // float3 wpos = ws_position.Sample(uv).xyz;
+    // float3 nrm = normal.Sample(uv).xyz;
+    // float3 alb = albedo.Sample(uv).xyz;
     
-    for(uint32 i=0; i < lighting.point_lights_count; i++) {
-        ws_po
-    }
+    // for(uint i=0; i < lighting.point_lights_count; i++) {
+    //     float3 vdist = wpos - lighting.point_lights[i].position.xyz;
+    //     float dist = length(vdist);
 
-    return albedo.Sample(vertexOutput.fragTexCoord);
+    //     float weight = 1.0 - (clamp(dist / lighting.point_lights[i].radius, 0, 1));
 
-    
+    //     color += alb * weight; 
+    // }
 
-    // return float4(vertexOutput.fragTexCoord, 0.f, 1.f);
+    // return float4(color, 1.f);
 
-    // return float4(0.f, 0.f, 1.f, 1.f);
+    return albedo.Sample(uv);
+
 }
+

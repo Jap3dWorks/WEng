@@ -16,7 +16,7 @@ public:
     using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
 
     struct GlobalPostprocessResources {
-        std::array<WVkDescriptorPoolInfo, frames_in_flight> descpool_info{};
+        std::array<VkDescriptorPool, frames_in_flight> descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
     };
 
@@ -44,7 +44,7 @@ public:
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
                                      const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
-    const WVkDescriptorPoolInfo & GlobalDescriptorPool(const std::uint32_t & in_frame_index) const {
+    const VkDescriptorPool & GlobalDescriptorPool(const std::uint32_t & in_frame_index) const {
         return global_resources_.descpool_info[in_frame_index];
     }
 
@@ -54,7 +54,7 @@ public:
 
     void ResetGlobalDescriptorPool(const std::uint32_t & in_frame_index) {
         vkResetDescriptorPool(device_,
-                              global_resources_.descpool_info[in_frame_index].descriptor_pool,
+                              global_resources_.descpool_info[in_frame_index],
                               {});
     }
 

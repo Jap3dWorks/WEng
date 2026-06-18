@@ -146,7 +146,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
         Device()
         );
 
-    // TODO CreateGlobalDescPool (camera and lights)
+    // Global descriptor pool (camera and lights)
     wvk::descriptor::Create(
         global_graphics_descsets_.descpool_info,
         Device()
@@ -183,7 +183,7 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
             ws,
             0,
             buffer_info,
-            global_graphics_descsets_.descset_info[i].descriptor_set
+            global_graphics_descsets_.descset_info[i]
             );
 
         vkUpdateDescriptorSets(
@@ -198,11 +198,12 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
 
 void WVkGBuffersPipelinesRAII::Destroy_GlobalResources() {
 
-    if (global_graphics_descsets_.descpool_info.descriptor_pool !=
+    if (global_graphics_descsets_.descpool_info !=
         VK_NULL_HANDLE) {
 
-        wvk::descriptor::Destroy(global_graphics_descsets_.descpool_info,
-                         device_);
+        wvk::descriptor::Destroy(
+            global_graphics_descsets_.descpool_info,
+            device_);
 
         for(uint32_t i=0; i<global_graphics_descsets_.camera_ubo.size(); i++) {
             wvk::buffer::Destroy(

@@ -105,17 +105,17 @@ public:
                              const std::uint32_t  & in_frameindex) {
         vkResetDescriptorPool(
             device_,
-            pipelines_db_.descriptor_pools[in_frameindex].Get(in_id).descriptor_pool,
+            pipelines_db_.descriptor_pools[in_frameindex].Get(in_id),
             {}
             );
     }
 
     void ResetDescriptorPools(const std::uint32_t  & in_frameindex) {
         pipelines_db_.descriptor_pools[in_frameindex].ForEach(
-            [&dev_info = device_](WVkDescriptorPoolInfo & _pool) {
+            [&dev_info = device_](VkDescriptorPool & _pool) {
                 vkResetDescriptorPool(
                     dev_info,
-                    _pool.descriptor_pool,
+                    _pool,
                     {}
                     );
             });
@@ -129,7 +129,7 @@ public:
         return pipelines_db_.descriptor_set_layouts.Get(in_id);
     }
 
-    WNODISCARD const WVkDescriptorPoolInfo & DescriptorPool(const WPipelineIdType & in_id,
+    WNODISCARD const VkDescriptorPool & DescriptorPool(const WPipelineIdType & in_id,
                                                             const std::uint32_t & in_frameindex) const {
         return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }

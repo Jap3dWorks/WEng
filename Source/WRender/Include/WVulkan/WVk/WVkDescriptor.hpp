@@ -11,15 +11,15 @@ namespace wvk::descriptor {
         );
     
     void Create(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & device
         );
 
     void Create(
-        WVkDescriptorSetInfo& out_descriptor_set_info,
+        VkDescriptorSet& out_descriptor_set_info,
         const VkDevice & device,
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const WVkDescriptorPoolInfo& descriptor_pool_info
+        const VkDescriptorPool & descriptor_pool_info
         );
 
     void Destroy(
@@ -28,7 +28,7 @@ namespace wvk::descriptor {
         );
 
     void Destroy(
-        WVkDescriptorPoolInfo & out_descriptor_pool_info,
+        VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & in_device
         );
 

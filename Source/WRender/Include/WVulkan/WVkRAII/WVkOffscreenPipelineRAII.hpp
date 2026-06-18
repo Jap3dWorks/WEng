@@ -2,10 +2,10 @@
 
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
+// #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+// #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 
@@ -48,6 +48,7 @@ public:
         pipeline_layout_(std::move(other.pipeline_layout_))
         {
             other.device_ = VK_NULL_HANDLE;
+            other.descpool_info_ = {};
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
@@ -64,6 +65,7 @@ public:
             pipeline_layout_=std::move(other.pipeline_layout_);
 
             other.device_ = VK_NULL_HANDLE;
+            other.descpool_info_={};
             other.descset_layout_ = VK_NULL_HANDLE;
             other.pipeline_ = VK_NULL_HANDLE;
             other.pipeline_layout_ = VK_NULL_HANDLE;
@@ -114,7 +116,7 @@ private:
     }
 
     void InitializeDescPool() {
-        for(auto & descpool : descpool_info_) {
+        for(VkDescriptorPool & descpool : descpool_info_) {
             
             std::array<VkDescriptorPoolSize, 2> pool_sizes;
 
@@ -148,6 +150,9 @@ private:
 
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
+
+        // TODO: Uniform Buffer with lights
+        
 
         // albedo,normal,ws_position,mrAO,emission,extra01,depth
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;

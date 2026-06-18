@@ -21,14 +21,12 @@ class WVkGBuffersPipelinesRAII : public WVkPipelinesBase<WAssetId,
 private:
 
     /**
-     * @Brief Graphics pipelines global descriptors sets for camera and lights.
+     * @Brief Graphics pipelines global descriptors sets for camera (lights?).
      */
     struct GlobalGraphicsResources {
-        WVkDescriptorPoolInfo descpool_info{};
-        // TODO : VkDescriptorPool descpool_{VK_NULL_HANDLE} ;
+        VkDescriptorPool descpool_info{};
         WVkDescriptorSetLayoutInfo descset_layout_info{};
-
-        std::array<WVkDescriptorSetInfo, frames_in_flight> descset_info{};
+        std::array<VkDescriptorSet, frames_in_flight> descset_info{};
         std::array<WVkUBOInfo, frames_in_flight> camera_ubo{};
     };
 
@@ -69,13 +67,6 @@ public:
 
 public:
 
-    // void Initialize(const VkDevice & in_device,
-    //                 const VkPhysicalDevice & in_physical_device) override {
-    //     Super::Initialize(in_device,
-    //                       in_physical_device);
-    //     Initialize_GlobalResources();
-    // }
-
     WEntityComponentId CreateBinding(
         const WEntityComponentId & in_binding_id,
         const WAssetId & in_pipeline_id,
@@ -89,7 +80,7 @@ public:
         uint32_t in_frame_index
         );
 
-    const WVkDescriptorSetInfo & GlobalGraphicsDescriptorSet(
+    const VkDescriptorSet & GlobalGraphicsDescriptorSet(
         const std::uint32_t & in_frame_index
         ) const
     {
@@ -104,7 +95,7 @@ private:
 
     void Destroy_GlobalResources();
 
-    /** Camera, lights, ... */
+    /** Camera, lights, ... */  // TODO extract from here?
     GlobalGraphicsResources global_graphics_descsets_{};
 
 };

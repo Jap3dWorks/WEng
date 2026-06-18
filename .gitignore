@@ -36,3 +36,4 @@ CMakeCache.txt
 CMakeFiles/
 *ConfigVersion.cmake
 /org/**/*.el
+/org/images/
