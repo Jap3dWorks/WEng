@@ -162,12 +162,9 @@ void WVkGBuffersPipelinesRAII::Initialize_GlobalResources() {
     }
 
     for(uint32_t i=0; i < frames_in_flight; i++) {
-        
-        global_graphics_descsets_.camera_ubo[i].range =
-            sizeof(wct::render::WCameraUBO);
 
-        wvk::buffer::CreateUBO(
-            global_graphics_descsets_.camera_ubo[i],
+        global_graphics_descsets_.camera_ubo[i] = wvk::buffer::CreateUBO(
+            sizeof(wct::render::WCameraUBO),
             Device(),
             PhysicalDevice()
             );
@@ -229,13 +226,13 @@ void WVkGBuffersPipelinesRAII::UpdateGlobalGraphicsDescriptorSet(
     const wct::render::WCameraUBO & camera_struct,
     uint32_t in_frame_index
     ) {
-    wvk::buffer::MapUBO(
+    void * ptr = wvk::buffer::MapUBO(
         global_graphics_descsets_.camera_ubo[in_frame_index],
         device_
         );
     
     memcpy(
-        global_graphics_descsets_.camera_ubo[in_frame_index].mapped_memory,
+        ptr,
         &camera_struct,
         sizeof(wct::render::WCameraUBO)
         );

@@ -14,25 +14,25 @@ namespace wvk::buffer {
         VkMemoryPropertyFlags properties
         );
 
-    void CreateUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device
+    WVkUBOInfo CreateUBO(
+        VkDeviceSize in_size,
+        VkDevice in_device,
+        VkPhysicalDevice in_physical_device
         );
 
-    void MapUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device
+    void * MapUBO(
+        const WVkUBOInfo & in_ubo,
+        VkDevice in_device
         );
 
     void UnmapUBO(
-        WVkUBOInfo & out_uniform_buffer_info,
-        const VkDevice & in_device
+        const WVkUBOInfo & in_ubo,
+        VkDevice in_device
         );
 
     void Destroy(
         WVkUBOInfo & out_ubo_info,
-        const VkDevice & in_device
+        VkDevice in_device
         );
 
     inline void CopyVkBuffer(
@@ -76,15 +76,14 @@ namespace wvk::buffer {
         vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
     }
 
-        
     inline bool UpdateUBO(
-        WVkUBOInfo & in_ubo_info,
+        void * ubo_memory,
         const void * in_data,
         const std::size_t & in_size,
         const std::size_t & in_offset=0
         ) {
 
-        char * mapped_mem = reinterpret_cast<char*>(in_ubo_info.mapped_memory);
+        char * mapped_mem = reinterpret_cast<char*>(ubo_memory);
         memcpy((mapped_mem + in_offset),
                in_data,
                in_size               
@@ -94,30 +93,18 @@ namespace wvk::buffer {
     }
 
     inline bool UpdateUBOModel(
-        WVkUBOInfo & uniform_buffer_object_info_,
+        void * ubo_memory,
         const glm::mat4 & model
         ) {
         wct::render::WGraphicsUBO ubo{};
 
         ubo.model = model;
         
-        memcpy(uniform_buffer_object_info_.mapped_memory,
+        memcpy(ubo_memory,
                &ubo,
                sizeof(wct::render::WGraphicsUBO));
 
         return true;
-    }
+    }    
 
-    inline bool UpdateUBOModel(
-        WVkUBOInfo & uniform_buffer_object_info_,
-        const wct::render::WGraphicsUBO & in_ubo_model_struct
-        ) {
-        
-        memcpy(uniform_buffer_object_info_.mapped_memory,
-               &in_ubo_model_struct,
-               sizeof(wct::render::WGraphicsUBO));
-
-        return true;
-    }
-    
 }

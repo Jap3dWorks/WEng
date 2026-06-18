@@ -185,8 +185,9 @@ public:
 
         if(!ubo) return;
 
-        wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
-        wvk::buffer::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
+        void * ptr = wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
+        wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+        // wvk::buffer::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
         wvk::buffer::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
     }
 
@@ -207,8 +208,9 @@ public:
         if(!ubo) return;
 
         for(auto & b: (*ubo)) {
-            wvk::buffer::MapUBO(b.ubo_info, device_);
-            wvk::buffer::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
+            void * ptr = wvk::buffer::MapUBO(b.ubo_info, device_);
+            wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+            // wvk::buffer::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
             wvk::buffer::UnmapUBO(b.ubo_info, device_);            
         }
     }
@@ -245,10 +247,9 @@ protected:
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
                         bindings[ubopd.binding][frm]={};
                         bindings[ubopd.binding][frm].binding = ubopd.binding;
-                        bindings[ubopd.binding][frm].ubo_info.range = ubopd.size;
 
-                        wvk::buffer::CreateUBO(
-                            bindings[ubopd.binding][frm].ubo_info,
+                        bindings[ubopd.binding][frm].ubo_info = wvk::buffer::CreateUBO(
+                            ubopd.size,
                             device_,
                             physical_device_
                             );
@@ -268,11 +269,12 @@ protected:
         
         for(auto & ubo : in_ubos) {
             for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
-                wvk::buffer::UpdateUBO(bindings[ubo.binding][frm].ubo_info,
-                                   in_ubos[ubo.binding].data,
-                                   in_ubos[ubo.binding].size,
-                                   in_ubos[ubo.binding].offset);
+                void * ptr = wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
+                wvk::buffer::UpdateUBO(
+                    ptr,
+                    in_ubos[ubo.binding].data,
+                    in_ubos[ubo.binding].size,
+                    in_ubos[ubo.binding].offset);
                 wvk::buffer::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
             }
         }

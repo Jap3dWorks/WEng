@@ -44,60 +44,60 @@ void wvk::buffer::CreateVkBuffer(
     // WFLOG("Create new Buffer {}", static_cast<void*>(out_buffer));
 }
 
-void wvk::buffer::CreateUBO(
-    WVkUBOInfo & out_ubo_info,
-    const VkDevice & in_device,
-    const VkPhysicalDevice & in_physical_device)
-{
+WVkUBOInfo wvk::buffer::CreateUBO(
+    VkDeviceSize in_size,
+    VkDevice in_device,
+    VkPhysicalDevice in_physical_device
+    ) {
+    WVkUBOInfo result;
+    result.range = in_size;
+
     CreateVkBuffer(
-        out_ubo_info.buffer,
-        out_ubo_info.buffer_memory,
+        result.buffer,
+        result.device_memory,
         in_device,
         in_physical_device,
-        out_ubo_info.range,
+        in_size,
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
+
+    return result;
 }
 
-void wvk::buffer::MapUBO(
-    WVkUBOInfo & out_uniform_buffer_info,
-    const VkDevice & in_device
-    )
-{
+void * wvk::buffer::MapUBO(
+    const WVkUBOInfo & in_ubo,
+    VkDevice in_device
+    ) {
+    void * ptr;
+
     vkMapMemory(
         in_device,
-        out_uniform_buffer_info.buffer_memory,
+        in_ubo.device_memory,
         0,
-        out_uniform_buffer_info.range,
+        in_ubo.range,
         0,
-        &out_uniform_buffer_info.mapped_memory
+        &ptr
         );
+    
+    return ptr;
 }
 
 void wvk::buffer::UnmapUBO(
-    WVkUBOInfo & out_uniform_buffer_info,
-    const VkDevice & in_device
+    const WVkUBOInfo & in_ubo,
+    VkDevice in_device
     ) {
     vkUnmapMemory(
         in_device,
-        out_uniform_buffer_info.buffer_memory
+        in_ubo.device_memory
         );
-
-    out_uniform_buffer_info.mapped_memory = nullptr;
 }
-
 
 void wvk::buffer::Destroy(
     WVkUBOInfo & out_ubo_info,
-    const VkDevice & in_device
+    VkDevice in_device
     ) {
 
-    if (out_ubo_info.mapped_memory) {
-        vkUnmapMemory(in_device, out_ubo_info.buffer_memory);
-        out_ubo_info.mapped_memory = nullptr;
-    }
-    
     vkDestroyBuffer(
         in_device,
         out_ubo_info.buffer,
@@ -106,11 +106,13 @@ void wvk::buffer::Destroy(
 
     vkFreeMemory(
         in_device,
-        out_ubo_info.buffer_memory,
+        out_ubo_info.device_memory,
         nullptr
         );
 
     out_ubo_info.buffer = VK_NULL_HANDLE;
-    out_ubo_info.buffer_memory = VK_NULL_HANDLE;
+    out_ubo_info.device_memory = VK_NULL_HANDLE;
     out_ubo_info.range = 0;
 }
+
+

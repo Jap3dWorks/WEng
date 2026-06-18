@@ -123,8 +123,7 @@ struct WVkMeshInfo
 struct WVkUBOInfo
 {
     VkBuffer buffer{VK_NULL_HANDLE};
-    VkDeviceMemory buffer_memory{VK_NULL_HANDLE};
-    void * mapped_memory{nullptr};
+    VkDeviceMemory device_memory{VK_NULL_HANDLE};
     VkDeviceSize range{1};
 };
 
