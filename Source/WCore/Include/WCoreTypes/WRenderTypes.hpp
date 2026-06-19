@@ -201,12 +201,15 @@ namespace wct::render {
     };
 
     struct WLightingUBO {
-        WPointLight point_lights[128];
-        WDirectionalLight directional_lights[32];
-        WAmbientLight ambient_light;
+        static constexpr std::uint32_t MAX_POINT_LIGHTS{64};
+        static constexpr std::uint32_t MAX_DIRECTIONAL_LIGHTS{16};
 
-        std::uint32_t point_lights_count;
-        std::uint32_t directionsl_lights_count;
+        WPointLight point_lights[MAX_POINT_LIGHTS];
+        WDirectionalLight directional_lights[MAX_DIRECTIONAL_LIGHTS];
+        WAmbientLight ambient_light{};
+
+        std::uint32_t point_lights_count{0};
+        std::uint32_t directionsl_lights_count{0};
     };
 
 }

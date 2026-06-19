@@ -1,8 +1,8 @@
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
-#include "TFunction.hpp"
 
 #include <concepts>
 #include <memory>
@@ -36,26 +36,26 @@ public:
 
     constexpr TSparseSet(const Allocator & in_allocator) :
         index_pos_(),
-        pos_index_(),
+        index_stack_(),
         compact_(in_allocator)
         {}
 
     constexpr TSparseSet(const TSparseSet & other) :
         index_pos_(other.index_pos_),
-        pos_index_(other.pos_index_),
+        index_stack_(other.index_stack_),
         compact_(other.compact_)
         {}
     
     TSparseSet(TSparseSet && other) noexcept :
         index_pos_(std::move(other.index_pos_)),
-        pos_index_(std::move(other.pos_index_)),
+        index_stack_(std::move(other.index_stack_)),
         compact_(std::move(other.compact_))
         {}
 
     constexpr TSparseSet & operator=(const TSparseSet & other) {
         if (this != &other) {
             index_pos_ = other.index_pos_;
-            pos_index_ = other.pos_index_;
+            index_stack_ = other.index_stack_;
             compact_ = other.compact_;
         }
 
@@ -65,7 +65,7 @@ public:
     constexpr TSparseSet & operator=(TSparseSet && other) noexcept {
         if (this != &other) {
             index_pos_ = std::move(other.index_pos_);
-            pos_index_ = std::move(other.pos_index_);
+            index_stack_ = std::move(other.index_stack_);
             compact_ = std::move(other.compact_);
         }
 
@@ -83,7 +83,8 @@ public:
             compact_.push_back(std::forward<D>(in_value));
 
             index_pos_[in_index] = pos;
-            pos_index_[pos] = in_index;            
+
+            index_stack_.push_back(in_index);
         }
     }
 
@@ -98,7 +99,7 @@ public:
     }
 
     std::size_t IndexInPos(std::size_t in_pos) const {
-        return pos_index_.at(in_pos);
+        return index_stack_[in_pos];
     }
 
     constexpr size_t Count() const noexcept {
@@ -107,23 +108,22 @@ public:
 
     void Remove(size_t in_index) {
         size_t pos = index_pos_[in_index];
-        size_t last = compact_.size() - 1;
+        size_t last_index = index_stack_.back();
+        
+        compact_[pos] = std::move(compact_.back());
 
-        compact_[pos] = std::move(compact_[last]);
-
-        size_t lindex = pos_index_[last];
-        index_pos_[lindex] = pos;
+        index_pos_[last_index] = pos;
 
         index_pos_.erase(in_index);
-        pos_index_.erase(last);
 
-        compact_.resize(last);
+        compact_.pop_back();
+        index_stack_.pop_back();
     }
 
     void Clear() noexcept {
-        pos_index_.clear();
         index_pos_.clear();
         compact_.clear();
+        index_stack_.clear();
     }
 
     constexpr void Reserve(size_t in_size) {
@@ -158,10 +158,11 @@ public:
         return compact_.cend();
     }
 
-    void ForEach(TFunction<void(std::size_t, T&)> in_predicate) {
+    template<CCallable<void, std::size_t, T&> TFn>
+    void ForEach(TFn && in_predicate) {
         std::size_t i=0;
         for(auto & v: *this) {
-            in_predicate(pos_index_.at(i++), v);
+            std::forward<TFn>(in_predicate)(index_stack_[i++], v);
         }
     }
 
@@ -180,14 +181,14 @@ public:
     }
 
     std::size_t IndexAt(std::size_t in_pos) const {
-        return pos_index_.at(in_pos);
+        return index_stack_[in_pos];
     }
 
 private:
 
     std::unordered_map<size_t, size_t> index_pos_;
 
-    std::unordered_map<size_t, size_t> pos_index_;
+    std::vector<size_t > index_stack_;
 
     std::vector<T, Allocator> compact_;
 

@@ -91,10 +91,6 @@ public:
         asset_render_data_.UnloadStaticMesh(in_id);
     }
 
-    void UpdateUboCamera(
-        const wct::render::WCameraUBO & in_ubo
-        ) override;
-
     /**
      * @brief Updates only for current frame in flight
      */
@@ -134,6 +130,13 @@ public:
     { return render_command_pool_; }
 
     void ClearPipelines() override;
+
+    // Camera
+    // ------
+
+    void UpdateUboCamera(
+        const wct::render::WCameraUBO & in_ubo
+        ) override;
 
     // Lights
     // ------

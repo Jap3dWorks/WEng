@@ -1,20 +1,33 @@
 #pragma once
 
+#include "WCore/WCoreMacros.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 
 namespace wvk::descriptor {
 
+    /**
+     * @DEPRECATED
+     */
     void Create(
         WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
         const VkDevice & device
         );
-    
+
+    WNODISCARD VkDescriptorSetLayout Create(
+        VkDescriptorSetLayoutBinding * in_bindings_ptr,
+        std::uint32_t in_binding_count,
+        VkDevice & in_device
+        );
+
     void Create(
         VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & device
         );
 
+    /**
+     * @DEPRECATED
+     */
     void Create(
         VkDescriptorSet& out_descriptor_set_info,
         const VkDevice & device,
@@ -22,9 +35,23 @@ namespace wvk::descriptor {
         const VkDescriptorPool & descriptor_pool_info
         );
 
+    WNODISCARD VkDescriptorSet Create(
+        VkDevice device,
+        VkDescriptorSetLayout descriptor_set_layout_info,
+        VkDescriptorPool descriptor_pool_info
+        );
+
+    /**
+     * @DEPRECATED
+     */
     void Destroy(
         WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
         const VkDevice & device
+        );
+
+    void Destroy(
+        VkDescriptorSetLayout in_descriptor_set_layout,
+        VkDevice in_device
         );
 
     void Destroy(

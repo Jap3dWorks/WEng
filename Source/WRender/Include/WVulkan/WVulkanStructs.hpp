@@ -106,6 +106,8 @@ struct WVkSwapChainInfo
 
 struct WVkDescriptorSetLayoutInfo
 {
+    // TODO it is not required to store the descriptor bindings.
+    //  Remove this struct.
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
     VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
 };

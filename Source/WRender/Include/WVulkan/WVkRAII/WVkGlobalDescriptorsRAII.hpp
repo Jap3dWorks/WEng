@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
@@ -22,12 +23,13 @@ public:
           descpool_info_(std::move(other.descpool_info_)),
           descset_layout_info_(std::move(other.descset_layout_info_)),
           descset_info_(std::move(other.descset_info_)),
-          camera_ubo_(std::move(other.camera_ubo_))
+          camera_ubo_(std::move(other.camera_ubo_)),
+          lighting_ubo_(std::move(other.camera_ubo_))
         {
             other.device_ = VK_NULL_HANDLE;
             other.physical_device_ = VK_NULL_HANDLE;
             other.descpool_info_ = VK_NULL_HANDLE;
-            other.descset_layout_info_ = {};
+            other.descset_layout_info_ = VK_NULL_HANDLE;
         }
           
 
@@ -41,11 +43,12 @@ public:
             descset_layout_info_ = std::move(other.descset_layout_info_);
             descset_info_ = std::move(other.descset_info_);
             camera_ubo_ = std::move(other.camera_ubo_);
+            lighting_ubo_ = std::move(other.lighting_ubo_);
 
             other.device_ = VK_NULL_HANDLE;
             other.physical_device_ = VK_NULL_HANDLE;
             other.descpool_info_ = VK_NULL_HANDLE;
-            other.descset_layout_info_ = {};
+            other.descset_layout_info_ = VK_NULL_HANDLE;
         }
         return *this;
     }
@@ -62,7 +65,7 @@ public:
     }
 
     VkDescriptorSetLayout DescriptorSetLayout() const {
-        return descset_layout_info_.descset_layout;
+        return descset_layout_info_;
     }
 
     VkDescriptorSet DescriptorSet(std::uint32_t in_frame_index) const {
@@ -70,7 +73,7 @@ public:
     }
 
     void UpdateDescriptorSet(
-        const wct::render::WCameraUBO & in_camera_struct,
+        const wct::render::WCameraUBO & in_camera_ubo,
         std::uint32_t in_frame_index
         ) {
         void * ptr = wvk::buffer::MapUBO(
@@ -80,7 +83,7 @@ public:
     
         memcpy(
             ptr,
-            &in_camera_struct,
+            &in_camera_ubo,
             sizeof(wct::render::WCameraUBO)
             );
     
@@ -90,44 +93,68 @@ public:
             );
     }
 
+    void UpdateDescriptorSet(
+        const wct::render::WLightingUBO & in_lighting_ubo,
+        std::uint32_t in_frame_index
+        ) {
+
+        memcpy(
+            wvk::buffer::MapUBO(
+                lighting_ubo_[in_frame_index],
+                device_
+            ),
+            &in_lighting_ubo,
+            sizeof(wct::render::WLightingUBO)
+            );
+
+        wvk::buffer::UnmapUBO(
+            lighting_ubo_[in_frame_index],
+            device_
+            );
+    }
+
+public:
+
+    static constexpr std::uint8_t CAMERA_BINDING{0};
+    static constexpr std::uint8_t LIGHTING_BINDING{1};
 
 private:
 
     void Initialize() {
-        VkDescriptorSetLayoutBinding camera_binding{};
-        camera_binding.binding=0;
-        camera_binding.descriptorCount = 1;
-        camera_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        camera_binding.pImmutableSamplers = nullptr;
-        camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; //TODO: vertex and fragment
 
-        // TODO lights here too
+        std::array<VkDescriptorSetLayoutBinding,2> bindings{};
 
-        descset_layout_info_.bindings = {
-            camera_binding
-        };
+        bindings[0].binding = CAMERA_BINDING;
+        bindings[0].descriptorCount = 1;
+        bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        bindings[0].pImmutableSamplers = nullptr;
+        bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT |
+                                 VK_SHADER_STAGE_FRAGMENT_BIT;
 
-        wvk::descriptor::Create(
-            descset_layout_info_,
+        bindings[1].binding = CAMERA_BINDING;
+        bindings[1].descriptorCount = 1;
+        bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        bindings[1].pImmutableSamplers = nullptr;
+        bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT |
+                                 VK_SHADER_STAGE_FRAGMENT_BIT; 
+
+        descset_layout_info_ = wvk::descriptor::Create(
+            bindings.data(),
+            bindings.size(),
             device_
             );
 
-        // Global descriptor pool (camera and lights)
         wvk::descriptor::Create(
             descpool_info_,
             device_
             );
 
         for (std::uint32_t i=0; i < FramesInFlight; i++) {
-            wvk::descriptor::Create(
-                descset_info_[i],
+            descset_info_[i] = wvk::descriptor::Create(
                 device_,
                 descset_layout_info_,
                 descpool_info_
                 );
-
-        }
-        for(uint32_t i=0; i < FramesInFlight; i++) {
 
             camera_ubo_[i] = wvk::buffer::CreateUBO(
                 sizeof(wct::render::WCameraUBO),
@@ -135,43 +162,56 @@ private:
                 physical_device_
                 );
 
-            VkWriteDescriptorSet ws = {};
-            VkDescriptorBufferInfo buffer_info{};
-
-            buffer_info.buffer = camera_ubo_[i].buffer;
-            buffer_info.offset = 0;
-            buffer_info.range = camera_ubo_[i].range;
-
-            wvk::descriptor::UpdateWriteDescriptorSet_UBO(
-                ws,
-                0,
-                buffer_info,
-                descset_info_[i]
+            lighting_ubo_[i] = wvk::buffer::CreateUBO(
+                sizeof(wct::render::WLightingUBO),
+                device_,
+                physical_device_
                 );
+
+            std::array<VkWriteDescriptorSet, 2> write_descriptors{};
+            std::array<VkDescriptorBufferInfo, 2> buffer_infos{};
+            std::uint8_t j=0;
+            for(auto * itm : {&camera_ubo_[i], &lighting_ubo_[i]}) {
+                buffer_infos[j].buffer = itm->buffer;
+                buffer_infos[j].range = itm->range;
+                buffer_infos[j].offset=0;
+
+                wvk::descriptor::UpdateWriteDescriptorSet_UBO(
+                    write_descriptors[j],
+                    j, // binding 0 and 1
+                    buffer_infos[j],
+                    descset_info_[i]
+                    );
+
+                ++j;
+            }
 
             vkUpdateDescriptorSets(
                 device_,
-                1,
-                &ws,
+                write_descriptors.size(),
+                write_descriptors.data(),
                 0,
                 nullptr
                 );
         }
-
     }
 
     void Destroy() {
         if (descpool_info_ != VK_NULL_HANDLE) {
 
-            wvk::descriptor::Destroy(descpool_info_,
-                                     device_);
+            wvk::descriptor::Destroy(
+                descpool_info_,
+                device_);
 
             for(uint32_t i=0; i<camera_ubo_.size(); i++) {
                 wvk::buffer::Destroy(camera_ubo_[i],
                                      device_);
             }
+            for (std::uint32_t i=0; i<lighting_ubo_.size(); i++) {
+                wvk::buffer::Destroy(lighting_ubo_[i], device_);
+            }
 
-            if (descset_layout_info_.descset_layout)
+            if (descset_layout_info_)
             {
                 wvk::descriptor::Destroy(
                     descset_layout_info_,
@@ -182,9 +222,10 @@ private:
             device_ = VK_NULL_HANDLE;
             physical_device_ = VK_NULL_HANDLE;
             descpool_info_ = VK_NULL_HANDLE;
-            descset_layout_info_ = {};
+            descset_layout_info_ = VK_NULL_HANDLE;
             descset_info_ = {};
             camera_ubo_ = {};
+            lighting_ubo_ = {};
         }
     }
 
@@ -192,8 +233,10 @@ private:
     VkPhysicalDevice physical_device_{VK_NULL_HANDLE};
 
     VkDescriptorPool descpool_info_{VK_NULL_HANDLE};
-    WVkDescriptorSetLayoutInfo descset_layout_info_{};
+    VkDescriptorSetLayout descset_layout_info_{VK_NULL_HANDLE};
     std::array<VkDescriptorSet, FramesInFlight> descset_info_{};
+
     std::array<WVkUBOInfo, FramesInFlight> camera_ubo_{};
+    std::array<WVkUBOInfo, FramesInFlight> lighting_ubo_{};
 
 };
