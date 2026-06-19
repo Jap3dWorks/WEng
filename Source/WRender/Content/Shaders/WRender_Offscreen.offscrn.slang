@@ -62,6 +62,7 @@ uniform Sampler2D ws_position;
 [[vk::binding(3,0)]]
 uniform Sampler2D depth;
 
+// --
 // [[vk::binding(0,0)]] // camera
 // ConstantBuffer<LightingUBO> lighting;
 

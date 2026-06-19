@@ -8,14 +8,15 @@
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRAII/WVkPipelineResourcesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkRenderPlaneRAII.hpp"
+#include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
+#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
-#include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
 
 #include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
@@ -75,19 +76,19 @@ public:
     void LoadTexture(const WAssetId & in_id,
                      const wct::texture::WTexture & in_texture) override
     {
-        render_resources_.LoadTexture(in_id, in_texture);
+        asset_render_data_.LoadTexture(in_id, in_texture);
     }
 
     void UnloadTexture(const WAssetId & in_id) override {
-        render_resources_.UnloadTexture(in_id);
+        asset_render_data_.UnloadTexture(in_id);
     }
 
     void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) override {
-        render_resources_.LoadStaticMesh(in_id, in_mesh);
+        asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 
     void UnloadStaticMesh(const WAssetIndexId & in_id) override {
-        render_resources_.UnloadStaticMesh(in_id);
+        asset_render_data_.UnloadStaticMesh(in_id);
     }
 
     void UpdateUboCamera(
@@ -121,11 +122,6 @@ public:
 
     void RenderSize(const wct::render::WRenderSize & in_render_size) override {
         render_size_ = in_render_size;
-    }
-
-    WNODISCARD WVkGBuffersPipelinesRAII & RenderPipelinesManager()
-    {
-        return gbuffers_pipelines_;
     }
 
     WNODISCARD VkDevice Device() const noexcept
@@ -209,7 +205,8 @@ private:
         GLFWwindow * window{nullptr};
     } window_{};
 
-    WVkAssetResourcesRAII render_resources_{};
+    WVkAssetRenderDataRAII asset_render_data_{};
+    WVkRenderPlaneRAII render_plane_{};
 
     std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
     std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
@@ -222,11 +219,11 @@ private:
     WVkRenderCommandPoolRAII render_command_pool_{};
     WVkCommandBufferInfo render_command_buffer_{};
 
-    WVkPipelineResourcesRAII pipeline_resources_{};
+    WVkGlobalDescriptorsRAII<WENG_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
 
-    WVkGBuffersPipelinesRAII gbuffers_pipelines_{};
-    WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
+    WVkGBufferPipelinesRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
+    WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
     struct PipelinesTrack {

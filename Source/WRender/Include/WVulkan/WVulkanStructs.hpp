@@ -106,7 +106,6 @@ struct WVkSwapChainInfo
 
 struct WVkDescriptorSetLayoutInfo
 {
-    // WAssetId wid{0};
     std::vector<VkDescriptorSetLayoutBinding> bindings{};
     VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
 };

@@ -9,11 +9,10 @@
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WCoreTypes/WGeometryStructs.hpp"
 #include "WRender/WShader.hpp"
-#include <stdexcept>
 #include <array>
 #include <vulkan/vulkan_core.h>
 
-namespace WVkGBuffersPipelinesUtils {
+namespace wvr::gbuffer_pipelines {
     
     inline void CreateDescSetPool(
         VkDescriptorPool & out_descriptor_pool,
@@ -94,28 +93,10 @@ namespace WVkGBuffersPipelinesUtils {
         return result;
     }
 
-    /**
-     * @brief Adds the Camera and lightings UBOs (std140, set=0)
-     */
-    inline void UpdateDSL_DefaultGlobalGraphicBindings(WVkDescriptorSetLayoutInfo & out_dsl) {
-        VkDescriptorSetLayoutBinding camera_binding{};
-        camera_binding.binding=0;
-        camera_binding.descriptorCount = 1;
-        camera_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        camera_binding.pImmutableSamplers = nullptr;
-        camera_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; //TODO: vertex and fragment
-
-        // TODO lights here too
-
-        out_dsl.bindings = {
-            camera_binding
-        };
-    }
-
     inline void CreatePipeline(
         WVkRenderPipelineInfo & out_render_pipeline,
         const VkDevice & in_device,
-        const std::vector<WVkDescriptorSetLayoutInfo> & in_descriptor_set_layout_infos,
+        const std::vector<VkDescriptorSetLayout> & in_desc_layouts,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         ) {
         WVkShaderStageInfo wvertex_stage_info;
@@ -124,13 +105,6 @@ namespace WVkGBuffersPipelinesUtils {
         std::vector<VkShaderModule> shader_modules = wvk::shader::CreateShaderModules(
             wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
             );
-
-        std::vector<VkDescriptorSetLayout> desc_layouts;
-        desc_layouts.reserve(in_descriptor_set_layout_infos.size());
-    
-        for(auto & v : in_descriptor_set_layout_infos) {
-            desc_layouts.push_back(v.descset_layout);
-        }
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
             wvk::types::CreateVkPipelineVertexInputStateCreateInfo();
@@ -188,7 +162,9 @@ namespace WVkGBuffersPipelinesUtils {
             WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,    // extra 01
         };
 
-        std::array<VkPipelineColorBlendAttachmentState, WENG_VK_GBUFFERS_COUNT-1> color_blend_attachments;
+        std::array<VkPipelineColorBlendAttachmentState, WENG_VK_GBUFFERS_COUNT-1>
+            color_blend_attachments;
+        
         for(auto & cblend_attch : color_blend_attachments) {
             cblend_attch = wvk::types::CreateVkPipelineColorBlendAttachmentState();
             cblend_attch.colorWriteMask =
@@ -228,8 +204,8 @@ namespace WVkGBuffersPipelinesUtils {
 
         VkPipelineLayoutCreateInfo pipeline_layout_info =
             wvk::types::CreateVkPipelineLayoutCreateInfo();
-        pipeline_layout_info.setLayoutCount = desc_layouts.size();
-        pipeline_layout_info.pSetLayouts = desc_layouts.data();
+        pipeline_layout_info.setLayoutCount = in_desc_layouts.size();
+        pipeline_layout_info.pSetLayouts = in_desc_layouts.data();
 
         VkGraphicsPipelineCreateInfo pipeline_create_info =
             wvk::types::CreateVkGraphicsPipelineCreateInfo();

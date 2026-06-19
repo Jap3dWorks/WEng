@@ -1,3 +1,5 @@
+// TODO add global descriptor
+
 struct VSInput {
     float2 inPosition;
     float2 inTexCoord;
@@ -30,7 +32,7 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-[[vk::binding(0,0)]]  // binding 0, set 0
+[[vk::binding(0,0)]]  // binding 0, set 2
 uniform Sampler2D prev_render;
 // SamplerState
 

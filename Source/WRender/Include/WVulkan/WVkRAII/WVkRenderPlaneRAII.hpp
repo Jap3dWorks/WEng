@@ -13,29 +13,29 @@
 /**
  * Contains common render pipelines resources
  */
-class WVkPipelineResourcesRAII {
+class WVkRenderPlaneRAII {
 
 public:
 
-    WVkPipelineResourcesRAII()=default;
+    WVkRenderPlaneRAII()=default;
 
-    WVkPipelineResourcesRAII(const VkDevice & in_device,
-                         const VkPhysicalDevice & in_physical_device,
-                         const VkQueue & in_graphics_queue,
-                         const VkCommandPool & in_command_pool) {
+    WVkRenderPlaneRAII(const VkDevice & in_device,
+                             const VkPhysicalDevice & in_physical_device,
+                             const VkQueue & in_graphics_queue,
+                             const VkCommandPool & in_command_pool) {
         Initialize(in_device,
                    in_physical_device,
                    in_graphics_queue,
                    in_command_pool);
     }
 
-    ~WVkPipelineResourcesRAII() {
+    ~WVkRenderPlaneRAII() {
         Destroy();
     }
 
-    WVkPipelineResourcesRAII(const WVkPipelineResourcesRAII &)=delete;
+    WVkRenderPlaneRAII(const WVkRenderPlaneRAII &)=delete;
 
-    WVkPipelineResourcesRAII(WVkPipelineResourcesRAII && other) noexcept :
+    WVkRenderPlaneRAII(WVkRenderPlaneRAII && other) noexcept :
         device_(std::move(other.device_)),
         render_plane_(std::move(other.render_plane_)),
         sampler_(std::move(other.sampler_))
@@ -46,9 +46,9 @@ public:
             other.sampler_ = VK_NULL_HANDLE;
         }
 
-    WVkPipelineResourcesRAII & operator=(const WVkPipelineResourcesRAII &)=delete;
+    WVkRenderPlaneRAII & operator=(const WVkRenderPlaneRAII &)=delete;
 
-    WVkPipelineResourcesRAII & operator=(WVkPipelineResourcesRAII && other) noexcept {
+    WVkRenderPlaneRAII & operator=(WVkRenderPlaneRAII && other) noexcept {
         if (this != &other) {
             Destroy();
 

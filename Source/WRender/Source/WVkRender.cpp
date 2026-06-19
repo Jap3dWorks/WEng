@@ -1,5 +1,6 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
@@ -20,8 +21,8 @@
 #include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRAII/WVkGBuffersPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 // #include "WStructs/WComponentStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
@@ -160,9 +161,16 @@ void WVkRender::Initialize()
         surface_.Surface()
         );
 
+    // Create Global Descriptors
+
+    global_descriptors_ = WVkGlobalDescriptorsRAII{
+        device_.Device(),
+        device_.PhysicalDevice()
+    };
+
     WFLOG("[DEBUG] Initialize Graphics Pipelines.");
 
-    gbuffers_pipelines_ = WVkGBuffersPipelinesRAII(
+    gbuffers_pipelines_ = WVkGBufferPipelinesRAII(
         device_.Device(),
         device_.PhysicalDevice()
         );
@@ -195,7 +203,7 @@ void WVkRender::Initialize()
         swapchain_.Format()
         );
 
-    pipeline_resources_ = WVkPipelineResourcesRAII(
+    render_plane_ = WVkRenderPlaneRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
@@ -215,7 +223,7 @@ void WVkRender::Initialize()
         device_.Device()
         );
 
-    render_resources_ = WVkAssetResourcesRAII(
+    asset_render_data_ = WVkAssetRenderDataRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
@@ -235,6 +243,8 @@ void WVkRender::Destroy() {
     offscreen_pipeline_={};
     ppcss_pipelines_={};
     tonemapping_pipeline_={};
+
+    global_descriptors_={};
 
     WFLOG("Destroy Fences and Semaphores.");
 
@@ -272,7 +282,7 @@ void WVkRender::Destroy() {
 
     swap_chain_pipeline_={};
 
-    pipeline_resources_ = {}; // .Destroy();
+    render_plane_ = {}; // .Destroy();
 
     WFLOG("Destroy Render Command Pool.");
 
@@ -282,7 +292,7 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy Render Resources.");
 
-    render_resources_ = {};
+    asset_render_data_ = {};
 
     swapchain_ = WVkSwapchainRAII{};
     device_ = WVkDeviceRAII{};
@@ -427,7 +437,8 @@ void WVkRender::CreateRenderPipeline(
     case wct::render::EPipelineType::Graphics:
         gbuffers_pipelines_.CreatePipeline(
             render_pipeline->WID(),
-            render_pipeline->RenderPipeline()
+            render_pipeline->RenderPipeline(),
+            global_descriptors_.DescriptorSetLayout()
             );
         break;
         
@@ -498,7 +509,7 @@ void WVkRender::CreatePipelineBinding(
     textures.resize(in_parameters.texture_params.size());
 
     for(std::uint32_t i=0; i < in_parameters.texture_params.size(); i++) {
-        const auto & tx = render_resources_.TextureInfo(
+        const auto & tx = asset_render_data_.TextureInfo(
             in_parameters.texture_params[i].value
             );
         
@@ -585,13 +596,14 @@ void WVkRender::ClearPipelines() {
 // ---------
 
 void WVkRender::UnloadAllResources() {
-    render_resources_.Clear();
+    asset_render_data_.Clear();
 }
 
 void WVkRender::UpdateUboCamera(
     const wct::render::WCameraUBO & camera_ubo
     ) {
-    gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
+    global_descriptors_.UpdateDescriptorSet(
+    // gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
         frame_index_
         );
@@ -705,7 +717,7 @@ void WVkRender::RecreateSwapChain() {
         device_.Device()
         );
 
-    // Recreate swap chain and other reder targets
+    // Recreate swap chain and other render targets
 
     swapchain_ = WVkSwapchainRAII(
         device_.Device(),
@@ -818,7 +830,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
                 );
 
             auto& mesh_info =
-                render_resources_.StaticMeshInfo(
+                asset_render_data_.StaticMeshInfo(
                     binding.mesh_asset_id
                     );
 
@@ -842,7 +854,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
             std::array<VkDescriptorSet, 2> descsets =
                 {
-                    gbuffers_pipelines_.GlobalGraphicsDescriptorSet(frame_index_),
+                    global_descriptors_.DescriptorSet(frame_index_),
                     descriptorset
                 };
 
@@ -915,7 +927,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         device_.Device(),
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
-        pipeline_resources_.Sampler(),
+        render_plane_.Sampler(),
         gbuffers_rtargets_[in_frame_index].albedo.view,
         gbuffers_rtargets_[in_frame_index].normal.view,
         gbuffers_rtargets_[in_frame_index].ws_position.view,
@@ -926,7 +938,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // Draw Commands
-    const WVkMeshInfo & rplane = pipeline_resources_.RenderPlane();
+    const WVkMeshInfo & rplane = render_plane_.RenderPlane();
     
     VkBuffer vertex_buffers[] = {rplane.vertex_buffer};
     VkDeviceSize offsets[] = {0};
@@ -1041,7 +1053,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             ppcss_pipelines_.GlobalDescriptorPool(in_frame_index),
             ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
             input_view,
-            pipeline_resources_.Sampler()
+            render_plane_.Sampler()
             );
 
         VkDescriptorSet pp_descriptor = wvk::render::CreateRenderDescriptor(
@@ -1053,7 +1065,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             binding.textures
             );
 
-        const WVkMeshInfo & render_plane = pipeline_resources_.RenderPlane();
+        const WVkMeshInfo & render_plane = render_plane_.RenderPlane();
 
         wvk::render::RndCmd_PostprocessDrawCommands(
             device_.Device(), in_command_buffer,
@@ -1127,11 +1139,11 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
             device_.Device(),
             tonemapping_pipeline_.DescriptorPool(in_frame_index),
             tonemapping_pipeline_.DescriptorSetLayout(),
-            pipeline_resources_.Sampler(),
+            render_plane_.Sampler(),
             swap_chain_input_imgview_ref
             );
 
-    const WVkMeshInfo & rplane = pipeline_resources_. RenderPlane();
+    const WVkMeshInfo & rplane = render_plane_. RenderPlane();
     VkDeviceSize offsets = 0;
 
     wvk::render::TonemappingBindings(
@@ -1209,10 +1221,10 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
         swap_chain_pipeline_.DescriptorPool(in_frame_index),
         dslay,
         swap_chain_input_imgview_ref,
-        pipeline_resources_.Sampler()
+        render_plane_.Sampler()
         );
 
-    auto & render_plane = pipeline_resources_.RenderPlane();
+    auto & render_plane = render_plane_.RenderPlane();
     VkDeviceSize offsets=0;
 
     vkCmdBindVertexBuffers(in_command_buffer,

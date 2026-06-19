@@ -27,6 +27,9 @@ struct SUniformBufferObject {
 [[vk::binding(0, 1)]] // binding, set
 ConstantBuffer<SUniformBufferObject> ubo;
 
+[[vk::binding(1, 1)]]
+ConstantBuffer<Sampler2D> texture;
+
 struct VSInput {
     float3 position;
     float2 tex_coords;
@@ -55,9 +58,6 @@ VSOutput vsMain(VSInput input) {
 
     return output;
 }
-
-[[vk::binding(1, 1)]]
-ConstantBuffer<Sampler2D> texture;
 
 // Output structure
 struct FSOutput {

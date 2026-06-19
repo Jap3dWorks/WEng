@@ -1,15 +1,15 @@
-#include "WVulkan/WVkRAII/WVkAssetResourcesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 
-WVkAssetResourcesRAII::WVkAssetResourcesRAII()=default;
+WVkAssetRenderDataRAII::WVkAssetRenderDataRAII()=default;
 
-WVkAssetResourcesRAII::~WVkAssetResourcesRAII() {
+WVkAssetRenderDataRAII::~WVkAssetRenderDataRAII() {
     Destroy();
 }
 
-WVkAssetResourcesRAII::WVkAssetResourcesRAII(
+WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkQueue & in_graphics_queue,
@@ -23,7 +23,7 @@ WVkAssetResourcesRAII::WVkAssetResourcesRAII(
     static_mesh_collection_()
 {}
 
-WVkAssetResourcesRAII::WVkAssetResourcesRAII(WVkAssetResourcesRAII && other) :
+WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(WVkAssetRenderDataRAII && other) :
     device_(std::move(other.device_)),
     physical_device_(std::move(other.physical_device_)),
     graphics_queue_(std::move(other.graphics_queue_)),
@@ -37,7 +37,7 @@ WVkAssetResourcesRAII::WVkAssetResourcesRAII(WVkAssetResourcesRAII && other) :
     other.command_pool_ = VK_NULL_HANDLE;
 }
 
-WVkAssetResourcesRAII & WVkAssetResourcesRAII::operator=(WVkAssetResourcesRAII && other) {
+WVkAssetRenderDataRAII & WVkAssetRenderDataRAII::operator=(WVkAssetRenderDataRAII && other) {
     if (this != &other) {
         Destroy();
 
@@ -57,7 +57,7 @@ WVkAssetResourcesRAII & WVkAssetResourcesRAII::operator=(WVkAssetResourcesRAII &
     return *this;
 }
 
-void WVkAssetResourcesRAII::UnloadTexture(const WAssetId & in_id) {
+void WVkAssetRenderDataRAII::UnloadTexture(const WAssetId & in_id) {
     texture_collection_.Remove(
         in_id,
         [this](WVkTextureInfo & in_texture_info) -> void {
@@ -69,7 +69,7 @@ void WVkAssetResourcesRAII::UnloadTexture(const WAssetId & in_id) {
         );
 }
 
-void WVkAssetResourcesRAII::UnloadStaticMesh(const WAssetIndexId & in_id) {
+void WVkAssetRenderDataRAII::UnloadStaticMesh(const WAssetIndexId & in_id) {
 
     static_mesh_collection_.Remove(
         in_id,
@@ -81,15 +81,15 @@ void WVkAssetResourcesRAII::UnloadStaticMesh(const WAssetIndexId & in_id) {
         });    
 }
 
-const WVkTextureInfo & WVkAssetResourcesRAII::TextureInfo(const WAssetId & in_id) const {
+const WVkTextureInfo & WVkAssetRenderDataRAII::TextureInfo(const WAssetId & in_id) const {
     return texture_collection_.Get(in_id);
 }
 
-const WVkMeshInfo & WVkAssetResourcesRAII::StaticMeshInfo(const WAssetIndexId & in_id) const {
+const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const WAssetIndexId & in_id) const {
     return static_mesh_collection_.Get(in_id);
 }
 
-void WVkAssetResourcesRAII::Clear() {
+void WVkAssetRenderDataRAII::Clear() {
     if (device_ != VK_NULL_HANDLE) {
         texture_collection_.Clear(
             [this](WVkTextureInfo & in_texture_info) -> void {
@@ -110,7 +110,7 @@ void WVkAssetResourcesRAII::Clear() {
     }
 }
 
-void WVkAssetResourcesRAII::Destroy() {
+void WVkAssetRenderDataRAII::Destroy() {
     if (device_ != VK_NULL_HANDLE) {
         Clear();
 

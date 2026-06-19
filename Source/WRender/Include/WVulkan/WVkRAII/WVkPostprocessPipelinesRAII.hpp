@@ -7,6 +7,8 @@
 #include "WVkPipelinesBase.hpp"
 #include <vulkan/vulkan_core.h>
 
+// TODO template with max frames in flight as param
+
 class WVkPostprocessPipelinesRAII :
     public WVkPipelinesBase<WAssetId,
                             WEntityComponentId,

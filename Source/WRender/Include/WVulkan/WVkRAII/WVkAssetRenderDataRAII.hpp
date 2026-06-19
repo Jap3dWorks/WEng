@@ -13,35 +13,34 @@
 #include "WVulkan/WVulkanStructs.hpp"
 
 /**
- * @brief Manage the lifetime of asset render resources like geometries or textures.
+ * @brief Manage the lifetime of asset render data like geometries and textures.
  */
-class WRENDER_API WVkAssetResourcesRAII {
+class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
 using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId>;
-
-using WVkAssetDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId>;
+using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId>;
 
 public:
 
-    WVkAssetResourcesRAII();
+    WVkAssetRenderDataRAII();
 
-    WVkAssetResourcesRAII(
+    WVkAssetRenderDataRAII(
         const VkDevice & in_device_info,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,
         const VkCommandPool & in_command_pool_info
         );
 
-    virtual ~WVkAssetResourcesRAII();
+    virtual ~WVkAssetRenderDataRAII();
 
-    WVkAssetResourcesRAII(const WVkAssetResourcesRAII & other) = delete;
+    WVkAssetRenderDataRAII(const WVkAssetRenderDataRAII & other) = delete;
 
-    WVkAssetResourcesRAII(WVkAssetResourcesRAII && other);
+    WVkAssetRenderDataRAII(WVkAssetRenderDataRAII && other);
 
-    WVkAssetResourcesRAII & operator=(const WVkAssetResourcesRAII & other) = delete;
+    WVkAssetRenderDataRAII & operator=(const WVkAssetRenderDataRAII & other) = delete;
 
-    WVkAssetResourcesRAII & operator=(WVkAssetResourcesRAII && other);
+    WVkAssetRenderDataRAII & operator=(WVkAssetRenderDataRAII && other);
 
     // Texture
 
@@ -109,7 +108,7 @@ private:
 
     WVkTextureDb texture_collection_;
              
-    WVkAssetDb static_mesh_collection_;
+    WVkMeshDb static_mesh_collection_;
 
     std::unordered_map<WAssetId, std::vector<WSubIdxId>> mesh_indexes_;
 
