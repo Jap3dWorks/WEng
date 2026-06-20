@@ -121,26 +121,30 @@ namespace wrd::lighting {
     };
 
     /**
-     * 
+     * Controller for the memory structure of the lighting UBO.
+     * This class ensures that light data is dense and located in the initial
+     * positions of each light type array in WLightingUBO.
+     * This class owns the WLightingUBO.
      */
-    class WLightingUBOController {
+    class WDenseLightingUBO {
     public:
 
-        WLightingUBOController() :
+        WDenseLightingUBO() :
             lighting_ubo_(),
             pl_controller_(lighting_ubo_.point_lights),
             dl_controller_(lighting_ubo_.directional_lights) {}
 
-        WLightingUBOController(const WLightingUBOController&) = default;
-        WLightingUBOController(WLightingUBOController&&) = default;
-        WLightingUBOController& operator=(const WLightingUBOController&) = default;
-        WLightingUBOController& operator=(WLightingUBOController&&) = default;
-        virtual ~WLightingUBOController() = default;
+        WDenseLightingUBO(const WDenseLightingUBO&) = default;
+        WDenseLightingUBO(WDenseLightingUBO&&) = default;
+        WDenseLightingUBO& operator=(const WDenseLightingUBO&) = default;
+        WDenseLightingUBO& operator=(WDenseLightingUBO&&) = default;
+        virtual ~WDenseLightingUBO() = default;
 
         void UpdatePointLight(WEntityComponentId in_component_id,
                               const wct::render::WPointLight & in_light) {
             pl_controller_.Insert(in_component_id, in_light);
             lighting_ubo_.point_lights_count = pl_controller_.Size();
+            // TODO LOG if max lights achieved
         }
 
         void RemovePointLight(WEntityComponentId in_component_id) {
@@ -152,6 +156,7 @@ namespace wrd::lighting {
                                     const wct::render::WDirectionalLight & in_light) {
             dl_controller_.Insert(in_component_id, in_light);
             lighting_ubo_.directional_lights_count = dl_controller_.Size();
+            // TODO LOG if max lights achieved            
         }
 
         void RemoveDirectionalLight(WEntityComponentId in_component_id) {
