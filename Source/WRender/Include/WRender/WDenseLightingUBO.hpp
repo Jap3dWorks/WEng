@@ -51,7 +51,7 @@ namespace wrd::lighting {
 
     private:
 
-        std::span<T, Size> mem_{nullptr};
+        std::span<T, Size> mem_;
 
     };
 
@@ -186,5 +186,4 @@ namespace wrd::lighting {
             wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
             StaticSpanAllocator> dl_controller_;
     };
-
 }
