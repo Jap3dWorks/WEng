@@ -1,45 +1,44 @@
 #pragma once
 
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WCore/TSparseSet.hpp"
 
-#include <unordered_map>
+// #include <unordered_map>
 #include <cstdint>
 #include <span>
 
 namespace wrd::lighting {
 
-
-    template<std::uint32_t N, typename T>
+    template<typename T, std::uint32_t Size=0>
     class StaticSpanAllocator {
+    public:
+
+        using value_type = T;
+        using pointer = T*;
+        using size_type = std::uint32_t;
 
     public:
 
-        StaticSpanAllocator() = default;
+        // StaticSpanAllocator() = default;
         StaticSpanAllocator(const StaticSpanAllocator&) = default;
         StaticSpanAllocator(StaticSpanAllocator&&) = default;
         StaticSpanAllocator& operator=(const StaticSpanAllocator&) = default;
         StaticSpanAllocator& operator=(StaticSpanAllocator&&) = default;
         virtual ~StaticSpanAllocator() = default;
 
-        StaticSpanAllocator(std::span<T,N> value) :
+        StaticSpanAllocator(std::span<T,Size> value) :
             mem_(value) {}
-
-        using pointer = T*;
-        using value_type = T;
-        using size_type = std::uint32_t;
 
     public:
 
-        pointer allocate(size_type n) {
-            return mem_.data();
+        WNODISCARD constexpr pointer allocate(size_type n) noexcept {
+            return mem_.empty() ? nullptr : mem_.data();
         }
 
-        void deallocate(pointer p, size_type n) {
-            
-        }
+        void deallocate(pointer p, size_type n) noexcept {}
 
-        constexpr size_type max_size() const {
-            return N;
+        size_type max_size() const {
+            return std::min(mem_.size, Size);
         }
 
         bool operator==(const StaticSpanAllocator& other) const {
@@ -52,127 +51,135 @@ namespace wrd::lighting {
 
     private:
 
-        std::span<T, N> mem_;
+        std::span<T, Size> mem_{nullptr};
 
     };
 
-    // template<std::uint32_t N, typename T>
-    // class UboLightTrack {
-    // public:
-        
-    //     UboLightTrack(std::span<T> in_data) {
-    //         light_map.reserve(N), light_data(in_data);
-    //     }
+    template<typename T,
+             std::uint32_t MAX,
+             template <typename, std::uint32_t> typename TStaticAlloc=StaticSpanAllocator>
+    struct DenseStaticMemController{
+    private:
 
-    //     UboLightTrack(const UboLightTrack&) = default;
-    //     UboLightTrack(UboLightTrack&&) = default;
-    //     UboLightTrack& operator=(const UboLightTrack&) = default;
-    //     UboLightTrack& operator=(UboLightTrack&&) = default;
-    //     virtual ~UboLightTrack() = default;
-
-    //     void PushBack(WEntityComponentId in_id, T data) {
-    //         light_data[count_]=data;
-
-    //         light_map[in_id]=count_;
-    //         light_stack[count_]=in_id;
-
-    //         count_++;
-    //     }
-
-    //     std::tuple<WEntityComponentId, T> Back() const {
-    //         WEntityComponentId cmpnt = light_stack[count_-1];
-    //         std::uint32_t indx = light_map.at(light_stack[count_-1]);
+        /**
+         * This class is required to fix an std library error with alloc_traits.h
+         * when allocator has more than 1 templated parameter.
+         */
+        template<typename D>
+        class Alloc : public TStaticAlloc<D, MAX> {
+        public:
+            using TStaticAlloc<D, MAX>::TStaticAlloc;
+        };
             
-    //         return {cmpnt, light_data[indx]};
-    //     }
+    public:
 
-    //     void Erase(WEntityComponentId in_id) {
-    //         WEntityComponentId lstcmp = light_stack[count_-1];
-    //         std::uint32_t lstindx = light_map[lstcmp];
+        using IndexArray = std::array<std::size_t, MAX>;
 
-    //         std::uint32_t rmvindx = light_map[in_id];
-    //         light_map.erase(in_id);
+        using LightSet = TSparseSet<T,
+                                    Alloc<T>,
+                                    Alloc<std::size_t>>;
 
-    //         light_data[rmvindx] = light_data[lstindx];
-    //         light_map[lstcmp] = rmvindx;
+    public:
 
-    //         light_stack[rmvindx] = lstcmp;
+        DenseStaticMemController() = default;
+        DenseStaticMemController(const DenseStaticMemController&) = default;
+        DenseStaticMemController(DenseStaticMemController&&) = default;
+        DenseStaticMemController& operator=(const DenseStaticMemController&) = default;
+        DenseStaticMemController& operator=(DenseStaticMemController&&) = default;
+        virtual ~DenseStaticMemController() = default;
 
-    //         PopBack();
-    //     }
+        DenseStaticMemController(std::array<T,MAX> & light_data) :
+            index_array_(),
+            light_set_(
+                Alloc<T>(light_data),
+                Alloc<std::size_t>(index_array_)
+                ) {}
 
-    //     void PopBack() {
-    //         light_map.erase(light_stack[count_-1]);
-    //         count_--;
-    //     }
 
-    //     std::uint32_t Get(WEntityComponentId in_id) const {
-    //         return light_map.at(in_id);
-    //     }
+        void Insert(std::size_t in_id, const T & in_value) {
+            light_set_.Insert(in_id, in_value);
+        }
 
-    //     std::uint32_t Count() const {
-    //         return count_;
-    //     }
+        void Remove(std::size_t in_id) {
+            light_set_.Remove(in_id);
+        }
 
-    // private:
-        
-    //     std::unordered_map<WEntityComponentId, std::uint32_t> light_map{};
-    //     std::array<WEntityComponentId, N> light_stack{};
-    //     std::span<T> light_data;
+        void Update(std::size_t in_id,
+                    wct::render::WPointLight point_light) {
+            light_set_.Insert(in_id, point_light);
+        }
 
-    //     std::uint32_t count_{0};
-    // };
+        std::uint32_t Size() const {
+            return light_set_.Count();
+        }
 
+    private:
+
+        LightSet light_set_{};
+        IndexArray index_array_{};
+
+    };
+
+    /**
+     * 
+     */
     class WLightingUBOController {
     public:
 
-        WLightingUBOController() = default;
+        WLightingUBOController() :
+            lighting_ubo_(),
+            pl_controller_(lighting_ubo_.point_lights),
+            dl_controller_(lighting_ubo_.directional_lights) {}
+
         WLightingUBOController(const WLightingUBOController&) = default;
         WLightingUBOController(WLightingUBOController&&) = default;
         WLightingUBOController& operator=(const WLightingUBOController&) = default;
         WLightingUBOController& operator=(WLightingUBOController&&) = default;
         virtual ~WLightingUBOController() = default;
 
-        void AddPointLight(WEntityComponentId in_component_id,
-                           wct::render::WPointLight point_light) {
-            std::uint32_t count = point_track.Count();
-
-            lighting_ubo_.point_lights[count]= point_light;
-
-            point_track.PushBack(in_component_id);
-
-            lighting_ubo_.point_lights_count = point_track.Count();
+        void UpdatePointLight(WEntityComponentId in_component_id,
+                              const wct::render::WPointLight & in_light) {
+            pl_controller_.Insert(in_component_id, in_light);
+            lighting_ubo_.point_lights_count = pl_controller_.Size();
         }
 
         void RemovePointLight(WEntityComponentId in_component_id) {
-            std::uint32_t rmv_indx = point_light_map[in_component_id];
-
-            lighting_ubo_.point_lights[rmv_indx] =
-                lighting_ubo_.point_lights[lighting_ubo_.point_lights_count - 1];
-
-            point_light_map[point_light_stack.back()] = rmv_indx;
-
-            point_light_stack[rmv_indx] = point_light_stack.back();
-            point_light_stack.pop_back();
-
-            std::array<WEntityComponentId, 32> stack;
-
+            pl_controller_.Remove(in_component_id);
+            lighting_ubo_.point_lights_count = pl_controller_.Size();
         }
 
-        void UpdatePointLight(WEntityComponentId in_component_id,
-                              wct::render::WPointLight point_light) {
-            std::uint32_t indx = point_light_map[in_component_id];
-            lighting_ubo_.point_lights[indx] = point_light;
+        void UpdateDirectionalLight(WEntityComponentId in_component_id,
+                                    const wct::render::WDirectionalLight & in_light) {
+            dl_controller_.Insert(in_component_id, in_light);
+            lighting_ubo_.directional_lights_count = dl_controller_.Size();
+        }
+
+        void RemoveDirectionalLight(WEntityComponentId in_component_id) {
+            dl_controller_.Remove(in_component_id);
+            lighting_ubo_.directional_lights_count = dl_controller_.Size();
+        }
+
+        void UpdateAmbientLight(const wct::render::WAmbientLight & in_light) {
+            lighting_ubo_.ambient_light = in_light;
+        }
+
+        const wct::render::WLightingUBO & LightingUbo() const {
+            return lighting_ubo_;
         }
 
     private:
 
         wct::render::WLightingUBO lighting_ubo_{};
 
-        UboLightTrack<wct::render::WLightingUBO::MAX_POINT_LIGHTS> point_track{};
+        DenseStaticMemController<
+            wct::render::WPointLight,
+            wct::render::WLightingUBO::MAX_POINT_LIGHTS,
+            StaticSpanAllocator> pl_controller_;
 
-        // std::unordered_map<WEntityComponentId, std::uint32_t> point_light_map{};
-        // std::vector<WEntityComponentId> point_light_stack{};
+        DenseStaticMemController<
+            wct::render::WDirectionalLight,
+            wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
+            StaticSpanAllocator> dl_controller_;
     };
 
 }

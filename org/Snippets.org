@@ -1,18 +1,10 @@
 #+title: Code Snippets
 
 
+* Babel Template
+
 #+HEADER: :flags --std=gnu++23
-#+begin_src C++ :main no :results output
-#include <iostream>
-
-#ifndef WCLASS
-#define WCLASS(...)
-#endif
-
-#ifndef WCLASS
-#define WCLASS(...)
-#endif
-
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
 
 int main() {
     std::cout << "HI\n";
@@ -23,3 +15,31 @@ int main() {
 
 #+RESULTS:
 : HI
+
+* Inherit Using sentences
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
+
+struct A {
+    using Natural = std::uint32_t;
+};
+
+struct B : public A {
+    using A::A;
+};
+
+int main() {
+
+    B::Natural n = 3;
+
+    std::cout << "Natural value: " << n << std::endl;
+
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: Natural value: 3
+

@@ -19,6 +19,8 @@
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
 
+#include "WRender/WLightingUBOController.hpp"
+
 #include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
 #include "WVulkan/WVkRAII/WVkInstanceRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
@@ -198,6 +200,8 @@ private:
         const std::uint32_t & in_frame_index,
         const std::uint32_t & in_image_index
         );
+
+    wrd::lighting::WLightingUBOController lighting_controller_{};
 
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};

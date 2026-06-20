@@ -204,12 +204,12 @@ namespace wct::render {
         static constexpr std::uint32_t MAX_POINT_LIGHTS{64};
         static constexpr std::uint32_t MAX_DIRECTIONAL_LIGHTS{16};
 
-        WPointLight point_lights[MAX_POINT_LIGHTS];
-        WDirectionalLight directional_lights[MAX_DIRECTIONAL_LIGHTS];
+        std::array<WPointLight, MAX_POINT_LIGHTS> point_lights;
+        std::array<WDirectionalLight, MAX_DIRECTIONAL_LIGHTS> directional_lights;
         WAmbientLight ambient_light{};
 
         std::uint32_t point_lights_count{0};
-        std::uint32_t directionsl_lights_count{0};
+        std::uint32_t directional_lights_count{0};
     };
 
 }

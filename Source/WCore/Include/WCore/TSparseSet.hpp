@@ -10,7 +10,9 @@
 #include <vector>
 #include <cassert>
 
-template<typename T, typename Allocator=std::allocator<T>>
+template<typename T,
+         typename ValueAllocator=std::allocator<T>,
+         typename IndexAllocator=std::allocator<std::size_t>>
 class TSparseSet {
 
 public:
@@ -24,9 +26,8 @@ public:
                                          ValueFn,
                                          IncrFn>;
 
-    using Iterator = std::vector<T, Allocator>::iterator;
-
-    using ConstIterator = std::vector<T,Allocator>::const_iterator;
+    using Iterator = std::vector<T, ValueAllocator>::iterator;
+    using ConstIterator = std::vector<T,ValueAllocator>::const_iterator;
 
 public:
 
@@ -34,29 +35,36 @@ public:
 
     virtual ~TSparseSet() = default;
 
-    constexpr TSparseSet(const Allocator & in_allocator) :
-        index_pos_(),
-        index_stack_(),
-        compact_(in_allocator)
+    constexpr TSparseSet(const ValueAllocator & in_value_allocator) :
+        index_pos_map_(),
+        index_dense_(),
+        value_dense_(in_value_allocator)
+        {}
+
+    constexpr TSparseSet(const ValueAllocator & in_value_allocator,
+                         const IndexAllocator & in_index_allocator) :
+        index_pos_map_(),
+        index_dense_(in_index_allocator),
+        value_dense_(in_value_allocator)
         {}
 
     constexpr TSparseSet(const TSparseSet & other) :
-        index_pos_(other.index_pos_),
-        index_stack_(other.index_stack_),
-        compact_(other.compact_)
+        index_pos_map_(other.index_pos_map_),
+        index_dense_(other.index_dense_),
+        value_dense_(other.value_dense_)
         {}
     
     TSparseSet(TSparseSet && other) noexcept :
-        index_pos_(std::move(other.index_pos_)),
-        index_stack_(std::move(other.index_stack_)),
-        compact_(std::move(other.compact_))
+        index_pos_map_(std::move(other.index_pos_map_)),
+        index_dense_(std::move(other.index_dense_)),
+        value_dense_(std::move(other.value_dense_))
         {}
 
     constexpr TSparseSet & operator=(const TSparseSet & other) {
         if (this != &other) {
-            index_pos_ = other.index_pos_;
-            index_stack_ = other.index_stack_;
-            compact_ = other.compact_;
+            index_pos_map_ = other.index_pos_map_;
+            index_dense_ = other.index_dense_;
+            value_dense_ = other.value_dense_;
         }
 
         return *this;
@@ -64,9 +72,9 @@ public:
     
     constexpr TSparseSet & operator=(TSparseSet && other) noexcept {
         if (this != &other) {
-            index_pos_ = std::move(other.index_pos_);
-            index_stack_ = std::move(other.index_stack_);
-            compact_ = std::move(other.compact_);
+            index_pos_map_ = std::move(other.index_pos_map_);
+            index_dense_ = std::move(other.index_dense_);
+            value_dense_ = std::move(other.value_dense_);
         }
 
         return *this;
@@ -75,101 +83,101 @@ public:
     template<std::convertible_to<T> D>
     void Insert(const size_t & in_index, D && in_value) {
         if (Contains(in_index)) {
-            size_t pos = index_pos_[in_index];
-            compact_[pos]=std::forward<D>(in_value);
+            size_t pos = index_pos_map_[in_index];
+            value_dense_[pos]=std::forward<D>(in_value);
         }
         else {
-            size_t pos = compact_.size();
-            compact_.push_back(std::forward<D>(in_value));
+            size_t pos = value_dense_.size();
+            value_dense_.push_back(std::forward<D>(in_value));
 
-            index_pos_[in_index] = pos;
+            index_pos_map_[in_index] = pos;
 
-            index_stack_.push_back(in_index);
+            index_dense_.push_back(in_index);
         }
     }
 
     T & Get(size_t in_index) {
         assert(index_pos_.contains(in_index));
-        return compact_[index_pos_[in_index]];
+        return value_dense_[index_pos_map_[in_index]];
     }
 
     const T & Get(size_t in_index) const {
         assert(index_pos_.contains(in_index));
-        return compact_[index_pos_.at(in_index)];
+        return value_dense_[index_pos_map_.at(in_index)];
     }
 
     std::size_t IndexInPos(std::size_t in_pos) const {
-        return index_stack_[in_pos];
+        return index_dense_[in_pos];
     }
 
     constexpr size_t Count() const noexcept {
-        return compact_.size();
+        return value_dense_.size();
     }
 
     void Remove(size_t in_index) {
-        size_t pos = index_pos_[in_index];
-        size_t last_index = index_stack_.back();
+        size_t pos = index_pos_map_[in_index];
+        size_t last_index = index_dense_.back();
         
-        compact_[pos] = std::move(compact_.back());
+        value_dense_[pos] = std::move(value_dense_.back());
 
-        index_pos_[last_index] = pos;
+        index_pos_map_[last_index] = pos;
 
-        index_pos_.erase(in_index);
+        index_pos_map_.erase(in_index);
 
-        compact_.pop_back();
-        index_stack_.pop_back();
+        value_dense_.pop_back();
+        index_dense_.pop_back();
     }
 
     void Clear() noexcept {
-        index_pos_.clear();
-        compact_.clear();
-        index_stack_.clear();
+        index_pos_map_.clear();
+        value_dense_.clear();
+        index_dense_.clear();
     }
 
     constexpr void Reserve(size_t in_size) {
-        compact_.reserve(in_size);
+        value_dense_.reserve(in_size);
     }
 
     WNODISCARD bool Contains(size_t in_index) const {
-        return index_pos_.contains(in_index);
+        return index_pos_map_.contains(in_index);
     }
 
     constexpr Iterator begin() noexcept {
-        return compact_.begin();
+        return value_dense_.begin();
     }
 
     constexpr Iterator end() noexcept {
-        return compact_.end();
+        return value_dense_.end();
     }
 
     constexpr ConstIterator begin() const noexcept {
-        return compact_.begin();
+        return value_dense_.begin();
     }
 
     constexpr ConstIterator end() const noexcept {
-        return compact_.end();
+        return value_dense_.end();
     }
 
     constexpr ConstIterator cbegin() const noexcept {
-        return compact_.cbegin();
+        return value_dense_.cbegin();
     }
 
     constexpr ConstIterator cend() const noexcept {
-        return compact_.cend();
+        return value_dense_.cend();
     }
 
     template<CCallable<void, std::size_t, T&> TFn>
     void ForEach(TFn && in_predicate) {
         std::size_t i=0;
         for(auto & v: *this) {
-            std::forward<TFn>(in_predicate)(index_stack_[i++], v);
+            std::forward<TFn>(in_predicate)(index_dense_[i++], v);
         }
     }
 
     auto IterIndexes() const {
         return ConstIndexIterator(
-            index_pos_.cbegin(),
-            index_pos_.cend(),
+            index_pos_map_.cbegin(),
+            index_pos_map_.cend(),
             [] (auto & _it, const std::int32_t & _i) -> const size_t & {
                 return (*_it).first;
             },
@@ -181,16 +189,14 @@ public:
     }
 
     std::size_t IndexAt(std::size_t in_pos) const {
-        return index_stack_[in_pos];
+        return index_dense_[in_pos];
     }
 
 private:
 
-    std::unordered_map<size_t, size_t> index_pos_;
-
-    std::vector<size_t > index_stack_;
-
-    std::vector<T, Allocator> compact_;
+    std::unordered_map<std::size_t, std::size_t> index_pos_map_;
+    std::vector<std::size_t, IndexAllocator> index_dense_;
+    std::vector<T, ValueAllocator> value_dense_;
 
 };
 
