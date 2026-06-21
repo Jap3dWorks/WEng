@@ -1,16 +1,23 @@
-struct VSInput {
-    float2 inPosition;
-    float2 inTexCoord;
+// Camera stuffs
+struct Camera {
+  float4x4 proj;
+  float4x4 view;
+  float px;
+  float py;
+  float pz;
+  float pitch;
+  float yaw;
+  float roll;
+  float sx;
+  float sy;
+  float sz;
+  float angle_of_view;
+  float near_clipping;
+  float far_clipping;
 };
 
-struct VSOutput
-{
-    float4 pos : SV_Position;
-    float2 fragTexCoord;
-};
-
-// TODO lighting data
-// ------------------
+// Lighting Types
+// --------------
 
 struct PointLight {
     float4 color;
@@ -30,28 +37,37 @@ struct AmbientLight {
     float intensity;
 };
 
-// TODO lighting UBOs
-// ------------------
+// WLightingUBO
+// ------------
 
 struct LightingUBO {
-    PointLight point_lights[128];
-    DirectionalLight directional_lights[32];
+    PointLight point_lights[64];
+    DirectionalLight directional_lights[16];
     AmbientLight ambient_light;
 
     uint point_lights_count;
     uint directional_lights_count;
 };
 
-// bindings
-// --------
+// Global bindings
+// ---------------
 
-[[vk::binding(0,0)]]            // binding 0, set 0
+[[vk::binding(0, 0)]] // binding, set
+ConstantBuffer<Camera> camera;
+
+[[vk::binding(1,0)]]
+ConstantBuffer<LightingUBO> lighting;
+
+
+// --
+
+[[vk::binding(0,1)]]            // binding 0, set 1
 uniform Sampler2D albedo;
 
-[[vk::binding(1,0)]]            // binding 1, set 0
+[[vk::binding(1,1)]]            // binding 1, set 1
 uniform Sampler2D normal;
 
-[[vk::binding(2,0)]]            // binfing 2, set 0
+[[vk::binding(2,1)]]            // binfing 2, set 1
 uniform Sampler2D ws_position;
 
 // TODO input render textures
@@ -59,15 +75,19 @@ uniform Sampler2D ws_position;
 //  emission
 //  extras 1 and 2
 
-[[vk::binding(3,0)]]
+[[vk::binding(3,1)]]
 uniform Sampler2D depth;
 
-// --
-// [[vk::binding(0,0)]] // camera
-// ConstantBuffer<LightingUBO> lighting;
+struct VSInput {
+    float2 inPosition;
+    float2 inTexCoord;
+};
 
-// [[vk::binding(1,0)]] // lighting
-// --
+struct VSOutput
+{
+    float4 pos : SV_Position;
+    float2 fragTexCoord;
+};
 
 // main functions
 // --------------

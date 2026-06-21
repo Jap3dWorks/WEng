@@ -72,7 +72,7 @@ public:
         return descset_info_[in_frame_index];
     }
 
-    void UpdateDescriptorSet(
+    void UpdateCameraUBO(
         const wct::render::WCameraUBO & in_camera_ubo,
         std::uint32_t in_frame_index
         ) {
@@ -93,7 +93,7 @@ public:
             );
     }
 
-    void UpdateDescriptorSet(
+    void UpdateLightingUBO(
         const wct::render::WLightingUBO & in_lighting_ubo,
         std::uint32_t in_frame_index
         ) {
@@ -112,6 +112,19 @@ public:
             device_
             );
     }
+
+    void StaticUpdateLightingUBO(
+        const wct::render::WLightingUBO & in_lighting_ubo
+        ) {
+        for(std::uint8_t i=0; i<FramesInFlight; i++) {
+            UpdateLightingUBO(
+                in_lighting_ubo,
+                i
+                );
+        }
+    }
+
+    // TODO UpdateDescriptorSet using pointers and offsets.
 
 public:
 

@@ -127,16 +127,6 @@ public:
 
     // Lighting
     // --------
-    /**
-     * @brief Initialize point lights data.
-     *        If point lights data is already initializated removes it and
-     *        reinitializes again.
-     *        This method is more efficient to update all scene point lights in one time.
-     */
-    virtual void InitializePointLights(
-        std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_point_lights_structs
-        )=0;
 
     /**
      * @brief Updates each point light inside in_ids list.
@@ -149,13 +139,21 @@ public:
         )=0;
 
     /**
-     * @brief Initialize directional lights data.
-     *        Same functionality than InitializePointLights.
+     * @brief Initialize lighting data.
+     *        Previous lighting data is removed.
      */
-    virtual void InitializaDirectionalLights(
-        std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_directional_lights_structs
+    virtual void InitializeLights(
+        std::span<WEntityComponentId> in_pl_ids,
+        std::span<wct::render::WPointLight> in_point_lights,
+        std::span<WEntityComponentId> in_dl_ids,
+        std::span<wct::render::WDirectionalLight> in_directional_lights,
+        const wct::render::WAmbientLight & in_ambient_light
         )=0;
+
+    /**
+     * @brief Removes all render lighting data.
+     */
+    virtual void ClearLights()=0;
 
     /**
      * @brief Updates each directional light inside in_ids list.
@@ -163,7 +161,7 @@ public:
      */
     virtual void UpdateDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_directional_light_structs
+        std::span<wct::render::WDirectionalLight> in_directional_light_structs
         )=0;
 
     /**

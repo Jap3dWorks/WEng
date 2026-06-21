@@ -339,6 +339,10 @@ bool SetupLevel(WEngine & in_engine,
                                           in_monkey_dt.pipeline_asset,
                                           in_monkey_dt.param_asset);
 
+    // Lights
+    WEntityId pl_ent = level.CreateEntity<WEntity>();
+    
+
     return true;
 
 }

@@ -143,24 +143,24 @@ public:
     // Lights
     // ------
 
-    void InitializePointLights(
-        std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_point_lights_structs
+    void InitializeLights(
+        std::span<WEntityComponentId> in_pl_ids,
+        std::span<wct::render::WPointLight> in_point_lights,
+        std::span<WEntityComponentId> in_dl_ids,
+        std::span<wct::render::WDirectionalLight> in_directional_lights,
+        const wct::render::WAmbientLight & in_ambient_light
         ) override;
+
+    void ClearLights() override;
 
     void UpdatePointLights(
         std::span<WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_point_lights_structs
         ) override;
 
-    void InitializaDirectionalLights(
-        std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_directional_lights_structs
-        ) override;
-
     void UpdateDirectionalLights(
         std::span<WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_directional_light_structs
+        std::span<wct::render::WDirectionalLight> in_directional_light_structs
         ) override;
 
     void UpdateAmbientLight(
@@ -201,7 +201,7 @@ private:
         const std::uint32_t & in_image_index
         );
 
-    wrd::lighting::WDenseLightingUBO lighting_controller_{};
+    wrd::lighting::WDenseLightingUBO lighting_UBO_{};
 
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};

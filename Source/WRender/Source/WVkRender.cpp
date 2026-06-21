@@ -178,7 +178,8 @@ void WVkRender::Initialize()
     WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
 
     offscreen_pipeline_ = WVkOffscreenPipelineRAII(
-        device_.Device()
+        device_.Device(),
+        global_descriptors_.DescriptorSetLayout()
         );
 
     WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
@@ -602,7 +603,7 @@ void WVkRender::UnloadAllResources() {
 void WVkRender::UpdateUboCamera(
     const wct::render::WCameraUBO & camera_ubo
     ) {
-    global_descriptors_.UpdateDescriptorSet(
+    global_descriptors_.UpdateCameraUBO(
     // gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
         camera_ubo,
         frame_index_
@@ -958,7 +959,8 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         VK_INDEX_TYPE_UINT32
         );
 
-    std::array<VkDescriptorSet,1> descsets = {
+    std::array<VkDescriptorSet,2> descsets = {
+        global_descriptors_.DescriptorSet(in_frame_index),
         descriptorset
     };
 
@@ -1270,29 +1272,72 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
 // Lights
 // ------
 
-void WVkRender::InitializePointLights(
-    std::span<WEntityComponentId> in_ids,
-    std::span<wct::render::WPointLight> in_point_lights_structs
+void WVkRender::InitializeLights(
+    std::span<WEntityComponentId> in_pl_ids,
+    std::span<wct::render::WPointLight> in_point_lights,
+    std::span<WEntityComponentId> in_dl_ids,
+    std::span<wct::render::WDirectionalLight> in_directional_lights,
+    const wct::render::WAmbientLight & in_ambient_light
     ) {
-    // TODO implementation
+    lighting_UBO_.Clear();
+
+    lighting_UBO_.UpdatePointLights(in_pl_ids, in_point_lights);
+    lighting_UBO_.UpdateDirectionalLights(in_dl_ids, in_directional_lights);
+    lighting_UBO_.UpdateAmbientLight(in_ambient_light);
+
+    global_descriptors_.StaticUpdateLightingUBO(
+        lighting_UBO_.LightingUbo()
+        );
+}
+
+void WVkRender::ClearLights() {
+    lighting_UBO_.Clear();
+
+    global_descriptors_.StaticUpdateLightingUBO(
+        lighting_UBO_.LightingUbo()
+        );
 }
 
 void WVkRender::UpdatePointLights(
     std::span<WEntityComponentId> in_ids,
-    std::span<wct::render::WPointLight> in_point_lights_structs
-    ) { /* TODO .cpp */ }
+    std::span<wct::render::WPointLight> in_point_lights
+    ) {
+    lighting_UBO_.UpdatePointLights(in_ids, in_point_lights);
 
-void WVkRender::InitializaDirectionalLights(
-    std::span<WEntityComponentId> in_ids,
-    std::span<wct::render::WPointLight> in_directional_lights_structs
-    ) { /* TODO .cpp */ }
+    // TODO update only the point lights memory
+
+    global_descriptors_.UpdateLightingUBO(
+        lighting_UBO_.LightingUbo(),
+        frame_index_
+        );
+}
 
 void WVkRender::UpdateDirectionalLights(
     std::span<WEntityComponentId> in_ids,
-    std::span<wct::render::WPointLight> in_directional_light_structs
-    ) { /* TODO .cpp */ }
+    std::span<wct::render::WDirectionalLight> in_directional_lights
+    ) {
+    lighting_UBO_.UpdateDirectionalLights(in_ids,
+                                          in_directional_lights);
+
+    // TODO update only the directional lights memory
+
+    global_descriptors_.UpdateLightingUBO(
+        lighting_UBO_.LightingUbo(),
+        frame_index_
+        );
+}
 
 void WVkRender::UpdateAmbientLight(
     const wct::render::WAmbientLight & in_ambient_light
-    ) { /* TODO .cpp */ }
+    ) {
+    lighting_UBO_.UpdateAmbientLight(in_ambient_light);
+
+    
+    // TODO update ambient light only.
+
+    global_descriptors_.UpdateLightingUBO(
+        lighting_UBO_.LightingUbo(),
+        frame_index_
+        );
+}
 

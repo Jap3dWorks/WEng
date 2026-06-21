@@ -8,6 +8,7 @@
 // #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
+#include "WVulkan/WVkRAII/_WVkOffscreenPipelineRAII_.hpp"
 
 #include "WRender/WShader.hpp"
 #include "WUtils/WStringUtils.hpp"
@@ -23,14 +24,16 @@ public:
 
     WVkOffscreenPipelineRAII() noexcept = default;
 
-    WVkOffscreenPipelineRAII(const VkDevice & in_device) :
+    WVkOffscreenPipelineRAII(
+        const VkDevice & in_device,
+        VkDescriptorSetLayout in_global_desc_layout) :
         device_(in_device)
         {
             InitializeDescSetLayout();
 
             InitializeDescPool();
 
-            InitializeRenderPipeline();
+            InitializeRenderPipeline(in_global_desc_layout);
         }
 
     ~WVkOffscreenPipelineRAII() {
@@ -151,10 +154,8 @@ private:
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
 
-        // TODO: Uniform Buffer with lights
-        
-
         // albedo,normal,ws_position,mrAO,emission,extra01,depth
+
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
         for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
             sampler_bindings[i]=wvk::types::CreateVkDescriptorSetLayoutBinding();
@@ -178,7 +179,9 @@ private:
         }
     }
 
-    void InitializeRenderPipeline() {
+    void InitializeRenderPipeline(
+        VkDescriptorSetLayout in_global_set_layout
+        ) {
         std::vector<char> shadercode = wrd::shader::ReadShader(
             WStringUtils::SystemPath(std::string(shader_path_))
             );
@@ -238,9 +241,15 @@ private:
                 dynamic_states
                 );
 
-        pipeline_layout_ = wvk::render_plane::VkPipelineLayout(
-            device_,
+        // Add global descriptor set layout
+        std::array<VkDescriptorSetLayout, 2> layouts {
+            in_global_set_layout,            
             descset_layout_
+        };
+
+        pipeline_layout_ = wvr::offscreen_pipelines::PipelineLayout(
+            layouts,
+            device_
             );
 
         VkGraphicsPipelineCreateInfo graphics_pipeline_info =

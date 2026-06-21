@@ -16,8 +16,50 @@ struct Camera {
   float far_clipping;
 };
 
+// Lighting Types
+// --------------
+
+struct PointLight {
+    float4 color;
+    float4 position;
+    float intensity;
+    float radius;
+};
+
+struct DirectionalLight {
+    float4 color;
+    float4 direction;
+    float intensity;
+};
+
+struct AmbientLight {
+    float4 color;
+    float intensity;
+};
+
+// WLightingUBO
+// ------------------
+
+struct LightingUBO {
+    PointLight point_lights[64];
+    DirectionalLight directional_lights[16];
+    AmbientLight ambient_light;
+
+    uint point_lights_count;
+    uint directional_lights_count;
+};
+
+// Global bindings
+// ---------------
+
 [[vk::binding(0, 0)]] // binding, set
 ConstantBuffer<Camera> camera;
+
+[[vk::binding(1,0)]]
+ConstantBuffer<LightingUBO> lighting;
+
+
+// --
 
 struct SUniformBufferObject {
     float4x4 model;
@@ -43,6 +85,9 @@ struct VSOutput {
     float3 normal     : TEXCOORD1;
     float3 world_pos  : TEXCOORD2;
 };
+
+// main functions
+// --------------
 
 [shader("vertex")]
 VSOutput vsMain(VSInput input) {

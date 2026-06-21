@@ -97,12 +97,10 @@ public:
     }
 
     T & Get(size_t in_index) {
-        assert(index_pos_.contains(in_index));
         return value_dense_[index_pos_map_[in_index]];
     }
 
     const T & Get(size_t in_index) const {
-        assert(index_pos_.contains(in_index));
         return value_dense_[index_pos_map_.at(in_index)];
     }
 

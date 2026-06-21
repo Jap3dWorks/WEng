@@ -217,6 +217,7 @@ namespace wvk::render_plane {
     inline VkPipelineLayout VkPipelineLayout(
         const VkDevice & in_device,
         const VkDescriptorSetLayout & in_desc_lay
+        // global desk layout
         ) {
 
         ::VkPipelineLayout result;
@@ -224,7 +225,7 @@ namespace wvk::render_plane {
         VkPipelineLayoutCreateInfo pipeline_layout_info =
             wvk::types::CreateVkPipelineLayoutCreateInfo();
 
-        // Only one desc set, in the future I could need more (some global parameters).
+        // TODO  global descriptor parameters
 
         pipeline_layout_info.setLayoutCount = 1;         // slayouts.size();
         pipeline_layout_info.pSetLayouts = &in_desc_lay; // slayouts.data();
