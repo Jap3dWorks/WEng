@@ -179,7 +179,7 @@ private:
 
     // Each component class has a unique 8 bit id
     std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_;
-    std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;
+    std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;  // <- TODO use an array
     WIdPool<WComponentTypeId> component_class_id_pool_;
 
 };

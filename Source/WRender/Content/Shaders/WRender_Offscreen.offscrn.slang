@@ -108,23 +108,43 @@ float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
     float2 uv = vertexOutput.fragTexCoord;
 
+    float3 color = albedo.Sample(uv).xyz * 0.5;
+
     // float3 color=float3(0.0, 0.0, 0.0);
-    // float3 wpos = ws_position.Sample(uv).xyz;
-    // float3 nrm = normal.Sample(uv).xyz;
-    // float3 alb = albedo.Sample(uv).xyz;
+    float3 wpos = ws_position.Sample(uv).xyz;
+    float3 nrm = normal.Sample(uv).xyz;
+    float3 alb = albedo.Sample(uv).xyz;
     
-    // for(uint i=0; i < lighting.point_lights_count; i++) {
-    //     float3 vdist = wpos - lighting.point_lights[i].position.xyz;
-    //     float dist = length(vdist);
+    for(uint i=0; i < lighting.point_lights_count; i++) {
+        float3 vdist = wpos - lighting.point_lights[i].position.xyz;
+        float dist = length(vdist);
 
-    //     float weight = 1.0 - (clamp(dist / lighting.point_lights[i].radius, 0, 1));
+        float weight = 1.0 - (clamp(dist / lighting.point_lights[i].radius, 0, 1));
 
-    //     color += alb * weight; 
+        color += alb * weight; 
+    }
+
+
+    // uint i = 0;
+    // float3 vdist = wpos - lighting.point_lights[i].position.xyz;
+    // float dist = length(vdist);
+
+    // float weight = 1.0 - (clamp(dist / lighting.point_lights[i].radius, 0, 1));
+
+    // color += alb * weight; 
+
+    
+
+    return float4(color, 1.f);
+
+
+    // if (1 == lighting.point_lights_count) {
+    //     return float4(1,0,0,1);
+    // }
+    // else {
+    //     return float4(0,1,0,1);
     // }
 
-    // return float4(color, 1.f);
-
-    return albedo.Sample(uv);
 
 }
 

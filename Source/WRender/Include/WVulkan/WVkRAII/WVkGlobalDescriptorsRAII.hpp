@@ -116,6 +116,7 @@ public:
     void StaticUpdateLightingUBO(
         const wct::render::WLightingUBO & in_lighting_ubo
         ) {
+
         for(std::uint8_t i=0; i<FramesInFlight; i++) {
             UpdateLightingUBO(
                 in_lighting_ubo,

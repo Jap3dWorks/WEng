@@ -187,18 +187,30 @@ namespace wct::render {
         glm::vec4 position{};
         float intensity{1.f};
         float radius{10.f};
+        float _padding[2];
     };
+
+    static_assert(sizeof(WPointLight) == 48, "Size must match GLSL layout");
+    static_assert(offsetof(WPointLight, color) == 0, "Color at offset 0");
+    static_assert(offsetof(WPointLight, position) == 16, "Position at offset 16");
+    static_assert(offsetof(WPointLight, intensity) == 32, "Intensity at offset 32");
+    static_assert(offsetof(WPointLight, radius) == 36, "Radius at offset 36");
 
     struct WDirectionalLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         glm::vec4 direction{0.f, 0.f, 0.f, 0.f};
         float intensity{1.f};
+        float _padding[3];
     };
+
+    static_assert(sizeof(WDirectionalLight)==48, "Size must match GLSL layout");
+    static_assert(offsetof(WDirectionalLight, color)==0, "Color at offset 0");
 
     struct WAmbientLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         float intensity{1.f};
     };
+
 
     struct WLightingUBO {
         static constexpr std::uint32_t MAX_POINT_LIGHTS{64};

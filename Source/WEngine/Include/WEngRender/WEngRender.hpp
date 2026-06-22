@@ -22,6 +22,89 @@
 
 namespace wng::render {
 
+    inline void InitializeLights(
+        IRender * in_render,
+        WLevel * in_level,
+        const WAssetDb & in_asset_db
+        ) {
+
+        // Point Lights
+
+        decltype(wct::render::WLightingUBO::point_lights) point_lights;
+        std::array<WEntityComponentId, point_lights.size()> pl_ids;
+        std::uint32_t pl_count=0;
+
+        in_level->ForEachComponent<wcm::light::WPointLightComponent>(
+            [&in_level, &point_lights, &pl_ids, &pl_count]
+            (wcm::light::WPointLightComponent * cmp) {
+                if (cmp->Get_active()) {
+                    auto plight = cmp->ToPointLight();
+
+                    auto & transform = in_level
+                        ->GetComponent<WTransformComponent>
+                        (cmp->EntityId()).TransformStruct();
+
+                    plight.position = {transform.position, 0.f};
+                    
+                    point_lights[pl_count] = plight;
+                    pl_ids[pl_count] = in_level->
+                        GetEntityComponentId<wcm::light::WPointLightComponent>(
+                            cmp->EntityId()
+                            );
+                    pl_count++;
+                }
+            }
+            );
+
+        // Directional Lights
+
+        decltype(wct::render::WLightingUBO::directional_lights) directional_lights;
+        std::array<WEntityComponentId, directional_lights.size()> dl_ids;
+        std::uint32_t dl_count=0;
+
+        in_level->ForEachComponent<wcm::light::WDirectionalLightComponent>(
+            [&in_level, &directional_lights, &dl_ids, &dl_count]
+            (wcm::light::WDirectionalLightComponent * cmp) {
+                if (cmp->Get_active()) {
+                    auto dlight = cmp->ToDirectionalLight();
+
+                    auto & transform = in_level
+                        ->GetComponent<WTransformComponent>
+                        (cmp->EntityId()).TransformStruct();
+
+                    dlight.direction = transform.transform_matrix[0];
+
+                    directional_lights[dl_count] = dlight;
+
+                    dl_ids[dl_count] = in_level->
+                        GetEntityComponentId<wcm::light::WDirectionalLightComponent>(
+                            cmp->EntityId()
+                            );
+                    
+                    dl_count++;
+                }
+            }
+            );
+
+        // Ambient Light
+
+        wct::render::WAmbientLight amb_light;
+        in_level->ForEachComponent<wcm::light::WAmbientLightComponent>(
+            [&amb_light](auto * cmp) {
+                amb_light = cmp->ToAmbientLight();
+            }
+            );
+        
+        in_render->InitializeLights(
+            {pl_ids.begin(), pl_ids.begin() + pl_count},
+            {point_lights.begin(), point_lights.begin() + pl_count},
+            {dl_ids.begin(), dl_ids.begin() + dl_count},
+            {directional_lights.begin(), directional_lights.begin() + dl_count},
+            amb_light
+            );
+
+    }
+
     inline void InitializeResources(
         IRender * in_render,
         WLevel * in_level,
@@ -218,28 +301,9 @@ namespace wng::render {
                 );
         }
 
+        InitializeLights(in_render, in_level, in_asset_db);
+
         in_render->RefreshPipelines();
-    }
-
-    inline void InitializeLights(
-        IRender * in_render,
-        WLevel * in_level,
-        const WAssetDb & in_asset_db
-        ) {
-
-        decltype(wct::render::WLightingUBO::point_lights) point_lights;
-        std::array<WComponentTypeId, point_lights.size()> pl_ids;
-
-        std::uint32_t i=0;
-        in_level->ForEachComponent<wcm::light::WPointLightComponent>(
-            [&point_lights, &pl_ids, &i](wcm::light::WPointLightComponent * cmp) {
-                if (cmp->Get_active()) {
-                    point_lights[i] = cmp->ToPointLight();
-                    // pl_ids[i] = cmp->WId();
-                }
-               }
-            );
-
     }
 
     inline void ReleaseRenderResources(
