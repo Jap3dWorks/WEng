@@ -108,11 +108,13 @@ float4 fsMain(VSOutput vertexOutput) : SV_TARGET
 {
     float2 uv = vertexOutput.fragTexCoord;
 
-    float3 color = {0.0};
-
     float3 wpos = ws_position.Sample(uv).xyz;
     float3 nrm = normal.Sample(uv).xyz;
     float3 alb = albedo.Sample(uv).xyz;
+
+    float3 color = alb *
+        lighting.ambient_light.color.xyz *
+        lighting.ambient_light.intensity;
     
     for(uint i=0; i < lighting.point_lights_count; i++) {
         float3 vdist = lighting.point_lights[i].position.xyz - wpos;
