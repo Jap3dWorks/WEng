@@ -63,7 +63,7 @@ public:
      */
     virtual void DeletePipelineBinding(const WEntityComponentId & in_id)=0;
 
-    /** Refresh things like postprocess order */
+    /** @brief Refresh things like postprocess order */
     virtual void RefreshPipelines()=0;
 
     /**

@@ -140,7 +140,8 @@ using WSystemId = _WId<std::uint16_t>;
 
 using WLevelSystemId = _WId<std::uint32_t>;
 
-// If multirender identify each one. 0 disabled.
+// 0 disabled. Each id is a render flow.
+// WRenderId 1 is the common render flow.
 using WRenderId = _WId<std::uint8_t>;
 
 namespace std

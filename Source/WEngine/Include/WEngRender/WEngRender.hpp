@@ -6,16 +6,19 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WCore/WCoreMacros.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-// #include "WObjectDb/WEntityComponentDb.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
+#include "WComponents/Light/WPointLightComponent.hpp"
+#include "WComponents/Light/WDirectionalLightComponent.hpp"
+#include "WComponents/Light/WAmbientLightComponent.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WRender/WRender.hpp"
 #include "WStructs/WComponentStructs.hpp"
-// #include "WUtils/WMathUtils.hpp"
+
 
 namespace wng::render {
 
@@ -162,8 +165,8 @@ namespace wng::render {
             }
             );
 
-        // TODO: Camera postprocess pipelines
         // Temporal solution, only one camera.
+        // other cameras with RenderId() > 1 could render into textures.
         WEntityId camera_entt{};
         in_level->ForEachComponent<WCameraComponent>(
             [&camera_entt](WCameraComponent * _cam){
@@ -191,7 +194,7 @@ namespace wng::render {
                 auto render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
                 in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
             }
-            
+
             WCameraComponent & comp = in_level->GetComponent<WCameraComponent>(camera_entt);
             comp.ForEachAssignment(
                 [&in_level,
@@ -216,6 +219,27 @@ namespace wng::render {
         }
 
         in_render->RefreshPipelines();
+    }
+
+    inline void InitializeLights(
+        IRender * in_render,
+        WLevel * in_level,
+        const WAssetDb & in_asset_db
+        ) {
+
+        decltype(wct::render::WLightingUBO::point_lights) point_lights;
+        std::array<WComponentTypeId, point_lights.size()> pl_ids;
+
+        std::uint32_t i=0;
+        in_level->ForEachComponent<wcm::light::WPointLightComponent>(
+            [&point_lights, &pl_ids, &i](wcm::light::WPointLightComponent * cmp) {
+                if (cmp->Get_active()) {
+                    point_lights[i] = cmp->ToPointLight();
+                    // pl_ids[i] = cmp->WId();
+                }
+               }
+            );
+
     }
 
     inline void ReleaseRenderResources(

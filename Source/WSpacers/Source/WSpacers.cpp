@@ -2,6 +2,7 @@
 
 #include "WAssets/WInputMappingAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WComponents/Light/WPointLightComponent.hpp"
 #include "WComponents/WCameraInputComponent.hpp"
 #include "WComponents/WMovementComponent.hpp"
 #include "WEngine/WEngine.hpp"
@@ -269,11 +270,11 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId cid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(cid);
     level.CreateComponent<WCameraComponent>(cid);
-    level.CreateComponent<WMovementComponent>(cid);
-    level.CreateComponent<WCameraInputComponent>(cid);
+    level.CreateComponent<WMovementComponent>(cid);     // parametrized movement
+    level.CreateComponent<WCameraInputComponent>(cid);  // User input
 
     WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
-    cameracomp.RenderId(1); // renderable camera
+    cameracomp.RenderId(1); // The renderable camera
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
@@ -339,9 +340,22 @@ bool SetupLevel(WEngine & in_engine,
                                           in_monkey_dt.pipeline_asset,
                                           in_monkey_dt.param_asset);
 
+
     // Lights
-    WEntityId pl_ent = level.CreateEntity<WEntity>();
+    // ------
     
+    // WEntityId point_light_1 = level.CreateEntity<WEntity>();
+    // level.CreateComponent<WTransformComponent>(point_light_1);
+    // level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
+    // WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
+    //     .TransformStruct();
+
+    // transform_ptr->position = {1.0, 2.3, 3.2};
+
+    // wcm::light::WPointLightComponent * light_ptr =
+    //     &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);
+
+    // light_ptr->Set_intensity(2.0);
 
     return true;
 

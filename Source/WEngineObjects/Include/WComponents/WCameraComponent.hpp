@@ -21,8 +21,8 @@ public:
     const WCameraPropertiesStruct & GetCameraStruct() const { return camera_struct_; }
 
     void SetRenderPipelineAssignment(const WSubIdxId & in_id,
-                                const WAssetId & in_pipeline_id,
-                                const WAssetId & in_param_id) {
+                                     const WAssetId & in_pipeline_id,
+                                     const WAssetId & in_param_id) {
         render_pipelines_[in_id.GetId()].pipeline=in_pipeline_id;
         render_pipelines_[in_id.GetId()].params=in_param_id;
     }

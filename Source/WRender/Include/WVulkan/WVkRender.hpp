@@ -41,7 +41,7 @@ public:
 
     WVkRender(GLFWwindow * in_window);
 
-    ~WVkRender() override;
+    ~WVkRender() override=default;
 
     WVkRender(const WVkRender &)=delete;
     WVkRender& operator=(const WVkRender&)=delete;

@@ -14,7 +14,6 @@
 #include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
 
 #include "WVulkan/WVkRender.hpp"
-// #include "WRender/WRender.hpp"
 #include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
@@ -23,7 +22,6 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
-// #include "WStructs/WComponentStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
 #include "WLog.hpp"
@@ -39,14 +37,6 @@
 
 WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
     Window(in_window);
-}
-
-WVkRender::~WVkRender()
-{
-    // TODO 
-    // if (device_info_.vk_device) {
-    //     Destroy();
-    // }
 }
 
 void WVkRender::WaitIdle() const
