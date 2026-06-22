@@ -89,20 +89,20 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 
 #+NAME: wclass-wengine-hpp
 #+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS"
-#+HEADER: :var nmespace="" :noweb yes
+#+HEADER: :var namespace="" :var pnamespace="" :noweb yes
 #+begin_src elisp
 (concat
-"
+ "
 #pragma once
 #include \"WClass/WClassFor.hpp\"
 "
-"
+ "
 #ifdef WCLASS
 #undef WCLASS
 #endif
 #define WCLASS(...)
 "
-"
+ "
 #ifdef WPROPERTY
 #undef WPROPERTY
 #endif
@@ -114,8 +114,8 @@ public:                                                                      \\
 private:                                                                     \\
     _type _name { _value };
 "
-(format
-"
+ (format
+  "
 #ifdef _WCLASS_
 #undef _WCLASS_
 #endif
@@ -132,12 +132,18 @@ private:                                                                     \\
 #undef _WCLASS_NAMESPACE_
 #endif
 
+#ifdef _PWCLASS_NAMESPACE_
+#undef _PWCLASS_NAMESPACE_
+#endif
+
 #define _WCLASS_ %s
 #define _PWCLASS_ %s
 #define _WENG_API_ %s_API
 #define _WCLASS_NAMESPACE_ %s
-" wclass pwclass (upcase weng-api) (downcase nmespace))
-"
+#define _PWCLASS_NAMESPACE_ %s
+" wclass pwclass (upcase weng-api) (downcase namespace) (downcase pnamespace))
+
+ "
 #ifdef _WCLASS_DECLARATION_
 #undef _WCLASS_DECLARATION_
 #endif
@@ -145,30 +151,47 @@ private:                                                                     \\
 #ifdef _PWCLASS_DECLARATION_
 #undef _PWCLASS_DECLARATION_
 #endif
+"
 
-#define _WCLASS_DECLARATION_ class _WCLASS_;
-#define _PWCLASS_DECLARATION_ class _PWCLASS_;
+ (format "
+#define _WCLASS_DECLARATION_ %s
+#define _PWCLASS_DECLARATION_ %s
 "
-"
+         (if (string-empty-p namespace)
+             "class _WCLASS_;"
+           "namespace _WCLASS_NAMESPACE_ { class _WCLASS_; }")
+         (if (string-empty-p pnamespace)
+             "class _PWCLASS_;"
+           "namespace _PWCLASS_NAMESPACE_ { class _PWCLASS_; }"
+           ))
+
+ "
 <<define-dconcat>>
 <<define-mp>>
 <<define-wclassname-macros>>
 "
-"
+
+ "
 _WCLASS_DECLARATION_
 _PWCLASS_DECLARATION_
+"
 
+ "
 namespace wrf::wclass {
     inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
         WENG_CLASSNAME_STR(_WCLASS_);
+"
 
-    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
+"
+    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
+"
 
+ "
     inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
         WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
 }
 "
-)
+ )
 #+end_src
 
 * CompileGenerated

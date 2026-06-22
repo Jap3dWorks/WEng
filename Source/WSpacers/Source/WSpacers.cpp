@@ -344,18 +344,18 @@ bool SetupLevel(WEngine & in_engine,
     // Lights
     // ------
     
-    // WEntityId point_light_1 = level.CreateEntity<WEntity>();
-    // level.CreateComponent<WTransformComponent>(point_light_1);
-    // level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
-    // WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
-    //     .TransformStruct();
+    WEntityId point_light_1 = level.CreateEntity<WEntity>();
+    level.CreateComponent<WTransformComponent>(point_light_1);
+    level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
+    WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
+        .TransformStruct();
 
-    // transform_ptr->position = {1.0, 2.3, 3.2};
+    transform_ptr->position = {1.0, 2.3, 3.2};
 
-    // wcm::light::WPointLightComponent * light_ptr =
-    //     &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);
+    wcm::light::WPointLightComponent * light_ptr =
+        &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);
 
-    // light_ptr->Set_intensity(2.0);
+    light_ptr->Set_intensity(2.0);
 
     return true;
 

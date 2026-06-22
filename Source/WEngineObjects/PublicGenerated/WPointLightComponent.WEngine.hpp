@@ -34,10 +34,15 @@ private:                                                                     \
 #undef _WCLASS_NAMESPACE_
 #endif
 
+#ifdef _PWCLASS_NAMESPACE_
+#undef _PWCLASS_NAMESPACE_
+#endif
+
 #define _WCLASS_ WPointLightComponent
 #define _PWCLASS_ WComponent
 #define _WENG_API_ WENGINEOBJECTS_API
 #define _WCLASS_NAMESPACE_ wcm::light
+#define _PWCLASS_NAMESPACE_ 
 
 #ifdef _WCLASS_DECLARATION_
 #undef _WCLASS_DECLARATION_
@@ -47,7 +52,7 @@ private:                                                                     \
 #undef _PWCLASS_DECLARATION_
 #endif
 
-#define _WCLASS_DECLARATION_ class _WCLASS_;
+#define _WCLASS_DECLARATION_ namespace _WCLASS_NAMESPACE_ { class _WCLASS_; }
 #define _PWCLASS_DECLARATION_ class _PWCLASS_;
 
 #ifndef WENG_DCONCAT
@@ -79,7 +84,7 @@ namespace wrf::wclass {
     inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
         WENG_CLASSNAME_STR(_WCLASS_);
 
-    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_, _PWCLASS_>;
+    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
 
     inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
         WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
