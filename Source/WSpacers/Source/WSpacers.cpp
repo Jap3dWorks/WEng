@@ -350,24 +350,15 @@ bool SetupLevel(WEngine & in_engine,
     WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
         .TransformStruct();
 
-    transform_ptr->position = {0.0, 1.3, -2.0};
+    transform_ptr->position = {0.0, 1.1, -2.0};
     transform_ptr->scale *= 0.1;
 
     wcm::light::WPointLightComponent * light_ptr =
         &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);
 
-    light_ptr->Set_intensity(100.0);
-    light_ptr->Set_radius(1.0);
+    light_ptr->Set_intensity(5.0);
+    light_ptr->Set_radius(1.5);
     light_ptr->Set_active(true);
-
-    level.CreateComponent<WStaticMeshComponent>(point_light_1);
-    auto & pl_mesh = level.GetComponent<WStaticMeshComponent>(point_light_1);
-
-    pl_mesh.StaticMeshAsset(in_monkey_dt.static_mesh);
-    pl_mesh.SetRenderPipelineAssignment(0,
-                                        in_monkey_dt.pipeline_asset,
-                                        in_monkey_dt.param_asset);
-
 
     return true;
 

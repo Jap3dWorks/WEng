@@ -19,7 +19,7 @@ namespace wct::render {
     struct WGraphicsUBO
     {
         glm::mat4 model;
-        glm::mat3 normal_matrix;
+        glm::mat4 normal_matrix;
     
         // params here
         // ...
@@ -190,7 +190,7 @@ namespace wct::render {
         float _padding[2];
     };
 
-    static_assert(sizeof(WPointLight) == 48, "Size must match GLSL layout");
+    static_assert(sizeof(WPointLight) == 48, "Size must match Vulkan layout");
     static_assert(offsetof(WPointLight, color) == 0, "Color at offset 0");
     static_assert(offsetof(WPointLight, position) == 16, "Position at offset 16");
     static_assert(offsetof(WPointLight, intensity) == 32, "Intensity at offset 32");
@@ -203,14 +203,20 @@ namespace wct::render {
         float _padding[3];
     };
 
-    static_assert(sizeof(WDirectionalLight)==48, "Size must match GLSL layout");
+    static_assert(sizeof(WDirectionalLight)==48, "Size must match Vulkan layout");
     static_assert(offsetof(WDirectionalLight, color)==0, "Color at offset 0");
+    static_assert(offsetof(WDirectionalLight, direction)==16, "Direction at offset 16");
+    static_assert(offsetof(WDirectionalLight, intensity)==32, "Intensity ar offset 32");
 
     struct WAmbientLight {
         glm::vec4 color{0.5, 0.5, 0.5, 1.f};
         float intensity{1.f};
+        float _padding[3];
     };
 
+    static_assert(sizeof(WAmbientLight)==32, "Size must match Vulkan layout");
+    static_assert(offsetof(WAmbientLight, color)==0, "Color at offset 0");
+    static_assert(offsetof(WAmbientLight, intensity)==16, "Intensity at offset 16");
 
     struct WLightingUBO {
         static constexpr std::uint32_t MAX_POINT_LIGHTS{64};
@@ -222,6 +228,12 @@ namespace wct::render {
 
         std::uint32_t point_lights_count{0};
         std::uint32_t directional_lights_count{0};
+        float _padding[2];
     };
+
+    static_assert(sizeof(WPointLight) * WLightingUBO::MAX_POINT_LIGHTS +
+                  sizeof(WDirectionalLight) * WLightingUBO::MAX_DIRECTIONAL_LIGHTS +
+                  sizeof(WAmbientLight) +
+                  16 == sizeof(WLightingUBO), "Size must match a Vulkan layout");
 
 }

@@ -210,7 +210,6 @@ public:
         for(auto & b: (*ubo)) {
             void * ptr = wvk::buffer::MapUBO(b.ubo_info, device_);
             wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
-            // wvk::buffer::UpdateUBO(b.ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
             wvk::buffer::UnmapUBO(b.ubo_info, device_);            
         }
     }

@@ -63,7 +63,7 @@ ConstantBuffer<LightingUBO> lighting;
 
 struct SUniformBufferObject {
     float4x4 model;
-    float3x3 normal_matrix;
+    float4x4 normal_matrix;
 };
 
 [[vk::binding(0, 1)]] // binding, set
@@ -93,7 +93,7 @@ struct VSOutput {
 VSOutput vsMain(VSInput input) {
     VSOutput output;
 
-    output.normal = normalize(mul(ubo.normal_matrix, input.normal));
+    output.normal = normalize(mul(float3x3(ubo.normal_matrix), input.normal));
 
     float4 wp = mul(ubo.model, float4(input.position, 1.0));
 

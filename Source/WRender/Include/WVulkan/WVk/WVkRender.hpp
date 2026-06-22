@@ -4,6 +4,7 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkImage.hpp"
 #include "WCore/WConcepts.hpp"
 
 #include <vulkan/vulkan_core.h>

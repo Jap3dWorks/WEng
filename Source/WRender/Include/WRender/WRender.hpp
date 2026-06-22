@@ -41,11 +41,14 @@ namespace wrd::render {
         const WTransformStruct & in_transform
         ) {
 
-        glm::mat3 normal_matrix = glm::transpose(
+        glm::mat3 tmp = glm::transpose(
             glm::inverse(
                 glm::mat3(in_transform.transform_matrix)
                 )
             );
+
+        // row/col 4 is not used. can be used for any other useful data.
+        glm::mat4 normal_matrix = glm::mat4(tmp);
 
         return {
             in_transform.transform_matrix,
