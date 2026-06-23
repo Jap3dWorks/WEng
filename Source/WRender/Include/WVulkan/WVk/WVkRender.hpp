@@ -54,82 +54,82 @@ namespace wvk::render {
     }
 
     
-    template<CIterable<WVkPostprocessRenderStruct> T>
-    void CreatePostprocessRenderTargets(T & postprocess_structs,
-                                        const VkDevice & in_device,
-                                        const VkPhysicalDevice & in_physical_device,
-                                        const std::uint32_t & in_width,
-                                        const std::uint32_t & in_height,
-                                        const VkFormat & in_color_format) {
-        for (auto & pstrnd : postprocess_structs) {
-            pstrnd.extent = {in_width, in_height};
-            pstrnd.color.extent = {in_width, in_height};
+    // template<CIterable<WVkPostprocessRenderStruct> T>
+    // void CreatePostprocessRenderTargets(T & postprocess_structs,
+    //                                     const VkDevice & in_device,
+    //                                     const VkPhysicalDevice & in_physical_device,
+    //                                     const std::uint32_t & in_width,
+    //                                     const std::uint32_t & in_height,
+    //                                     const VkFormat & in_color_format) {
+    //     for (auto & pstrnd : postprocess_structs) {
+    //         pstrnd.extent = {in_width, in_height};
+    //         pstrnd.color.extent = {in_width, in_height};
 
-            wvk::image::CreateImage(
-                pstrnd.color.image,
-                pstrnd.color.memory,
-                in_device,
-                in_physical_device,
-                pstrnd.extent.width, pstrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_color_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
+    //         wvk::image::CreateImage(
+    //             pstrnd.color.image,
+    //             pstrnd.color.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             pstrnd.extent.width, pstrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_color_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
 
-            pstrnd.color.view = wvk::image::CreateImageView(
-                pstrnd.color.image,
-                in_color_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
-        }
-    }
+    //         pstrnd.color.view = wvk::image::CreateImageView(
+    //             pstrnd.color.image,
+    //             in_color_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
+    //     }
+    // }
 
-    template<CIterable<WVkTonemappingRenderStruct> T>
-    inline void CreateTonemappingRenderTargets(
-        T & out_tonemapping_targets,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device,
-        // const WVkDeviceInfo & in_device_info,
-        const std::uint32_t & in_width,
-        const std::uint32_t & in_height,
-        const VkFormat & in_color_format
-        ) {
-        for (auto & tmprt : out_tonemapping_targets) {
-            tmprt.extent = {in_width, in_height};
-            tmprt.color.extent = tmprt.extent;
+    // template<CIterable<WVkTonemappingRenderStruct> T>
+    // inline void CreateTonemappingRenderTargets(
+    //     T & out_tonemapping_targets,
+    //     const VkDevice & in_device,
+    //     const VkPhysicalDevice & in_physical_device,
+    //     // const WVkDeviceInfo & in_device_info,
+    //     const std::uint32_t & in_width,
+    //     const std::uint32_t & in_height,
+    //     const VkFormat & in_color_format
+    //     ) {
+    //     for (auto & tmprt : out_tonemapping_targets) {
+    //         tmprt.extent = {in_width, in_height};
+    //         tmprt.color.extent = tmprt.extent;
 
-            wvk::image::CreateImage(
-                tmprt.color.image,
-                tmprt.color.memory,
-                in_device,
-                in_physical_device,
-                tmprt.extent.width, tmprt.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_color_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
+    //         wvk::image::CreateImage(
+    //             tmprt.color.image,
+    //             tmprt.color.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             tmprt.extent.width, tmprt.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_color_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
 
-            tmprt.color.view = wvk::image::CreateImageView(
-                tmprt.color.image,
-                in_color_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
-        }
-    }
+    //         tmprt.color.view = wvk::image::CreateImageView(
+    //             tmprt.color.image,
+    //             in_color_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
+    //     }
+    // }
 
     // // TODO DEPRECATED
     // template<CIterable<WVkGBuffersRenderStruct> T>
@@ -684,47 +684,13 @@ namespace wvk::render {
         in_render_target.memory = VK_NULL_HANDLE;
     }
 
-    
-    // // DEPRECATED
-    // template<CIterable<WVkGBuffersRenderStruct> T>
-    // void DestroyGBuffersRender(T & in_gbuffers_structs,
-    //                            const VkDevice & in_device_info) {
-    //     for(auto& gbffr : in_gbuffers_structs) {
-    //         DestroyAttachment(gbffr.albedo, in_device_info);
-    //         DestroyAttachment(gbffr.normal, in_device_info);
-    //         DestroyAttachment(gbffr.ws_position, in_device_info);
-    //         DestroyAttachment(gbffr.mrAO, in_device_info);
-    //         DestroyAttachment(gbffr.emission, in_device_info);
-    //         DestroyAttachment(gbffr.extra01, in_device_info);
-
-    //         DestroyAttachment(gbffr.depth, in_device_info);
+    // template<CIterable<WVkTonemappingRenderStruct> T>
+    // void DestroyTonemappingRender(T & out_tonemapping_render,
+    //                               const VkDevice & in_device_info) {
+    //     for (auto & tnrnd : out_tonemapping_render) {
+    //         DestroyAttachment(tnrnd.color, in_device_info);
     //     }
     // }
-
-    // template<CIterable<WVkOffscreenRenderStruct> T>
-    // void DestroyOffscreenRender(T & out_offscreen_structs,
-    //                             const VkDevice & in_device_info) {
-        
-    //     for(auto& offrnd : out_offscreen_structs) {
-    //         DestroyAttachment(offrnd.color, in_device_info);
-    //     }
-    // }
-
-    template<CIterable<WVkPostprocessRenderStruct> T>
-    void DestroyPostprocessRender(T & out_postprocess_render,
-                                  const VkDevice & in_device_info) {
-        for (auto & pstrnd : out_postprocess_render) {
-            DestroyAttachment(pstrnd.color, in_device_info);
-        }
-    }
-
-    template<CIterable<WVkTonemappingRenderStruct> T>
-    void DestroyTonemappingRender(T & out_tonemapping_render,
-                                  const VkDevice & in_device_info) {
-        for (auto & tnrnd : out_tonemapping_render) {
-            DestroyAttachment(tnrnd.color, in_device_info);
-        }
-    }
 
     inline void RndCmd_TransitionRenderImageLayout(
         const VkCommandBuffer & in_command_buffer,

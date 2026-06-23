@@ -47,7 +47,6 @@ public:
             );
     }
 
-
     WNODISCARD const WVkAttachmentRAII & Albedo(std::uint8_t frame_index) const noexcept {
         return attachments_[frame_index].albedo;
     }

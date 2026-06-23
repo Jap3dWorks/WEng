@@ -117,27 +117,30 @@ void WVkRender::Initialize()
     };
 
     // Postprocess render targets
-
-    wvk::render::CreatePostprocessRenderTargets(
-        postprocess_rtargets_,
+    postprocess_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        // device_info_,
-        dimensions[0],
-        dimensions[1],
-        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
-        );
+        {dimensions[0], dimensions[1]},
+        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT        
+    };
 
     // tonemapping render targets
-    
-    wvk::render::CreateTonemappingRenderTargets(
-        tonemapping_rtargets_,
+
+    tonemapping_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
+        {dimensions[0], dimensions[1]},
         swapchain_.Format()
-        );
+    };
+    
+    // wvk::render::CreateTonemappingRenderTargets(
+    //     tonemapping_rtargets_,
+    //     device_.Device(),
+    //     device_.PhysicalDevice(),
+    //     dimensions[0],
+    //     dimensions[1],
+    //     swapchain_.Format()
+    //     );
 
     // Create Render Command Pool
 
@@ -247,24 +250,13 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy render targets.")
 
-    // wvk::render::DestroyGBuffersRender(
-    //     gbuffers_rtargets_,
-    //     device_.Device()
-    //     );
-
     gbuffers_attachments_ = {};
 
     offscreen_attachments_ = {};
 
-    wvk::render::DestroyPostprocessRender(
-        postprocess_rtargets_,
-        device_.Device()
-        );
+    postprocess_attachments_ = {};
 
-    wvk::render::DestroyTonemappingRender(
-        tonemapping_rtargets_,
-        device_.Device()
-        );
+    tonemapping_attachments_ = {};
 
     swap_chain_pipeline_={};
 
@@ -686,15 +678,15 @@ void WVkRender::RecreateSwapChain() {
     //     device_.Device()
     //     );
 
-    wvk::render::DestroyPostprocessRender(
-        postprocess_rtargets_,
-        device_.Device()
-        );
+    // wvk::render::DestroyPostprocessRender(
+    //     postprocess_rtargets_,
+    //     device_.Device()
+    //     );
 
-    wvk::render::DestroyTonemappingRender(
-        tonemapping_rtargets_,
-        device_.Device()
-        );
+    // wvk::render::DestroyTonemappingRender(
+    //     tonemapping_rtargets_,
+    //     device_.Device()
+    //     );
 
     // Recreate swap chain and other render targets
 
@@ -730,32 +722,20 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
     };
 
-    // wvk::render::CreateOffscreenRenderTargets(
-    //     offscreen_attachments_,
-    //     device_.Device(),
-    //     device_.PhysicalDevice(),
-    //     dimensions[0],
-    //     dimensions[1],
-    //     WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
-    //     );
-
-    wvk::render::CreatePostprocessRenderTargets(
-        postprocess_rtargets_,
+    postprocess_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
-        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT
-        );
+        {dimensions[0], dimensions[1]},
+        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT        
+    };
 
-    wvk::render::CreateTonemappingRenderTargets(
-        tonemapping_rtargets_,
+    tonemapping_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
+        {dimensions[0], dimensions[1]},
         swapchain_.Format()
-        );
+    };
+
 }
 
 void WVkRender::RecordGBuffersRenderCommandBuffer(
@@ -997,8 +977,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     VkImageView input_view = offscreen_attachments_.Color(in_frame_index).View();
     VkImage input_img = offscreen_attachments_.Color(in_frame_index).Image();
     
-    VkImageView dst_view = postprocess_rtargets_[in_frame_index].color.view;
-    VkImage dst_img = postprocess_rtargets_[in_frame_index].color.image;
+    VkImageView dst_view = postprocess_attachments_.Color(in_frame_index).View();
+    VkImage dst_img = postprocess_attachments_.Color(in_frame_index).Image();
     
     std::array<VkImageView, 2> pp_views = {input_view, dst_view};
     std::array<VkImage, 2> pp_images = {input_img, dst_img};
@@ -1031,7 +1011,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
         wvk::render::RndCmd_BeginPostprocessRendering(
             in_command_buffer,
             dst_view,
-            postprocess_rtargets_[in_frame_index].extent
+            postprocess_attachments_.Extent()
+            // postprocess_rtargets_[in_frame_index].extent
             );
 
         vkCmdBindPipeline(
@@ -1042,7 +1023,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 
         wvk::render::RndCmd_SetViewportAndScissor(
             in_command_buffer,
-            postprocess_rtargets_[in_frame_index].extent
+            postprocess_attachments_.Extent()
+            // postprocess_rtargets_[in_frame_index].extent
             );
 
         // TODO also pass GBuffers in the global descriptor
@@ -1109,13 +1091,14 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
     
     wvk::render::RndCmd_TransitionTonemappingWriteLayout(
         in_command_buffer,
-        tonemapping_rtargets_[in_frame_index].color.image
+        tonemapping_attachments_.Color(in_frame_index).Image()
+        // tonemapping_rtargets_[in_frame_index].color.image
         );
 
     wvk::render::RndCmd_BeginTonemappingRendering(
         in_command_buffer,
-        tonemapping_rtargets_[in_frame_index].color.view,
-        tonemapping_rtargets_[in_frame_index].extent
+        tonemapping_attachments_.Color(in_frame_index).View(),
+        tonemapping_attachments_.Extent()
         );
 
     tonemapping_pipeline_.ResetDescriptorPool(in_frame_index);
@@ -1130,7 +1113,7 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
 
     wvk::render::RndCmd_SetViewportAndScissor(
         in_command_buffer,
-        tonemapping_rtargets_[in_frame_index].extent
+        tonemapping_attachments_.Extent()
         );
 
     VkDescriptorSet descriptorset =
@@ -1165,11 +1148,11 @@ void WVkRender::RecordTonemappingRenderCommandBuffer(
 
     wvk::render::RndCmd_TransitionTonemappingReadLayout(
         in_command_buffer,
-        tonemapping_rtargets_[in_frame_index].color.image
+        tonemapping_attachments_.Color(in_frame_index).Image()
         );
 
     swap_chain_input_imgview_ref =
-        tonemapping_rtargets_[in_frame_index].color.view;
+        tonemapping_attachments_.Color(in_frame_index).View();
 }
 
 void WVkRender::RecordSwapChainRenderCommandBuffer(

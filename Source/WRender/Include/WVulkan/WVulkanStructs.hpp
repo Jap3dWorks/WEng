@@ -58,39 +58,10 @@ struct WVkRenderTarget {
     VkExtent2D extent{};
 };
 
-// Render Resources
-// DEPRECATED
-// struct WVkGBuffersRenderStruct
-// {
-//     WVkRenderTarget albedo{};
-//     WVkRenderTarget normal{};
-//     WVkRenderTarget ws_position{};
-//     WVkRenderTarget mrAO{};         // /metallic/roughness/ambientOclusion
-//     WVkRenderTarget emission{};
-//     WVkRenderTarget extra01{};
-
-//     WVkRenderTarget depth{};
-    
-//     VkExtent2D extent{};
-// };
-
-// struct WVkOffscreenRenderStruct {
-
+// struct WVkTonemappingRenderStruct {
 //     WVkRenderTarget color{};
-
 //     VkExtent2D extent{};
 // };
-
-struct WVkPostprocessRenderStruct
-{
-    WVkRenderTarget color{};
-    VkExtent2D extent{};
-};
-
-struct WVkTonemappingRenderStruct {
-    WVkRenderTarget color{};
-    VkExtent2D extent{};
-};
 
 struct WVkSwapChainInfo
 {

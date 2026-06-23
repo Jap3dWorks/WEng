@@ -6,6 +6,8 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsPostprocessRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -220,11 +222,8 @@ private:
     // TODO RAII attachments
     WVkAttachmentsGBuffersRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
     WVkAttachmentsOffscreenRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
-
-    // std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
-    // std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
-    std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};
-    std::array<WVkTonemappingRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_rtargets_{};
+    WVkAttachmentsPostprocessRAII<WENG_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
+    WVkAttachmentsTonemappingRAII<WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
     WVkSwapchainPipelineRAII<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
