@@ -94,12 +94,10 @@ void WVkRender::Initialize()
 
     // GBuffers render targets
 
-    wvk::render::CreateGBuffersRenderTargets(
-        gbuffers_rtargets_,
+    gbuffers_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
+        {dimensions[0], dimensions[1]},
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
@@ -107,18 +105,16 @@ void WVkRender::Initialize()
         WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
-        );
+    };
 
     // Offscreen render targets
 
-    wvk::render::CreateOffscreenRenderTargets(
-        offscreen_rtargets_,
+    offscreen_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
-        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
-        );
+        {dimensions[0], dimensions[1]},
+        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
+    };
 
     // Postprocess render targets
 
@@ -251,15 +247,14 @@ void WVkRender::Destroy() {
 
     WFLOG("Destroy render targets.")
 
-    wvk::render::DestroyGBuffersRender(
-        gbuffers_rtargets_,
-        device_.Device()
-        );
-    
-    wvk::render::DestroyOffscreenRender(
-        offscreen_rtargets_,
-        device_.Device()
-        );
+    // wvk::render::DestroyGBuffersRender(
+    //     gbuffers_rtargets_,
+    //     device_.Device()
+    //     );
+
+    gbuffers_attachments_ = {};
+
+    offscreen_attachments_ = {};
 
     wvk::render::DestroyPostprocessRender(
         postprocess_rtargets_,
@@ -681,15 +676,15 @@ void WVkRender::RecreateSwapChain() {
 
     // Destroy render targets
 
-    wvk::render::DestroyGBuffersRender(
-        gbuffers_rtargets_,
-        device_.Device()
-        );
+    // wvk::render::DestroyGBuffersRender(
+    //     gbuffers_rtargets_,
+    //     device_.Device()
+    //     );
 
-    wvk::render::DestroyOffscreenRender(
-        offscreen_rtargets_,
-        device_.Device()
-        );
+    // wvk::render::DestroyOffscreenRender(
+    //     offscreen_attachments_,
+    //     device_.Device()
+    //     );
 
     wvk::render::DestroyPostprocessRender(
         postprocess_rtargets_,
@@ -715,12 +710,10 @@ void WVkRender::RecreateSwapChain() {
 
     // TODO Attachment using RAII.
 
-    wvk::render::CreateGBuffersRenderTargets(
-        gbuffers_rtargets_,
+    gbuffers_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
+        {dimensions[0], dimensions[1]},
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
@@ -728,16 +721,23 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
-        );
+    };
 
-    wvk::render::CreateOffscreenRenderTargets(
-        offscreen_rtargets_,
+    offscreen_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        dimensions[0],
-        dimensions[1],
-        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
-        );
+        {dimensions[0], dimensions[1]},
+        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
+    };
+
+    // wvk::render::CreateOffscreenRenderTargets(
+    //     offscreen_attachments_,
+    //     device_.Device(),
+    //     device_.PhysicalDevice(),
+    //     dimensions[0],
+    //     dimensions[1],
+    //     WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT
+    //     );
 
     wvk::render::CreatePostprocessRenderTargets(
         postprocess_rtargets_,
@@ -766,25 +766,25 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
     wvk::render::RndCmd_TransitionGBufferWriteLayout(
         in_command_buffer,
-        gbuffers_rtargets_[in_frame_index].albedo.image,
-        gbuffers_rtargets_[in_frame_index].normal.image,
-        gbuffers_rtargets_[in_frame_index].ws_position.image,
-        gbuffers_rtargets_[in_frame_index].mrAO.image,
-        gbuffers_rtargets_[in_frame_index].emission.image,
-        gbuffers_rtargets_[in_frame_index].extra01.image,
-        gbuffers_rtargets_[in_frame_index].depth.image
+        gbuffers_attachments_.Albedo(in_frame_index).Image(),
+        gbuffers_attachments_.Normal(in_frame_index).Image(),
+        gbuffers_attachments_.WsPosition(in_frame_index).Image(),
+        gbuffers_attachments_.MrAO(in_frame_index).Image(),
+        gbuffers_attachments_.Emission(in_frame_index).Image(),
+        gbuffers_attachments_.Extra01(in_frame_index).Image(),
+        gbuffers_attachments_.Depth(in_frame_index).Image()
         );
 
     wvk::render::RndCmd_BeginGBuffersRendering(
         in_command_buffer,
-        gbuffers_rtargets_[in_frame_index].albedo.view,
-        gbuffers_rtargets_[in_frame_index].normal.view,
-        gbuffers_rtargets_[in_frame_index].ws_position.view,
-        gbuffers_rtargets_[in_frame_index].mrAO.view,
-        gbuffers_rtargets_[in_frame_index].emission.view,
-        gbuffers_rtargets_[in_frame_index].extra01.view,
-        gbuffers_rtargets_[in_frame_index].depth.view,
-        gbuffers_rtargets_[in_frame_index].extent
+        gbuffers_attachments_.Albedo(in_frame_index).View(),
+        gbuffers_attachments_.Normal(in_frame_index).View(),
+        gbuffers_attachments_.WsPosition(in_frame_index).View(),
+        gbuffers_attachments_.MrAO(in_frame_index).View(),
+        gbuffers_attachments_.Emission(in_frame_index).View(),
+        gbuffers_attachments_.Extra01(in_frame_index).View(),
+        gbuffers_attachments_.Depth(in_frame_index).View(),
+        gbuffers_attachments_.Extent()
         );
 
     for(auto pipeline_id : gbuffers_pipelines_.IterPipelines()) {
@@ -800,7 +800,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
         wvk::render::RndCmd_SetViewportAndScissor(
             in_command_buffer,
-            gbuffers_rtargets_[in_frame_index].extent
+            gbuffers_attachments_.Extent()
             );
 
         for (auto & bid : gbuffers_pipelines_.IterBindings(pipeline_id)) {
@@ -868,13 +868,13 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
     wvk::render::RndCmd_TransitionGBufferReadLayout(
         in_command_buffer,
-        gbuffers_rtargets_[in_frame_index].albedo.image,
-        gbuffers_rtargets_[in_frame_index].normal.image,
-        gbuffers_rtargets_[in_frame_index].ws_position.image,
-        gbuffers_rtargets_[in_frame_index].mrAO.image,
-        gbuffers_rtargets_[in_frame_index].emission.image,
-        gbuffers_rtargets_[in_frame_index].extra01.image,
-        gbuffers_rtargets_[in_frame_index].depth.image
+        gbuffers_attachments_.Albedo(in_frame_index).Image(),
+        gbuffers_attachments_.Normal(in_frame_index).Image(),
+        gbuffers_attachments_.WsPosition(in_frame_index).Image(),
+        gbuffers_attachments_.MrAO(in_frame_index).Image(),
+        gbuffers_attachments_.Emission(in_frame_index).Image(),
+        gbuffers_attachments_.Extra01(in_frame_index).Image(),
+        gbuffers_attachments_.Depth(in_frame_index).Image()
         );
 }
 
@@ -885,13 +885,14 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     
     wvk::render::RndCmd_TransitionOffscreenWriteLayout(
         in_command_buffer,
-        offscreen_rtargets_[in_frame_index].color.image
+        offscreen_attachments_.Color(in_frame_index).Image()
+        // offscreen_rtargets_[in_frame_index].color.image
         );
 
     wvk::render::RndCmd_BeginOffscreenRendering(
         in_command_buffer,
-        offscreen_rtargets_[in_frame_index].color.view,
-        offscreen_rtargets_[in_frame_index].extent
+        offscreen_attachments_.Color(in_frame_index).View(),
+        offscreen_attachments_.Extent()
         );
 
     offscreen_pipeline_.ResetDescriptorPool(in_frame_index);
@@ -907,7 +908,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
 
     wvk::render::RndCmd_SetViewportAndScissor(
         in_command_buffer,
-        offscreen_rtargets_[in_frame_index].extent
+        offscreen_attachments_.Extent()
         );
 
     // DescriptorSet
@@ -916,13 +917,21 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
         render_plane_.Sampler(),
-        gbuffers_rtargets_[in_frame_index].albedo.view,
-        gbuffers_rtargets_[in_frame_index].normal.view,
-        gbuffers_rtargets_[in_frame_index].ws_position.view,
-        gbuffers_rtargets_[in_frame_index].mrAO.view,
-        gbuffers_rtargets_[in_frame_index].emission.view,
-        gbuffers_rtargets_[in_frame_index].extra01.view,
-        gbuffers_rtargets_[in_frame_index].depth.view
+        gbuffers_attachments_.Albedo(in_frame_index).View(),
+        gbuffers_attachments_.Normal(in_frame_index).View(),
+        gbuffers_attachments_.WsPosition(in_frame_index).View(),
+        gbuffers_attachments_.MrAO(in_frame_index).View(),
+        gbuffers_attachments_.Emission(in_frame_index).View(),
+        gbuffers_attachments_.Extra01(in_frame_index).View(),
+        gbuffers_attachments_.Depth(in_frame_index).View()
+
+        // gbuffers_rtargets_[in_frame_index].albedo.view,
+        // gbuffers_rtargets_[in_frame_index].normal.view,
+        // gbuffers_rtargets_[in_frame_index].ws_position.view,
+        // gbuffers_rtargets_[in_frame_index].mrAO.view,
+        // gbuffers_rtargets_[in_frame_index].emission.view,
+        // gbuffers_rtargets_[in_frame_index].extra01.view,
+        // gbuffers_rtargets_[in_frame_index].depth.view
         );
 
     // Draw Commands
@@ -971,7 +980,8 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     
     wvk::render::RndCmd_TransitionOffscreenReadLayout(
         in_command_buffer,
-        offscreen_rtargets_[in_frame_index].color.image
+        offscreen_attachments_.Color(in_frame_index).Image()
+        // offscreen_rtargets_[in_frame_index].color.image
         );
     
 }
@@ -984,8 +994,8 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
 {
     // first input
     
-    VkImageView input_view = offscreen_rtargets_[in_frame_index].color.view;
-    VkImage input_img = offscreen_rtargets_[in_frame_index].color.image;
+    VkImageView input_view = offscreen_attachments_.Color(in_frame_index).View();
+    VkImage input_img = offscreen_attachments_.Color(in_frame_index).Image();
     
     VkImageView dst_view = postprocess_rtargets_[in_frame_index].color.view;
     VkImage dst_img = postprocess_rtargets_[in_frame_index].color.image;

@@ -131,268 +131,269 @@ namespace wvk::render {
         }
     }
 
-    template<CIterable<WVkGBuffersRenderStruct> T>
-    inline void CreateGBuffersRenderTargets(
-        T & in_gbuffers_structs,
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device,
-        // const WVkDeviceInfo & in_device_info,
-        const std::uint32_t & in_width,
-        const std::uint32_t & in_height,
-        const VkFormat & in_color_format,
-        const VkFormat & in_normal_format,
-        const VkFormat & in_ws_position_format,
-        const VkFormat & in_mrAO_format,
-        const VkFormat & in_emission_format,
-        const VkFormat & in_extra01_format,
-        // const VkFormat & in_extra02_format,
-        const VkFormat & in_depth_format
-        ) {
-        for(auto& offrnd : in_gbuffers_structs) {
+    // // TODO DEPRECATED
+    // template<CIterable<WVkGBuffersRenderStruct> T>
+    // inline void CreateGBuffersRenderTargets(
+    //     T & in_gbuffers_structs,
+    //     const VkDevice & in_device,
+    //     const VkPhysicalDevice & in_physical_device,
+    //     // const WVkDeviceInfo & in_device_info,
+    //     const std::uint32_t & in_width,
+    //     const std::uint32_t & in_height,
+    //     const VkFormat & in_color_format,
+    //     const VkFormat & in_normal_format,
+    //     const VkFormat & in_ws_position_format,
+    //     const VkFormat & in_mrAO_format,
+    //     const VkFormat & in_emission_format,
+    //     const VkFormat & in_extra01_format,
+    //     // const VkFormat & in_extra02_format,
+    //     const VkFormat & in_depth_format
+    //     ) {
+    //     for(auto& offrnd : in_gbuffers_structs) {
             
-            offrnd.extent = {in_width, in_height};
-            offrnd.albedo.extent = {in_width, in_height};
+    //         offrnd.extent = {in_width, in_height};
+    //         offrnd.albedo.extent = {in_width, in_height};
 
-            // albedo
-            wvk::image::CreateImage(
-                offrnd.albedo.image,
-                offrnd.albedo.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_color_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
+    //         // albedo
+    //         wvk::image::CreateImage(
+    //             offrnd.albedo.image,
+    //             offrnd.albedo.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_color_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
             
-            offrnd.albedo.view = wvk::image::CreateImageView(
-                offrnd.albedo.image,
-                in_color_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         offrnd.albedo.view = wvk::image::CreateImageView(
+    //             offrnd.albedo.image,
+    //             in_color_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
 
-            // normal
-            offrnd.normal.extent = {in_width, in_height};
-            wvk::image::CreateImage(
-                offrnd.normal.image,
-                offrnd.normal.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_normal_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.normal.view = wvk::image::CreateImageView(
-                offrnd.normal.image,
-                in_normal_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         // normal
+    //         offrnd.normal.extent = {in_width, in_height};
+    //         wvk::image::CreateImage(
+    //             offrnd.normal.image,
+    //             offrnd.normal.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_normal_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.normal.view = wvk::image::CreateImageView(
+    //             offrnd.normal.image,
+    //             in_normal_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
 
-            // ws_position
-            offrnd.ws_position.extent = {in_width, in_height};
-            wvk::image::CreateImage(
-                offrnd.ws_position.image,
-                offrnd.ws_position.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_ws_position_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.ws_position.view = wvk::image::CreateImageView(
-                offrnd.ws_position.image,
-                in_ws_position_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         // ws_position
+    //         offrnd.ws_position.extent = {in_width, in_height};
+    //         wvk::image::CreateImage(
+    //             offrnd.ws_position.image,
+    //             offrnd.ws_position.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_ws_position_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.ws_position.view = wvk::image::CreateImageView(
+    //             offrnd.ws_position.image,
+    //             in_ws_position_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
 
-            // mrAO
-            offrnd.mrAO.extent = {in_width, in_height};
-            wvk::image::CreateImage(
-                offrnd.mrAO.image,
-                offrnd.mrAO.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_mrAO_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.mrAO.view = wvk::image::CreateImageView(
-                offrnd.mrAO.image,
-                in_mrAO_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         // mrAO
+    //         offrnd.mrAO.extent = {in_width, in_height};
+    //         wvk::image::CreateImage(
+    //             offrnd.mrAO.image,
+    //             offrnd.mrAO.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_mrAO_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.mrAO.view = wvk::image::CreateImageView(
+    //             offrnd.mrAO.image,
+    //             in_mrAO_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
             
-            // emission
-            offrnd.emission.extent = {in_width, in_height};
-            wvk::image::CreateImage(
-                offrnd.emission.image,
-                offrnd.emission.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_emission_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.emission.view = wvk::image::CreateImageView(
-                offrnd.emission.image,
-                in_emission_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         // emission
+    //         offrnd.emission.extent = {in_width, in_height};
+    //         wvk::image::CreateImage(
+    //             offrnd.emission.image,
+    //             offrnd.emission.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_emission_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.emission.view = wvk::image::CreateImageView(
+    //             offrnd.emission.image,
+    //             in_emission_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
 
-            // extra01
-            offrnd.extra01.extent = {in_width, in_height};
-            wvk::image::CreateImage(
-                offrnd.extra01.image,
-                offrnd.extra01.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_extra01_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.extra01.view = wvk::image::CreateImageView(
-                offrnd.extra01.image,
-                in_extra01_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
+    //         // extra01
+    //         offrnd.extra01.extent = {in_width, in_height};
+    //         wvk::image::CreateImage(
+    //             offrnd.extra01.image,
+    //             offrnd.extra01.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_extra01_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.extra01.view = wvk::image::CreateImageView(
+    //             offrnd.extra01.image,
+    //             in_extra01_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
 
-            // extra2
-            // offrnd.extra02.extent = {in_width, in_height};
-            // wvk::image::CreateImage(
-            //     offrnd.extra02.image,
-            //     offrnd.extra02.memory,
-            //     in_device_info.vk_device,
-            //     in_device_info.vk_physical_device,
-            //     offrnd.extent.width, offrnd.extent.height,
-            //     1,
-            //     VK_SAMPLE_COUNT_1_BIT,
-            //     in_extra02_format,
-            //     VK_IMAGE_TILING_OPTIMAL,
-            //     VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-            //     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-            //     VK_IMAGE_USAGE_SAMPLED_BIT,
-            //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-            //     );
-            // offrnd.extra02.view = wvk::image::CreateImageView(
-            //     offrnd.extra02.image,
-            //     in_extra02_format,
-            //     VK_IMAGE_ASPECT_COLOR_BIT,
-            //     1,
-            //     in_device_info.vk_device
-            //     );
+    //         // extra2
+    //         // offrnd.extra02.extent = {in_width, in_height};
+    //         // wvk::image::CreateImage(
+    //         //     offrnd.extra02.image,
+    //         //     offrnd.extra02.memory,
+    //         //     in_device_info.vk_device,
+    //         //     in_device_info.vk_physical_device,
+    //         //     offrnd.extent.width, offrnd.extent.height,
+    //         //     1,
+    //         //     VK_SAMPLE_COUNT_1_BIT,
+    //         //     in_extra02_format,
+    //         //     VK_IMAGE_TILING_OPTIMAL,
+    //         //     VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //         //     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //         //     VK_IMAGE_USAGE_SAMPLED_BIT,
+    //         //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //         //     );
+    //         // offrnd.extra02.view = wvk::image::CreateImageView(
+    //         //     offrnd.extra02.image,
+    //         //     in_extra02_format,
+    //         //     VK_IMAGE_ASPECT_COLOR_BIT,
+    //         //     1,
+    //         //     in_device_info.vk_device
+    //         //     );
 
-            // depth
-            offrnd.depth.extent = offrnd.extent;
-            wvk::image::CreateImage(
-                offrnd.depth.image,
-                offrnd.depth.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_depth_format,
-                VK_IMAGE_TILING_OPTIMAL, 
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
-            offrnd.depth.view = wvk::image::CreateImageView(
-                offrnd.depth.image,
-                in_depth_format,
-                VK_IMAGE_ASPECT_DEPTH_BIT,
-                1,
-                in_device
-                );
-        }
-    }
+    //         // depth
+    //         offrnd.depth.extent = offrnd.extent;
+    //         wvk::image::CreateImage(
+    //             offrnd.depth.image,
+    //             offrnd.depth.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_depth_format,
+    //             VK_IMAGE_TILING_OPTIMAL, 
+    //             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //             VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
+    //         offrnd.depth.view = wvk::image::CreateImageView(
+    //             offrnd.depth.image,
+    //             in_depth_format,
+    //             VK_IMAGE_ASPECT_DEPTH_BIT,
+    //             1,
+    //             in_device
+    //             );
+    //     }
+    // }
 
-    template<CIterable<WVkOffscreenRenderStruct> T>
-    inline void CreateOffscreenRenderTargets(T & in_offscreen_structs,
-                                             const VkDevice & in_device,
-                                             const VkPhysicalDevice & in_physical_device,
-                                             const std::uint32_t & in_width,
-                                             const std::uint32_t & in_height,
-                                             const VkFormat & in_color_format)
-    {
-        for(auto& offrnd : in_offscreen_structs) {
+    // template<CIterable<WVkOffscreenRenderStruct> T>
+    // inline void CreateOffscreenRenderTargets(T & in_offscreen_structs,
+    //                                          const VkDevice & in_device,
+    //                                          const VkPhysicalDevice & in_physical_device,
+    //                                          const std::uint32_t & in_width,
+    //                                          const std::uint32_t & in_height,
+    //                                          const VkFormat & in_color_format)
+    // {
+    //     for(auto& offrnd : in_offscreen_structs) {
             
-            offrnd.extent = {in_width, in_height};
-            offrnd.color.extent = {in_width, in_height};
+    //         offrnd.extent = {in_width, in_height};
+    //         offrnd.color.extent = {in_width, in_height};
 
-            wvk::image::CreateImage(
-                offrnd.color.image,
-                offrnd.color.memory,
-                in_device,
-                in_physical_device,
-                offrnd.extent.width, offrnd.extent.height,
-                1,
-                VK_SAMPLE_COUNT_1_BIT,
-                in_color_format,
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                  VK_IMAGE_USAGE_SAMPLED_BIT,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-                );
+    //         wvk::image::CreateImage(
+    //             offrnd.color.image,
+    //             offrnd.color.memory,
+    //             in_device,
+    //             in_physical_device,
+    //             offrnd.extent.width, offrnd.extent.height,
+    //             1,
+    //             VK_SAMPLE_COUNT_1_BIT,
+    //             in_color_format,
+    //             VK_IMAGE_TILING_OPTIMAL,
+    //             VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    //               VK_IMAGE_USAGE_SAMPLED_BIT,
+    //             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    //             );
 
-            offrnd.color.view = wvk::image::CreateImageView(
-                offrnd.color.image,
-                in_color_format,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                in_device
-                );
-        }
-    }
+    //         offrnd.color.view = wvk::image::CreateImageView(
+    //             offrnd.color.image,
+    //             in_color_format,
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             1,
+    //             in_device
+    //             );
+    //     }
+    // }
 
     inline VkDescriptorSet CreateRenderDescriptor(
         const VkDevice & in_device,
@@ -651,7 +652,9 @@ namespace wvk::render {
     }
 
     template<std::size_t N>
-    inline void DestroySyncFences(std::array<VkFence, N> & out_fences, const VkDevice & in_device) {
+    inline void DestroySyncFences(std::array<VkFence, N> & out_fences,
+                                  const VkDevice & in_device)
+    {
         for(auto & fnc : out_fences) {
             vkDestroyFence(
                 in_device,
@@ -663,7 +666,8 @@ namespace wvk::render {
         }
     }
 
-    inline void DestroyRenderTarget(WVkRenderTarget & in_render_target,
+    // DEPRECATED
+    inline void DestroyAttachment(WVkRenderTarget & in_render_target,
                                     const VkDevice & in_device_info) {
         vkDestroyImageView(in_device_info,
                            in_render_target.view,
@@ -680,35 +684,37 @@ namespace wvk::render {
         in_render_target.memory = VK_NULL_HANDLE;
     }
 
-    template<CIterable<WVkGBuffersRenderStruct> T>
-    void DestroyGBuffersRender(T & in_gbuffers_structs,
-                               const VkDevice & in_device_info) {
-        for(auto& gbffr : in_gbuffers_structs) {
-            DestroyRenderTarget(gbffr.albedo, in_device_info);
-            DestroyRenderTarget(gbffr.normal, in_device_info);
-            DestroyRenderTarget(gbffr.ws_position, in_device_info);
-            DestroyRenderTarget(gbffr.mrAO, in_device_info);
-            DestroyRenderTarget(gbffr.emission, in_device_info);
-            DestroyRenderTarget(gbffr.extra01, in_device_info);
+    
+    // // DEPRECATED
+    // template<CIterable<WVkGBuffersRenderStruct> T>
+    // void DestroyGBuffersRender(T & in_gbuffers_structs,
+    //                            const VkDevice & in_device_info) {
+    //     for(auto& gbffr : in_gbuffers_structs) {
+    //         DestroyAttachment(gbffr.albedo, in_device_info);
+    //         DestroyAttachment(gbffr.normal, in_device_info);
+    //         DestroyAttachment(gbffr.ws_position, in_device_info);
+    //         DestroyAttachment(gbffr.mrAO, in_device_info);
+    //         DestroyAttachment(gbffr.emission, in_device_info);
+    //         DestroyAttachment(gbffr.extra01, in_device_info);
 
-            DestroyRenderTarget(gbffr.depth, in_device_info);
-        }
-    }
+    //         DestroyAttachment(gbffr.depth, in_device_info);
+    //     }
+    // }
 
-    template<CIterable<WVkOffscreenRenderStruct> T>
-    void DestroyOffscreenRender(T & out_offscreen_structs,
-                                const VkDevice & in_device_info) {
+    // template<CIterable<WVkOffscreenRenderStruct> T>
+    // void DestroyOffscreenRender(T & out_offscreen_structs,
+    //                             const VkDevice & in_device_info) {
         
-        for(auto& offrnd : out_offscreen_structs) {
-            DestroyRenderTarget(offrnd.color, in_device_info);
-        }
-    }
+    //     for(auto& offrnd : out_offscreen_structs) {
+    //         DestroyAttachment(offrnd.color, in_device_info);
+    //     }
+    // }
 
     template<CIterable<WVkPostprocessRenderStruct> T>
     void DestroyPostprocessRender(T & out_postprocess_render,
                                   const VkDevice & in_device_info) {
         for (auto & pstrnd : out_postprocess_render) {
-            DestroyRenderTarget(pstrnd.color, in_device_info);
+            DestroyAttachment(pstrnd.color, in_device_info);
         }
     }
 
@@ -716,7 +722,7 @@ namespace wvk::render {
     void DestroyTonemappingRender(T & out_tonemapping_render,
                                   const VkDevice & in_device_info) {
         for (auto & tnrnd : out_tonemapping_render) {
-            DestroyRenderTarget(tnrnd.color, in_device_info);
+            DestroyAttachment(tnrnd.color, in_device_info);
         }
     }
 

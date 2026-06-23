@@ -49,6 +49,7 @@ struct WVkShaderStageInfo
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors{}; // vertex attributes, ...
 };
 
+// DEPRECATED
 struct WVkRenderTarget {
     VkImage image{VK_NULL_HANDLE};
     VkDeviceMemory memory{VK_NULL_HANDLE};
@@ -58,27 +59,27 @@ struct WVkRenderTarget {
 };
 
 // Render Resources
+// DEPRECATED
+// struct WVkGBuffersRenderStruct
+// {
+//     WVkRenderTarget albedo{};
+//     WVkRenderTarget normal{};
+//     WVkRenderTarget ws_position{};
+//     WVkRenderTarget mrAO{};         // /metallic/roughness/ambientOclusion
+//     WVkRenderTarget emission{};
+//     WVkRenderTarget extra01{};
 
-struct WVkGBuffersRenderStruct
-{
-    WVkRenderTarget albedo{};
-    WVkRenderTarget normal{};
-    WVkRenderTarget ws_position{};
-    WVkRenderTarget mrAO{};         // /metallic/roughness/ambientOclusion
-    WVkRenderTarget emission{};
-    WVkRenderTarget extra01{};
-
-    WVkRenderTarget depth{};
+//     WVkRenderTarget depth{};
     
-    VkExtent2D extent{};
-};
+//     VkExtent2D extent{};
+// };
 
-struct WVkOffscreenRenderStruct {
+// struct WVkOffscreenRenderStruct {
 
-    WVkRenderTarget color{};
+//     WVkRenderTarget color{};
 
-    VkExtent2D extent{};
-};
+//     VkExtent2D extent{};
+// };
 
 struct WVkPostprocessRenderStruct
 {

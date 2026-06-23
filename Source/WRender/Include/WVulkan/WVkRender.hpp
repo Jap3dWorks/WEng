@@ -5,6 +5,7 @@
 #include "WCoreTypes/WGeometryStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -18,6 +19,7 @@
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"
 
 #include "WRender/WDenseLightingUBO.hpp"
 
@@ -216,8 +218,11 @@ private:
     WVkRenderPlaneRAII render_plane_{};
 
     // TODO RAII attachments
-    std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
-    std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
+    WVkAttachmentsGBuffersRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
+    WVkAttachmentsOffscreenRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
+
+    // std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
+    // std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};
     std::array<WVkTonemappingRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_rtargets_{};
 
