@@ -8,6 +8,7 @@
 // #include <stdatomic.h>
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
+#include <cassert>
 
 /**
  * @brief RAII class to manage the lifetime of the swapchain vulkan resources.
@@ -54,7 +55,6 @@ public:
         create_info.imageColorSpace = surface_format.colorSpace;
         create_info.imageExtent = extent; // Swap chain image resolution
         create_info.imageArrayLayers = 1;
-        // VK_IMAGE_USAGE_TRANSFER_DST_BIT for post-processing
         create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
         wvk::vulkan::QueueFamilyIndices indices =
@@ -145,13 +145,17 @@ public:
     }
 
     WVkSwapchainRAII & operator=(WVkSwapchainRAII && other) noexcept {
+        assert((device_ == VK_NULL_HANDLE ||
+                other.device_ == VK_NULL_HANDLE) &&
+               "2 or more Swapchains can't coexists!");
+
         if (this != &other) {
             Destroy();
 
-            device_= std::move(other.device_);
-            swapchain_= std::move(other.swapchain_);
-            format_= std::move(other.format_);
-            extent_= std::move(other.extent_);
+            device_= other.device_;
+            swapchain_= other.swapchain_;
+            format_= other.format_;
+            extent_= other.extent_;
             images_= std::move(other.images_);
             views_= std::move(other.views_);
             memory_= std::move(other.memory_);
@@ -202,11 +206,13 @@ private:
             }
 
             vkDestroySwapchainKHR(device_, swapchain_, nullptr);
-    
+
             swapchain_ = VK_NULL_HANDLE;
             images_.clear();
             views_.clear();
             memory_.clear();
+
+            device_ = VK_NULL_HANDLE;
         }
     }
 

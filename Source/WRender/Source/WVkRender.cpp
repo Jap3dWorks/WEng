@@ -41,7 +41,7 @@ WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
 
 void WVkRender::WaitIdle() const
 {
-    // vkDeviceWaitIdle(device_info_.vk_device);
+    vkDeviceWaitIdle(device_.Device());
 }
 
 void WVkRender::Window(GLFWwindow * in_window) {
@@ -183,8 +183,8 @@ void WVkRender::Initialize()
 
     tonemapping_pipeline_ = WVkTonemappingPipelineRAII(
         device_.Device(),
-        VK_FORMAT_B8G8R8A8_UNORM
-        // swapchain_.Format()
+        // VK_FORMAT_B8G8R8A8_UNORM
+        swapchain_.Format()
         );
     
     WFLOG("[DEBUG] Initialize swap chain pipeline");
@@ -679,14 +679,7 @@ void WVkRender::RecreateSwapChain() {
 
     WaitIdle();
 
-    // Destroy swap chain and other render targets
-
-    // wvk::vulkan::Destroy(
-    //     swap_chain_info_,
-    //     device_.Device()
-    //     );
-
-    
+    // Destroy render targets
 
     wvk::render::DestroyGBuffersRender(
         gbuffers_rtargets_,
@@ -710,6 +703,8 @@ void WVkRender::RecreateSwapChain() {
 
     // Recreate swap chain and other render targets
 
+    swapchain_ = {};
+
     swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
@@ -717,6 +712,8 @@ void WVkRender::RecreateSwapChain() {
         dimensions[0],
         dimensions[1]
         );
+
+    // TODO Attachment using RAII.
 
     wvk::render::CreateGBuffersRenderTargets(
         gbuffers_rtargets_,

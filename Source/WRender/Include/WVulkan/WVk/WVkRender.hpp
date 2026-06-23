@@ -359,7 +359,6 @@ namespace wvk::render {
     inline void CreateOffscreenRenderTargets(T & in_offscreen_structs,
                                              const VkDevice & in_device,
                                              const VkPhysicalDevice & in_physical_device,
-                                             // const WVkDeviceInfo & in_device_info,
                                              const std::uint32_t & in_width,
                                              const std::uint32_t & in_height,
                                              const VkFormat & in_color_format)

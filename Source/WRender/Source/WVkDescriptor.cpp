@@ -151,7 +151,6 @@ void wvk::descriptor::Destroy(
     VkDescriptorSetLayout in_descriptor_set_layout,
     VkDevice in_device
     ) {
-    // destroy descriptor set layout
     vkDestroyDescriptorSetLayout(
         in_device,
         in_descriptor_set_layout,

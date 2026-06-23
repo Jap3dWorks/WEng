@@ -215,6 +215,7 @@ private:
     WVkAssetRenderDataRAII asset_render_data_{};
     WVkRenderPlaneRAII render_plane_{};
 
+    // TODO RAII attachments
     std::array<WVkGBuffersRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_rtargets_{};
     std::array<WVkOffscreenRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> offscreen_rtargets_{};
     std::array<WVkPostprocessRenderStruct, WENG_MAX_FRAMES_IN_FLIGHT> postprocess_rtargets_{};

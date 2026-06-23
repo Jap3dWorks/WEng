@@ -253,7 +253,20 @@ WAssetDb & WEngine::AssetManager() noexcept {
 }
 
 bool WEngine::InitializeWindow() {
-    glfwInit();
+
+    glfwSetErrorCallback(
+        [](int code, const char* desc)
+            {
+                WLOG("GLFW Error {} : {}.", code, desc);
+            });    
+
+    // Force wayland session
+    // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);    
+
+    if(!glfwInit()) {
+        WFLOG("glfwInit failed.");
+        return false;
+    }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
@@ -264,6 +277,11 @@ bool WEngine::InitializeWindow() {
         nullptr,
         nullptr
         );
+
+    if (!window_.window) {
+        WFLOG("glfwCreateWindow failed.");
+        return false;
+    }
 
     glfwSetWindowUserPointer(window_.window, this);
 
