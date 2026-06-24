@@ -49,14 +49,14 @@ struct WVkShaderStageInfo
     std::vector<VkVertexInputAttributeDescription> attribute_descriptors{}; // vertex attributes, ...
 };
 
-// DEPRECATED
-struct WVkRenderTarget {
-    VkImage image{VK_NULL_HANDLE};
-    VkDeviceMemory memory{VK_NULL_HANDLE};
-    VkImageView view{VK_NULL_HANDLE};
-    VkFormat format{};
-    VkExtent2D extent{};
-};
+// // DEPRECATED
+// struct WVkRenderTarget {
+//     VkImage image{VK_NULL_HANDLE};
+//     VkDeviceMemory memory{VK_NULL_HANDLE};
+//     VkImageView view{VK_NULL_HANDLE};
+//     VkFormat format{};
+//     VkExtent2D extent{};
+// };
 
 // struct WVkTonemappingRenderStruct {
 //     WVkRenderTarget color{};

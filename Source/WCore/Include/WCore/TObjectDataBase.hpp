@@ -246,22 +246,22 @@ public:
     }
 
     T & GetFirst(WIdClass & out_id) {
-        out_id = objects_.IndexInPos(0);
+        out_id = objects_.DensePosition(0);
         return objects_.Get(out_id.GetId());
     }
 
     T & GetFirst(WIdClass & out_id) const {
-        out_id = objects_.IndexInPos(0);
+        out_id = objects_.DensePosition(0);
         return objects_.Get(out_id.GetId());
     }
 
     void BGetFirst(B* & out_first, WIdClass & out_id) override {
-        out_id = objects_.IndexInPos(0);
+        out_id = objects_.DensePosition(0);
         out_first = &(objects_.Get(out_id.GetId()));
     }
     
     void BGetFirst(const B*& out_first, WIdClass & out_id) const override {
-        out_id = objects_.IndexInPos(0);
+        out_id = objects_.DensePosition(0);
         out_first = &(objects_.Get(out_id.GetId()));
     }
 

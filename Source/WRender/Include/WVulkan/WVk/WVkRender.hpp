@@ -666,32 +666,6 @@ namespace wvk::render {
         }
     }
 
-    // DEPRECATED
-    inline void DestroyAttachment(WVkRenderTarget & in_render_target,
-                                    const VkDevice & in_device_info) {
-        vkDestroyImageView(in_device_info,
-                           in_render_target.view,
-                           nullptr);
-        vkDestroyImage(in_device_info,
-                       in_render_target.image,
-                       nullptr);
-        vkFreeMemory(in_device_info,
-                     in_render_target.memory,
-                     nullptr);
-
-        in_render_target.view = VK_NULL_HANDLE;
-        in_render_target.image = VK_NULL_HANDLE;
-        in_render_target.memory = VK_NULL_HANDLE;
-    }
-
-    // template<CIterable<WVkTonemappingRenderStruct> T>
-    // void DestroyTonemappingRender(T & out_tonemapping_render,
-    //                               const VkDevice & in_device_info) {
-    //     for (auto & tnrnd : out_tonemapping_render) {
-    //         DestroyAttachment(tnrnd.color, in_device_info);
-    //     }
-    // }
-
     inline void RndCmd_TransitionRenderImageLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_image,

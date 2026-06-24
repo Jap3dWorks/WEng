@@ -5,6 +5,7 @@
 #include "WLog.hpp"
 
 #include <cstdint>
+#include <limits>
 #include <span>
 
 namespace wrd::lighting {
@@ -82,8 +83,8 @@ namespace wrd::lighting {
 
         DenseStaticMemController() = default;
         DenseStaticMemController(const DenseStaticMemController&) = default;
-        DenseStaticMemController(DenseStaticMemController&&) = default;
         DenseStaticMemController& operator=(const DenseStaticMemController&) = default;
+        DenseStaticMemController(DenseStaticMemController&&) = default;
         DenseStaticMemController& operator=(DenseStaticMemController&&) = default;
         virtual ~DenseStaticMemController() = default;
 
@@ -119,12 +120,111 @@ namespace wrd::lighting {
             light_set_.Clear();
         }
 
+        WNODISCARD std::uint32_t DensePosition(std::size_t in_id) const {
+            return light_set_.DensePosition(in_id);
+        }
+
     private:
 
         LightSet light_set_{};
 
         IndexArray _index_mem_{};
 
+    };
+
+    template<typename T, std::uint32_t MaxLights, typename CountType>
+    struct WLightDenseController {
+
+        WLightDenseController() = default;
+        WLightDenseController(const WLightDenseController&) = delete;
+        WLightDenseController& operator=(const WLightDenseController&) = delete;
+
+        WLightDenseController(WLightDenseController&&) = default;
+        WLightDenseController& operator=(WLightDenseController&&) = default;
+        virtual ~WLightDenseController() = default;
+
+        WLightDenseController(
+            std::array<T, MaxLights> & in_lights_data_ref,
+            CountType & in_count_ref
+            ) :
+            count_ref_(&in_count_ref),
+            controller_(in_lights_data_ref)
+            {}
+
+
+        void Update(WEntityComponentId in_component_id,
+                              const T & in_light) {
+
+            controller_.Insert(in_component_id, in_light);
+            *count_ref_ = controller_.Count();
+
+            #ifndef NDEBUG
+            if (MaxLights == *count_ref_) {
+                WFLOG("Max lights achieved: MAX {}, Lights {}",
+                      MaxLights,
+                      *count_ref_);
+            }
+            #endif
+        }
+
+        void Update(std::span<WEntityComponentId> in_ids,
+                               std::span<T> in_point_lights) {
+            for(std::uint32_t i=0; i<in_ids.size(); i++) {
+                Update(
+                    in_ids[i],
+                    in_point_lights[i]
+                    );
+            }
+        }
+
+        void RemoveLight(WEntityComponentId in_component_id) {
+            controller_.Remove(in_component_id);
+            *count_ref_ = controller_.Count();
+        }
+
+        void Clear() {
+            controller_.Clear();
+            *count_ref_ = controller_.Count();
+        }
+
+
+        WNODISCARD bool Contains(WEntityComponentId in_id) const {
+            return controller_.Contains(in_id);
+        }
+
+        WNODISCARD std::uint32_t Count() const {
+            return controller_.Count();
+        }
+
+        WNODISCARD std::uint32_t DensePosition(WEntityComponentId in_id) const {
+            return controller_.DensePosition(in_id);
+        }
+
+        WNODISCARD std::uint32_t FirstDensePosition(std::span<WEntityComponentId> in_ids) const {
+            assert(!in_ids.empty());
+
+            std::uint32_t lower = std::numeric_limits<std::uint32_t>::max();
+
+            for (auto id : in_ids) {
+                std::uint32_t tmp = DensePosition(id);
+                if (tmp < lower) {
+                    lower = tmp;
+                }
+            }
+
+            return std::min(lower, *count_ref_);
+            return lower;
+        }
+
+    private:
+
+        CountType * count_ref_{nullptr};
+
+        DenseStaticMemController<
+            T,
+            MaxLights,
+            StaticSpanAllocator> controller_;
+        
     };
 
     /**
@@ -136,99 +236,40 @@ namespace wrd::lighting {
     class WDenseLightingUBO {
     public:
 
-        WDenseLightingUBO() :
-            lighting_ubo_(),
-            pl_controller_(lighting_ubo_.point_lights),
-            dl_controller_(lighting_ubo_.directional_lights) {}
+        using  PointLightDC = WLightDenseController<
+            wct::render::WPointLight,
+            wct::render::WLightingUBO::MAX_POINT_LIGHTS,
+            decltype(wct::render::WLightingUBO::point_lights_count)
+            >;
 
-        WDenseLightingUBO(const WDenseLightingUBO&) = default;
+        using DirectionalLightDC = WLightDenseController<
+            wct::render::WDirectionalLight,
+            wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
+            decltype(wct::render::WLightingUBO::directional_lights_count)
+            >;
+
+        WDenseLightingUBO() :
+            lighting_ubo_() {}
+
+        WDenseLightingUBO(const WDenseLightingUBO&) = delete;
+        WDenseLightingUBO& operator=(const WDenseLightingUBO&) = delete;
+
         WDenseLightingUBO(WDenseLightingUBO&&) = default;
-        WDenseLightingUBO& operator=(const WDenseLightingUBO&) = default;
         WDenseLightingUBO& operator=(WDenseLightingUBO&&) = default;
         virtual ~WDenseLightingUBO() = default;
 
         void Clear() {
-            dl_controller_.Clear();
-            pl_controller_.Clear();
+            PointLightDenseController().Clear();
+            DirectionalLightDenseController().Clear();
             lighting_ubo_.ambient_light = {};
-
-            lighting_ubo_.point_lights_count = pl_controller_.Count();
-            lighting_ubo_.directional_lights_count = dl_controller_.Count();
         }
 
-        WNODISCARD bool ContainsLight(WEntityComponentId in_component_id) const {
-            return pl_controller_.Contains(in_component_id) ||
-                dl_controller_.Contains(in_component_id);
+        WNODISCARD PointLightDC PointLightDenseController() {
+            return {lighting_ubo_.point_lights, lighting_ubo_.point_lights_count};
         }
 
-        void UpdatePointLight(WEntityComponentId in_component_id,
-                              const wct::render::WPointLight & in_light) {
-
-            pl_controller_.Insert(in_component_id, in_light);
-            lighting_ubo_.point_lights_count = pl_controller_.Count();
-
-            #ifndef NDEBUG
-            if (wct::render::WLightingUBO::MAX_POINT_LIGHTS == lighting_ubo_.point_lights_count) {
-                WFLOG("Max point lights achieved: MAX {}, Lights {}",
-                      wct::render::WLightingUBO::MAX_POINT_LIGHTS,
-                      lighting_ubo_.point_lights_count);
-            }
-            #endif
-        }
-
-        void UpdatePointLights(std::span<WEntityComponentId> in_ids,
-                               std::span<wct::render::WPointLight> in_point_lights) {
-            for(std::uint32_t i=0; i<in_ids.size(); i++) {
-                UpdatePointLight(
-                    in_ids[i],
-                    in_point_lights[i]
-                    );
-            }
-        }
-
-        void RemovePointLight(WEntityComponentId in_component_id) {
-            pl_controller_.Remove(in_component_id);
-            lighting_ubo_.point_lights_count = pl_controller_.Count();
-        }
-
-        WNODISCARD std::uint32_t PointLightCount() const {
-            return pl_controller_.Count();
-        }
-
-        void UpdateDirectionalLight(WEntityComponentId in_component_id,
-                                    const wct::render::WDirectionalLight & in_light) {
-
-            dl_controller_.Insert(in_component_id, in_light);
-            lighting_ubo_.directional_lights_count = dl_controller_.Count();
-
-            #ifndef NDEBUG
-            if (wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS ==
-                lighting_ubo_.directional_lights_count) {
-                WFLOG("Max directional lights achieved: MAX {}, Lights {}",
-                      wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
-                      lighting_ubo_.directional_lights_count);
-            }
-            #endif
-        }
-
-        void UpdateDirectionalLights(
-            std::span<WEntityComponentId> in_ids,
-            std::span<wct::render::WDirectionalLight> in_directional_lights) {
-            for(std::uint32_t i=0; i<in_ids.size(); i++) {
-                UpdateDirectionalLight(
-                    in_ids[i],
-                    in_directional_lights[i]
-                    );
-            }
-        }
-
-        void RemoveDirectionalLight(WEntityComponentId in_component_id) {
-            dl_controller_.Remove(in_component_id);
-            lighting_ubo_.directional_lights_count = dl_controller_.Count();
-        }
-
-        WNODISCARD std::uint32_t DirectionalLightCount() const {
-            return dl_controller_.Count();
+        WNODISCARD DirectionalLightDC DirectionalLightDenseController() {
+            return {lighting_ubo_.directional_lights, lighting_ubo_.directional_lights_count};
         }
 
         void UpdateAmbientLight(const wct::render::WAmbientLight & in_light) {
@@ -242,15 +283,6 @@ namespace wrd::lighting {
     private:
 
         wct::render::WLightingUBO lighting_ubo_{};
-
-        DenseStaticMemController<
-            wct::render::WPointLight,
-            wct::render::WLightingUBO::MAX_POINT_LIGHTS,
-            StaticSpanAllocator> pl_controller_;
-
-        DenseStaticMemController<
-            wct::render::WDirectionalLight,
-            wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
-            StaticSpanAllocator> dl_controller_;
+        
     };
 }

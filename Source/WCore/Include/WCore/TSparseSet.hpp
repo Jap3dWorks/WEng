@@ -104,7 +104,7 @@ public:
         return value_dense_[index_pos_map_.at(in_index)];
     }
 
-    std::size_t IndexInPos(std::size_t in_pos) const {
+    std::size_t DensePosition(std::size_t in_pos) const {
         return index_dense_[in_pos];
     }
 

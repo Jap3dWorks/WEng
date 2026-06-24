@@ -219,7 +219,6 @@ private:
     WVkAssetRenderDataRAII asset_render_data_{};
     WVkRenderPlaneRAII render_plane_{};
 
-    // TODO RAII attachments
     WVkAttachmentsGBuffersRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
     WVkAttachmentsOffscreenRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
     WVkAttachmentsPostprocessRAII<WENG_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};

@@ -581,9 +581,8 @@ void WVkRender::UpdateUboCamera(
     const wct::render::WCameraUBO & camera_ubo
     ) {
     global_descriptors_.UpdateCameraUBO(
-    // gbuffers_pipelines_.UpdateGlobalGraphicsDescriptorSet(
-        camera_ubo,
-        frame_index_
+        frame_index_,
+        camera_ubo
         );
 }
 
@@ -1261,8 +1260,12 @@ void WVkRender::InitializeLights(
     ) {
     lighting_UBO_.Clear();
 
-    lighting_UBO_.UpdatePointLights(in_pl_ids, in_point_lights);
-    lighting_UBO_.UpdateDirectionalLights(in_dl_ids, in_directional_lights);
+    lighting_UBO_.PointLightDenseController()
+        .Update(in_pl_ids, in_point_lights);
+
+    lighting_UBO_.DirectionalLightDenseController()
+        .Update(in_dl_ids, in_directional_lights);
+
     lighting_UBO_.UpdateAmbientLight(in_ambient_light);
 
     global_descriptors_.StaticUpdateLightingUBO(
@@ -1278,17 +1281,56 @@ void WVkRender::ClearLights() {
         );
 }
 
+
+namespace {
+/**
+ * Helper function to avoid too much duplicated code
+ * TODO move to a better object.
+ */
+    template<typename LightType, typename GlobalDescriptor>
+    inline void UpdateLightUBO(
+        GlobalDescriptor & global_descriptor,
+        std::uint8_t frame_index,
+        wct::render::WLightingUBO* ubo_ptr,
+        std::uint32_t light_count,
+        std::size_t property_offset,
+        std::size_t first_position) {
+    
+        std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(ubo_ptr)
+            + property_offset
+            + (sizeof(LightType) * first_position);
+
+        global_descriptor.UpdateLightingUBO(
+            frame_index,
+            ptr,
+            sizeof(wct::render::WPointLight) * (light_count - first_position)
+            );
+    }
+}
+
 void WVkRender::UpdatePointLights(
     std::span<WEntityComponentId> in_ids,
     std::span<wct::render::WPointLight> in_point_lights
     ) {
-    lighting_UBO_.UpdatePointLights(in_ids, in_point_lights);
+    if (in_ids.empty()) return;
 
-    // TODO update only the point lights memory
+    auto dense_controller = lighting_UBO_.PointLightDenseController();
+    dense_controller.Update(
+        in_ids, in_point_lights
+        );
 
-    global_descriptors_.UpdateLightingUBO(
-        lighting_UBO_.LightingUbo(),
-        frame_index_
+    std::uint32_t first_position = dense_controller.FirstDensePosition(in_ids);
+    std::uint32_t light_count = dense_controller.Count();
+
+    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
+
+    UpdateLightUBO<wct::render::WPointLight>(
+        global_descriptors_,
+        frame_index_,
+        const_cast<wct::render::WLightingUBO*>(&ubo),
+        light_count,
+        offsetof(wct::render::WLightingUBO, point_lights),
+        first_position
         );
 }
 
@@ -1296,14 +1338,39 @@ void WVkRender::UpdateDirectionalLights(
     std::span<WEntityComponentId> in_ids,
     std::span<wct::render::WDirectionalLight> in_directional_lights
     ) {
-    lighting_UBO_.UpdateDirectionalLights(in_ids,
-                                          in_directional_lights);
+    if (in_ids.empty()) return;
 
-    // TODO update only the directional lights memory
+    auto dense_controller = lighting_UBO_.DirectionalLightDenseController();
+    dense_controller.Update(
+        in_ids, in_directional_lights
+        );
+
+    std::uint32_t first_position = dense_controller.FirstDensePosition(in_ids);
+    std::uint32_t light_count = dense_controller.Count();
+
+    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
+
+    UpdateLightUBO<wct::render::WDirectionalLight>(
+        global_descriptors_,
+        frame_index_,
+        const_cast<wct::render::WLightingUBO*>(&ubo),
+        light_count,
+        offsetof(wct::render::WLightingUBO, directional_lights),
+        first_position
+        );    
+
+
+
+    std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(
+        const_cast<wct::render::WLightingUBO*>(&ubo)
+        )
+        + offsetof(wct::render::WLightingUBO, directional_lights)
+        + first_position;
 
     global_descriptors_.UpdateLightingUBO(
-        lighting_UBO_.LightingUbo(),
-        frame_index_
+        frame_index_,
+        ptr,
+        sizeof(wct::render::WLightingUBO::directional_lights) - first_position
         );
 }
 
@@ -1312,12 +1379,16 @@ void WVkRender::UpdateAmbientLight(
     ) {
     lighting_UBO_.UpdateAmbientLight(in_ambient_light);
 
-    
-    // TODO update ambient light only.
+    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
+
+    std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(
+        const_cast<wct::render::WLightingUBO*>(&ubo)
+        ) + offsetof(wct::render::WLightingUBO, ambient_light);
 
     global_descriptors_.UpdateLightingUBO(
-        lighting_UBO_.LightingUbo(),
-        frame_index_
+        frame_index_,
+        ptr,
+        sizeof(wct::render::WLightingUBO::ambient_light)
         );
 }
 
