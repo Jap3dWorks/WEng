@@ -1266,7 +1266,7 @@ namespace {
         std::uint32_t first=0;
         std::uint32_t last = light_count - 1;
 
-        // if more than a half of the lights are being updated,
+        // if more than a half of the lights are being updated
         // update all lights.
         if (in_ids.size() < dense_controller.Count() / 2 ) {
             auto first_last = dense_controller

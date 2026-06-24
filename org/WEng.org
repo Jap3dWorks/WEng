@@ -246,6 +246,10 @@ lightingUBO contains an array for each light type. this array is ensured that wi
 So if any update is placed only at the Dynamic lights area, Static lights will never lose its Dense set positions.
 All dynamic updates can be done in memory ranges, avoiding that any update range overlaps with the static lights memory area.
 
+- Notes
+      - Static lights requires only one UBO (no frames in flight).
+      - Dynamic lights could be updated each frame.
+
 
 * Coding Style
 
