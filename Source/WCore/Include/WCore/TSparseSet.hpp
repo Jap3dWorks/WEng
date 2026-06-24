@@ -108,6 +108,14 @@ public:
         return index_dense_[in_pos];
     }
 
+    T * DenseData() noexcept {
+        return value_dense_.data();
+    }
+
+    T const * DenseData() const noexcept {
+        return value_dense_.data();
+    }
+
     constexpr size_t Count() const noexcept {
         return value_dense_.size();
     }

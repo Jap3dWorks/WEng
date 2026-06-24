@@ -133,15 +133,6 @@ void WVkRender::Initialize()
         swapchain_.Format()
     };
     
-    // wvk::render::CreateTonemappingRenderTargets(
-    //     tonemapping_rtargets_,
-    //     device_.Device(),
-    //     device_.PhysicalDevice(),
-    //     dimensions[0],
-    //     dimensions[1],
-    //     swapchain_.Format()
-    //     );
-
     // Create Render Command Pool
 
     render_command_pool_ = WVkRenderCommandPoolRAII( 
@@ -665,28 +656,6 @@ void WVkRender::RecreateSwapChain() {
 
     WaitIdle();
 
-    // Destroy render targets
-
-    // wvk::render::DestroyGBuffersRender(
-    //     gbuffers_rtargets_,
-    //     device_.Device()
-    //     );
-
-    // wvk::render::DestroyOffscreenRender(
-    //     offscreen_attachments_,
-    //     device_.Device()
-    //     );
-
-    // wvk::render::DestroyPostprocessRender(
-    //     postprocess_rtargets_,
-    //     device_.Device()
-    //     );
-
-    // wvk::render::DestroyTonemappingRender(
-    //     tonemapping_rtargets_,
-    //     device_.Device()
-    //     );
-
     // Recreate swap chain and other render targets
 
     swapchain_ = {};
@@ -699,7 +668,7 @@ void WVkRender::RecreateSwapChain() {
         dimensions[1]
         );
 
-    // TODO Attachment using RAII.
+    // Recreate Attachments
 
     gbuffers_attachments_ = {
         device_.Device(),
@@ -903,14 +872,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         gbuffers_attachments_.Emission(in_frame_index).View(),
         gbuffers_attachments_.Extra01(in_frame_index).View(),
         gbuffers_attachments_.Depth(in_frame_index).View()
-
-        // gbuffers_rtargets_[in_frame_index].albedo.view,
-        // gbuffers_rtargets_[in_frame_index].normal.view,
-        // gbuffers_rtargets_[in_frame_index].ws_position.view,
-        // gbuffers_rtargets_[in_frame_index].mrAO.view,
-        // gbuffers_rtargets_[in_frame_index].emission.view,
-        // gbuffers_rtargets_[in_frame_index].extra01.view,
-        // gbuffers_rtargets_[in_frame_index].depth.view
         );
 
     // Draw Commands
@@ -960,7 +921,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     wvk::render::RndCmd_TransitionOffscreenReadLayout(
         in_command_buffer,
         offscreen_attachments_.Color(in_frame_index).Image()
-        // offscreen_rtargets_[in_frame_index].color.image
         );
     
 }
@@ -1283,27 +1243,47 @@ void WVkRender::ClearLights() {
 
 
 namespace {
-/**
- * Helper function to avoid too much duplicated code
- * TODO move to a better object.
- */
-    template<typename LightType, typename GlobalDescriptor>
+    /**
+     * Helper function to avoid too much duplicated code
+     * TODO move to a better object.
+     */
+    template<typename LightType,
+             std::uint8_t FramesInFlight,
+             typename DenseController>
     inline void UpdateLightUBO(
-        GlobalDescriptor & global_descriptor,
+        WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptor,
         std::uint8_t frame_index,
-        wct::render::WLightingUBO* ubo_ptr,
-        std::uint32_t light_count,
-        std::size_t property_offset,
-        std::size_t first_position) {
+        DenseController & dense_controller,
+        std::span<WEntityComponentId> in_ids,
+        std::span<LightType> in_lights
+        ) {
     
-        std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(ubo_ptr)
-            + property_offset
-            + (sizeof(LightType) * first_position);
+        dense_controller.Update(
+            in_ids, in_lights
+            );
+
+        std::uint32_t light_count = dense_controller.Count();
+        std::uint32_t first=0;
+        std::uint32_t last = light_count - 1;
+
+        // if more than a half of the lights are being updated,
+        // update all lights.
+        if (in_ids.size() < dense_controller.Count() / 2 ) {
+            auto first_last = dense_controller
+                .FirstLastDensePosition(in_ids);
+
+            first = std::get<0>(first_last);
+            last = std::get<1>(first_last);
+        }
+
+        std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(
+            const_cast<LightType*>(dense_controller.DenseData()))
+            + (sizeof(LightType) * first);
 
         global_descriptor.UpdateLightingUBO(
             frame_index,
             ptr,
-            sizeof(wct::render::WPointLight) * (light_count - first_position)
+            sizeof(wct::render::WPointLight) * (last + 1 - first)
             );
     }
 }
@@ -1315,24 +1295,12 @@ void WVkRender::UpdatePointLights(
     if (in_ids.empty()) return;
 
     auto dense_controller = lighting_UBO_.PointLightDenseController();
-    dense_controller.Update(
-        in_ids, in_point_lights
-        );
-
-    // TODO first and last position (it is free)
-    std::uint32_t first_position = dense_controller.FirstDensePosition(in_ids);
-    std::uint32_t light_count = dense_controller.Count();
-
-    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
-
+    
     UpdateLightUBO<wct::render::WPointLight>(
         global_descriptors_,
         frame_index_,
-        const_cast<wct::render::WLightingUBO*>(&ubo),
-        light_count,
-        offsetof(wct::render::WLightingUBO, point_lights),
-        first_position
-        );
+        dense_controller,
+        in_ids, in_point_lights);
 }
 
 void WVkRender::UpdateDirectionalLights(
@@ -1342,37 +1310,12 @@ void WVkRender::UpdateDirectionalLights(
     if (in_ids.empty()) return;
 
     auto dense_controller = lighting_UBO_.DirectionalLightDenseController();
-    dense_controller.Update(
-        in_ids, in_directional_lights
-        );
-
-    std::uint32_t first_position = dense_controller.FirstDensePosition(in_ids);
-    std::uint32_t light_count = dense_controller.Count();
-
-    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
 
     UpdateLightUBO<wct::render::WDirectionalLight>(
         global_descriptors_,
         frame_index_,
-        const_cast<wct::render::WLightingUBO*>(&ubo),
-        light_count,
-        offsetof(wct::render::WLightingUBO, directional_lights),
-        first_position
-        );    
-
-
-
-    std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(
-        const_cast<wct::render::WLightingUBO*>(&ubo)
-        )
-        + offsetof(wct::render::WLightingUBO, directional_lights)
-        + first_position;
-
-    global_descriptors_.UpdateLightingUBO(
-        frame_index_,
-        ptr,
-        sizeof(wct::render::WLightingUBO::directional_lights) - first_position
-        );
+        dense_controller,
+        in_ids, in_directional_lights);
 }
 
 void WVkRender::UpdateAmbientLight(

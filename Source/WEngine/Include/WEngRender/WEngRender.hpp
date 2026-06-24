@@ -28,6 +28,11 @@ namespace wng::render {
         const WAssetDb & in_asset_db
         ) {
 
+        // TODO It is required that Static Lights goes first than Dynamic lights.
+        // id arrays like :
+        // [SLight 1 , ..., SLight n, Dlight 1,...,Dlight m]
+        // More info at [[org/WEng.org::#StaticDynamicLightsUBOUpdates]]
+
         // Point Lights
 
         decltype(wct::render::WLightingUBO::point_lights) point_lights;

@@ -16,7 +16,7 @@ int main() {
 #+RESULTS:
 : HI
 
-* Inherit Using sentences
+* Inherit Using A::A
 
 #+HEADER: :flags --std=gnu++23
 #+begin_src C++ :main no :results output :includes <iostream> <cstdint>
@@ -43,3 +43,21 @@ int main() {
 #+RESULTS:
 : Natural value: 3
 
+
+* Const Ptr
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
+
+int main() {
+    std::uint32_t a=3;
+    std::uint32_t const *  c = &a;
+
+    c[0] = 5; // illegal
+    *c = 5;   // illegal
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:

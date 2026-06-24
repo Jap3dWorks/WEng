@@ -203,39 +203,55 @@ Los componentes están asociados a actores. formando así entidades compuestas d
 
 *** WAssets
 
-* WObject and WClass Template/Reflection
-** WPROPERTY macro
+** WObject and WClass Template/Reflection
+*** WPROPERTY macro
 :PROPERTIES:
 :CUSTOM_ID: WPROPERTY
 :END:
-*** Objective
+**** Objective
 
 - Property self knowledge (type, names, ranges, etc).
 - Get_ Set_ method access.
 - Serialization.
 
+*** WClass.WEngine.hpp
 
-** WClass.WEngine.hpp
+**** Objective
 
-*** Objective
 WClass generation for current WObject.
 
-*** Namespace
+**** Namespace
 
 - wrf::wclass
 
-** WOBJECT_BODY macro
+*** WOBJECT_BODY macro
 
 * Shaders
+
 - language *Slang*
 - [[https://docs.shader-slang.org/en/latest/external/core-module-reference/global-decls/math.html][slang functions reference]]
+
+* WRender
+** Static Dynamic Lights UBO updates
+:PROPERTIES:
+:CUSTOM_ID: StaticDynamicLightsUBOUpdates
+:END:
+
+id arrays like :
+[SLight 1 , ..., SLight n, Dlight 1,...,Dlight m]
+
+Using a light structure like this allows to perform per frame light updates in a efficiente way.
+lightingUBO contains an array for each light type. this array is ensured that will behave lika a dense/sparse set.
+
+So if any update is placed only at the Dynamic lights area, Static lights will never lose its Dense set positions.
+All dynamic updates can be done in memory ranges, avoiding that any update range overlaps with the static lights memory area.
+
 
 * Coding Style
 
 ** Classes Initial letter
 
 - T -> templates
-- B -> Base Clases not Interfaces
 - I -> Interfaces
 - W -> WEng Object | Engine modules | Engine classes
 - E -> Enums

@@ -124,6 +124,10 @@ namespace wrd::lighting {
             return light_set_.DensePosition(in_id);
         }
 
+        WNODISCARD T const * DenseData() const {
+            return light_set_.DenseData();
+        }
+
     private:
 
         LightSet light_set_{};
@@ -151,9 +155,8 @@ namespace wrd::lighting {
             controller_(in_lights_data_ref)
             {}
 
-
         void Update(WEntityComponentId in_component_id,
-                              const T & in_light) {
+                    const T & in_light) {
 
             controller_.Insert(in_component_id, in_light);
             *count_ref_ = controller_.Count();
@@ -168,7 +171,7 @@ namespace wrd::lighting {
         }
 
         void Update(std::span<WEntityComponentId> in_ids,
-                               std::span<T> in_point_lights) {
+                    std::span<T> in_point_lights) {
             for(std::uint32_t i=0; i<in_ids.size(); i++) {
                 Update(
                     in_ids[i],
@@ -200,20 +203,34 @@ namespace wrd::lighting {
             return controller_.DensePosition(in_id);
         }
 
-        WNODISCARD std::uint32_t FirstDensePosition(std::span<WEntityComponentId> in_ids) const {
+        WNODISCARD T const * DenseData() const {
+            return controller_.DenseData();
+        }
+
+        /**
+         * @returns {<first>, <last>}
+         * <first> is the lower dense position. <last> is the higher dense position.
+         */
+        WNODISCARD std::tuple<std::uint32_t, std::uint32_t>
+        FirstLastDensePosition(
+            std::span<WEntityComponentId> in_ids
+            ) const {
             assert(!in_ids.empty());
 
-            std::uint32_t lower = std::numeric_limits<std::uint32_t>::max();
+            std::uint32_t first = std::numeric_limits<std::uint32_t>::max();
+            std::uint32_t last = 0;
 
             for (auto id : in_ids) {
                 std::uint32_t tmp = DensePosition(id);
-                if (tmp < lower) {
-                    lower = tmp;
+                if (tmp < first) {
+                    first = tmp;
+                }
+                if (tmp > last) {
+                    last = tmp;
                 }
             }
 
-            return std::min(lower, *count_ref_);
-            return lower;
+            return {std::min(first, *count_ref_), last};
         }
 
     private:
