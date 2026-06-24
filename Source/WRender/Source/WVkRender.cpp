@@ -1319,6 +1319,7 @@ void WVkRender::UpdatePointLights(
         in_ids, in_point_lights
         );
 
+    // TODO first and last position (it is free)
     std::uint32_t first_position = dense_controller.FirstDensePosition(in_ids);
     std::uint32_t light_count = dense_controller.Count();
 
