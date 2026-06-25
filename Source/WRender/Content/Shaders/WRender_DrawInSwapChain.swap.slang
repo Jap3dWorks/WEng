@@ -1,18 +1,21 @@
-struct VSInput {
+struct VSSwapchainInput {
     float2 inPosition;
     float2 inTexCoord;
 };
 
-struct VSOutput
+struct VSSwapchainOutput
 {
     float4 pos : SV_Position;
     float2 fragTexCoord;
 };
 
+[[vk::binding(0,0)]]
+uniform Sampler2D texture;
+
 [shader("vertex")]
-VSOutput vsMain(VSInput input)
+VSSwapchainOutput vsMain(VSSwapchainInput input)
 {
-    VSOutput output;
+    VSSwapchainOutput output;
 
     output.pos = float4(input.inPosition, 0.f, 1.f);
     output.fragTexCoord = input.inTexCoord;
@@ -20,12 +23,9 @@ VSOutput vsMain(VSInput input)
     return output;
 }
 
-uniform Sampler2D texture;
-
 [shader("fragment")]
-float4 fsMain(VSOutput vertIn) : SV_TARGET
+float4 fsMain(VSSwapchainOutput vertIn) : SV_TARGET
 {
-    // return float4(0.1, 0.0, 0.0, 1.0);
     return texture.Sample(vertIn.fragTexCoord);
 }
 

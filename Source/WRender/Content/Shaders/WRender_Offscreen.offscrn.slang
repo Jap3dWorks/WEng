@@ -1,134 +1,51 @@
-// Camera stuffs
-struct Camera {
-  float4x4 proj;
-  float4x4 view;
-  float px;
-  float py;
-  float pz;
-  float pitch;
-  float yaw;
-  float roll;
-  float sx;
-  float sy;
-  float sz;
-  float angle_of_view;
-  float near_clipping;
-  float far_clipping;
-};
+import GlobalUBO.GlobalUBO;
+import Offscreen.Offscreen;
 
-// Lighting Types
-// --------------
+// Set 0 is reserved for GlobalUBOs
+// Set 0 binding 0 contains camera_ubo.
+// Set 0 binding 1 contiains lighting_ubo.
 
-struct PointLight {
-    float4 color;
-    float4 position;
-    float intensity;
-    float radius;
-};
-
-struct DirectionalLight {
-    float4 color;
-    float4 direction;
-    float intensity;
-};
-
-struct AmbientLight {
-    float4 color;
-    float intensity;
-};
-
-// WLightingUBO
-// ------------
-
-struct LightingUBO {
-    PointLight point_lights[64];
-    DirectionalLight directional_lights[16];
-    AmbientLight ambient_light;
-
-    uint point_lights_count;
-    uint directional_lights_count;
-};
-
-// Global bindings
-// ---------------
-
-[[vk::binding(0, 0)]] // binding, set
-ConstantBuffer<Camera> camera;
-
-[[vk::binding(1,0)]]
-ConstantBuffer<LightingUBO> lighting;
-
-
-// --
-
-[[vk::binding(0,1)]]            // binding 0, set 1
-uniform Sampler2D albedo;
-
-[[vk::binding(1,1)]]            // binding 1, set 1
-uniform Sampler2D normal;
-
-[[vk::binding(2,1)]]            // binfing 2, set 1
-uniform Sampler2D ws_position;
-
-// TODO input render textures
-//  rm (roughness/metallic)
-//  emission
-//  extras 1 and 2
-
-[[vk::binding(3,1)]]
-uniform Sampler2D depth;
-
-struct VSInput {
-    float2 inPosition;
-    float2 inTexCoord;
-};
-
-struct VSOutput
-{
-    float4 pos : SV_Position;
-    float2 fragTexCoord;
-};
+// Set 1 is reserved for local Shader descriptors.
+// 
 
 // main functions
 // --------------
 
 [shader("vertex")]
-VSOutput vsMain(VSInput input)
+VSOffscreenOutput vsMain(VSOffscreenInput input)
 {
-    VSOutput output;
+    VSOffscreenOutput output;
 
-    output.pos = float4(input.inPosition, 0.f, 1.f);
-    output.fragTexCoord = input.inTexCoord;
+    output.position = float4(input.position, 0.f, 1.f);
+    output.tex_coord = input.tex_coord;
 
     return output;
 }
 
 [shader("fragment")]
-float4 fsMain(VSOutput vertexOutput) : SV_TARGET
+float4 fsMain(VSOffscreenOutput vertexOutput) : SV_TARGET
 {
-    float2 uv = vertexOutput.fragTexCoord;
+    float2 uv = vertexOutput.tex_coord;
 
     float3 wpos = ws_position.Sample(uv).xyz;
     float3 nrm = normal.Sample(uv).xyz;
     float3 alb = albedo.Sample(uv).xyz;
 
     float3 color = alb *
-        lighting.ambient_light.color.xyz *
-        lighting.ambient_light.intensity;
+        lighting_ubo.ambient_light.color.xyz *
+        lighting_ubo.ambient_light.intensity;
     
-    for(uint i=0; i < lighting.point_lights_count; i++) {
-        float3 vdist = lighting.point_lights[i].position.xyz - wpos;
+    for(uint i=0; i < lighting_ubo.point_lights_count; i++) {
+        float3 vdist = lighting_ubo.point_lights[i].position.xyz - wpos;
         float dist = length(vdist);
 
-        float weight = 1.0 - (clamp(dist / lighting.point_lights[i].radius, 0, 1));
+        float weight = 1.0 - (clamp(dist / lighting_ubo.point_lights[i].radius, 0, 1));
         float n = clamp(dot(normalize(vdist), nrm), 0, 1);
         
-        color += alb * lighting.point_lights[i].intensity * n * weight; 
+        color += alb * lighting_ubo.point_lights[i].intensity * n * weight; 
     }
 
     return float4(color, 1.f);
-
-    // return float4(nrm, 1.0);
 
 }
 
