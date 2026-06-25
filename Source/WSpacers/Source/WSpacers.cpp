@@ -78,7 +78,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     WRenderPipelineAsset * pipeline_asset = engine.AssetManager()
         .Get<WRenderPipelineAsset>(pipelineid);
 
-    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::Graphics;
+    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::GBuffer;
 
     // Add shaders to the render pipeline
 
@@ -86,7 +86,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[0].file,
-        "/Content/Shaders/WRender_GBuffer.graphic.spv"
+        "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
@@ -98,7 +98,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     
     std::strcpy(
         pipeline_asset->RenderPipeline().shaders[1].file,
-        "/Content/Shaders/WRender_GBuffer.graphic.spv"
+        "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
@@ -111,7 +111,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     params[0].binding=0;
     params[0].type=wct::render::EPipeParamType::Ubo;
     params[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
-    params[0].size=sizeof(wct::render::WGraphicsUBO);
+    params[0].size=sizeof(wct::render::WModelUBO);
     params[1].binding=1;
     params[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
     params[1].stage_flags=wct::render::EShaderStageFlag::Fragment;

@@ -5,8 +5,10 @@
 
 #include <cstdint>
 #include <array>
+#include <stdexcept>
 
 #include <glm/glm.hpp>
+#include <utility>
 
 namespace wct::render {
 
@@ -16,7 +18,7 @@ namespace wct::render {
     /**
      * @brief Uniform buffer data structure.
      */
-    struct WGraphicsUBO
+    struct WModelUBO
     {
         glm::mat4 model;
         glm::mat4 normal_matrix;
@@ -92,7 +94,9 @@ namespace wct::render {
 
     enum class EPipelineType : uint8_t
     {
-        Graphics,       // Default Opaque
+        Graphics,       // DEPRECATED Default Opaque
+        GBuffer,        // GBuffer generation shader
+        Offscreen,      // Offscreen render using GBuffers
         Transparency,   // Alpha Blending
         Postprocess,    // Camera shader pipelines
         Compute,        // GPU
@@ -100,6 +104,37 @@ namespace wct::render {
         Tonemapping,    // Apply tonemapping
         Swap            // Used to write in the swap chain
     };
+
+    namespace {
+        template<typename ...Args>
+        inline constexpr bool _dispatch_impl(EPipelineType smpl) {
+            return false;
+        }
+
+        template<EPipelineType NextType, EPipelineType ... PTypes,
+                 typename NextHandler, typename ...Handlers >
+        inline constexpr bool _dispatch_impl(EPipelineType smpl,
+                                             NextHandler&& next_handler,
+                                             Handlers&&... handlers) {
+            if (NextType == smpl) {
+                next_handler();
+                return true;
+            }
+            else {
+                return _dispatch_impl<PTypes...>(smpl, std::forward<Handlers>(handlers)...);
+            }
+        }
+    }
+    
+    template<EPipelineType... PipelineTypes, typename... Handlers>
+    constexpr inline void pipeline_type_dispatcher(EPipelineType type, Handlers&&... handlers) {
+
+        static_assert(sizeof...(PipelineTypes) == sizeof...(Handlers));
+    
+        if(!_dispatch_impl<PipelineTypes...>(type, std::forward<Handlers>(handlers)...)) {
+            throw std::runtime_error("Unknown type");
+        }
+    }
 
     enum class EPipeParamType {
         None,

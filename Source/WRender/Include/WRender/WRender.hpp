@@ -65,7 +65,7 @@ namespace wrd::render {
         return ubo_camera;
     }
 
-    inline wct::render::WGraphicsUBO ToUBOGraphicsStruct(
+    inline wct::render::WModelUBO ToUBOGraphicsStruct(
         const WTransformComponent & in_transform
         // const WTransformStruct & in_transform
         ) {

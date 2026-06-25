@@ -148,7 +148,7 @@ void WVkRender::Initialize()
         device_.PhysicalDevice()
     };
 
-    WFLOG("[DEBUG] Initialize Graphics Pipelines.");
+    WFLOG("[DEBUG] Initialize GBuffer Pipelines.");
 
     gbuffers_pipelines_ = WVkGBufferPipelinesRAII(
         device_.Device(),
@@ -401,26 +401,33 @@ void WVkRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
     ) {
 
-    switch(render_pipeline->RenderPipeline().type) {
-        
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.CreatePipeline(
-            render_pipeline->WID(),
-            render_pipeline->RenderPipeline(),
-            global_descriptors_.DescriptorSetLayout()
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess>
+        (
+            render_pipeline->RenderPipeline().type,
+            [&,this](){
+                gbuffers_pipelines_.CreatePipeline(
+                    render_pipeline->WID(),
+                    render_pipeline->RenderPipeline(),
+                    global_descriptors_.DescriptorSetLayout()
+                    );
+            },
+            [&,this](){
+                gbuffers_pipelines_.CreatePipeline(
+                    render_pipeline->WID(),
+                    render_pipeline->RenderPipeline(),
+                    global_descriptors_.DescriptorSetLayout()
+                    );
+            },
+            [&,this](){
+                ppcss_pipelines_.CreatePipeline(
+                    render_pipeline->WID(),
+                    render_pipeline->RenderPipeline()
+                    );
+            }
             );
-        break;
-        
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.CreatePipeline(
-            render_pipeline->WID(),
-            render_pipeline->RenderPipeline()
-            );
-        break;
-
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
 
     pipeline_track_.pipeline_pipetype[render_pipeline->WID()] =
         render_pipeline->RenderPipeline().type;
@@ -433,33 +440,37 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
         pipeline_track_.binding_pipetype.erase(binding);
     };
 
-    switch(pipeline_track_.pipeline_pipetype[in_id]) {
-        
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.ForEachBinding(
-            in_id, clearbindingfn
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess
+        >
+        (pipeline_track_.pipeline_pipetype[in_id],
+         [&,this]() {
+             gbuffers_pipelines_.ForEachBinding(
+                 in_id, clearbindingfn
+                 );
+             gbuffers_pipelines_.DeletePipeline(
+                 in_id
+                 );
+         },
+         [&,this]() {
+             gbuffers_pipelines_.ForEachBinding(
+                 in_id, clearbindingfn
+                 );
+             gbuffers_pipelines_.DeletePipeline(
+                 in_id
+                 );
+         },
+         [&,this]() {
+             ppcss_pipelines_.ForEachBinding(
+                 in_id, clearbindingfn
+                 );
+             gbuffers_pipelines_.DeletePipeline(
+                 in_id
+                 );
+         }
             );
-            
-        gbuffers_pipelines_.DeletePipeline(
-            in_id
-            );
-            
-        break;
-
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.ForEachBinding(
-            in_id, clearbindingfn
-            );
-
-        gbuffers_pipelines_.DeletePipeline(
-            in_id
-            );
-        
-        break;
-
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
 
     pipeline_track_.pipeline_pipetype.erase(in_id);
 
@@ -505,26 +516,34 @@ void WVkRender::CreatePipelineBinding(
         };
     }
 
-    switch(pipeline_track_.pipeline_pipetype[pipeline_id]) {
-
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.CreateBinding(component_id,
-                                          pipeline_id,
-                                          in_assetindex_id,
-                                          ubos,
-                                          textures);
-        break;
-        
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.CreateBinding(component_id,
-                                       pipeline_id,
-                                       ubos,
-                                       textures);
-        break;
-        
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess
+        >
+        (pipeline_track_.pipeline_pipetype[pipeline_id],
+         [&,this](){
+             gbuffers_pipelines_.CreateBinding(component_id,
+                                               pipeline_id,
+                                               in_assetindex_id,
+                                               ubos,
+                                               textures);
+         },
+         [&,this](){
+             gbuffers_pipelines_.CreateBinding(component_id,
+                                               pipeline_id,
+                                               in_assetindex_id,
+                                               ubos,
+                                               textures);
+             
+         },
+         [&,this](){
+             ppcss_pipelines_.CreateBinding(component_id,
+                                            pipeline_id,
+                                            ubos,
+                                            textures);
+         }
+            );
 
     pipeline_track_.binding_pipetype[component_id] =
         pipeline_track_.pipeline_pipetype[pipeline_id];
@@ -533,20 +552,17 @@ void WVkRender::CreatePipelineBinding(
 
 void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 
-    switch(pipeline_track_.binding_pipetype[in_id]) {
-        
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.DeleteBinding(in_id);
-        break;
-        
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.DeleteBinding(in_id);
-        break;
-        
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
-
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess>
+        (
+            pipeline_track_.binding_pipetype[in_id],
+            [&,this](){ gbuffers_pipelines_.DeleteBinding(in_id); },
+            [&,this](){ gbuffers_pipelines_.DeleteBinding(in_id); },
+            [&,this](){ ppcss_pipelines_.DeleteBinding(in_id); }
+            );
+    
     pipeline_track_.binding_pipetype.erase(in_id);
 }
 
@@ -589,23 +605,29 @@ void WVkRender::UpdateParameterDynamic(
         .offset = ubo_write.offset
     };
 
-    switch(pipeline_track_.binding_pipetype[in_component_id]) {
-
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.UpdateBinding(in_component_id,
-                                          frame_index_,
-                                          ubowrt);
-        break;
-
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.UpdateBinding(in_component_id,
-                                       frame_index_,
-                                       ubowrt);
-        break;
-
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess
+        >
+        (
+            pipeline_track_.binding_pipetype[in_component_id],
+            [&, this](){
+                gbuffers_pipelines_.UpdateBinding(in_component_id,
+                                                  frame_index_,
+                                                  ubowrt);
+            },
+            [&,this](){
+                gbuffers_pipelines_.UpdateBinding(in_component_id,
+                                                  frame_index_,
+                                                  ubowrt);
+            },
+            [&,this](){
+                ppcss_pipelines_.UpdateBinding(in_component_id,
+                                               frame_index_,
+                                               ubowrt);
+            }
+            );
 }
 
 void WVkRender::UpdateParameterStatic(
@@ -620,22 +642,26 @@ void WVkRender::UpdateParameterStatic(
         .offset = ubo_write.offset
     };
 
-    switch(pipeline_track_.binding_pipetype[in_component_id]) {
-        
-    case wct::render::EPipelineType::Graphics:
-        gbuffers_pipelines_.UpdateBinding(
-            in_component_id, ubowrt
+    wct::render::pipeline_type_dispatcher<
+        wct::render::EPipelineType::Graphics,
+        wct::render::EPipelineType::GBuffer,
+        wct::render::EPipelineType::Postprocess
+        >
+        (
+            pipeline_track_.binding_pipetype[in_component_id],
+            [&, this](){
+                gbuffers_pipelines_.UpdateBinding(in_component_id,
+                                                  ubowrt);
+            },
+            [&,this](){
+                gbuffers_pipelines_.UpdateBinding(in_component_id,
+                                                  ubowrt);
+            },
+            [&,this](){
+                ppcss_pipelines_.UpdateBinding(in_component_id,
+                                               ubowrt);
+            }
             );
-        break;
-
-    case wct::render::EPipelineType::Postprocess:
-        ppcss_pipelines_.UpdateBinding(in_component_id,
-                                       ubowrt);
-        break;
-
-    default:
-        WFLOG("Pipeline type not implemented.");
-    }
 }
 
 void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height) {

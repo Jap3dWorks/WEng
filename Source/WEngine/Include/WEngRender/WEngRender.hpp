@@ -253,7 +253,7 @@ namespace wng::render {
                         //     in_component->EntityId()
                         //     ).TransformStruct();
 
-                        wct::render::WGraphicsUBO grpubo =
+                        wct::render::WModelUBO grpubo =
                             wrd::render::ToUBOGraphicsStruct(*transform_component);
                         wct::render::WRPParamUbo ubodt{.binding=0, .offset=0};
                         ubodt.databuffer.resize(sizeof(decltype(grpubo)));

@@ -96,13 +96,13 @@ namespace wvk::buffer {
         void * ubo_memory,
         const glm::mat4 & model
         ) {
-        wct::render::WGraphicsUBO ubo{};
+        wct::render::WModelUBO ubo{};
 
         ubo.model = model;
         
         memcpy(ubo_memory,
                &ubo,
-               sizeof(wct::render::WGraphicsUBO));
+               sizeof(wct::render::WModelUBO));
 
         return true;
     }    
