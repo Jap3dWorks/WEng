@@ -17,7 +17,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WRender/WRender.hpp"
-#include "WStructs/WComponentStructs.hpp"
+#include "WComponents/WComponentTypes.hpp"
 
 
 namespace wng::render {
@@ -129,7 +129,7 @@ namespace wng::render {
              &texture_assets,
              &in_asset_db](WStaticMeshComponent * in_component) {
                 
-                WAssetId smid = in_component->GetStaticMeshAsset();
+                WAssetId smid = in_component->Get_static_mesh_asset();
                 
                 if(smid.IsValid()) {
                     static_meshes.Insert(smid.GetId(), smid);
@@ -149,8 +149,8 @@ namespace wng::render {
                      &texture_assets,
                      &in_asset_db](WStaticMeshAsset * _sm, const WSubIdxId & _id, WMeshStruct& _m) {
                         
-                        WRenderPipelineAssignmentStruct pipassign =
-                            in_component->GetRenderPipelineAssignment(0);
+                        wcm::types::WPipelineAssignment pipassign =
+                            in_component->GetPipelineAssignment(0);
                         
                         if(pipassign.pipeline.IsValid() && pipassign.params.IsValid()) {
                             
@@ -211,7 +211,7 @@ namespace wng::render {
              &in_asset_db,
              &in_level]
             (WStaticMeshComponent* in_component) {
-                const WAssetId & sm_id = in_component->GetStaticMeshAsset();
+                const WAssetId & sm_id = in_component->Get_static_mesh_asset();
                 WStaticMeshAsset * sm_asset = in_asset_db.Get<WStaticMeshAsset>(sm_id);
 
                 sm_asset->ForEachMesh(
@@ -221,7 +221,7 @@ namespace wng::render {
                      &in_component](WStaticMeshAsset* _sma, const WSubIdxId & _id, WMeshStruct& _m) {
                         
                         auto param = in_asset_db.Get<WRenderPipelineParametersAsset>(
-                            in_component->GetRenderPipelineAssignment(_id).params
+                            in_component->GetPipelineAssignment(_id).params
                             );
 
                         WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
@@ -231,7 +231,7 @@ namespace wng::render {
                         WAssetIndexId assidx = WIdUtils::ToAssetIndexId(_sma->WID(), _id);
                         in_render->CreatePipelineBinding(
                             ecid,
-                            in_component->GetRenderPipelineAssignment(_id).pipeline,
+                            in_component->GetPipelineAssignment(_id).pipeline,
                             assidx,
                             param->RenderPipelineParameters()
                             );
@@ -258,7 +258,7 @@ namespace wng::render {
         WEntityId camera_entt{};
         in_level->ForEachComponent<WCameraComponent>(
             [&camera_entt](WCameraComponent * _cam){
-                if (!camera_entt && _cam->RenderId().IsValid()) {
+                if (!camera_entt && _cam->Get_render_id().IsValid()) {
                     camera_entt = _cam->EntityId();
                 }
             }
@@ -268,12 +268,11 @@ namespace wng::render {
             TSparseSet<WAssetId> cam_render_pipelines;
             cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
 
-            in_level->GetComponent<WCameraComponent>(camera_entt).ForEachAssignment(
+            in_level->GetComponent<WCameraComponent>(camera_entt).ForEachPostprocessAssignment(
                 [&cam_render_pipelines](
                      const WCameraComponent * _cmp,
                      const WSubIdxId & _idx,
-                     const WRenderPipelineAssignmentStruct & _assgn) {
-                    
+                     const auto & _assgn) {
                     cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
                 }
                 );
@@ -284,13 +283,13 @@ namespace wng::render {
             }
 
             WCameraComponent & comp = in_level->GetComponent<WCameraComponent>(camera_entt);
-            comp.ForEachAssignment(
+            comp.ForEachPostprocessAssignment(
                 [&in_level,
                  &in_render,
                  &in_asset_db](
                     const WCameraComponent * _cmp,
                     const WSubIdxId & _idx,
-                    const WRenderPipelineAssignmentStruct & _assgn
+                    const auto & _assgn
                     ) {
                     WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
                         _cmp->EntityId(), _idx
@@ -334,12 +333,12 @@ namespace wng::render {
                 ](WStaticMeshComponent * _component) {
 
                 static_meshes.Insert(
-                    _component->GetStaticMeshAsset().GetId(),
-                    _component->GetStaticMeshAsset()
+                    _component->Get_static_mesh_asset().GetId(),
+                    _component->Get_static_mesh_asset()
                     );
 
                 WStaticMeshAsset * sm_asset = in_asset_db.Get<WStaticMeshAsset>(
-                    _component->GetStaticMeshAsset()
+                    _component->Get_static_mesh_asset()
                     );
 
                 sm_asset->ForEachMesh(
@@ -353,7 +352,7 @@ namespace wng::render {
                         auto pipeline_parameters =
                             static_cast<WRenderPipelineParametersAsset*>(
                                 in_asset_db.Get(
-                                    _component->GetRenderPipelineAssignment(_id).params
+                                    _component->GetPipelineAssignment(_id).params
                                     ));
 
                         auto & parameters_struct = pipeline_parameters

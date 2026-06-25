@@ -82,10 +82,10 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
             switch(_v.input.mode) {
             case EInputMode::Press:
-                ic.Front(true);
+                ic.Set_front(true);
                 break;
             case EInputMode::Release:
-                ic.Front(false);
+                ic.Set_front(false);
                 break;
             default:
                 
@@ -101,10 +101,10 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
             switch(_v.input.mode) {
             case EInputMode::Press:
-                ic.Back(true);
+                ic.Set_back(true);
                 break;
             case EInputMode::Release:
-                ic.Back(false);
+                ic.Set_back(false);
                 break;
             default:
                 
@@ -120,10 +120,10 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
             switch(_v.input.mode) {
             case EInputMode::Press:
-                ic.Left(true);
+                ic.Set_left(true);
                 break;
             case EInputMode::Release:
-                ic.Left(false);
+                ic.Set_left(false);
                 break;
             default:
                 
@@ -139,10 +139,10 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
             switch(_v.input.mode) {
             case EInputMode::Press:
-                ic.Right(true);
+                ic.Set_right(true);
                 break;
             case EInputMode::Release:
-                ic.Right(false);
+                ic.Set_right(false);
                 break;
             default:
                 
@@ -173,37 +173,37 @@ START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
             WTransformComponent & tc = parameters.level->
                 GetComponent<WTransformComponent>(mc->EntityId());
 
-            float amag = std::min(glm::length(mc->Acceleration()), mc->MaxAcceleration());
+            float amag = std::min(glm::length(mc->Get_acceleration()), mc->Get_max_acceleration());
 
             if (amag > 0.0000001) {
-                mc->Acceleration(glm::normalize(mc->Acceleration()) * amag);
+                mc->Set_acceleration(glm::normalize(mc->Get_acceleration()) * amag);
             }
             else {
-                mc->Acceleration(glm::vec3{0});
+                mc->Set_acceleration(glm::vec3{0});
             }
 
-            mc->Velocity(
-                mc->Velocity() + mc->Acceleration() * (float)parameters.engine->EngineCycle().DeltaTime
+            mc->Set_velocity(
+                mc->Get_velocity() + mc->Get_acceleration() * (float)parameters.engine->EngineCycle().DeltaTime
                 );
 
-            float vlength = glm::length(mc->Velocity());
-            float vmag = std::min(vlength, mc->MaxVelocity());
+            float vlength = glm::length(mc->Get_velocity());
+            float vmag = std::min(vlength, mc->Get_max_velocity());
 
             glm::vec3 current_direction{0.00001, 0.00001, 0.00001};
             if(vlength > 0.0000001) {
-                current_direction = glm::normalize(mc->Velocity());
+                current_direction = glm::normalize(mc->Get_velocity());
             }
 
-            float drag = mc->Drag() * (float)parameters.engine->EngineCycle().DeltaTime;
+            float drag = mc->Get_drag() * (float)parameters.engine->EngineCycle().DeltaTime;
 
-            mc->Velocity(
+            mc->Set_velocity(
                 (current_direction * vmag) - (current_direction * vmag * drag)
                 );
 
             WTransformStruct & ts = tc.TransformStruct();
 
             ts.position +=
-                mc->Velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
+                mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
 
             ts.transform_matrix = WMathUtils::ToMat4(
                 ts.position,
@@ -223,20 +223,20 @@ START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
 
     glm::vec3 acc{0};
 
-    if(ic.Front()) {
+    if(ic.Get_front()) {
         acc -= glm::vec3(tc.TransformStruct().transform_matrix[2]);
     }
-    if(ic.Back()) {
+    if(ic.Get_back()) {
         acc += glm::vec3(tc.TransformStruct().transform_matrix[2]);
     }
-    if(ic.Left()) {
+    if(ic.Get_left()) {
         acc -= glm::vec3(tc.TransformStruct().transform_matrix[0]);
     }
-    if(ic.Right()) {
+    if(ic.Get_right()) {
         acc += glm::vec3(tc.TransformStruct().transform_matrix[0]);
     }
 
-    mc.Acceleration(acc * 3.f);
+    mc.Set_acceleration(acc * 3.f);
 END_DEFINE_WSYSTEM()
 
 
@@ -253,7 +253,7 @@ START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
 
             parameters.engine->Render()->UpdateUboCamera(
                 wrd::render::ToUBOCameraStruct(
-                    cam->GetCameraStruct(),
+                    *cam,
                     ts.TransformStruct(),
                     (float) rsize.width / (float) rsize.height
                     )

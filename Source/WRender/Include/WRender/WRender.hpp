@@ -1,6 +1,7 @@
 #pragma once
 
-#include "WStructs/WComponentStructs.hpp"
+#include "WComponents/WCameraComponent.hpp"
+#include "WComponents/WComponentTypes.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WUtils/WMathUtils.hpp"
 #include <glm/ext/quaternion_transform.hpp>
@@ -11,17 +12,43 @@
 
 namespace wrd::render {
 
+    // inline wct::render::WCameraUBO ToUBOCameraStruct(
+    //     const WCameraPropertiesStruct & in_camera,
+    //     const WTransformStruct & in_transform,
+    //     float in_aspect
+    //     ) {
+    //     wct::render::WCameraUBO ubo_camera;
+    //     ubo_camera.proj = glm::perspective(
+    //         glm::radians(in_camera.angle_of_view),
+    //         in_aspect,
+    //         in_camera.near_clipping,
+    //         in_camera.far_clipping
+    //         );
+
+    //     glm::mat3 orient{in_transform.transform_matrix};
+    //     glm::mat4 o = glm::transpose(orient);
+
+    //     glm::vec3 translation{in_transform.transform_matrix[3]};
+    //     glm::mat4 t = glm::translate(glm::mat4{1}, -translation);
+
+    //     ubo_camera.view = o * t;
+
+    //     ubo_camera.proj[1][1] *= -1;
+        
+    //     return ubo_camera;
+    // }
+
     inline wct::render::WCameraUBO ToUBOCameraStruct(
-        const WCameraPropertiesStruct & in_camera,
+        const WCameraComponent & in_camera,
         const WTransformStruct & in_transform,
         float in_aspect
         ) {
         wct::render::WCameraUBO ubo_camera;
         ubo_camera.proj = glm::perspective(
-            glm::radians(in_camera.angle_of_view),
+            glm::radians(in_camera.Get_angle_of_view()),
             in_aspect,
-            in_camera.near_clipping,
-            in_camera.far_clipping
+            in_camera.Get_near_clipping(),
+            in_camera.Get_far_clipping()
             );
 
         glm::mat3 orient{in_transform.transform_matrix};

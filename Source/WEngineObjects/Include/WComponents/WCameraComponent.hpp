@@ -3,7 +3,7 @@
 #include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WStructs/WComponentStructs.hpp"
+#include "WComponents/WComponentTypes.hpp"
 
 #include <glm/glm.hpp>
 
@@ -12,37 +12,44 @@
 
 class WENGINEOBJECTS_API WCameraComponent : public WComponent {
 
-    WOBJECT_BODY
-        
+    WOBJECT_BODY;
+
 public:
 
-    WCameraPropertiesStruct & GetCameraStruct() { return camera_struct_; };
+    using WPostprocessAssignments =
+        wcm::types::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
 
-    const WCameraPropertiesStruct & GetCameraStruct() const { return camera_struct_; }
+public:
 
-    void SetRenderPipelineAssignment(const WSubIdxId & in_id,
-                                     const WAssetId & in_pipeline_id,
-                                     const WAssetId & in_param_id) {
-        render_pipelines_[in_id.GetId()].pipeline=in_pipeline_id;
-        render_pipelines_[in_id.GetId()].params=in_param_id;
+    WPROPERTY(glm::vec3, point, 0);
+    WPROPERTY(float, angle_of_view, 45.f);
+    WPROPERTY(float, near_clipping, 0.01f);
+    WPROPERTY(float, far_clipping, 100.f);
+
+    WPROPERTY(WRenderId, render_id, 0);
+
+    WPROPERTY(WPostprocessAssignments, postprocess_pipelines, );
+
+public:    
+
+    void SetPostprocessAssignment(const WSubIdxId & in_id,
+                                  const WAssetId & in_pipeline_id,
+                                  const WAssetId & in_param_id) {
+        postprocess_pipelines[in_id.GetId()].pipeline=in_pipeline_id;
+        postprocess_pipelines[in_id.GetId()].params=in_param_id;
     }
 
-    void SetRenderPipelineAssignment(const WSubIdxId & in_id,
-                                     const WRenderPipelineAssignmentStruct & in_assignment) {
-        render_pipelines_[in_id.GetId()] = in_assignment;
-    }
-
-    WRenderPipelineAssignmentStruct GetRenderPipelineAssignment(const WSubIdxId & in_id=0) const {
-        return render_pipelines_[in_id.GetId()];
+    wcm::types::WPipelineAssignment GetPostprocessAssignment(const WSubIdxId & in_id=0) const {
+        return postprocess_pipelines[in_id.GetId()];
     }
 
     template<CCallable<void,
                        const WCameraComponent *,
                        const WSubIdxId &,
-                       const WRenderPipelineAssignmentStruct &> TFn>
-    void ForEachAssignment(TFn && in_fn) const {
+                       const wcm::types::WPipelineAssignment &> TFn>
+    void ForEachPostprocessAssignment(TFn && in_fn) const {
         std::uint8_t idx = 0;
-        for(const auto & assignment : render_pipelines_) {
+        for(const auto & assignment : postprocess_pipelines) {
             if(!assignment.pipeline.IsValid()) break;
 
             std::forward<TFn>(in_fn)(this, WSubIdxId(idx), assignment);
@@ -50,20 +57,5 @@ public:
         }
     }
 
-    void RenderId(const WRenderId & in_id) {
-        render_id_ = in_id;
-    }
 
-    WRenderId RenderId() const {
-        return render_id_;
-    }
-
-private:
-
-    WCameraPropertiesStruct camera_struct_{};
-
-    WRenderId render_id_{0};
-
-    WRenderPipelineAssignments render_pipelines_{};
-    
 };

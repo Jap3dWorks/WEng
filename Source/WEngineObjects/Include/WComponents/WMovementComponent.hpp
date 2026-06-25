@@ -9,50 +9,58 @@
 
 class WENGINEOBJECTS_API WMovementComponent : public WComponent {
 
-    WOBJECT_BODY
-        
-public:
+    WOBJECT_BODY;
 
-    glm::vec3 Velocity() const noexcept {
-        return velocity_;
-    }
+public:        
 
-    void Velocity(const glm::vec3 & in_velocity_direction) noexcept {
-        velocity_ = in_velocity_direction;
-    }
+    WPROPERTY(glm::vec3, velocity, 0);
+    WPROPERTY(float, max_velocity, 30.f);
+    WPROPERTY(glm::vec3, acceleration, 0);
+    WPROPERTY(float, max_acceleration, 30.f);
+    WPROPERTY(float, drag, 2.5f);
 
-    float MaxVelocity() const noexcept {
-        return max_velocity_;
-    }
+// public:
 
-    void MaxVelocity(const float & in_velocity)  noexcept {
-        max_velocity_ = in_velocity;
-    }
+//     glm::vec3 Velocity() const noexcept {
+//         return velocity_;
+//     }
 
-    glm::vec3 Acceleration() const noexcept { return acceleration_; }
+//     void Velocity(const glm::vec3 & in_velocity_direction) noexcept {
+//         velocity_ = in_velocity_direction;
+//     }
 
-    void Acceleration(const glm::vec3 & in_direction)  noexcept {
-        acceleration_ = in_direction;
-    }
+//     float MaxVelocity() const noexcept {
+//         return max_velocity_;
+//     }
 
-    float MaxAcceleration() const noexcept { return max_acceleration_; }
+//     void MaxVelocity(const float & in_velocity)  noexcept {
+//         max_velocity_ = in_velocity;
+//     }
 
-    void MaxAcceleration(const float & in_max_acceleration) noexcept {
-        max_acceleration_ = in_max_acceleration;
-    }
+//     glm::vec3 Acceleration() const noexcept { return acceleration_; }
 
-    float Drag() const noexcept { return drag_; }
+//     void Acceleration(const glm::vec3 & in_direction)  noexcept {
+//         acceleration_ = in_direction;
+//     }
 
-    void Drag(const float & in_value) noexcept { drag_ = in_value; }
+//     float MaxAcceleration() const noexcept { return max_acceleration_; }
 
-private:
+//     void MaxAcceleration(const float & in_max_acceleration) noexcept {
+//         max_acceleration_ = in_max_acceleration;
+//     }
 
-    glm::vec3 velocity_{0};
-    float max_velocity_{30.f};
+//     float Drag() const noexcept { return drag_; }
 
-    glm::vec3 acceleration_{0};
-    float max_acceleration_{30.f};
+//     void Drag(const float & in_value) noexcept { drag_ = in_value; }
 
-    float drag_{2.5f};
+// private:
+
+//     glm::vec3 velocity_{0};
+//     float max_velocity_{30.f};
+
+//     glm::vec3 acceleration_{0};
+//     float max_acceleration_{30.f};
+
+//     float drag_{2.5f};
 
 };

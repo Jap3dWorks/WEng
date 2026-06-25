@@ -13,7 +13,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WStructs/WComponentStructs.hpp"
+#include "WComponents/WComponentTypes.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WCoreTypes/WGeometryStructs.hpp"
 #include "WObjectDb/WAssetDb.hpp"
@@ -132,7 +132,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     return true;
 }
 
-bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmentStruct> & out_postprcss) {
+bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
     WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur.PPBlur");
 
     WRenderPipelineAsset * pipeline_asset =
@@ -164,9 +164,7 @@ bool PostprocessPipelines(WEngine & engine, std::vector<WRenderPipelineAssignmen
     WRenderPipelineParametersAsset * paramass =
         engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    out_postprcss.clear();
-
-    out_postprcss.push_back({pipid, paramid});
+    camera.SetPostprocessAssignment(0, pipid, paramid);
 
     return true;
 }
@@ -251,8 +249,8 @@ bool InputAssets(WEngine & in_engine) {
 
 bool SetupLevel(WEngine & in_engine,
                 const ModelAssets & in_viking_room,
-                const ModelAssets & in_monkey_dt,
-                const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
+                const ModelAssets & in_monkey_dt // ,
+                // const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
     ) {
 
     WLevelId levelid = in_engine.LevelRegister().Create();
@@ -274,16 +272,13 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WCameraInputComponent>(cid);  // User input
 
     WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
-    cameracomp.RenderId(1); // The renderable camera
+    cameracomp.Set_render_id(1); // The renderable camera
     WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
     cts.rotation = {0.0f, 0.0f, 0.0f};
     cts.position = {0.0, 0.0f, .5f};
 
     // postprocess
-    
-    for(std::uint8_t i=0; i < in_ppcss_assgnm.size(); i++) {
-        cameracomp.SetRenderPipelineAssignment({i}, in_ppcss_assgnm[i]);
-    }
+    SetPostprocessPipelines(in_engine, cameracomp);
 
     // Models
     // Viking Room
@@ -299,8 +294,8 @@ bool SetupLevel(WEngine & in_engine,
 
     WStaticMeshComponent & smcomponent =
         level.GetComponent<WStaticMeshComponent>(eid);
-    smcomponent.StaticMeshAsset(in_viking_room.static_mesh);
-    smcomponent.SetRenderPipelineAssignment(
+    smcomponent.Set_static_mesh_asset(in_viking_room.static_mesh);
+    smcomponent.SetPipelineAssignment(
         0, in_viking_room.pipeline_asset, in_viking_room.param_asset
         );
 
@@ -317,8 +312,8 @@ bool SetupLevel(WEngine & in_engine,
 
     auto & monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
 
-    monkeysm.StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkeysm.SetRenderPipelineAssignment(0,
+    monkeysm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
+    monkeysm.SetPipelineAssignment(0,
                                          in_monkey_dt.pipeline_asset,
                                          in_monkey_dt.param_asset);
 
@@ -335,8 +330,8 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WStaticMeshComponent>(monkey2_id);
     auto & monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
 
-    monkey2sm.StaticMeshAsset(in_monkey_dt.static_mesh);
-    monkey2sm.SetRenderPipelineAssignment(0,
+    monkey2sm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
+    monkey2sm.SetPipelineAssignment(0,
                                           in_monkey_dt.pipeline_asset,
                                           in_monkey_dt.param_asset);
 
@@ -383,7 +378,7 @@ int main(int argc, char** argv)
         
         WEngine engine = WEngine::DefaultCreate();
 
-        std::vector<WRenderPipelineAssignmentStruct> ppcsst_assignments;
+        std::vector<wcm::types::WPipelineAssignment> ppcsst_assignments;
 
         ModelAssets viking_room;
         ModelAssets monkey_1;
@@ -394,17 +389,13 @@ int main(int argc, char** argv)
         LoadVikingRoom(engine, viking_room);
         LoadMonkey(engine, monkey_1, viking_room.pipeline_asset);
 
-        PostprocessPipelines(engine, ppcsst_assignments);
-
         InputAssets(engine);
 
         WFLOG("[INFO] Setup Init Level.");
        
         SetupLevel(engine,
                    viking_room,
-                   monkey_1,
-                   ppcsst_assignments
-            );
+                   monkey_1);
 
         WFLOG("[INFO] Initialize While Loop");
 

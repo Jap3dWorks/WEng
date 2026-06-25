@@ -9,6 +9,8 @@
 
 // TODO move each struct to its logical object.
 
+
+// DEPRECATED
 struct WTransformStruct
 {
 public:
@@ -20,19 +22,12 @@ public:
     glm::mat4 transform_matrix{1.0};
 };
 
-struct WCameraPropertiesStruct
-{
-    glm::vec3 point{0};
-    float angle_of_view{45.f};
-    float near_clipping{0.01f};
-    float far_clipping{100.f};
-};
+namespace wcm::types {
+    struct WPipelineAssignment {
+        WAssetId pipeline{};
+        WAssetId params{};
+    };
 
-struct WRenderPipelineAssignmentStruct {
-    WAssetId pipeline{};
-    WAssetId params{};
-};
-
-using WRenderPipelineAssignments = std::array<WRenderPipelineAssignmentStruct, WENG_MAX_ASSET_IDS>;
-
-
+    template<std::uint8_t Max=WENG_MAX_ASSET_IDS>
+    using WPipelineAssignments = std::array<WPipelineAssignment, Max>;
+}
