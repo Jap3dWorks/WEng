@@ -107,27 +107,31 @@ namespace wct::render {
 
     namespace {
         template<typename ...Args>
-        inline constexpr bool _dispatch_impl(EPipelineType smpl) {
+        inline constexpr bool _dispatch_impl(EPipelineType pype_type) {
             return false;
         }
 
         template<EPipelineType NextType, EPipelineType ... PTypes,
                  typename NextHandler, typename ...Handlers >
-        inline constexpr bool _dispatch_impl(EPipelineType smpl,
+        inline constexpr bool _dispatch_impl(EPipelineType pipe_type,
                                              NextHandler&& next_handler,
                                              Handlers&&... handlers) {
-            if (NextType == smpl) {
+
+            static_assert(sizeof...(PTypes) == sizeof...(handlers), 
+                          "Number of pipeline types must match number of handlers");
+            
+            if (NextType == pipe_type) {
                 next_handler();
                 return true;
             }
             else {
-                return _dispatch_impl<PTypes...>(smpl, std::forward<Handlers>(handlers)...);
+                return _dispatch_impl<PTypes...>(pipe_type, std::forward<Handlers>(handlers)...);
             }
         }
     }
     
     template<EPipelineType... PipelineTypes, typename... Handlers>
-    constexpr inline void pipeline_type_dispatcher(EPipelineType type, Handlers&&... handlers) {
+    inline constexpr void pipeline_type_dispatcher(EPipelineType type, Handlers&&... handlers) {
 
         static_assert(sizeof...(PipelineTypes) == sizeof...(Handlers));
     
