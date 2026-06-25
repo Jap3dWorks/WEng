@@ -45,11 +45,16 @@ namespace wng::render {
                 if (cmp->Get_active()) {
                     auto plight = cmp->ToPointLight();
 
-                    auto & transform = in_level
-                        ->GetComponent<WTransformComponent>
-                        (cmp->EntityId()).TransformStruct();
+                    auto * transform_component =
+                        &in_level->GetComponent<WTransformComponent>
+                        (cmp->EntityId());
 
-                    plight.position = {transform.position, 0.f};
+                    // auto & transform = in_level
+                    //     ->GetComponent<WTransformComponent>
+                    //     (cmp->EntityId()).TransformStruct();
+
+                    plight.position = {transform_component->Get_position(),
+                                       0.f};
                     
                     point_lights[pl_count] = plight;
                     pl_ids[pl_count] = in_level->
@@ -73,11 +78,15 @@ namespace wng::render {
                 if (cmp->Get_active()) {
                     auto dlight = cmp->ToDirectionalLight();
 
-                    auto & transform = in_level
+                    auto * transform_cmp = &in_level
                         ->GetComponent<WTransformComponent>
-                        (cmp->EntityId()).TransformStruct();
+                        (cmp->EntityId());
+                    // auto & transform = in_level
+                    //     ->GetComponent<WTransformComponent>
+                    //     (cmp->EntityId()).TransformStruct();
 
-                    dlight.direction = transform.transform_matrix[0];
+                    // dlight.direction = transform.transform_matrix[0];
+                    dlight.direction = transform_cmp->Get_transform_matrix()[0];
 
                     directional_lights[dl_count] = dlight;
 
@@ -236,12 +245,16 @@ namespace wng::render {
                             param->RenderPipelineParameters()
                             );
 
-                        WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
-                            in_component->EntityId()
-                            ).TransformStruct();
+                        auto * transform_component = &in_level
+                            ->GetComponent<WTransformComponent>
+                            (in_component->EntityId());
+
+                        // WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
+                        //     in_component->EntityId()
+                        //     ).TransformStruct();
 
                         wct::render::WGraphicsUBO grpubo =
-                            wrd::render::ToUBOGraphicsStruct(tstruct);
+                            wrd::render::ToUBOGraphicsStruct(*transform_component);
                         wct::render::WRPParamUbo ubodt{.binding=0, .offset=0};
                         ubodt.databuffer.resize(sizeof(decltype(grpubo)));
 

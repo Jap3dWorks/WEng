@@ -273,9 +273,10 @@ bool SetupLevel(WEngine & in_engine,
 
     WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
     cameracomp.Set_render_id(1); // The renderable camera
-    WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
-    cts.rotation = {0.0f, 0.0f, 0.0f};
-    cts.position = {0.0, 0.0f, .5f};
+    WTransformComponent * tcmp = &level.GetComponent<WTransformComponent>(cid);
+    // WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
+    tcmp->Set_rotation({0.0f, 0.0f, 0.0f});
+    tcmp->Set_position({0.0, 0.0f, .5f});
 
     // postprocess
     SetPostprocessPipelines(in_engine, cameracomp);
@@ -284,11 +285,15 @@ bool SetupLevel(WEngine & in_engine,
     // Viking Room
     WEntityId eid = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(eid);
-    WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid).TransformStruct();
-    ts.rotation_order = ERotationOrder::zxy;
-    ts.position.z = -2.0f;
-    ts.rotation.x = -3.1415 * 0.5;
-    ts.rotation.y = -3.1415 * 0.5 ;
+    WTransformComponent & ctcmp = level.GetComponent<WTransformComponent>(eid);
+    // WTransformStruct & ts = level.GetComponent<WTransformComponent>(eid).TransformStruct();
+    ctcmp.Set_rotation_order(ERotationOrder::zxy);
+    // ts.rotation_order = ERotationOrder::zxy;
+    ctcmp.Set_position({0.0, 0.0, -2.f});
+    ctcmp.Set_rotation({-3.1415 * 0.5, -3.1415 * 0.5, 0.f});
+    // ts.position.z = -2.0f;
+    // ts.rotation.x = -3.1415 * 0.5;
+    // ts.rotation.y = -3.1415 * 0.5 ;
 
     level.CreateComponent<WStaticMeshComponent>(eid);    
 
@@ -302,11 +307,15 @@ bool SetupLevel(WEngine & in_engine,
     // Monkey 1
     WEntityId monkey_id = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(monkey_id);
-    WTransformStruct & monkey_ts = level.GetComponent<WTransformComponent>(monkey_id).TransformStruct();
-    monkey_ts.rotation_order = ERotationOrder::zxy;
-    monkey_ts.position.z = -2.0;
-    monkey_ts.position.y = 0.5;
-    monkey_ts.scale *= 0.15;
+    auto * monkey_tc = &level.GetComponent<WTransformComponent>(monkey_id);
+    // WTransformStruct & monkey_ts = level.GetComponent<WTransformComponent>(monkey_id).TransformStruct();
+    monkey_tc->Set_rotation_order(ERotationOrder::zxy);
+    // monkey_ts.rotation_order = ERotationOrder::zxy;
+    monkey_tc->Set_position({0.0, 0.5, -2.0});
+    // monkey_ts.position.z = -2.0;
+    // monkey_ts.position.y = 0.5;
+    monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.15f);
+    // monkey_ts.scale *= 0.15;
 
     level.CreateComponent<WStaticMeshComponent>(monkey_id);
 
@@ -320,12 +329,16 @@ bool SetupLevel(WEngine & in_engine,
     // Monkey 2
     WEntityId monkey2_id = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(monkey2_id);
-    WTransformStruct & monkey2_ts = level.GetComponent<WTransformComponent>(monkey2_id).TransformStruct();
-    monkey2_ts.rotation_order = ERotationOrder::zxy;
-    monkey2_ts.position.z = -2.0;
-    monkey2_ts.position.y = 0.65;
-    monkey2_ts.position.x = 0.2;
-    monkey2_ts.scale *= 0.25;
+    monkey_tc = &level.GetComponent<WTransformComponent>(monkey2_id);
+    // WTransformStruct & monkey2_ts = level.GetComponent<WTransformComponent>(monkey2_id).TransformStruct();
+    monkey_tc->Set_rotation_order(ERotationOrder::zxy);
+    // monkey2_ts.rotation_order = ERotationOrder::zxy;
+    monkey_tc->Set_position({0.2, 0.65, -2.0});
+    // monkey2_ts.position.z = -2.0;
+    // monkey2_ts.position.y = 0.65;
+    // monkey2_ts.position.x = 0.2;
+    monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.25f);
+    // monkey2_ts.scale *= 0.25;
 
     level.CreateComponent<WStaticMeshComponent>(monkey2_id);
     auto & monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
@@ -342,11 +355,12 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId point_light_1 = level.CreateEntity<WEntity>();
     level.CreateComponent<WTransformComponent>(point_light_1);
     level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
-    WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
-        .TransformStruct();
+    auto * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1);
+    // WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
+        // .TransformStruct();
 
-    transform_ptr->position = {0.0, 1.1, -2.0};
-    transform_ptr->scale *= 0.1;
+    transform_ptr->Set_position({0.0, 1.1, -2.0});
+    transform_ptr->Set_scale(transform_ptr->Get_scale() * 0.1f);
 
     wcm::light::WPointLightComponent * light_ptr =
         &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);

@@ -17,10 +17,17 @@
 START_DEFINE_WSYSTEM(SystemInit_InitializeTransformsMatrix)
     parameters.engine->LevelInfo().level.ForEachComponent<WTransformComponent>(
         [&parameters](WTransformComponent * _transform) {
-            WTransformStruct & ts = _transform->TransformStruct();
-            ts.transform_matrix = WMathUtils::ToMat4(
-                ts.position, ts.rotation, ts.rotation_order, ts.scale
-                );
+            // WTransformStruct & ts = _transform->TransformStruct();
+            
+            _transform
+                ->Set_transform_matrix(
+                    WMathUtils::ToMat4(
+                        _transform->Get_position(),
+                        _transform->Get_rotation(),
+                        _transform->Get_rotation_order(),
+                        _transform->Get_scale()
+                        ));
+            
         }
         );
 END_DEFINE_WSYSTEM()
@@ -153,15 +160,30 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
     parameters.engine->InputMappingRegister().BindAction(
         mousemovement,
         [camid](const WInputValuesStruct & _v, const WActionStruct & _a, WEngine * _e) {
+
+            auto * transform_component = &_e->LevelInfo()
+                .level.GetComponent<WTransformComponent>(camid);
             
-            WTransformStruct & t = _e->LevelInfo()
-                .level.GetComponent<WTransformComponent>(camid)
-                .TransformStruct();
+            // WTransformStruct & t = _e->LevelInfo()
+            //     .level.GetComponent<WTransformComponent>(camid)
+            //     .TransformStruct();
 
-            t.rotation.x = _v.direction.y * -0.001;
-            t.rotation.y = _v.direction.x * -0.001;
+            auto rot = transform_component->Get_rotation();
+            rot.x = _v.direction.y * -0.001;
+            rot.y = _v.direction.x * -0.001;
 
-            t.transform_matrix = WMathUtils::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
+            transform_component->Set_rotation(rot);
+
+            transform_component->Set_transform_matrix(
+                WMathUtils::ToMat4(
+                    transform_component->Get_position(),
+                    transform_component->Get_rotation(),
+                    transform_component->Get_rotation_order(),
+                    transform_component->Get_scale()
+                    )
+                );
+
+            // t.transform_matrix = WMathUtils::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
         }
         );
 END_DEFINE_WSYSTEM()
@@ -200,16 +222,29 @@ START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
                 (current_direction * vmag) - (current_direction * vmag * drag)
                 );
 
-            WTransformStruct & ts = tc.TransformStruct();
+            // WTransformStruct & ts = tc.TransformStruct();
 
-            ts.position +=
-                mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
+            tc.Set_position(
+                tc.Get_position() +
+                mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime
+                );
 
-            ts.transform_matrix = WMathUtils::ToMat4(
-                ts.position,
-                ts.rotation,
-                ts.rotation_order,
-                ts.scale);
+            // ts.position +=
+            //     mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
+
+            tc.Set_transform_matrix(
+                WMathUtils::ToMat4(
+                    tc.Get_position(),
+                    tc.Get_rotation(),
+                    tc.Get_rotation_order(),
+                    tc.Get_scale())
+                );
+
+            // ts.transform_matrix = WMathUtils::ToMat4(
+            //     ts.position,
+            //     ts.rotation,
+            //     ts.rotation_order,
+            //     ts.scale);
         }
         );
 END_DEFINE_WSYSTEM()
@@ -223,17 +258,19 @@ START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
 
     glm::vec3 acc{0};
 
+    auto matrx = tc.Get_transform_matrix();
+
     if(ic.Get_front()) {
-        acc -= glm::vec3(tc.TransformStruct().transform_matrix[2]);
+        acc -= glm::vec3(matrx[2]);
     }
     if(ic.Get_back()) {
-        acc += glm::vec3(tc.TransformStruct().transform_matrix[2]);
+        acc += glm::vec3(matrx[2]);
     }
     if(ic.Get_left()) {
-        acc -= glm::vec3(tc.TransformStruct().transform_matrix[0]);
+        acc -= glm::vec3(matrx[0]);
     }
     if(ic.Get_right()) {
-        acc += glm::vec3(tc.TransformStruct().transform_matrix[0]);
+        acc += glm::vec3(matrx[0]);
     }
 
     mc.Set_acceleration(acc * 3.f);
@@ -254,7 +291,7 @@ START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
             parameters.engine->Render()->UpdateUboCamera(
                 wrd::render::ToUBOCameraStruct(
                     *cam,
-                    ts.TransformStruct(),
+                    ts,
                     (float) rsize.width / (float) rsize.height
                     )
                 );

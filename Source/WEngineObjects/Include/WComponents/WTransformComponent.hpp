@@ -3,6 +3,8 @@
 #include "WEngineObjects/WComponent.hpp"
 #include "WComponents/WComponentTypes.hpp"
 
+#include "WCoreTypes/WMathStructs.hpp"
+
 #include "WTransformComponent.WEngine.hpp"
 
 
@@ -12,17 +14,14 @@ class WENGINEOBJECTS_API WTransformComponent : public WComponent {
         
 public:
 
-    void TransformStruct(const WTransformStruct & in_transform) {
-        transform_ = in_transform;
-    }
-
-    WTransformStruct & TransformStruct() { return transform_; }
-
-    const WTransformStruct & TransformStruct() const { return transform_; }
+    WPROPERTY(glm::vec3, position, 0.0);
+    WPROPERTY(glm::vec3, rotation, 0.0);
+    WPROPERTY(glm::vec3, scale, 1.0);
+    WPROPERTY(ERotationOrder, rotation_order, ERotationOrder::zxy);
+    WPROPERTY(glm::mat4, transform_matrix, 1.0);
+    
+public:
 
 private:
-    
-    // Transform data
-    WTransformStruct transform_{};
   
 };
