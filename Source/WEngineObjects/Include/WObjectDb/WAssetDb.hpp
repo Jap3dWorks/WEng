@@ -76,8 +76,8 @@ public:
     
         object_manager_.CreateAt(in_class, id);
         
-        object_manager_.Get(in_class, id)->WID(id);
-        object_manager_.Get(in_class, id)->Name(in_fullname);
+        object_manager_.Get(in_class, id)->Set_asset_id(id);
+        object_manager_.Get(in_class, id)->Set_name(in_fullname);
 
         return id;
     }

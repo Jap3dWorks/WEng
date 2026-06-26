@@ -8,8 +8,6 @@ template<typename T>
 struct TWRefTrack_ {
 
     static void UnregInstance(void * in_address, T * in_obj) {
-        // TODO: use a better data structure
-        
         if (!in_obj) return;
 
         assert(Track().contains(in_address));
@@ -50,6 +48,7 @@ struct TWRefTrack_ {
 private:    
 
     static std::unordered_map<void*, std::vector<T*>> & Track() noexcept {
+        // TODO: Is there a better data structure?
         static std::unordered_map<void*, std::vector<T*>> track_{};
         return track_;
     }

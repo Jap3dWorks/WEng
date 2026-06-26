@@ -77,21 +77,21 @@ std::vector<WAssetId> wim::importer::WImportObj::Import(
 
     uint32_t index_offset = 0;
     
-    std::vector<WMeshStruct> meshes(shapes.size());
+    std::vector<wct::geometry::WMesh> meshes(shapes.size());
     std::vector<std::string> names(shapes.size());
 
     for (const auto & shape : shapes)
     {
-        WMeshStruct & mesh = meshes[index_offset];
+        wct::geometry::WMesh & mesh = meshes[index_offset];
         names[index_offset] = shape.name;
 
         ++index_offset;
 
-        std::unordered_map<WVertexStruct, uint32_t> unique_vertices = {};
+        std::unordered_map<wct::geometry::WVertex, uint32_t> unique_vertices = {};
 
         for (const auto & index : shape.mesh.indices)
         {
-            WVertexStruct vertex = {};
+            wct::geometry::WVertex vertex = {};
 
             vertex.position = {
                 attrib.vertices[(3 * index.vertex_index) + 0],
@@ -160,47 +160,56 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
         throw std::runtime_error("Failed to load texture image!");
     }
 
-    wct::texture::WTexture texture_struct = {};
-    texture_struct.width = width;
-    texture_struct.height = height;
+    // wct::texture::WTexture texture_struct = {};
+    // texture_struct.width = width;
+    // texture_struct.height = height;
+
+    wct::texture::ETextureFormat format;
 
     // Default formats
     switch(num_channels) {
     case 1:
-        texture_struct.format = wct::texture::ETextureFormat::R8_UNORM;
+        format = wct::texture::ETextureFormat::R8_UNORM;
         break;
     case 2:
-        texture_struct.format = wct::texture::ETextureFormat::RG8_UNORM;
+        format = wct::texture::ETextureFormat::RG8_UNORM;
         break;
     case 3:
-        texture_struct.format = wct::texture::ETextureFormat::RGB8_SRGB;
+        format = wct::texture::ETextureFormat::RGB8_SRGB;
         break;
     case 4:
-        texture_struct.format = wct::texture::ETextureFormat::RGBA8_SRGB;
+        format = wct::texture::ETextureFormat::RGBA8_SRGB;
         break;
     default:
-        texture_struct.format = wct::texture::ETextureFormat::RGBA8_SRGB;
+        format = wct::texture::ETextureFormat::RGBA8_SRGB;
     }
 
-    size_t csize = width * height;
+    // size_t csize = width * height;
 
-    texture_struct.data.resize(csize * 4, 0);
+    // texture_struct.data.resize(csize * 4, 0);
 
-    std::memcpy(
-        texture_struct.data.data(), 
-        Pixels,
-        csize * num_channels
-        // texture_struct.data.size()
-    );
+    // std::memcpy(
+    //     texture_struct.data.data(), 
+    //     Pixels,
+    //     csize * num_channels
+    //     // texture_struct.data.size()
+    // );
 
-    stbi_image_free(Pixels);
+    // TODO is this filename okey?
 
     WAssetId id = in_asset_manager.Create<WTextureAsset>(
         WStringUtils::AssetPath(asset_directory, file_path, "texture").c_str()
         );
 
-    static_cast<WTextureAsset*>(in_asset_manager.Get(id))->
-        SetTexture(std::move(texture_struct));
+    auto * asset = in_asset_manager.Get<WTextureAsset>(id);
+
+    asset->SetTextureData(
+        Pixels,
+        width, height,
+        format
+        );
+
+    stbi_image_free(Pixels);
 
     return { id };
 }

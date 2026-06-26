@@ -7,18 +7,15 @@
 
 #include "WInputMappingAsset.WEngine.hpp"
 
-WCLASS()
+using WInputMap = std::unordered_map<WInput, std::vector<WAssetId>>;
+
 class WENGINEOBJECTS_API WInputMappingAsset : public WAsset {
 
     WOBJECT_BODY
 
 public:
 
-    WInputMapStruct & InputMap() { return input_map_; }
-
-private:
-
-    WInputMapStruct input_map_;
+    WPROPERTY(WInputMap, input_map, );
 
 };
 

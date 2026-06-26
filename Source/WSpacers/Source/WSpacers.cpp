@@ -15,7 +15,7 @@
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WComponents/WComponentTypes.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometry.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WComponents/WTransformComponent.hpp"
@@ -78,43 +78,51 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     WRenderPipelineAsset * pipeline_asset = engine.AssetManager()
         .Get<WRenderPipelineAsset>(pipelineid);
 
-    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::GBuffer;
+    pipeline_asset->Set_pipeline_type(wct::render::EPipelineType::GBuffer);
+    // pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::GBuffer;
 
     // Add shaders to the render pipeline
 
-    pipeline_asset->RenderPipeline().shaders[0].type=wct::render::EShaderStageFlag::Vertex;
+    auto shader_list = pipeline_asset->Get_shader_list();
+    shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
 
     std::strcpy(
-        pipeline_asset->RenderPipeline().shaders[0].file,
+        shader_list[0].file,
         "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
-        pipeline_asset->RenderPipeline().shaders[0].entry,
+        shader_list[0].entry,
         "vsMain"
         );
 
-    pipeline_asset->RenderPipeline().shaders[1].type=wct::render::EShaderStageFlag::Fragment;
+    shader_list[1].type=wct::render::EShaderStageFlag::Fragment;
     
     std::strcpy(
-        pipeline_asset->RenderPipeline().shaders[1].file,
+        shader_list[1].file,
         "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
-        pipeline_asset->RenderPipeline().shaders[1].entry,
+        shader_list[1].entry,
         "fsMain"
         );
 
-    auto & params = pipeline_asset->RenderPipeline().params_descriptor;
+    pipeline_asset->Set_shader_list(shader_list);
 
-    params[0].binding=0;
-    params[0].type=wct::render::EPipeParamType::Ubo;
-    params[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
-    params[0].size=sizeof(wct::render::WModelUBO);
-    params[1].binding=1;
-    params[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
-    params[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
+    auto descriptors = pipeline_asset->Get_descriptor_list();
+
+    // auto & params = pipeline_asset->RenderPipeline().params_descriptor;
+
+    descriptors[0].binding=0;
+    descriptors[0].type=wct::render::EPipeParamType::Ubo;
+    descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
+    descriptors[0].size=sizeof(wct::render::WModelUBO);
+    descriptors[1].binding=1;
+    descriptors[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
+    descriptors[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
+
+    pipeline_asset->Set_descriptor_list(descriptors);
 
     // Create Pipeline Parameter Asset
 
@@ -124,10 +132,14 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     out_model.param_asset = paramid;
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
-
-    param_asset->RenderPipelineParameters().texture_params.push_back(
-        {.binding=1, .value=tex_ids[0]}
+    param_asset->Set_texture_list(
+        {
+            {.binding=1, .value=tex_ids[0]}
+        }
         );
+    // param_asset->RenderPipelineParameters().texture_params.push_back(
+    //     {.binding=1, .value=tex_ids[0]}
+    //     );
 
     return true;
 }
@@ -138,23 +150,30 @@ bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
     WRenderPipelineAsset * pipeline_asset =
         engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
 
-    pipeline_asset->RenderPipeline().type = wct::render::EPipelineType::Postprocess;
-    pipeline_asset->RenderPipeline().shaders[0].type=wct::render::EShaderStageFlag::Vertex;
+    pipeline_asset->Set_pipeline_type(wct::render::EPipelineType::Postprocess);
 
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].file,
+    auto shader_list = pipeline_asset->Get_shader_list();
+    shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
+    // TODO do not use strcpy, use a TName type class.
+    std::strcpy(shader_list[0].file,
                 "/Content/Shaders/WRender_blur.pprcess.spv");
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[0].entry, "vsMain");
+    std::strcpy(shader_list[0].entry, "vsMain");
 
-    pipeline_asset->RenderPipeline().shaders[1].type=wct::render::EShaderStageFlag::Fragment;
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].file,
-                "/Content/Shaders/WRender_blur.pprcess.spv");
-    std::strcpy(pipeline_asset->RenderPipeline().shaders[1].entry, "fsMain");
+    shader_list[1].type=wct::render::EShaderStageFlag::Fragment;
+    std::strcpy(
+        shader_list[1].file,
+        "/Content/Shaders/WRender_blur.pprcess.spv");
+    std::strcpy(shader_list[1].entry, "fsMain");
 
-    auto & params = pipeline_asset->RenderPipeline().params_descriptor;
-    params[0].binding = 0;
-    params[0].type = wct::render::EPipeParamType::Ubo;
-    params[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
-    params[0].size = sizeof(wct::render::WPostprocessUBO);
+    pipeline_asset->Set_shader_list(shader_list);
+
+    auto descriptors = pipeline_asset->Get_descriptor_list();
+    // auto & params = pipeline_asset->RenderPipeline().params_descriptor;
+    descriptors[0].binding = 0;
+    descriptors[0].type = wct::render::EPipeParamType::Ubo;
+    descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
+    descriptors[0].size = sizeof(wct::render::WPostprocessUBO);
+    pipeline_asset->Set_descriptor_list(descriptors);
 
     WAssetId paramid =
         engine.AssetManager().Create<WRenderPipelineParametersAsset>(
@@ -199,8 +218,11 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
-    param_asset->RenderPipelineParameters().texture_params.push_back(
-        {.binding=1, .value=tex_ids[0]}
+    param_asset->Set_texture_list(
+    // param_asset->RenderPipelineParameters().texture_params.push_back(
+        {
+            {.binding=1, .value=tex_ids[0]}
+        }
         );
 
     return true;
@@ -231,18 +253,25 @@ bool InputAssets(WEngine & in_engine) {
         "/Content/Input/MouseMovement.MouseMovement"
         );
 
-    WInputMapStruct & input_map = in_engine.AssetManager()
-        .Get<WInputMappingAsset>(cameramapping)->InputMap();
+    auto * mapping_asset = in_engine.AssetManager()
+        .Get<WInputMappingAsset>(cameramapping);
 
-    input_map.map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
-    input_map.map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};
-    input_map.map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
-    input_map.map[{EInputKey::Key_S, EInputMode::Release}] = {backaction};
-    input_map.map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
-    input_map.map[{EInputKey::Key_A, EInputMode::Release}] = {leftaction};
-    input_map.map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
-    input_map.map[{EInputKey::Key_D, EInputMode::Release}] = {rightaction};
-    input_map.map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
+    // WInputMapStruct & input_map = in_engine.AssetManager()
+    //     .Get<WInputMappingAsset>(cameramapping)->InputMap();
+
+    WInputMap input_map = mapping_asset->Get_input_map();
+
+    input_map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
+    input_map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};
+    input_map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
+    input_map[{EInputKey::Key_S, EInputMode::Release}] = {backaction};
+    input_map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
+    input_map[{EInputKey::Key_A, EInputMode::Release}] = {leftaction};
+    input_map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
+    input_map[{EInputKey::Key_D, EInputMode::Release}] = {rightaction};
+    input_map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
+
+    mapping_asset->Set_input_map(input_map);
 
     return true;
 }

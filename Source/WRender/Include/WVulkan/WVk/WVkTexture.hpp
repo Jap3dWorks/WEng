@@ -2,6 +2,7 @@
 
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WAssets/WTextureAsset.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace wvk::texture {
@@ -13,7 +14,7 @@ namespace wvk::texture {
      */
     void CreateTexture(
         WVkTextureInfo & out_texture_info, 
-        const wct::texture::WTexture & texture_struct,
+        const WTextureAsset & texture_struct,
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,

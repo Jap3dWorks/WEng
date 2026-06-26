@@ -6,7 +6,7 @@
 WLevelDb::WLevelDb() :
     levels_(
         [](const WLevelId& id){
-            WLevel lvl("WLevel", id);
+            WLevel lvl({"WLevel"}, id);
             return lvl;},
         [](WLevel&){}
         ) {}

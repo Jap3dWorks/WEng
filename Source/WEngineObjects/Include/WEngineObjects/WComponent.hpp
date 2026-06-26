@@ -5,7 +5,6 @@
 
 #include "WComponent.WEngine.hpp"
 
-WCLASS()
 class WCORE_API WComponent : public WObject
 {
 
@@ -15,17 +14,9 @@ public:
 
 public:
 
-    WEntityId EntityId() const {
-        return entity_id_;
-    }
-
-    void EntityId(const WEntityId & in_id) {
-        entity_id_ = in_id;
-    }
+    WPROPERTY(WEntityId, entity_id, 0);
 
 private:
-
-    WEntityId entity_id_;
 
 };
 

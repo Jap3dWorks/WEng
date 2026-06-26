@@ -7,19 +7,18 @@
 
 #include "WRenderPipelineParametersAsset.WEngine.hpp"
 
-WCLASS()
 class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
-    WOBJECT_BODY
+
+    WOBJECT_BODY;
 
 public:
 
-    wct::render::WRenderPipelineParameters & RenderPipelineParameters() {
-        return pipeline_parameters_;
-    }
+    WPROPERTY(wct::render::WRPParameterList_Ubo, ubo_list,);
+    WPROPERTY(wct::render::WRPParameterList_WAssetId, texture_list,);
+
+public:
 
 private:
-
-    wct::render::WRenderPipelineParameters pipeline_parameters_{};
 
 };
 

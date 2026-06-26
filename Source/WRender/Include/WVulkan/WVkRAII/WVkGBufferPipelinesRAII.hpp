@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WAssets/WRenderPipelineAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "_WVKGBufferPipelinesRAII_.hpp"
 
@@ -61,11 +62,11 @@ public:
 
     void CreatePipeline(
         const WAssetId & in_id,
-        const wct::render::WRenderPipelineInfo & in_pipeline_struct,
+        const WRenderPipelineAsset & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descset_layout
         ) {
         std::vector<WVkShaderStageInfo> shaders = Super::pipelines_db_.BuildShaders(
-            in_pipeline_struct.shaders,
+            in_pipeline_struct.Get_shader_list(),
             wvr::gbuffer_pipelines::BuildShaderStageInfo
             );
 
@@ -74,7 +75,8 @@ public:
         Super::pipelines_db_.CreateDescSetLayout(
             in_id,
             Super::Device(),
-            in_pipeline_struct.params_descriptor,
+            in_pipeline_struct.Get_descriptor_list(),
+            // in_pipeline_struct.params_descriptor,
             wvk::descriptor::UpdateDescriptorSetLayout
             );
 
@@ -95,7 +97,8 @@ public:
                     },
                     _shdrs
                     );
-                _rp.params_descriptor = in_pipeline_struct.params_descriptor;
+                _rp.params_descriptor = in_pipeline_struct.Get_descriptor_list();
+                // _rp.params_descriptor = in_pipeline_struct.params_descriptor;
             }
             );
 

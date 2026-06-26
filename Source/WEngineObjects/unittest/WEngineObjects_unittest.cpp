@@ -84,11 +84,11 @@ bool WObjectDb_TWRef_Test() {
     TWRef<WStaticMeshAsset> a = man.Get<WStaticMeshAsset>(man.Create<WStaticMeshAsset>());
     TWRef<WTextureAsset> t = man.Get<WTextureAsset>(man.Create<WTextureAsset>());
 
-    a->Name("a");
-    t->Name("t");
+    a->Set_name("a");
+    t->Set_name("t");
 
     WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
-    WFLOG("Name: {}", a->Name());
+    WFLOG("Name: {}", a->Get_name().View());
 
     void* ptr = a.BPtr();
 
@@ -97,7 +97,7 @@ bool WObjectDb_TWRef_Test() {
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
-    WFLOG("Name: {}", a->Name());
+    WFLOG("Name: {}", a->Get_name().View());
 
     WFLOG("END")
 

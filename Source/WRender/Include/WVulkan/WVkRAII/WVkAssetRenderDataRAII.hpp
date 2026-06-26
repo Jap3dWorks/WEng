@@ -3,7 +3,7 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 
-#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkMesh.hpp"
@@ -44,7 +44,7 @@ public:
 
     // Texture
 
-    void LoadTexture(const WAssetId & in_id, const wct::texture::WTexture & in_texture) {
+    void LoadTexture(const WAssetId & in_id, const WTextureAsset & in_texture) {
         texture_collection_.CreateAt(
             in_id,
             [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
@@ -67,7 +67,7 @@ public:
 
     // Static Mesh
 
-    void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) {
+    void LoadStaticMesh(const WAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
 
         static_mesh_collection_.CreateAt(
             in_id,

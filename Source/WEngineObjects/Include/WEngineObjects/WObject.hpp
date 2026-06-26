@@ -16,14 +16,6 @@ class WENGINEOBJECTS_API WObject
 
 public:
 
-    // void Name(const char * in_name) noexcept {
-    //     std::strcpy(name_, in_name);
-    // }
-
-    // constexpr std::string Name() const {
-    //     return name_;
-    // }
-
     constexpr void MarkToRemove() {
         remove_=true;
     }

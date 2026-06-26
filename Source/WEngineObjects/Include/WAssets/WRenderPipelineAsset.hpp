@@ -6,18 +6,15 @@
 
 #include "WRenderPipelineAsset.WEngine.hpp"
 
-WCLASS()
 class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
     WOBJECT_BODY
 
 public:
 
-    wct::render::WRenderPipelineInfo & RenderPipeline() {
-        return pipeline_;
-    }
+    WPROPERTY(wct::render::EPipelineType, pipeline_type, wct::render::EPipelineType::GBuffer);
+    WPROPERTY(wct::render::WShaderList, shader_list,);
+    WPROPERTY(wct::render::WPipeParamDescriptorList, descriptor_list,);
 
 private:
-
-    wct::render::WRenderPipelineInfo pipeline_{};
 
 };

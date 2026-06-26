@@ -1,8 +1,9 @@
 #pragma once
 
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
-#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
@@ -70,7 +71,8 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const wct::render::WRenderPipelineParameters & in_parameters
+        const WRenderPipelineParametersAsset & in_param_asset
+        // const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
 
     void DeleteRenderPipeline(const WAssetId & in_id) override;
@@ -80,7 +82,7 @@ public:
     void RefreshPipelines() override;
 
     void LoadTexture(const WAssetId & in_id,
-                     const wct::texture::WTexture & in_texture) override
+                     const WTextureAsset & in_texture) override
     {
         asset_render_data_.LoadTexture(in_id, in_texture);
     }
@@ -89,7 +91,7 @@ public:
         asset_render_data_.UnloadTexture(in_id);
     }
 
-    void LoadStaticMesh(const WAssetIndexId & in_id, const WMeshStruct & in_mesh) override {
+    void LoadStaticMesh(const WAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 

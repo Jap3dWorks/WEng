@@ -5,6 +5,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVkPipelinesBase.hpp"
+#include "WAssets/WRenderPipelineAsset.hpp"
 #include <vulkan/vulkan_core.h>
 
 // TODO template with max frames in flight as param
@@ -39,7 +40,7 @@ public:
     WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
     void CreatePipeline(const WAssetId & in_id,
-                        const wct::render::WRenderPipelineInfo & in_pipeline_struct);
+                        const WRenderPipelineAsset & in_pipeline_struct);
 
     WEntityComponentId CreateBinding(const WEntityComponentId & in_binding_id,
                                      const WAssetId & in_pipeline_id,

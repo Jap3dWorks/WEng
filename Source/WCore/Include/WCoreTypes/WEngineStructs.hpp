@@ -95,14 +95,10 @@ struct WInputValuesStruct {
     glm::vec2 direction{};
 };
 
-struct WInputMapStruct {
-    // EInput ActionsAssets
-    std::unordered_map<WInput, std::vector<WAssetId>> map{};  
-};
-
-struct WActionStruct {
-    char name[32];
-};
+// struct WInputMapStruct {
+//     // EInput ActionsAssets
+//     std::unordered_map<WInput, std::vector<WAssetId>> map{};  
+// };
 
 struct WActionDataStruct {
     WAssetId input_map_asset;

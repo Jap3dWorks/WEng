@@ -159,18 +159,11 @@ namespace wct::render {
 
     struct WShaderInfo {
         EShaderStageFlag type{EShaderStageFlag::None};
-        char file[128]{""};
+        char file[128]{""};   // TODO : use TName based types
         char entry[16]{"main"};
     };
 
     using WShaderList = std::array<WShaderInfo, WENG_MAX_PIPELINE_SHADERS>;
-
-    struct WRenderPipelineInfo {
-        wct::render::EPipelineType type {wct::render::EPipelineType::Graphics};
-        WShaderList shaders{};
-
-        wct::render::WPipeParamDescriptorList params_descriptor{};
-    };
 
 // Pipeline Parameters Structs
 // ---------------------------
@@ -193,10 +186,10 @@ namespace wct::render {
     using WRPParameterList_WAssetId = std::vector<WRPParamAsset>;
     using WRPParameterList_Ubo = std::vector<WRPParamUbo>;
 
-    struct WRenderPipelineParameters {
-        WRPParameterList_Ubo ubo_params{};
-        WRPParameterList_WAssetId texture_params{};
-    };
+    // struct WRenderPipelineParameters {
+    //     WRPParameterList_Ubo ubo_params{};
+    //     WRPParameterList_WAssetId texture_params{};
+    // };
  
     template<CCallable<void, const WPipeParamDescriptorInfo &> TFn>
     inline void ForEach(const wct::render::WPipeParamDescriptorList & in_lst, TFn && in_fn) {

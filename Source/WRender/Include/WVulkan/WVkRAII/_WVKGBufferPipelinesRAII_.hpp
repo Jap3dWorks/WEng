@@ -7,7 +7,7 @@
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
-#include "WCoreTypes/WGeometryStructs.hpp"
+#include "WCoreTypes/WGeometry.hpp"
 #include "WRender/WShader.hpp"
 #include <array>
 #include <vulkan/vulkan_core.h>
@@ -65,28 +65,28 @@ namespace wvr::gbuffer_pipelines {
             result.attribute_descriptors[0].binding = 0;
             result.attribute_descriptors[0].location = 0;
             result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[0].offset = offsetof(WVertexStruct, position);
+            result.attribute_descriptors[0].offset = offsetof(wct::geometry::WVertex, position);
 
             result.attribute_descriptors[1].binding = 0;
             result.attribute_descriptors[1].location = 1;
             result.attribute_descriptors[1].format = VK_FORMAT_R32G32_SFLOAT;
-            result.attribute_descriptors[1].offset = offsetof(WVertexStruct, tex_coords);
+            result.attribute_descriptors[1].offset = offsetof(wct::geometry::WVertex, tex_coords);
 
             result.attribute_descriptors[2].binding = 0;
             result.attribute_descriptors[2].location = 2;
             result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[2].offset = offsetof(WVertexStruct, color);
+            result.attribute_descriptors[2].offset = offsetof(wct::geometry::WVertex, color);
 
             result.attribute_descriptors[3].binding = 0;
             result.attribute_descriptors[3].location = 3;
             result.attribute_descriptors[3].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[3].offset = offsetof(WVertexStruct, normal);
+            result.attribute_descriptors[3].offset = offsetof(wct::geometry::WVertex, normal);
 
             // more vertex data bindings here
 
             result.binding_descriptors.resize(1);
             result.binding_descriptors[0].binding = 0;
-            result.binding_descriptors[0].stride = sizeof(WVertexStruct);
+            result.binding_descriptors[0].stride = sizeof(wct::geometry::WVertex);
             result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
         }
 

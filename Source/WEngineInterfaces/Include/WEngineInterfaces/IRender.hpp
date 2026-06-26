@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 
 #include <vector>
 #include <span>
@@ -12,8 +13,11 @@ class WRenderPipelineAsset;
 // class WStaticMeshAsset;
 namespace wct::texture { struct WTexture; }
 
-struct WMeshStruct;
+namespace wct::geometry {struct WMesh;}
+
 struct WTransformStruct;
+
+class WTextureAsset; 
 
 struct GLFWwindow;
 
@@ -50,7 +54,7 @@ public:
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
         const WAssetIndexId & in_mesh_id,
-        const wct::render::WRenderPipelineParameters & in_parameters  // TODO Check
+        const WRenderPipelineParametersAsset & in_parameters
         )=0;
 
     /**
@@ -78,12 +82,12 @@ public:
      * @brief Load the registered texture asset with id in_id.
      */
     virtual void LoadTexture(const WAssetId & in_id,
-                             const wct::texture::WTexture & in_texture)=0;
+                             const WTextureAsset & in_texture)=0;
 
     virtual void UnloadTexture(const WAssetId & in_id)=0;
 
     virtual void LoadStaticMesh(const WAssetIndexId & in_id,
-                                const WMeshStruct & in_mesh)=0;
+                                const wct::geometry::WMesh & in_mesh)=0;
 
     virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
 

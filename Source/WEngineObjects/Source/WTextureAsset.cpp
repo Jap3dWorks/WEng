@@ -3,17 +3,17 @@
 
 // WTextureAsset
 // -------------
-void WTextureAsset::SetTexture(const wct::texture::WTexture& texture)
-{
-    texture_ = texture;
-}
+// void WTextureAsset::SetTexture(const wct::texture::WTexture& texture)
+// {
+//     texture_ = texture;
+// }
 
-const wct::texture::WTexture& WTextureAsset::GetTexture() const
-{
-    return texture_;
-}
+// const wct::texture::WTexture& WTextureAsset::GetTexture() const
+// {
+//     return texture_;
+// }
 
-void WTextureAsset::SetTexture(wct::texture::WTexture&& texture)
-{
-    texture_ = std::move(texture);
-}
+// void WTextureAsset::SetTexture(wct::texture::WTexture&& texture)
+// {
+//     texture_ = std::move(texture);
+// }

@@ -1,5 +1,6 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
@@ -406,31 +407,31 @@ void WVkRender::CreateRenderPipeline(
         wct::render::EPipelineType::GBuffer,
         wct::render::EPipelineType::Postprocess>
         (
-            render_pipeline->RenderPipeline().type,
+            render_pipeline->Get_pipeline_type(),
             [&,this](){
                 gbuffers_pipelines_.CreatePipeline(
-                    render_pipeline->WID(),
-                    render_pipeline->RenderPipeline(),
+                    render_pipeline->Get_asset_id(),
+                    *render_pipeline,
                     global_descriptors_.DescriptorSetLayout()
                     );
             },
             [&,this](){
                 gbuffers_pipelines_.CreatePipeline(
-                    render_pipeline->WID(),
-                    render_pipeline->RenderPipeline(),
+                    render_pipeline->Get_asset_id(),
+                    *render_pipeline,
                     global_descriptors_.DescriptorSetLayout()
                     );
             },
             [&,this](){
                 ppcss_pipelines_.CreatePipeline(
-                    render_pipeline->WID(),
-                    render_pipeline->RenderPipeline()
+                    render_pipeline->Get_asset_id(),
+                    *render_pipeline
                     );
             }
             );
 
-    pipeline_track_.pipeline_pipetype[render_pipeline->WID()] =
-        render_pipeline->RenderPipeline().type;
+    pipeline_track_.pipeline_pipetype[render_pipeline->Get_asset_id()] =
+        render_pipeline->Get_pipeline_type();
 
 }
 
@@ -480,21 +481,24 @@ void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
     const WAssetIndexId & in_assetindex_id,
-    const wct::render::WRenderPipelineParameters & in_parameters
+    const WRenderPipelineParametersAsset & in_parameters
+    // const wct::render::WRenderPipelineParameters & in_parameters
     )
 {
     assert(pipeline_track_.pipeline_pipetype.contains(pipeline_id));
 
-    std::vector<WVkDescriptorSetTextureWriteStruct> textures{};
-    textures.resize(in_parameters.texture_params.size());
+    auto texture_params = in_parameters.Get_texture_list();
 
-    for(std::uint32_t i=0; i < in_parameters.texture_params.size(); i++) {
+    std::vector<WVkDescriptorSetTextureWriteStruct> textures{};
+    textures.resize(texture_params.size());
+
+    for(std::uint32_t i=0; i < texture_params.size(); i++) {
         const auto & tx = asset_render_data_.TextureInfo(
-            in_parameters.texture_params[i].value
+            texture_params[i].value
             );
         
         textures[i] = {
-            .binding = in_parameters.texture_params[i].binding,
+            .binding = texture_params[i].binding,
             .image_info = {
                 .sampler = tx.sampler,
                 .imageView = tx.view,
@@ -503,11 +507,13 @@ void WVkRender::CreatePipelineBinding(
         };
     }
 
-    std::vector<WVkDescriptorSetUBOWriteStruct> ubos{};
-    ubos.resize(in_parameters.ubo_params.size());
+    auto ubo_params = in_parameters.Get_ubo_list();
 
-    for(std::uint32_t i=0; i < in_parameters.ubo_params.size(); i++) {
-        const auto & ubop = in_parameters.ubo_params[i];
+    std::vector<WVkDescriptorSetUBOWriteStruct> ubos{};
+    ubos.resize(ubo_params.size());
+
+    for(std::uint32_t i=0; i < ubo_params.size(); i++) {
+        const auto & ubop = ubo_params[i];
         ubos[i] = {
             .binding = ubop.binding,
             .data = ubop.databuffer.data(),

@@ -18,17 +18,17 @@ public:
 
     WLevel();
 
-    WLevel(const char* in_name, const WLevelId & in_id);
+    WLevel(const WObjectName &, WLevelId in_id);
     
     virtual ~WLevel() = default;
 
-    WLevel(const WLevel& other);
+    WLevel(const WLevel& other)=default;
 
-    WLevel(WLevel && other);
+    WLevel(WLevel && other)=default;
 
-    WLevel & operator=(const WLevel& other);
+    WLevel & operator=(const WLevel& other)=default;
 
-    WLevel & operator=(WLevel && other);
+    WLevel & operator=(WLevel && other)=default;
 
 public:    
 
@@ -103,7 +103,7 @@ public:
         entity_component_db_.ForEachComponent<T>(std::forward<TFn>(in_fn));
     }
 
-    const char * Name() const;
+    const WObjectName & Name() const;
 
     template<std::derived_from<WComponent> T>
     WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
@@ -130,6 +130,8 @@ private:
 
     std::string ComponentPath(const WEntityId & in_entity_id,
                               const WClass * in_class) const;
+
+private:
 
     WObjectName name_;
 

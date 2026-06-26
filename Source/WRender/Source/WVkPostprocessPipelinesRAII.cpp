@@ -53,11 +53,12 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
-    const wct::render::WRenderPipelineInfo & in_pipeline_struct
+    const WRenderPipelineAsset & in_pipeline_struct
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
-        in_pipeline_struct.shaders,
+        in_pipeline_struct.Get_shader_list(),
+        // in_pipeline_struct.shaders,
         WVkPostprocessPipeUtils::BuildPostprocessShaderStageInfo
         );
     
@@ -65,7 +66,8 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_,
-        in_pipeline_struct.params_descriptor,
+        in_pipeline_struct.Get_descriptor_list(),
+        // in_pipeline_struct.params_descriptor,
         wvk::descriptor::UpdateDescriptorSetLayout
         );
 
@@ -86,7 +88,8 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
                 _shdrs
                 );
 
-            _rp.params_descriptor = in_pipeline_struct.params_descriptor;
+            _rp.params_descriptor = in_pipeline_struct.Get_descriptor_list();
+            // _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
 
