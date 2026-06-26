@@ -8,17 +8,17 @@ namespace wct::texture {
 
    /**
     * 8 bits, significative bit to left
-    *   8765 - 4321
+    *   7654 - 3210
     *
-    * [16bit] = 128(bit 8) (high range)
-    * IF bit 8 active THEN
-    *    [32bit]=64 (bit 7)
+    * [16bit] = 128(bit 7) (high range)
+    * IF bit 7 active THEN
+    *    [32bit]=64 (bit 6)
     * ELSE
     *    [SNORM]= 64 (bit 6)
-    *    [sRGB] = 32 (bit 7)
+    *    [sRGB] = 32 (bit 5)
     *
-    * [R channel]=8 (bit 4), [G channel]=4 (bit 3),
-    * [B channel]=2 (bit 2), [A channel]=1 (bit 1)
+    * [R channel]=8 (bit 3), [G channel]=4 (bit 2),
+    * [B channel]=2 (bit 1), [A channel]=1 (bit 0)
     */
     enum class ETextureFormat : uint8_t {
 
@@ -88,44 +88,14 @@ namespace wct::texture {
         }
     }
 
-    struct WTexture {
-        std::vector<uint8_t> data;
-        ETextureFormat format;
-        uint32_t width;
-        uint32_t height;
-    };
-
-    inline WTexture AddRGBAPadding(const WTexture & in_texture) {
-        wct::texture::WTexture result;
-
-        wct::texture::ETextureFormat all_channels_format =
-            in_texture.format | 
-            wct::texture::ETextureFormat::R |
-            wct::texture::ETextureFormat::G |
-            wct::texture::ETextureFormat::B |
-            wct::texture::ETextureFormat::A;
-
-        result.format = all_channels_format;
-        result.height = in_texture.height;
-        result.width = in_texture.width;
-
-        result.data = in_texture.data;
-
-        size_t tex_size = result.height * result.width;
-
-        result.data.resize(tex_size * 4, 255);
-
-        int num_channels = wct::texture::NumOfChannels(in_texture.format);
-
-        for (int i=num_channels; i < 4; i++) {
-            std::memcpy(
-                result.data.data() + (tex_size * i),
-                result.data.data(),
-                tex_size
-                );
+    inline std::uint8_t ColorDepth(ETextureFormat in_format) {
+        switch(static_cast<uint8_t>(in_format) & (128 + 64)) {
+        case 128 + 64:
+            return 32;
+        case 128:
+            return 16;
+        default:
+            return 8;
         }
-
-        return result;
     }
-
 }

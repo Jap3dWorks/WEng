@@ -65,8 +65,8 @@ void wvk::texture::CreateTexture(
     vkMapMemory(in_device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(
         data,
-        texture_ptr->GetTexturePtr(),
-        std::min(texture_ptr->GetTextureDataSize(), static_cast<size_t>(image_size))
+        texture_ptr->GetDataPtr(),
+        std::min(texture_ptr->GetDataSize(), static_cast<size_t>(image_size))
         );
     vkUnmapMemory(in_device, staging_buffer_memory);
 

@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WTexture.hpp"
-#include <memory>
+#include <cstring>
 
 #include "WTextureAsset.WEngine.hpp"
 
@@ -14,8 +14,6 @@ class WCORE_API WTextureAsset : public WAsset
     WOBJECT_BODY;
 
 public:
-
-    // WPROPERTY(wct::texture::WTexture, texture, );
 
     WPROPERTY(WTextureData, data_,);
     WPROPERTY(wct::texture::ETextureFormat, format,);
@@ -34,12 +32,13 @@ public:
         width = in_width;
         height = in_height;
         
+        std::uint8_t color_depth_bytes = wct::texture::ColorDepth(format) / 8;
+        
         std::size_t size =
             in_width *
             in_height *
-            wct::texture::NumOfChannels(in_format) 
-            // TODO * color depth bytes
-            ;
+            wct::texture::NumOfChannels(in_format) *
+            color_depth_bytes;
         
         data_.resize(size);
 
@@ -50,22 +49,15 @@ public:
             );
     }
 
-    std::uint8_t const * GetTexturePtr() const {
+    std::uint8_t const * GetDataPtr() const {
         return data_.data();
     }
 
-    std::size_t GetTextureDataSize() const {
+    std::size_t GetDataSize() const {
         return data_.size();
     }
 
-    // void SetTexture(const wct::texture::WTexture& texture);
-
-    // void SetTexture(wct::texture::WTexture&& texture);
-
-    // const wct::texture::WTexture& GetTexture() const;
-
     inline void AddRGBAPadding() {
-        // wct::texture::WTexture result;
 
         wct::texture::ETextureFormat all_channels_format =
             format | 
@@ -74,27 +66,23 @@ public:
             wct::texture::ETextureFormat::B |
             wct::texture::ETextureFormat::A;
 
-        // result.data = in_texture.data;
-
         size_t tex_size = height * width; // TODO * depth
 
-        // TODO * color depth
-        data_.resize(tex_size * 4, 255);
+        std::uint8_t color_depth_bytes = wct::texture::ColorDepth(format) / 8;
+
+        data_.resize(tex_size * 4 * color_depth_bytes, 255);
 
         int num_channels = wct::texture::NumOfChannels(format);
 
         for (int i=num_channels; i < 4; i++) {
             std::memcpy(
-                data_.data() + (tex_size * i),
+                data_.data() + (tex_size * i * color_depth_bytes),
                 data_.data(),
-                tex_size
+                tex_size * color_depth_bytes
                 );
         }
 
         format = all_channels_format;
     }    
-
-private:
-
 };
 
