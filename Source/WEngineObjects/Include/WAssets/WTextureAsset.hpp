@@ -31,6 +31,9 @@ public:
         wct::texture::ETextureFormat in_format
         ) {
         format = in_format;
+        width = in_width;
+        height = in_height;
+        
         std::size_t size =
             in_width *
             in_height *
