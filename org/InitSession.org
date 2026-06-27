@@ -1,0 +1,15 @@
+#+title: Init Session
+
+
+* Load Required modules
+
+Load org and elisp required libraries.
+
+#+begin_src elisp
+(require 'org)
+(org-babel-load-file "elisp/WModules.org")
+(org-babel-load-file "elisp/WObject.org")
+(org-babel-lob-ingest "templates/WClass.org")
+(org-babel-lob-ingest "templates/WObject.org")
+#+end_src
+
