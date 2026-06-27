@@ -5,13 +5,19 @@ CMAKE_CXX_COMPILER?=clang++
 
 all: compile-release
 
-generate-release:
+generate-source-files:
+	@emacs --batch --quick												\
+	--eval "(require 'org)"												\
+	--eval "(org-babel-load-file \"$(realpath org/InitSession.org)\")"	\
+	--eval "(wng/evaluate-module-org-files (wng/find-module-org-files \"$(realpath Source)\"))"
+
+generate-release: generate-source-files
 	@cmake --preset Release						\
 		-Dslang_DIR=$(realpath ${slang_DIR})	\
 		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	\
 		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 
-generate-debug:
+generate-debug: generate-source-files
 	@cmake --preset Debug						\
 		-DWUNITTEST=1							\
 		-Dslang_DIR=$(realpath ${slang_DIR})	\

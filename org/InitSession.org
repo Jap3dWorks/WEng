@@ -7,9 +7,11 @@ Load org and elisp required libraries.
 
 #+begin_src elisp
 (require 'org)
-(org-babel-load-file "elisp/WModules.org")
-(org-babel-load-file "elisp/WObject.org")
-(org-babel-lob-ingest "templates/WClass.org")
-(org-babel-lob-ingest "templates/WObject.org")
+(org-babel-do-load-languages 'org-babel-load-languages '((python . t)(shell . t)(C . t)))
+(let ((current-dir (file-name-directory (or load-file-name (buffer-file-name)))))
+(org-babel-load-file (expand-file-name "elisp/WModules.org" current-dir))
+(org-babel-load-file (expand-file-name "elisp/WObject.org" current-dir))
+(org-babel-lob-ingest (expand-file-name "templates/WClass.org" current-dir))
+(org-babel-lob-ingest (expand-file-name "templates/WObject.org" current-dir))
+)
 #+end_src
-

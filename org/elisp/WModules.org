@@ -6,10 +6,8 @@
 (defun wng/find-files (root-dir regex)
   "Return list of files under ROOT-DIR whose names match REGEX.
 ROOT-DIR is expanded relative to the current buffer's directory."
-  (let* ((base-dir (file-name-directory (buffer-file-name)))
-         (full-dir (expand-file-name root-dir base-dir))
-         (result '()))
-    (dolist (file (directory-files-recursively full-dir "." t))
+  (let* ((result '()))
+    (dolist (file (directory-files-recursively root-dir "." t))
       (when (string-match-p regex (file-name-nondirectory file))
         (push file result)))
     (nreverse result)))
@@ -18,6 +16,12 @@ ROOT-DIR is expanded relative to the current buffer's directory."
 #+begin_src elisp :results value
 (defun wng/find-module-org-files (root-dir)
   (wng/find-files root-dir "\\.org$"))
+#+end_src
+
+* Collect lob modules
+
+#+begin_src elisp
+
 #+end_src
 
 * Evaluate module org files
@@ -32,6 +36,8 @@ Open each file, execute all source blocks and tangle, then close buffer."
     (when (string-match-p "\\.org$"  file)
       (ignore-errors
         (with-current-buffer (find-file-noselect file)
+          (setq-local org-confirm-babel-evaluate nil)
+          (print file)
           (org-babel-execute-buffer)
           (org-babel-tangle)
           (kill-current-buffer))))))
