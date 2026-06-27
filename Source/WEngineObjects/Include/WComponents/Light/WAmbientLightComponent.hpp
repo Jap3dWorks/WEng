@@ -15,16 +15,10 @@ namespace wcm::light {
 
         WPROPERTY(bool, active, true);
         WPROPERTY(float, intensity, 1.f);
-        WPROPERTY(glm::vec4, color, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+        WPROPERTY(glm::vec3, color, glm::vec3(0.5f, 0.5f, 0.5f));
 
     public:
 
-        WNODISCARD wct::render::WAmbientLight ToAmbientLight() const {
-            return {
-                .color = color,
-                .intensity = intensity
-            };
-        }
     };
 
 }

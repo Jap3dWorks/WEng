@@ -8,7 +8,7 @@
 #include <limits>
 #include <span>
 
-namespace wrd::lighting {
+namespace wrd::light {
 
     template<typename T, std::uint32_t Size=0>
     class StaticSpanAllocator {

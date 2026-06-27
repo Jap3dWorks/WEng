@@ -7,15 +7,15 @@
 #include "WComponents/Light/WAmbientLightComponent.hpp"
 
 namespace wrd::light {
+
     inline constexpr wct::render::WPointLight ToPointLight(
         const WTransformComponent & in_transform,
         const wcm::light::WPointLightComponent & in_light
         ) {
         return {
-            .color=in_light.Get_color(),
-            .position={in_transform.Get_position(), 1.f},
-            .intensity=in_light.Get_intensity(),
+            .color={in_light.Get_color() * in_light.Get_intensity()},
             .radius=in_light.Get_radius(),
+            .position={in_transform.Get_position()}
         };
     }
 
@@ -24,13 +24,18 @@ namespace wrd::light {
         const wcm::light::WDirectionalLightComponent & in_light
         )
     {
-        return {};
+        return {
+            .color=in_light.Get_color() * in_light.Get_intensity(),
+            .direction=in_transform.Get_transform_matrix()[0]
+        };
     }
 
     inline constexpr wct::render::WAmbientLight ToAmbientLight(
         const wcm::light::WAmbientLightComponent & in_light
         )
     {
-        return {};
+        return {
+            .color=in_light.Get_color() * in_light.Get_intensity()
+        };
     }
 }

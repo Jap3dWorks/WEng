@@ -215,40 +215,35 @@ namespace wct::render {
    // --------
 
     struct WPointLight {
-        glm::vec4 color{0.5, 0.5, 0.5, 1.f};
-        glm::vec4 position{};
-        float intensity{1.f};
+        glm::vec3 color{0.5, 0.5, 0.5};
         float radius{10.f};
-        float _padding[2];
+        glm::vec3 position{0.f, 0.f, 0.f};
+        float _padding[1];
     };
 
-    static_assert(sizeof(WPointLight) == 48, "Size must match Vulkan layout");
+    static_assert(sizeof(WPointLight) == 32, "Size must match Vulkan layout");
     static_assert(offsetof(WPointLight, color) == 0, "Color at offset 0");
-    static_assert(offsetof(WPointLight, position) == 16, "Position at offset 16");
-    static_assert(offsetof(WPointLight, intensity) == 32, "Intensity at offset 32");
-    static_assert(offsetof(WPointLight, radius) == 36, "Radius at offset 36");
+    static_assert(offsetof(WPointLight, radius) == 12, "Radius at offset 12");
+    static_assert(offsetof(WPointLight, position) == 16, "Intensity at offset 16");
 
     struct WDirectionalLight {
-        glm::vec4 color{0.5, 0.5, 0.5, 1.f};
-        glm::vec4 direction{0.f, 0.f, 0.f, 0.f};
-        float intensity{1.f};
-        float _padding[3];
+        glm::vec3 color{0.5, 0.5, 0.5};
+        float _padding_1;
+        glm::vec3 direction{0.f, 0.f, 0.f};
+        float _padding_2;
     };
 
-    static_assert(sizeof(WDirectionalLight)==48, "Size must match Vulkan layout");
+    static_assert(sizeof(WDirectionalLight)==32, "Size must match Vulkan layout");
     static_assert(offsetof(WDirectionalLight, color)==0, "Color at offset 0");
     static_assert(offsetof(WDirectionalLight, direction)==16, "Direction at offset 16");
-    static_assert(offsetof(WDirectionalLight, intensity)==32, "Intensity ar offset 32");
 
     struct WAmbientLight {
-        glm::vec4 color{0.5, 0.5, 0.5, 1.f};
-        float intensity{1.f};
-        float _padding[3];
+        glm::vec3 color{0.5, 0.5, 0.5};
+        float _padding;
     };
 
-    static_assert(sizeof(WAmbientLight)==32, "Size must match Vulkan layout");
+    static_assert(sizeof(WAmbientLight)==16, "Size must match Vulkan layout");
     static_assert(offsetof(WAmbientLight, color)==0, "Color at offset 0");
-    static_assert(offsetof(WAmbientLight, intensity)==16, "Intensity at offset 16");
 
     struct WLightingUBO {
         static constexpr std::uint32_t MAX_POINT_LIGHTS{64};

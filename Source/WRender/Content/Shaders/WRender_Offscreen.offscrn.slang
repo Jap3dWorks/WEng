@@ -32,17 +32,21 @@ float4 fsMain(VSOffscreenOutput vertexOutput) : SV_TARGET
     float3 alb = albedo.Sample(uv).xyz;
 
     float3 color = alb *
-        lighting_ubo.ambient_light.color.xyz *
-        lighting_ubo.ambient_light.intensity;
-    
+        lighting_ubo.ambient_light.color.xyz;
+
     for(uint i=0; i < lighting_ubo.point_lights_count; i++) {
         float3 vdist = lighting_ubo.point_lights[i].position.xyz - wpos;
         float dist = length(vdist);
 
-        float weight = 1.0 - (clamp(dist / lighting_ubo.point_lights[i].radius, 0, 1));
+        float radius_weight =
+            1.0 - (clamp(dist / lighting_ubo.point_lights[i].color_radius.w, 0, 1));
+
         float n = clamp(dot(normalize(vdist), nrm), 0, 1);
         
-        color += alb * lighting_ubo.point_lights[i].intensity * n * weight; 
+        color += alb *
+            lighting_ubo.point_lights[i].color_radius.xyz *
+            n *
+            radius_weight; 
     }
 
     return float4(color, 1.f);

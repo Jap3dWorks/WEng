@@ -22,21 +22,17 @@ public struct CameraUBO {
 // --------------
 
 public struct PointLight {
-    public float4 color;
+    public float4 color_radius; // xyz -> color | w -> radius
     public float4 position;
-    public float intensity;
-    public float radius;
 };
 
 public struct DirectionalLight {
     public float4 color;
     public float4 direction;
-    public float intensity;
 };
 
 public struct AmbientLight {
     public float4 color;
-    public float intensity;
 };
 
 // WLightingUBO

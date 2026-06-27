@@ -207,7 +207,7 @@ private:
         const std::uint32_t & in_image_index
         );
 
-    wrd::lighting::WDenseLightingUBO lighting_UBO_{};
+    wrd::light::WDenseLightingUBO lighting_UBO_{};
 
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};

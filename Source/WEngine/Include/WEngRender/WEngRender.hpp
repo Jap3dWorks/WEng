@@ -17,6 +17,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WLevel/WLevel.hpp"
 #include "WRender/WRender.hpp"
+#include "WRender/WLight.hpp"
 #include "WComponents/WComponentTypes.hpp"
 
 
@@ -43,18 +44,15 @@ namespace wng::render {
             [&in_level, &point_lights, &pl_ids, &pl_count]
             (wcm::light::WPointLightComponent * cmp) {
                 if (cmp->Get_active()) {
-                    auto plight = cmp->ToPointLight();
 
                     auto * transform_component =
                         &in_level->GetComponent<WTransformComponent>
                         (cmp->Get_entity_id());
 
-                    // auto & transform = in_level
-                    //     ->GetComponent<WTransformComponent>
-                    //     (cmp->EntityId()).TransformStruct();
-
-                    plight.position = {transform_component->Get_position(),
-                                       0.f};
+                    auto plight = wrd::light::ToPointLight(
+                        *transform_component,
+                        *cmp
+                        );
                     
                     point_lights[pl_count] = plight;
                     pl_ids[pl_count] = in_level->
@@ -76,16 +74,16 @@ namespace wng::render {
             [&in_level, &directional_lights, &dl_ids, &dl_count]
             (wcm::light::WDirectionalLightComponent * cmp) {
                 if (cmp->Get_active()) {
-                    auto dlight = cmp->ToDirectionalLight();
 
                     auto * transform_cmp = &in_level
                         ->GetComponent<WTransformComponent>
                         (cmp->Get_entity_id());
-                    // auto & transform = in_level
-                    //     ->GetComponent<WTransformComponent>
-                    //     (cmp->EntityId()).TransformStruct();
 
-                    // dlight.direction = transform.transform_matrix[0];
+                    auto dlight = wrd::light::ToDirectionalLight(
+                        *transform_cmp,
+                        *cmp
+                        );
+
                     dlight.direction = transform_cmp->Get_transform_matrix()[0];
 
                     directional_lights[dl_count] = dlight;
@@ -105,7 +103,7 @@ namespace wng::render {
         wct::render::WAmbientLight amb_light;
         in_level->ForEachComponent<wcm::light::WAmbientLightComponent>(
             [&amb_light](auto * cmp) {
-                amb_light = cmp->ToAmbientLight();
+                amb_light = wrd::light::ToAmbientLight(*cmp);
             }
             );
         

@@ -385,8 +385,6 @@ bool SetupLevel(WEngine & in_engine,
     level.CreateComponent<WTransformComponent>(point_light_1);
     level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
     auto * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1);
-    // WTransformStruct * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1)
-        // .TransformStruct();
 
     transform_ptr->Set_position({0.0, 1.1, -2.0});
     transform_ptr->Set_scale(transform_ptr->Get_scale() * 0.1f);
@@ -403,7 +401,7 @@ bool SetupLevel(WEngine & in_engine,
 
     auto * ambient_ptr = &level.GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
-    ambient_ptr->Set_color({0.5, 0.5, 0.5, 1.0});
+    ambient_ptr->Set_color({0.5, 0.5, 0.5});
     ambient_ptr->Set_intensity(0.25);
     ambient_ptr->Set_active(true);
 
