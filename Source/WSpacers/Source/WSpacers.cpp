@@ -374,8 +374,8 @@ bool SetupLevel(WEngine & in_engine,
 
     monkey2sm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
     monkey2sm.SetPipelineAssignment(0,
-                                          in_monkey_dt.pipeline_asset,
-                                          in_monkey_dt.param_asset);
+                                    in_monkey_dt.pipeline_asset,
+                                    in_monkey_dt.param_asset);
 
 
     // Lights
