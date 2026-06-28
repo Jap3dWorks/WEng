@@ -1,16 +1,36 @@
 include_guard()
 
-find_package(slang REQUIRED)
+# ---- Find the Slang compiler executable ----
 
-get_filename_component(SLANG_ROOT_DIR "${slang_DIR}" DIRECTORY)
 find_program(SLANGC_EXECUTABLE
-    NAMES slangc slang-compiler
-    HINTS 
-        ${SLANG_ROOT_DIR}/bin
-        ${Slang_DIR}/bin
+    NAMES slangc slangc.exe
+    HINTS
+    # If Slang was found via find_package
+        ${SLANG_BINARY_DIR}/
+        ${slang_DIR}/../../../bin
+        ${slang_DIR}/bin
+        # If Slang was fetched via FetchContent
+        ${slang_SOURCE_DIR}/bin
+        ${slang_BINARY_DIR}/bin
+        # Standard system locations
+        ${CMAKE_INSTALL_PREFIX}/bin
         /usr/local/bin
-    REQUIRED
+        /usr/bin
+        # Windows
+        "C:/Program Files/slang/bin"
+        $ENV{ProgramFiles}/slang/bin
+    PATH_SUFFIXES
+        Release
+        Debug
+        RelWithDebInfo
+        MinSizeRel
 )
+
+if(NOT SLANGC_EXECUTABLE)
+    message(FATAL_ERROR "Could not find slangc executable. Please install Slang or set SLANGC_EXECUTABLE.")
+endif()
+
+message(STATUS "Found slangc: ${SLANGC_EXECUTABLE}")
 
 function(add_slang_shader_target TARGET)
     cmake_parse_arguments(

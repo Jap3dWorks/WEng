@@ -6,8 +6,6 @@ add_library(
         Source/WImporterRegister.cpp
 )
 
-find_package(tinyobjloader REQUIRED)
-
 target_include_directories(
     WImporter 
     PUBLIC 
@@ -17,7 +15,6 @@ target_include_directories(
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
-        ${tinyobjloader_INCLUDE_DIRS}
 )
 
 target_link_libraries(
@@ -26,6 +23,7 @@ target_link_libraries(
         WCore::WCore
         WEngineObjects::WEngineObjects
         WEngineInterfaces::WEngineInterfaces
+        tinyobjloader
 )
 
 add_library(WImporter::WImporter ALIAS WImporter)

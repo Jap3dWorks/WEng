@@ -1,4 +1,3 @@
-slang_DIR?=../slang/install/lib64/cmake/slang
 WENG_WLOG_ENABLE?=1
 CMAKE_C_COMPILER?=clang
 CMAKE_CXX_COMPILER?=clang++
@@ -13,14 +12,12 @@ generate-source-files:
 
 generate-release: generate-source-files
 	@cmake --preset Release						\
-		-Dslang_DIR=$(realpath ${slang_DIR})	\
 		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	\
 		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 
 generate-debug: generate-source-files
 	@cmake --preset Debug						\
 		-DWUNITTEST=1							\
-		-Dslang_DIR=$(realpath ${slang_DIR})	\
 		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	\
 		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 

@@ -1,0 +1,9 @@
+FROM quay.io/fedora/fedora-toolbox:44
+
+# Copy package list
+COPY packages.txt /tmp/packages.txt
+
+# Install development tools
+RUN dnf -y upgrade --refresh
+RUN dnf -y install $(cat /tmp/packages.txt)
+RUN dnf -y clean all
