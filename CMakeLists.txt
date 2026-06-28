@@ -38,7 +38,7 @@ FetchContent_MakeAvailable(tinyobjloader)
 # Get slang prebuild tools
 # ------------------------
 include(SlangSetup)
-download_slang()
+download_slang(v2026.12)
 
 
 macro(FIND_CMAKE_LISTS result curdir)
