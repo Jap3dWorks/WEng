@@ -9,8 +9,7 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_VERBOSE_MAKEFILE on)
 
 # Enable Logging
-# TODO do not use ENV
-if (DEFINED WENG_WLOG_ENABLE OR DEFINED ENV{WENG_WLOG_ENABLE})
+if (DEFINED WENG_WLOG_ENABLE)
     add_compile_definitions(WENG_WLOG_ENABLE=1)
 endif()
 
@@ -39,7 +38,6 @@ FetchContent_MakeAvailable(tinyobjloader)
 # ------------------------
 include(SlangSetup)
 download_slang(v2026.12)
-
 
 macro(FIND_CMAKE_LISTS result curdir)
   FILE(GLOB_RECURSE children ABSOLUTE ${curdir} ${curdir}/*/CMakeLists.txt)

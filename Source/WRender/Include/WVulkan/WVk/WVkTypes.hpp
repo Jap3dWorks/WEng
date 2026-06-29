@@ -103,6 +103,12 @@ namespace wvk::types {
         return {};
     }
 
+    inline constexpr VkDescriptorPoolCreateInfo VkDescriptorPoolCreateInfo() noexcept {
+        ::VkDescriptorPoolCreateInfo result{};
+        result.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        return result;
+    }
+
     inline constexpr VkRenderingInfo CreateVkRenderingInfo()  noexcept {
         VkRenderingInfo result{};
         result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;

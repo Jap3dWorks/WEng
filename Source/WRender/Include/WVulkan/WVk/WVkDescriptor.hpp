@@ -20,6 +20,9 @@ namespace wvk::descriptor {
         VkDevice & in_device
         );
 
+    /**
+     * @DEPRECATED
+     */
     void Create(
         VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & device
@@ -35,7 +38,37 @@ namespace wvk::descriptor {
         const VkDescriptorPool & descriptor_pool_info
         );
 
-    WNODISCARD VkDescriptorSet Create(
+    template<std::uint8_t N>
+    VkDescriptorPool CreateDescriptorPool(
+        VkDevice in_device,
+        const std::array<VkDescriptorPoolSize,N> pool_sizes,
+        std::uint32_t max_sets
+        ) {
+        
+        VkDescriptorPool result;
+        VkDescriptorPoolCreateInfo pool_info{};
+        
+        pool_info = wvk::types::VkDescriptorPoolCreateInfo();
+        
+        pool_info.poolSizeCount = static_cast<std::uint32_t>(
+            pool_sizes.size()
+            );
+        pool_info.pPoolSizes = pool_sizes.data();
+        pool_info.maxSets = max_sets;
+
+        wvk::vulkan::ExecVkProcChecked(
+            vkCreateDescriptorPool,
+            "Failed to create descriptor pool!",
+            in_device,
+            &pool_info,
+            nullptr,
+            &result
+            );
+
+        return result;
+    }
+
+    WNODISCARD VkDescriptorSet CreateDescriptor(
         VkDevice device,
         VkDescriptorSetLayout descriptor_set_layout_info,
         VkDescriptorPool descriptor_pool_info
@@ -75,17 +108,16 @@ namespace wvk::descriptor {
         }
     }
 
-    inline void UpdateDescriptorSetLayout(
-        WVkDescriptorSetLayoutInfo & out_dsl,
+    inline std::vector<VkDescriptorSetLayoutBinding> ToDescriptorSetLayoutBinding(
         const wct::render::WPipeParamDescriptorList & in_param_list
         ) {
+        std::vector<VkDescriptorSetLayoutBinding> result;
 
-        std::vector<VkDescriptorSetLayoutBinding> bindings;
-        bindings.reserve(in_param_list.size());
+        result.reserve(in_param_list.size());
 
         wct::render::ForEach(
             in_param_list,
-            [&bindings]
+            [&result]
             (const auto& _prm) {
                 VkDescriptorSetLayoutBinding bndng{};
 
@@ -109,11 +141,22 @@ namespace wvk::descriptor {
                 bndng.pImmutableSamplers = nullptr;
                 bndng.stageFlags = wvk::types::ToVkShaderStageFlag(_prm.stage_flags);
 
-                bindings.push_back(bndng);
+                result.push_back(bndng);
             }
             );
 
-        out_dsl.bindings = bindings;
+        return result;
+    }
+
+    /**
+     * @DEPRECATED
+     */
+    inline void UpdateDescriptorSetLayout(
+        WVkDescriptorSetLayoutInfo & out_dsl,
+        const wct::render::WPipeParamDescriptorList & in_param_list
+        ) {
+
+        out_dsl.bindings = ToDescriptorSetLayoutBinding(in_param_list);
 
     }
 

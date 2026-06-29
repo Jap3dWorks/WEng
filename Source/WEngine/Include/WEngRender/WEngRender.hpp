@@ -20,6 +20,8 @@
 #include "WRender/WLight.hpp"
 #include "WComponents/WComponentTypes.hpp"
 
+#include <cstdint>
+#include <span>
 
 namespace wng::render {
 
@@ -243,24 +245,24 @@ namespace wng::render {
                             in_component->GetPipelineAssignment(_id).pipeline,
                             assidx,
                             *param
-                            // param->RenderPipelineParameters()
                             );
 
                         auto * transform_component = &in_level
                             ->GetComponent<WTransformComponent>
                             (in_component->Get_entity_id());
 
-                        // WTransformStruct & tstruct = in_level->GetComponent<WTransformComponent>(
-                        //     in_component->EntityId()
-                        //     ).TransformStruct();
-
                         wct::render::WModelUBO grpubo =
-                            wrd::render::ToUBOGraphicsStruct(*transform_component);
-                        wct::render::WRPParamUbo ubodt{.binding=0, .offset=0};
-                        ubodt.databuffer.resize(sizeof(decltype(grpubo)));
+                          wrd::render::ToUBOGraphicsStruct(*transform_component);
 
-                        std::memcpy(ubodt.databuffer.data(), &grpubo, sizeof(decltype(grpubo)));
+                        std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(&grpubo);
 
+                        wct::render::WRPParamUbo ubodt{
+                            .binding=0,
+                            .data=std::span<std::uint8_t>(
+                                                          ptr,
+                                                          ptr + sizeof(grpubo)),
+                            .offset=0};
+                        
                         in_render->UpdateParameterStatic(ecid, ubodt);
                     }
                     );

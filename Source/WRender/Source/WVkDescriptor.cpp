@@ -108,7 +108,7 @@ void wvk::descriptor::Create(
     }
 }
 
-VkDescriptorSet wvk::descriptor::Create(
+VkDescriptorSet wvk::descriptor::CreateDescriptor(
     VkDevice in_device,
     VkDescriptorSetLayout in_descriptor_set_layout,
     VkDescriptorPool in_descriptor_pool

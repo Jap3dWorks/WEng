@@ -23,7 +23,7 @@ public:
         : device_(std::move(other.device_)),
           descpool_info_(std::move(other.descpool_info_)),
           descset_layout_info_(std::move(other.descset_layout_info_)),
-          descset_info_(std::move(other.descset_info_)),
+          descriptors_(std::move(other.descriptors_)),
           camera_ubo_(std::move(other.camera_ubo_)),
           lighting_ubo_(std::move(other.camera_ubo_))
         {
@@ -40,7 +40,7 @@ public:
             device_ = std::move(other.device_);
             descpool_info_ = std::move(other.descpool_info_);
             descset_layout_info_ = std::move(other.descset_layout_info_);
-            descset_info_ = std::move(other.descset_info_);
+            descriptors_ = std::move(other.descriptors_);
             camera_ubo_ = std::move(other.camera_ubo_);
             lighting_ubo_ = std::move(other.lighting_ubo_);
 
@@ -66,7 +66,7 @@ public:
     }
 
     VkDescriptorSet DescriptorSet(std::uint32_t in_frame_index) const {
-        return descset_info_[in_frame_index];
+        return descriptors_[in_frame_index];
     }
 
     void UpdateCameraUBO(
@@ -192,7 +192,7 @@ private:
         descpool_info_ = CreateDescriptorPool(device_);
 
         for (std::uint32_t i=0; i < FramesInFlight; i++) {
-            descset_info_[i] = wvk::descriptor::Create(
+            descriptors_[i] = wvk::descriptor::CreateDescriptor(
                 device_,
                 descset_layout_info_,
                 descpool_info_
@@ -223,9 +223,8 @@ private:
                     write_descriptors[j],
                     j, // binding 0 and 1
                     buffer_infos[j],
-                    descset_info_[i]
+                    descriptors_[i]
                     );
-
                 ++j;
             }
 
@@ -243,7 +242,6 @@ private:
         VkDevice in_device
         )
         {
-        
             VkDescriptorPool result;
             std::array<VkDescriptorPoolSize,1> pool_sizes;
 
@@ -251,24 +249,11 @@ private:
             pool_sizes[0].descriptorCount =
                 static_cast<uint32_t>(FramesInFlight) * 4;
 
-            VkDescriptorPoolCreateInfo pool_info{};
-            pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-            pool_info.poolSizeCount = static_cast<uint32_t>(
-                pool_sizes.size()
-                );
-            pool_info.pPoolSizes = pool_sizes.data();
-            pool_info.maxSets = pool_sizes[0].descriptorCount;
-
-            wvk::vulkan::ExecVkProcChecked(
-                vkCreateDescriptorPool,
-                "Failed to create descriptor pool!",
+            return wvk::descriptor::CreateDescriptorPool<1>(
                 in_device,
-                &pool_info,
-                nullptr,
-                &result
+                pool_sizes,
+                pool_sizes[0].descriptorCount
                 );
-
-            return result;
         }
     
 
@@ -322,7 +307,7 @@ private:
             device_ = VK_NULL_HANDLE;
             descpool_info_ = VK_NULL_HANDLE;
             descset_layout_info_ = VK_NULL_HANDLE;
-            descset_info_ = {};
+            descriptors_ = {};
             camera_ubo_ = {};
             lighting_ubo_ = {};
         }
@@ -335,5 +320,5 @@ private:
     std::array<WVkUBOInfo, FramesInFlight> camera_ubo_{};
     std::array<WVkUBOInfo, FramesInFlight> lighting_ubo_{};
 
-    std::array<VkDescriptorSet, FramesInFlight> descset_info_{};
+    std::array<VkDescriptorSet, FramesInFlight> descriptors_{};
 };

@@ -241,7 +241,6 @@ private:
                 dynamic_states
                 );
 
-        // Add global descriptor set layout
         std::array<VkDescriptorSetLayout, 2> layouts {
             in_global_set_layout,            
             descset_layout_

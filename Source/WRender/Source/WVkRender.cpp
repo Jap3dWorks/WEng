@@ -516,8 +516,10 @@ void WVkRender::CreatePipelineBinding(
         const auto & ubop = ubo_params[i];
         ubos[i] = {
             .binding = ubop.binding,
-            .data = ubop.databuffer.data(),
-            .size = ubop.databuffer.size(),
+            .data = ubop.data.data(),
+            // .data = ubop.databuffer.data(),
+            .size = ubop.data.size(),
+            // .size = ubop.databuffer.size(),
             .offset = ubop.offset
         };
     }
@@ -600,16 +602,20 @@ void WVkRender::UpdateUboCamera(
 }
 
 void WVkRender::UpdateParameterDynamic(
-        const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUbo & ubo_write
+									   const WEntityComponentId & in_component_id,
+									   const wct::render::WRPParamUbo & ubo_write
     ) {
-
+  
     WVkDescriptorSetUBOWriteStruct ubowrt{
         .binding = ubo_write.binding,
-        .data = ubo_write.databuffer.data(),
-        .size = ubo_write.databuffer.size(),
+        .data = ubo_write.data.data(),
+        // .data = ubo_write.databuffer.data(),
+        .size = ubo_write.data.size(),
+        // .size = ubo_write.databuffer.size(),
         .offset = ubo_write.offset
     };
+
+  
 
     wct::render::pipeline_type_dispatcher<
         wct::render::EPipelineType::Graphics,
@@ -637,14 +643,14 @@ void WVkRender::UpdateParameterDynamic(
 }
 
 void WVkRender::UpdateParameterStatic(
-        const WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUbo & ubo_write
+    const WEntityComponentId & in_component_id,
+    const wct::render::WRPParamUbo & ubo_write
     ) {
-
-    WVkDescriptorSetUBOWriteStruct ubowrt{
+    
+    WVkDescriptorSetUBOWriteStruct ubowrt {
         .binding = ubo_write.binding,
-        .data = ubo_write.databuffer.data(),
-        .size = ubo_write.databuffer.size(),
+        .data = ubo_write.data.data(),
+        .size = ubo_write.data.size(),
         .offset = ubo_write.offset
     };
 
@@ -652,8 +658,7 @@ void WVkRender::UpdateParameterStatic(
         wct::render::EPipelineType::Graphics,
         wct::render::EPipelineType::GBuffer,
         wct::render::EPipelineType::Postprocess
-        >
-        (
+        > (
             pipeline_track_.binding_pipetype[in_component_id],
             [&, this](){
                 gbuffers_pipelines_.UpdateBinding(in_component_id,
@@ -892,6 +897,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         );
 
     // DescriptorSet
+    // TODO do not recreate each frame, create descriptorsSets only once.
     VkDescriptorSet descriptorset = wvk::render::CreateOffscreenRenderDescriptor(
         device_.Device(),
         offscreen_pipeline_.DescriptorPool(in_frame_index),

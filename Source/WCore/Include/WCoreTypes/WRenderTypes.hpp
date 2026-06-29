@@ -6,13 +6,14 @@
 #include <cstdint>
 #include <array>
 #include <stdexcept>
+#include <span>
 
 #include <glm/glm.hpp>
 #include <utility>
 
 namespace wct::render {
 
-        // Uniform Buffer Objects
+    // Uniform Buffer Objects
     // ----------------------
 
     /**
@@ -171,7 +172,7 @@ namespace wct::render {
     /** Render Pipeline Param Ubo Struct */
     struct WRPParamUbo {
         std::uint16_t binding{0};
-        std::vector<char> databuffer{};  // TODO: std::span
+        std::span<std::uint8_t> data{};
         std::size_t offset{0};
     };
 
@@ -186,11 +187,6 @@ namespace wct::render {
     using WRPParameterList_WAssetId = std::vector<WRPParamAsset>;
     using WRPParameterList_Ubo = std::vector<WRPParamUbo>;
 
-    // struct WRenderPipelineParameters {
-    //     WRPParameterList_Ubo ubo_params{};
-    //     WRPParameterList_WAssetId texture_params{};
-    // };
- 
     template<CCallable<void, const WPipeParamDescriptorInfo &> TFn>
     inline void ForEach(const wct::render::WPipeParamDescriptorList & in_lst, TFn && in_fn) {
         for(const auto& param: in_lst) {

@@ -1,17 +1,30 @@
 module Postprocess;
 
-public struct PostprocessParamsUBO {
-    public float4 param1;
-    public float4 param2;
-    public float4 param3;
-    public float4 param4;
-};
+// import ..GlobalUBO.GlobalUBO;
 
-// TODO move to set 1 binding 1
-[[vk::binding(0,1)]] // binding 0, set 1
-public uniform ConstantBuffer<PostprocessParamsUBO> ppcess_params_ubo;
+// [[vk::binding(0,2)]]  // binding 2, set 0
+// public uniform Sampler2D color;
 
-// TODO move color set to set 1 binding 0
+[[vk::binding(1,2)]]
+public uniform Sampler2D albedo;
+
+[[vk::binding(2,2)]]
+public uniform Sampler2D normal;
+
+[[vk::binding(3,2)]]
+public uniform Sampler2D ws_position;
+
+// TODO input render textures
+//  rm (roughness/metallic)
+//  emission
+//  extras 1 and 2
+
+[[vk::binding(4,2)]]
+public uniform Sampler2D depth;
+
+// --
+
+// // TODO move color set to set 2 binding 0
 [[vk::binding(0,0)]]  // binding 0, set #
 public uniform Sampler2D color;
 

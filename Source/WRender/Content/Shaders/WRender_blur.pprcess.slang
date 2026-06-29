@@ -1,6 +1,18 @@
 // import GlobalUBO.GlobalUBO;
 import Postprocess.Postprocess;
 
+//
+public struct PostprocessParamsUBO {
+    public float4 param1;
+    public float4 param2;
+    public float4 param3;
+    public float4 param4;
+};
+
+[[vk::binding(0,1)]] // binding 0, set 1
+public uniform ConstantBuffer<PostprocessParamsUBO> ppcess_params_ubo;
+
+
 // TODO add global descriptor
 
 [shader("vertex")]

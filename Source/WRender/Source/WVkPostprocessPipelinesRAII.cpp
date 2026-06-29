@@ -53,12 +53,11 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
     const WAssetId & in_id,
-    const WRenderPipelineAsset & in_pipeline_struct
+    const WRenderPipelineAsset & in_pipeline_asset
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
-        in_pipeline_struct.Get_shader_list(),
-        // in_pipeline_struct.shaders,
+        in_pipeline_asset.Get_shader_list(),
         WVkPostprocessPipeUtils::BuildPostprocessShaderStageInfo
         );
     
@@ -66,7 +65,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_,
-        in_pipeline_struct.Get_descriptor_list(),
+        in_pipeline_asset.Get_descriptor_list(),
         // in_pipeline_struct.params_descriptor,
         wvk::descriptor::UpdateDescriptorSetLayout
         );
@@ -76,7 +75,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
         device_,
         in_id,
         shaders,
-        [this, &in_pipeline_struct]
+        [this, &in_pipeline_asset]
         (auto& _rp, const auto & _dvc, const auto & _desclay, const auto & _shdrs) {
             WVkPostprocessPipeUtils::CreatePostprocessPipeline(
                 _rp,
@@ -88,7 +87,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
                 _shdrs
                 );
 
-            _rp.params_descriptor = in_pipeline_struct.Get_descriptor_list();
+            _rp.params_descriptor = in_pipeline_asset.Get_descriptor_list();
             // _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
@@ -150,10 +149,10 @@ void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
 }
 
 void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
-    auto plane_vertex = wvk::render_plane::RenderPlaneVertex();
-    auto plane_index = wvk::render_plane::RenderPlaneIndexes();
 
     global_resources_.descset_layout_info = {};
+ 
+
     WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(
         global_resources_.descset_layout_info
         );

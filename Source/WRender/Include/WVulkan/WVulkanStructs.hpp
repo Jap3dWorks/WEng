@@ -127,6 +127,7 @@ struct WVkDescriptorSetUBOWriteStruct {
     std::size_t range{0};
 };
 
+// DEPRECATED
 struct WVkDescriptorSetTextureWriteStruct {
     std::uint32_t binding{0};
     VkDescriptorImageInfo image_info{.sampler=VK_NULL_HANDLE,
