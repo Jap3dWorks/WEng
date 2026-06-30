@@ -21,14 +21,14 @@ public:
 
     WVkGlobalDescriptorsRAII(WVkGlobalDescriptorsRAII&& other) noexcept
         : device_(std::move(other.device_)),
-          descpool_info_(std::move(other.descpool_info_)),
+          descriptor_pool_(std::move(other.descriptor_pool_)),
           descset_layout_info_(std::move(other.descset_layout_info_)),
           descriptors_(std::move(other.descriptors_)),
           camera_ubo_(std::move(other.camera_ubo_)),
           lighting_ubo_(std::move(other.camera_ubo_))
         {
             other.device_ = VK_NULL_HANDLE;
-            other.descpool_info_ = VK_NULL_HANDLE;
+            other.descriptor_pool_ = VK_NULL_HANDLE;
             other.descset_layout_info_ = VK_NULL_HANDLE;
         }
           
@@ -38,14 +38,14 @@ public:
             Destroy();
 
             device_ = std::move(other.device_);
-            descpool_info_ = std::move(other.descpool_info_);
+            descriptor_pool_ = std::move(other.descriptor_pool_);
             descset_layout_info_ = std::move(other.descset_layout_info_);
             descriptors_ = std::move(other.descriptors_);
             camera_ubo_ = std::move(other.camera_ubo_);
             lighting_ubo_ = std::move(other.lighting_ubo_);
 
             other.device_ = VK_NULL_HANDLE;
-            other.descpool_info_ = VK_NULL_HANDLE;
+            other.descriptor_pool_ = VK_NULL_HANDLE;
             other.descset_layout_info_ = VK_NULL_HANDLE;
         }
         return *this;
@@ -78,7 +78,7 @@ public:
             device_
             );
     
-        memcpy(
+        std::memcpy(
             ptr,
             &in_camera_ubo,
             sizeof(wct::render::WCameraUBO)
@@ -189,13 +189,13 @@ private:
 
         descset_layout_info_ = CreateDescrSetLayout(device_);
 
-        descpool_info_ = CreateDescriptorPool(device_);
+        descriptor_pool_ = CreateDescriptorPool(device_);
 
         for (std::uint32_t i=0; i < FramesInFlight; i++) {
             descriptors_[i] = wvk::descriptor::CreateDescriptor(
                 device_,
                 descset_layout_info_,
-                descpool_info_
+                descriptor_pool_
                 );
 
             camera_ubo_[i] = wvk::buffer::CreateUBO(
@@ -282,10 +282,10 @@ private:
     }
 
     void Destroy() {
-        if (descpool_info_ != VK_NULL_HANDLE) {
+        if (descriptor_pool_ != VK_NULL_HANDLE) {
 
             wvk::descriptor::Destroy(
-                descpool_info_,
+                descriptor_pool_,
                 device_);
 
             for(uint32_t i=0; i<camera_ubo_.size(); i++) {
@@ -305,7 +305,7 @@ private:
             }
 
             device_ = VK_NULL_HANDLE;
-            descpool_info_ = VK_NULL_HANDLE;
+            descriptor_pool_ = VK_NULL_HANDLE;
             descset_layout_info_ = VK_NULL_HANDLE;
             descriptors_ = {};
             camera_ubo_ = {};
@@ -315,7 +315,7 @@ private:
 
     VkDevice device_{VK_NULL_HANDLE};
 
-    VkDescriptorPool descpool_info_{VK_NULL_HANDLE};
+    VkDescriptorPool descriptor_pool_{VK_NULL_HANDLE};
     VkDescriptorSetLayout descset_layout_info_{VK_NULL_HANDLE};
     std::array<WVkUBOInfo, FramesInFlight> camera_ubo_{};
     std::array<WVkUBOInfo, FramesInFlight> lighting_ubo_{};

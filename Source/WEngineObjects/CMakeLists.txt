@@ -5,7 +5,6 @@ add_library(
         Source/WAsset.cpp
         Source/WEntity.cpp
         Source/WComponent.cpp
-        Source/WTextureAsset.cpp
         Source/WObjectDb.cpp
         Source/WAssetDb.cpp
         Source/WEntityComponentDb.cpp

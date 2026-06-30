@@ -162,6 +162,8 @@ void WEngine::Run()
             level_info_.level = level_db_.Get(level_info_.current_level);
             LoadLevel(level_info_.level);
 
+            WLOG("Level Load Done.");
+
             level_info_.loaded = true;
         }
         else

@@ -58,7 +58,6 @@ namespace WVkPostprocessPipeUtils {
                                           const std::vector<VkDescriptorSetLayout> & in_desc_lay,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
-        WFLOG("Create Postprocess pipeline");
         WVkShaderStageInfo wvertex_stage_info;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     

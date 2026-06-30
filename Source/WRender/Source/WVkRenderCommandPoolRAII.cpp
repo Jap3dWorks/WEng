@@ -21,7 +21,7 @@ WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(
     wvk::vulkan::QueueFamilyIndices queue_family_indices =
         wvk::vulkan::FindQueueFamilies(in_physical_device, in_surface);
 
-    VkCommandPoolCreateInfo pool_info = wvk::types::CreateVkCommandPoolCreateInfo();
+    VkCommandPoolCreateInfo pool_info = wvk::types::VkCommandPoolCreateInfo();
     pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 

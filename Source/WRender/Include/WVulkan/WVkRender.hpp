@@ -5,15 +5,16 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WCoreTypes/WTexture.hpp"
+// #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
+// #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkRenderPlaneRAII.hpp"
 #include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
@@ -233,16 +234,12 @@ private:
     WVkCommandBufferInfo render_command_buffer_{};
 
     WVkGlobalDescriptorsRAII<WENG_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
+    WVkPostprocessGlobalDescriptorRAII<WENG_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
     WVkGBufferPipelinesRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
     WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
-
-    struct PipelinesTrack {
-        std::unordered_map<WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
-        std::unordered_map<WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
-    } pipeline_track_{};
 
     // --
 
@@ -254,6 +251,14 @@ private:
     std::size_t semaphore_index_{0};
     
     std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> sync_fences_{};
+
+    // --
+
+    struct PipelinesTrack {
+        std::unordered_map<WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
+        std::unordered_map<WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
+    } pipeline_track_{};
+
 
     uint32_t frame_index_{0};
     

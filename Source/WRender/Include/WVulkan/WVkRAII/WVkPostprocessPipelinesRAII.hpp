@@ -18,11 +18,6 @@ class WVkPostprocessPipelinesRAII :
 public:
     using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
 
-    struct GlobalPostprocessResources {
-        std::array<VkDescriptorPool, frames_in_flight> descpool_info{};
-        WVkDescriptorSetLayoutInfo descset_layout_info{};
-    };
-
 public:
 
     WVkPostprocessPipelinesRAII()=default;
@@ -30,7 +25,7 @@ public:
     WVkPostprocessPipelinesRAII(const VkDevice & in_device,
                             const VkPhysicalDevice & in_physical_device);
 
-    virtual ~WVkPostprocessPipelinesRAII() override;
+    virtual ~WVkPostprocessPipelinesRAII()=default; 
 
     WVkPostprocessPipelinesRAII(const WVkPostprocessPipelinesRAII &)=delete;
     WVkPostprocessPipelinesRAII & operator=(const WVkPostprocessPipelinesRAII &)=delete;
@@ -39,31 +34,26 @@ public:
 
     WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
-    void CreatePipeline(const WAssetId & in_id,
-                        const WRenderPipelineAsset & in_pipeline_struct);
+    void CreatePipeline(
+        WAssetId in_id,
+        const WRenderPipelineAsset & in_pipeline_struct,
+        VkDescriptorSetLayout in_global_descriptor,
+        VkDescriptorSetLayout in_ppcess_global_descriptor
+        );
 
     WEntityComponentId CreateBinding(const WEntityComponentId & in_binding_id,
                                      const WAssetId & in_pipeline_id,
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
                                      const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
-    const VkDescriptorPool & GlobalDescriptorPool(const std::uint32_t & in_frame_index) const {
-        return global_resources_.descpool_info[in_frame_index];
-    }
+    /**
+     * @Brief Computes pipeline bindings order, order is relevant because 
+     * in a postprocess stack each postprocess is applied over the previous postprocess.
+     * This function is required to be called at least once.
+     */
+    void ComputeBindingOrder();
 
-    const WVkDescriptorSetLayoutInfo & GlobalDescSetLayout() const {
-        return global_resources_.descset_layout_info;
-    }
-
-    void ResetGlobalDescriptorPool(const std::uint32_t & in_frame_index) {
-        vkResetDescriptorPool(device_,
-                              global_resources_.descpool_info[in_frame_index],
-                              {});
-    }
-
-    void CalcBindingOrder();
-
-    auto IterBindingOrder() const {
+    auto BindingOrderIterator() const {
         return WIteratorUtils::DefaultIteratorPtr<const WEntityComponentId>(
             &(*binding_order_.begin()),
             &(*binding_order_.end())
@@ -71,14 +61,6 @@ public:
     }
 
 private:
-    
-    void Destroy();
-
-    void Initialize_GlobalResources();
-
-    void Destroy_GlobalResources();
-
-    GlobalPostprocessResources global_resources_{};
 
     std::vector<WEntityComponentId> binding_order_{};
 

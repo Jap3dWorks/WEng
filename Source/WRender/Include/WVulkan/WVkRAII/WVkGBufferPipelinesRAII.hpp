@@ -4,8 +4,8 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WCoreTypes/WRenderTypes.hpp"
-#include "_WVKGBufferPipelinesRAII_.hpp"
+// #include "WCoreTypes/WRenderTypes.hpp"
+#include "_WVkGBufferPipelinesRAII_.hpp"
 
 #include <vector>
 #include "WVkPipelinesBase.hpp"
@@ -98,7 +98,6 @@ public:
                     _shdrs
                     );
                 _rp.params_descriptor = in_pipeline_struct.Get_descriptor_list();
-                // _rp.params_descriptor = in_pipeline_struct.params_descriptor;
             }
             );
 

@@ -2,6 +2,7 @@
 
 #include "WCore/WCoreMacros.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
@@ -11,13 +12,15 @@ template<std::uint8_t FramesInFlight>
 class WVkPostprocessGlobalDescriptorRAII {
 public:
 
-    static inline const std::uint8_t COLOR_BINDING{0};
-    static inline const std::uint8_t ALBEDO_BINDING{1};
-    static inline const std::uint8_t NORMAL_BINDING{2};
-    static inline const std::uint8_t WS_POSITION_BINDING{3};
-    static inline const std::uint8_t DEPTH_BINDING{4};
+    static inline const std::uint8_t PREV_BINDING{0}; // Previous render
 
-    static inline const std::uint8_t BINDING_COUNT{5};
+    static inline const std::uint8_t COLOR_BINDING{1};
+    static inline const std::uint8_t ALBEDO_BINDING{2};
+    static inline const std::uint8_t NORMAL_BINDING{3};
+    static inline const std::uint8_t WS_POSITION_BINDING{4};
+    static inline const std::uint8_t DEPTH_BINDING{5};
+
+    static inline const std::uint8_t BINDING_COUNT{6};
 
 public:    
 
@@ -30,22 +33,59 @@ public:
         const WVkPostprocessGlobalDescriptorRAII &
         ) = delete;
 
-    WVkPostprocessGlobalDescriptorRAII(WVkPostprocessGlobalDescriptorRAII &&) = default;
+    WVkPostprocessGlobalDescriptorRAII(WVkPostprocessGlobalDescriptorRAII && other) noexcept :
+        device_(other.device_),
+        descriptor_pool_(other.descriptor_pool_),
+        descriptor_layout_(other.descriptor_layout_),
+        descriptor_sets_(std::move(other.descriptor_sets_))
+        {
+        other.device_=VK_NULL_HANDLE;
+        other.descriptor_pool_=VK_NULL_HANDLE;
+        other.descriptor_layout_=VK_NULL_HANDLE;
+    }
 
-    WVkPostprocessGlobalDescriptorRAII& operator=(WVkPostprocessGlobalDescriptorRAII &&) = default;
-    virtual ~WVkPostprocessGlobalDescriptorRAII() = default;
+    WVkPostprocessGlobalDescriptorRAII& operator=(WVkPostprocessGlobalDescriptorRAII && other) noexcept {
+        if(this != &other) {
+            Destroy();
 
-    void UpdateBindings(std::uint8_t frame_index,
-                        std::array<VkDescriptorImageInfo, BINDING_COUNT> in_descriptor_images) {
+            device_=other.device_;
+            descriptor_pool_ = other.descriptor_pool_;
+            descriptor_layout_ = other.descriptor_layout_;
+            descriptor_sets_ = std::move(other.descriptor_sets_);
 
-        std::array<VkWriteDescriptorSet,BINDING_COUNT> write_ds;
+            other.device_ = VK_NULL_HANDLE;
+            other.descriptor_pool_ = VK_NULL_HANDLE;
+            other.descriptor_layout_ = VK_NULL_HANDLE;
+        }
+        return *this;
+    }
+
+
+    virtual ~WVkPostprocessGlobalDescriptorRAII() {
+        Destroy();
+    }
+
+    WVkPostprocessGlobalDescriptorRAII(VkDevice in_device) :
+        device_(in_device)
+        {
+        Initialize(device_);
+    }
+
+public:
+
+    void UpdateDescriptorSet(
+        std::uint8_t in_frame_index,
+        const std::array<VkDescriptorImageInfo, BINDING_COUNT> & in_descriptor_images
+        ) {
+        
+        std::array<VkWriteDescriptorSet, BINDING_COUNT> write_ds;
 
         for(std::uint32_t i=0; i<write_ds.size(); i++) {
             wvk::descriptor::UpdateWriteDescriptorSet_Texture(
                 write_ds[i],
                 i,
                 in_descriptor_images[i],
-                descriptor_sets_[frame_index]
+                descriptor_sets_[in_frame_index]
                 );
         }
 
@@ -53,6 +93,29 @@ public:
             device_,
             static_cast<std::uint32_t>(write_ds.size()),
             write_ds.data(),
+            0,
+            nullptr
+            );
+    }
+
+    void UpdateDescriptorBinding(
+        std::uint8_t in_binding,
+        std::uint8_t frame_index,
+        VkDescriptorImageInfo in_descriptor_image_info
+        ) {
+        VkWriteDescriptorSet write_ds=wvk::types::VkWriteDescriptorSet();
+        
+        wvk::descriptor::UpdateWriteDescriptorSet_Texture(
+            write_ds,
+            in_binding,
+            in_descriptor_image_info,
+            descriptor_sets_[frame_index]
+            );
+
+        vkUpdateDescriptorSets(
+            device_,
+            1,
+            &write_ds,
             0,
             nullptr
             );
@@ -79,16 +142,31 @@ private:
                 descriptor_pool_
                 );
         }
-        
-
     }
 
     void Destroy() {
-        // TODO
+        if (device_ != VK_NULL_HANDLE) {
+            descriptor_sets_ = {};
+
+            wvk::descriptor::Destroy(
+                descriptor_pool_,
+                device_
+                );
+
+            wvk::descriptor::Destroy(
+                descriptor_layout_,
+                device_
+                );
+
+            device_=VK_NULL_HANDLE;
+            descriptor_pool_=VK_NULL_HANDLE;
+            descriptor_layout_=VK_NULL_HANDLE;
+        }
     }
 
     VkDescriptorSetLayout CreateDescLayout(VkDevice in_device) {
-        std::array<VkDescriptorSetLayoutBinding, 5> bindings{};
+        
+        std::array<VkDescriptorSetLayoutBinding, BINDING_COUNT> bindings{};
 
         auto buildbinding = [] (std::uint8_t _binding) -> auto {
             return VkDescriptorSetLayoutBinding{
@@ -101,9 +179,9 @@ private:
             };
         };
 
-        bindings[0] = buildbinding(COLOR_BINDING);
-        bindings[1] = buildbinding(ALBEDO_BINDING);
-        bindings[2] = buildbinding(NORMAL_BINDING);
+        bindings[0] = buildbinding(PREV_BINDING);
+        bindings[1] = buildbinding(COLOR_BINDING);
+        bindings[2] = buildbinding(ALBEDO_BINDING);
         bindings[3] = buildbinding(NORMAL_BINDING);
         bindings[4] = buildbinding(WS_POSITION_BINDING);
         bindings[5] = buildbinding(DEPTH_BINDING);

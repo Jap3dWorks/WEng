@@ -1,5 +1,9 @@
 #pragma once
 
+#include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
+#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
@@ -159,7 +163,7 @@ namespace wvk::render {
             image_infos[idx].imageView = vw;
             image_infos[idx].sampler = in_sampler;
 
-            write_ds[idx] = wvk::types::CreateVkWriteDescriptorSet();
+            write_ds[idx] = wvk::types::VkWriteDescriptorSet();
             write_ds[idx].dstBinding = idx;
             write_ds[idx].dstSet = descriptor_set;
             write_ds[idx].dstArrayElement=0;
@@ -185,6 +189,9 @@ namespace wvk::render {
         return descriptor_set;
     }
 
+    /**
+     * @DEPRECATED
+     */
     inline VkDescriptorSet CreateInputRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
@@ -236,6 +243,9 @@ namespace wvk::render {
         return descriptor_set;
     }
 
+    /**
+     * @DEPRECATED
+     */
     template<typename T>
     inline std::vector<T> CreateSyncSemaphore(const std::size_t & in_images,
                                               const VkDevice & in_device) {
@@ -952,6 +962,72 @@ namespace wvk::render {
                          in_index_count,
                          1,0,0,0);
     }
+
+    template<std::uint8_t FramesInFlight>
+    inline void UpdatePPcessGlobalDescriptorSet(
+        WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
+        const WVkAttachmentsGBuffersRAII<FramesInFlight> & gbffr_attach,
+        const WVkAttachmentsOffscreenRAII<FramesInFlight> & offscrn_attach,
+        VkSampler in_sampler,
+        std::uint8_t in_frm_indx
+        ) {
+
+        auto to_desc_info = [in_sampler](VkImageView in_img_view) -> VkDescriptorImageInfo {
+            return {
+                .sampler=in_sampler,
+                .imageView=in_img_view,
+                .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            };
+        };
+
+        std::array<VkDescriptorImageInfo,
+                   out_ppcss.BINDING_COUNT> image_infos;
+
+        image_infos[out_ppcss.PREV_BINDING] =
+            to_desc_info(offscrn_attach.Color(in_frm_indx).View());
+
+        image_infos[out_ppcss.COLOR_BINDING] =
+            to_desc_info(offscrn_attach.Color(in_frm_indx).View());
+
+        image_infos[out_ppcss.ALBEDO_BINDING] =
+            to_desc_info(gbffr_attach.Albedo(in_frm_indx).View());
+            
+        image_infos[out_ppcss.NORMAL_BINDING] =
+            to_desc_info(gbffr_attach.Normal(in_frm_indx).View());
+            
+        image_infos[out_ppcss.WS_POSITION_BINDING] =
+            to_desc_info(gbffr_attach.WsPosition(in_frm_indx).View());
+
+        image_infos[out_ppcss.DEPTH_BINDING] =
+            to_desc_info(gbffr_attach.Depth(in_frm_indx).View());
+
+        out_ppcss.UpdateDescriptorSet(
+            in_frm_indx,
+            image_infos
+            );
+
+    }    
+
+    template<std::uint8_t FramesInFlight>
+    inline void UpdatePPcessGlobalDescriptorSet(
+        WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
+        const WVkAttachmentsGBuffersRAII<FramesInFlight> & gbffr_attach,
+        const WVkAttachmentsOffscreenRAII<FramesInFlight> & offscrn_attach,
+        VkSampler in_sampler
+        ) {
+
+        for(std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+            
+            UpdatePPcessGlobalDescriptorSet(
+                out_ppcss,
+                gbffr_attach,
+                offscrn_attach,
+                in_sampler,
+                frm
+                );
+        }
+    }
+
 
 }
 

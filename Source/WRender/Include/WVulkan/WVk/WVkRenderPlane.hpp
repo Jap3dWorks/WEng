@@ -62,12 +62,12 @@ namespace wvk::render_plane {
         ) {
 
         // VkShaderStageFlagBits
-        in_data[0] = wvk::types::CreateVkPipelineShaderStageCreateInfo();
+        in_data[0] = wvk::types::VkPipelineShaderStageCreateInfo();
         in_data[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
         in_data[0].module=in_shader_module;
         in_data[0].pName="vsMain";
 
-        in_data[1] = wvk::types::CreateVkPipelineShaderStageCreateInfo();
+        in_data[1] = wvk::types::VkPipelineShaderStageCreateInfo();
         in_data[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         in_data[1].module=in_shader_module;
         in_data[1].pName="fsMain";

@@ -95,6 +95,7 @@ private:
         ) {
         for(Attachments & attchs : attachments_) {
 
+            // albedo
             attchs.albedo = WVkAttachmentRAII(
                 in_device,
                 in_physical_device,

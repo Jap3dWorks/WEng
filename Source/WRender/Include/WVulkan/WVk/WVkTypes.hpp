@@ -93,8 +93,8 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkWriteDescriptorSet CreateVkWriteDescriptorSet() noexcept {
-        VkWriteDescriptorSet result{};
+    inline constexpr VkWriteDescriptorSet VkWriteDescriptorSet() noexcept {
+        ::VkWriteDescriptorSet result{};
         result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         return result;
     }
@@ -206,38 +206,58 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkShaderModuleCreateInfo CreateVkShaderModuleCreateInfo() noexcept {
-        VkShaderModuleCreateInfo result{};
+    inline constexpr VkShaderModuleCreateInfo VkShaderModuleCreateInfo() noexcept {
+        ::VkShaderModuleCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         return result;
     }
 
-    inline constexpr VkPipelineShaderStageCreateInfo CreateVkPipelineShaderStageCreateInfo() noexcept {
-        VkPipelineShaderStageCreateInfo result{};
+    inline constexpr VkPipelineShaderStageCreateInfo VkPipelineShaderStageCreateInfo() noexcept {
+        ::VkPipelineShaderStageCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkSubmitInfo CreateVkSubmitInfo() noexcept {
-        VkSubmitInfo result{};
+    inline constexpr VkSubmitInfo VkSubmitInfo() noexcept {
+        ::VkSubmitInfo result{};
         result.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPresentInfoKHR CreateVkPresentInfoKHR() noexcept {
-        VkPresentInfoKHR result{};
+    inline constexpr VkPresentInfoKHR VkPresentInfoKHR() noexcept {
+        ::VkPresentInfoKHR result{};
         result.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkCommandPoolCreateInfo CreateVkCommandPoolCreateInfo() noexcept {
-        VkCommandPoolCreateInfo result{};
+    inline constexpr VkCommandPoolCreateInfo VkCommandPoolCreateInfo() noexcept {
+        ::VkCommandPoolCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
+    }
+
+    inline constexpr VkSamplerCreateInfo VkSamplerCreateInfo() noexcept {
+        return {
+            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO
+        };
+    }
+
+    inline constexpr VkSemaphoreCreateInfo VkSemaphoreCreateInfo() noexcept {
+        return {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            .pNext = VK_NULL_HANDLE            
+        };
+    }
+
+    inline constexpr VkFenceCreateInfo VkFenceCreateInfo() noexcept {
+        return {
+            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            .pNext = VK_NULL_HANDLE
+        };
     }
 
 }

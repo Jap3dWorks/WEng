@@ -156,23 +156,24 @@ bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
     shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
     // TODO do not use strcpy, use a TName type class.
     std::strcpy(shader_list[0].file,
-                "/Content/Shaders/WRender_blur.pprcess.spv");
+                "/Content/Shaders/WRender_rpassdebug.pprcess.spv");
     std::strcpy(shader_list[0].entry, "vsMain");
 
     shader_list[1].type=wct::render::EShaderStageFlag::Fragment;
     std::strcpy(
         shader_list[1].file,
-        "/Content/Shaders/WRender_blur.pprcess.spv");
+        "/Content/Shaders/WRender_rpassdebug.pprcess.spv");
     std::strcpy(shader_list[1].entry, "fsMain");
 
     pipeline_asset->Set_shader_list(shader_list);
 
     auto descriptors = pipeline_asset->Get_descriptor_list();
-    // auto & params = pipeline_asset->RenderPipeline().params_descriptor;
+
     descriptors[0].binding = 0;
     descriptors[0].type = wct::render::EPipeParamType::Ubo;
     descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
     descriptors[0].size = sizeof(wct::render::WPostprocessUBO);
+
     pipeline_asset->Set_descriptor_list(descriptors);
 
     WAssetId paramid =
@@ -180,8 +181,8 @@ bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
             "/Content/Assets/PPBlurParam.PPBlurParam"
             );
 
-    WRenderPipelineParametersAsset * paramass =
-        engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+    // WRenderPipelineParametersAsset * paramass =
+    //     engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
     camera.SetPostprocessAssignment(0, pipid, paramid);
 

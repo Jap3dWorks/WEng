@@ -17,7 +17,7 @@ namespace wvk::shader {
         VkShaderModule result;
 
         VkShaderModuleCreateInfo shader_module_create_info =
-            wvk::types::CreateVkShaderModuleCreateInfo();
+            wvk::types::VkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
         shader_module_create_info.pCode = in_code;
 

@@ -13,38 +13,22 @@
 WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device
-    ) : Super(in_device, in_physical_device)
-{
-    Initialize_GlobalResources();
-}
-
-WVkPostprocessPipelinesRAII::~WVkPostprocessPipelinesRAII() {
-    Destroy();
-    Super::~Super();
-}
+    ) : Super(in_device, in_physical_device) {}
 
 WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
     WVkPostprocessPipelinesRAII && other
     ) noexcept  :
     Super(std::move(other)),
-    global_resources_(std::move(other.global_resources_)),
     binding_order_(std::move(other.binding_order_))
-{
-    other.global_resources_ = {};
-}
+{}
 
 WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
     WVkPostprocessPipelinesRAII && other
     ) noexcept {
     if (this != &other) {
-        Destroy();
-        
         Super::operator=(std::move(other));
 
-        global_resources_ = std::move(other.global_resources_);
         binding_order_ = std::move(other.binding_order_);
-
-        other.global_resources_ = {};
     }
 
     return *this;
@@ -52,8 +36,10 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
-    const WAssetId & in_id,
-    const WRenderPipelineAsset & in_pipeline_asset
+    WAssetId in_id,
+    const WRenderPipelineAsset & in_pipeline_asset,
+    VkDescriptorSetLayout in_global_descriptor,
+    VkDescriptorSetLayout in_ppcess_global_descriptor
     ) {
 
     std::vector<WVkShaderStageInfo> shaders = pipelines_db_.BuildShaders(
@@ -61,12 +47,10 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
         WVkPostprocessPipeUtils::BuildPostprocessShaderStageInfo
         );
     
-    // One Ubo should be required as first binding (0)
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_,
         in_pipeline_asset.Get_descriptor_list(),
-        // in_pipeline_struct.params_descriptor,
         wvk::descriptor::UpdateDescriptorSetLayout
         );
 
@@ -75,20 +59,20 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
         device_,
         in_id,
         shaders,
-        [this, &in_pipeline_asset]
+        [this, &in_pipeline_asset, &in_global_descriptor, &in_ppcess_global_descriptor]
         (auto& _rp, const auto & _dvc, const auto & _desclay, const auto & _shdrs) {
             WVkPostprocessPipeUtils::CreatePostprocessPipeline(
                 _rp,
                 _dvc,
                 {
-                    global_resources_.descset_layout_info.descset_layout,
-                    _desclay.descset_layout
+                    in_global_descriptor,
+                    _desclay.descset_layout,
+                    in_ppcess_global_descriptor
                 },
                 _shdrs
                 );
 
             _rp.params_descriptor = in_pipeline_asset.Get_descriptor_list();
-            // _rp.params_descriptor = in_pipeline_struct.params_descriptor;
         }
         );
 
@@ -125,17 +109,7 @@ WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
     return in_binding_id;
 }
 
-void WVkPostprocessPipelinesRAII::Destroy() {
-    if (global_resources_.descset_layout_info.descset_layout !=
-        VK_NULL_HANDLE) {
-
-        Destroy_GlobalResources();
-
-    }
-
-}
-
-void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
+void WVkPostprocessPipelinesRAII::ComputeBindingOrder() {
     binding_order_.clear();
     binding_order_.resize(pipelines_db_.bindings.Count());
 
@@ -148,41 +122,3 @@ void WVkPostprocessPipelinesRAII::CalcBindingOrder() {
     std::sort(binding_order_.begin(), binding_order_.end());
 }
 
-void WVkPostprocessPipelinesRAII::Initialize_GlobalResources() {
-
-    global_resources_.descset_layout_info = {};
- 
-
-    WVkPostprocessPipeUtils::UpdateDSL_DefaultGlobalBindings(
-        global_resources_.descset_layout_info
-        );
-
-    wvk::descriptor::Create(
-        global_resources_.descset_layout_info,
-        device_
-        );
-
-    for(auto & descpool : global_resources_.descpool_info) {
-        descpool = {};
-        WVkPostprocessPipeUtils::CreateGlobalResourcesDescPool(
-            descpool,
-            device_
-            );
-    }
-
-}
-
-void WVkPostprocessPipelinesRAII::Destroy_GlobalResources() {
-
-    wvk::descriptor::Destroy(
-        global_resources_.descset_layout_info,
-        device_
-        );
-
-    for(auto & descpool : global_resources_.descpool_info) {
-        wvk::descriptor::Destroy(descpool, device_);
-    }
-
-    global_resources_ = {};
-    binding_order_.clear();
-}

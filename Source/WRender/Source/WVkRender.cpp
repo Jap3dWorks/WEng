@@ -1,28 +1,15 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
-#include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #endif
+
+#include "WVulkan/WVkRender.hpp"
 
 #include <GLFW/glfw3.h>
 
-#include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
-
-#include "WVulkan/WVkRender.hpp"
-#include "WCore/WCore.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
 #include "WLog.hpp"
@@ -52,7 +39,8 @@ void WVkRender::Window(GLFWwindow * in_window) {
 void WVkRender::Initialize()
 {
     WVkRenderDebugInfo render_debug_info =
-        wvk::render::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
+        // wvk::render::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
+        wvk::render::CreateWVkRenderDebugInfo(true);
 
     std::array<std::uint32_t,2> dimensions = {
         render_size_.width,
@@ -93,7 +81,7 @@ void WVkRender::Initialize()
         dimensions[1]
         );
 
-    // GBuffers render targets
+    // GBuffers Attachments
 
     gbuffers_attachments_ = {
         device_.Device(),
@@ -108,7 +96,7 @@ void WVkRender::Initialize()
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
     };
 
-    // Offscreen render targets
+    // Offscreen Attachments
 
     offscreen_attachments_ = {
         device_.Device(),
@@ -117,7 +105,8 @@ void WVkRender::Initialize()
         WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
     };
 
-    // Postprocess render targets
+    // Postprocess Attachments
+
     postprocess_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
@@ -125,7 +114,7 @@ void WVkRender::Initialize()
         WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
 
-    // tonemapping render targets
+    // tonemapping Attachments
 
     tonemapping_attachments_ = {
         device_.Device(),
@@ -142,55 +131,60 @@ void WVkRender::Initialize()
         surface_.Surface()
         );
 
-    // Create Global Descriptors
-
-    global_descriptors_ = WVkGlobalDescriptorsRAII{
-        device_.Device(),
-        device_.PhysicalDevice()
-    };
-
-    WFLOG("[DEBUG] Initialize GBuffer Pipelines.");
-
-    gbuffers_pipelines_ = WVkGBufferPipelinesRAII(
-        device_.Device(),
-        device_.PhysicalDevice()
-        );
-
-    WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
-
-    offscreen_pipeline_ = WVkOffscreenPipelineRAII(
-        device_.Device(),
-        global_descriptors_.DescriptorSetLayout()
-        );
-
-    WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
-
-    ppcss_pipelines_ = WVkPostprocessPipelinesRAII(
-        device_.Device(),
-        device_.PhysicalDevice()
-        );
-
-    WFLOG("[DEBUG] Initialize tonemapping pipeline");
-
-    tonemapping_pipeline_ = WVkTonemappingPipelineRAII(
-        device_.Device(),
-        // VK_FORMAT_B8G8R8A8_UNORM
-        swapchain_.Format()
-        );
-    
-    WFLOG("[DEBUG] Initialize swap chain pipeline");
-
-    swap_chain_pipeline_ = WVkSwapchainPipelineRAII(
-        device_.Device(),
-        swapchain_.Format()
-        );
-
     render_plane_ = WVkRenderPlaneRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
         render_command_pool_.CommandPoolInfo()
         );
+
+    WFLOG("[DEBUG] Initialize Global Descriptor Set.");
+
+    global_descriptors_ = {
+        device_.Device(),
+        device_.PhysicalDevice()
+    };
+
+    WFLOG("[DEBUG] Initialize Postprocess Global Descriptor Set.");
+
+    ppcess_global_descriptors_ = {
+        device_.Device()
+    };
+
+    WFLOG("[DEBUG] Initialize GBuffer Pipelines.");
+
+    gbuffers_pipelines_ = {
+        device_.Device(),
+        device_.PhysicalDevice()
+    };
+
+    WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
+
+    offscreen_pipeline_ = {
+        device_.Device(),
+        global_descriptors_.DescriptorSetLayout()
+    };
+
+    WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
+
+    ppcss_pipelines_ = {
+        device_.Device(),
+        device_.PhysicalDevice()
+    };
+
+    WFLOG("[DEBUG] Initialize tonemapping pipeline");
+
+    tonemapping_pipeline_ = {
+        device_.Device(),
+        swapchain_.Format()
+    };
+    
+    WFLOG("[DEBUG] Initialize swap chain pipeline");
+
+    swap_chain_pipeline_ = {
+        device_.Device(),
+        swapchain_.Format()
+    };
 
     render_command_buffer_ =
         render_command_pool_.
@@ -205,15 +199,22 @@ void WVkRender::Initialize()
         device_.Device()
         );
 
-    asset_render_data_ = WVkAssetRenderDataRAII(
+    asset_render_data_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
         render_command_pool_.CommandPoolInfo()
-        );
+    };
 
+    wvk::render::UpdatePPcessGlobalDescriptorSet(
+        ppcess_global_descriptors_,
+        gbuffers_attachments_,
+        offscreen_attachments_,
+        render_plane_.Sampler()
+        );
 }
 
+// TODO use default destructor
 void WVkRender::Destroy() {
 
     WFLOG("Destroy WVkRender...");
@@ -227,9 +228,11 @@ void WVkRender::Destroy() {
     tonemapping_pipeline_={};
 
     global_descriptors_={};
+    ppcess_global_descriptors_ = {};
 
     WFLOG("Destroy Fences and Semaphores.");
 
+    // TODO RAII sync objects
     wvk::render::DestroySyncSemaphores(
         sync_semaphores_,
         device_.Device()
@@ -252,7 +255,7 @@ void WVkRender::Destroy() {
 
     swap_chain_pipeline_={};
 
-    render_plane_ = {}; // .Destroy();
+    render_plane_ = {};
 
     WFLOG("Destroy Render Command Pool.");
 
@@ -301,7 +304,6 @@ void WVkRender::Draw()
 
     vkResetFences(
         device_.Device(),
-        // device_info_.vk_device,
         1,
         &sync_fences_[frame_index_]
         );
@@ -344,7 +346,7 @@ void WVkRender::Draw()
         render_command_buffer_[frame_index_]
         );
 
-    VkSubmitInfo submit_info = wvk::types::CreateVkSubmitInfo();
+    VkSubmitInfo submit_info = wvk::types::VkSubmitInfo();
 
     VkPipelineStageFlags wait_stages[] =
         { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -366,24 +368,21 @@ void WVkRender::Draw()
         vkQueueSubmit,
         "Failed to submit draw command buffer",
         device_.GraphicsQueue(),
-        // device_info_.vk_graphics_queue,
         1,
         &submit_info,
         sync_fences_[frame_index_]
         );
 
-    VkPresentInfoKHR present_info = wvk::types::CreateVkPresentInfoKHR();
+    VkPresentInfoKHR present_info = wvk::types::VkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
     present_info.swapchainCount = 1;
-    // present_info.pSwapchains = &swap_chain_info_.swap_chain;
     present_info.pSwapchains = &swapchain_.Swapchain();
     present_info.pImageIndices = &image_index;
     present_info.pResults = VK_NULL_HANDLE;
 
     result = vkQueuePresentKHR(
         device_.PresentQueue(),
-        // device_info_.vk_present_queue,
         &present_info);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
@@ -394,9 +393,11 @@ void WVkRender::Draw()
 
     semaphore_index_ = (semaphore_index_ + 1) % sync_semaphores_.size();
     frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
+    
 }
 
 // Pipelines
+// ---------
 
 void WVkRender::CreateRenderPipeline(
     WRenderPipelineAsset * render_pipeline
@@ -425,7 +426,9 @@ void WVkRender::CreateRenderPipeline(
             [&,this](){
                 ppcss_pipelines_.CreatePipeline(
                     render_pipeline->Get_asset_id(),
-                    *render_pipeline
+                    *render_pipeline,
+                    global_descriptors_.DescriptorSetLayout(),
+                    ppcess_global_descriptors_.DescriptorSetLayout()
                     );
             }
             );
@@ -482,7 +485,6 @@ void WVkRender::CreatePipelineBinding(
     const WAssetId & pipeline_id,
     const WAssetIndexId & in_assetindex_id,
     const WRenderPipelineParametersAsset & in_parameters
-    // const wct::render::WRenderPipelineParameters & in_parameters
     )
 {
     assert(pipeline_track_.pipeline_pipetype.contains(pipeline_id));
@@ -517,9 +519,7 @@ void WVkRender::CreatePipelineBinding(
         ubos[i] = {
             .binding = ubop.binding,
             .data = ubop.data.data(),
-            // .data = ubop.databuffer.data(),
             .size = ubop.data.size(),
-            // .size = ubop.databuffer.size(),
             .offset = ubop.offset
         };
     }
@@ -575,14 +575,16 @@ void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
 }
 
 void WVkRender::RefreshPipelines() {
-    ppcss_pipelines_.CalcBindingOrder();
+    ppcss_pipelines_.ComputeBindingOrder();
 }
 
 void WVkRender::ClearPipelines() {
-    // preserve global pipelines
+    
+    // Do not clear global pipelines and global descriptros.
+    
     gbuffers_pipelines_.ClearPipelinesDb();
     ppcss_pipelines_.ClearPipelinesDb();
-    ppcss_pipelines_.CalcBindingOrder();
+    ppcss_pipelines_.ComputeBindingOrder();
 }
 
 // Resources
@@ -609,9 +611,7 @@ void WVkRender::UpdateParameterDynamic(
     WVkDescriptorSetUBOWriteStruct ubowrt{
         .binding = ubo_write.binding,
         .data = ubo_write.data.data(),
-        // .data = ubo_write.databuffer.data(),
         .size = ubo_write.data.size(),
-        // .size = ubo_write.databuffer.size(),
         .offset = ubo_write.offset
     };
 
@@ -684,7 +684,6 @@ void WVkRender::Rescale(const std::uint32_t & in_width, const std::uint32_t & in
 }
 
 void WVkRender::RecreateSwapChain() {
-    WFLOG("RECREATE SWAP CHAIN!");
 
     std::array<std::uint32_t,2> dimensions = {
         render_size_.width,
@@ -741,6 +740,14 @@ void WVkRender::RecreateSwapChain() {
         swapchain_.Format()
     };
 
+    // update postprocess global descriptors
+
+    wvk::render::UpdatePPcessGlobalDescriptorSet(
+        ppcess_global_descriptors_,
+        gbuffers_attachments_,
+        offscreen_attachments_,
+        render_plane_.Sampler()
+        );
 }
 
 void WVkRender::RecordGBuffersRenderCommandBuffer(
@@ -871,7 +878,6 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
     wvk::render::RndCmd_TransitionOffscreenWriteLayout(
         in_command_buffer,
         offscreen_attachments_.Color(in_frame_index).Image()
-        // offscreen_rtargets_[in_frame_index].color.image
         );
 
     wvk::render::RndCmd_BeginOffscreenRendering(
@@ -969,8 +975,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     const std::uint32_t & in_image_index
     )
 {
-    // first input
-    
+
     VkImageView input_view = offscreen_attachments_.Color(in_frame_index).View();
     VkImage input_img = offscreen_attachments_.Color(in_frame_index).Image();
     
@@ -980,18 +985,22 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     std::array<VkImageView, 2> pp_views = {input_view, dst_view};
     std::array<VkImage, 2> pp_images = {input_img, dst_img};
 
+    // TODO Descriptors are being recreated each frame.
+    //  is it required? can I preserve the descriptors between frames?
     ppcss_pipelines_.ResetDescriptorPools(in_frame_index);
 
     // Render each postprocess shader
     std::uint32_t idx=0;
-    for(auto pbindingid : ppcss_pipelines_.IterBindingOrder()) {
+    for(auto pbindingid : ppcss_pipelines_.BindingOrderIterator()) {
 
-        WVkPipelineBindingInfo binding = ppcss_pipelines_.Binding(pbindingid);
-        WVkRenderPipelineInfo pipeline = ppcss_pipelines_.Pipeline(binding.pipeline_id);
-        WVkDescriptorSetLayoutInfo dsetlay = ppcss_pipelines_.DescriptorSetLayout(binding.pipeline_id);
-        VkDescriptorPool dpool = ppcss_pipelines_.DescriptorPool(binding.pipeline_id, in_frame_index);
-
-        ppcss_pipelines_.ResetGlobalDescriptorPool(in_frame_index);
+        WVkPipelineBindingInfo ppcess_binding =
+            ppcss_pipelines_.Binding(pbindingid);
+        WVkRenderPipelineInfo ppcess_pipeline =
+            ppcss_pipelines_.Pipeline(ppcess_binding.pipeline_id);
+        WVkDescriptorSetLayoutInfo ppcess_dsetlay =
+            ppcss_pipelines_.DescriptorSetLayout(ppcess_binding.pipeline_id);
+        VkDescriptorPool ppcess_dpool =
+            ppcss_pipelines_.DescriptorPool(ppcess_binding.pipeline_id, in_frame_index);
 
         // render into layout
         wvk::render::RndCmd_TransitionRenderImageLayout(
@@ -1009,38 +1018,37 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             in_command_buffer,
             dst_view,
             postprocess_attachments_.Extent()
-            // postprocess_rtargets_[in_frame_index].extent
             );
 
         vkCmdBindPipeline(
             in_command_buffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipeline.pipeline
+            ppcess_pipeline.pipeline
             );
 
         wvk::render::RndCmd_SetViewportAndScissor(
             in_command_buffer,
             postprocess_attachments_.Extent()
-            // postprocess_rtargets_[in_frame_index].extent
             );
 
-        // TODO also pass GBuffers in the global descriptor
-
-        VkDescriptorSet input_render_descriptor = wvk::render::CreateInputRenderDescriptor(
-            device_.Device(),
-            ppcss_pipelines_.GlobalDescriptorPool(in_frame_index),
-            ppcss_pipelines_.GlobalDescSetLayout().descset_layout,
-            input_view,
-            render_plane_.Sampler()
+        ppcess_global_descriptors_.UpdateDescriptorBinding(
+            ppcess_global_descriptors_.PREV_BINDING,
+            frame_index_,
+            {
+                .sampler=render_plane_.Sampler(),
+                .imageView=input_view,
+                .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            }
             );
 
+        // TODO is it required to be recreated each frame?
         VkDescriptorSet pp_descriptor = wvk::render::CreateRenderDescriptor(
             device_.Device(),
-            dpool,
-            dsetlay.descset_layout,
+            ppcess_dpool,
+            ppcess_dsetlay.descset_layout,
             frame_index_,
-            binding.ubos,
-            binding.textures
+            ppcess_binding.ubos,
+            ppcess_binding.textures
             );
 
         const WVkMeshInfo & render_plane = render_plane_.RenderPlane();
@@ -1049,9 +1057,13 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             device_.Device(), in_command_buffer,
             render_plane.vertex_buffer, render_plane.index_buffer,
             render_plane.index_count,
-            pipeline.pipeline_layout,
-            pipeline.pipeline,
-            std::array<VkDescriptorSet,2>{ input_render_descriptor, pp_descriptor }
+            ppcess_pipeline.pipeline_layout,
+            ppcess_pipeline.pipeline,
+            std::array<VkDescriptorSet,3>{
+                global_descriptors_.DescriptorSet(frame_index_),
+                pp_descriptor,
+                ppcess_global_descriptors_.DescriptorSet(frame_index_)
+            }
             );
 
         vkCmdEndRendering(in_command_buffer);
