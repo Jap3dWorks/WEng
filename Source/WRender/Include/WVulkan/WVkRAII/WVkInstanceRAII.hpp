@@ -2,21 +2,20 @@
 
 #include "WUtils/WStringUtils.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVk/WVkTypes.hpp"
+#include "WVulkan/WVkRAII/WVkRAII.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <vector>
 #include <string_view>
 
-class WVkInstanceRAII {
-public:
+struct WVkInstanceCreator {
 
-    WVkInstanceRAII()=default;
-
-    WVkInstanceRAII(bool in_enable_validation_layers,
-                    const std::vector<std::string_view>& in_validation_layers,
-                    const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
-                    const VkDebugUtilsMessengerEXT & in_debug_messenger) {
+    VkInstance Create(bool in_enable_validation_layers,
+                      const std::vector<std::string_view>& in_validation_layers,
+                      const PFN_vkDebugUtilsMessengerCallbackEXT & in_debug_callback,
+                      const VkDebugUtilsMessengerEXT & in_debug_messenger){
         if (in_enable_validation_layers &&
             !wvk::vulkan::CheckValidationLayerSupport(in_validation_layers))
         {
@@ -75,54 +74,24 @@ public:
             create_info.enabledLayerCount = 0;
         }
 
+        VkInstance result;
+
         wvk::vulkan::ExecVkProcChecked(
             vkCreateInstance,
             "Failed to create instance!",
             &create_info,
             nullptr,
-            &vk_instance_
+            &result
             );
+
+        return result;
     }
 
-    ~WVkInstanceRAII() {
-        Destroy();
+    void Destroy(VkInstance value) {
+        vkDestroyInstance(value, nullptr);        
     }
-
-    WVkInstanceRAII(const WVkInstanceRAII & other) = delete;
-    WVkInstanceRAII & operator=(const WVkInstanceRAII & other) = delete;
-
-    WVkInstanceRAII(WVkInstanceRAII && other) noexcept :
-        vk_instance_(std::move(other.vk_instance_)) {
-        other.vk_instance_ = VK_NULL_HANDLE;
-    }
-
-    WVkInstanceRAII & operator=(WVkInstanceRAII && other) {
-        if (this != &other) {
-            
-            Destroy();
-
-            vk_instance_ = std::move(other.vk_instance_);
-            other.vk_instance_ = VK_NULL_HANDLE;
-        }
-
-        return *this;
-    }
-
-public:
-
-    VkInstance Instance() const noexcept {
-        return vk_instance_;
-    }
-
-private:
-
-    void Destroy() {
-        if (vk_instance_ != VK_NULL_HANDLE) {
-            vkDestroyInstance(vk_instance_, nullptr);
-            vk_instance_ = VK_NULL_HANDLE;
-        }
-    }
-
-    VkInstance vk_instance_{VK_NULL_HANDLE};
-
+    
 };
+
+using WVkInstanceRAII = WVkRAII<VkInstance, WVkInstanceCreator>;
+

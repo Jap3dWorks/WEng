@@ -1,21 +1,19 @@
 #include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
 
-#ifndef GLFW_INCLUDE_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif
+#include "WWindow/WWindow.hpp"
 
-#include <GLFW/glfw3.h>
+VkSurfaceKHR WVkSurfaceCreator::Create(wdw::WWindow* in_window) {
+    VkSurfaceKHR result;
+    in_window->CreateWindowSurface(result, instance_);
 
-WVkSurfaceRAII::WVkSurfaceRAII(const VkInstance & in_instance,
-                               GLFWwindow * in_window) :
-    vk_instance_(in_instance)
-{
-    wvk::vulkan::ExecVkProcChecked(
-        glfwCreateWindowSurface,
-        "Failed to create window surface!",
-        vk_instance_,
-        in_window,
-        nullptr,
-        &vk_surface_
-        );
+    return result;
 }
+
+
+// WVkSurfaceRAII::WVkSurfaceRAII(VkInstance in_instance,
+//                                wdw::WWindow * in_window) :
+//     vk_instance_(in_instance)
+// {
+//     in_window->CreateWindowSurface(vk_surface_, vk_instance_);
+
+// }

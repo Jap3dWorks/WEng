@@ -24,6 +24,7 @@
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/WVkRAII/WVkRenderSyncRAII.hpp"
 
 #include "WRender/WDenseLightingUBO.hpp"
 
@@ -34,18 +35,17 @@
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
 
-struct GLFWwindow;
+// struct GLFWwindow;
+namespace wdw { class WWindow; }
 
 /**
- * @brief Default Rendere class
+ * @brief Default Render class
 */
 class WRENDER_API WVkRender : public IRender
 {
 public:
 
     WVkRender() noexcept=default;
-
-    WVkRender(GLFWwindow * in_window);
 
     ~WVkRender() override=default;
 
@@ -56,11 +56,7 @@ public:
 
     WVkRender & operator=(WVkRender && other) noexcept=default;
 
-    void Initialize() override;
-
     void Draw() override;
-
-    void Destroy() override;
 
     void WaitIdle() const override;
 
@@ -118,16 +114,12 @@ public:
 
     void UnloadAllResources() override;
 
-    void Window(GLFWwindow * in_window) override;
+    void SetWindow(wdw::WWindow * in_window) override;
 
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
 
     wct::render::WRenderSize RenderSize() const override { return render_size_; }
-
-    void RenderSize(const wct::render::WRenderSize & in_render_size) override {
-        render_size_ = in_render_size;
-    }
 
     WNODISCARD VkDevice Device() const noexcept
     { return device_.Device(); }
@@ -176,6 +168,8 @@ public:
 
 private:
 
+    void Initialize();
+
     void RecreateSwapChain();
 
     // TODO move Record commands to an inline library
@@ -215,9 +209,7 @@ private:
     WVkDeviceRAII device_{};
     WVkSwapchainRAII swapchain_{};
 
-    struct WVkRenderWindow {
-        GLFWwindow * window{nullptr};
-    } window_{};
+    wdw::WWindow * window_{nullptr};
 
     WVkAssetRenderDataRAII asset_render_data_{};
     WVkRenderPlaneRAII render_plane_{};
@@ -241,18 +233,8 @@ private:
     WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
-    // --
-
-    struct SyncSemaphores {
-        VkSemaphore image_available{VK_NULL_HANDLE};
-        VkSemaphore render_finished{VK_NULL_HANDLE};
-    };
-    std::vector<SyncSemaphores> sync_semaphores_{};
+    WVkRenderSyncRAII<WENG_MAX_FRAMES_IN_FLIGHT> render_sync_{};
     std::size_t semaphore_index_{0};
-    
-    std::array<VkFence, WENG_MAX_FRAMES_IN_FLIGHT> sync_fences_{};
-
-    // --
 
     struct PipelinesTrack {
         std::unordered_map<WAssetId, wct::render::EPipelineType> pipeline_pipetype{};

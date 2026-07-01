@@ -100,3 +100,20 @@
 #else
     #define WLEVEL_API
 #endif
+
+#if defined(_WIN32)
+    #ifdef WWINDOW_EXPORTS
+        #define WWINDOW_API __declspec(dllexport)
+    #else
+        #define WWINDOW_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WWINDOW_EXPORTS
+        #define WWINDOW_API __attribute__((visibility("default")))
+    #else
+        #define WWINDOW_API
+    #endif
+#else
+    #define WWINDOW_API
+#endif
+    

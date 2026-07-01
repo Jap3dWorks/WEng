@@ -19,23 +19,16 @@
 
 #include "WEngRender/WEngRender.hpp"
 
-#ifndef GLFW_INCLUDE_NONE
-#define GLFW_INCLUDE_NONE
-#endif
-#include <GLFW/glfw3.h>
-
 WEngine WEngine::DefaultCreate()
 {
     WEngine result(std::make_unique<WVkRender>());
-
-    result.Initialize();
 
     result.ImportersRegister().Register<wim::importer::WImportObj>();
     result.ImportersRegister().Register<wim::importer::WImportTexture>();
 
     // Register Wengine systems
     
-    WSystems::WENGINE_WSYSTEMS_REG(result.systems_reg_);
+    WSystems::WENGINE_WSYSTEMS_REG(result.state_.systems_reg);
 
     // This must be the first included system
     result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
@@ -51,302 +44,200 @@ WEngine WEngine::DefaultCreate()
     return result;
 }
 
-WEngine::WEngine(std::unique_ptr<IRender> && in_render) :
-    level_info_(),
-    startup_info_(),
-    engine_status_(),
-    window_(),
-    engine_cycle_(),
-    render_(std::move(in_render)),
-    asset_db_(),
-    level_db_(),
-    systems_reg_(),
-    systems_runner_(),
-    input_mapping_register_(),
-    importers_register_()    
-{}
-
-WEngine::~WEngine()=default;
-
-WEngine::WEngine(WEngine && other) noexcept :
-    level_info_(std::move(other.level_info_)),
-    startup_info_(std::move(other.startup_info_)),
-    engine_status_(std::move(other.engine_status_)),
-    window_(std::move(other.window_)),
-    engine_cycle_(std::move(other.engine_cycle_)),
-    render_(std::move(other.render_)),
-    asset_db_(std::move(other.asset_db_)),
-    level_db_(std::move(other.level_db_)),
-    systems_reg_(std::move(other.systems_reg_)),
-    systems_runner_(std::move(other.systems_runner_)),
-    input_mapping_register_(std::move(other.input_mapping_register_)),
-    importers_register_(std::move(other.importers_register_))
+WEngine::WEngine(std::unique_ptr<IRender> && in_render)
 {
-    if (window_.window) {
-        glfwSetWindowUserPointer(window_.window, this);
-    }
-
-    other.window_ = {};
-    other.render_ = nullptr;
+    state_.render = std::move(in_render);
+    Initialize();
 }
 
-WEngine & WEngine::operator=(WEngine && other) noexcept {
+WEngine::WEngine(WEngine && other):
+    state_(std::move(other.state_))
+
+{
+    if (state_.window.IsValid()) {
+        state_.window.SetWindowUserPtr(this);
+    }
+
+}
+
+WEngine & WEngine::operator=(WEngine && other)
+{
     if (this != &other) {
-        level_info_ = std::move(other.level_info_);
-        startup_info_ = std::move(other.startup_info_);
-        engine_status_ = std::move(other.engine_status_);
-        window_ = std::move(other.window_);
-        render_ = std::move(other.render_);
-        asset_db_ = std::move(other.asset_db_);
-        level_db_ = std::move(other.level_db_);
-        systems_reg_ = std::move(other.systems_reg_);
-        systems_runner_ = std::move(other.systems_runner_);
-        input_mapping_register_ = std::move(other.input_mapping_register_);
-        importers_register_ = std::move(other.importers_register_);
+        state_ = std::move(other.state_);
 
-        if (window_.window) {
-            glfwSetWindowUserPointer(window_.window, this);
+        if (state_.window.IsValid()) {
+            state_.window.SetWindowUserPtr(this);
         }
-
-        other.window_ = {};
-        other.render_ = nullptr;
     }
 
     return *this;
 }
 
-bool WEngine::Initialize() {
-    InitializeWindow();
+void WEngine::Initialize() {
+    state_.window.Initialize();
+    state_.window.SetWindowUserPtr(this);
 
-    render_->Window(window_.window);
+    state_.window.SetFramebufferSizeCallback(FrameBufferSizeCallback);
+    state_.window.SetKeyCallback(KeyCallback);
+    state_.window.SetCursorPosCallback(CursorCallback);
 
-    std::int32_t width, height;
-    glfwGetFramebufferSize(window_.window, &width, &height);
-
-    render_->RenderSize({
-            static_cast<std::uint32_t>(width),
-            static_cast<std::uint32_t>(height)
-        });
-
-    WFLOG("[DEBUG] Initialize Renderer.")
-    render_->Initialize();
-
-    return true;
-}
-
-void WEngine::Destroy() {
-    render_->Destroy();
-    DestroyWindow();
+    state_.render->SetWindow(&state_.window);
 }
 
 void WEngine::Run()
 {
-    assert(startup_info_.startup_level.IsValid());
+    assert(state_.startup_info_.startup_level.IsValid());
 
-    level_info_.current_level = startup_info_.startup_level;
-    level_info_.level = level_db_.Get(level_info_.current_level);
+    state_.level_info.current_level = state_.startup_info.startup_level;
+    state_.level_info.level = state_.level_db.Get(state_.level_info.current_level);
 
-    LoadLevel(level_info_.level);
+    LoadLevel(state_.level_info.level);
 
-    level_info_.loaded = true;
+    state_.level_info.loaded = true;
 
-    while(!glfwWindowShouldClose(window_.window)) {
+    while(!state_.window.ShouldClose()) {
         UpdateEngineCycleStruct();
-        glfwPollEvents();
+        state_.window.PollEvents();
         
-        if (!level_info_.loaded) {
-            UnloadLevel(level_info_.level);
+        if (!state_.level_info.loaded) {
+            UnloadLevel(state_.level_info.level);
 
             Render()->WaitIdle();
 
-            level_info_.level = level_db_.Get(level_info_.current_level);
-            LoadLevel(level_info_.level);
+            state_.level_info.level = state_.level_db.Get(
+                state_.level_info.current_level);
+
+            LoadLevel(state_.level_info.level);
 
             WLOG("Level Load Done.");
 
-            level_info_.loaded = true;
+            state_.level_info.loaded = true;
         }
         else
         {
-            systems_runner_.RunPreSystems(0, {this, &level_info_.level});
-            systems_runner_.RunPreSystems(level_info_.level.WID(),
-                                          {this, &level_info_.level});
+            state_.systems_runner
+                .RunPreSystems(0, {this, &state_.level_info.level});
 
-            systems_runner_.RunPostSystems(0, {this, &level_info_.level});
-            systems_runner_.RunPostSystems(level_info_.level.WID(),
-                                           {this, &level_info_.level});
+            state_.systems_runner
+                .RunPreSystems(state_.level_info.level.WID(),
+                               {this, &state_.level_info.level});
+
+            state_.systems_runner
+                .RunPostSystems(0, {this, &state_.level_info.level});
+
+            state_.systems_runner
+                .RunPostSystems(state_.level_info.level.WID(),
+                                {this, &state_.level_info.level});
 
             Render()->Draw();
         }
     }
     
     Render()->WaitIdle();
-    UnloadLevel(level_info_.level);
+    UnloadLevel(state_.level_info.level);
 }
 
 void WEngine::MarkLoadLevel(const WLevelId & in_level) {
-    level_info_.current_level = in_level;
-    level_info_.loaded = false;
+    state_.level_info.current_level = in_level;
+    state_.level_info.loaded = false;
 }
 
 void WEngine::LoadLevel(WLevel & in_level) {
     // TODO register level systems
 
     WFLOG("[DEBUG] Run Engine Init Systems.");
-    systems_runner_.RunInitSystems(
-        0, {this, &level_info_.level}
+    state_.systems_runner.RunInitSystems(
+        0, {this, &state_.level_info.level}
         );
 
     WFLOG("[DEBUG] Run Level Init Systems.")
-    systems_runner_.RunInitSystems(
-        level_info_.level.WID(),
-        {this, &level_info_.level}
+    state_.systems_runner.RunInitSystems(
+        state_.level_info.level.WID(),
+        {this, &state_.level_info.level}
         );
 }
 
 void WEngine::UnloadLevel(WLevel & in_level) {
 
-    systems_runner_.RunEndSystems(0, {this, &in_level});
-    systems_runner_.RunEndSystems(in_level.WID(), {this, &in_level});
+    state_.systems_runner.RunEndSystems(0, {this, &in_level});
+    state_.systems_runner.RunEndSystems(in_level.WID(), {this, &in_level});
 
     // TODO deregister level systems
     
 }
 
 void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
-    startup_info_.startup_level = in_id;
+    state_.startup_info.startup_level = in_id;
 }
 
 WLevelSystemId WEngine::AddInitSystem(const WLevelId & in_level_id, const char * in_system_name) {
-    WSystemId wsid = systems_reg_.GetId(in_system_name);
-    return systems_runner_.AddInitSystem(
-        in_level_id, wsid, systems_reg_.Get(wsid)
+    WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+    return state_.systems_runner.AddInitSystem(
+        in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
 WLevelSystemId WEngine::AddPreSystem(const WLevelId & in_level_id, const char * in_system_name) {
-    WSystemId wsid = systems_reg_.GetId(in_system_name);
-    return systems_runner_.AddPreSystem(
-        in_level_id, wsid, systems_reg_.Get(wsid)
+    WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+    return state_.systems_runner.AddPreSystem(
+        in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
 WLevelSystemId WEngine::AddPostSystem(const WLevelId & in_level_id, const char * in_system_name) {
-    WSystemId wsid = systems_reg_.GetId(in_system_name);
-    return systems_runner_.AddPostSystem(
-        in_level_id, wsid, systems_reg_.Get(wsid)
+    WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+    return state_.systems_runner.AddPostSystem(
+        in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
 WLevelSystemId WEngine::AddEndSystem(const WLevelId & in_level_id, const char * in_system_name) {
-    WSystemId wsid = systems_reg_.GetId(in_system_name);
-    return systems_runner_.AddEndSystem(
-        in_level_id, wsid, systems_reg_.Get(wsid)
+    WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+    return state_.systems_runner.AddEndSystem(
+        in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
 TRef<IRender> WEngine::Render() noexcept
 {
-    return render_.get();
+    return state_.render.get();
 }
 
 WAssetDb & WEngine::AssetManager() noexcept {
-    return asset_db_;
-}
-
-bool WEngine::InitializeWindow() {
-
-    glfwSetErrorCallback(
-        [](int code, const char* desc)
-            {
-                WLOG("GLFW Error {} : {}.", code, desc);
-            });    
-
-    // Force wayland session
-    // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);    
-
-    if(!glfwInit()) {
-        WFLOG("glfwInit failed.");
-        return false;
-    }
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-    window_.window = glfwCreateWindow(
-        800,
-        600,
-        "WEngine Title",
-        nullptr,
-        nullptr
-        );
-
-    if (!window_.window) {
-        WFLOG("glfwCreateWindow failed.");
-        return false;
-    }
-
-    glfwSetWindowUserPointer(window_.window, this);
-
-    glfwSetFramebufferSizeCallback(
-        window_.window,
-        &FrameBufferSizeCallback
-        );
-
-    glfwSetKeyCallback(
-        window_.window,
-        &KeyCallback
-        );
-
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-    glfwSetInputMode(window_.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetInputMode(window_.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-    glfwSetCursorPosCallback(window_.window, CursorCallback);
-
-    return true;
-}
-
-void WEngine::DestroyWindow() {
-    glfwDestroyWindow(window_.window);
-    glfwTerminate();
+    return state_.asset_db;
 }
 
 void WEngine::UpdateEngineCycleStruct() {
     double seconds = glfwGetTime();
 
-    engine_cycle_.DeltaTime = seconds - engine_cycle_.TotalTime;
-    engine_cycle_.TotalTime = seconds;
-    engine_cycle_.fps = 1 / engine_cycle_.DeltaTime;
+    state_.engine_cycle.DeltaTime = seconds - state_.engine_cycle.TotalTime;
+    state_.engine_cycle.TotalTime = seconds;
+    state_.engine_cycle.fps = 1 / state_.engine_cycle.DeltaTime;
 }
 
-void WEngine::FrameBufferSizeCallback(GLFWwindow* in_window, int in_width, int in_height)
+void WEngine::FrameBufferSizeCallback(wdw::WWindow* in_window, int in_width, int in_height)
 {
-    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
+    auto app = reinterpret_cast<WEngine*>(in_window->GetWindowUserPtr());
 
-    app->window_.width = in_width;
-    app->window_.height = in_height;
-
-    app->render_->Rescale(
+    app->state_.render->Rescale(
         static_cast<std::uint32_t>(in_width),
         static_cast<std::uint32_t>(in_height)
         );
 }
 
-void WEngine::KeyCallback(GLFWwindow * in_window, int key, int scancode, int action, int mods)
+void WEngine::KeyCallback(wdw::WWindow * in_window, int key, int scancode, int action, int mods)
 {
-    auto app = reinterpret_cast<WEngine*>(glfwGetWindowUserPointer(in_window));
+    auto app = reinterpret_cast<WEngine*>(in_window->GetWindowUserPtr());
 
     WInput imd = WInputLib::ToWInputMode(key, action);
 
     WInputValuesStruct ival = {imd, 1.f, {0,0}};
 
-    app->input_mapping_register_.Emit(ival, app);
+    app->state_.input_mapping_register.Emit(ival, app);
 }
 
-void WEngine::CursorCallback(GLFWwindow * in_window, double in_x, double in_y) {
-    auto app = reinterpret_cast<WEngine *>(glfwGetWindowUserPointer(in_window));
+void WEngine::CursorCallback(wdw::WWindow * in_window, double in_x, double in_y) {
+    auto app = reinterpret_cast<WEngine *>(in_window->GetWindowUserPtr());
 
     WInputValuesStruct ival {
         {EInputKey::Mouse_Move, EInputMode::None},
@@ -354,5 +245,5 @@ void WEngine::CursorCallback(GLFWwindow * in_window, double in_x, double in_y) {
         {in_x, in_y}
     };
 
-    app->input_mapping_register_.Emit(ival, app);
+    app->state_.input_mapping_register.Emit(ival, app);
 }

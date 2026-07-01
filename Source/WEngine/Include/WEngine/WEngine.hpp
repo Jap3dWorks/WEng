@@ -12,6 +12,8 @@
 #include "WSystems/WSystemsRegister.hpp"
 #include "WSystems/WSystemsRunner.hpp"
 
+#include "WWindow/WWindow.hpp"
+
 #include <memory>
 
 class WENGINE_API WEngine
@@ -32,15 +34,15 @@ public:
 
     WEngine(std::unique_ptr<IRender> && in_render);
 
-    virtual ~WEngine();
+    virtual ~WEngine()=default;
 
     WEngine(const WEngine & other) = delete;
 
-    WEngine(WEngine && other) noexcept;
-
     WEngine & operator=(const WEngine & other) = delete;
 
-    WEngine & operator=(WEngine && other) noexcept;
+    WEngine(WEngine && other);
+
+    WEngine & operator=(WEngine && other);
 
     static WEngine DefaultCreate();
 
@@ -49,42 +51,42 @@ public:
     void StartupLevel(const WLevelId & in_id) noexcept;
 
     WLevelId StartupLevel() const noexcept {
-        return startup_info_.startup_level;
+        return state_.startup_info.startup_level;
     }
 
     /** Set a level to be loaded when possible */
     void MarkLoadLevel(const WLevelId & in_level_id);
 
     const LevelInfoStruct & LevelInfo() const noexcept {
-        return level_info_;
+        return state_.level_info;
     }
 
     WLevelDb & LevelRegister() noexcept {
-        return level_db_;
+        return state_.level_db;
     }
 
     const WLevelDb & LevelRegister() const noexcept {
-        return level_db_;
+        return state_.level_db;
     }
 
     wim::imp_register::WImporterRegister & ImportersRegister() noexcept {
-        return importers_register_;
+        return state_.importers_register;
     }
 
     const wim::imp_register::WImporterRegister & ImportersRegister() const noexcept {
-        return importers_register_;
+        return state_.importers_register;
     }
 
     WInputMappingRegister & InputMappingRegister() noexcept {
-        return input_mapping_register_;
+        return state_.input_mapping_register;
     }
 
     const WInputMappingRegister & InputMappingRegister() const noexcept {
-        return input_mapping_register_;
+        return state_.input_mapping_register;
     }
 
     const WEngineCycleStruct & EngineCycle() const noexcept {
-        return engine_cycle_;
+        return state_.engine_cycle;
     }
 
     WLevelSystemId AddInitSystem(const WLevelId & in_level_id, const char * in_system_name);
@@ -99,53 +101,67 @@ public:
 
     WAssetDb & AssetManager() noexcept;
 
-    bool Initialize();
-
-    void Destroy();
-
 private:
 
-    bool InitializeWindow();
-
-    void DestroyWindow();
+    void Initialize();
 
     void InitializeLevel(WLevel * in_level);
 
     void UpdateEngineCycleStruct();
 
-    static void FrameBufferSizeCallback(GLFWwindow * in_window, int width, int height);
-
-    static void KeyCallback(GLFWwindow * in_window, int in_key, int in_scancode, int in_action, int in_mods);
-
-    static void CursorCallback(GLFWwindow * in_window, double in_x, double in_y);
-
     void LoadLevel(WLevel & in_level);
 
     void UnloadLevel(WLevel & in_level);
 
-    LevelInfoStruct level_info_{};
+    static void FrameBufferSizeCallback(
+        wdw::WWindow * in_window,
+        int width,
+        int height);
 
-    StartupInfo startup_info_{};
+    static void KeyCallback(
+        wdw::WWindow * in_window,
+        int in_key,
+        int in_scancode,
+        int in_action,
+        int in_mods);
 
-    struct EngineStatus {
-        bool close{false};
-    }engine_status_;
+    static void CursorCallback(
+        wdw::WWindow * in_window,
+        double in_x,
+        double in_y);
 
-    WWindowStruct window_{};
+private:
 
-    WEngineCycleStruct engine_cycle_{};
+    /**
+     * State Struct helps to reduce code in move semanthics.
+     */
+    struct State{
 
-    std::unique_ptr<IRender> render_{};
+        LevelInfoStruct level_info{};
 
-    WAssetDb asset_db_{};
-    WLevelDb level_db_{};
+        StartupInfo startup_info{};
 
-    WSystemsRegister systems_reg_{};
-    WSystemsRunner systems_runner_{};
+        struct EngineStatus {
+            bool close{false};
+        } engine_status{};
 
-    WInputMappingRegister input_mapping_register_{};
+        wdw::WWindow window{};
 
-    wim::imp_register::WImporterRegister importers_register_{};
+        WEngineCycleStruct engine_cycle{};
+
+        std::unique_ptr<IRender> render{nullptr};
+
+        WAssetDb asset_db{};
+        WLevelDb level_db{};
+
+        WSystemsRegister systems_reg{};
+        WSystemsRunner systems_runner{};
+
+        WInputMappingRegister input_mapping_register{};
+
+        wim::imp_register::WImporterRegister importers_register{};
+
+    } state_{};
 
 };
 

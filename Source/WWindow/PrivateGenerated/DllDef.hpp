@@ -50,8 +50,6 @@
     #define WENGINEOBJECTS_API
 #endif
 
-
-
 #if defined(_WIN32)
     #ifdef WWINDOW_EXPORTS
         #define WWINDOW_API __declspec(dllexport)

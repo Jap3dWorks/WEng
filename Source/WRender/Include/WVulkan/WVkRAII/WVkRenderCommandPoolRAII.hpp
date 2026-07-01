@@ -4,6 +4,7 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/WVkRAII/WVkRAII.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -15,34 +16,42 @@ class WRENDER_API WVkRenderCommandPoolRAII
 
 public:
 
-    WVkRenderCommandPoolRAII();
-
     WVkRenderCommandPoolRAII(
         const VkDevice & in_device,
         const VkPhysicalDevice & in_physical_device,
         const VkSurfaceKHR & in_surface
         );
 
-    ~WVkRenderCommandPoolRAII();
+    WVkRenderCommandPoolRAII()=default;
+    ~WVkRenderCommandPoolRAII()=default;
 
-    WVkRenderCommandPoolRAII(WVkRenderCommandPoolRAII&& other) noexcept;
-    WVkRenderCommandPoolRAII & operator=(WVkRenderCommandPoolRAII&& other) noexcept;
+    WVkRenderCommandPoolRAII(WVkRenderCommandPoolRAII&&) noexcept=default;
+    WVkRenderCommandPoolRAII & operator=(WVkRenderCommandPoolRAII&&) noexcept=default;
 
-    WVkRenderCommandPoolRAII(const WVkRenderCommandPoolRAII & in_other) = delete;
-    WVkRenderCommandPoolRAII & operator=(const WVkRenderCommandPoolRAII & in_other) = delete;
+    WVkRenderCommandPoolRAII(const WVkRenderCommandPoolRAII &) = delete;
+    WVkRenderCommandPoolRAII & operator=(const WVkRenderCommandPoolRAII &) = delete;
 
     WVkCommandBufferInfo CreateCommandBuffer();
 
-    WNODISCARD const VkCommandPool & CommandPoolInfo() const noexcept
-    { return command_pool_; }
+    WNODISCARD const VkCommandPool & Value() const noexcept
+    { return *command_pool_; }
 
 private:
 
-    void Destroy();
+    struct WVkCommandPoolCreator {
+        VkDevice device{VK_NULL_HANDLE};
+        
+        VkCommandPool Create(VkPhysicalDevice in_physical_device,
+                             VkSurfaceKHR in_surface);
 
-    VkDevice device_;
-    VkCommandPool command_pool_;
-    std::vector<WVkCommandBufferInfo> command_buffers_;
+        void Destroy(VkCommandPool command_pool);
+    };
+
+    using WVkCommandPool = WVkRAII<VkCommandPool, WVkCommandPoolCreator>;
+
+    WVkCommandPool command_pool_{};
+
+    std::vector<WVkCommandBufferInfo> command_buffers_{};
     
 };
 

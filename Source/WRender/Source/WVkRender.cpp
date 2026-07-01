@@ -12,6 +12,8 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
+#include "WWindow/WWindow.hpp"
+
 #include "WLog.hpp"
 
 #include <cstdint>
@@ -23,17 +25,20 @@
 // WVkRender
 // -------
 
-WVkRender::WVkRender(GLFWwindow * in_window) : WVkRender() {
-    Window(in_window);
-}
-
 void WVkRender::WaitIdle() const
 {
     vkDeviceWaitIdle(device_.Device());
 }
 
-void WVkRender::Window(GLFWwindow * in_window) {
-    window_.window = in_window;
+void WVkRender::SetWindow(wdw::WWindow * in_window) {
+    window_ = in_window;
+
+    auto size = window_->GetFramebufferSize();
+    
+    render_size_={.width=size.width,
+                  .height=size.height};
+
+    Initialize();
 }
 
 void WVkRender::Initialize()
@@ -49,6 +54,7 @@ void WVkRender::Initialize()
 
     // Create Vulkan Instance
     instance_ = WVkInstanceRAII(
+        {},
         render_debug_info.enable_validation_layers,
         render_debug_info.validation_layers,
         render_debug_info.debug_callback,
@@ -57,8 +63,8 @@ void WVkRender::Initialize()
 
     // Create Vulkan Window Surface
     surface_ = WVkSurfaceRAII(
-        instance_.Instance(),
-        window_.window
+        {*instance_},
+        window_
         );
 
     // Create Vulkan Device
@@ -67,8 +73,8 @@ void WVkRender::Initialize()
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
         },
-        instance_.Instance(),
-        surface_.Surface(),
+        instance_.Value(),
+        surface_.Value(),
         render_debug_info.enable_validation_layers,
         render_debug_info.validation_layers
         );
@@ -76,7 +82,7 @@ void WVkRender::Initialize()
     swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
-        surface_.Surface(),
+        surface_.Value(),
         dimensions[0],
         dimensions[1]
         );
@@ -128,14 +134,14 @@ void WVkRender::Initialize()
     render_command_pool_ = WVkRenderCommandPoolRAII( 
         device_.Device(),
         device_.PhysicalDevice(),
-        surface_.Surface()
+        surface_.Value()
         );
 
     render_plane_ = WVkRenderPlaneRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
-        render_command_pool_.CommandPoolInfo()
+        render_command_pool_.Value()
         );
 
     WFLOG("[DEBUG] Initialize Global Descriptor Set.");
@@ -190,20 +196,23 @@ void WVkRender::Initialize()
         render_command_pool_.
         CreateCommandBuffer();
 
-    sync_semaphores_ = wvk::render::CreateSyncSemaphore<SyncSemaphores>(
-        swapchain_.Images().size(),
-        device_.Device()
-        );
+    render_sync_ = {device_.Device(),
+                   swapchain_.Images().size()};
+    
+    // sync_semaphores_ = wvk::render::CreateSyncSemaphore<SyncSemaphores>(
+    //     swapchain_.Images().size(),
+    //     device_.Device()
+    //     );
 
-    sync_fences_ = wvk::render::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
-        device_.Device()
-        );
+    // sync_fences_ = wvk::render::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
+    //     device_.Device()
+    //     );
 
     asset_render_data_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
-        render_command_pool_.CommandPoolInfo()
+        render_command_pool_.Value()
     };
 
     wvk::render::UpdatePPcessGlobalDescriptorSet(
@@ -214,71 +223,63 @@ void WVkRender::Initialize()
         );
 }
 
-// TODO use default destructor
-void WVkRender::Destroy() {
+// // TODO use default destructor
+// void WVkRender::Destroy() {
 
-    WFLOG("Destroy WVkRender...");
+//     WFLOG("Destroy WVkRender...");
 
-    WFLOG("Destroy Render Pipelines.");
-    swap_chain_input_imgview_ref = VK_NULL_HANDLE;
+//     WFLOG("Destroy Render Pipelines.");
+//     swap_chain_input_imgview_ref = VK_NULL_HANDLE;
     
-    gbuffers_pipelines_={};
-    offscreen_pipeline_={};
-    ppcss_pipelines_={};
-    tonemapping_pipeline_={};
+//     gbuffers_pipelines_={};
+//     offscreen_pipeline_={};
+//     ppcss_pipelines_={};
+//     tonemapping_pipeline_={};
 
-    global_descriptors_={};
-    ppcess_global_descriptors_ = {};
+//     global_descriptors_={};
+//     ppcess_global_descriptors_ = {};
 
-    WFLOG("Destroy Fences and Semaphores.");
+//     WFLOG("Destroy Fences and Semaphores.");
 
-    // TODO RAII sync objects
-    wvk::render::DestroySyncSemaphores(
-        sync_semaphores_,
-        device_.Device()
-        );
+//     render_sync_ = {};
 
-    wvk::render::DestroySyncFences(
-        sync_fences_,
-        device_.Device()
-        );
+//     WFLOG("Destroy render targets.")
 
-    WFLOG("Destroy render targets.")
+//     gbuffers_attachments_ = {};
 
-    gbuffers_attachments_ = {};
+//     offscreen_attachments_ = {};
 
-    offscreen_attachments_ = {};
+//     postprocess_attachments_ = {};
 
-    postprocess_attachments_ = {};
+//     tonemapping_attachments_ = {};
 
-    tonemapping_attachments_ = {};
+//     swap_chain_pipeline_={};
 
-    swap_chain_pipeline_={};
+//     render_plane_ = {};
 
-    render_plane_ = {};
+//     WFLOG("Destroy Render Command Pool.");
 
-    WFLOG("Destroy Render Command Pool.");
+//     render_command_pool_ = {};
 
-    render_command_pool_ = {};
+//     render_command_buffer_ = {};
 
-    render_command_buffer_ = {};
+//     WFLOG("Destroy Render Resources.");
 
-    WFLOG("Destroy Render Resources.");
+//     asset_render_data_ = {};
 
-    asset_render_data_ = {};
-
-    swapchain_ = WVkSwapchainRAII{};
-    device_ = WVkDeviceRAII{};
-    surface_ = WVkSurfaceRAII{};
-    instance_ = WVkInstanceRAII{};
-}
+//     swapchain_ = {};
+//     device_ = {};
+//     surface_ = {};
+//     instance_ = {};
+// }
 
 void WVkRender::Draw()
 {
     vkWaitForFences(
         device_.Device(),
         1,
-        &sync_fences_[frame_index_],
+        &render_sync_.Fence(frame_index_),
+        // &sync_fences_[frame_index_],
         VK_TRUE,
         UINT64_MAX
         );
@@ -289,7 +290,8 @@ void WVkRender::Draw()
         device_.Device(),
         swapchain_.Swapchain(),
         UINT64_MAX,
-        sync_semaphores_[semaphore_index_].image_available,
+        render_sync_.ImageAvailableSemaphore(semaphore_index_),
+        // sync_semaphores_[semaphore_index_].image_available,
         VK_NULL_HANDLE,
         &image_index
         );
@@ -305,7 +307,8 @@ void WVkRender::Draw()
     vkResetFences(
         device_.Device(),
         1,
-        &sync_fences_[frame_index_]
+        &render_sync_.Fence(frame_index_)
+        // &sync_fences_[frame_index_]
         );
 
     // Begin command buffer
@@ -353,7 +356,7 @@ void WVkRender::Draw()
 
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores =
-        &sync_semaphores_[semaphore_index_].image_available;
+        &render_sync_.ImageAvailableSemaphore(semaphore_index_);
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
@@ -362,7 +365,7 @@ void WVkRender::Draw()
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores =
-        &sync_semaphores_[image_index].render_finished;
+        &render_sync_.RenderFinishedSempahore(image_index);
 
     wvk::vulkan::ExecVkProcChecked(
         vkQueueSubmit,
@@ -370,12 +373,13 @@ void WVkRender::Draw()
         device_.GraphicsQueue(),
         1,
         &submit_info,
-        sync_fences_[frame_index_]
+        render_sync_.Fence(frame_index_)
         );
 
     VkPresentInfoKHR present_info = wvk::types::VkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = &sync_semaphores_[image_index].render_finished;
+    present_info.pWaitSemaphores = &render_sync_.RenderFinishedSempahore(image_index);
+
     present_info.swapchainCount = 1;
     present_info.pSwapchains = &swapchain_.Swapchain();
     present_info.pImageIndices = &image_index;
@@ -391,9 +395,8 @@ void WVkRender::Draw()
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    semaphore_index_ = (semaphore_index_ + 1) % sync_semaphores_.size();
+    semaphore_index_ = (semaphore_index_ + 1) % swapchain_.Images().size();
     frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
-    
 }
 
 // Pipelines
@@ -699,7 +702,7 @@ void WVkRender::RecreateSwapChain() {
     swapchain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
-        surface_.Surface(),
+        surface_.Value(),
         dimensions[0],
         dimensions[1]
         );

@@ -4,7 +4,6 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-// #include "WCoreTypes/WRenderTypes.hpp"
 #include "_WVkGBufferPipelinesRAII_.hpp"
 
 #include <vector>
@@ -25,40 +24,21 @@ public:
                                    WEntityComponentId,
                                    FramesInFlight>;
 
+    using Super::Super;
+
     WVkGBufferPipelinesRAII() noexcept=default;
 
-    WVkGBufferPipelinesRAII(
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device
-        ) : Super(in_device, in_physical_device) {
-    }
+    virtual ~WVkGBufferPipelinesRAII() override = default;
 
-    virtual ~WVkGBufferPipelinesRAII() override {
-        Destroy();
-        Super::~Super();
-    }
-
-    WVkGBufferPipelinesRAII(const WVkGBufferPipelinesRAII & other)=delete;
-
-    WVkGBufferPipelinesRAII & operator=(
-        const WVkGBufferPipelinesRAII & other
-        ) = delete;
+    WVkGBufferPipelinesRAII(const WVkGBufferPipelinesRAII&)=delete;
+    WVkGBufferPipelinesRAII & operator=(const WVkGBufferPipelinesRAII&) = delete;
 
     WVkGBufferPipelinesRAII(
         WVkGBufferPipelinesRAII && other
-        ) noexcept :
-        Super(std::move(other)) {}
-
+        ) noexcept =default;
     WVkGBufferPipelinesRAII & operator=(
         WVkGBufferPipelinesRAII && other
-        ) noexcept {
-        if (this != &other) {
-            Destroy();
-            Super::operator=(std::move(other));
-        }
-
-        return *this;
-    }
+        ) noexcept =default;
 
     void CreatePipeline(
         const WAssetId & in_id,
@@ -136,10 +116,6 @@ public:
 
         return in_component_id;
     }
-
-private:
-
-    void Destroy() {}
 
  };
 

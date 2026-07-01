@@ -25,7 +25,6 @@ target_link_libraries(
         WImporter::WImporter
         WEngine::WEngine
         WLevel::WLevel
-        
 )
 
 install(

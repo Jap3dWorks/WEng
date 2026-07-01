@@ -444,9 +444,6 @@ int main(int argc, char** argv)
         Run(engine);
 
         WFLOG("Clossing app ...");
-
-        engine.Destroy();
-
     }
     catch(const std::exception& e)
     {

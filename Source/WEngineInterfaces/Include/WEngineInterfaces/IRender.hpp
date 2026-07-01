@@ -15,6 +15,8 @@ namespace wct::texture { struct WTexture; }
 
 namespace wct::geometry {struct WMesh;}
 
+namespace wdw { class WWindow; }
+
 struct WTransformStruct;
 
 class WTextureAsset; 
@@ -24,13 +26,15 @@ struct GLFWwindow;
 class IRender {
 public:
 
-    virtual ~IRender()=default;
-
-    virtual void Initialize()=0;
+    // Rule of Five (explicit defaults for clarity)
+    IRender() = default;
+    IRender(const IRender&) = default;
+    IRender(IRender&&) noexcept = default;
+    IRender& operator=(const IRender&) = default;
+    IRender& operator=(IRender&&) noexcept = default;
+    virtual ~IRender() = default;
 
     virtual void Draw()=0;
-
-    virtual void Destroy()=0;
 
     virtual void WaitIdle() const=0;
 
@@ -118,15 +122,14 @@ public:
     // ------
 
     /**
-     * @brief Returns current render window.
+     * @brief Sets the render window.
      */
-    virtual void Window(GLFWwindow * in_window)=0;
+    virtual void SetWindow(wdw::WWindow * in_window)=0;
 
     // Render Data
     // -----------
 
     virtual wct::render::WRenderSize RenderSize() const =0;
-    virtual void RenderSize(const wct::render::WRenderSize & in_render_size)=0;
     virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
 
     // Lighting

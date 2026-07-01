@@ -4,75 +4,21 @@
 #include "WVulkan/WVk/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
-WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII() :
-    device_(VK_NULL_HANDLE),
-    command_pool_(VK_NULL_HANDLE),
-    command_buffers_()
-{}
 
 WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
     const VkSurfaceKHR & in_surface
     ) :
-    device_(in_device),
-    command_buffers_()
-{
-    wvk::vulkan::QueueFamilyIndices queue_family_indices =
-        wvk::vulkan::FindQueueFamilies(in_physical_device, in_surface);
-
-    VkCommandPoolCreateInfo pool_info = wvk::types::VkCommandPoolCreateInfo();
-    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
-
-    wvk::vulkan::ExecVkProcChecked(
-        vkCreateCommandPool,
-        "Failed to create command pool!",
-        device_,
-        &pool_info,
-        nullptr,
-        &command_pool_
-        );
-}
-
-WVkRenderCommandPoolRAII::~WVkRenderCommandPoolRAII()
-{
-    Destroy();
-}
-
-WVkRenderCommandPoolRAII::WVkRenderCommandPoolRAII(WVkRenderCommandPoolRAII && other) noexcept :
-    device_(std::move(other.device_)),
-    command_pool_(std::move(other.command_pool_)),
-    command_buffers_(std::move(other.command_buffers_))
-{
-    other.device_ = VK_NULL_HANDLE;
-    other.command_pool_ = VK_NULL_HANDLE;
-    other.command_buffers_={};
-}
-
-WVkRenderCommandPoolRAII& WVkRenderCommandPoolRAII::operator=(WVkRenderCommandPoolRAII && other) noexcept
-{
-    if (this != &other) {
-        Destroy();
-
-        device_ = std::move(other.device_);
-        command_pool_ = std::move(other.command_pool_);
-        command_buffers_ = std::move(other.command_buffers_);
-
-        other.device_ = VK_NULL_HANDLE;
-        other.command_pool_ = VK_NULL_HANDLE;
-        other.command_buffers_={};
-    }
-    
-    return *this;
-}
+    command_pool_({in_device}, in_physical_device, in_surface),
+    command_buffers_() {}
 
 WVkCommandBufferInfo WVkRenderCommandPoolRAII::CreateCommandBuffer() {
     command_buffers_.push_back({});
 
     VkCommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info.commandPool = command_pool_;
+    alloc_info.commandPool = *command_pool_;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     alloc_info.commandBufferCount = static_cast<uint32_t>(
         command_buffers_.back().size()
@@ -81,7 +27,7 @@ WVkCommandBufferInfo WVkRenderCommandPoolRAII::CreateCommandBuffer() {
     wvk::vulkan::ExecVkProcChecked(
         vkAllocateCommandBuffers,
         "Failed to allocate command buffers!",
-        device_,
+        command_pool_.Creator().device,
         &alloc_info,
         command_buffers_.back().data()
         );
@@ -89,20 +35,34 @@ WVkCommandBufferInfo WVkRenderCommandPoolRAII::CreateCommandBuffer() {
     return command_buffers_.back();
 }
 
-void WVkRenderCommandPoolRAII::Destroy()
-{
-    if (device_ != VK_NULL_HANDLE) {
-        WFLOG("Destroy Command Pool");
-        
-        vkDestroyCommandPool(
-            device_,
-            command_pool_,
-            nullptr
-            );
+VkCommandPool WVkRenderCommandPoolRAII::WVkCommandPoolCreator::Create(
+    VkPhysicalDevice in_physical_device,
+    VkSurfaceKHR in_surface) {
+        wvk::vulkan::QueueFamilyIndices queue_family_indices =
+        wvk::vulkan::FindQueueFamilies(in_physical_device, in_surface);
 
-        command_pool_ = VK_NULL_HANDLE;
-        device_ = VK_NULL_HANDLE;
-        command_buffers_.clear();
-    }
+    VkCommandPoolCreateInfo pool_info = wvk::types::VkCommandPoolCreateInfo();
+    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+
+    VkCommandPool result;
+
+    wvk::vulkan::ExecVkProcChecked(
+        vkCreateCommandPool,
+        "Failed to create command pool!",
+        device,
+        &pool_info,
+        nullptr,
+        &result
+        );
+
+    return result;
 }
 
+void WVkRenderCommandPoolRAII::WVkCommandPoolCreator::Destroy(VkCommandPool command_pool) {
+    vkDestroyCommandPool(
+        device,
+        command_pool,
+        nullptr
+        );
+}

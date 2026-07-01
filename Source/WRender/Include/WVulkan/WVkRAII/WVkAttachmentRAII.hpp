@@ -125,22 +125,6 @@ private:
             1,
             device_
             );
-
-        // fill image memory with a black image.
-
-        // VkMemoryRequirements mem_req;
-        // vkGetImageMemoryRequirements(
-        //     device_,
-        //     image_,
-        //     &mem_req);
-
-        // std::vector<std::uint8_t> data(mem_req.size, 0);
-
-        // void * ptr;
-        // vkMapMemory(device_, memory_, 0, mem_req.size, 0, &ptr);
-        // std::memcpy(ptr, data.data(), data.size());
-        // vkUnmapMemory(device_, memory_);
-
     }
 
     void Destroy() {

@@ -61,3 +61,28 @@ int main() {
 #+end_src
 
 #+RESULTS:
+
+* Operator*
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+
+struct A {
+    A& operator*() {
+        std::print("Operator*!");
+        return *this;
+    }
+};
+
+int main() {
+
+    A a;
+    *a;
+
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: Operator*!

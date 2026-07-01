@@ -41,6 +41,7 @@ target_link_libraries(
         WEngineInterfaces::WEngineInterfaces
         glm::glm
         glfw
+        WWindow
         Vulkan::Vulkan
         dl
         pthread

@@ -3,39 +3,18 @@
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/WVkRAII/WVkRAII.hpp"
 
 #include <vulkan/vulkan_core.h>
 
-class WVkSemaphoreRAII {
+struct SemaphoreCreator {
 
-public:
-    
-    WVkSemaphoreRAII() = default;
+    VkDevice device{VK_NULL_HANDLE};
 
-    WVkSemaphoreRAII(const WVkSemaphoreRAII&) = delete;
-    WVkSemaphoreRAII & operator=(const WVkSemaphoreRAII&) = delete;
+    template<typename ...Args>
+    WNODISCARD VkSemaphore Create(Args && ...) {
 
-    WVkSemaphoreRAII(WVkSemaphoreRAII && other) noexcept :
-        device_(other.device_),
-        semaphore_(other.semaphore_) {}
-
-    WVkSemaphoreRAII & operator=(WVkSemaphoreRAII && other) noexcept {
-        if (this != &other) {
-            Destroy();
-
-            device_ = other.device_;
-            semaphore_ = other.semaphore_;
-
-            other.device_ = nullptr;
-            other.semaphore_ = nullptr;
-        }
-        return *this;
-    }
-
-    virtual ~WVkSemaphoreRAII() = default;
-
-    WVkSemaphoreRAII(VkDevice in_device) :
-        device_(in_device) {
+        VkSemaphore semaphore;
 
         VkSemaphoreCreateInfo create_info =
             wvk::types::VkSemaphoreCreateInfo();
@@ -43,34 +22,22 @@ public:
         wvk::vulkan::ExecVkProcChecked(
             vkCreateSemaphore,
             "Fail while creating a Semaphore!",
-            device_,
+            device,
             &create_info,
             nullptr,
-            &semaphore_
+            &semaphore
+            );
+
+        return semaphore;
+    }
+
+    void Destroy(VkSemaphore in_semaphore) {
+        vkDestroySemaphore(
+            device,
+            in_semaphore,
+            nullptr
             );
     }
-
-    WNODISCARD VkSemaphore Semaphore() const {
-        return semaphore_;
-    }
-
-private:
-
-    void Destroy() {
-        if (device_ != VK_NULL_HANDLE) {
-            vkDestroySemaphore(
-                device_,
-                semaphore_,
-                nullptr
-                );
-
-            device_ = VK_NULL_HANDLE;
-        }
-    }
-
-private:    
-
-    VkDevice device_{VK_NULL_HANDLE};
-    VkSemaphore semaphore_{VK_NULL_HANDLE};
-
 };
+
+using WVkSemaphoreRAII = WVkRAII<VkSemaphore, SemaphoreCreator>;

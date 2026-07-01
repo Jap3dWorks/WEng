@@ -1,42 +1,38 @@
 #pragma once
 
+#include "WVulkan/WVk/WVkTypes.hpp"
+#include "WVulkan/WVkRAII/WVkRAII.hpp"
+
 #include <vulkan/vulkan_core.h>
 
-class WVkFenceRAII {
-public:
+struct VkFenceCreator {
+    VkDevice device{VK_NULL_HANDLE};
 
-    WVkFenceRAII() = default;
+    VkFence Create() const {
+        VkFence fence;
 
-    WVkFenceRAII(const WVkFenceRAII&) = delete;
-    WVkFenceRAII& operator=(const WVkFenceRAII&) = delete;
-    
-    WVkFenceRAII(WVkFenceRAII&&) = default;
-    WVkFenceRAII& operator=(WVkFenceRAII&&) = default;
-    
-    virtual ~WVkFenceRAII() = default;
+        VkFenceCreateInfo create_info =
+            wvk::types::VkFenceCreateInfo();
+        create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
+        vkCreateFence(
+            device,
+            &create_info,
+            nullptr,
+            &fence
+            );
 
-    VkFence Fence() const {
-        return fence_;
+        return fence;
     }
 
-private:
-
-    void Destroy(){
-        if (device_ != VK_NULL_HANDLE) {
-            vkDestroyFence(
-                device_,
-                fence_,
-                nullptr
-                );
-
-            device_ = VK_NULL_HANDLE;
-        }
+    void Destroy(VkFence in_fence) const {
+        vkDestroyFence(
+            device,
+            in_fence,
+            nullptr
+            );
     }
-
-private:
-    
-    VkDevice device_{VK_NULL_HANDLE};
-    VkFence fence_{VK_NULL_HANDLE};
-  
 };
+
+using WVkFenceRAII = WVkRAII<VkFence, VkFenceCreator>;
+

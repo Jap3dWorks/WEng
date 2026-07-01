@@ -22,6 +22,8 @@ target_include_directories(
 
 target_link_libraries(
     WEngine
+    PUBLIC
+        WWindow
     PRIVATE
         WCore::WCore
         WEngineObjects::WEngineObjects
