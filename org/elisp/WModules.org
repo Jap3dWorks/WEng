@@ -1,6 +1,12 @@
 #+title: WModules
 
-* Find Module org files
+#+begin_src elisp
+;; -*- lexical-binding: t; -*-
+#+end_src
+
+#+RESULTS:
+
+* Find Modules org files
 
 #+begin_src elisp :results value
 (defun wng/find-files (root-dir regex)
@@ -13,16 +19,16 @@ ROOT-DIR is expanded relative to the current buffer's directory."
     (nreverse result)))
 #+end_src
 
+#+RESULTS:
+: wng/find-files
+
 #+begin_src elisp :results value
 (defun wng/find-module-org-files (root-dir)
   (wng/find-files root-dir "\\.org$"))
 #+end_src
 
-* Collect lob modules
-
-#+begin_src elisp
-
-#+end_src
+#+RESULTS:
+: wng/find-module-org-files
 
 * Evaluate module org files
 
@@ -42,4 +48,56 @@ Open each file, execute all source blocks and tangle, then close buffer."
           (org-babel-tangle)
           (kill-current-buffer))))))
 #+end_src
+
+#+RESULTS:
+: wng/evaluate-module-org-files
+
+* LinkDef generators
+
+#+begin_src elisp :results value
+(defun wng/linkdef-single-module-string (module-name)
+  "Returns a linkdef block for module-name."
+  (concat
+   (format
+    "
+#if defined(_WIN32)
+    #ifdef %1$s_EXPORTS
+        #define %1$s_API __declspec(dllexport)
+    #else
+        #define %1$s_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef %1$s_EXPORTS
+        #define %1$s_API __attribute__((visibility(\"default\")))
+    #else
+        #define %1$s_API
+    #endif
+#else
+    #define %1$s_API
+#endif
+
+"
+    (upcase module-name)
+    )
+   )
+  )
+#+end_src
+
+#+RESULTS:
+: wng/linkdef-single-module-string
+
+#+begin_src elisp :results value
+(defun wng/linkdef-complete-string (root-dir)
+  (let* ((result '()))
+    (dolist (file (wng/find-module-org-files root-dir))
+      (push (wng/linkdef-single-module-string (file-name-base file)) result)
+      )
+    (apply #'concat result)
+    )
+  )
+#+end_src
+
+#+RESULTS:
+: wng/linkdef-complete-string
+
 

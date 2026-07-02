@@ -1,5 +1,8 @@
 #+title: WObject
 
+#+begin_src elisp
+;; -*- lexical-binding: t; -*-
+#+end_src
 
 * Templates
 ** WObject hpp initial code

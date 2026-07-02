@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DllDef.hpp"
+#include "LinkDef.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WCoreTypes.hpp"
 

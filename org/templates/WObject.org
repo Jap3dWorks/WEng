@@ -5,7 +5,6 @@
 * WObject Body Macro
 
 #+NAME: wobject-wobject-body-macro
-#+HEADER: :noweb yes
 #+begin_src elisp :var wobject-name="WObject"
 (format 
 "#ifdef WOBJECT_BODY
@@ -60,7 +59,7 @@ If not exists creates it with a default template.
 #+NAME: create-if-not-exists-wobject-hpp
 #+HEADER: :var module="WEngineObjects" :var name="WObject" :var parent-module=""
 #+HEADER: :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
-#+begin_src elisp :noweb yes
+#+begin_src elisp
 (let ((file-path (format "Include/%s/%s.hpp" module name)))
   (unless (f-exists-p file-path)
     (make-directory (file-name-directory file-path) t)

@@ -13,5 +13,6 @@ Load org and elisp required libraries.
 (org-babel-load-file (expand-file-name "elisp/WObject.org" current-dir))
 (org-babel-lob-ingest (expand-file-name "templates/WClass.org" current-dir))
 (org-babel-lob-ingest (expand-file-name "templates/WObject.org" current-dir))
+(org-babel-lob-ingest (expand-file-name "templates/WModules.org" current-dir))
 )
 #+end_src
