@@ -86,7 +86,7 @@ void WEngine::Initialize() {
 
 void WEngine::Run()
 {
-    assert(state_.startup_info.startup_level.IsValid());
+    assert(state_.startup_infor.startup_level.IsValid());
 
     state_.level_info.current_level = state_.startup_info.startup_level;
     state_.level_info.level = state_.level_db.Get(state_.level_info.current_level);

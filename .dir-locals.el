@@ -44,7 +44,7 @@
                               :name "[LLDB][WSpacers]"
                               :env '(
                                      ("LD_LIBRARY_PATH" . "lib:${workspaceFolder}/Build/Debug/Debug"))
-                                     )))
+                                     ))
 
                        (dap-register-debug-template
                         "[LLDB][WEngineObjects] unittests"
