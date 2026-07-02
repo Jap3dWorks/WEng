@@ -1,0 +1,19 @@
+#+title: WEngine
+
+* LinkDef
+
+#+NAME: LinkDef
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link :mkdirp yes
+#+begin_src C++ :tangle PrivateGenerated/LinkDef.hpp
+#pragma once
+<<linkdef-module-macros()>>
+#+end_src
+
+* Local Variables
+
+# Local Variables:
+# eval: (org-babel-lob-ingest "../../org/templates/WClass.org")
+# eval: (org-babel-lob-ingest "../../org/templates/WObject.org")
+# eval: (org-babel-lob-ingest "../../org/templates/WModules.org")
+# End:
