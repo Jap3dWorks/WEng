@@ -8,8 +8,10 @@
 #include "WEngine/WEngine.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
-#include "WImporter/WImporterRegister.hpp"
-#include "WImporter/WImporter.hpp"
+#include "WImporterRegister/WImporterRegister.hpp"
+#include "WImporter/WImporterTexture.hpp"
+#include "WImporter/WImporterObj.hpp"
+
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
@@ -47,8 +49,8 @@ struct ModelAssets {
 bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 {
     // Import Viking Room
-    wim::importer::WImportObj obj_importer =
-        engine.ImportersRegister().GetImporter<wim::importer::WImportObj>();
+    wim::importer::WImporterObj obj_importer =
+        engine.ImportersRegister().GetImporter<wim::importer::WImporterObj>();
 
     std::vector<WAssetId> geo_ids =
         obj_importer.Import(
@@ -190,9 +192,9 @@ bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
 }
 
 bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_render_pipeline) {
-    wim::importer::WImportObj obj_importer =
+    wim::importer::WImporterObj obj_importer =
         engine.ImportersRegister()
-        .GetImporter<wim::importer::WImportObj>();
+        .GetImporter<wim::importer::WImporterObj>();
 
     std::vector<WAssetId> geo_ids =
         obj_importer.Import(

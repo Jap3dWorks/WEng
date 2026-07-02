@@ -78,7 +78,7 @@ namespace wim::imp_register {
             wim::importer::WImporter* r=nullptr;
 
             ForEach([&r, &in_extension](wim::importer::WImporter* _imp) ->bool {
-                for (const std::string & s : _imp->Extensions()) {
+                for (std::string_view s : _imp->Extensions()) {
                     if (in_extension == s) {
                         r=_imp;
                         return false;

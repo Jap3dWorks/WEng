@@ -4,8 +4,10 @@
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
 
-#include "WImporter/WImporter.hpp"
-#include "WImporter/WImporterRegister.hpp"
+#include "WImporter/WImporterTexture.hpp"
+#include "WImporter/WImporterObj.hpp"
+
+#include "WImporterRegister/WImporterRegister.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WLevel/WLevelDb.hpp"
@@ -23,7 +25,7 @@ WEngine WEngine::DefaultCreate()
 {
     WEngine result(std::make_unique<WVkRender>());
 
-    result.ImportersRegister().Register<wim::importer::WImportObj>();
+    result.ImportersRegister().Register<wim::importer::WImporterObj>();
     result.ImportersRegister().Register<wim::importer::WImportTexture>();
 
     // Register Wengine systems

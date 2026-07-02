@@ -1,5 +1,6 @@
 # fetch tiniobjloader header
 # --------------------------
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -36,8 +37,9 @@ add_library(
     WImporter 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WImporter.cpp
         Source/WImporterRegister.cpp
+        Source/WImporterObj.cpp
+        Source/WImporterTexture.cpp
 )
 
 set_target_properties(

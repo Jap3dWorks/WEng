@@ -4,7 +4,7 @@
 #include "WCore/TRef.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WLevel/WLevel.hpp"
-#include "WImporter/WImporterRegister.hpp"
+#include "WImporterRegister/WImporterRegister.hpp"
 #include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"

@@ -36,7 +36,7 @@ namespace WStringUtils {
         const std::string & package_name,
         const std::string & asset_name
         ) {
-
+        // TODO can I use string_view here?
         assert(asset_directory.starts_with("/Content"));
 
         std::string p_name = WStringUtils::Split(
