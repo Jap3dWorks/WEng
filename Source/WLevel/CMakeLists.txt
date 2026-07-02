@@ -6,6 +6,13 @@ add_library(
         Source/WLevelDb.cpp
     )
 
+set_target_properties(
+    WLevel
+    PROPERTIES
+        CXX_STANDARD 23
+)
+    
+
 target_include_directories(
     WLevel
     PUBLIC
@@ -20,12 +27,12 @@ target_include_directories(
 target_link_libraries(
     WLevel
     PRIVATE
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        WEngineInterfaces::WEngineInterfaces
+        WCore
+        WEngineObjects
+        WEngineInterfaces
 )
 
-add_library(WLevel::WLevel ALIAS WLevel)
+# add_library(WLevel::WLevel ALIAS WLevel)
 
 install(
     TARGETS WLevel

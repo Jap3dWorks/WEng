@@ -4,6 +4,12 @@ add_library(
         Source/WWindow.cpp
     )
 
+set_target_properties(
+    WWindow
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
 find_package(glfw3 REQUIRED)
 
 target_include_directories(
@@ -19,21 +25,11 @@ target_include_directories(
 target_link_libraries(
     WWindow
     PRIVATE
-        WEngineObjects::WEngineObjects
-        WCore::WCore
-        WEngineInterfaces::WEngineInterfaces
+        WEngineObjects
+        WCore
+        WEngineInterfaces
         glfw
 )
-
-# include(ShaderUtils)
-
-# add_slang_shader_target(
-#     WWindow_AllShaders
-#     SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders
-# )
-
-# # compile shaders first
-# add_dependencies(WWindow WWindow_AllShaders)
 
 install(
     TARGETS WWindow

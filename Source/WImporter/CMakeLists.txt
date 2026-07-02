@@ -1,9 +1,49 @@
+# fetch tiniobjloader header
+# --------------------------
+include(FetchContent)
+
+FetchContent_Declare(
+    tinyobjloader
+    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+    GIT_TAG v2.0.0rc13
+    GIT_SHALLOW TRUE
+)
+
+# Get KTX prebuild libraries
+# --------------------------
+
+FetchContent_Declare(
+    ktx
+    GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
+    GIT_TAG v5.0.0-rc1
+)
+
+# Include fastgltf library
+# ------------------------
+
+FetchContent_Declare(
+    fastgltf
+    GIT_REPOSITORY https://github.com/spnda/fastgltf.git
+    GIT_TAG v0.9.0
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_Populate(fastgltf)
+FetchContent_Populate(tinyobjloader)
+FetchContent_MakeAvailable(ktx)
+
 add_library(
     WImporter 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
         Source/WImporter.cpp
         Source/WImporterRegister.cpp
+)
+
+set_target_properties(
+    WImporter
+    PROPERTIES
+        CXX_STANDARD 23
 )
 
 target_include_directories(
@@ -15,18 +55,18 @@ target_include_directories(
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
+        ${tinyobjloader_SOURCE_DIR}
+        ${fastgltf_INCLUDE_DIR}
 )
 
 target_link_libraries(
     WImporter 
     PRIVATE
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        WEngineInterfaces::WEngineInterfaces
-        tinyobjloader
+        WCore
+        WEngineObjects
+        WEngineInterfaces
+        ktx
 )
-
-add_library(WImporter::WImporter ALIAS WImporter)
 
 install(
     TARGETS WImporter

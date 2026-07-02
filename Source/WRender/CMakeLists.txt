@@ -18,6 +18,13 @@ add_library(
         Source/WVkSwapChain.cpp
     )
 
+set_target_properties(
+    WRender
+    PROPERTIES
+        CXX_STANDARD 23
+)
+    
+
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -36,9 +43,9 @@ target_include_directories(
 target_link_libraries(
     WRender
     PRIVATE
-        WEngineObjects::WEngineObjects
-        WCore::WCore
-        WEngineInterfaces::WEngineInterfaces
+        WEngineObjects
+        WCore
+        WEngineInterfaces
         glm::glm
         glfw
         WWindow
@@ -51,7 +58,7 @@ target_link_libraries(
         # Xi
 )
 
-add_library(WRender::WRender ALIAS WRender)
+# add_library(WRender::WRender ALIAS WRender)
 
 include(ShaderUtils)
 

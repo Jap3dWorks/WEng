@@ -2,6 +2,12 @@ add_library(
     WEngineInterfaces INTERFACE
 )
 
+set_target_properties(
+    WEngineInterfaces
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
 target_include_directories(
     WEngineInterfaces INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>
@@ -9,7 +15,7 @@ target_include_directories(
         $<INSTALL_INTERFACE:include>
 )
 
-add_library(WEngineInterfaces::WEngineInterfaces ALIAS WEngineInterfaces)
+# add_library(WEngineInterfaces::WEngineInterfaces ALIAS WEngineInterfaces)
 
 install(
     TARGETS WEngineInterfaces

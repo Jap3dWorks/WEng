@@ -9,6 +9,12 @@ add_library(
         Source/WSystemsRegister.cpp
 )
 
+set_target_properties(
+    WEngine
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
 target_include_directories(
     WEngine 
     PUBLIC 
@@ -25,15 +31,15 @@ target_link_libraries(
     PUBLIC
         WWindow
     PRIVATE
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        WImporter::WImporter
-        WRender::WRender
-        WEngineInterfaces::WEngineInterfaces
-        WLevel::WLevel
+        WCore
+        WEngineObjects
+        WImporter
+        WRender
+        WEngineInterfaces
+        WLevel
 )
 
-add_library(WEngine::WEngine ALIAS WEngine)
+# add_library(WEngine::WEngine ALIAS WEngine)
 
 install(
     TARGETS WEngine

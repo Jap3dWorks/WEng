@@ -11,15 +11,17 @@ generate-source-files:
 	--eval "(wng/evaluate-module-org-files (wng/find-module-org-files \"$(realpath Source)\"))"
 
 generate-release: generate-source-files
-	@cmake --preset Release						\
-		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	\
-		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+	@cmake --preset Release					    	\
+		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	    \
+		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}  \
+		-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 
 generate-debug: generate-source-files
-	@cmake --preset Debug						\
-		-DWUNITTEST=1							\
-		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	\
-		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+	@cmake --preset Debug					    	\
+		-DWUNITTEST=1							    \
+		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	    \
+		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}  \
+		-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 
 compile-release: generate-release
 	@cmake --build --preset Release 

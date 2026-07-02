@@ -4,6 +4,13 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
 )
 
+set_target_properties(
+    WCore
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
+
 find_package(glm REQUIRED)
 
 target_include_directories(
@@ -23,7 +30,7 @@ target_link_libraries(
         glm::glm
 )
 
-add_library(WCore::WCore ALIAS WCore)
+# add_library(WCore::WCore ALIAS WCore)
 
 install(
     TARGETS WCore
@@ -88,6 +95,12 @@ if (DEFINED WUNITTEST)
         unittest/WCore_unittest.cpp
     )
 
+    set_target_properties(
+        WCore_unittest
+        PROPERTIES
+        CXX_STANDARD 23
+    )
+
     target_include_directories(
         WCore_unittest
         PUBLIC
@@ -103,7 +116,7 @@ if (DEFINED WUNITTEST)
         WCore_unittest
         PRIVATE
             Catch2::Catch2
-            WCore::WCore
+            WCore
         )
 
     install(

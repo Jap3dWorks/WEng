@@ -10,6 +10,12 @@ add_library(
         Source/WEntityComponentDb.cpp
 )
 
+set_target_properties(
+    WEngineObjects
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
 target_include_directories(
     WEngineObjects 
     PUBLIC 
@@ -24,10 +30,10 @@ target_include_directories(
 target_link_libraries(
     WEngineObjects
     PRIVATE
-        WCore::WCore
+        WCore
 )    
 
-add_library(WEngineObjects::WEngineObjects ALIAS WEngineObjects)
+# add_library(WEngineObjects::WEngineObjects ALIAS WEngineObjects)
 
 install(
     TARGETS WEngineObjects
@@ -89,6 +95,12 @@ if (DEFINED WUNITTEST)
         unittest/WEngineObjects_unittest.cpp
     )
 
+    set_target_properties(
+        WEngineObjects_unittest
+        PROPERTIES
+        CXX_STANDARD 23
+    )
+
     target_include_directories(
         WEngineObjects_unittest
         PUBLIC 
@@ -104,8 +116,8 @@ if (DEFINED WUNITTEST)
         WEngineObjects_unittest
         PRIVATE
             Catch2::Catch2
-            WCore::WCore
-            WEngineObjects::WEngineObjects
+            WCore
+            WEngineObjects
     )
 
     install(

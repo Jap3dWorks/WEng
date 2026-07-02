@@ -4,6 +4,12 @@ add_executable(
     CompileGenerated/CompileGenerated.cpp
 )
 
+set_target_properties(
+    WSpacers
+    PROPERTIES
+        CXX_STANDARD 23
+)
+
 target_include_directories(
     WSpacers 
     PRIVATE 
@@ -18,13 +24,13 @@ target_link_libraries(
     WSpacers
     PUBLIC
     PRIVATE
-        WCore::WCore
-        WEngineObjects::WEngineObjects
-        WEngineInterfaces::WEngineInterfaces
-        WRender::WRender
-        WImporter::WImporter
-        WEngine::WEngine
-        WLevel::WLevel
+        WCore
+        WEngineObjects
+        WEngineInterfaces
+        WRender
+        WImporter
+        WEngine
+        WLevel
 )
 
 install(

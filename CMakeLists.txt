@@ -1,14 +1,13 @@
 cmake_minimum_required (VERSION 3.20)
 
-project(WEng VERSION 0.1.0 LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 23)
+project(WEng VERSION 0.1.0 LANGUAGES CXX C)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Enable Logging
+# --------------
 if (DEFINED WENG_WLOG_ENABLE)
     add_compile_definitions(WENG_WLOG_ENABLE=1)
 endif()
@@ -22,22 +21,13 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
 else()
 endif()
 
-# fetch tiniobjloader header
-# --------------------------
-include(FetchContent)
-
-FetchContent_Declare(
-    tinyobjloader
-    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-    GIT_TAG v2.0.0rc13
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(tinyobjloader)
-
 # Get slang prebuild tools
 # ------------------------
 include(SlangSetup)
 download_slang(v2026.12)
+
+# Collect submodules
+# ------------------
 
 macro(FIND_CMAKE_LISTS result curdir)
   FILE(GLOB_RECURSE children ABSOLUTE ${curdir} ${curdir}/*/CMakeLists.txt)
