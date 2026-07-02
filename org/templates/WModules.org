@@ -1,0 +1,14 @@
+#+title: WModules
+
+* LinkDef templates
+
+#+NAME: linkdef-module-macros
+#+begin_src elisp :exports none
+(wng/linkdef-complete-string (concat (project-root (project-current)) "/Source"))
+#+end_src
+
+* Local variables
+
+# Local Variables:
+# eval: (org-babel-load-file "../elisp/WModules.org")
+# End:
