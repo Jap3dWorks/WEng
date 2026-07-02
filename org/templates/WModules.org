@@ -10,5 +10,5 @@
 * Local variables
 
 # Local Variables:
-# eval: (org-babel-load-file "../elisp/WModules.org")
+# eval: (org-babel-load-file "../elisp/WModules.org");
 # End:

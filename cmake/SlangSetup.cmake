@@ -1,5 +1,4 @@
-# Script to install slang. As it is inconvenient to install slang via submodules, because you would need to 
-# install every dependency
+# Script to install slang.
 
 include(FetchContent)
 
@@ -15,18 +14,6 @@ function(download_slang VERSION)
 
     set(TEMP_DIR "${CMAKE_BINARY_DIR}/slang_tmp")
     file(MAKE_DIRECTORY "${TEMP_DIR}")
-
-    # set(RELEASE_API "https://api.github.com/repos/shader-slang/slang/releases/latest")
-    # file(DOWNLOAD "${RELEASE_API}" "${TEMP_DIR}/release.json" STATUS STATUS_LIST)
-    # list(GET STATUS_LIST 0 STATUS_CODE)
-    # if(NOT STATUS_CODE EQUAL 0)
-    #     message(FATAL_ERROR "Failed to fetch Slang release info")
-    # endif()
-
-    # file(READ "${TEMP_DIR}/release.json" RELEASE_JSON)
-    # string(REGEX MATCH "\"tag_name\"[ \t]*:[ \t]*\"([^\"]+)\"" _ "${RELEASE_JSON}")
-    # set(VERSION "${CMAKE_MATCH_1}")
-    # string(REGEX REPLACE "^v" "" VERSION_NUM "${VERSION}")
 
     string(REGEX REPLACE "^v" "" VERSION_NUM "${VERSION}")
 

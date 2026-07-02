@@ -9,7 +9,7 @@ class WAssetDb;
 
 namespace wim::importer {
 
-    class WIMPORTERS_API WImporter {
+    class WIMPORTER_API WImporter {
 
     public:
 
@@ -54,7 +54,7 @@ namespace wim::importer {
     
     };
 
-    class WIMPORTERS_API WImportObj final : public WImporter
+    class WIMPORTER_API WImportObj final : public WImporter
     {
     
     public:
@@ -89,7 +89,7 @@ namespace wim::importer {
         }
     };
 
-    class WIMPORTERS_API WImportTexture final : public WImporter
+    class WIMPORTER_API WImportTexture final : public WImporter
     {
     
     public:

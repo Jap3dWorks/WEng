@@ -20,3 +20,4 @@ glm-devel
 catch2-devel
 glfw-devel
 stb_image-devel
+simdjson-devel

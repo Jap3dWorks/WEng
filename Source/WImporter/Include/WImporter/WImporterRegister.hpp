@@ -10,7 +10,7 @@
 
 namespace wim::imp_register {
 
-    class WIMPORTERS_API WImporterRegister {
+    class WIMPORTER_API WImporterRegister {
     
     public:
 
