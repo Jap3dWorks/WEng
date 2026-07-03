@@ -37,8 +37,8 @@ target_link_libraries(
 install(
     TARGETS WLevel
     EXPORT WLevelTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
 )
@@ -68,15 +68,15 @@ install(
         PATTERN "*.h"
 )    
 
-# Version config file
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    WLevelConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+# # Version config file
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     WLevelConfigVersion.cmake
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY SameMajorVersion
+# )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/WLevelConfigVersion.cmake
-    DESTINATION lib/cmake/WLevel
-)
+# install(
+#     FILES ${CMAKE_CURRENT_BINARY_DIR}/WLevelConfigVersion.cmake
+#     DESTINATION lib/cmake/WLevel
+# )

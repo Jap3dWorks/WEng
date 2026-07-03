@@ -44,8 +44,8 @@ target_link_libraries(
 install(
     TARGETS WEngine
     EXPORT WEngineTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib64
+        ARCHIVE DESTINATION lib64
         RUNTIME DESTINATION bin
         INCLUDES DESTINATIoN include
 )
@@ -73,15 +73,15 @@ install(
         PATTERN "*.h"
 )
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    WEngineConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion    
-)
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     WEngineConfigVersion.cmake
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY SameMajorVersion    
+# )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/WEngineConfigVersion.cmake
-    DESTINATION lib/cmake/WEngine
-)
+# install(
+#     FILES ${CMAKE_CURRENT_BINARY_DIR}/WEngineConfigVersion.cmake
+#     DESTINATION lib64/cmake/WEngine
+# )
 

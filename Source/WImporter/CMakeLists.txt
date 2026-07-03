@@ -17,6 +17,7 @@ FetchContent_Declare(
     ktx
     GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
     GIT_TAG v5.0.0-rc1
+    GIT_SHALLOW TRUE
 )
 
 # Include fastgltf library
@@ -29,9 +30,10 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-FetchContent_Populate(fastgltf)
+# FetchContent_Populate(fastgltf)
 FetchContent_Populate(tinyobjloader)
-FetchContent_MakeAvailable(ktx)
+
+FetchContent_MakeAvailable(fastgltf ktx)
 
 add_library(
     WImporter 
@@ -58,7 +60,6 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${tinyobjloader_SOURCE_DIR}
-        ${fastgltf_INCLUDE_DIR}
 )
 
 target_link_libraries(
@@ -67,14 +68,15 @@ target_link_libraries(
         WCore
         WEngineObjects
         WEngineInterfaces
+        fastgltf
         ktx
 )
 
 install(
     TARGETS WImporter
     EXPORT WImporterTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include
     )
@@ -102,15 +104,15 @@ install(
         PATTERN "*.h"
 )
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    WImporterConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion    
-)
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     WImporterConfigVersion.cmake
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY SameMajorVersion    
+# )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/WImporterConfigVersion.cmake
-    DESTINATION lib/cmake/WImporter
-)
+# install(
+#     FILES ${CMAKE_CURRENT_BINARY_DIR}/WImporterConfigVersion.cmake
+#     DESTINATION lib64/cmake/WImporter
+# )
     

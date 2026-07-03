@@ -28,7 +28,7 @@
                                    (project-root (project-current))
                                    "/Install/Release ; "
                                    (concat
-                                    "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib:"
+                                    "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:lib:lib64:"
                                     (project-root (project-current)) "/Build/Release/Release "
                                     "bin/WSpacers'")))))
 
@@ -43,7 +43,7 @@
                               :program "bin/WSpacers" 
                               :name "[LLDB][WSpacers]"
                               :env '(
-                                     ("LD_LIBRARY_PATH" . "lib:${workspaceFolder}/Build/Debug/Debug"))
+                                     ("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))
                                      ))
 
                        (dap-register-debug-template

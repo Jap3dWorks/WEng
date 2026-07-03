@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WCore/WCoreMacros.hpp"
+
 #include <cstdint>
 #include <vector>
 #include <cstring>
@@ -98,4 +100,63 @@ namespace wct::texture {
             return 8;
         }
     }
+
+    enum class ESampler : std::uint8_t {
+        MIN_NEAREST  = 0b00000000,
+        MIN_LINEAR   = 0b00000001,
+        MIN_BILINEAR = 0b00000010,
+
+        MAG_NEAREST  = 0b00000000,
+        MAG_LINEAR   = 0b00000100,
+        MAG_BILINEAR = 0b00001000,
+
+        WRAPS_REPEAT = 0b00000000,  // Horizontal
+        WRAPS_CLAMP  = 0b00010000,
+        WRAPS_MIRROR = 0b00100000,
+
+        WRAPT_REPEAT = 0b00000000,  // Vertical
+        WRAPT_CLAMP  = 0b01000000,
+        WRAPT_MIRROR = 0b10000000,        
+
+        MIN_MASK   = 0b00000011,
+        MAG_MASK   = 0b00001100,
+        WRAP_SMASK = 0b00110000,
+        WRAP_TMASK = 0b11000000
+    };
+
+    WNODISCARD constexpr ESampler operator|(ESampler a, ESampler b)
+    {
+        return static_cast<ESampler>(
+            static_cast<std::uint8_t>(a) | static_cast<std::uint8_t>(b)
+            );
+    }
+
+    WNODISCARD constexpr ESampler operator&(ESampler a, ESampler b)
+    {
+        return static_cast<ESampler>(
+            static_cast<std::uint8_t>(a) & static_cast<std::uint8_t>(b)
+            );
+    }
+
+    WNODISCARD constexpr ESampler & operator|=(ESampler & a, ESampler b) {
+        a = a | b;
+        return a;
+    }
+
+    WNODISCARD constexpr ESampler GetMin(ESampler in_sampler) {
+        return ESampler::MIN_MASK & in_sampler;
+    }
+
+    WNODISCARD constexpr ESampler GetMag (ESampler in_sampler) {
+        return ESampler::MAG_MASK & in_sampler;
+    }
+
+    WNODISCARD constexpr ESampler GetWrapS(ESampler in_sampler) {
+        return ESampler::WRAP_SMASK & in_sampler;
+    }
+
+    WNODISCARD constexpr ESampler GetWrapT(ESampler in_sampler) {
+        return ESampler::WRAP_TMASK & in_sampler;
+    }
+
 }

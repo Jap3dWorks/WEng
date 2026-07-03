@@ -5,7 +5,7 @@
 namespace wim::importer {
     
     class WIMPORTER_API WImporterGltf : public WImporter {
-
+    public:
         WImporterGltf() = default;
         WImporterGltf(const WImporterGltf&) = default;
         WImporterGltf(WImporterGltf&&) noexcept = default;
@@ -22,7 +22,6 @@ namespace wim::importer {
         ) override;
 
     std::vector<std::string_view> Extensions() const noexcept override;
-
     std::vector<std::string_view> Formats() const noexcept override;
 
     virtual std::unique_ptr<WImporter> Clone() override;

@@ -47,15 +47,15 @@ install(
     PATTERN "*.h"
 )
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    WEngineInterfacesConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion    
-)
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     WEngineInterfacesConfigVersion.cmake
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY SameMajorVersion    
+# )
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/WEngineInterfacesConfigVersion.cmake
-    DESTINATION lib/cmake/WEngineInterfaces
-)
+# install(
+#     FILES ${CMAKE_CURRENT_BINARY_DIR}/WEngineInterfacesConfigVersion.cmake
+#     DESTINATION lib64/cmake/WEngineInterfaces
+# )
 
