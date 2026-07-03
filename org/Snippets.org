@@ -1,5 +1,6 @@
 #+title: Code Snippets
 
+#+startup: content
 
 * Babel Template
 
@@ -43,7 +44,6 @@ int main() {
 #+RESULTS:
 : Natural value: 3
 
-
 * Const Ptr
 
 #+HEADER: :flags --std=gnu++23
@@ -86,3 +86,22 @@ int main() {
 
 #+RESULTS:
 : Operator*!
+
+
+* Array Size
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <array>
+#include <iostream>
+ 
+int main()
+{ 
+    std::array<int, 4> nums{};
+ 
+    std::cout << "nums contains " << nums.size() << " elements.\n";
+}
+#+end_src
+
+#+RESULTS:
+: nums contains 4 elements.

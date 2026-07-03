@@ -8,9 +8,11 @@ public struct GraphicUBO {
 public struct VSGraphicInput {
     public float3 position;
     public float2 tex_coord;
-    public float3 color;
+    public float4 color;
     public float3 normal;
 };
+
+// TODO ADD vert color pass
 
 public struct VSGraphicOutput {
     public float4 pos        : SV_POSITION;

@@ -13,7 +13,7 @@
 
 #define WPROPERTY(_type, _name, _value)                                      \
 public:                                                                      \
-    inline _type Get_ ## _name () const { return _name ; };                   \
+    inline const _type & Get_ ## _name () const { return _name ; };          \
     inline void Set_ ## _name (const _type & in_value) { _name = in_value; } \
 private:                                                                     \
     _type _name { _value };

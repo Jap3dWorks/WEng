@@ -9,10 +9,12 @@
 
 namespace wct::geometry {
 
+    using WIndex = std::uint32_t;
+
     struct WVertex{
         glm::vec3 position;
         glm::vec2 tex_coords;
-        glm::vec3 color;
+        glm::vec4 color;
         glm::vec3 normal;
         // glm::vec3 Tangent;
         // glm::vec3 Bitangent;
@@ -27,7 +29,7 @@ namespace wct::geometry {
 
     struct WMesh{
         std::vector<WVertex> vertices;
-        std::vector<uint32_t> indices;
+        std::vector<WIndex> indices;
     };
 
 // Meshes by Id, max 16

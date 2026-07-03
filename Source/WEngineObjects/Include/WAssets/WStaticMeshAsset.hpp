@@ -59,10 +59,5 @@ public:
             in_fn(this, i, m);
         };
     }
-
-// private:
-
-//     std::array<WMeshStruct, WENG_MAX_ASSET_IDS> mesh_list{};
-    
 };
 

@@ -74,7 +74,7 @@ namespace wvr::gbuffer_pipelines {
 
             result.attribute_descriptors[2].binding = 0;
             result.attribute_descriptors[2].location = 2;
-            result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+            result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
             result.attribute_descriptors[2].offset = offsetof(wct::geometry::WVertex, color);
 
             result.attribute_descriptors[3].binding = 0;
@@ -99,6 +99,9 @@ namespace wvr::gbuffer_pipelines {
         const std::vector<VkDescriptorSetLayout> & in_desc_layouts,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         ) {
+
+        // TODO write WVkShaderStageInfo and CreateShaderModules better.
+
         WVkShaderStageInfo wvertex_stage_info;
         std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
     

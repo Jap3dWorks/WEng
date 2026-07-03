@@ -9,9 +9,10 @@
 #include <span>
 
 class WRenderPipelineAsset;
+
 // class WTextureAsset;
 // class WStaticMeshAsset;
-namespace wct::texture { struct WTexture; }
+// namespace wct::texture { struct WTexture; }
 
 namespace wct::geometry {struct WMesh;}
 
