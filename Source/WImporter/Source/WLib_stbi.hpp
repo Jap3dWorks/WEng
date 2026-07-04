@@ -56,12 +56,15 @@ namespace wim::WLib_wtbi {
         };
     }
 
-    WNODISCARD inline WStbiImage LoadBuffer(const stbi_uc * in_buffer, int in_size) {
+    WNODISCARD inline WStbiImage LoadBuffer(const std::byte * in_buffer, int in_size) {
         int width, height, num_channels;
 
         stbi_uc * pixels = stbi_load_from_memory(
-            in_buffer, in_size,
-            &width, &height, &num_channels,
+            reinterpret_cast<stbi_uc const *>(in_buffer),
+            in_size,
+            &width,
+            &height,
+            &num_channels,
             STBI_rgb_alpha
             );
 

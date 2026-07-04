@@ -1,12 +1,15 @@
 #pragma once
 
+#include "WCore/WCoreMacros.hpp"
+
 #include <vector>
 #include <string>
 #include <format>
 #include <cassert>
 #include <filesystem>
+#include <string_view>
 
-namespace WStringUtils {
+namespace wstr::utils {
 
     inline std::vector<std::string> Split(std::string in_string, const std::string & in_delimiter) {
 
@@ -32,15 +35,15 @@ namespace WStringUtils {
      * @param asset_name, asset name.
      */
     inline std::string AssetPath(
-        std::string asset_directory,
-        const std::string & package_name,
-        const std::string & asset_name
+        std::string asset_directory, // TODO use string_view if it is possible.
+        std::string const & package_name,
+        std::string const & asset_name
         ) {
         // TODO can I use string_view here?
         assert(asset_directory.starts_with("/Content"));
 
-        std::string p_name = WStringUtils::Split(
-            WStringUtils::Split(package_name, ".")[0], "/"
+        std::string p_name = wstr::utils::Split(
+            wstr::utils::Split(package_name, ".")[0], "/"
             ).back();
 
         while(asset_directory.ends_with("/")) {
@@ -68,14 +71,37 @@ namespace WStringUtils {
 
     /**
      * @brief converts a vector of std::string_view into a vector of const char *.
+     * @DEPRECATED this is not reliable.
      */
-    inline void ToConstCharPtrs(const std::vector<std::string_view>& in_vw, std::vector<const char *> & out_char_ptr) {
+    [[deprecated("Not a secure function.")]] inline void ToConstCharPtrs(
+        const std::vector<std::string_view>& in_vw,
+        std::vector<const char *> & out_char_ptr
+        ) {
         out_char_ptr.clear();
         out_char_ptr.reserve(in_vw.size());
 
         for (const std::string_view & v : in_vw) {
-            out_char_ptr.push_back(v.data());
+            out_char_ptr.push_back(v.data());  // CAUTION not null character!
         }
 
     }
+
+    /**
+     * @brief Returns a string_view located at the segment of the in_path that represents
+     * the basename without extension.
+     */
+    WNODISCARD inline std::string_view CleanBasename(std::string_view in_path) {
+        auto last_sep = in_path.find_last_of("/\\");
+        auto filename = (last_sep == std::string_view::npos)
+            ? in_path
+            : in_path.substr(last_sep + 1);
+
+        // Find the last dot for the extension
+        auto dot = filename.rfind('.');
+        if (dot == std::string_view::npos) {
+            return filename;               // No extension, whole filename is stem
+        }
+        return filename.substr(0, dot);    // Stem without extension
+    }
+    
 }

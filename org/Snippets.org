@@ -105,3 +105,23 @@ int main()
 
 #+RESULTS:
 : nums contains 4 elements.
+
+
+* Bitwise
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <array>
+#include <iostream>
+ 
+int main()
+{ 
+    std::size_t v=1;
+
+    std::print("Value lshift {}", v << sizeof(v)) * 8 - 1;
+}
+#+end_src
+
+#+RESULTS:
+: Value lshift 4
+

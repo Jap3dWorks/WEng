@@ -2,7 +2,7 @@
 #include "WCoreTypes/WTexture.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WUtils/WStringUtils.hpp"
+#include "WString/WStringUtils.hpp"
 #include "WLib_stbi.hpp"
 
 // WImportTexture
@@ -23,7 +23,7 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
     }
 
     WAssetId id = in_asset_manager.Create<WTextureAsset>(
-        WStringUtils::AssetPath(
+        wstr::utils::AssetPath(
             std::string(asset_directory),
             std::string(file_path),
             "texture").c_str()

@@ -1,18 +1,23 @@
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WCore/WCore.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WEngineInterfaces/IRender.hpp"
+#include "WObjectDb/WAssetDb.hpp"
+#include "WString/WStringUtils.hpp"
 #include "fastgltf/core.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
-#include "WLib_stbi.hpp"
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 
-#include "glm/glm.hpp"
+#include <WLib_stbi.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtx/type_trait.hpp>
 
 #include <stdexcept>
+#include <type_traits>
 
 std::vector<std::string_view> wim::importer::WImporterGltf::Extensions() const noexcept {
     return {".gltf", ".glb"};
@@ -38,7 +43,42 @@ template <>
 struct fastgltf::ElementTraits<glm::vec4> :
     fastgltf::ElementTraitsBase<glm::vec4, AccessorType::Vec4, float> {};
 
+namespace nullindex {
+
+    struct _NullIndexType_ {};
+
+    template<typename T=std::size_t, T NullValue=std::numeric_limits<T>::max()>
+    struct NullableIndex {
+
+        NullableIndex(T in_val) :
+            value(in_val) {}
+
+        constexpr NullableIndex(_NullIndexType_) :
+            value(NullValue) {}
+
+        NullableIndex() = default;
+        NullableIndex(const NullableIndex&) = default;
+        NullableIndex(NullableIndex&&) = default;
+        NullableIndex& operator=(const NullableIndex&) = default;
+        NullableIndex& operator=(NullableIndex&&) = default;
+        virtual ~NullableIndex() = default;
+
+        WNODISCARD bool IsValid() { return value != NullValue; }
+        WNODISCARD operator bool() const {return IsValid(); }
+
+        WNODISCARD const T & Value() const { return value; }
+        WNODISCARD const T &  operator*() const { return value; }
+
+    private:
+        
+        T value{NullValue};
+    };
+
+    constexpr const _NullIndexType_ Null={};
+}
+
 namespace {
+
 
     WNODISCARD constexpr wct::texture::ESampler MagFilter(fastgltf::Filter mag_filter) noexcept {
         switch(mag_filter) {
@@ -104,7 +144,7 @@ namespace {
         }
     }    
 
-    inline wct::texture::ESampler ToESampler(fastgltf::Sampler & sampler) {
+    inline wct::texture::ESampler ToESampler(fastgltf::Sampler const & sampler) {
         return MinFilter(sampler.minFilter.value_or(fastgltf::Filter::Linear)) |
             MagFilter(sampler.minFilter.value_or(fastgltf::Filter::Linear))    |
             WrapSFilter(sampler.wrapS) |
@@ -161,9 +201,20 @@ namespace {
         return asset_gltf;
     }
 
+    WNODISCARD inline  WRenderPipelineParametersAsset CollectMaterial(
+        fastgltf::Asset const & in_asset,
+        std::vector<WAssetId> const & textures,
+        fastgltf::Material const & in_material
+        ) {
+        // in_material.
+        // in_material.
+
+        return {};
+    }
+
     WNODISCARD inline wct::geometry::WMesh CollectMeshPrimitive(
-        const fastgltf::Asset & in_asset,
-        const fastgltf::Primitive & in_primitive
+        fastgltf::Asset const & in_asset,
+        fastgltf::Primitive const  & in_primitive
         ) {
 
         wct::geometry::WMesh result;
@@ -240,180 +291,210 @@ namespace {
         return result;
     }
 
-    void CollectMaterials(fastgltf::Asset & gltf_asset) {
-        
-        for (fastgltf::Material& mat : gltf_asset.materials) {
-            // std::shared_ptr<GLTFMaterial> newMat = std::make_shared<GLTFMaterial>();
-            // materials.push_back(newMat);
-            // file.materials[mat.name.c_str()] = newMat;
+    WNODISCARD inline auto CollectStaticMeshes(
+        fastgltf::Asset const & in_asset
+        ) {
 
-            // GLTFMetallic_Roughness::MaterialConstants constants;
-            // constants.colorFactors.x = mat.pbrData.baseColorFactor[0];
-            // constants.colorFactors.y = mat.pbrData.baseColorFactor[1];
-            // constants.colorFactors.z = mat.pbrData.baseColorFactor[2];
-            // constants.colorFactors.w = mat.pbrData.baseColorFactor[3];
+        std::vector<nullindex::NullableIndex<>> index_sm_map;
+        index_sm_map.reserve(in_asset.meshes.size());
 
-            // constants.metal_rough_factors.x = mat.pbrData.metallicFactor;
-            // constants.metal_rough_factors.y = mat.pbrData.roughnessFactor;
-            // write material parameters to buffer
-            
-            // sceneMaterialConstants[data_index] = constants;
+        std::vector<WStaticMeshAsset> sm_assets;
+        sm_assets.reserve(in_asset.meshes.size());
 
-            // Detect if it is a transparent material
-            // MaterialPass passType = MaterialPass::MainColor;
-            // if (mat.alphaMode == fastgltf::AlphaMode::Blend) {
-            //     passType = MaterialPass::Transparent;
-            // }
+        std::vector<std::string_view> sm_names;
+        sm_names.reserve(in_asset.meshes.size());
 
-            // GLTFMetallic_Roughness::MaterialResources materialResources;
-            // default the material textures
-            // materialResources.colorImage = engine->_whiteImage;
-            // materialResources.colorSampler = engine->_defaultSamplerLinear;
-            // materialResources.metalRoughImage = engine->_whiteImage;
-            // materialResources.metalRoughSampler = engine->_defaultSamplerLinear;
+        for (fastgltf::Mesh const & mesh : in_asset.meshes) {
 
-            // set the uniform buffer for the material data
-            // materialResources.dataBuffer =
-            //     file.materialDataBuffer.buffer;
+            WStaticMeshAsset sm_asset{};
 
-            // materialResources.dataBufferOffset =
-            //     data_index * sizeof(GLTFMetallic_Roughness::MaterialConstants);
+            std::size_t idx=0;
+            while(idx < mesh.primitives.size() &&
+                  idx < sm_asset.Get_mesh_list().size()) {
 
-            // // grab textures from gltf file
-            // if (mat.pbrData.baseColorTexture.has_value()) {
-            //     size_t img = gltf_asset.textures[mat.pbrData.baseColorTexture.value().textureIndex].imageIndex.value();
-            //     size_t sampler = gltf_asset.textures[mat.pbrData.baseColorTexture.value().textureIndex].samplerIndex.value();
+                sm_asset.SetMesh(
+                    CollectMeshPrimitive(
+                        in_asset,
+                        mesh.primitives[idx]
+                        ),
+                    idx
+                    );
 
-            //     materialResources.colorImage = images[img];
-            //     materialResources.colorSampler = file.samplers[sampler];
-            // }
-            // // build material
-            // newMat->data = engine->metalRoughMaterial.write_material(engine->_device, passType, materialResources, file.descriptorPool);
+                idx++;
+            }
 
-            // data_index++;
-        }        
+            if (idx > 0) {
+                index_sm_map.push_back(sm_assets.size());
+                sm_assets.push_back(sm_asset);
+                sm_names.push_back(mesh.name);
+            }
+            else {
+                index_sm_map.push_back(nullindex::Null);
+            }
+        }
+
+        return std::tuple{std::move(index_sm_map),
+                          std::move(sm_assets),
+                          std::move(sm_names)};
     }
 
-    void CollectLevel() {
-
-        // // load all nodes and their meshes
-        // for (fastgltf::Node& node : gltf.nodes) {
-        //     std::shared_ptr<Node> newNode;
-
-        //     // find if the node has a mesh, and if it does hook it to the mesh pointer and allocate it with the meshnode class
-        //     if (node.meshIndex.has_value()) {
-        //         newNode = std::make_shared<MeshNode>();
-        //         static_cast<MeshNode*>(newNode.get())->mesh = meshes[*node.meshIndex];
-        //     } else {
-        //         newNode = std::make_shared<Node>();
-        //     }
-
-        //     nodes.push_back(newNode);
-        //     file.nodes[node.name.c_str()];
-
-        //     std::visit(fastgltf::visitor { [&](fastgltf::Node::TransformMatrix matrix) {
-        //         memcpy(&newNode->localTransform, matrix.data(), sizeof(matrix));
-        //     },
-        //                 [&](fastgltf::Node::TRS transform) {
-        //                     glm::vec3 tl(transform.translation[0], transform.translation[1],
-        //                                  transform.translation[2]);
-        //                     glm::quat rot(transform.rotation[3], transform.rotation[0], transform.rotation[1],
-        //                                   transform.rotation[2]);
-        //                     glm::vec3 sc(transform.scale[0], transform.scale[1], transform.scale[2]);
-
-        //                     glm::mat4 tm = glm::translate(glm::mat4(1.f), tl);
-        //                     glm::mat4 rm = glm::toMat4(rot);
-        //                     glm::mat4 sm = glm::scale(glm::mat4(1.f), sc);
-
-        //                     newNode->localTransform = tm * rm * sm;
-        //                 } },
-        //         node.transform);
-        // }        
-    }
-
-    WTextureAsset CollectImage(fastgltf::Asset& asset, fastgltf::Image& image) {
+    WNODISCARD inline WTextureAsset CollectImage(
+        fastgltf::Asset const & asset,
+        fastgltf::Image const & image
+        ) {
         WTextureAsset result;
 
         std::visit(
             fastgltf::visitor {
                 [&result](auto& arg) {},
-                    [&result](fastgltf::sources::URI& filePath) {
-                        assert(filePath.fileByteOffset == 0);
-                        assert(filePath.uri.isLocalPath());
+                [&result](fastgltf::sources::URI& filePath) {
+                    assert(filePath.fileByteOffset == 0);
+                    assert(filePath.uri.isLocalPath());
 
-                        std::string_view path(
-                            filePath.uri.path().begin(),
-                            filePath.uri.path().end()
+                    std::string_view path(
+                        filePath.uri.path().begin(),
+                        filePath.uri.path().end()
+                        );
+
+                    auto stbi_image = wim::WLib_wtbi::LoadPath(path);
+
+                    if (stbi_image.pixels) {
+
+                        result.SetTextureData(
+                            stbi_image.pixels.get(),
+                            stbi_image.width,
+                            stbi_image.height,
+                            stbi_image.format
                             );
+                    }
+                },
+                [&result](fastgltf::sources::Vector& vector) {
 
-                        auto stbi_image = wim::WLib_wtbi::LoadPath(path);
+                    auto stbi_image = wim::WLib_wtbi::LoadBuffer(
+                        vector.bytes.data(),
+                        vector.bytes.size()
+                        );
 
-                        if (stbi_image.pixels) {
+                    if (stbi_image.pixels) {
+                        result.SetTextureData(
+                            stbi_image.pixels.get(),
+                            stbi_image.width,
+                            stbi_image.height,
+                            stbi_image.format
+                            );
+                    }
+                },
+                [&result, &asset](fastgltf::sources::BufferView& view) {
+                    auto& bufferView = asset.bufferViews[view.bufferViewIndex];
+                    auto& buffer = asset.buffers[bufferView.bufferIndex];
 
-                            result.SetTextureData(
-                                stbi_image.pixels.get(),
-                                stbi_image.width,
-                                stbi_image.height,
-                                stbi_image.format
-                                );
-                        }
-                    },
-                    [&](fastgltf::sources::Vector& vector) {
-                        
-                        // unsigned char* data =
-                        //     stbi_load_from_memory(
-                        //         vector.bytes.data(),
-                        //         static_cast<int>(vector.bytes.size()),
-                        //         &width, &height, &nrChannels, 4);
-                        
-                        // if (data) {
-                        //     // VkExtent3D imagesize;
-                        //     // imagesize.width = width;
-                        //     // imagesize.height = height;
-                        //     // imagesize.depth = 1;
+                    std::visit(fastgltf::visitor { 
+                            [](auto& arg) {},
+                            [&result, &bufferView](fastgltf::sources::Vector& vector) {
+                                auto stbi_image = wim::WLib_wtbi::LoadBuffer(
+                                    vector.bytes.data() + bufferView.byteOffset,
+                                    bufferView.byteLength
+                                    );
 
-                        //     // newImage = engine->create_image(data, imagesize, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT,false);
+                                if (stbi_image.pixels) {
 
-                        //     stbi_image_free(data);
-                        // }
-                    },
-                    [&](fastgltf::sources::BufferView& view) {
-                        // auto& bufferView = asset.bufferViews[view.bufferViewIndex];
-                        // auto& buffer = asset.buffers[bufferView.bufferIndex];
-
-                        // std::visit(fastgltf::visitor { 
-                        //         [](auto& arg) {},
-                        //             [&](fastgltf::sources::Vector& vector) {
-                        //                 unsigned char* data = stbi_load_from_memory(
-                        //                     vector.bytes.data() + bufferView.byteOffset,
-                        //                     static_cast<int>(bufferView.byteLength),
-                        //                     &width, &height, &nrChannels, 4);
-                                        
-                        //                 if (data) {
-                                            
-                        //                     // VkExtent3D imagesize;
-                        //                     // imagesize.width = width;
-                        //                     // imagesize.height = height;
-                        //                     // imagesize.depth = 1;
-
-                        //                     // newImage = engine->create_image(
-                        //                     //     data, imagesize,
-                        //                     //     VK_FORMAT_R8G8B8A8_UNORM,
-                        //                     //     VK_IMAGE_USAGE_SAMPLED_BIT,
-                        //                     //     false);
-
-                        //                     stbi_image_free(data);
-                                            
-                        //                 }
-                        //             } },
-                        //     buffer.data);
-                    },
-                    },
-            image.data);
+                                    result.SetTextureData(
+                                        stbi_image.pixels.get(),
+                                        stbi_image.width,
+                                        stbi_image.height,
+                                        stbi_image.format
+                                        );
+                                }
+                            }
+                        },
+                        buffer.data
+                        );
+                },
+            },
+            image.data
+            );
 
         return result;
     }
 
+    WNODISCARD inline auto CollectImageSamplersIndex(fastgltf::Asset const & asset ) {
+        using OptIndex = decltype(decltype(asset.textures)::value_type::samplerIndex);
+        using IndexType = std::decay_t<decltype(std::declval<OptIndex>().value())>;
+
+        std::vector<nullindex::NullableIndex<IndexType>> image_samplers;
+        image_samplers.resize(asset.images.size(), {});
+
+        for(auto & tx : asset.textures) {
+            if (tx.imageIndex.has_value()) {
+                image_samplers[tx.imageIndex.value()] =
+                    tx.samplerIndex
+                    .and_then([](auto & v ) -> std::optional<nullindex::NullableIndex<IndexType>>
+                              { return v ;})
+                    .value_or(nullindex::Null);
+            }
+        }
+        return image_samplers;
+    }
+
+    WNODISCARD inline auto CollectImages(fastgltf::Asset const & in_asset) {
+        auto image_samplers = CollectImageSamplersIndex(in_asset);
+
+        std::vector<WTextureAsset> text_assets{};
+        text_assets.reserve(in_asset.images.size());
+
+        std::vector<std::string_view> text_names{};
+        text_names.reserve(in_asset.images.size());
+
+        std::size_t idx=0;
+        for (auto & img : in_asset.images) {
+            text_assets.push_back(
+                CollectImage(in_asset, img)
+                );
+
+            text_names.push_back(
+                wstr::utils::CleanBasename(img.name)
+                );
+
+            if(image_samplers[idx].IsValid()) {
+                auto sampleridx = image_samplers[idx].Value();
+                text_assets[idx].Set_sampler(
+                    ToESampler(in_asset.samplers[sampleridx])
+                    );
+            }
+        
+            idx++;
+        }
+
+        return std::tuple{std::move(text_assets), std::move(text_names)};
+    }
+
+    
+
+    WNODISCARD inline std::vector<WAssetId> CreateTextures(
+        std::vector<WTextureAsset> const & in_textures,
+        std::vector<std::string_view> const & in_names,
+        std::string_view in_engine_path,
+        WAssetDb & asset_db
+        ) {
+
+        std::vector<WAssetId> result;
+        result.reserve(in_textures.size());
+
+        for(std::size_t i=0; i<in_textures.size(); i++) {
+
+            auto assetid = asset_db.CreateFrom<WTextureAsset>(
+                wstr::utils::AssetPath(
+                    std::string(in_engine_path),
+                    std::string(in_names[i]),
+                    std::string(in_names[i])
+                    ),
+                std::move(in_textures[i])
+                );
+        }
+
+        return result;
+    }
+    
 }
 
 std::vector<WAssetId> wim::importer::WImporterGltf::Import(
@@ -423,41 +504,33 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     ) {
 
     fastgltf::Asset gltf_asset=LoadGltf(in_file_path);
+    std::uint32_t idx=0;
 
+    // TODO create a pbr shader
     // Materials and textures
-
-    gltf_asset.materials.size();
-    gltf_asset.samplers.size();
-    gltf_asset.images.size();
-
-    for (auto & img : gltf_asset.images) {
-        // CollectImage(gltf_asset, img);
-    }
     
-    std::vector<wct::geometry::WMesh> meshes;
-    meshes.reserve(gltf_asset.meshes.size());
+    // gltf_asset.materials.size();
 
-    for (fastgltf::Mesh& mesh : gltf_asset.meshes) {
+    // gltf_asset.samplers.size();
+    // gltf_asset.images.size();
 
-        // mesh.name;
+    // Collect textures
 
-        WStaticMeshAsset sm_asset{};
+    auto textures_data = CollectImages(gltf_asset);
 
-        std::uint8_t idx=0;
-        while(idx < mesh.primitives.size() &&
-              idx < sm_asset.Get_mesh_list().size()) {
+    // Collect meshes
+    auto static_mesh_data = CollectStaticMeshes(gltf_asset);
 
-            sm_asset.SetMesh(
-                CollectMeshPrimitive(
-                    gltf_asset,
-                    mesh.primitives[idx]
-                    ),
-                idx
-                );
+    // Create Texture Assets
+    auto textures_ids = CreateTextures(
+        std::get<0>(textures_data),
+        std::get<1>(textures_data),
+        in_asset_directory,
+        in_asset_manager
+        );
 
-            idx++;
-        }
-    }
+    // TODO Collect Materials
+    // auto materials_data = CollectMaterials(gltf_asset);
 
     // Nodes are Entities, can be imported like a level.
     // Current state is not working with transform hierarchy

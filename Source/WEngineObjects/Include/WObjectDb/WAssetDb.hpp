@@ -64,13 +64,14 @@ public:
             );
     }
 
+    // TODO string_view
     template<std::derived_from<WAsset> T>
-    WAssetId Create(const char * in_fullname) {
+    WAssetId Create(std::string_view in_fullname) {
         return Create(T::StaticClass(), in_fullname);
     }
 
-    WAssetId Create(const WClass * in_class,
-                    const char * in_fullname) {
+    WAssetId Create(WClass const * in_class,
+                    std::string_view in_fullname) {
         WAssetId id = id_pool_.Generate();
         id_class_[id] = in_class;
     
@@ -83,7 +84,31 @@ public:
     }
 
     template<std::derived_from<WAsset> T>
-    T * Get(const WAssetId & in_id) const {
+    WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
+        WAssetId asset_id = Create<T>(in_fullname);
+        T * ptr = Get<T>(asset_id);
+
+        *ptr = other;
+        ptr -> Set_asset_id(asset_id);
+        ptr -> Set_name(in_fullname);
+
+        return asset_id;
+    }
+
+    template<std::derived_from<WAsset> T>
+    WAssetId CreateFrom(std::string_view in_fullname, T && other) {
+        WAssetId asset_id = Create<T>(in_fullname);
+        T * ptr = Get<T>(asset_id);
+
+        *ptr = std::move(other);
+        ptr -> Set_asset_id(asset_id);
+        ptr -> Set_name(in_fullname);
+
+        return asset_id;
+    }
+
+    template<std::derived_from<WAsset> T>
+    T * Get(WAssetId const & in_id) const {
         assert(id_class_.contains(in_id));
 
         return static_cast<T*>(object_manager_.Get(
@@ -91,7 +116,7 @@ public:
                                    in_id));
     }
 
-    WAsset * Get(const WAssetId & in_id) const {
+    WAsset * Get(WAssetId const & in_id) const {
         assert(id_class_.contains(in_id));
         return object_manager_.Get(id_class_.at(in_id), in_id);
     }
@@ -104,6 +129,6 @@ private:
 
     WIdPool<WAssetId> id_pool_;
 
-    std::unordered_map<WAssetId, const WClass *> id_class_;
+    std::unordered_map<WAssetId, WClass const *> id_class_;
 
 };

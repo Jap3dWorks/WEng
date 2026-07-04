@@ -11,7 +11,7 @@
 #include "WVulkan/WVk/WVkPipeline.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WCore/WConcepts.hpp"
-#include "WUtils/WStringUtils.hpp"
+#include "WString/WStringUtils.hpp"
 
 #include <utility>
 #include <vulkan/vulkan_core.h>
@@ -128,7 +128,7 @@ public:
             [&result, &in_fn]
             (const wct::render::WShaderInfo & shd) {
                 result.push_back(
-                    in_fn(WStringUtils::SystemPath(shd.file).c_str(),
+                    in_fn(wstr::utils::SystemPath(shd.file).c_str(),
                           shd.entry,
                           shd.type)
                     );

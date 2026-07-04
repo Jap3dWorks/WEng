@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WUtils/WStringUtils.hpp"
+#include "WString/WStringUtils.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
 // #include "WVulkan/WVk/WVulkan.hpp"
@@ -186,7 +186,7 @@ private:
     void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
         // shader modules
         std::vector<char> shadercode = wrd::shader::ReadShader(
-            WStringUtils::SystemPath(std::string(shader_path))
+            wstr::utils::SystemPath(std::string(shader_path))
             );
 
         VkShaderModule shader_module = wvk::shader::CreateShaderModule(

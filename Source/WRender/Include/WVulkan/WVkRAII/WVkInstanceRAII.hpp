@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WUtils/WStringUtils.hpp"
+#include "WString/WStringUtils.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVkRAII/WVkRAII.hpp"
@@ -45,7 +45,7 @@ struct WVkInstanceCreator {
         {
             create_info.enabledLayerCount = static_cast<std::uint32_t>(in_validation_layers.size());
         
-            WStringUtils::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
+            wstr::utils::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
 
             create_info.ppEnabledLayerNames = enabled_layers_names.data();
 
