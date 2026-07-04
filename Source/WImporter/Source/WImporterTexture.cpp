@@ -3,11 +3,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WUtils/WStringUtils.hpp"
-
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-#endif
+#include "WLib_stbi.hpp"
 
 // WImportTexture
 // --------------
@@ -19,42 +15,11 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
     std::string_view file_path,
     std::string_view asset_directory)
 {
-    int width, height, num_channels;
-    stbi_uc * Pixels = stbi_load(
-        std::string(file_path).data(),
-        &width,
-        &height,
-        &num_channels,
-        STBI_rgb_alpha
-    );
-
-    if (!Pixels)
+    auto stbi_image = wim::WLib_wtbi::LoadPath(file_path);
+        
+    if (!stbi_image.pixels)
     {
         throw std::runtime_error("Failed to load texture image!");
-    }
-
-    // wct::texture::WTexture texture_struct = {};
-    // texture_struct.width = width;
-    // texture_struct.height = height;
-
-    wct::texture::ETextureFormat format;
-
-    // Default formats
-    switch(num_channels) {
-    case 1:
-        format = wct::texture::ETextureFormat::R8_UNORM;
-        break;
-    case 2:
-        format = wct::texture::ETextureFormat::RG8_UNORM;
-        break;
-    case 3:
-        format = wct::texture::ETextureFormat::RGB8_SRGB;
-        break;
-    case 4:
-        format = wct::texture::ETextureFormat::RGBA8_SRGB;
-        break;
-    default:
-        format = wct::texture::ETextureFormat::RGBA8_SRGB;
     }
 
     WAssetId id = in_asset_manager.Create<WTextureAsset>(
@@ -67,12 +32,11 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
     auto * asset = in_asset_manager.Get<WTextureAsset>(id);
 
     asset->SetTextureData(
-        Pixels,
-        width, height,
-        format
+        stbi_image.pixels.get(),
+        stbi_image.width,
+        stbi_image.height,
+        stbi_image.format
         );
-
-    stbi_image_free(Pixels);
 
     return { id };
 }

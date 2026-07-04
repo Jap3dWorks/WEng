@@ -7,6 +7,7 @@
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
+#include "WLib_stbi.hpp"
 
 #include "glm/glm.hpp"
 #include <glm/gtx/type_trait.hpp>
@@ -168,7 +169,6 @@ namespace {
         wct::geometry::WMesh result;
 
         {
-            
             const fastgltf::Accessor& index_accessor =
                 in_asset.accessors.at(in_primitive.indicesAccessor.value());
 
@@ -236,6 +236,7 @@ namespace {
                     );
             }
         }
+
         return result;
     }
 
@@ -330,102 +331,88 @@ namespace {
         // }        
     }
 
-    // WTextureAsset CollectImage(fastgltf::Asset& asset, fastgltf::Image& image) {
-    //     WTextureAsset result;
+    WTextureAsset CollectImage(fastgltf::Asset& asset, fastgltf::Image& image) {
+        WTextureAsset result;
 
-    //     std::visit(
-    //         fastgltf::visitor {
-    //             [](auto& arg) {},
-    //                 [&result](fastgltf::sources::URI& filePath) {
-    //                     assert(filePath.fileByteOffset == 0);
-    //                     assert(filePath.uri.isLocalPath());
+        std::visit(
+            fastgltf::visitor {
+                [&result](auto& arg) {},
+                    [&result](fastgltf::sources::URI& filePath) {
+                        assert(filePath.fileByteOffset == 0);
+                        assert(filePath.uri.isLocalPath());
 
-    //                     const std::string path(filePath.uri.path().begin(),
-    //                                            filePath.uri.path().end()); // Thanks C++.
+                        std::string_view path(
+                            filePath.uri.path().begin(),
+                            filePath.uri.path().end()
+                            );
 
-    //                     int width,height,nrChannels;
+                        auto stbi_image = wim::WLib_wtbi::LoadPath(path);
 
-    //                     // TODO stbi loader library.
-    //                     unsigned char* data = stbi_load(
-    //                         path.c_str(),
-    //                         &width,
-    //                         &height,
-    //                         &nrChannels,
-    //                         4);
+                        if (stbi_image.pixels) {
+
+                            result.SetTextureData(
+                                stbi_image.pixels.get(),
+                                stbi_image.width,
+                                stbi_image.height,
+                                stbi_image.format
+                                );
+                        }
+                    },
+                    [&](fastgltf::sources::Vector& vector) {
                         
-    //                     if (data) {
-                            
-    //                         // VkExtent3D imagesize;
-
-    //                         // imagesize.width = width;
-    //                         // imagesize.height = height;
-    //                         // imagesize.depth = 1;
-
-    //                         // newImage = engine->create_image(
-    //                         //     data,
-    //                         //     imagesize,
-    //                         //     VK_FORMAT_R8G8B8A8_UNORM,
-    //                         //     VK_IMAGE_USAGE_SAMPLED_BIT,
-    //                         //     false);
-
-    //                         stbi_image_free(data);
-    //                     }
-    //                 },
-    //                 [&](fastgltf::sources::Vector& vector) {
+                        // unsigned char* data =
+                        //     stbi_load_from_memory(
+                        //         vector.bytes.data(),
+                        //         static_cast<int>(vector.bytes.size()),
+                        //         &width, &height, &nrChannels, 4);
                         
-    //                     unsigned char* data =
-    //                         stbi_load_from_memory(
-    //                             vector.bytes.data(),
-    //                             static_cast<int>(vector.bytes.size()),
-    //                             &width, &height, &nrChannels, 4);
-                        
-    //                     if (data) {
-    //                         // VkExtent3D imagesize;
-    //                         // imagesize.width = width;
-    //                         // imagesize.height = height;
-    //                         // imagesize.depth = 1;
+                        // if (data) {
+                        //     // VkExtent3D imagesize;
+                        //     // imagesize.width = width;
+                        //     // imagesize.height = height;
+                        //     // imagesize.depth = 1;
 
-    //                         // newImage = engine->create_image(data, imagesize, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT,false);
+                        //     // newImage = engine->create_image(data, imagesize, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT,false);
 
-    //                         stbi_image_free(data);
-    //                     }
-    //                 },
-    //                 [&](fastgltf::sources::BufferView& view) {
-    //                     auto& bufferView = asset.bufferViews[view.bufferViewIndex];
-    //                     auto& buffer = asset.buffers[bufferView.bufferIndex];
+                        //     stbi_image_free(data);
+                        // }
+                    },
+                    [&](fastgltf::sources::BufferView& view) {
+                        // auto& bufferView = asset.bufferViews[view.bufferViewIndex];
+                        // auto& buffer = asset.buffers[bufferView.bufferIndex];
 
-    //                     std::visit(fastgltf::visitor { 
-    //                             [](auto& arg) {},
-    //                                 [&](fastgltf::sources::Vector& vector) {
-    //                                     unsigned char* data = stbi_load_from_memory(
-    //                                         vector.bytes.data() + bufferView.byteOffset,
-    //                                         static_cast<int>(bufferView.byteLength),
-    //                                         &width, &height, &nrChannels, 4);
+                        // std::visit(fastgltf::visitor { 
+                        //         [](auto& arg) {},
+                        //             [&](fastgltf::sources::Vector& vector) {
+                        //                 unsigned char* data = stbi_load_from_memory(
+                        //                     vector.bytes.data() + bufferView.byteOffset,
+                        //                     static_cast<int>(bufferView.byteLength),
+                        //                     &width, &height, &nrChannels, 4);
                                         
-    //                                     if (data) {
+                        //                 if (data) {
                                             
-    //                                         // VkExtent3D imagesize;
-    //                                         // imagesize.width = width;
-    //                                         // imagesize.height = height;
-    //                                         // imagesize.depth = 1;
+                        //                     // VkExtent3D imagesize;
+                        //                     // imagesize.width = width;
+                        //                     // imagesize.height = height;
+                        //                     // imagesize.depth = 1;
 
-    //                                         // newImage = engine->create_image(
-    //                                         //     data, imagesize,
-    //                                         //     VK_FORMAT_R8G8B8A8_UNORM,
-    //                                         //     VK_IMAGE_USAGE_SAMPLED_BIT,
-    //                                         //     false);
+                        //                     // newImage = engine->create_image(
+                        //                     //     data, imagesize,
+                        //                     //     VK_FORMAT_R8G8B8A8_UNORM,
+                        //                     //     VK_IMAGE_USAGE_SAMPLED_BIT,
+                        //                     //     false);
 
-    //                                         stbi_image_free(data);
+                        //                     stbi_image_free(data);
                                             
-    //                                     }
-    //                                 } },
-    //                         buffer.data);
-    //                 },
-    //                 },
-    //         image.data);
+                        //                 }
+                        //             } },
+                        //     buffer.data);
+                    },
+                    },
+            image.data);
 
-    //     return result;
-    // }
+        return result;
+    }
 
 }
 

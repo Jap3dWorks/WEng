@@ -43,6 +43,7 @@ add_library(
         Source/WImporterObj.cpp
         Source/WImporterTexture.cpp
         Source/WImporterGltf.cpp
+        Source/WLib_stbi.cpp
 )
 
 set_target_properties(
