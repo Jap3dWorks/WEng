@@ -28,8 +28,8 @@ namespace wct::geometry {
     };
 
     struct WMesh{
-        std::vector<WVertex> vertices;
-        std::vector<WIndex> indices;
+        std::vector<WVertex> vertices{};
+        std::vector<WIndex> indices{};
     };
 
 // Meshes by Id, max 16

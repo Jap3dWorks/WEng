@@ -7,7 +7,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WComponents/WComponentTypes.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WStaticMeshComponent.WEngine.hpp"
 
@@ -15,9 +15,10 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 
     WOBJECT_BODY;
 
-public:        
+private:
+    
+    using SMeshAssignments = wct::render::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
 
-    using SMeshAssignments = wcm::types::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
 
 public:
 
@@ -41,7 +42,7 @@ public:
         pipeline_assignments[in_id.GetId()].params=in_param_id;
     }
 
-    wcm::types::WPipelineAssignment GetPipelineAssignment(const WSubIdxId & in_id=0) const {
+    wct::render::WPipelineAssignment GetPipelineAssignment(const WSubIdxId & in_id=0) const {
         return pipeline_assignments[in_id.GetId()];
     }
   

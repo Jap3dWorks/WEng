@@ -3,7 +3,7 @@
 #include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WComponents/WComponentTypes.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include <glm/glm.hpp>
 
@@ -17,7 +17,7 @@ class WENGINEOBJECTS_API WCameraComponent : public WComponent {
 public:
 
     using WPostprocessAssignments =
-        wcm::types::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
+        wct::render::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
 
 public:
 
@@ -39,14 +39,14 @@ public:
         postprocess_pipelines[in_id.GetId()].params=in_param_id;
     }
 
-    wcm::types::WPipelineAssignment GetPostprocessAssignment(const WSubIdxId & in_id=0) const {
+    wct::render::WPipelineAssignment GetPostprocessAssignment(const WSubIdxId & in_id=0) const {
         return postprocess_pipelines[in_id.GetId()];
     }
 
     template<CCallable<void,
                        const WCameraComponent *,
                        const WSubIdxId &,
-                       const wcm::types::WPipelineAssignment &> TFn>
+                       const wct::render::WPipelineAssignment &> TFn>
     void ForEachPostprocessAssignment(TFn && in_fn) const {
         std::uint8_t idx = 0;
         for(const auto & assignment : postprocess_pipelines) {

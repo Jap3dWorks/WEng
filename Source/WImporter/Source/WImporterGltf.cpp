@@ -238,7 +238,7 @@ namespace {
             in_material.pbrData.baseColorTexture
                 )) {
             texture_params.emplace_back(
-                0,  // pbr binding constant
+                1,  // pbr binding constant
                 albedo_wid
                 );
         }
@@ -247,7 +247,7 @@ namespace {
                 in_material.normalTexture
                 )) {
             texture_params.emplace_back(
-                1, // pbr binding constant
+                2, // pbr binding constant
                 normal_wid
                 );
         }
@@ -260,21 +260,48 @@ namespace {
                    ->roughnessMetallicOcclusionTexture
                    )) {
                 texture_params.emplace_back(
-                    2,
+                    3,
                     mrAO
                     );
             }
             
         }
 
-        // TODO pbr values UBO
+        // TODO pbr values into UBO
 
         result.Set_texture_list(texture_params);
 
         return {};
     }
 
-    inline void CollectMaterials(auto p){}
+    WNODISCARD inline
+    auto
+    CollectMaterials(
+        fastgltf::Asset const & in_asset,
+        std::vector<WAssetId> const & in_textures
+        ){
+        
+        std::vector<WRenderPipelineParametersAsset> assets;
+        assets.reserve(in_asset.materials.size());
+
+        std::vector<std::string_view> names;
+        names.reserve(in_asset.materials.size());
+
+        for(auto & mat : in_asset.materials) {
+            assets.push_back(
+                CollectMaterial(
+                    in_asset,
+                    in_textures,
+                    mat
+                    )
+                );
+
+            names.push_back(mat.name);
+        }
+        
+        return std::tuple{std::move(assets),
+                          std::move(names)};
+    }
 
     WNODISCARD inline wct::geometry::WMesh CollectMeshPrimitive(
         fastgltf::Asset const & in_asset,
@@ -356,7 +383,8 @@ namespace {
     }
 
     WNODISCARD inline auto CollectStaticMeshes(
-        fastgltf::Asset const & in_asset
+        fastgltf::Asset const & in_asset,
+        std::vector<WRenderPipelineParametersAsset> const & in_parameters
         ) {
 
         std::vector<nullindex::NullableIndex<>> index_sm_map;
@@ -376,16 +404,33 @@ namespace {
             while(idx < mesh.primitives.size() &&
                   idx < sm_asset.Get_mesh_list().size()) {
 
-                sm_asset.SetMesh(
-                    CollectMeshPrimitive(
-                        in_asset,
-                        mesh.primitives[idx]
-                        ),
-                    idx
+                auto & primitive = mesh.primitives[idx];
+
+                auto mesh = CollectMeshPrimitive(
+                    in_asset, primitive
                     );
+
+                // TODO set materials to the static mesh.
+                
+                // mesh.
+
+                // sm_asset.SetMesh(
+                //     CollectMeshPrimitive(
+                //         in_asset,
+                //         primitive
+                //         ),
+                //     idx
+                //     );
+
+                
+
+                // sm_asset.
+                // primitive.materialIndex
 
                 idx++;
             }
+
+            
 
             if (idx > 0) {
                 index_sm_map.push_back(sm_assets.size());
@@ -403,8 +448,8 @@ namespace {
     }
 
     WNODISCARD inline WTextureAsset CollectImage(
-        fastgltf::Asset const & asset,
-        fastgltf::Image const & image
+        fastgltf::Asset const & in_asset,
+        fastgltf::Image const & in_image
         ) {
         WTextureAsset result;
 
@@ -448,9 +493,9 @@ namespace {
                             );
                     }
                 },
-                [&result, &asset](fastgltf::sources::BufferView& view) {
-                    auto& bufferView = asset.bufferViews[view.bufferViewIndex];
-                    auto& buffer = asset.buffers[bufferView.bufferIndex];
+                [&result, &in_asset](fastgltf::sources::BufferView& view) {
+                    auto& bufferView = in_asset.bufferViews[view.bufferViewIndex];
+                    auto& buffer = in_asset.buffers[bufferView.bufferIndex];
 
                     std::visit(fastgltf::visitor { 
                             [](auto& arg) {},
@@ -475,20 +520,22 @@ namespace {
                         );
                 },
             },
-            image.data
+            in_image.data
             );
 
         return result;
     }
 
-    WNODISCARD inline auto CollectImageSamplersIndex(fastgltf::Asset const & asset ) {
-        using OptIndex = decltype(decltype(asset.textures)::value_type::samplerIndex);
+    WNODISCARD inline auto CollectImageSamplersIndex(
+        fastgltf::Asset const & in_asset
+        ) {
+        using OptIndex = decltype(decltype(in_asset.textures)::value_type::samplerIndex);
         using IndexType = std::decay_t<decltype(std::declval<OptIndex>().value())>;
 
         std::vector<nullindex::NullableIndex<IndexType>> image_samplers;
-        image_samplers.resize(asset.images.size(), {});
+        image_samplers.resize(in_asset.images.size(), {});
 
-        for(auto & tx : asset.textures) {
+        for(auto & tx : in_asset.textures) {
             if (tx.imageIndex.has_value()) {
                 image_samplers[tx.imageIndex.value()] =
                     tx.samplerIndex
@@ -500,7 +547,9 @@ namespace {
         return image_samplers;
     }
 
-    WNODISCARD inline auto CollectImages(fastgltf::Asset const & in_asset) {
+    WNODISCARD inline auto CollectImages(
+        fastgltf::Asset const & in_asset
+        ) {
         auto image_samplers = CollectImageSamplersIndex(in_asset);
 
         std::vector<WTextureAsset> text_assets{};
@@ -532,10 +581,9 @@ namespace {
         return std::tuple{std::move(text_assets), std::move(text_names)};
     }
 
-    
-
-    WNODISCARD inline std::vector<WAssetId> CreateTextures(
-        std::vector<WTextureAsset> const & in_textures,
+    WNODISCARD inline
+    std::vector<WAssetId> CreateTextures(
+        std::vector<WTextureAsset> & in_textures,
         std::vector<std::string_view> const & in_names,
         std::string_view in_engine_path,
         WAssetDb & asset_db
@@ -554,15 +602,42 @@ namespace {
                     ),
                 std::move(in_textures[i])
                 );
+
+            result.push_back(assetid);
         }
 
         return result;
     }
     
+    WNODISCARD inline
+    std::vector<WAssetId> CreateMaterials(
+        std::vector<WRenderPipelineParametersAsset> & in_parameters,
+        std::vector<std::string_view> const & in_names,
+        std::string_view in_asset_directory,
+        WAssetDb & in_asset_db
+        ) {
+
+        std::vector<WAssetId> result;
+        result.reserve(in_parameters.size());
+
+        for(std::size_t i=0; i<in_parameters.size(); i++) {
+            auto assetid = in_asset_db
+                .CreateFrom<WRenderPipelineParametersAsset>(
+                    wstr::utils::AssetPath(
+                        std::string(in_asset_directory),
+                        std::string(in_names[i]),
+                        std::string(in_names[i])
+                        ),
+                    std::move(in_parameters[i])
+                    );
+        }
+        return result;
+    }
+
 }
 
 std::vector<WAssetId> wim::importer::WImporterGltf::Import(
-    WAssetDb & in_asset_manager,
+    WAssetDb & in_asset_db,
     std::string_view in_file_path,
     std::string_view in_asset_directory
     ) {
@@ -582,19 +657,30 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
 
     auto textures_data = CollectImages(gltf_asset);
 
-    // Collect meshes
-    auto static_mesh_data = CollectStaticMeshes(gltf_asset);
-
     // Create Texture Assets
-    auto textures_ids = CreateTextures(
+    auto textures_wids = CreateTextures(
         std::get<0>(textures_data),
         std::get<1>(textures_data),
         in_asset_directory,
-        in_asset_manager
+        in_asset_db
         );
 
     // TODO Collect Materials
-    // auto materials_data = CollectMaterials(gltf_asset);
+    auto materials_data = CollectMaterials(
+        gltf_asset,
+        textures_wids
+        );
+
+    auto materials_wid = CreateMaterials(
+        std::get<0>(materials_data),
+        std::get<1>(materials_data),
+        in_asset_directory,
+        in_asset_db
+        );
+
+    // Collect meshes
+    // auto static_mesh_data = CollectStaticMeshes(gltf_asset);
+
 
     // Nodes are Entities, can be imported like a level.
     // Current state is not working with transform hierarchy

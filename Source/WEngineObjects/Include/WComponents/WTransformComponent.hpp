@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WEngineObjects/WComponent.hpp"
-#include "WComponents/WComponentTypes.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WCoreTypes/WMathStructs.hpp"
 

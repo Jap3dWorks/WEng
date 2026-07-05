@@ -2,7 +2,6 @@
 
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WComponentTypes.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WUtils/WMathUtils.hpp"
 #include <glm/ext/quaternion_transform.hpp>

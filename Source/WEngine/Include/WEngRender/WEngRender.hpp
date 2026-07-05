@@ -18,7 +18,7 @@
 #include "WLevel/WLevel.hpp"
 #include "WRender/WRender.hpp"
 #include "WRender/WLight.hpp"
-#include "WComponents/WComponentTypes.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 
 #include <cstdint>
 #include <span>
@@ -158,7 +158,7 @@ namespace wng::render {
                      &texture_assets,
                      &in_asset_db](WStaticMeshAsset * _sm, const WSubIdxId & _id, wct::geometry::WMesh& _m) {
                         
-                        wcm::types::WPipelineAssignment pipassign =
+                        wct::render::WPipelineAssignment pipassign =
                             in_component->GetPipelineAssignment(0);
                         
                         if(pipassign.pipeline.IsValid() && pipassign.params.IsValid()) {

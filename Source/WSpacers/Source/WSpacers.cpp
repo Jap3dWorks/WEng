@@ -15,11 +15,11 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
-#include "WComponents/WComponentTypes.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
@@ -422,7 +422,7 @@ int main(int argc, char** argv)
         
         WEngine engine = WEngine::DefaultCreate();
 
-        std::vector<wcm::types::WPipelineAssignment> ppcsst_assignments;
+        std::vector<wct::render::WPipelineAssignment> ppcsst_assignments;
 
         ModelAssets viking_room;
         ModelAssets monkey_1;
