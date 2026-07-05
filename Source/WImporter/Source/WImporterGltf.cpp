@@ -2,6 +2,7 @@
 #include "WAssets/WTextureAsset.hpp"
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
@@ -66,8 +67,8 @@ namespace nullindex {
         WNODISCARD bool IsValid() { return value != NullValue; }
         WNODISCARD operator bool() const {return IsValid(); }
 
-        WNODISCARD const T & Value() const { return value; }
-        WNODISCARD const T &  operator*() const { return value; }
+        WNODISCARD T const & Value() const { return value; }
+        WNODISCARD T const &  operator*() const { return value; }
 
     private:
         
@@ -206,11 +207,74 @@ namespace {
         std::vector<WAssetId> const & textures,
         fastgltf::Material const & in_material
         ) {
-        // in_material.
-        // in_material.
+        WRenderPipelineParametersAsset result{};
+
+        // in_material.normalTexture;
+        // in_material.emissiveTexture;
+        // in_material.packedOcclusionRoughnessMetallicTextures;
+        // in_material.pbrData.baseColorTexture;
+        // in_material.pbrData.metallicRoughnessTexture;
+
+        auto GetWAssetId = [&textures]
+            (auto & tex_info) -> WAssetId {
+            return tex_info
+                .and_then(
+                    [&textures]
+                    (fastgltf::TextureInfo const & value) -> std::optional<WAssetId> {
+                        return textures[value.textureIndex];
+                    }
+                    )
+                .or_else(
+                    []() -> std::optional<WAssetId>
+                    { return wid_null; }
+                    )
+                .value();
+        };
+
+        wct::render::WRPParameterList_WAssetId texture_params{};
+        texture_params.reserve(4);
+        
+        if (WAssetId albedo_wid = GetWAssetId(
+            in_material.pbrData.baseColorTexture
+                )) {
+            texture_params.emplace_back(
+                0,  // pbr binding constant
+                albedo_wid
+                );
+        }
+
+        if (WAssetId normal_wid = GetWAssetId(
+                in_material.normalTexture
+                )) {
+            texture_params.emplace_back(
+                1, // pbr binding constant
+                normal_wid
+                );
+        }
+
+        if (in_material.packedOcclusionRoughnessMetallicTextures) {
+
+            if(WAssetId mrAO = GetWAssetId(
+                   in_material
+                   .packedOcclusionRoughnessMetallicTextures
+                   ->roughnessMetallicOcclusionTexture
+                   )) {
+                texture_params.emplace_back(
+                    2,
+                    mrAO
+                    );
+            }
+            
+        }
+
+        // TODO pbr values UBO
+
+        result.Set_texture_list(texture_params);
 
         return {};
     }
+
+    inline void CollectMaterials(auto p){}
 
     WNODISCARD inline wct::geometry::WMesh CollectMeshPrimitive(
         fastgltf::Asset const & in_asset,

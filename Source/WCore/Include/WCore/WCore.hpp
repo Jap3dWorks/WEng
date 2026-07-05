@@ -11,8 +11,12 @@
 #include <cassert>
 #include <type_traits>
 
+struct _WID_NULL_T_{};
+
 /**
  * @brief Basic identifier token
+ * TODO: configurable null value.
+ * TODO: namespace.
 */
 template<typename T>
 class WCORE_API _WId
@@ -21,13 +25,17 @@ public:
 
     using IdType = T;
 
+    static inline constexpr T NULL_VALUE{0};
+
 public:
 
-    constexpr _WId() noexcept :
-    id_(0) {}
+    constexpr _WId() noexcept =default;
 
     constexpr _WId(T id) noexcept :
     id_(id) {}
+
+    constexpr _WId(_WID_NULL_T_) noexcept :
+    id_(NULL_VALUE) {}
 
     constexpr T GetId() const noexcept {
         return id_;
@@ -108,7 +116,7 @@ public:
     }
 
     constexpr bool IsValid() const noexcept {
-        return id_ > 0;
+        return id_ != NULL_VALUE;
     }
 
     constexpr operator bool() const noexcept {
@@ -116,9 +124,11 @@ public:
     }
 
 private:
-
-    T id_=0; 
+T id_{NULL_VALUE}; 
 };
+
+inline constexpr _WID_NULL_T_ const wid_null{};
+
 
 template<typename T>
 concept CIsWId = std::is_same_v<T, _WId<typename T::IdType>>;

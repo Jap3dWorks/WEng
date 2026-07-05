@@ -109,8 +109,9 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 
 #define WPROPERTY(_type, _name, _value)                                      \\
 public:                                                                      \\
-    inline const _type & Get_ ## _name () const { return _name ; };          \\
-    inline void Set_ ## _name (const _type & in_value) { _name = in_value; } \\
+    inline _type const & Get_ ## _name () const { return _name ; };          \\
+    inline void Set_ ## _name (_type const & in_value) { _name = in_value; } \\
+    inline void Set_ ## _name (_type && in_value) { _name = std::move(in_value); } \\
 private:                                                                     \\
     _type _name { _value };
 "
