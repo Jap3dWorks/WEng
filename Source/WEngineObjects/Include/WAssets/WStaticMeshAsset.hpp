@@ -11,18 +11,27 @@
 
 #include "WStaticMeshAsset.WEngine.hpp"
 
-using WMeshList = std::array<wct::geometry::WMesh, WENG_MAX_ASSET_IDS>;
-
 class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 {
     WOBJECT_BODY;
 
 public:
 
-    WPROPERTY(WMeshList, mesh_list, );
+    static inline constexpr std::uint8_t MAX_MESH_COUNT{8};
+
+    using WMeshList =
+        std::array<wct::geometry::WMesh, MAX_MESH_COUNT>;
+
+    using PipelineAssignments =
+        wct::render::WPipelineAssignments<MAX_MESH_COUNT>;
 
 public:
 
+    WPROPERTY(WMeshList, mesh_list, );
+    WPROPERTY(PipelineAssignments, pipeline_assignment_list,);
+
+public:
+    
     constexpr void SetMesh(const wct::geometry::WMesh & in_mesh, const WSubIdxId & in_id=0) {
         mesh_list[in_id.GetId()] = in_mesh;
     }
@@ -55,9 +64,11 @@ public:
             if(m.indices.empty()) {
                 break;
             }
-
             in_fn(this, i, m);
         };
     }
+
+    // TODO Set assignments methods
+
 };
 

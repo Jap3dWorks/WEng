@@ -15,15 +15,17 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
 
     WOBJECT_BODY;
 
-private:
+public:
     
-    using SMeshAssignments = wct::render::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
-
+    using PipelineAssignments =
+        wct::render::WPipelineAssignments<
+            WStaticMeshAsset::MAX_MESH_COUNT
+            >;
 
 public:
 
     WPROPERTY(WAssetId, static_mesh_asset,);
-    WPROPERTY(SMeshAssignments, pipeline_assignments,);
+    WPROPERTY(PipelineAssignments, pipeline_assignments,);
 
 public:
 
@@ -36,8 +38,8 @@ public:
     // }
 
     void SetPipelineAssignment(const WSubIdxId & in_id,
-                                     const WAssetId & in_pipeline_id,
-                                     const WAssetId & in_param_id) {
+                               const WAssetId & in_pipeline_id,
+                               const WAssetId & in_param_id) {
         pipeline_assignments[in_id.GetId()].pipeline=in_pipeline_id;
         pipeline_assignments[in_id.GetId()].params=in_param_id;
     }

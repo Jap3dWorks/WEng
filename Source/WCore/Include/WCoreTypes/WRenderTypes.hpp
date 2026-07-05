@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WCoreMacros.hpp"
 #include "WCore/WConcepts.hpp"
 
 #include <cstdint>
