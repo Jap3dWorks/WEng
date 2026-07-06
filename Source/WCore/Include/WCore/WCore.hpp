@@ -13,6 +13,7 @@
 #include <type_traits>
 
 struct _WID_NULL_T_{};
+inline constexpr _WID_NULL_T_ const wid_null{};
 
 /**
  * @brief Basic identifier token
@@ -135,7 +136,6 @@ private:
 
 };
 
-inline constexpr _WID_NULL_T_ const wid_null{};
 
 
 template<typename T>
@@ -144,28 +144,21 @@ concept CIsWId = std::is_same_v<T, _WId<typename T::IdType>>;
 using WId = _WId<std::size_t>;
 
 
-// Id Reestructuration
+// TODO Id Reestructuration
 // -------------------
 
 using WLevelId = _WId<std::uint16_t>;
 using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
-using WEntityComponentId = _WId<std::uint64_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
+// WLevelId[22] | WEntityId[22] | WComponentTypeId[8] (WComponentID) (now it is runtime assigned) | index[5]
+using WEntityComponentId = _WId<std::uint64_t>;
 
-using WAssetType = _WId<std::uint16_t>;
 using WAssetId = _WId<std::uint32_t>;
 using WSubIdxId = _WId<std::uint8_t, std::numeric_limits<std::uint8_t>::max()>;
 
-using WAssetIndexId = _WId<std::uint64_t>;       // WAssetId[32] | Index[4] (StaticMesh with material ids)
+// WAssetId[22] | Index[5] (StaticMesh with material ids)
+using WAssetIndexId = _WId<std::uint64_t>;       
 
-
-// ================== Universal Engine Object ID ==================
-// A compact 64-bit identifier for any engine object:
-//   - Asset (with sub-index)
-//   - Entity component (level+entity+type+sub-index)
-//   - Reserved for future kinds (e.g., systems)
-//
-// The type is discriminated by the two highest bits.
 
 enum class EObjectKind : std::uint8_t {
     Asset         = 0b01,
