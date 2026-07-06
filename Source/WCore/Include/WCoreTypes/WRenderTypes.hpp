@@ -208,6 +208,8 @@ namespace wct::render {
         }
     }
 
+    // Pipeline Params assignment
+
     struct WPipelineAssignment {
         WAssetId pipeline{};
         WAssetId params{};
@@ -215,7 +217,6 @@ namespace wct::render {
 
     template<std::uint8_t Max=WENG_MAX_ASSET_IDS>
     using WPipelineAssignments = std::array<WPipelineAssignment, Max>;
-
 
    // Lighting
    // --------

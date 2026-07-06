@@ -9,6 +9,8 @@
 
 class WEngine;
 
+// TODO Move level to WLevelAsset?
+
 /**
  * @brief WLevel stores all current entities and components.
  * WEntityId 1 is reserved to store Level components.
@@ -16,7 +18,7 @@ class WEngine;
 class WLEVEL_API WLevel {
 public:
 
-    WLevel();
+    WLevel()=default;
 
     WLevel(const WObjectName &, WLevelId in_id);
     
@@ -133,11 +135,11 @@ private:
 
 private:
 
-    WObjectName name_;
+    WObjectName name_{"InvalidLevel"};
 
     // WEntityId 0 is reserved for Level Components.
-    WEntityComponentDb entity_component_db_;
+    WEntityComponentDb entity_component_db_{};
 
-    WLevelId wid_;
+    WLevelId wid_{wid_null};
 
 };

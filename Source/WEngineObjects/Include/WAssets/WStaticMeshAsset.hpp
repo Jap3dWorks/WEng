@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/WCoreMacros.hpp"
 #include "WCore/WConcepts.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCore/TIterator.hpp"
@@ -19,7 +19,7 @@ public:
 
     static inline constexpr std::uint8_t MAX_MESH_COUNT{8};
 
-    using WMeshList =
+    using MeshList =
         std::array<wct::geometry::WMesh, MAX_MESH_COUNT>;
 
     using PipelineAssignments =
@@ -27,26 +27,26 @@ public:
 
 public:
 
-    WPROPERTY(WMeshList, mesh_list, );
-    WPROPERTY(PipelineAssignments, pipeline_assignment_list,);
+    WPROPERTY(MeshList, meshes,);
+    WPROPERTY(PipelineAssignments, pipeline_assignments,);
 
 public:
     
-    constexpr void SetMesh(const wct::geometry::WMesh & in_mesh, const WSubIdxId & in_id=0) {
-        mesh_list[in_id.GetId()] = in_mesh;
+    constexpr void SetMesh(wct::geometry::WMesh const & in_mesh, WSubIdxId const & in_id=0) {
+        meshes[in_id.GetId()] = in_mesh;
     }
 
-    constexpr void SetMesh(wct::geometry::WMesh && in_mesh, const WSubIdxId & in_id=0) noexcept {
-        mesh_list[in_id.GetId()] = std::move(in_mesh);
+    constexpr void SetMesh(wct::geometry::WMesh && in_mesh, WSubIdxId const & in_id=0) noexcept {
+        meshes[in_id.GetId()] = std::move(in_mesh);
     }
 
-    constexpr const wct::geometry::WMesh & GetMesh(const WSubIdxId & in_index=0) const noexcept {
-        return mesh_list[in_index.GetId()];
+    constexpr wct::geometry::WMesh const & GetMesh(WSubIdxId const & in_index=0) const noexcept {
+        return meshes[in_index.GetId()];
     }
 
     std::uint8_t MeshCount() const {
         std::uint8_t r = 0;
-        for(auto & v : mesh_list) {
+        for(auto & v : meshes) {
             if(!v.indices.empty()) {
                 r++;
             }
@@ -57,10 +57,10 @@ public:
         return r;
     }
 
-    template<CCallable<void, WStaticMeshAsset *, const WSubIdxId &, wct::geometry::WMesh&> F>
+    template<CCallable<void, WStaticMeshAsset *, WSubIdxId, wct::geometry::WMesh&> F>
     void ForEachMesh(F && in_fn) {
-        for(std::uint32_t i=0; i<mesh_list.size(); i++) {
-            wct::geometry::WMesh & m = mesh_list[i];
+        for(std::uint32_t i=0; i<meshes.size(); i++) {
+            wct::geometry::WMesh & m = meshes[i];
             if(m.indices.empty()) {
                 break;
             }
@@ -68,7 +68,18 @@ public:
         };
     }
 
-    // TODO Set assignments methods
+    constexpr void SetPipelineAssignment(
+        wct::render::WPipelineAssignment in_assignment,
+        WSubIdxId in_index
+        ) {
+        pipeline_assignments[in_index.GetId()] =
+            std::move(in_assignment);
+    }
 
+    constexpr wct::render::WPipelineAssignment GetPipelineAssignment(
+        WSubIdxId in_index
+        ) const {
+        return pipeline_assignments[in_index.GetId()];
+    }
 };
 

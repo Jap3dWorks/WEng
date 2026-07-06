@@ -16,26 +16,19 @@ class WENGINEOBJECTS_API WStaticMeshComponent : public WComponent {
     WOBJECT_BODY;
 
 public:
-    
-    using PipelineAssignments =
-        wct::render::WPipelineAssignments<
-            WStaticMeshAsset::MAX_MESH_COUNT
-            >;
-
-public:
 
     WPROPERTY(WAssetId, static_mesh_asset,);
-    WPROPERTY(PipelineAssignments, pipeline_assignments,);
+    WPROPERTY(WStaticMeshAsset::PipelineAssignments, pipeline_assignments,);
 
 public:
 
-    // void StaticMeshAsset(const WAssetId & in_id) {
-    //     static_mesh_asset = in_id;
-    // }
-
-    // WAssetId GetStaticMeshAsset() const {
-    //     return static_mesh_asset;
-    // }
+    /**
+     * @brief assigns a static mesh asset and its render pipeline assignments.
+     */
+    void SetStaticMeshAsset(WStaticMeshAsset const & in_static_mesh) {
+        Set_static_mesh_asset(in_static_mesh.Get_asset_id());
+        Set_pipeline_assignments(in_static_mesh.Get_pipeline_assignments());
+    }
 
     void SetPipelineAssignment(const WSubIdxId & in_id,
                                const WAssetId & in_pipeline_id,

@@ -384,7 +384,9 @@ namespace {
 
     WNODISCARD inline auto CollectStaticMeshes(
         fastgltf::Asset const & in_asset,
-        std::vector<WRenderPipelineParametersAsset> const & in_parameters
+        WAssetId gbuffer_pipeline,
+        WAssetId transparent_pipeline,
+        std::vector<WAssetId> const & in_parameters
         ) {
 
         std::vector<nullindex::NullableIndex<>> index_sm_map;
@@ -401,36 +403,33 @@ namespace {
             WStaticMeshAsset sm_asset{};
 
             std::size_t idx=0;
+            
             while(idx < mesh.primitives.size() &&
-                  idx < sm_asset.Get_mesh_list().size()) {
+                  idx < sm_asset.Get_meshes().size()) {
 
                 auto & primitive = mesh.primitives[idx];
 
-                auto mesh = CollectMeshPrimitive(
-                    in_asset, primitive
+                sm_asset.SetMesh(
+                    CollectMeshPrimitive(
+                        in_asset,
+                        primitive
+                        ),
+                    idx
                     );
 
-                // TODO set materials to the static mesh.
+                if (primitive.materialIndex) {
+                    sm_asset.SetPipelineAssignment(
+                        {
+                            // TODO, select valid pipeline
+                            gbuffer_pipeline,  
+                            in_parameters[primitive.materialIndex.value()]
+                        },
+                        idx
+                        );
+                }
                 
-                // mesh.
-
-                // sm_asset.SetMesh(
-                //     CollectMeshPrimitive(
-                //         in_asset,
-                //         primitive
-                //         ),
-                //     idx
-                //     );
-
-                
-
-                // sm_asset.
-                // primitive.materialIndex
-
                 idx++;
             }
-
-            
 
             if (idx > 0) {
                 index_sm_map.push_back(sm_assets.size());
@@ -610,7 +609,7 @@ namespace {
     }
     
     WNODISCARD inline
-    std::vector<WAssetId> CreateMaterials(
+    std::vector<WAssetId> CreatePipelineParameters(
         std::vector<WRenderPipelineParametersAsset> & in_parameters,
         std::vector<std::string_view> const & in_names,
         std::string_view in_asset_directory,
@@ -629,6 +628,30 @@ namespace {
                         std::string(in_names[i])
                         ),
                     std::move(in_parameters[i])
+                    );
+        }
+        return result;
+    }
+
+    WNODISCARD inline
+    std::vector<WAssetId> CreateStaticMeshes(
+        std::vector<WStaticMeshAsset> const & in_static_meshes,
+        std::vector<std::basic_string_view<char>> const & in_names,
+        std::string_view in_asset_directory,
+        WAssetDb & in_asset_db
+        ) {
+        std::vector<WAssetId> result;
+        result.reserve(in_static_meshes.size());
+
+        for (std::size_t i=0; i<in_static_meshes.size(); i++) {
+            auto assetid = in_asset_db
+                .CreateFrom<WStaticMeshAsset>(
+                    wstr::utils::AssetPath(
+                        std::string(in_asset_directory),
+                        std::string(in_names[i]),
+                        std::string(in_names[i])
+                        ),
+                    std::move(in_static_meshes[i])
                     );
         }
         return result;
@@ -671,7 +694,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         textures_wids
         );
 
-    auto materials_wid = CreateMaterials(
+    auto materials_wid = CreatePipelineParameters(
         std::get<0>(materials_data),
         std::get<1>(materials_data),
         in_asset_directory,
@@ -679,9 +702,20 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         );
 
     // Collect meshes
-    // auto static_mesh_data = CollectStaticMeshes(gltf_asset);
+    auto static_mesh_data = CollectStaticMeshes(
+        gltf_asset,
+        render_pipelines_.gbuffer,
+        render_pipelines_.transparent,
+        materials_wid
+        );
 
-
+    auto sm_wid = CreateStaticMeshes(
+        std::get<1>(static_mesh_data),
+        std::get<2>(static_mesh_data),
+        in_asset_directory,
+        in_asset_db
+        );
+    
     // Nodes are Entities, can be imported like a level.
     // Current state is not working with transform hierarchy
     // CollectLevel()

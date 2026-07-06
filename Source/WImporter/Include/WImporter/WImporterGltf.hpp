@@ -6,6 +6,7 @@ namespace wim::importer {
     
     class WIMPORTER_API WImporterGltf : public WImporter {
     public:
+        
         WImporterGltf() = default;
         WImporterGltf(const WImporterGltf&) = default;
         WImporterGltf(WImporterGltf&&) noexcept = default;
@@ -15,16 +16,31 @@ namespace wim::importer {
 
     public:
 
-    std::vector<WAssetId> Import(
-        WAssetDb & in_asset_manager,
-        std::string_view file_path,
-        std::string_view asset_directory
-        ) override;
+        std::vector<WAssetId> Import(
+            WAssetDb & in_asset_manager,
+            std::string_view file_path,
+            std::string_view asset_directory
+            ) override;
 
-    std::vector<std::string_view> Extensions() const noexcept override;
-    std::vector<std::string_view> Formats() const noexcept override;
+        std::vector<std::string_view> Extensions() const noexcept override;
+        std::vector<std::string_view> Formats() const noexcept override;
 
-    virtual std::unique_ptr<WImporter> Clone() override;
+        virtual std::unique_ptr<WImporter> Clone() override;
+
+        constexpr void SetGBufferPipeline(WAssetId in_id) {
+            render_pipelines_.gbuffer = in_id;
+        }
+
+        constexpr void SetTransaprentPipeline(WAssetId in_id) {
+            render_pipelines_.transparent = in_id;
+        }
+
+    private:
+
+        struct RenderPipelines {
+            WAssetId gbuffer{};      // opaque pbr.
+            WAssetId transparent{};  // transparent pbr.
+        } render_pipelines_{};
 
     };
     

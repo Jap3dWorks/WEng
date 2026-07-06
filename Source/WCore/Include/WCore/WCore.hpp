@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <functional>
+#include <limits>
 #include <string_view>
 #include <cstdint>
 #include <cassert>
@@ -18,14 +19,14 @@ struct _WID_NULL_T_{};
  * TODO: configurable null value.
  * TODO: namespace.
 */
-template<typename T>
+template<typename T, T NullValue=0>
 class WCORE_API _WId
 {
 public:
 
     using IdType = T;
 
-    static inline constexpr T NULL_VALUE{0};
+    static inline constexpr T NULL_VALUE{NullValue};
 
 public:
 
@@ -38,6 +39,10 @@ public:
     id_(NULL_VALUE) {}
 
     constexpr T GetId() const noexcept {
+        return id_;
+    }
+
+    constexpr T operator*() const noexcept {
         return id_;
     }
 
@@ -83,6 +88,7 @@ public:
     {
         _WId temp = _WId(id_);
         ++id_;
+        
         return temp;
     }
 
@@ -124,7 +130,9 @@ public:
     }
 
 private:
-T id_{NULL_VALUE}; 
+
+    T id_{NULL_VALUE}; 
+
 };
 
 inline constexpr _WID_NULL_T_ const wid_null{};
@@ -141,7 +149,7 @@ using WComponentTypeId = _WId<std::uint8_t>;
 using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
 
 using WAssetId = _WId<std::uint32_t>;
-using WSubIdxId = _WId<std::uint8_t>;
+using WSubIdxId = _WId<std::uint8_t, std::numeric_limits<std::uint8_t>::max()>;
 using WAssetIndexId = _WId<std::uint64_t>; // WAssetId[32] | Index[4] (StaticMesh with material ids)
 
 using WEventId = _WId<std::uint32_t>;
