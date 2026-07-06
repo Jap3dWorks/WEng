@@ -5,7 +5,7 @@
 #include <cassert>
 #include <unordered_set>
 
-// TODO Should be serializable?
+// TODO Work with in ranges
 /**
  * WId pool to generate and store unnused ids.
  */

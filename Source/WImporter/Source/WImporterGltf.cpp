@@ -80,7 +80,6 @@ namespace nullindex {
 
 namespace {
 
-
     WNODISCARD constexpr wct::texture::ESampler MagFilter(fastgltf::Filter mag_filter) noexcept {
         switch(mag_filter) {
         case fastgltf::Filter::Linear:
@@ -209,12 +208,6 @@ namespace {
         ) {
         WRenderPipelineParametersAsset result{};
 
-        // in_material.normalTexture;
-        // in_material.emissiveTexture;
-        // in_material.packedOcclusionRoughnessMetallicTextures;
-        // in_material.pbrData.baseColorTexture;
-        // in_material.pbrData.metallicRoughnessTexture;
-
         auto GetWAssetId = [&textures]
             (auto & tex_info) -> WAssetId {
             return tex_info
@@ -275,8 +268,7 @@ namespace {
     }
 
     WNODISCARD inline
-    auto
-    CollectMaterials(
+    auto CollectMaterials(
         fastgltf::Asset const & in_asset,
         std::vector<WAssetId> const & in_textures
         ){
@@ -303,7 +295,8 @@ namespace {
                           std::move(names)};
     }
 
-    WNODISCARD inline wct::geometry::WMesh CollectMeshPrimitive(
+    WNODISCARD inline
+    wct::geometry::WMesh CollectMeshPrimitive(
         fastgltf::Asset const & in_asset,
         fastgltf::Primitive const  & in_primitive
         ) {
@@ -382,7 +375,8 @@ namespace {
         return result;
     }
 
-    WNODISCARD inline auto CollectStaticMeshes(
+    WNODISCARD inline
+    auto CollectStaticMeshes(
         fastgltf::Asset const & in_asset,
         WAssetId gbuffer_pipeline,
         WAssetId transparent_pipeline,
@@ -446,7 +440,8 @@ namespace {
                           std::move(sm_names)};
     }
 
-    WNODISCARD inline WTextureAsset CollectImage(
+    WNODISCARD inline
+    WTextureAsset CollectImage(
         fastgltf::Asset const & in_asset,
         fastgltf::Image const & in_image
         ) {
@@ -525,7 +520,8 @@ namespace {
         return result;
     }
 
-    WNODISCARD inline auto CollectImageSamplersIndex(
+    WNODISCARD inline
+    auto CollectImageSamplersIndex(
         fastgltf::Asset const & in_asset
         ) {
         using OptIndex = decltype(decltype(in_asset.textures)::value_type::samplerIndex);
@@ -546,7 +542,8 @@ namespace {
         return image_samplers;
     }
 
-    WNODISCARD inline auto CollectImages(
+    WNODISCARD inline
+    auto CollectImages(
         fastgltf::Asset const & in_asset
         ) {
         auto image_samplers = CollectImageSamplersIndex(in_asset);

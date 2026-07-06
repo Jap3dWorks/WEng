@@ -143,14 +143,109 @@ concept CIsWId = std::is_same_v<T, _WId<typename T::IdType>>;
 
 using WId = _WId<std::size_t>;
 
+
+// Id Reestructuration
+// -------------------
+
 using WLevelId = _WId<std::uint16_t>;
 using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
-using WEntityComponentId = _WId<std::size_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
+using WEntityComponentId = _WId<std::uint64_t>;  // WLevelId[16] | WEntityId[32] | WComponentTypeId[8] | index[4]
 
+using WAssetType = _WId<std::uint16_t>;
 using WAssetId = _WId<std::uint32_t>;
 using WSubIdxId = _WId<std::uint8_t, std::numeric_limits<std::uint8_t>::max()>;
-using WAssetIndexId = _WId<std::uint64_t>; // WAssetId[32] | Index[4] (StaticMesh with material ids)
+
+using WAssetIndexId = _WId<std::uint64_t>;       // WAssetId[32] | Index[4] (StaticMesh with material ids)
+
+
+// ================== Universal Engine Object ID ==================
+// A compact 64-bit identifier for any engine object:
+//   - Asset (with sub-index)
+//   - Entity component (level+entity+type+sub-index)
+//   - Reserved for future kinds (e.g., systems)
+//
+// The type is discriminated by the two highest bits.
+
+enum class EObjectKind : std::uint8_t {
+    Asset         = 0b01,
+    EntityComponent = 0b10,
+    // 0b11 reserved
+};
+
+class WENGINE_API WEngId {
+
+    static constexpr std::uint64_t NullSentinel {~0ULL};
+    static constexpr std::uint64_t KindSifht = 62;
+    static constexpr std::uint64_t KindMask  = 0b11ULL << KindSifht;
+
+public:
+
+    constexpr WEngId() = default;
+    constexpr WEngId(const WEngId&) = default;
+    constexpr WEngId(WEngId&&) = default;
+    constexpr WEngId& operator=(const WEngId&) = default;
+    constexpr WEngId& operator=(WEngId&&) = default;
+    virtual ~WEngId() = default;
+
+    static constexpr WEngId FromAsset(WAssetIndexId assetIndex) noexcept {
+        std::uint64_t payload = assetIndex.GetId();
+        return WEngId( (static_cast<std::uint64_t>(EObjectKind::Asset) << KindSifht) | payload );
+    }
+
+    static constexpr WEngId FromEntityComponent(WEntityComponentId ecId) noexcept {
+        uint64_t payload = ecId.GetId();
+        return WEngId( (static_cast<uint64_t>(EObjectKind::EntityComponent) << KindSifht) | payload );
+    }
+
+    constexpr bool IsValid() const noexcept { return data_ != NullSentinel; }
+
+    constexpr EObjectKind Kind() const noexcept {
+        return static_cast<EObjectKind>( (data_ & KindMask) >> KindSifht );
+    }
+
+    constexpr WAssetIndexId AsAssetIndexId() const noexcept {
+        assert(Kind() == EObjectKind::Asset);
+        return WAssetIndexId( data_ & ~KindMask );
+    }
+
+    constexpr WEntityComponentId AsEntityComponentId() const noexcept {
+        assert(Kind() == EObjectKind::EntityComponent);
+        return WEntityComponentId( data_ & ~KindMask );
+    }
+
+    constexpr explicit operator std::uint64_t() const noexcept { return data_; }
+    static constexpr WEngId FromRaw(std::uint64_t raw) noexcept { return WEngId(raw); }
+
+    constexpr bool operator==(const WEngId& o) const noexcept { return data_ == o.data_; }
+    constexpr bool operator!=(const WEngId& o) const noexcept { return data_ != o.data_; }
+    constexpr bool operator<(const WEngId& o) const noexcept { return data_ < o.data_; }
+
+    struct Hash {
+        std::size_t operator()(const WEngId& id) const noexcept {
+            return std::hash<std::uint64_t>{}(id.data_);
+        }
+    };
+
+private:
+
+    constexpr explicit WEngId(std::uint64_t data) noexcept :
+    data_(data) {}
+
+    std::uint64_t data_{NullSentinel};
+
+};
+
+namespace std {
+    template<>
+    struct hash<WEngId> {
+        std::size_t operator()(const WEngId& id) const noexcept {
+            return WEngId::Hash{}(id);
+        }
+    };
+}
+
+// ------------------
 
 using WEventId = _WId<std::uint32_t>;
 
