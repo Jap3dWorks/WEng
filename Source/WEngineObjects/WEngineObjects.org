@@ -216,8 +216,6 @@
 
 ** Level
 
-#+CALL: create-if-not-exists-wobject-hpp[:results none](module="WAssets", name="Level", parent-module="WEngineObjects", parent="WAsset", namespace="was" , API="WENGINEOBJECTS")
-
 #+NAME: was-level-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
@@ -340,8 +338,6 @@
 :CUSTOM_ID: WAmbientLightComponent
 :END:
 
-#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WAmbientLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
-
 #+NAME: wambientlightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
@@ -362,8 +358,6 @@
 :CUSTOM_ID: WPointLightComponent
 :END:
 
-#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WPointLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
-
 #+NAME: wpointlightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
@@ -383,8 +377,6 @@
 :PROPERTIES:
 :CUSTOM_ID: WDirectionalLightComponent
 :END:
-
-#+CALL: create-if-not-exists-wobject-hpp[:results none]("WComponents/Light", "WDirectionalLightComponent", "WEngineObjects", "WComponent", "wcm::light", "WENGINEOBJECTS")
 
 #+NAME: wdirectionallightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
