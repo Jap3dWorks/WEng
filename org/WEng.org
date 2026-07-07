@@ -75,6 +75,7 @@ Se declaran en WCore para evitar las dependencias cruzadas entre módulos.
 
 **** Files
 
+- WCore/IdPool.hpp
 - WCoreTypes/WTexture.hpp
 - WCoreTypes/WGeometry.hpp
 - WCoreTypes/WEngine.hpp
@@ -88,6 +89,8 @@ Se declaran en WCore para evitar las dependencias cruzadas entre módulos.
       - Pipeline types (materials)
       - Pipeline parameters types (materials)
       - Lighting types (lights)
+- wcr::idpool
+      - Weng Core
 
 ** WImporter
 *** Objective
@@ -202,6 +205,12 @@ Los componentes están asociados a actores. formando así entidades compuestas d
 - wcm::geometry
 
 *** WAssets
+
+**** Namespace
+
+- was::geometry
+- was
+  
 
 ** WObject and WClass Template/Reflection
 *** WPROPERTY macro

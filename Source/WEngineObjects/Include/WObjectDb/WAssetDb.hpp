@@ -1,11 +1,13 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/WIdPool.hpp"
+#include "WCore/IdPool.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
+#include "WAssets/Level.hpp"
 
 #include <concepts>
+#include <limits>
 #include <unordered_map>
 
 class WAsset;
@@ -20,42 +22,17 @@ public:
 
     using WAssetDbType = WObjectDb<WAsset, WAssetId>;
 
-    constexpr WAssetDb() noexcept :
-    object_manager_(),
-    id_pool_(),
-    id_class_() {
-        InitializeIdPool();
-    }
+    constexpr WAssetDb() noexcept = default;
 
     virtual ~WAssetDb() = default;
 
-    WAssetDb(const WAssetDb & other) :
-    object_manager_(other.object_manager_),
-    id_pool_(other.id_pool_),
-    id_class_(other.id_class_) {}
+    WAssetDb(WAssetDb const & other) = default;
     
-    WAssetDb(WAssetDb && other) :
-    object_manager_(std::move(other.object_manager_)),
-    id_pool_(std::move(other.id_pool_)),
-    id_class_(std::move(other.id_class_)) {}
+    WAssetDb(WAssetDb && other) = default;
 
-    WAssetDb & operator=(const WAssetDb & other) {
-        if (this != &other) {
-            object_manager_ = other.object_manager_;
-            id_pool_ = other.id_pool_;
-            id_class_ = other.id_class_;
-        }
-        return *this;
-    }
+    WAssetDb & operator=(WAssetDb const & other) = default;
 
-    WAssetDb & operator=(WAssetDb && other) {
-        if (this != &other) {
-            object_manager_ = std::move(other.object_manager_);
-            id_pool_ = std::move(other.id_pool_);
-            id_class_ = std::move(other.id_class_);
-        }
-        return *this;
-    }
+    WAssetDb & operator=(WAssetDb && other) = default;
 
     template<std::derived_from<WAsset> T, CCallable<void, T&> TFn>
     void ForEach(TFn && in_fn) const {
@@ -64,7 +41,6 @@ public:
             );
     }
 
-    // TODO string_view
     template<std::derived_from<WAsset> T>
     WAssetId Create(std::string_view in_fullname) {
         return Create(T::StaticClass(), in_fullname);
@@ -72,7 +48,8 @@ public:
 
     WAssetId Create(WClass const * in_class,
                     std::string_view in_fullname) {
-        WAssetId id = id_pool_.Generate();
+        WAssetId id = GetIdPool(in_class).Generate();
+
         id_class_[id] = in_class;
     
         object_manager_.CreateAt(in_class, id);
@@ -123,12 +100,35 @@ public:
 
 private:
 
-    void InitializeIdPool();
+    wcr::IdPool<WAssetId::IdType> & GetIdPool(WClass const * in_class) {
+        if (was::Level::StaticClass()->IsEqual(in_class)) {
+            return id_level_pool_;
+        }
+        else {
+            return id_pool_;
+        }
+    }
 
-    WAssetDbType object_manager_;
+    WAssetDbType object_manager_{};
+    
+    wcr::IdPool<WAssetId::IdType> id_level_pool_{
+        {
+            {
+                .first=1,
+                .last=std::numeric_limits<std::uint16_t>::max()
+            }
+        }
+    };
 
-    WIdPool<WAssetId::IdType> id_pool_;
+    wcr::IdPool<WAssetId::IdType> id_pool_{
+        {
+            {
+                .first=std::numeric_limits<std::uint16_t>::max() + 1,
+                .last=std::numeric_limits<WAssetId::IdType>::max()
+            }
+        }
+    };
 
-    std::unordered_map<WAssetId, WClass const *> id_class_;
+    std::unordered_map<WAssetId, WClass const *> id_class_{};
 
 };

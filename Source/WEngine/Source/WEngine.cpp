@@ -91,7 +91,8 @@ void WEngine::Run()
     assert(state_.startup_infor.startup_level.IsValid());
 
     state_.level_info.current_level = state_.startup_info.startup_level;
-    state_.level_info.level = state_.level_db.Get(state_.level_info.current_level);
+    state_.level_info.level =
+        *(state_.asset_db.Get<was::Level>(state_.level_info.current_level));
 
     LoadLevel(state_.level_info.level);
 
@@ -106,7 +107,8 @@ void WEngine::Run()
 
             Render()->WaitIdle();
 
-            state_.level_info.level = state_.level_db.Get(
+            state_.level_info.level =
+                *state_.asset_db.Get<was::Level>(
                 state_.level_info.current_level);
 
             LoadLevel(state_.level_info.level);
@@ -121,14 +123,14 @@ void WEngine::Run()
                 .RunPreSystems(0, {this, &state_.level_info.level});
 
             state_.systems_runner
-                .RunPreSystems(state_.level_info.level.WID(),
+                .RunPreSystems(state_.level_info.level.Get_asset_id(),
                                {this, &state_.level_info.level});
 
             state_.systems_runner
                 .RunPostSystems(0, {this, &state_.level_info.level});
 
             state_.systems_runner
-                .RunPostSystems(state_.level_info.level.WID(),
+                .RunPostSystems(state_.level_info.level.Get_asset_id(),
                                 {this, &state_.level_info.level});
 
             Render()->Draw();
@@ -139,12 +141,12 @@ void WEngine::Run()
     UnloadLevel(state_.level_info.level);
 }
 
-void WEngine::MarkLoadLevel(const WLevelId & in_level) {
+void WEngine::MarkLoadLevel(const WAssetId & in_level) {
     state_.level_info.current_level = in_level;
     state_.level_info.loaded = false;
 }
 
-void WEngine::LoadLevel(WLevel & in_level) {
+void WEngine::LoadLevel(was::Level & in_level) {
     // TODO register level systems
 
     WFLOG("[DEBUG] Run Engine Init Systems.");
@@ -154,51 +156,83 @@ void WEngine::LoadLevel(WLevel & in_level) {
 
     WFLOG("[DEBUG] Run Level Init Systems.")
     state_.systems_runner.RunInitSystems(
-        state_.level_info.level.WID(),
+        state_.level_info.level.Get_asset_id(),
         {this, &state_.level_info.level}
         );
 }
 
-void WEngine::UnloadLevel(WLevel & in_level) {
+void WEngine::UnloadLevel(was::Level & in_level) {
 
     state_.systems_runner.RunEndSystems(0, {this, &in_level});
-    state_.systems_runner.RunEndSystems(in_level.WID(), {this, &in_level});
+    state_.systems_runner.RunEndSystems(in_level.Get_asset_id(), {this, &in_level});
 
     // TODO deregister level systems
     
 }
 
-void WEngine::StartupLevel(const WLevelId& in_id) noexcept {
+void WEngine::StartupLevel(const WAssetId& in_id) noexcept {
     state_.startup_info.startup_level = in_id;
 }
 
-WLevelSystemId WEngine::AddInitSystem(const WLevelId & in_level_id, const char * in_system_name) {
+// WLevelSystemId WEngine::AddInitSystem(const WAssetId & in_level_id, const char * in_system_name) {
+//     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+//     return state_.systems_runner.AddInitSystem(
+//         in_level_id, wsid, state_.systems_reg.Get(wsid)
+//         );
+// }
+
+// WLevelSystemId WEngine::AddPreSystem(const WAssetId & in_level_id, const char * in_system_name) {
+//     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+//     return state_.systems_runner.AddPreSystem(
+//         in_level_id, wsid, state_.systems_reg.Get(wsid)
+//         );
+// }
+
+// WLevelSystemId WEngine::AddPostSystem(const WAssetId & in_level_id, const char * in_system_name) {
+//     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+//     return state_.systems_runner.AddPostSystem(
+//         in_level_id, wsid, state_.systems_reg.Get(wsid)
+//         );
+// }
+
+// WLevelSystemId WEngine::AddEndSystem(const WAssetId & in_level_id, const char * in_system_name) {
+//     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+//     return state_.systems_runner.AddEndSystem(
+//         in_level_id, wsid, state_.systems_reg.Get(wsid)
+//         );
+// }
+
+
+WLevelSystemId WEngine::AddInitSystem(const WAssetId & in_level_id, std::string_view in_system_name) {
     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddInitSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-WLevelSystemId WEngine::AddPreSystem(const WLevelId & in_level_id, const char * in_system_name) {
+WLevelSystemId WEngine::AddPreSystem(const WAssetId & in_level_id, std::string_view in_system_name) {
     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddPreSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-WLevelSystemId WEngine::AddPostSystem(const WLevelId & in_level_id, const char * in_system_name) {
+WLevelSystemId WEngine::AddPostSystem(const WAssetId & in_level_id, std::string_view in_system_name) {
     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddPostSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-WLevelSystemId WEngine::AddEndSystem(const WLevelId & in_level_id, const char * in_system_name) {
+WLevelSystemId WEngine::AddEndSystem(const WAssetId & in_level_id, std::string_view in_system_name) {
     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddEndSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
+
+
+
 
 TRef<IRender> WEngine::Render() noexcept
 {

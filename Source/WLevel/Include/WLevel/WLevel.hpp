@@ -7,7 +7,8 @@
 #include "WEngineObjects/WComponent.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
-class WEngine;
+
+class [[deprecated("Use was::Level")]] WEngine;
 
 // TODO Move level to WLevelAsset?
 

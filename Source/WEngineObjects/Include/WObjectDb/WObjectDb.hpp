@@ -15,10 +15,6 @@
 #include <concepts>
 #include <vector>
 
-#ifndef WOBJECTMANAGER_INITIAL_MEMORY
-#define WOBJECTMANAGER_INITIAL_MEMORY 1024
-#endif
-
 /**
  * @brief This class is a container for WObjects and derived types.
  */
@@ -27,8 +23,9 @@ class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
-    using DbType = std::unordered_map<const WClass *,
-    std::unique_ptr<IObjectDataBase<WObjClass, typename WIdType::IdType>>>;
+    using DbType =
+        std::unordered_map<const WClass *,
+        std::unique_ptr<IObjectDataBase<WObjClass, typename WIdType::IdType>>>;
 
     template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,
@@ -39,25 +36,19 @@ public:
 
 public:
 
-    constexpr WObjectDb() :
-    db_(),
-    initial_memory_size_(WOBJECTMANAGER_INITIAL_MEMORY)
-    {}
+    constexpr WObjectDb() = default;
     
     virtual ~WObjectDb() = default;
 
-    WObjectDb(const WObjectDb & other) :
+    WObjectDb(WObjectDb const & other) :
     db_(),
     initial_memory_size_(other.initial_memory_size_) {
         CopyContainersFrom(other);
     }
     
-    constexpr WObjectDb(WObjectDb && other) noexcept :
-    db_(std::move(other.db_)),
-    initial_memory_size_(std::move(other.initial_memory_size_))
-    {}
+    constexpr WObjectDb(WObjectDb && other) noexcept = default;
     
-    constexpr WObjectDb & operator=(const WObjectDb & other) {
+    constexpr WObjectDb & operator=(WObjectDb const & other) {
         if (this != &other) {
             initial_memory_size_ = other.initial_memory_size_;
             CopyContainersFrom(other);
@@ -65,33 +56,9 @@ public:
         return *this;
     }
 
-    constexpr WObjectDb & operator=(WObjectDb && other) noexcept {
-        if (this != &other) {
-            db_ = std::move(other.db_);
-            initial_memory_size_ = std::move(other.initial_memory_size_);
-        }
-        return *this;
-    }
+    constexpr WObjectDb & operator=(WObjectDb && other) noexcept = default;
     
 public:
-
-    /**
-     * @brief Create a new object of type T and assign a WId.
-     * Assigned WId is unique by class type.
-     */
-    template<std::derived_from<WObjClass> T>
-    WIdType Create() {
-        return Create(T::StaticClass());
-    }
-
-    /**
-     * @brief Create a new object of type WClass and assign a WId.
-     * Assigned WId id unique by class type.
-     */
-    WIdType Create(const WClass * in_class) {
-        EnsureClassStorage(in_class);
-        return db_[in_class]->Create();
-    }
 
     /**
      * @brief Create a new object of type WClass at the specified in_id.
@@ -235,7 +202,7 @@ public:
     /**
      * @brief Ammount of memory initially present for each stored class.
      */
-    void InitialMemorySize(size_t in_ammount) {
+    void InitialMemorySize(std::size_t in_ammount) {
         initial_memory_size_ = in_ammount;
     }
 
@@ -244,11 +211,11 @@ public:
         return db_.at(in_class)->Indexes();
     }
 
-    WNODISCARD size_t InitialMemorySize() const {
+    WNODISCARD std::size_t InitialMemorySize() const {
         return initial_memory_size_;
     }
 
-    WNODISCARD size_t Count(const WClass * in_class) const {
+    WNODISCARD std::size_t Count(const WClass * in_class) const {
         if (!db_.contains(in_class)) return 0;
         
         return db_.at(in_class)->Count();
@@ -256,7 +223,7 @@ public:
 
 private:
 
-    void CopyContainersFrom(const WObjectDb & other) {
+    void CopyContainersFrom(WObjectDb const & other) {
         db_.clear();
         for (auto & p : other.db_) {
             db_.insert(
@@ -276,9 +243,9 @@ private:
         }
     }
 
-    DbType db_;
+    DbType db_{};
 
-    size_t initial_memory_size_;
+    std::size_t initial_memory_size_{1024};
 
 };
 

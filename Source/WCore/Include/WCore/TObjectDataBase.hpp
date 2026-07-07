@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/WIdPool.hpp"
+#include "WCore/IdPool.hpp"
 #include "WCore/TFunction.hpp"
 #include "TSparseSet.hpp"
 #include "WCore/WConcepts.hpp"
@@ -70,15 +70,10 @@ public:
 
 public:
 
-    constexpr TObjDb() noexcept :
-        create_fn_(),
-        destroy_fn_(),
-        id_pool_(),
-        objects_()
-        {}
+    constexpr TObjDb() noexcept = default;
 
     constexpr TObjDb(
-        const Allocator & in_allocator
+        Allocator const & in_allocator
         ) :
         create_fn_(),
         destroy_fn_(),
@@ -87,8 +82,8 @@ public:
         {}
 
     constexpr TObjDb(
-        const CreateFn & in_create_fn,
-        const DestroyFn & in_destroy_fn
+        CreateFn const & in_create_fn,
+        DestroyFn const & in_destroy_fn
         ) :
         create_fn_(in_create_fn),
         destroy_fn_(in_destroy_fn),
@@ -97,9 +92,9 @@ public:
         {}
 
     constexpr TObjDb(
-        const CreateFn & in_create_fn,
-        const DestroyFn & in_destroy_fn,
-        const Allocator & in_allocator
+        CreateFn const & in_create_fn,
+        DestroyFn const & in_destroy_fn,
+        Allocator const & in_allocator
         ) :
         create_fn_(in_create_fn),
         destroy_fn_(in_destroy_fn),
@@ -111,43 +106,13 @@ public:
         Clear();
     }
 
-    TObjDb(const TObjDb & other) :
-        create_fn_(other.create_fn_),
-        destroy_fn_(other.destroy_fn_),
-        id_pool_(other.id_pool_),
-        objects_(other.objects_)
-        {}
+    TObjDb(TObjDb const & other) = default;
+    
+    constexpr TObjDb(TObjDb && other) noexcept = default;
 
-    constexpr TObjDb(TObjDb && other) noexcept :
-        create_fn_(std::move(other.create_fn_)),
-        destroy_fn_(std::move(other.destroy_fn_)),
-        id_pool_(std::move(other.id_pool_)),
-        objects_(std::move(other.objects_))
-        {}
+    TObjDb & operator=(const TObjDb & other) = default;
 
-    TObjDb & operator=(const TObjDb & other) {
-        if (this != &other) {
-            Clear();
-            create_fn_ = other.create_fn_;
-            destroy_fn_ = other.destroy_fn_;
-            objects_ = other.objects_;
-            id_pool_ = other.id_pool_;
-        }
-
-        return *this;
-    }
-
-    TObjDb & operator=(TObjDb && other) noexcept {
-        if (this != &other) {
-            Clear();
-            create_fn_ = std::move(other.create_fn_);
-            destroy_fn_ = std::move(other.destroy_fn_);
-            objects_ = std::move(other.objects_);
-            id_pool_ = std::move(other.id_pool_);            
-        }
-
-        return *this;
-    }
+    TObjDb & operator=(TObjDb && other) noexcept = default;
 
     virtual std::unique_ptr<Super> Clone() const override {
         return std::make_unique<TObjDb>(*this);
@@ -364,12 +329,12 @@ public:
 
 private:
 
-    CreateFn create_fn_;
-    DestroyFn destroy_fn_; 
+    CreateFn create_fn_{};
+    DestroyFn destroy_fn_{}; 
 
-    WIdPool<IdBase> id_pool_;
+    wcr::IdPool<IdBase> id_pool_{};
 
-    ObjectsType objects_;
+    ObjectsType objects_{};
     
 };
 

@@ -150,7 +150,7 @@ using WId = _WId<std::size_t>;
 using WLevelId = _WId<std::uint16_t>;
 using WEntityId = _WId<std::uint32_t>;
 using WComponentTypeId = _WId<std::uint8_t>;
-// WLevelId[22] | WEntityId[22] | WComponentTypeId[8] (WComponentID) (now it is runtime assigned) | index[5]
+// WLevelId[16] | WEntityId[22] | WComponentTypeId[8] (WComponentID) (now it is runtime assigned) | index[5] ]
 using WEntityComponentId = _WId<std::uint64_t>;
 
 using WAssetId = _WId<std::uint32_t>;
@@ -293,6 +293,7 @@ namespace WIdUtils {
         out_dst4 = index;
     }
 
+    [[deprecated("Level will be an asset")]]
     inline WEntityComponentId ToEntityComponentId(const WLevelId & in_src1,
                                                   const WEntityId & in_src2,
                                                   const WComponentTypeId & in_src3,
@@ -312,7 +313,28 @@ namespace WIdUtils {
         return v;
     }
 
-    inline void FromLevelSystemId(const WLevelSystemId & in_src,
+    inline WEntityComponentId ToEntityComponentId(WAssetId const & in_src1,
+                                                  const WEntityId & in_src2,
+                                                  const WComponentTypeId & in_src3,
+                                                  const WSubIdxId & in_src4
+        ) {
+        size_t v=0;
+
+        v |= in_src1.GetId();
+        // v |= in_src1.GetId();
+        v <<= sizeof(WEntityId) * 8;
+        v |= in_src2.GetId();
+        v <<= sizeof(WComponentTypeId) * 8;
+        v |= in_src3.GetId();
+        v <<= 4;
+        std::uint8_t imask = 8 + 4 + 2 + 1;
+        v |= (imask & in_src4.GetId());
+
+        return v;
+    }
+    
+
+    [[deprecated("Level is an asset")]] inline void FromLevelSystemId(const WLevelSystemId & in_src,
                                   WLevelId & out_dst1,
                                   WSystemId & out_dst2) {
         std::uint32_t v = in_src.GetId();
@@ -327,7 +349,36 @@ namespace WIdUtils {
         out_dst2 = sysid;
     }
 
-    inline WLevelSystemId ToLevelSystemId(const WLevelId & in_level_id,
+    inline void FromLevelSystemId(const WLevelSystemId & in_src,
+                                  WAssetId & out_dst1,
+                                  WSystemId & out_dst2) {
+
+        std::uint32_t v = in_src.GetId();
+        std::uint16_t lvlid = 0;
+        std::uint16_t sysid = 0;
+
+        sysid |= v;
+        v >>= sizeof(WSystemId) * 8;
+        lvlid |= v;
+
+        out_dst1 = lvlid;
+        out_dst2 = sysid;
+    }
+    
+
+    [[deprecated("Level is an asset")]] inline WLevelSystemId ToLevelSystemId(
+        const WLevelId & in_level_id,
+        const WSystemId & in_system_id)
+    {
+        std::uint32_t v=0;
+        v |= in_level_id.GetId();
+        v <<= sizeof(WSystemId) * 8;
+        v |= in_system_id.GetId();
+
+        return v;
+    }
+
+    inline WLevelSystemId ToLevelSystemId(const WAssetId & in_level_id,
                                           const WSystemId & in_system_id) {
         std::uint32_t v=0;
         v |= in_level_id.GetId();
@@ -336,6 +387,7 @@ namespace WIdUtils {
 
         return v;
     }
+    
 
     inline void FromAssetIndexId(const WAssetIndexId & in_asset_index_id,
                                  WAssetId & out_asset_id,

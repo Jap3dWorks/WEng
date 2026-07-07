@@ -21,13 +21,13 @@ class WENGINE_API WEngine
 private:
 
     struct LevelInfoStruct {
-        WLevelId current_level{0};
+        WAssetId current_level{0};
         bool loaded{false};
-        WLevel level{};
+        was::Level level{};
     };
 
     struct StartupInfo {
-        WLevelId startup_level{0};
+        WAssetId startup_level{0};
     };
 
 public:
@@ -48,26 +48,26 @@ public:
 
     void Run();
 
-    void StartupLevel(const WLevelId & in_id) noexcept;
+    void StartupLevel(const WAssetId & in_id) noexcept;
 
-    WLevelId StartupLevel() const noexcept {
+    WAssetId StartupLevel() const noexcept {
         return state_.startup_info.startup_level;
     }
 
     /** Set a level to be loaded when possible */
-    void MarkLoadLevel(const WLevelId & in_level_id);
+    void MarkLoadLevel(const WAssetId & in_level_id);
 
     const LevelInfoStruct & LevelInfo() const noexcept {
         return state_.level_info;
     }
 
-    WLevelDb & LevelRegister() noexcept {
-        return state_.level_db;
-    }
+    // WLevelDb & LevelRegister() noexcept {
+    //     return state_.level_db;
+    // }
 
-    const WLevelDb & LevelRegister() const noexcept {
-        return state_.level_db;
-    }
+    // const WLevelDb & LevelRegister() const noexcept {
+    //     return state_.level_db;
+    // }
 
     wim::imp_register::WImporterRegister & ImportersRegister() noexcept {
         return state_.importers_register;
@@ -89,13 +89,10 @@ public:
         return state_.engine_cycle;
     }
 
-    WLevelSystemId AddInitSystem(const WLevelId & in_level_id, const char * in_system_name);
-
-    WLevelSystemId AddPreSystem(const WLevelId & in_level_id, const char * in_system_name);
-
-    WLevelSystemId AddPostSystem(const WLevelId & in_level_id, const char * in_system_name);
-
-    WLevelSystemId AddEndSystem(const WLevelId & in_level_id, const char * in_system_name);
+    WLevelSystemId AddInitSystem(const WAssetId & in_level_id, std::string_view in_system_name);
+    WLevelSystemId AddPreSystem(const WAssetId & in_level_id, std::string_view in_system_name);
+    WLevelSystemId AddPostSystem(const WAssetId & in_level_id, std::string_view in_system_name);
+    WLevelSystemId AddEndSystem(const WAssetId & in_level_id, std::string_view in_system_name);
 
     TRef<IRender> Render() noexcept;
 
@@ -105,13 +102,13 @@ private:
 
     void Initialize();
 
-    void InitializeLevel(WLevel * in_level);
+    void InitializeLevel(was::Level * in_level);
 
     void UpdateEngineCycleStruct();
 
-    void LoadLevel(WLevel & in_level);
+    void LoadLevel(was::Level & in_level);
 
-    void UnloadLevel(WLevel & in_level);
+    void UnloadLevel(was::Level & in_level);
 
     static void FrameBufferSizeCallback(
         wdw::WWindow * in_window,
@@ -152,7 +149,6 @@ private:
         std::unique_ptr<IRender> render{nullptr};
 
         WAssetDb asset_db{};
-        WLevelDb level_db{};
 
         WSystemsRegister systems_reg{};
         WSystemsRunner systems_runner{};

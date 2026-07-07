@@ -8,6 +8,7 @@ add_library(
         Source/WObjectDb.cpp
         Source/WAssetDb.cpp
         Source/WEntityComponentDb.cpp
+        Source/Level.cpp
 )
 
 set_target_properties(

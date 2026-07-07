@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 
 #include "WObjectDb/WObjectDb.hpp"
-#include "WCore/WIdPool.hpp"
+#include "WCore/IdPool.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
 
@@ -20,7 +20,9 @@ public:
 
 public:
 
-    constexpr WEntityComponentDb() noexcept = default;
+    constexpr WEntityComponentDb() noexcept {
+        InsertEntity<WEntity>(0, "GlobalEntity");
+    }
 
     virtual ~WEntityComponentDb() = default;
 
@@ -167,21 +169,21 @@ private:
 
     void UpdateEntityData(const WClass * in_entity_class, const WEntityId & in_id, const char * in_name);
 
-    WEntityDbType entity_db_;
+    WEntityDbType entity_db_{};
 
-    WComponentDbType component_db_;
+    WComponentDbType component_db_{};
 
-    WIdPool<WEntityId::IdType> entity_id_pool_;
+    wcr::IdPool<WEntityId::IdType> entity_id_pool_{};
 
     // Track where the Entity is stored
-    std::unordered_map<WEntityId, const WClass *> id_entityclass_;
+    std::unordered_map<WEntityId, const WClass *> id_entityclass_{};
 
     // Track which components has each entity
-    std::unordered_map<WEntityId, std::unordered_set<const WClass *>> entity_components_;
+    std::unordered_map<WEntityId, std::unordered_set<const WClass *>> entity_components_{};
 
     // Each component class has a unique 8 bit id
-    std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_;
-    std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;  // <- TODO use an array
-    WIdPool<WComponentTypeId::IdType> component_class_id_pool_;
+    std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_{};
+    std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_{};  // <- TODO use an array
+    wcr::IdPool<WComponentTypeId::IdType> component_class_id_pool_{};
 
 };

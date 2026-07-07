@@ -3,7 +3,7 @@
 #include "WCore/TFunction.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
-#include "WCore/WIdPool.hpp"
+#include "WCore/IdPool.hpp"
 
 #include <cstdint>
 #include <unordered_map>
@@ -65,6 +65,6 @@ private:
 
     TSparseSet<FnType> subscribers_{};
 
-    WIdPool<WEventId::IdType> id_pool_{};
+    wcr::IdPool<WEventId::IdType> id_pool_{};
 
 };

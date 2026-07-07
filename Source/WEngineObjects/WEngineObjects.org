@@ -214,6 +214,25 @@
 <<compile-generated-cpp("WAssets", "WTextureAsset")>>
 #+end_src
 
+** Level
+
+#+CALL: create-if-not-exists-wobject-hpp[:results none](module="WAssets", name="Level", parent-module="WEngineObjects", parent="WAsset", namespace="was" , API="WENGINEOBJECTS")
+
+#+NAME: was-level-wengine-hpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/was_Level.WEngine.hpp
+<<wclass-wengine-hpp("Level", "WAsset", "WENGINEOBJECTS", "was")>>
+<<wobject-body-macro("Level")>>
+#+end_src
+
+#+NAME: wambientlightcomponent-compilegenerated-cpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<compile-generated-cpp("WAssets", "Level")>>
+#+end_src
+
 * WComponents
 ** WCameraComponent
 :PROPERTIES:

@@ -5,16 +5,6 @@
 
 #include <format>
 
-// WLevel::WLevel() :
-//     name_("InvalidLevel"),
-//     wid_(wid_null),
-//     entity_component_db_()
-// {
-//     entity_component_db_.InsertEntity<WEntity>(
-//         WEntityId{0},
-//         "LevelEntity"
-//         );
-// }
 
 WLevel::WLevel(const WObjectName & in_name,
                WLevelId in_id) :

@@ -15,7 +15,8 @@
 #include "WComponents/Light/WAmbientLightComponent.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
-#include "WLevel/WLevel.hpp"
+// #include "WLevel/WLevel.hpp"
+#include "WAssets/Level.hpp"
 #include "WRender/WRender.hpp"
 #include "WRender/WLight.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
@@ -27,7 +28,7 @@ namespace wng::render {
 
     inline void InitializeLights(
         IRender * in_render,
-        WLevel * in_level,
+        was::Level * in_level,
         const WAssetDb & in_asset_db
         ) {
 
@@ -121,7 +122,7 @@ namespace wng::render {
 
     inline void InitializeResources(
         IRender * in_render,
-        WLevel * in_level,
+        was::Level * in_level,
         const WAssetDb & in_asset_db
         ) {
 
@@ -327,7 +328,7 @@ namespace wng::render {
 
     inline void ReleaseRenderResources(
         IRender * in_render,
-        WLevel * in_level,
+        was::Level * in_level,
         const WAssetDb & in_asset_db
         ) {
 

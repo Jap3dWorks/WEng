@@ -3,10 +3,11 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TFunction.hpp"
 #include "WSystems/WSystemMacros.hpp"
+#include "WAssets/Level.hpp"
 
 struct WSystemParameters {
     WEngine * engine;
-    WLevel * level;
+    was::Level * level;
 };
 
 using WSystemFn = TFnPtr<bool(const WSystemParameters &)>;

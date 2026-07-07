@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TOptionalRef.hpp"
-#include "WCore/WIdPool.hpp"
+#include "WCore/IdPool.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WLevel/WLevel.hpp"
 
@@ -12,7 +12,7 @@
 class WLEVEL_API WLevelDb {
 public:
 
-    using WLevelIdPool = WIdPool<WLevelId::IdType>;
+    using WLevelIdPool = wcr::IdPool<WLevelId::IdType>;
 
     using WLevelDbType = TObjectDataBase<WLevel, WLevel, WLevelId::IdType>;
 

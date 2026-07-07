@@ -2,7 +2,7 @@
 #include "WCore/WCore.hpp"
 #include "WLevel/WLevel.hpp"
 
-WLevelSystemId WSystemsRunner::AddInitSystem(const WLevelId & in_level_id,
+WLevelSystemId WSystemsRunner::AddInitSystem(const WAssetId & in_level_id,
                                         const WSystemId & in_system_id,
                                         const WSystemFn & in_system) {
     return AddSystem(init_systems_,
@@ -12,7 +12,7 @@ WLevelSystemId WSystemsRunner::AddInitSystem(const WLevelId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddPreSystem(const WLevelId & in_level_id,
+WLevelSystemId WSystemsRunner::AddPreSystem(const WAssetId & in_level_id,
                                        const WSystemId & in_system_id,
                                        const WSystemFn & in_system) {
     return AddSystem(pre_systems_,
@@ -22,7 +22,7 @@ WLevelSystemId WSystemsRunner::AddPreSystem(const WLevelId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddPostSystem(const WLevelId & in_level_id,
+WLevelSystemId WSystemsRunner::AddPostSystem(const WAssetId & in_level_id,
                                         const WSystemId & in_system_id,
                                         const WSystemFn & in_system) {
     return AddSystem(post_systems_,
@@ -32,7 +32,7 @@ WLevelSystemId WSystemsRunner::AddPostSystem(const WLevelId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddEndSystem(const WLevelId & in_level_id,
+WLevelSystemId WSystemsRunner::AddEndSystem(const WAssetId & in_level_id,
                                        const WSystemId & in_system_id,
                                        const WSystemFn & in_system) {
     return AddSystem(end_systems_,
@@ -43,7 +43,7 @@ WLevelSystemId WSystemsRunner::AddEndSystem(const WLevelId & in_level_id,
 }
 
 void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
-    WLevelId lvlid;
+    WAssetId lvlid;
     WSystemId sysid;
     
     WIdUtils::FromLevelSystemId(in_id, lvlid, sysid);
@@ -66,7 +66,7 @@ void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
     systemid_location_.extract(in_id);
 }
 
-void WSystemsRunner::RemoveSystems(const WLevelId & in_level_id) {
+void WSystemsRunner::RemoveSystems(const WAssetId & in_level_id) {
     init_systems_.erase(in_level_id);
     pre_systems_.erase(in_level_id);
     post_systems_.erase(in_level_id);
@@ -82,7 +82,7 @@ void WSystemsRunner::Clear() {
     systemid_location_.clear();
 }
 
-void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
+void WSystemsRunner::RunInitSystems(const WAssetId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
     if(!init_systems_.contains(in_level_id)) {
         return;
@@ -93,7 +93,7 @@ void WSystemsRunner::RunInitSystems(const WLevelId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunPreSystems(const WLevelId & in_level_id,
+void WSystemsRunner::RunPreSystems(const WAssetId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
     if (!pre_systems_.contains(in_level_id)) return;
 
@@ -102,7 +102,7 @@ void WSystemsRunner::RunPreSystems(const WLevelId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunPostSystems(const WLevelId & in_level_id,
+void WSystemsRunner::RunPostSystems(const WAssetId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
     if (!post_systems_.contains(in_level_id)) return;
 
@@ -111,7 +111,7 @@ void WSystemsRunner::RunPostSystems(const WLevelId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunEndSystems(const WLevelId & in_level_id,
+void WSystemsRunner::RunEndSystems(const WAssetId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
     if (!end_systems_.contains(in_level_id)) return;
 
@@ -122,12 +122,12 @@ void WSystemsRunner::RunEndSystems(const WLevelId & in_level_id,
 
 WLevelSystemId WSystemsRunner::AddSystem(Systems & out_system,
                                          const ESystemLocation & in_location,
-                                         const WLevelId & in_level_id,
+                                         WAssetId const & in_level_id,
                                          const WSystemId & in_system_id,
                                          const WSystemFn & in_system) {
-    
+
     WLevelSystemId lvlsysid = WIdUtils::ToLevelSystemId(in_level_id,
-                                                     in_system_id);
+                                                        in_system_id);
     
     out_system[in_level_id].Insert(in_system_id.GetId(), in_system);
 
