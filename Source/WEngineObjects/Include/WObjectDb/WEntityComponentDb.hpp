@@ -56,8 +56,10 @@ public:
         return entity_db_.Get(id_entityclass_.at(in_id), in_id);
     }
 
-    WEntity * GetFirstEntity(const WClass * in_class, WEntityId & in_id) const {
-        return entity_db_.GetFirst(in_class, in_id);
+    WEntity * GetFirstEntity(const WClass * in_class, WEntityId & out_id) const {
+        auto result =  entity_db_.GetFirst(in_class, out_id);
+
+        return result;
     }
 
     template<std::derived_from<WEntity> T>
@@ -169,7 +171,7 @@ private:
 
     WComponentDbType component_db_;
 
-    WIdPool<WEntityId> entity_id_pool_;
+    WIdPool<WEntityId::IdType> entity_id_pool_;
 
     // Track where the Entity is stored
     std::unordered_map<WEntityId, const WClass *> id_entityclass_;
@@ -180,6 +182,6 @@ private:
     // Each component class has a unique 8 bit id
     std::unordered_map<const WClass *, WComponentTypeId> componentclass_id_;
     std::unordered_map<WComponentTypeId, const WClass*> id_componentclass_;  // <- TODO use an array
-    WIdPool<WComponentTypeId> component_class_id_pool_;
+    WIdPool<WComponentTypeId::IdType> component_class_id_pool_;
 
 };

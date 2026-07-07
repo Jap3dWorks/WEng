@@ -32,7 +32,7 @@ private:
 
     TSparseSet<WSystemFn> system_set_;
 
-    WIdPool<WSystemId> id_pool_;
+    WIdPool<WSystemId::IdType> id_pool_;
     std::unordered_map<std::string, WSystemId> name_wid_;
 
 };

@@ -127,7 +127,7 @@ private:
 
     WAssetDbType object_manager_;
 
-    WIdPool<WAssetId> id_pool_;
+    WIdPool<WAssetId::IdType> id_pool_;
 
     std::unordered_map<WAssetId, WClass const *> id_class_;
 

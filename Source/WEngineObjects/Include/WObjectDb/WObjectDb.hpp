@@ -22,13 +22,13 @@
 /**
  * @brief This class is a container for WObjects and derived types.
  */
-template<CWObjectDerived WObjClass, typename WIdClass=WId>
+template<CWObjectDerived WObjClass, CIsWId WIdType=WId>
 class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
     using DbType = std::unordered_map<const WClass *,
-                                      std::unique_ptr<IObjectDataBase<WObjClass, WIdClass>>>;
+    std::unique_ptr<IObjectDataBase<WObjClass, typename WIdType::IdType>>>;
 
     template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,
@@ -80,7 +80,7 @@ public:
      * Assigned WId is unique by class type.
      */
     template<std::derived_from<WObjClass> T>
-    WIdClass Create() {
+    WIdType Create() {
         return Create(T::StaticClass());
     }
 
@@ -88,7 +88,7 @@ public:
      * @brief Create a new object of type WClass and assign a WId.
      * Assigned WId id unique by class type.
      */
-    WIdClass Create(const WClass * in_class) {
+    WIdType Create(const WClass * in_class) {
         EnsureClassStorage(in_class);
         return db_[in_class]->Create();
     }
@@ -99,7 +99,7 @@ public:
      * If your replace an existing WId for the indicated class behaviour is undefined.
      */
     void CreateAt(const WClass * in_class,
-                  const WIdClass& in_id) {
+                  const WIdType& in_id) {
         EnsureClassStorage(in_class);
 
         assert(!db_[in_class]->Contains(in_id));
@@ -108,7 +108,7 @@ public:
     }
 
     template<std::derived_from<WObjClass> T>
-    void CreateAt(const WIdClass & in_id) {
+    void CreateAt(const WIdType & in_id) {
         EnsureClassStorage(T::StaticClass());
         
         assert(!db_[T::StaticClass()]->Contains(in_id));
@@ -116,7 +116,7 @@ public:
         db_[T::StaticClass()]->CreateAt(in_id);
     }
 
-    WObjClass * Get(const WClass * in_class, const WIdClass & in_id) const {
+    WObjClass * Get(const WClass * in_class, const WIdType & in_id) const {
         WObjClass * result;
         db_.at(in_class)->Get(in_id, result);
 
@@ -127,34 +127,43 @@ public:
      * @brief get element at in_id.
      */
     template<std::derived_from<WObjClass> T>
-    T & Get(WIdClass in_id) const {
+    T & Get(WIdType in_id) const {
         return T::StaticClass()->DbBuilder()
-            .template DbCast<T,WObjClass,WIdClass>(
+            .template DbCast<T,WObjClass, typename WIdType::IdType>(
                 db_.at(T::StaticClass()).get()
                 )->Get(in_id);
     }
 
-    WObjClass * GetFirst(const WClass * in_class, WIdClass & out_id) const {
+    WObjClass * GetFirst(const WClass * in_class, WIdType & out_id) const {
         assert(db_.contains(in_class));
-        
+
+        auto id_value = out_id.GetId();
+
         WObjClass * result;
-        db_.at(in_class)->BGetFirst(result, out_id);
+        db_.at(in_class)->BGetFirst(result, id_value);
+
+        out_id = id_value;
         
         return result;
     }
 
     template<std::derived_from<WObjClass> T>
-    T & GetFirst(WIdClass & out_id) const {
-        return T::StaticClass()->DbBuilder()
-            .template DbCast<T, WObjClass, WIdClass>(
+    T & GetFirst(WIdType & out_id) const {
+        typename WIdType::IdType idval;
+
+        auto & result = T::StaticClass()->DbBuilder()
+            .template DbCast<T, WObjClass, typename WIdType::IdType>(
                 db_.at(T::StaticClass()).get()
-                )->GetFirst(out_id);
+                )->GetFirst(idval);
+
+        out_id = idval;
+        return result;
     }
 
     /**
      * @brief More flexible but less performant.
      */
-    template<CCallable<void, const WIdClass &, WObjClass *> TFn>
+    template<CCallable<void, const WIdType &, WObjClass *> TFn>
     void ForEachIdValue(const WClass * in_class, TFn && in_fn) const {
         db_.at(in_class)->BForEachIdValue(std::forward<TFn>(in_fn));
     }
@@ -162,10 +171,10 @@ public:
     /**
      * @brief Less flexible bur more performant for each.
      */
-    template<std::derived_from<WObjClass> T, CCallable<void, const WIdClass &, T&> TFn>
+    template<std::derived_from<WObjClass> T, CCallable<void, const WIdType &, T&> TFn>
     void ForEachIdValue(TFn && in_fn) const {
         T::StaticClass()->DbBuilder()
-            .template DbCast<T,WObjClass,WIdClass>(
+            .template DbCast<T,WObjClass,WIdType>(
                 db_.at(T::StaticClass()).get()
                 )->ForEachIdValue(std::forward<TFn>(in_fn));
     }
@@ -187,18 +196,18 @@ public:
         assert(db_.contains(T::StaticClass()));
 
         T::StaticClass()->DbBuilder()
-            .template DbCast<T,WObjClass,WIdClass>(
+            .template DbCast<T,WObjClass, typename WIdType::IdType>(
                 db_.at(T::StaticClass()).get()
                 )->ForEach(std::forward<TFn>(in_fn));
     }
 
     template<typename T>
-    bool Contains(const WIdClass & in_id) const {
+    bool Contains(const WIdType & in_id) const {
         return db_.contains(T::StaticClass()) &&
             db_.at(T::StaticClass())->Contains(in_id.GetId());
     }
 
-    bool Contains(const WClass * in_class, const WIdClass & in_id) const {
+    bool Contains(const WClass * in_class, const WIdType & in_id) const {
         return db_.contains(in_class) && db_.at(in_class)->Contains(in_id.GetId());
     }
 
@@ -230,7 +239,7 @@ public:
         initial_memory_size_ = in_ammount;
     }
 
-    std::vector<WIdClass> Indexes(const WClass * in_class) const {
+    std::vector<typename WIdType::IdType> Indexes(const WClass * in_class) const {
         assert(db_.contains(in_class));
         return db_.at(in_class)->Indexes();
     }
@@ -259,7 +268,7 @@ private:
     void EnsureClassStorage(const WClass * in_class) {
         if (!db_.contains(in_class)) {
             db_[in_class] =
-                in_class->DbBuilder().Create<WObjClass, WIdClass>();
+                in_class->DbBuilder().Create<WObjClass, typename WIdType::IdType>();
 
             db_[in_class]->Reserve(
                 initial_memory_size_

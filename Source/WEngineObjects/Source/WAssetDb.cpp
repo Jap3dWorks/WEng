@@ -6,7 +6,7 @@
 void WAssetDb::InitializeIdPool() {
     for(const WClass * c : object_manager_.IterWClasses()) {
         for (WAssetId wid : object_manager_.Indexes(c)) {
-            id_pool_.Reserve(wid);
+            id_pool_.Release(wid.GetId());
             id_class_[wid] = c;
         }
     }

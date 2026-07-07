@@ -81,7 +81,7 @@ public:
     }
 
     template<std::convertible_to<T> D>
-    void Insert(const size_t & in_index, D && in_value) {
+    void Insert(const std::size_t & in_index, D && in_value) {
         if (Contains(in_index)) {
             size_t pos = index_pos_map_[in_index];
             value_dense_[pos]=std::forward<D>(in_value);

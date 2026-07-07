@@ -12,9 +12,9 @@
 class WLEVEL_API WLevelDb {
 public:
 
-    using WLevelIdPool = WIdPool<WLevelId>;
+    using WLevelIdPool = WIdPool<WLevelId::IdType>;
 
-    using WLevelDbType = TObjectDataBase<WLevel, WLevel, WLevelId>;
+    using WLevelDbType = TObjectDataBase<WLevel, WLevel, WLevelId::IdType>;
 
 public:
 

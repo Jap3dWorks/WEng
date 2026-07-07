@@ -63,12 +63,8 @@ public:
 
 private:
 
-    // TODO SparseSet and WIDPool;
-
     TSparseSet<FnType> subscribers_{};
 
-    WIdPool<WEventId> id_pool_{};
-
-    // TObjectDataBase<FnType, FnType, WEventId> subscribers_{};
+    WIdPool<WEventId::IdType> id_pool_{};
 
 };

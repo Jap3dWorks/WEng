@@ -21,7 +21,7 @@ void WEntityComponentDb::InsertEntity(const WClass * in_class,
                                       const char * in_name) {
     entity_db_.CreateAt(in_class, in_id);
     UpdateEntityData(in_class, in_id, in_name);
-    entity_id_pool_.Reserve(in_id);
+    entity_id_pool_.Release(in_id.GetId());
 }
 
 void WEntityComponentDb::CreateComponent(const WClass * in_component_class,

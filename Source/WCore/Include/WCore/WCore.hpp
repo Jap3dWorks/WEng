@@ -139,7 +139,7 @@ private:
 
 
 template<typename T>
-concept CIsWId = std::is_same_v<T, _WId<typename T::IdType>>;
+concept CIsWId = std::is_same_v<T, _WId<typename T::IdType, T::NULL_VALUE >>;
 
 using WId = _WId<std::size_t>;
 

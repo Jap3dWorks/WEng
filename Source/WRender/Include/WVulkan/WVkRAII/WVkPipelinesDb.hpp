@@ -16,19 +16,24 @@
 #include <utility>
 #include <vulkan/vulkan_core.h>
 
-template<typename WPipelineIdType=WAssetId,
-         typename WBindingIdType=WEntityComponentId,
+template<CIsWId WPipelineIdType=WAssetId,
+         CIsWId WBindingIdType=WEntityComponentId,
          std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesDb {
 public:
 
-    using WVkPipelineDb = TObjectDataBase<WVkRenderPipelineInfo, void, WPipelineIdType>;
-    using WVkDescSetLayoutDb = TObjectDataBase<WVkDescriptorSetLayoutInfo, void, WPipelineIdType>;
+    using WVkPipelineDb =
+        TObjectDataBase<WVkRenderPipelineInfo, void, typename WPipelineIdType::IdType>;
+
+    using WVkDescSetLayoutDb =
+        TObjectDataBase<WVkDescriptorSetLayoutInfo, void, typename  WPipelineIdType::IdType>;
+
     using WVkDescriptorPoolDb = std::array<
-        TObjectDataBase<VkDescriptorPool, void, WPipelineIdType>,
+        TObjectDataBase<VkDescriptorPool, void, typename WPipelineIdType::IdType>,
         FramesInFlight
         >;
-    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId>;
+
+    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId::IdType>;
 
 public:
 

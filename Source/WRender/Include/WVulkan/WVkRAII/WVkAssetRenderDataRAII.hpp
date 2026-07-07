@@ -18,8 +18,8 @@
 class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
-using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId>;
-using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId>;
+using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId::IdType>;
+using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId::IdType>;
 
 public:
 

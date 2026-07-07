@@ -121,7 +121,7 @@ public:
         // dbops_[typeid(RegKey<B,I>)] = std::make_unique<TDbOps<T,B,I>>();
     }
 
-    template<typename T, CConvertibleTo<T> B, typename I>
+    template<typename T, CConvertibleTo<T> B, std::integral I>
     TObjectDbBld<T,B,I>* DbCast(DbType<B,I> * in_db) const {
         return static_cast<TObjectDbBld<T,B,I>*>(in_db);
     }

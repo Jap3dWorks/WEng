@@ -1,106 +1,113 @@
 #pragma once
 
-#include "WCore/WCore.hpp"
-#include <list>
+#include "WCore/WCoreMacros.hpp"
+
 #include <cassert>
-#include <unordered_set>
+#include <algorithm>
+#include <stdexcept>
+#include <vector>
+#include <concepts>
 
-// TODO Work with in ranges
-/**
- * WId pool to generate and store unnused ids.
- */
-template<typename T=WId>
-class WCORE_API WIdPool
-{
+template<std::integral T=std::size_t>
+struct WIdRange {
 
+    T first{1};
+    T last{ std::numeric_limits<T>::max() };
+
+    WNODISCARD constexpr bool InRange(T in_value) const noexcept {
+        return in_value >= first && in_value <= last;
+    }
+
+    WNODISCARD constexpr bool IsValid() const noexcept {
+        return first <= last;
+    }
+};
+
+template<std::integral T=std::size_t>
+class WIdPool {
 public:
-
-    constexpr WIdPool() noexcept =default;
-
-    virtual ~WIdPool() noexcept {
-        Clear();
-    }
-
-    WIdPool(const WIdPool & other) :
-    last_id_(other.last_id_),
-    reserved_(other.reserved_),
-    released_(other.released_) {}
-
-    WIdPool(WIdPool && other) :
-    last_id_(std::move(other.last_id_)),
-    reserved_(std::move(other.reserved_)),
-    released_(std::move(other.released_)) {}
-
-    WIdPool & operator=(const WIdPool & other) {
-        if (this != &other) {
-            last_id_ = other.last_id_;
-            reserved_ = other.reserved_;
-            released_ = other.released_;
+    
+    T Generate() {
+        if (free_ranges_.empty()) {
+            throw std::runtime_error(
+                "Ges Id Pool is empty, no more DTId's can be generated!"
+                );
         }
-
-        return *this;
-    }
-
-    WIdPool & operator=(WIdPool && other) {
-        if (this != &other) {
-            last_id_ = std::move(other.last_id_);
-            reserved_ = std::move(other.reserved_);
-            released_ = std::move(other.released_);
+        
+        auto& front = free_ranges_.front();
+        auto result = front.first++;
+        if (front.first > front.last) {
+            // Range exhausted
+            free_ranges_.erase(free_ranges_.begin());
         }
-
-        return *this;
+        return result;
     }
 
-    T Generate()
+    void Reserve(T id)
     {
-        T r = 0;
-        if (!released_.empty())
-        {
-            r = released_.back();
-            released_.pop_back();
-        }
-        else {
-            r = ++last_id_;
-            while(reserved_.contains(r)) {
-                reserved_.erase(r);
-                r = ++last_id_;
+        std::vector<WIdRange<T>> splitted;
+        splitted.reserve(free_ranges_.max_size());
+
+        bool reserved{false};
+    
+        for (auto const & r : free_ranges_) {
+            if (r.InRange(id)) {
+                reserved = true;
+                
+                WIdRange<T> before = {r.first, id-1};
+                WIdRange<T> after = {id+1, r.last};
+                if (before.IsValid()) {
+                    splitted.push_back(r);
+                }
+                if (after.IsValid()) {
+                    splitted.push_back(r);
+                }
+            }
+            else {
+                splitted.push_back(r);
             }
         }
 
-        return r;
-    }
-
-    void Release(T wid)
-    {
-        assert(wid.GetId() < last_id_.GetId() || reserved_.contains(wid));
-
-        if (reserved_.contains(wid)) {
-            reserved_.erase(wid);
-        }
-        
-        released_.push_back(wid);
-    }
-
-    void Reserve(T in_id) {
-        assert(!reserved_.contains(in_id));
-        
-        released_.remove(in_id);
-        if (in_id >= last_id_) {
-            reserved_.insert(in_id);
+        if (reserved) {
+            free_ranges_ = std::move(splitted);
         }
     }
 
-    void Clear() noexcept {
-        last_id_ = 0;
-        released_.clear();
-        reserved_.clear();
+    /**
+     * @biref Makes id avaiable.
+     */
+    void Release(T id) {
+
+        free_ranges_.push_back({id, id});
+
+        std::sort(free_ranges_.begin(), free_ranges_.end(),
+                  [](const WIdRange<T>& a, const WIdRange<T>& b) {
+                      return a.first < b.first;
+                  });
+
+        std::vector<WIdRange<T>> merged;
+        for (auto const & r : free_ranges_) {
+            if (merged.empty()) {
+                merged.push_back(r);
+            } else {
+                auto& last = merged.back();
+                if (r.first <= last.last + 1) {
+                    last.last = std::max(last.last, r.last);
+                } else {
+                    merged.push_back(r);
+                }
+            }
+        }
+        free_ranges_ = std::move(merged);
     }
 
+    void Clear() {
+        free_ranges_ = {};
+    }
+   
 private:
-
-    T last_id_{0};
-    std::unordered_set<T> reserved_{};
-    std::list<T> released_{};
-
+    
+    std::vector<WIdRange<T>> free_ranges_{{}};
+    
 };
 
