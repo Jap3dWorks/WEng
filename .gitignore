@@ -38,3 +38,5 @@ CMakeFiles/
 /org/**/*.el
 /org/images/
 /External
+PublicGenerated/
+CompileGenerated/

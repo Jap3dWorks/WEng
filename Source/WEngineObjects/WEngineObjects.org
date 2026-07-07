@@ -19,7 +19,7 @@
 
 #+NAME: WObject-wengine-hpp
 #+HEADER: :main no :eval no
-#+HEADER: :noweb yes :comments link
+#+HEADER: :noweb yes :comments link :mkdirp yes
 #+begin_src C++ :tangle PublicGenerated/WObject.WEngine.hpp
 <<wclass-wengine-hpp("WObject", "WObject", "WENGINEOBJECTS", "")>>
 <<wobject-wobject-body-macro("WObject")>>
@@ -27,7 +27,7 @@
 
 #+NAME: WObject-compilegenerated-cpp
 #+HEADER: :main no :noeval
-#+HEADER: :noweb yes :comments link
+#+HEADER: :noweb yes :comments link :mkdirp yes
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
 <<compile-generated-cpp("WEngineObjects", "WObject")>>
 #+end_src
