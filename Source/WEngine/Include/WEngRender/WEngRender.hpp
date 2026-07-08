@@ -196,10 +196,10 @@ namespace wng::render {
             auto static_mesh = in_asset_db.Get<WStaticMeshAsset>(id);
             
             static_mesh->ForEachMesh(
-                [&in_render](WStaticMeshAsset* _sma, const WSubIdxId & _id, wct::geometry::WMesh& _m) {
-                    WAssetIndexId asset_index = WIdUtils::ToAssetIndexId(
-                        _sma->Get_asset_id(), _id
-                        );
+                [&in_render]
+                (WStaticMeshAsset* _sma, const WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                    WAssetIndexId asset_index {_sma->Get_asset_id(), _id};
+
                     in_render->LoadStaticMesh(asset_index, _m);
                 }
                 );
@@ -240,7 +240,10 @@ namespace wng::render {
                             in_component->Get_entity_id(), _id
                             );
 
-                        WAssetIndexId assidx = WIdUtils::ToAssetIndexId(_sma->Get_asset_id(), _id);
+                        WAssetIndexId assidx {
+                            _sma->Get_asset_id(), _id
+                        };
+
                         in_render->CreatePipelineBinding(
                             ecid,
                             in_component->GetPipelineAssignment(_id).pipeline,
@@ -399,7 +402,7 @@ namespace wng::render {
             in_asset_db.Get<WStaticMeshAsset>(id)->ForEachMesh(
                 [&in_render](WStaticMeshAsset * _sm, const WSubIdxId & _id, wct::geometry::WMesh & _m) {
                     in_render->UnloadStaticMesh(
-                        WIdUtils::ToAssetIndexId(_sm->Get_asset_id(), _id)
+                        {_sm->Get_asset_id(), _id}
                         );
                 }
                 );            

@@ -30,7 +30,6 @@ target_link_libraries(
         WRender
         WImporter
         WEngine
-        WLevel
 )
 
 install(

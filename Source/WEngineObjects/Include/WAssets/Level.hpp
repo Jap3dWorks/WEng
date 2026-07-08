@@ -102,7 +102,7 @@ namespace was {
             assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
 
             WComponentTypeId cid = entity_component_db.GetComponentTypeId(in_component_class);
-            return WIdUtils::ToEntityComponentId(Get_asset_id(), in_entity_id, cid, in_index_id);
+            return {Get_asset_id(), in_entity_id, cid, in_index_id};
         }
 
     private:

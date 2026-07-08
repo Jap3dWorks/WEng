@@ -125,3 +125,26 @@ int main()
 #+RESULTS:
 : Value lshift 4
 
+
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <array>
+#include <iostream>
+#include <bitset> 
+#include <limits>
+
+int main()
+{
+    std::bitset<64> bt {~(std::numeric_limits<std::size_t>::max() <<  4)};
+
+    bt = ~(0ULL);
+
+    std::cout << "Value: " << bt << std::endl;
+
+}
+#+end_src
+
+#+RESULTS:
+: Value: 1111111111111111111111111111111111111111111111111111111111111111
+

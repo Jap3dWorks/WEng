@@ -138,13 +138,13 @@ public:
     }
 
     void CreateAt(const IdBase & in_id) override {
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Insert(in_id, create_fn_(in_id));
     }
 
     template<CCallable<T, const IdBase &> TCreateFn>
     void CreateAt(const IdBase & in_id, TCreateFn && in_create_fn) {
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Insert(in_id, std::forward<TCreateFn>(in_create_fn)(in_id));
     }
 
@@ -158,25 +158,25 @@ public:
 
     template<typename D> requires std::is_same_v<std::remove_cvref_t<D>, T>
     void InsertAt(const IdBase & in_id, D && in_value) {
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Insert(in_id, std::forward<D>(in_value));
     }
 
     void InsertAt(const IdBase & in_id, B* & in_value) override {
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Insert(in_id, *static_cast<T*>(in_value));
     }
 
     template<CCallable<void, T&> TDestroyFn>
     void Remove(const IdBase & in_id, TDestroyFn && in_destroy_fn) {
         std::forward<TDestroyFn>(in_destroy_fn)(objects_.Get(in_id));
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Remove(in_id);
     }
 
     void Remove(const IdBase & in_id) override final {
         destroy_fn_(objects_.Get(in_id));
-        id_pool_.Release(in_id);
+        id_pool_.AddToPool(in_id);
         objects_.Remove(in_id);
     }
 

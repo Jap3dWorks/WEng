@@ -52,15 +52,15 @@ bool TWAllocator_1_Test() {
 bool TObjectDataBase_Test() {
     WFLOG("--Init Test--");
     
-    TObjectDataBase<A, B, WId> od;
+    TObjectDataBase<A, B, WId<>::IdType> od{};
 
     od.CreateAt(1);
     od.CreateAt(2);
     od.CreateAt(3);
 
-    TObjectDataBase<A, B, WId> od2 = od;
+    TObjectDataBase<A, B, WId<>::IdType> od2 = od;
 
-    std::unique_ptr<IObjectDataBase<B,WId>>od3 = od.Clone();
+    std::unique_ptr<IObjectDataBase<B,WId<>::IdType>>od3 = od.Clone();
 
     od3->BForEach([](B * b) -> void {
         WFLOG("Print od3 Item.");

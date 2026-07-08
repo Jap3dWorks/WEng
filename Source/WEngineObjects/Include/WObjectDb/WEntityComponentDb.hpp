@@ -20,7 +20,11 @@ public:
 
 public:
 
-    constexpr WEntityComponentDb() noexcept {
+    constexpr WEntityComponentDb() :
+    entity_db_(), component_db_(),
+    entity_id_pool_(), id_entityclass_(),
+    entity_components_(), componentclass_id_(),
+    id_componentclass_(), component_class_id_pool_() {
         InsertEntity<WEntity>(0, "GlobalEntity");
     }
 
@@ -115,12 +119,12 @@ public:
     }
 
     WComponent * GetComponent(const WEntityComponentId & in_entity_component_id) const {
-        WLevelId lid;
+        WAssetId lid;
         WEntityId eid;
         WComponentTypeId cid;
         WSubIdxId idxid;
-    
-        WIdUtils::FromEntityComponentId(in_entity_component_id, lid, eid, cid, idxid);
+
+        in_entity_component_id.ExtractWIds(lid, eid, cid, idxid);
 
         return GetComponent(id_componentclass_.at(cid), eid);
     }

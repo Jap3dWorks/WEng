@@ -2,7 +2,6 @@
 
 #include "WCore/WCore.hpp"
 #include "WEngineInterfaces/IRender.hpp"
-#include "WLevel/WLevel.hpp"
 
 #include "WImporter/WImporterTexture.hpp"
 #include "WImporter/WImporterObj.hpp"
@@ -10,7 +9,6 @@
 #include "WImporterRegister/WImporterRegister.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
-#include "WLevel/WLevelDb.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WEngineObjects/WComponent.hpp"
@@ -88,7 +86,7 @@ void WEngine::Initialize() {
 
 void WEngine::Run()
 {
-    assert(state_.startup_infor.startup_level.IsValid());
+    assert(state_.startup_info.startup_level.IsValid());
 
     state_.level_info.current_level = state_.startup_info.startup_level;
     state_.level_info.level =

@@ -60,16 +60,16 @@ namespace wcr {
             return result;
         }
 
-        void Reserve(T id)
+        void ExtractFromPool(T id)
             {
-                std::vector<IdRange<T>> splitted;
-                splitted.reserve(free_ranges_.max_size());
+                std::vector<IdRange<T>> splitted{};
+                // splitted.reserve(free_ranges_.max_size());
 
-                bool reserved{false};
+                bool extracted{false};
     
                 for (auto const & r : free_ranges_) {
                     if (r.InRange(id)) {
-                        reserved = true;
+                        extracted = true;
                 
                         IdRange<T> before = {r.first, id-1};
                         IdRange<T> after = {id+1, r.last};
@@ -85,7 +85,7 @@ namespace wcr {
                     }
                 }
 
-                if (reserved) {
+                if (extracted) {
                     free_ranges_ = std::move(splitted);
                 }
             }
@@ -93,7 +93,7 @@ namespace wcr {
         /**
          * @biref Makes id avaiable.
          */
-        void Release(T id) {
+        void AddToPool(T id) {
 
             free_ranges_.push_back({id, id});
 
@@ -124,7 +124,7 @@ namespace wcr {
    
     private:
     
-        std::vector<IdRange<T>> free_ranges_ { IdRange<T>() };
+        std::vector<IdRange<T>> free_ranges_ { IdRange<T>{} };
     
     };
 

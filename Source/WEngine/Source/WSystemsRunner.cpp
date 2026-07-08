@@ -1,6 +1,5 @@
 #include "WSystems/WSystemsRunner.hpp"
 #include "WCore/WCore.hpp"
-#include "WLevel/WLevel.hpp"
 
 WLevelSystemId WSystemsRunner::AddInitSystem(const WAssetId & in_level_id,
                                         const WSystemId & in_system_id,

@@ -81,8 +81,13 @@ bool WObjectDb_TWRef_Test() {
 
     man.InitialMemorySize(1);
 
-    TWRef<WStaticMeshAsset> a = man.Get<WStaticMeshAsset>(man.Create<WStaticMeshAsset>());
-    TWRef<WTextureAsset> t = man.Get<WTextureAsset>(man.Create<WTextureAsset>());
+    man.CreateAt<WStaticMeshAsset>(1);
+    TWRef<WStaticMeshAsset> a =
+        man.Get<WStaticMeshAsset>(1);
+
+    man.CreateAt<WTextureAsset>(2);
+    TWRef<WTextureAsset> t =
+        man.Get<WTextureAsset>(2);
 
     a->Set_name("a");
     t->Set_name("t");
@@ -93,7 +98,7 @@ bool WObjectDb_TWRef_Test() {
     void* ptr = a.BPtr();
 
     for (size_t i=0; i<10; i++) {
-        auto z = man.Create<WStaticMeshAsset>();
+        man.CreateAt<WStaticMeshAsset>(i+3);
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
@@ -110,31 +115,33 @@ bool WObjectDb_WClass_Test() {
     WObjectDb<WEntity, WEntityId> man;
 
     WFLOG("Create a1");
-    TWRef<WEntity> a1 = man.Get<WEntity>(man.Create<WEntity>());
+    man.CreateAt<WEntity>(1);
+    TWRef<WEntity> a1 = man.Get<WEntity>(1);
     
     WFLOG("Create a2");
+    man.CreateAt(WEntity::StaticClass(), 2);
     TWRef<WObject> a2 = man.Get(WEntity::StaticClass(),
-                                man.Create(WEntity::StaticClass()));
+                                2);
 
     return a2->Class()->Name() == "WEntity";
 }
 
 bool WEntityComponentDb_Test() {
 
-    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> smdb =
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId::IdType>> smdb =
         WStaticMeshComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, WEntityId>();
+        .Create<WComponent, WEntityId::IdType>();
 
-    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> tdb =
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId::IdType>> tdb =
         WTransformComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, WEntityId>();
+        .Create<WComponent, WEntityId::IdType>();
 
-    std::unique_ptr<IObjectDataBase<WComponent, WEntityId>> cdb =
+    std::unique_ptr<IObjectDataBase<WComponent, WEntityId::IdType>> cdb =
         WCameraComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, WEntityId>();
+        .Create<WComponent, WEntityId::IdType>();
 
     smdb->Create();
     smdb->Create();

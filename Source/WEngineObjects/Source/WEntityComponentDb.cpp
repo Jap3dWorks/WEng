@@ -5,7 +5,8 @@
 
 WEntityId WEntityComponentDb::CreateEntity(const WClass * in_class, const char * in_name) {
     assert(
-        in_class == WEntity::StaticClass() || WEntity::StaticClass()->IsBaseOf(in_class)
+        in_class == WEntity::StaticClass() ||
+        WEntity::StaticClass()->IsBaseOf(in_class)
         );
 
     auto id = CreateEntityId(in_class);
@@ -21,7 +22,7 @@ void WEntityComponentDb::InsertEntity(const WClass * in_class,
                                       const char * in_name) {
     entity_db_.CreateAt(in_class, in_id);
     UpdateEntityData(in_class, in_id, in_name);
-    entity_id_pool_.Release(in_id.GetId());
+    entity_id_pool_.ExtractFromPool(in_id.GetId());
 }
 
 void WEntityComponentDb::CreateComponent(const WClass * in_component_class,

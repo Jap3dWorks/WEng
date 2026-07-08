@@ -36,10 +36,7 @@ target_link_libraries(
         WImporter
         WRender
         WEngineInterfaces
-        WLevel
 )
-
-# add_library(WEngine::WEngine ALIAS WEngine)
 
 install(
     TARGETS WEngine
