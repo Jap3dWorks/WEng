@@ -44,8 +44,8 @@ WLevelSystemId WSystemsRunner::AddEndSystem(const WAssetId & in_level_id,
 void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
     WAssetId lvlid;
     WSystemId sysid;
-    
-    WIdUtils::FromLevelSystemId(in_id, lvlid, sysid);
+
+    in_id.ExtractWIds(lvlid, sysid);
     
     switch(systemid_location_[in_id]) {
     case ESystemLocation::INIT:
@@ -125,9 +125,8 @@ WLevelSystemId WSystemsRunner::AddSystem(Systems & out_system,
                                          const WSystemId & in_system_id,
                                          const WSystemFn & in_system) {
 
-    WLevelSystemId lvlsysid = WIdUtils::ToLevelSystemId(in_level_id,
-                                                        in_system_id);
-    
+    WLevelSystemId lvlsysid{in_level_id, in_system_id};
+
     out_system[in_level_id].Insert(in_system_id.GetId(), in_system);
 
     systemid_location_[lvlsysid] = in_location;

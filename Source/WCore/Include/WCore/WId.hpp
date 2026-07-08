@@ -185,10 +185,6 @@ using WEventId = WId<std::uint32_t, _WEventId_Flag_>;
 struct _WSystemId_Flag_{};
 using WSystemId = WId<std::uint16_t, _WSystemId_Flag_>;
 
-// TODO Compound id class
-struct _WLevelSustemId_Flag_{};
-using WLevelSystemId = WId<std::uint32_t, _WLevelSustemId_Flag_>;
-
 struct _WRenderId_Flag_{};
 
 /**
@@ -203,13 +199,14 @@ concept WEntityComponentId_Subtype = std::is_same_v<T,WAssetId> ||
     std::is_same_v<T,WComponentTypeId> ||
     std::is_same_v<T,WSubIdxId>;
 
-
 // -----------------
 // Compound ID Types
 // -----------------
 
-
 namespace {
+
+    inline constexpr std::uint8_t const WID_COMPOUND_BITS_MAX{62};
+
     inline constexpr std::size_t GenBitMask(std::uint8_t bits_size) {
         return ~(std::numeric_limits<std::size_t>::max() <<  bits_size);
     }
@@ -257,10 +254,12 @@ public:
     static constexpr std::uint8_t COMPONENT_BITS_SIZE{8};
     static constexpr std::uint8_t SUBINDEX_BITS_SIZE{5};
 
-    static_assert(LEVEL_BITS_SIZE +
-                  ENTITY_BITS_SIZE +
-                  COMPONENT_BITS_SIZE +
-                  SUBINDEX_BITS_SIZE <= 62);    
+    static constexpr std::uint8_t WID_BITS_SIZE{
+        LEVEL_BITS_SIZE + ENTITY_BITS_SIZE +
+        COMPONENT_BITS_SIZE + SUBINDEX_BITS_SIZE
+    };
+
+    static_assert(WID_BITS_SIZE <= WID_COMPOUND_BITS_MAX);
 
     template<WEntityComponentId_Subtype T>
     static constexpr std::uint8_t GetBitsSize() {
@@ -366,12 +365,15 @@ struct _WAssetIndexId_Flag_{};
 
 class WCORE_API WAssetIndexId : public WId<std::uint64_t, _WAssetIndexId_Flag_> {
 public:
+
     using WId::WId;
 
     static constexpr std::uint8_t ASSET_BITS_SIZE{sizeof(WAssetId::IdType) * 8};
     static constexpr std::uint8_t SUBINDEX_BITS_SIZE{5};
 
-    static_assert(ASSET_BITS_SIZE + SUBINDEX_BITS_SIZE <= 62);
+    static constexpr std::uint8_t WID_BITS_SIZE{ASSET_BITS_SIZE + SUBINDEX_BITS_SIZE};
+
+    static_assert(WID_BITS_SIZE <= WID_COMPOUND_BITS_MAX);
 
     template<WAssetIndexId_Subtype T>
     static constexpr std::uint8_t GetBitsSize(){
@@ -392,9 +394,9 @@ public:
 public:
 
     constexpr WAssetIndexId() noexcept = default;
-    constexpr WAssetIndexId(const WAssetIndexId&) noexcept = default;
+    constexpr WAssetIndexId(WAssetIndexId const &) noexcept = default;
     constexpr WAssetIndexId(WAssetIndexId&&) noexcept = default;
-    constexpr WAssetIndexId& operator=(const WAssetIndexId&) noexcept = default;
+    constexpr WAssetIndexId& operator=(WAssetIndexId const &) noexcept = default;
     constexpr WAssetIndexId& operator=(WAssetIndexId&&) noexcept = default;
     virtual ~WAssetIndexId() = default;
 
@@ -440,16 +442,18 @@ concept WLevelSystemId_Subtype =
     std::is_same_v<T, WAssetId> ||
     std::is_same_v<T, WSystemId>;
 
-struct _N_WLevelSustemId_Flag_{};
+struct _WLevelSystemId_Flag_{};
 
-class N_WLevelSystemId : public WId<std::uint64_t, _N_WLevelSustemId_Flag_> {
+class WLevelSystemId : public WId<std::uint64_t, _WLevelSystemId_Flag_> {
 public:
     using WId::WId;
 
-    static constexpr std::uint8_t LEVEL_BITS_SIZE{16};
+    static constexpr std::uint8_t LEVEL_BITS_SIZE{ WEntityComponentId::BitsSizeV<WAssetId> };
     static constexpr std::uint8_t SYSTEM_BITS_SIZE{16};
 
-    static_assert(LEVEL_BITS_SIZE + SYSTEM_BITS_SIZE < 62);
+    static constexpr std::uint8_t WID_BITS_SIZE{LEVEL_BITS_SIZE + SYSTEM_BITS_SIZE};
+
+    static_assert(WID_BITS_SIZE < WID_COMPOUND_BITS_MAX);
 
     template<WLevelSystemId_Subtype T>
     static constexpr std::uint8_t GetBitsSize() {
@@ -461,6 +465,8 @@ public:
         }
     } 
 
+    
+
     template<WLevelSystemId_Subtype T>
     static constexpr std::uint8_t BitsSizeV = GetBitsSize<T>();
 
@@ -469,14 +475,14 @@ public:
 
 public:
 
-    constexpr N_WLevelSystemId() noexcept = default;
-    constexpr N_WLevelSystemId(N_WLevelSystemId const &) noexcept = default;
-    constexpr N_WLevelSystemId(N_WLevelSystemId &&) noexcept = default;
-    constexpr N_WLevelSystemId& operator=(N_WLevelSystemId const &) noexcept = default;
-    constexpr N_WLevelSystemId& operator=(N_WLevelSystemId &&) noexcept = default;
-    virtual ~N_WLevelSystemId() = default;
+    constexpr WLevelSystemId() noexcept = default;
+    constexpr WLevelSystemId(WLevelSystemId const &) noexcept = default;
+    constexpr WLevelSystemId(WLevelSystemId &&) noexcept = default;
+    constexpr WLevelSystemId& operator=(WLevelSystemId const &) noexcept = default;
+    constexpr WLevelSystemId& operator=(WLevelSystemId &&) noexcept = default;
+    virtual ~WLevelSystemId() = default;
 
-    N_WLevelSystemId(WAssetId in_asset_id, WSystemId in_system_id) {
+    WLevelSystemId(WAssetId in_asset_id, WSystemId in_system_id) {
         
         ValidateWIds<
             BitsSizeV<WAssetId>,
@@ -520,17 +526,25 @@ enum class EObjectKind : std::uint8_t {
     Asset         = 0b01,
     EntityComponent = 0b10,
     System          = 0b11
-    // 0b00 reserved
+    // 0b00 is free
 };
 
 /**
  * WEngId General id class
  */
 class WCORE_API WEngId {
+public:
+    using IdType = std::uint64_t;
 
-    static constexpr std::uint64_t NullSentinel {0ULL};
-    static constexpr std::uint64_t KindSifht = 62;
-    static constexpr std::uint64_t KindMask  = 0b11ULL << KindSifht;
+private:
+
+    static constexpr std::uint64_t NullValue {0ULL};
+    static constexpr std::uint64_t KindShift = WID_COMPOUND_BITS_MAX;
+    static constexpr std::uint64_t KindMask  = std::numeric_limits<IdType>::max() << KindShift;
+
+    static inline constexpr std::uint64_t GetKindBits(EObjectKind in_kind) noexcept {
+        return static_cast<IdType>(in_kind) << KindShift;
+    }
 
 public:
 
@@ -541,53 +555,59 @@ public:
     constexpr WEngId& operator=(WEngId&&) = default;
     virtual ~WEngId() = default;
 
-    static constexpr WEngId FromAsset(WAssetIndexId assetIndex) noexcept {
-        std::uint64_t payload = assetIndex.GetId();
-        return WEngId( (static_cast<std::uint64_t>(EObjectKind::Asset) << KindSifht) | payload );
+    constexpr WEngId (IdType in_id) noexcept : id_data_(in_id) {}
+
+    static constexpr WEngId FromAsset(WAssetIndexId in_asset_index) noexcept {
+        IdType payload = in_asset_index.GetId();
+        return WEngId( GetKindBits(EObjectKind::Asset) | payload );
     }
 
-    static constexpr WEngId FromEntityComponent(WEntityComponentId ecId) noexcept {
-        std::uint64_t payload = ecId.GetId();
-        return WEngId(
-            (static_cast<uint64_t>(EObjectKind::EntityComponent) << KindSifht) |
-            payload );
+    static constexpr WEngId FromEntityComponent(WEntityComponentId in_entt_component_id) noexcept {
+        std::uint64_t payload = in_entt_component_id.GetId();
+        return WEngId(GetKindBits(EObjectKind::EntityComponent) | payload );
     }
 
-    constexpr bool IsValid() const noexcept { return data_ != NullSentinel; }
+    static constexpr WEngId FromLevelSystem(WLevelSystemId in_level_system) noexcept {
+        std::uint64_t payload = in_level_system.GetId();
+        return WEngId(GetKindBits(EObjectKind::System) | payload);
+    }
+
+    constexpr bool IsValid() const noexcept { return id_data_ != NullValue; }
 
     constexpr EObjectKind Kind() const noexcept {
-        return static_cast<EObjectKind>( (data_ & KindMask) >> KindSifht );
+        return static_cast<EObjectKind>( (id_data_ & KindMask) >> KindShift );
     }
 
     constexpr WAssetIndexId AsAssetIndexId() const noexcept {
         assert(Kind() == EObjectKind::Asset);
-        return WAssetIndexId( data_ & ~KindMask );
+        return { id_data_ & ~KindMask };
     }
 
     constexpr WEntityComponentId AsEntityComponentId() const noexcept {
         assert(Kind() == EObjectKind::EntityComponent);
-        return WEntityComponentId( data_ & ~KindMask );
+        return { id_data_ & ~KindMask };
     }
 
-    constexpr explicit operator std::uint64_t() const noexcept { return data_; }
-    static constexpr WEngId FromRaw(std::uint64_t raw) noexcept { return WEngId(raw); }
+    constexpr WLevelSystemId AsLevelSystemId() const noexcept {
+        assert(Kind() == EObjectKind::System);
+        return { id_data_ & ~KindMask };
+    }
 
-    constexpr bool operator==(const WEngId& o) const noexcept { return data_ == o.data_; }
-    constexpr bool operator!=(const WEngId& o) const noexcept { return data_ != o.data_; }
-    constexpr bool operator<(const WEngId& o) const noexcept { return data_ < o.data_; }
+    constexpr explicit operator std::uint64_t() const noexcept { return id_data_; }
+
+    constexpr bool operator==(const WEngId& o) const noexcept { return id_data_ == o.id_data_; }
+    constexpr bool operator!=(const WEngId& o) const noexcept { return id_data_ != o.id_data_; }
+    constexpr bool operator<(const WEngId& o) const noexcept { return id_data_ < o.id_data_; }
 
     struct Hash {
         std::size_t operator()(const WEngId& id) const noexcept {
-            return std::hash<std::uint64_t>{}(id.data_);
+            return std::hash<std::uint64_t>{}(id.id_data_);
         }
     };
 
 private:
 
-    constexpr explicit WEngId(std::uint64_t data) noexcept :
-    data_(data) {}
-
-    std::uint64_t data_{NullSentinel};
+    std::uint64_t id_data_{NullValue};
 
 };
 

@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/IdPool.hpp"
+#include "WCore/WId.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/Level.hpp"
@@ -115,7 +116,7 @@ private:
         {
             {
                 .first=1,
-                .last=std::numeric_limits<std::uint16_t>::max()
+                .last = WEntityComponentId::BitMaskV<WAssetId>
             }
         }
     };
@@ -123,7 +124,7 @@ private:
     wcr::IdPool<WAssetId::IdType> id_pool_{
         {
             {
-                .first=std::numeric_limits<std::uint16_t>::max() + 1,
+                .first=WEntityComponentId::BitMaskV<WAssetId> + 1,
                 .last=std::numeric_limits<WAssetId::IdType>::max()
             }
         }
