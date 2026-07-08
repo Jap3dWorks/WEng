@@ -15,7 +15,6 @@ struct WIdDefaultFlag{};
 
 /**
  * @brief Basic identifier token
- * TODO: configurable null value.
  * TODO: namespace.
 */
 template<typename T=std::size_t, typename Flag=WIdDefaultFlag, T NullValue=0>
@@ -26,7 +25,7 @@ public:
     using IdType = T;
     using FlagType = Flag;
 
-    static inline constexpr T NULL_VALUE{NullValue};
+    static inline constexpr T const NULL_VALUE{NullValue};
 
 public:
 
@@ -35,7 +34,7 @@ public:
     constexpr WId(WId&&) noexcept = default;
     constexpr WId& operator=(const WId&) noexcept = default;
     constexpr WId& operator=(WId&&) noexcept = default;
-    virtual ~WId() = default;
+    ~WId() = default;
 
     constexpr WId(T id) noexcept :
     id_(id) {}
@@ -352,7 +351,6 @@ public:
 
 };
 
-
 // -------------
 // WAssetIndexId
 // -------------
@@ -398,7 +396,7 @@ public:
     constexpr WAssetIndexId(WAssetIndexId&&) noexcept = default;
     constexpr WAssetIndexId& operator=(WAssetIndexId const &) noexcept = default;
     constexpr WAssetIndexId& operator=(WAssetIndexId&&) noexcept = default;
-    virtual ~WAssetIndexId() = default;
+    ~WAssetIndexId() = default;
 
     WAssetIndexId(WAssetId in_asset_id, WSubIdxId in_subidx) {
 
@@ -446,6 +444,7 @@ struct _WLevelSystemId_Flag_{};
 
 class WLevelSystemId : public WId<std::uint64_t, _WLevelSystemId_Flag_> {
 public:
+
     using WId::WId;
 
     static constexpr std::uint8_t LEVEL_BITS_SIZE{ WEntityComponentId::BitsSizeV<WAssetId> };
@@ -480,7 +479,7 @@ public:
     constexpr WLevelSystemId(WLevelSystemId &&) noexcept = default;
     constexpr WLevelSystemId& operator=(WLevelSystemId const &) noexcept = default;
     constexpr WLevelSystemId& operator=(WLevelSystemId &&) noexcept = default;
-    virtual ~WLevelSystemId() = default;
+    ~WLevelSystemId() = default;
 
     WLevelSystemId(WAssetId in_asset_id, WSystemId in_system_id) {
         
@@ -534,6 +533,7 @@ enum class EObjectKind : std::uint8_t {
  */
 class WCORE_API WEngId {
 public:
+
     using IdType = std::uint64_t;
 
 private:
@@ -553,9 +553,11 @@ public:
     constexpr WEngId(WEngId&&) = default;
     constexpr WEngId& operator=(const WEngId&) = default;
     constexpr WEngId& operator=(WEngId&&) = default;
-    virtual ~WEngId() = default;
+    ~WEngId() = default;
 
     constexpr WEngId (IdType in_id) noexcept : id_data_(in_id) {}
+
+    constexpr WEngId(_WID_NULL_T_) noexcept : id_data_(NullValue) {}
 
     static constexpr WEngId FromAsset(WAssetIndexId in_asset_index) noexcept {
         IdType payload = in_asset_index.GetId();

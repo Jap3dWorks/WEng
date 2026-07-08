@@ -1,5 +1,6 @@
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Level.hpp"
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
@@ -654,6 +655,15 @@ namespace {
         return result;
     }
 
+    WNODISCARD inline
+    was::Level CollectLevel(
+        fastgltf::Asset const & in_asset,
+        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
+        std::vector<WAssetId> const & sm_wids
+        ) {
+        
+    }
+
 }
 
 std::vector<WAssetId> wim::importer::WImporterGltf::Import(
@@ -714,6 +724,14 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         );
     
     // Nodes are Entities, can be imported like a level.
+    if (gltf_asset.defaultScene.has_value()) {
+        auto level = CollectLevel(
+            gltf_asset,
+            std::get<0>(static_mesh_data),   // ids map
+            sm_wid
+            );
+    }
+
     // Current state is not working with transform hierarchy
     // CollectLevel()
 
