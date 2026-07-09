@@ -6,6 +6,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "WCameraComponent.WEngine.hpp"
 
@@ -21,10 +22,14 @@ public:
 
 public:
 
-    WPROPERTY(glm::vec3, point, 0);
-    WPROPERTY(float, angle_of_view, 45.f);
+    /**
+     * field of view in radiants
+     */
+    WPROPERTY(float, field_of_view, glm::pi<float>() * 0.25);
     WPROPERTY(float, near_clipping, 0.01f);
     WPROPERTY(float, far_clipping, 100.f);
+    // Focus Distance
+    WPROPERTY(float, focus_distance, 0)
 
     WPROPERTY(WRenderId, render_id, 0);
 

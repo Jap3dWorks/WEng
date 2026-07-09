@@ -13,7 +13,7 @@ layout(std140, set=0, binding=0) uniform Camera {
   float sx;
   float sy;
   float sz;
-  float angle_of_view;
+  float field_of_view;
   float near_clipping;
   float far_clipping;
 

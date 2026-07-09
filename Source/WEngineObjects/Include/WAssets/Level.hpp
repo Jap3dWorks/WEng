@@ -66,7 +66,7 @@ namespace was {
         }
 
         // IF GetFirstComponent returns a pointer (not a reference)
-        // Can be used to know if there is at least one component of a type in the level.
+        // Can be used to know if there is at least one component of a type in the level
         // It will be more flexible and useful.
 
         template<std::derived_from<WComponent> T>

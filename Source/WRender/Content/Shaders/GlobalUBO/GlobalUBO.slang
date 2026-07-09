@@ -13,7 +13,7 @@ public struct CameraUBO {
   public float sx;
   public float sy;
   public float sz;
-  public float angle_of_view;
+  public float field_of_view;
   public float near_clipping;
   public float far_clipping;
 };

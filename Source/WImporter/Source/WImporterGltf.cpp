@@ -17,6 +17,7 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WComponents/WTransformComponent.hpp"
+#include "WComponents/WCameraComponent.hpp"
 #include "fastgltf/util.hpp"
 
 #include <WLib_stbi.hpp>
@@ -630,7 +631,6 @@ namespace {
         was::Level & out_level,
         fastgltf::Light const & in_light
         ) {
-
         auto collect_directional_lgt =
             [&](){
                 // TODO Rename Light components less verbose
@@ -660,7 +660,33 @@ namespace {
         default:
             collect_point_lgt();
         }
+    }
 
+    inline
+    void CollectCameraComponent(
+        WEntityId in_entity,
+        was::Level & out_level,
+        fastgltf::Camera const & in_camera
+        ) {
+        out_level.CreateComponent<WCameraComponent>(in_entity);
+        auto & component = out_level.GetComponent<WCameraComponent>(in_entity);
+
+        std::visit(
+            fastgltf::visitor{
+                [&component](fastgltf::Camera::Perspective const & value) {
+                    component.Set_field_of_view(value.yfov);
+                    if (value.zfar.has_value())
+                        component.Set_far_clipping(value.zfar.value());
+
+                    component.Set_near_clipping(value.znear);
+                },
+                [](fastgltf::Camera::Orthographic const & value) {
+
+                }
+                },
+            in_camera.camera
+            );
+        
     }
 
     WNODISCARD inline
@@ -699,7 +725,6 @@ namespace {
                 }
             }
 
-            // TODO lights
             if (in_asset.nodes[node].lightIndex.has_value()) {
                 std::size_t gltfindx = in_asset.nodes[node].lightIndex.value();
 
@@ -709,30 +734,81 @@ namespace {
                     in_asset.lights[gltfindx]
                     );
             }
+
+            if (in_asset.nodes[node].cameraIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[node].cameraIndex.value();
+
+                CollectCameraComponent(
+                    entityid,
+                    level,
+                    in_asset.cameras[gltfindx]
+                    );
+            }
         }
 
         return level;
     }
 
     WNODISCARD inline
-    std::vector<was::Level> CollectLevels(
+    auto CollectLevels(
         fastgltf::Asset const & in_asset,
         std::vector<nullindex::NullableIndex<>> const & sm_id_map,
-        std::vector<WAssetId> const & sm_wids
+        std::vector<WAssetId> const & sm_wids,
+        WAssetDb const & in_asset_db
         ) {
+        std::vector<was::Level> levels;
+        std::vector<std::string_view> names;
+        
+        levels.reserve(in_asset.scenes.size());
+        names.reserve(in_asset.scenes.size());
 
         for(fastgltf::Scene const & scene : in_asset.scenes) {
-            
+            levels.push_back(
+                CollectLevel(
+                    scene,
+                    in_asset,
+                    sm_id_map,
+                    sm_wids,
+                    in_asset_db
+                    )
+                );
+
+            names.push_back(scene.name);
         }
 
+        return std::tuple{levels, names};
     }
 
+    WNODISCARD inline
+    std::vector<WAssetId> CreateLevels(
+        std::vector<was::Level> & in_levels,
+        std::vector<std::string_view> const & in_names,
+        std::string_view in_assets_path,
+        WAssetDb & in_asset_db
+        ) {
+
+        std::vector<WAssetId> result{};
+        result.reserve(in_levels.size());
+        
+        for (std::uint32_t i=0; i<in_levels.size(); i++) {
+            in_asset_db.CreateFrom<was::Level>(
+                wstr::utils::AssetPath(
+                    std::string(in_assets_path),
+                    std::string(in_names[i]),
+                    std::string(in_names[i])
+                    ),
+                std::move(in_levels[i])
+                );
+        }
+
+        return result;
+    }
 
     WNODISCARD inline
     std::vector<WAssetId> CreateTextures(
         std::vector<WTextureAsset> & in_textures,
         std::vector<std::string_view> const & in_names,
-        std::string_view in_engine_path,
+        std::string_view in_assets_path,
         WAssetDb & asset_db
         ) {
 
@@ -743,7 +819,7 @@ namespace {
 
             auto assetid = asset_db.CreateFrom<WTextureAsset>(
                 wstr::utils::AssetPath(
-                    std::string(in_engine_path),
+                    std::string(in_assets_path),
                     std::string(in_names[i]),
                     std::string(in_names[i])
                     ),
@@ -827,31 +903,33 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
 
     // Collect textures
 
-    auto textures_data = CollectImages(gltf_asset);
+    // auto textures_data = CollectImages(gltf_asset);
+
+    auto [text_assets, text_names] = CollectImages(gltf_asset);
 
     // Create Texture Assets
     auto textures_wids = CreateTextures(
-        std::get<0>(textures_data),
-        std::get<1>(textures_data),
+        text_assets,
+        text_names,
         in_asset_directory,
         in_asset_db
         );
 
     // TODO Collect Materials
-    auto materials_data = CollectMaterials(
+    auto [mat_assets, mat_names] =CollectMaterials(
         gltf_asset,
         textures_wids
         );
 
     auto materials_wid = CreatePipelineParameters(
-        std::get<0>(materials_data),
-        std::get<1>(materials_data),
+        mat_assets,
+        mat_names,
         in_asset_directory,
         in_asset_db
         );
 
     // Collect meshes
-    auto static_mesh_data = CollectStaticMeshes(
+    auto [sm_index_map, sm_assets, sm_names] = CollectStaticMeshes(
         gltf_asset,
         render_pipelines_.gbuffer,
         render_pipelines_.transparent,
@@ -859,21 +937,47 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         );
 
     auto sm_wid = CreateStaticMeshes(
-        std::get<1>(static_mesh_data),
-        std::get<2>(static_mesh_data),
+        sm_assets,
+        sm_names,
         in_asset_directory,
         in_asset_db
         );
 
-    auto levels = CollecLevels(
+    auto [level_assets, level_names] = CollectLevels(
         gltf_asset,
-        std::get<0>(static_mesh_data),   // ids map
-        sm_wid
+        sm_index_map,
+        sm_wid,
+        in_asset_db
         );
 
-    // Current state is not working with transform hierarchy
-    // CollectLevel()
+    auto lvl_wid = CreateLevels(
+        level_assets,
+        level_names,
+        in_asset_directory,
+        in_asset_db);
+    
+    std::vector<WAssetId> result;
+    result.reserve(textures_wids.size() +
+                   materials_wid.size() +
+                   sm_wid.size() +
+                   lvl_wid.size());
 
-    return {};
+    result.insert(result.end(),
+                  std::make_move_iterator(textures_wids.begin()),
+                  std::make_move_iterator(textures_wids.end()));
+    
+    result.insert(result.end(),
+                  std::make_move_iterator(materials_wid.begin()),
+                  std::make_move_iterator(materials_wid.end()));
+    
+    result.insert(result.end(),
+                  std::make_move_iterator(sm_wid.begin()),
+                  std::make_move_iterator(sm_wid.end()));
+    
+    result.insert(result.end(),
+                  std::make_move_iterator(lvl_wid.begin()),
+                  std::make_move_iterator(lvl_wid.end()));
+    
+    return result;
 }
 

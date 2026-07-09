@@ -87,7 +87,6 @@ int main() {
 #+RESULTS:
 : Operator*!
 
-
 * Array Size
 
 #+HEADER: :flags --std=gnu++23
@@ -105,7 +104,6 @@ int main()
 
 #+RESULTS:
 : nums contains 4 elements.
-
 
 * Bitwise
 
@@ -148,3 +146,82 @@ int main()
 #+RESULTS:
 : Value: 1111111111111111111111111111111111111111111111111111111111111111
 
+* Move/Copy semantics
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <array>
+#include <iostream>
+
+struct Data {
+    std::uint64_t value{0};
+
+    Data()=default;
+
+    Data(Data const & other) :
+        value(other.value) {
+        std::print("Data Copy constructor!\n");
+    }
+
+    Data(Data && other) :
+        value(std::move(other.value)) {
+        std::print("Data move constructor!\n");
+        
+    }
+
+    Data & operator=(Data const & other) {
+        if(this != &other) {
+            value = other.value;
+
+            std::print("Data Copy operator!\n");
+        }
+        return *this;
+    }
+
+    Data & operator=(Data && other) {
+        if (this != & other) {
+            value = other.value;
+            other.value;
+
+            std::print("Data move operator!\n");
+        }
+        return *this;
+    }
+
+    ~Data()=default;
+};
+
+class Container {
+public:
+
+    void Update(Data dt) {
+        data_ = std::move(dt);
+    }
+
+    void UpdateMove(Data && dt) {
+        data_ = std::move(dt);
+    }
+
+private:
+
+    Data data_{};
+    
+};
+ 
+int main()
+{ 
+    Data dt;
+    dt.value=100;
+
+    Container cntr{};
+
+    std::print("Update container with moved data.\n");
+    
+    cntr.Update(std::move(dt));
+}
+#+end_src
+
+#+RESULTS:
+: Update container with moved data.
+: Data move constructor!
+: Data move operator!

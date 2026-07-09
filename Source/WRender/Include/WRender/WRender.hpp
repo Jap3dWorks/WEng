@@ -19,7 +19,7 @@ namespace wrd::render {
         ) {
         wct::render::WCameraUBO ubo_camera;
         ubo_camera.proj = glm::perspective(
-            glm::radians(in_camera.Get_angle_of_view()),
+            in_camera.Get_field_of_view(),
             in_aspect,
             in_camera.Get_near_clipping(),
             in_camera.Get_far_clipping()

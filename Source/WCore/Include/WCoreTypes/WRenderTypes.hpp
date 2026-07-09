@@ -10,6 +10,7 @@
 #include <span>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <utility>
 
 namespace wct::render {
@@ -49,7 +50,7 @@ namespace wct::render {
         glm::vec3 pos{1};
         glm::vec3 rot{0};  // pitch, yaw, roll
         glm::vec3 scale{1};
-        float angle_of_view{54.f};
+        float field_of_view{glm::pi<float>() * 0.25};
         float near_clipping{0.01f};
         float far_clipping{100.f};
     };
