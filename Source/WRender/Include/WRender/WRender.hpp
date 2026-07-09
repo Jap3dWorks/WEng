@@ -3,7 +3,7 @@
 #include "WComponents/WCameraComponent.hpp"
 #include "WComponents/WTransformComponent.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WUtils/WMathUtils.hpp"
+#include "WUtils/WMath.hpp"
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>

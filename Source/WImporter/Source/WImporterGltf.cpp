@@ -1,6 +1,9 @@
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/Level.hpp"
+#include "WComponents/Light/WDirectionalLightComponent.hpp"
+#include "WComponents/Light/WPointLightComponent.hpp"
+#include "WComponents/WStaticMeshComponent.hpp"
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
@@ -13,6 +16,8 @@
 #include "fastgltf/tools.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WComponents/WTransformComponent.hpp"
+#include "fastgltf/util.hpp"
 
 #include <WLib_stbi.hpp>
 #include <glm/glm.hpp>
@@ -65,7 +70,7 @@ namespace nullindex {
         NullableIndex& operator=(NullableIndex&&) = default;
         virtual ~NullableIndex() = default;
 
-        WNODISCARD bool IsValid() { return value != NullValue; }
+        WNODISCARD bool IsValid() const { return value != NullValue; }
         WNODISCARD operator bool() const {return IsValid(); }
 
         WNODISCARD T const & Value() const { return value; }
@@ -578,6 +583,151 @@ namespace {
         return std::tuple{std::move(text_assets), std::move(text_names)};
     }
 
+
+    inline
+    void CollectTransformComponent(
+        WTransformComponent & out_transform,
+        fastgltf::Node const & in_node
+        ) {
+        std::visit(
+            fastgltf::visitor{
+                [&out_transform](fastgltf::TRS const & value) {
+                    out_transform.Set_position(
+                        {value.translation.x(),
+                         value.translation.y(),
+                         value.translation.z()}
+                        );
+                    out_transform.Set_rotation(
+                        {value.rotation.x(),
+                         value.rotation.y(),
+                         value.rotation.z()}
+                        );
+                    out_transform.Set_scale(
+                        {value.scale.x(),
+                         value.scale.y(),
+                         value.scale.z()
+                        }
+                        );
+                },
+                [&out_transform](fastgltf::math::fmat4x4 const & value) {
+                    
+                    out_transform.SetTransformMatrix(
+                        {value.col(0).x(), value.col(0).y(), value.col(0).z(), value.col(0).w(),
+                         value.col(1).x(), value.col(1).y(), value.col(1).z(), value.col(1).w(),
+                         value.col(2).x(), value.col(2).y(), value.col(2).z(), value.col(2).w(),
+                         value.col(3).x(), value.col(3).y(), value.col(3).z(), value.col(3).w()
+                        }
+                        );
+                }
+                },
+            in_node.transform
+            );
+    }
+
+    inline
+    void CollectLightComponent(
+        WEntityId in_entity,
+        was::Level & out_level,
+        fastgltf::Light const & in_light
+        ) {
+
+        auto collect_directional_lgt =
+            [&](){
+                // TODO Rename Light components less verbose
+                out_level.CreateComponent<wcm::light::WDirectionalLightComponent>(in_entity);
+                auto & cmp = out_level
+                    .GetComponent<wcm::light::WDirectionalLightComponent>(in_entity);
+
+                cmp.Set_color({in_light.color.x(), in_light.color.y(), in_light.color.z()});
+                cmp.Set_intensity(in_light.intensity);
+            };
+
+        auto collect_point_lgt =
+            [&](){
+                out_level.CreateComponent<wcm::light::WPointLightComponent>(in_entity);
+                auto & cmp = out_level
+                    .GetComponent<wcm::light::WPointLightComponent>(in_entity);
+
+                cmp.Set_color({in_light.color.x(), in_light.color.y(), in_light.color.z()});
+                cmp.Set_intensity(in_light.intensity);
+            };
+
+        switch(in_light.type) {
+        case fastgltf::LightType::Point:
+            collect_point_lgt();
+        case fastgltf::LightType::Directional:
+            collect_directional_lgt();
+        default:
+            collect_point_lgt();
+        }
+
+    }
+
+    WNODISCARD inline
+    was::Level CollectLevel(
+        fastgltf::Scene const & in_scene,
+        fastgltf::Asset const & in_asset,
+        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
+        std::vector<WAssetId> const & sm_wids,
+        WAssetDb const & in_asset_db
+        ) {
+        
+        was::Level level{};
+        level.Set_name(in_scene.name.c_str());
+        
+        for (auto & node : in_scene.nodeIndices) {
+            auto entityid = level.CreateEntity<WEntity>();
+
+            auto trnsfid = level.CreateComponent<WTransformComponent>(entityid);
+            auto & transform = level.GetComponent<WTransformComponent>(entityid);
+
+            CollectTransformComponent(
+                transform,
+                in_asset.nodes[node]
+                );
+
+            if (in_asset.nodes[node].meshIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[node].meshIndex.value();
+                if (sm_id_map[gltfindx].IsValid()) {
+                    auto smcmpid = level.CreateComponent<WStaticMeshComponent>(entityid);
+                    auto & smcmp = level.GetComponent<WStaticMeshComponent>(entityid);
+
+                    smcmp.SetStaticMeshAsset(
+                        *in_asset_db
+                        .Get<WStaticMeshAsset>(sm_wids[sm_id_map[gltfindx].Value()])
+                        );
+                }
+            }
+
+            // TODO lights
+            if (in_asset.nodes[node].lightIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[node].lightIndex.value();
+
+                CollectLightComponent(
+                    entityid,
+                    level,
+                    in_asset.lights[gltfindx]
+                    );
+            }
+        }
+
+        return level;
+    }
+
+    WNODISCARD inline
+    std::vector<was::Level> CollectLevels(
+        fastgltf::Asset const & in_asset,
+        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
+        std::vector<WAssetId> const & sm_wids
+        ) {
+
+        for(fastgltf::Scene const & scene : in_asset.scenes) {
+            
+        }
+
+    }
+
+
     WNODISCARD inline
     std::vector<WAssetId> CreateTextures(
         std::vector<WTextureAsset> & in_textures,
@@ -655,14 +805,6 @@ namespace {
         return result;
     }
 
-    WNODISCARD inline
-    was::Level CollectLevel(
-        fastgltf::Asset const & in_asset,
-        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
-        std::vector<WAssetId> const & sm_wids
-        ) {
-        
-    }
 
 }
 
@@ -722,15 +864,12 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         in_asset_directory,
         in_asset_db
         );
-    
-    // Nodes are Entities, can be imported like a level.
-    if (gltf_asset.defaultScene.has_value()) {
-        auto level = CollectLevel(
-            gltf_asset,
-            std::get<0>(static_mesh_data),   // ids map
-            sm_wid
-            );
-    }
+
+    auto levels = CollecLevels(
+        gltf_asset,
+        std::get<0>(static_mesh_data),   // ids map
+        sm_wid
+        );
 
     // Current state is not working with transform hierarchy
     // CollectLevel()

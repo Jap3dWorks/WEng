@@ -3,13 +3,33 @@
 #include <string_view>
 #include <cstring>
 #include <cstdint>
-
+#include <string>
+#include <cassert>
+#include <algorithm>
 
 template<std::uint32_t BufferSize=256>
 struct TName{
 public:
 
     TName() = default;
+
+    TName(std::string_view in_name)
+    {
+        assert(in_name.size <= BufferSize);
+        
+        size = std::min(
+            in_name.size(),
+            static_cast<std::size_t>(BufferSize)
+            );
+        
+        std::memcpy(data, in_name.data(), size);
+    }
+
+    TName(char const * in_name) :
+        TName(std::string_view(in_name)){}
+
+    TName(std::string const & in_name) :
+        TName(in_name.c_str()) {}
 
     TName(const TName& other) :
         size(other.size) {
@@ -25,14 +45,14 @@ public:
         return *this;
     }
 
-    TName(TName&& other) :
+    TName(TName&& other) noexcept :
         size(other.size)
         {
             std::memcpy(data, other.data, size);
             other.size = 0;
         }
     
-    TName& operator=(TName&& other) {
+    TName& operator=(TName&& other) noexcept {
         if (this != &other) {
             size = other.size;
             std::memcpy(data, other.data, size);
@@ -43,15 +63,6 @@ public:
     }
 
     virtual ~TName() = default;
-
-    TName(std::string_view in_name)
-    {
-        size = in_name.size();
-        std::memcpy(data, in_name.data(), size);
-    }
-
-    TName(const char * in_name) :
-        TName(std::string_view(in_name)){}
 
     std::string_view View() const {
         return {data, size};

@@ -85,6 +85,7 @@ public:
         return asset_id;
     }
 
+    // TODO ptr or reference?
     template<std::derived_from<WAsset> T>
     T * Get(WAssetId const & in_id) const {
         assert(id_class_.contains(in_id));
