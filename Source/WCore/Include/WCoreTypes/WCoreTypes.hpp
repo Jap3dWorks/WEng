@@ -15,7 +15,7 @@ public:
 
     TName(std::string_view in_name)
     {
-        assert(in_name.size <= BufferSize);
+        assert(in_name.size() <= BufferSize);
         
         size = std::min(
             in_name.size(),

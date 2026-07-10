@@ -13,14 +13,17 @@ class WVkPostprocessGlobalDescriptorRAII {
 public:
 
     static inline const std::uint8_t PREV_BINDING{0}; // Previous render
-
     static inline const std::uint8_t COLOR_BINDING{1};
-    static inline const std::uint8_t ALBEDO_BINDING{2};
-    static inline const std::uint8_t NORMAL_BINDING{3};
-    static inline const std::uint8_t WS_POSITION_BINDING{4};
-    static inline const std::uint8_t DEPTH_BINDING{5};
 
-    static inline const std::uint8_t BINDING_COUNT{6};
+    static inline const std::uint8_t ALBEDO_BINDING{2};
+    static inline const std::uint8_t EMISSION_BINDING{3};    
+    static inline const std::uint8_t NORMAL_BINDING{4};
+    static inline const std::uint8_t WS_POSITION_BINDING{5};
+    static inline const std::uint8_t MRAO_BINDING{6};
+    static inline const std::uint8_t DEPTH_BINDING{7};
+    static inline const std::uint8_t EXTRA01_BINDING{8};
+
+    static inline const std::uint8_t BINDING_COUNT{9};
 
 public:    
 
@@ -165,8 +168,6 @@ private:
     }
 
     VkDescriptorSetLayout CreateDescLayout(VkDevice in_device) {
-        
-        std::array<VkDescriptorSetLayoutBinding, BINDING_COUNT> bindings{};
 
         auto buildbinding = [] (std::uint8_t _binding) -> auto {
             return VkDescriptorSetLayoutBinding{
@@ -179,12 +180,17 @@ private:
             };
         };
 
-        bindings[0] = buildbinding(PREV_BINDING);
-        bindings[1] = buildbinding(COLOR_BINDING);
-        bindings[2] = buildbinding(ALBEDO_BINDING);
-        bindings[3] = buildbinding(NORMAL_BINDING);
-        bindings[4] = buildbinding(WS_POSITION_BINDING);
-        bindings[5] = buildbinding(DEPTH_BINDING);
+        std::array bindings {
+            buildbinding(PREV_BINDING),
+            buildbinding(COLOR_BINDING),
+            buildbinding(ALBEDO_BINDING),
+            buildbinding(EMISSION_BINDING),
+            buildbinding(NORMAL_BINDING),
+            buildbinding(WS_POSITION_BINDING),
+            buildbinding(MRAO_BINDING),
+            buildbinding(DEPTH_BINDING),
+            buildbinding(EXTRA01_BINDING)
+        };
 
         return wvk::descriptor::Create(
             bindings.data(),

@@ -94,12 +94,12 @@ void WVkRender::Initialize()
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
-        WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
+        WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
-        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
     };
 
     // Offscreen Attachments
@@ -223,63 +223,12 @@ void WVkRender::Initialize()
         );
 }
 
-// // TODO use default destructor
-// void WVkRender::Destroy() {
-
-//     WFLOG("Destroy WVkRender...");
-
-//     WFLOG("Destroy Render Pipelines.");
-//     swap_chain_input_imgview_ref = VK_NULL_HANDLE;
-    
-//     gbuffers_pipelines_={};
-//     offscreen_pipeline_={};
-//     ppcss_pipelines_={};
-//     tonemapping_pipeline_={};
-
-//     global_descriptors_={};
-//     ppcess_global_descriptors_ = {};
-
-//     WFLOG("Destroy Fences and Semaphores.");
-
-//     render_sync_ = {};
-
-//     WFLOG("Destroy render targets.")
-
-//     gbuffers_attachments_ = {};
-
-//     offscreen_attachments_ = {};
-
-//     postprocess_attachments_ = {};
-
-//     tonemapping_attachments_ = {};
-
-//     swap_chain_pipeline_={};
-
-//     render_plane_ = {};
-
-//     WFLOG("Destroy Render Command Pool.");
-
-//     render_command_pool_ = {};
-
-//     render_command_buffer_ = {};
-
-//     WFLOG("Destroy Render Resources.");
-
-//     asset_render_data_ = {};
-
-//     swapchain_ = {};
-//     device_ = {};
-//     surface_ = {};
-//     instance_ = {};
-// }
-
 void WVkRender::Draw()
 {
     vkWaitForFences(
         device_.Device(),
         1,
         &render_sync_.Fence(frame_index_),
-        // &sync_fences_[frame_index_],
         VK_TRUE,
         UINT64_MAX
         );
@@ -291,7 +240,6 @@ void WVkRender::Draw()
         swapchain_.Swapchain(),
         UINT64_MAX,
         render_sync_.ImageAvailableSemaphore(semaphore_index_),
-        // sync_semaphores_[semaphore_index_].image_available,
         VK_NULL_HANDLE,
         &image_index
         );
@@ -308,7 +256,6 @@ void WVkRender::Draw()
         device_.Device(),
         1,
         &render_sync_.Fence(frame_index_)
-        // &sync_fences_[frame_index_]
         );
 
     // Begin command buffer
@@ -714,12 +661,12 @@ void WVkRender::RecreateSwapChain() {
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
         WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT,
-        WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
-        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT
+        WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
+        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT
     };
 
     offscreen_attachments_ = {
@@ -762,23 +709,23 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
     wvk::render::RndCmd_TransitionGBufferWriteLayout(
         in_command_buffer,
         gbuffers_attachments_.Albedo(in_frame_index).Image(),
+        gbuffers_attachments_.Emission(in_frame_index).Image(),
         gbuffers_attachments_.Normal(in_frame_index).Image(),
         gbuffers_attachments_.WsPosition(in_frame_index).Image(),
         gbuffers_attachments_.MrAO(in_frame_index).Image(),
-        gbuffers_attachments_.Emission(in_frame_index).Image(),
-        gbuffers_attachments_.Extra01(in_frame_index).Image(),
-        gbuffers_attachments_.Depth(in_frame_index).Image()
+        gbuffers_attachments_.Depth(in_frame_index).Image(),
+        gbuffers_attachments_.Extra01(in_frame_index).Image()
         );
 
     wvk::render::RndCmd_BeginGBuffersRendering(
         in_command_buffer,
         gbuffers_attachments_.Albedo(in_frame_index).View(),
+        gbuffers_attachments_.Emission(in_frame_index).View(),
         gbuffers_attachments_.Normal(in_frame_index).View(),
         gbuffers_attachments_.WsPosition(in_frame_index).View(),
         gbuffers_attachments_.MrAO(in_frame_index).View(),
-        gbuffers_attachments_.Emission(in_frame_index).View(),
-        gbuffers_attachments_.Extra01(in_frame_index).View(),
         gbuffers_attachments_.Depth(in_frame_index).View(),
+        gbuffers_attachments_.Extra01(in_frame_index).View(),
         gbuffers_attachments_.Extent()
         );
 
@@ -864,12 +811,12 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
     wvk::render::RndCmd_TransitionGBufferReadLayout(
         in_command_buffer,
         gbuffers_attachments_.Albedo(in_frame_index).Image(),
+        gbuffers_attachments_.Emission(in_frame_index).Image(),
         gbuffers_attachments_.Normal(in_frame_index).Image(),
         gbuffers_attachments_.WsPosition(in_frame_index).Image(),
         gbuffers_attachments_.MrAO(in_frame_index).Image(),
-        gbuffers_attachments_.Emission(in_frame_index).Image(),
-        gbuffers_attachments_.Extra01(in_frame_index).Image(),
-        gbuffers_attachments_.Depth(in_frame_index).Image()
+        gbuffers_attachments_.Depth(in_frame_index).Image(),
+        gbuffers_attachments_.Extra01(in_frame_index).Image()
         );
 }
 
@@ -913,12 +860,12 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
         offscreen_pipeline_.DescriptorSetLayout(),
         render_plane_.Sampler(),
         gbuffers_attachments_.Albedo(in_frame_index).View(),
+        gbuffers_attachments_.Emission(in_frame_index).View(),
         gbuffers_attachments_.Normal(in_frame_index).View(),
         gbuffers_attachments_.WsPosition(in_frame_index).View(),
         gbuffers_attachments_.MrAO(in_frame_index).View(),
-        gbuffers_attachments_.Emission(in_frame_index).View(),
-        gbuffers_attachments_.Extra01(in_frame_index).View(),
-        gbuffers_attachments_.Depth(in_frame_index).View()
+        gbuffers_attachments_.Depth(in_frame_index).View(),
+        gbuffers_attachments_.Extra01(in_frame_index).View()
         );
 
     // Draw Commands

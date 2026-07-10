@@ -25,12 +25,12 @@ public:
         VkPhysicalDevice in_physical_device,
         VkExtent2D in_extent,
         VkFormat in_color_format,
+        VkFormat in_emission_format,
         VkFormat in_normal_format,
         VkFormat in_ws_position_format,
         VkFormat in_mrAO_format,
-        VkFormat in_emission_format,
-        VkFormat in_extra01_format,
-        VkFormat in_depth_format
+        VkFormat in_depth_format,
+        VkFormat in_extra01_format
         ) : extent_(in_extent) {
 
         Initialize(
@@ -38,41 +38,41 @@ public:
             in_physical_device,
             in_extent,
             in_color_format,
+            in_emission_format,
             in_normal_format,
             in_ws_position_format,
             in_mrAO_format,
-            in_emission_format,
-            in_extra01_format,
-            in_depth_format
+            in_depth_format,
+            in_extra01_format
             );
     }
 
     WNODISCARD const WVkAttachmentRAII & Albedo(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].albedo;
-    }
-
-    WNODISCARD const  WVkAttachmentRAII & Normal(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].normal;
-    }
-
-    WNODISCARD const WVkAttachmentRAII & WsPosition(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].ws_position;
-    }
-
-    WNODISCARD const WVkAttachmentRAII & MrAO(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].mrAO;
+        return frame_attachments_[frame_index].albedo;
     }
 
     WNODISCARD const WVkAttachmentRAII & Emission(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].emission;
+        return frame_attachments_[frame_index].emission;
     }
 
-    WNODISCARD const WVkAttachmentRAII & Extra01(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].extra01;
+    WNODISCARD const  WVkAttachmentRAII & Normal(std::uint8_t frame_index) const noexcept {
+        return frame_attachments_[frame_index].normal;
+    }
+
+    WNODISCARD const WVkAttachmentRAII & WsPosition(std::uint8_t frame_index) const noexcept {
+        return frame_attachments_[frame_index].ws_position;
+    }
+
+    WNODISCARD const WVkAttachmentRAII & MrAO(std::uint8_t frame_index) const noexcept {
+        return frame_attachments_[frame_index].mrAO;
     }
 
     WNODISCARD const WVkAttachmentRAII & Depth(std::uint8_t frame_index) const noexcept {
-        return attachments_[frame_index].depth;
+        return frame_attachments_[frame_index].depth;
+    }
+
+    WNODISCARD const WVkAttachmentRAII & Extra01(std::uint8_t frame_index) const noexcept {
+        return frame_attachments_[frame_index].extra01;
     }
 
     WNODISCARD VkExtent2D Extent() const noexcept {
@@ -86,20 +86,28 @@ private:
         VkPhysicalDevice in_physical_device,
         VkExtent2D in_extent,
         VkFormat in_color_format,
+        VkFormat in_emission_format,
         VkFormat in_normal_format,
         VkFormat in_ws_position_format,
         VkFormat in_mrAO_format,
-        VkFormat in_emission_format,
-        VkFormat in_extra01_format,
-        VkFormat in_depth_format
+        VkFormat in_depth_format,
+        VkFormat in_extra01_format
         ) {
-        for(Attachments & attchs : attachments_) {
+        for(Attachments & attchs : frame_attachments_) {
 
             // albedo
             attchs.albedo = WVkAttachmentRAII(
                 in_device,
                 in_physical_device,
                 in_color_format,
+                in_extent
+                );
+
+            // emission
+            attchs.emission = WVkAttachmentRAII(
+                in_device,
+                in_physical_device,
+                in_emission_format,
                 in_extent
                 );
 
@@ -126,23 +134,7 @@ private:
                 in_mrAO_format,
                 in_extent
                 );
-            
-            // emission
-            attchs.emission = WVkAttachmentRAII(
-                in_device,
-                in_physical_device,
-                in_emission_format,
-                in_extent
-                );
 
-            // extra01
-            attchs.extra01 = WVkAttachmentRAII(
-                in_device,
-                in_physical_device,
-                in_emission_format,
-                in_extent
-                );
-            
             // depth
             attchs.depth = WVkAttachmentRAII(
                 in_device,
@@ -152,6 +144,14 @@ private:
                 WVkAttachmentRAII::DEPTH_USAGE_FLAGS,
                 WVkAttachmentRAII::DEPTH_ASPECT_FLAGS
                 );
+            
+            // extra01
+            attchs.extra01 = WVkAttachmentRAII(
+                in_device,
+                in_physical_device,
+                in_emission_format,
+                in_extent
+                );
         }
     }
 
@@ -159,14 +159,14 @@ private:
 
     struct Attachments {
         WVkAttachmentRAII albedo{};
+        WVkAttachmentRAII emission{};
         WVkAttachmentRAII normal{};
         WVkAttachmentRAII ws_position{};
         WVkAttachmentRAII mrAO{};          // /metallic/roughness/ambientOclusion
-        WVkAttachmentRAII emission{};
-        WVkAttachmentRAII extra01{};
         WVkAttachmentRAII depth{};
+        WVkAttachmentRAII extra01{};
     }; 
-    std::array<Attachments, FramesInFlight> attachments_{};
+    std::array<Attachments, FramesInFlight> frame_attachments_{};
 
     VkExtent2D extent_{};
 

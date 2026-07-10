@@ -158,11 +158,11 @@ namespace wvr::gbuffer_pipelines {
         // dynamic rendering color formats
         std::array<VkFormat, WENG_VK_GBUFFERS_COUNT-1> color_formats  {
             WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,      // albedo
+            WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,   // emission
             WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,     // normal
             WENG_VK_GBUFFER_RENDER_WSPOSITION_FORMAT, // ws_position
-            WENG_VK_GBUFFER_RENDER_MTLLRGHAO_FORMAT,  // metallic roughness AO
-            WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,   // emission
-            WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,    // extra 01
+            WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,       // metallic roughness AO
+            WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT     // extra 01
         };
 
         std::array<VkPipelineColorBlendAttachmentState, WENG_VK_GBUFFERS_COUNT-1>
@@ -197,13 +197,10 @@ namespace wvr::gbuffer_pipelines {
             VK_DYNAMIC_STATE_SCISSOR
         };
 
-        // TODO use weng::vk:vkstructs
-
         VkPipelineDynamicStateCreateInfo dynamic_state_create_info =
             wvk::types::CreateVkPipelineDynamicStateCreateInfo();
         dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
         dynamic_state_create_info.pDynamicStates = dynamic_states.data();
-
 
         VkPipelineLayoutCreateInfo pipeline_layout_info =
             wvk::types::CreateVkPipelineLayoutCreateInfo();

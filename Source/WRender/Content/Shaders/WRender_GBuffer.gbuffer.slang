@@ -9,14 +9,23 @@ import GBuffer.GBuffer;
 // Set 1 binding 0 contains graphic_ubo.
 
 [[vk::binding(1, 1)]]  // binding, set
-ConstantBuffer<Sampler2D> texture;
+ConstantBuffer<Sampler2D> albedo;
+
+// [[vk::binding(2, 1)]]  // binding, set
+// ConstantBuffer<Sampler2D> emission;
+
+// [[vk::binding(3, 1)]]  // binding, set
+// ConstantBuffer<Sampler2D> normal;
+
+// [[vk::binding(4, 1)]]  // binding, set
+// ConstantBuffer<Sampler2D> mrAO;
 
 // main functions
 // --------------
 
 [shader("vertex")]
-VSGraphicOutput vsMain(VSGraphicInput input) {
-    VSGraphicOutput output;
+VSGBufferOutput vsMain(VSGBufferInput input) {
+    VSGBufferOutput output;
 
     output.normal = normalize(mul(float3x3(graphic_ubo.normal_matrix), input.normal));
 
@@ -30,18 +39,20 @@ VSGraphicOutput vsMain(VSGraphicInput input) {
 }
 
 [shader("fragment")]
-FSOutput fsMain(VSGraphicOutput vert_in) : SV_TARGET {
-    FSOutput output;
+FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
+    FSGBUFferOutput output;
 
-    output.albedo = texture.Sample(vert_in.tex_coord);
+    output.albedo = albedo.Sample(vert_in.tex_coord);
+
+    // output.emission = emission.Sample(vert_in.tex_coord);
+    output.emission = float4(0.f);
 
     output.normal = float4(vert_in.normal, 1.f);
 
     output.ws_position = float4(vert_in.world_pos, 1.f);
 
-    output.mrAO = float4(0.f);
-
-    output.emission = float4(0.f);
+    // output.mrAO = mrAO.Sample(vert_in.tex_coord);
+    output.mrAO = float(0.f);
 
     output.extra01 = float4(0.f);
 

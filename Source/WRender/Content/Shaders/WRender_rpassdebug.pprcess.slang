@@ -28,7 +28,7 @@ VSPostprocessOutput vsMain(VSPostprocessInput input)
 float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
 {
     float2 uv = vertIn.tex_coord;
-    
+
     if (uv.x < 0.5) {
         if (uv.y <0.5) {
             return previous.Sample(uv);

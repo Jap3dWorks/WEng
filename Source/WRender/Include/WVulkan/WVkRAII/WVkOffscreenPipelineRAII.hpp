@@ -125,19 +125,16 @@ private:
 
             pool_sizes[0]={};
             pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            // bytes reserved for Uniform Buffer descriptors (like shader parameters)
-            pool_sizes[0].descriptorCount = 32;
+            pool_sizes[0].descriptorCount = 4;
         
             pool_sizes[1]={};
             pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            // 10 images
-            pool_sizes[1].descriptorCount = 10;  // TODO to CONFIG
+            pool_sizes[1].descriptorCount = 12;  // TODO to CONFIG
 
             VkDescriptorPoolCreateInfo pool_info{};
             pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
             pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
             pool_info.pPoolSizes = pool_sizes.data();
-            // max number of sets (an image is a set)
             pool_info.maxSets = 32;
 
             if (vkCreateDescriptorPool(
@@ -154,22 +151,22 @@ private:
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
 
-        // albedo,normal,ws_position,mrAO,emission,extra01,depth
+        // albedo,emission,normal,ws_position,mrAO,depth,(extra01)
 
-        std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> sampler_bindings;
-        for(std::uint32_t i=0; i<sampler_bindings.size(); i++) {
-            sampler_bindings[i]=wvk::types::CreateVkDescriptorSetLayoutBinding();
-            sampler_bindings[i].binding = i;
-            sampler_bindings[i].descriptorCount = 1;
-            sampler_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            sampler_bindings[i].pImmutableSamplers = nullptr;
-            sampler_bindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> dsl_bindings;
+        for(std::uint32_t i=0; i<dsl_bindings.size(); i++) {
+            dsl_bindings[i]=wvk::types::CreateVkDescriptorSetLayoutBinding();
+            dsl_bindings[i].binding = i;
+            dsl_bindings[i].descriptorCount = 1;
+            dsl_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            dsl_bindings[i].pImmutableSamplers = nullptr;
+            dsl_bindings[i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         }
 
         VkDescriptorSetLayoutCreateInfo layout_info{};
         layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layout_info.bindingCount = static_cast<std::uint32_t>(sampler_bindings.size());
-        layout_info.pBindings=sampler_bindings.data();
+        layout_info.bindingCount = static_cast<std::uint32_t>(dsl_bindings.size());
+        layout_info.pBindings=dsl_bindings.data();
 
         if (vkCreateDescriptorSetLayout(device_,
                                         &layout_info,
@@ -265,8 +262,6 @@ private:
                 &dynamic_state,
                 pipeline_layout_
             );
-
-        // Dynamic rendering info
 
         VkFormat color_format = WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT;
 

@@ -123,13 +123,12 @@ namespace wvk::render {
         const VkDescriptorSetLayout & in_desc_lay,
         const VkSampler & in_sampler,
         const VkImageView & in_albedo_view,
+        const VkImageView & in_emission_view,
         const VkImageView & in_normal_view,
         const VkImageView & in_ws_position_view,
         const VkImageView & in_mrAO_view,
-        const VkImageView & in_emission_view,
-        const VkImageView & in_extra01_view,
-        // const VkImageView & in_extra02_view,
-        const VkImageView & in_depth_view
+        const VkImageView & in_depth_view,
+        const VkImageView & in_extra01_view
         ) {
         VkDescriptorSet descriptor_set{};
         VkDescriptorSetAllocateInfo alloc_info{};
@@ -151,12 +150,13 @@ namespace wvk::render {
 
         std::uint32_t idx=0;
         for (const VkImageView & vw : {in_albedo_view,
+                                       in_emission_view,
                                        in_normal_view,
                                        in_ws_position_view,
                                        in_mrAO_view,
-                                       in_emission_view,
-                                       in_extra01_view,
-                                       in_depth_view}) {
+                                       in_depth_view,
+                                       in_extra01_view
+                                       }) {
 
             image_infos[idx] = wvk::types::CreateVkDescriptorImageInfo();
             image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -176,7 +176,7 @@ namespace wvk::render {
         }
 
         // The depth image layout
-        image_infos.back().imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+        image_infos[5].imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
         vkUpdateDescriptorSets(
             vk_device,
@@ -381,18 +381,28 @@ namespace wvk::render {
     inline void RndCmd_TransitionGBufferWriteLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_albedo,
+        const VkImage & in_emission,
         const VkImage & in_normal,
         const VkImage & in_ws_position,
         const VkImage & in_mrAO,
-        const VkImage & in_emission,
-        const VkImage & in_extra01,
-        // const VkImage & in_extra02,
-        const VkImage & in_depth
+        const VkImage & in_depth,
+        const VkImage & in_extra01
         ) {
         // Image Layouts
         RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             in_albedo,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            {},
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            );
+
+        RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_emission,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             {},
@@ -436,17 +446,6 @@ namespace wvk::render {
 
         RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
-            in_emission,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            {},
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-            );
-
-        RndCmd_TransitionRenderImageLayout(
-            in_command_buffer,
             in_extra01,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -455,17 +454,6 @@ namespace wvk::render {
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
             );
-
-        // RndCmd_TransitionRenderImageLayout(
-        //     in_command_buffer,
-        //     in_extra02,
-        //     VK_IMAGE_LAYOUT_UNDEFINED,
-        //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        //     {},
-        //     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        //     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        //     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        //     );
 
         RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
@@ -483,18 +471,28 @@ namespace wvk::render {
     inline void RndCmd_TransitionGBufferReadLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_albedo,
+        const VkImage & in_emission,
         const VkImage & in_normal,
         const VkImage & in_ws_position,
         const VkImage & in_mrAO,
-        const VkImage & in_emission,
-        const VkImage & in_extra01,
-        // const VkImage & in_extra02,
-        const VkImage & in_depth
+        const VkImage & in_depth,
+        const VkImage & in_extra01
         ) {
 
         wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
             in_albedo,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+        wvk::render::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_emission,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -527,6 +525,17 @@ namespace wvk::render {
 
         wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
+            in_mrAO,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
+
+        wvk::render::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
             in_depth,
             VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL,
@@ -536,17 +545,28 @@ namespace wvk::render {
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
             VK_IMAGE_ASPECT_DEPTH_BIT
             );
+
+        wvk::render::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            in_extra01,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+            );
     }
 
     inline void RndCmd_BeginGBuffersRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_albedo_view,
+        const VkImageView & in_emission_view,
         const VkImageView & in_normal_view,
         const VkImageView & in_ws_position_view,
         const VkImageView & in_mrAO_view,
-        const VkImageView & in_emission_view,
-        const VkImageView & in_extra01_view,
         const VkImageView & in_depth_view,
+        const VkImageView & in_extra01_view,
         const VkExtent2D & in_extent
         ) {
 
@@ -561,33 +581,33 @@ namespace wvk::render {
         // TODO WENG_ALBEDO_CLEAR_VALUE
         color_attachments[0].clearValue = {0.18, 0.18, 0.18, 1.f};
 
-        // Normal Attachment
+        // emission attachment
         color_attachments[1] = wvk::types::CreateVkRenderingAttachmentInfo();
-        color_attachments[1].imageView = in_normal_view;
+        color_attachments[1].imageView = in_emission_view;
         color_attachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         color_attachments[1].clearValue = {0.f, 0.f, 0.f, 1.f};
 
-        // WS Position Attachment
+        // Normal Attachment
         color_attachments[2] = wvk::types::CreateVkRenderingAttachmentInfo();
-        color_attachments[2].imageView = in_ws_position_view;
+        color_attachments[2].imageView = in_normal_view;
         color_attachments[2].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         color_attachments[2].clearValue = {0.f, 0.f, 0.f, 1.f};
 
-        // mrAO attachment
+        // WS Position Attachment
         color_attachments[3] = wvk::types::CreateVkRenderingAttachmentInfo();
-        color_attachments[3].imageView = in_mrAO_view;
+        color_attachments[3].imageView = in_ws_position_view;
         color_attachments[3].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         color_attachments[3].clearValue = {0.f, 0.f, 0.f, 1.f};
 
-        // emission attachment
+        // mrAO attachment
         color_attachments[4] = wvk::types::CreateVkRenderingAttachmentInfo();
-        color_attachments[4].imageView = in_emission_view;
+        color_attachments[4].imageView = in_mrAO_view;
         color_attachments[4].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         color_attachments[4].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         color_attachments[4].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -980,26 +1000,42 @@ namespace wvk::render {
             };
         };
 
-        std::array<VkDescriptorImageInfo,
-                   out_ppcss.BINDING_COUNT> image_infos;
+        // std::array<VkDescriptorImageInfo,
+        //            out_ppcss.BINDING_COUNT> image_infos;
 
-        image_infos[out_ppcss.PREV_BINDING] =
-            to_desc_info(offscrn_attach.Color(in_frm_indx).View());
+        // image_infos[out_ppcss.PREV_BINDING] =
+        //     to_desc_info(offscrn_attach.Color(in_frm_indx).View());
 
-        image_infos[out_ppcss.COLOR_BINDING] =
-            to_desc_info(offscrn_attach.Color(in_frm_indx).View());
+        // image_infos[out_ppcss.COLOR_BINDING] =
+        //     to_desc_info(offscrn_attach.Color(in_frm_indx).View());
 
-        image_infos[out_ppcss.ALBEDO_BINDING] =
-            to_desc_info(gbffr_attach.Albedo(in_frm_indx).View());
+        // image_infos[out_ppcss.ALBEDO_BINDING] =
+        //     to_desc_info(gbffr_attach.Albedo(in_frm_indx).View());
+
+        // image_infos[out_ppcss.COLOR_BINDING] =
+        //     to_desc_info()
             
-        image_infos[out_ppcss.NORMAL_BINDING] =
-            to_desc_info(gbffr_attach.Normal(in_frm_indx).View());
+        // image_infos[out_ppcss.NORMAL_BINDING] =
+        //     to_desc_info(gbffr_attach.Normal(in_frm_indx).View());
             
-        image_infos[out_ppcss.WS_POSITION_BINDING] =
-            to_desc_info(gbffr_attach.WsPosition(in_frm_indx).View());
+        // image_infos[out_ppcss.WS_POSITION_BINDING] =
+        //     to_desc_info(gbffr_attach.WsPosition(in_frm_indx).View());
 
-        image_infos[out_ppcss.DEPTH_BINDING] =
-            to_desc_info(gbffr_attach.Depth(in_frm_indx).View());
+        // image_infos[out_ppcss.DEPTH_BINDING] =
+        //     to_desc_info(gbffr_attach.Depth(in_frm_indx).View());
+        
+
+        std::array image_infos {
+            to_desc_info(offscrn_attach.Color(in_frm_indx).View()),
+            to_desc_info(offscrn_attach.Color(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.Albedo(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.Emission(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.Normal(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.WsPosition(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.MrAO(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.Depth(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.Extra01(in_frm_indx).View())
+        };
 
         out_ppcss.UpdateDescriptorSet(
             in_frm_indx,

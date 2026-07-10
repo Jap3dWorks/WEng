@@ -1,10 +1,10 @@
+#include "WCore/WCore.hpp"
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/Level.hpp"
 #include "WComponents/Light/WDirectionalLightComponent.hpp"
 #include "WComponents/Light/WPointLightComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
-#include "WCore/WCore.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
@@ -243,11 +243,21 @@ namespace {
                 );
         }
 
+        if (in_material.emissiveTexture) {
+            if (WAssetId emissive_wid = GetWAssetId(
+                    in_material.emissiveTexture
+                    )) {
+                texture_params.emplace_back(
+                    2, emissive_wid
+                    );
+            }
+        }
+
         if (WAssetId normal_wid = GetWAssetId(
                 in_material.normalTexture
                 )) {
             texture_params.emplace_back(
-                2, // pbr binding constant
+                3, // pbr binding constant
                 normal_wid
                 );
         }
@@ -260,7 +270,7 @@ namespace {
                    ->roughnessMetallicOcclusionTexture
                    )) {
                 texture_params.emplace_back(
-                    3,
+                    4,
                     mrAO
                     );
             }
@@ -896,15 +906,6 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     // TODO create a pbr shader
     // Materials and textures
     
-    // gltf_asset.materials.size();
-
-    // gltf_asset.samplers.size();
-    // gltf_asset.images.size();
-
-    // Collect textures
-
-    // auto textures_data = CollectImages(gltf_asset);
-
     auto [text_assets, text_names] = CollectImages(gltf_asset);
 
     // Create Texture Assets
@@ -915,7 +916,6 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
         in_asset_db
         );
 
-    // TODO Collect Materials
     auto [mat_assets, mat_names] =CollectMaterials(
         gltf_asset,
         textures_wids

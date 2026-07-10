@@ -82,11 +82,11 @@ public:
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const VkDevice & in_device,
                              const wct::render::WPipeParamDescriptorList & params,
-                             ConfigInfoFn && info_fn) {
+                             ConfigInfoFn && config_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
 
-        std::forward<ConfigInfoFn>(info_fn)(descriptor_set_layout_info, params);
+        std::forward<ConfigInfoFn>(config_fn)(descriptor_set_layout_info, params);
 
         descriptor_set_layouts.CreateAt(
             in_id,
