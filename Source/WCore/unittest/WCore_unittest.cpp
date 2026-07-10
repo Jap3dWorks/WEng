@@ -6,11 +6,12 @@
 #include <catch2/catch.hpp>
 
 #include "WCore/TRef.hpp"
-#include "WCore/TFunction.hpp"
+// #include "WCore/TFunction.hpp"
 #include "WLog.hpp"
 
 #include <vector>
 #include <cstdio>
+#include <cstdint>
 #include <print>
 
 struct B{};

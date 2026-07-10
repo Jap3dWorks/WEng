@@ -1,8 +1,10 @@
 #pragma once
 
-#include "WCore/TFunction.hpp"
+// #include "WCore/TFunction.hpp"
 #include "WCore/WConcepts.hpp"
+
 #include <utility>
+#include <cstdint>
 
 template<typename _ValueType,
          typename _IterType,

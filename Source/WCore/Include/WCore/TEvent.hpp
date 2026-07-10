@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/TFunction.hpp"
+// #include "WCore/TFunction.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WCore/IdPool.hpp"
@@ -8,13 +8,16 @@
 #include <cstdint>
 #include <unordered_map>
 #include <utility>
+#include <functional>
 
 template<typename ... Args>
 struct TEvent {
 
 public:
     
-    using FnType = TFnLmbd16<void, Args...>;
+    // using FnType = TFnLmbd16<void, Args...>;
+
+    using FnType = std::function<void(Args...)>;
 
 public:
 

@@ -7,7 +7,7 @@
 #include <catch2/catch.hpp>
 
 #include "WCore/TRef.hpp"
-#include "WCore/TFunction.hpp"
+// #include "WCore/TFunction.hpp"
 #include "WCore/TWAllocator.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"

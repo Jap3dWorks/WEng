@@ -7,6 +7,7 @@
 #include "WEngineObjects/TWRef.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WLog.hpp"
+#include "WObjectDb/WDbBuilder.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -23,9 +24,10 @@ class WENGINEOBJECTS_API WObjectDb {
 
 public:
 
+    using ObjectDbType = IObjectDataBase<WObjClass, typename WIdType::IdType>;
+
     using DbType =
-        std::unordered_map<const WClass *,
-        std::unique_ptr<IObjectDataBase<WObjClass, typename WIdType::IdType>>>;
+        std::unordered_map<const WClass *, std::unique_ptr<ObjectDbType>>;
 
     template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,
@@ -65,18 +67,9 @@ public:
      * Asserts that the WId doesn't exists for the indicated class already (only in debug).
      * If your replace an existing WId for the indicated class behaviour is undefined.
      */
-    void CreateAt(const WClass * in_class,
-                  const WIdType& in_id) {
-        EnsureClassStorage(in_class);
-
-        assert(!db_[in_class]->Contains(in_id));
-
-        db_[in_class]->CreateAt(in_id);
-    }
-
     template<std::derived_from<WObjClass> T>
     void CreateAt(const WIdType & in_id) {
-        EnsureClassStorage(T::StaticClass());
+        EnsureClassStorage<T>();
         
         assert(!db_[T::StaticClass()]->Contains(in_id));
 
@@ -232,20 +225,105 @@ private:
         }
     }
 
-    void EnsureClassStorage(const WClass * in_class) {
-        if (!db_.contains(in_class)) {
-            db_[in_class] =
-                in_class->DbBuilder().Create<WObjClass, typename WIdType::IdType>();
+    template<typename T>
+    static inline void OnAllocateEventManager(
+        void * prev_ptr, std::size_t prev_n,
+        void * new_ptr, std::size_t new_n
+        ) {
+        
+    }
 
-            db_[in_class]->Reserve(
+    template<typename T>
+    static inline void OnDeallocateEventManager(
+        void * ptr, std::size_t n
+        ) {
+        
+    }
+
+    template<std::derived_from<WObjClass> T>
+    void EnsureClassStorage() {
+        if (!db_.contains(T::StaticClass())) {
+            db_[T::StaticClass()] =
+                T::StaticClass()->DbBuilder()
+                . template Create <WObjClass, typename WIdType::IdType>();
+
+            db_[T::StaticClass()]->Reserve(
                 initial_memory_size_
                 );
+
+            WDbBuilder::RegisterOnAllocateEvent<T>(&OnAllocateEventManager<T>);
+            WDbBuilder::RegisterOnDeallocateEvent<T>(&OnDeallocateEventManager<T>);
+
+            // db_[T::StaticClass()]->
+            db_[T::StaticClass()]->BData();
         }
     }
 
     DbType db_{};
 
     std::size_t initial_memory_size_{1024};
-
 };
 
+template<CWObjectDerived WObjClass, CIsWId WIdType=WId<>>
+struct StorageEvents {
+
+    using WObjectDb = WObjectDb<WObjClass,WIdType>;
+
+    static inline std::unordered_map<
+        void const *,
+        WObjectDb * >
+    ptr_container;
+    
+    static inline std::unordered_map<WObjectDb*, std::vector<void const *>> container_ptrs;
+
+
+    StorageEvents()=delete;
+
+    StorageEvents(WObjectDb * in_object_db ) :
+        db_ref_(in_object_db) {}
+    
+    StorageEvents(const StorageEvents&) {
+        // db_ref_->
+    };
+    
+    StorageEvents(StorageEvents&&) = default;
+    StorageEvents& operator=(const StorageEvents&) = default;
+    StorageEvents& operator=(StorageEvents&&) = default;
+
+    ~StorageEvents() {
+        if(db_ref_ && container_ptrs.contains(db_ref_)) {
+            for (auto ptr : container_ptrs[db_ref_]) {
+                ptr_container.erase(ptr);
+            }
+            container_ptrs.erase(db_ref_);
+        }
+    }
+
+    void RegPtrReference(void const * ptrref) {
+        ptr_container[ptrref]= db_ref_;
+        container_ptrs[db_ref_].push_back(ptrref);
+    }
+
+    void DeregPtrReference(void const * ptr_ref ) {
+        if(ptr_container.contains(ptr_ref)) {
+            ptr_container.erase(ptr_ref);
+        }
+
+        auto it = std::find(container_ptrs[db_ref_].begin(),
+                            container_ptrs[db_ref_].end(),
+                            ptr_ref);
+        
+        if (it != container_ptrs[db_ref_].end()) {
+            *it = container_ptrs[db_ref_].back();
+            
+            container_ptrs[db_ref_].resize(
+                container_ptrs[db_ref_].size() - 1
+                );
+        }
+    }
+
+private:
+
+    WObjectDb * db_ref_{nullptr};
+    
+};

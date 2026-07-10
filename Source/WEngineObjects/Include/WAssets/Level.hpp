@@ -27,10 +27,13 @@ namespace was {
 
         template<std::derived_from<WEntity> T>
         WEntityId CreateEntity() {
-            return CreateEntity(T::StaticClass());
-        }
+            std::string actor_path = WEntityPath(T::StaticClass());
 
-        WEntityId CreateEntity(WClass const * in_class);
+            WEntityId id = entity_component_db
+                .CreateEntity<T>(actor_path.c_str());
+
+            return id;
+        }
 
         WEntity * GetEntity(const WEntityId & in_id) const ;
 
@@ -43,8 +46,14 @@ namespace was {
         }
 
         template<std::derived_from<WComponent> T>
-        WEntityComponentId CreateComponent(const WEntityId & in_entity_id) {
-            return CreateComponent(in_entity_id, T::StaticClass());
+            WEntityComponentId CreateComponent(const WEntityId & in_entity_id) {
+            std::string component_path=ComponentPath(in_entity_id, T::StaticClass());
+
+            entity_component_db.CreateComponent<T>(in_entity_id);
+
+            // WEntityComponentId
+            return GetEntityComponentId<T>(in_entity_id, 0);
+
         }
 
         WEntityComponentId CreateComponent(const WEntityId & in_entity_id,

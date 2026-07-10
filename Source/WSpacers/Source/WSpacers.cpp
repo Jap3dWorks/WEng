@@ -237,7 +237,6 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
     auto * param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
     param_asset->Set_texture_list(
-    // param_asset->RenderPipelineParameters().texture_params.push_back(
         {
             {.binding=1, .value=tex_ids[0]}
         }

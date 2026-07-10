@@ -42,19 +42,27 @@ public:
 
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity(const char * in_name) {
-        return CreateEntity(T::StaticClass(), in_name);
-    }
+        assert(
+            in_class == WEntity::StaticClass() ||
+            WEntity::StaticClass()->IsBaseOf(in_class)
+            );
 
-    WEntityId CreateEntity(const WClass * in_class, const char * in_name);
+        auto id = CreateEntityId(T::StaticClass());
+
+        entity_db_.CreateAt<T>(id);
+
+        UpdateEntityData(T::StaticClass(), id, in_name);
+
+        return id;
+
+    }
 
     template<std::derived_from<WEntity> T>
     void InsertEntity(const WEntityId & in_id, const char * in_name) {
-        InsertEntity(T::StaticClass(), in_id, in_name);
+        entity_db_.CreateAt<T>(in_id);
+        UpdateEntityData(T::StaticClass(), in_id, in_name);
+        entity_id_pool_.ExtractFromPool(in_id.GetId());
     }
-
-    void InsertEntity(const WClass * in_class,
-                      const WEntityId & in_id,
-                      const char * in_name);
 
     WEntity * GetEntity(const WEntityId & in_id) const {
         assert(id_entityclass_.contains(in_id));
@@ -69,8 +77,10 @@ public:
     }
 
     template<std::derived_from<WEntity> T>
-    T * GetFirstEntity(WEntityId & in_id) const {
-        return entity_db_.GetFirst<T>(in_id);
+    T * GetFirstEntity(WEntityId & out_id) const {
+        auto result =  entity_db_.GetFirst<T>(out_id);
+
+        return result;
     }
 
     /**
@@ -93,14 +103,23 @@ public:
 
     template<std::derived_from<WComponent> T>
     void CreateComponent(const WEntityId & in_entity_id) {
-        return CreateComponent(T::StaticClass(), in_entity_id);
+        assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
+        assert(entity_db_.Contains(id_entityclass_[in_entity_id], in_entity_id));
+
+        UpdateComponentMetadata(T::StaticClass(), in_entity_id);
+
+        component_db_.CreateAt<T>(in_entity_id);
+
+        component_db_
+            .Get<T>(in_entity_id)
+            .Set_entity_id(in_entity_id);
     }
 
-    /**
-     * @brief Create component for entity id.
-     */
-    void CreateComponent(const WClass * in_class,
-                         const WEntityId & in_entity_id);
+    // /**
+    //  * @brief Create component for entity id.
+    //  */
+    // void CreateComponent(const WClass * in_class,
+    //                      const WEntityId & in_entity_id);
 
     TWRef<WComponent> GetComponentRef(const WClass * in_class,
                                       const WEntityId & in_entity_id) const {

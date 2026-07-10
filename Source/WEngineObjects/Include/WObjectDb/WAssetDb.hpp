@@ -44,22 +44,31 @@ public:
 
     template<std::derived_from<WAsset> T>
     WAssetId Create(std::string_view in_fullname) {
-        return Create(T::StaticClass(), in_fullname);
-    }
+        WAssetId id = GetIdPool(T::StaticClass()).Generate();
 
-    WAssetId Create(WClass const * in_class,
-                    std::string_view in_fullname) {
-        WAssetId id = GetIdPool(in_class).Generate();
-
-        id_class_[id] = in_class;
+        id_class_[id] = T::StaticClass();
     
-        object_manager_.CreateAt(in_class, id);
+        object_manager_.CreateAt<T>(id);
         
-        object_manager_.Get(in_class, id)->Set_asset_id(id);
-        object_manager_.Get(in_class, id)->Set_name(in_fullname);
+        object_manager_.Get<T>(id).Set_asset_id(id);
+        object_manager_.Get<T>(id).Set_name(in_fullname);
 
         return id;
     }
+
+    // WAssetId Create(WClass const * in_class,
+    //                 std::string_view in_fullname) {
+    //     WAssetId id = GetIdPool(in_class).Generate();
+
+    //     id_class_[id] = in_class;
+    
+    //     object_manager_.CreateAt(in_class, id);
+        
+    //     object_manager_.Get(in_class, id)->Set_asset_id(id);
+    //     object_manager_.Get(in_class, id)->Set_name(in_fullname);
+
+    //     return id;
+    // }
 
     template<std::derived_from<WAsset> T>
     WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
@@ -100,6 +109,8 @@ public:
         return object_manager_.Get(id_class_.at(in_id), in_id);
     }
 
+    WAsset * Get(std::string_view asset_name) const;
+
 private:
 
     wcr::IdPool<WAssetId::IdType> & GetIdPool(WClass const * in_class) {
@@ -132,5 +143,12 @@ private:
     };
 
     std::unordered_map<WAssetId, WClass const *> id_class_{};
+
+    struct NameData{
+        std::string_view name;
+        WAssetId asset_id;
+        WClass const * asset_class;
+    };
+
 
 };

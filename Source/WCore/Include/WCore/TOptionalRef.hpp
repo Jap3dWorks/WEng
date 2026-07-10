@@ -1,6 +1,7 @@
 #pragma once
 
-#include "WCore/TFunction.hpp"
+// #include "WCore/TFunction.hpp"
+#include <functional>
 
 struct NullOptionalRef_t
 {
@@ -122,18 +123,18 @@ public:
 
     // fill with IfEmpty IfEmptyOrElse 
 
-    void IfEmpty(TFunction<void()> p) {
+    void IfEmpty(std::function<void()> p) {
         if (IsEmpty()) { p(); }
     }
 
-    void IfPresent(TFunction<void(T & item)> p)
+    void IfPresent(std::function<void(T & item)> p)
     {
         if(IsPresent()) {
             p(Get());
         }
     }
 
-    void IfPresentOrElse(TFunction<void(T & item)> p1, TFunction<void()> p2) {
+    void IfPresentOrElse(std::function<void(T & item)> p1, std::function<void()> p2) {
         if (IsPresent()) {
             p1(Get());
         }
