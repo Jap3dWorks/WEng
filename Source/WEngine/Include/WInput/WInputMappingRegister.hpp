@@ -15,7 +15,7 @@ class WEngine;
 class WENGINE_API WInputMappingRegister {
 private:
 
-    using EventType = TEvent<const WInputValuesStruct &, WActionAsset const *, WEngine *>;
+using EventType = TEvent<void(const WInputValuesStruct &, WActionAsset const *, WEngine *)>;
 
     using MappingAssetsSTackType = TStack<WAssetId>;
 

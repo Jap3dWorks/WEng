@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/TEvent.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TIterator.hpp"
 #include "WCore/TObjectDataBase.hpp"
@@ -27,12 +28,12 @@ public:
     using ObjectDbType = IObjectDataBase<WObjClass, typename WIdType::IdType>;
 
     using DbType =
-        std::unordered_map<const WClass *, std::unique_ptr<ObjectDbType>>;
+        std::unordered_map<WClass const *, std::unique_ptr<ObjectDbType>>;
 
     template<typename ValueFn, typename IncrFn>
     using ClassIterator = TIterator<const WClass *,
                                     typename DbType::const_iterator,
-                                    const WClass *,
+                                    WClass const *,
                                     ValueFn,
                                     IncrFn>;
 
@@ -214,6 +215,14 @@ public:
         return db_.at(in_class)->Count();
     }
 
+    WNODISCARD auto & OnAllocateEvent() {
+        return on_allocate_events_;
+    }
+
+    WNODISCARD auto & OnDeallocateEvent() {
+        return on_deallocate_events_;
+    }
+
 private:
 
     void CopyContainersFrom(WObjectDb const & other) {
@@ -225,20 +234,137 @@ private:
         }
     }
 
-    template<typename T>
-    static inline void OnAllocateEventManager(
-        void * prev_ptr, std::size_t prev_n,
-        void * new_ptr, std::size_t new_n
-        ) {
-        
-    }
+    DbType db_{};
 
-    template<typename T>
-    static inline void OnDeallocateEventManager(
-        void * ptr, std::size_t n
-        ) {
+    std::size_t initial_memory_size_{1024};
+
+    TEvent<void(WObjectDb *, WClass const *)> on_allocate_events_{};
+    TEvent<void(WObjectDb *, WClass const *)> on_deallocate_events_{};
+
+    struct StorageEvents {
+
+        template<typename T>
+        static inline void OnAllocateEventManager(
+            void * prev_ptr, std::size_t prev_n,
+            void * new_ptr, std::size_t new_n
+            ) {
+
+            WObjectDb * object_db = GetObjectDb(prev_ptr);
+
+            if (!object_db) return;
+
+            object_db->storage_events_.RegPtrReference(new_ptr);
+
+            object_db->on_allocate_events_.Emit(
+                object_db, T::StaticClass()
+                );
+        }
+
+        template<typename T>
+        static inline void OnDeallocateEventManager(
+            void * ptr, std::size_t n
+            ) {
+
+            WObjectDb * object_db = GetObjectDb(ptr);
+
+            if (!object_db) return;
+
+            object_db->storage_events_.DeregPtrReference(ptr);
+
+            object_db->on_deallocate_events_.Emit(
+                object_db, T::StaticClass()
+                );
+        }
+
+        static inline WObjectDb * GetObjectDb(void const * ref_ptr) {
+            if (ptr_container.contains(ref_ptr)) {
+                return ptr_container[ref_ptr];
+            }
+            return nullptr;
+        }
+
+        StorageEvents()=delete;
+
+        StorageEvents(WObjectDb * in_object_db ) :
+            db_ref_(in_object_db) {
+            Initialize();
+        }
+    
+        StorageEvents(const StorageEvents&) = delete;
+        StorageEvents(StorageEvents&&) = delete;
         
-    }
+        StorageEvents& operator=(const StorageEvents& other) {
+            if (this != &other) {
+                Clear();
+                Initialize();
+            }
+            return *this;
+        }
+    
+        StorageEvents& operator=(StorageEvents&& other) {
+            if(this != &other) {
+                Clear();
+                Initialize();
+            }
+            return *this;
+        }
+
+        ~StorageEvents() {
+            if(db_ref_ && container_ptrs.contains(db_ref_)) {
+                for (auto ptr : container_ptrs[db_ref_]) {
+                    ptr_container.erase(ptr);
+                }
+                container_ptrs.erase(db_ref_);
+            }
+        }
+
+        void RegPtrReference(void const * ptrref) {
+            ptr_container[ptrref]= db_ref_;
+            container_ptrs[db_ref_].insert(ptrref);
+        }
+
+        void DeregPtrReference(void const * ptr_ref ) {
+            if(ptr_container.contains(ptr_ref)) {
+                ptr_container.erase(ptr_ref);
+            }
+
+            if (container_ptrs[db_ref_].contains(ptr_ref)) {
+                container_ptrs[db_ref_].erase(ptr_ref);
+            }
+
+        }
+
+        constexpr void Initialize() {
+            if (!container_ptrs.contains(db_ref_)) {
+                container_ptrs[db_ref_] = {};
+            }
+            
+            for(auto it : db_ref_->IterWClasses()) {
+                RegPtrReference(db_ref_->db_[it]->BData());
+            }
+        }
+
+        void Clear() {
+            if(container_ptrs.contains(db_ref_)) {
+                for (auto ptr : container_ptrs[db_ref_]) {
+                    ptr_container.erase(ptr);
+                }
+                container_ptrs.erase(db_ref_);
+            }            
+        }
+
+    private:
+
+        static inline std::unordered_map<
+            void const *,
+            WObjectDb * > ptr_container;
+    
+        static inline std::unordered_map<WObjectDb*,
+                                         std::unordered_set<void const *>> container_ptrs;
+
+        WObjectDb * const db_ref_;
+    
+    } storage_events_{this};
 
     template<std::derived_from<WObjClass> T>
     void EnsureClassStorage() {
@@ -251,79 +377,17 @@ private:
                 initial_memory_size_
                 );
 
-            WDbBuilder::RegisterOnAllocateEvent<T>(&OnAllocateEventManager<T>);
-            WDbBuilder::RegisterOnDeallocateEvent<T>(&OnDeallocateEventManager<T>);
-
-            // db_[T::StaticClass()]->
-            db_[T::StaticClass()]->BData();
-        }
-    }
-
-    DbType db_{};
-
-    std::size_t initial_memory_size_{1024};
-};
-
-template<CWObjectDerived WObjClass, CIsWId WIdType=WId<>>
-struct StorageEvents {
-
-    using WObjectDb = WObjectDb<WObjClass,WIdType>;
-
-    static inline std::unordered_map<
-        void const *,
-        WObjectDb * >
-    ptr_container;
-    
-    static inline std::unordered_map<WObjectDb*, std::vector<void const *>> container_ptrs;
-
-
-    StorageEvents()=delete;
-
-    StorageEvents(WObjectDb * in_object_db ) :
-        db_ref_(in_object_db) {}
-    
-    StorageEvents(const StorageEvents&) {
-        // db_ref_->
-    };
-    
-    StorageEvents(StorageEvents&&) = default;
-    StorageEvents& operator=(const StorageEvents&) = default;
-    StorageEvents& operator=(StorageEvents&&) = default;
-
-    ~StorageEvents() {
-        if(db_ref_ && container_ptrs.contains(db_ref_)) {
-            for (auto ptr : container_ptrs[db_ref_]) {
-                ptr_container.erase(ptr);
-            }
-            container_ptrs.erase(db_ref_);
-        }
-    }
-
-    void RegPtrReference(void const * ptrref) {
-        ptr_container[ptrref]= db_ref_;
-        container_ptrs[db_ref_].push_back(ptrref);
-    }
-
-    void DeregPtrReference(void const * ptr_ref ) {
-        if(ptr_container.contains(ptr_ref)) {
-            ptr_container.erase(ptr_ref);
-        }
-
-        auto it = std::find(container_ptrs[db_ref_].begin(),
-                            container_ptrs[db_ref_].end(),
-                            ptr_ref);
-        
-        if (it != container_ptrs[db_ref_].end()) {
-            *it = container_ptrs[db_ref_].back();
-            
-            container_ptrs[db_ref_].resize(
-                container_ptrs[db_ref_].size() - 1
+            storage_events_.RegPtrReference(
+                db_[T::StaticClass()]->BData() 
                 );
+
+            WDbBuilder::RegisterOnAllocateEvent<T>(
+                &StorageEvents:: template OnAllocateEventManager<T>
+                );
+            
+            WDbBuilder::RegisterOnDeallocateEvent<T>(
+                &StorageEvents:: template OnDeallocateEventManager<T>);
         }
     }
-
-private:
-
-    WObjectDb * db_ref_{nullptr};
-    
 };
+

@@ -10,14 +10,15 @@
 #include <utility>
 #include <functional>
 
-template<typename ... Args>
-struct TEvent {
+template<typename T>
+struct TEvent;
+
+template<typename RetType, typename ... Args>
+struct TEvent<RetType(Args...)> {
 
 public:
-    
-    // using FnType = TFnLmbd16<void, Args...>;
 
-    using FnType = std::function<void(Args...)>;
+    using FnType = std::function<RetType(Args...)>;
 
 public:
 
