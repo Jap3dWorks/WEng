@@ -86,32 +86,32 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 
     // Add shaders to the render pipeline
 
-    auto shader_list = pipeline_asset->Get_shader_list();
-    shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
+    auto shader_stages = pipeline_asset->Get_shader_list();
+    shader_stages[0].type=wct::render::EShaderStageFlag::Vertex;
 
     std::strcpy(
-        shader_list[0].file,
+        shader_stages[0].file,
         "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
-        shader_list[0].entry,
+        shader_stages[0].entry,
         "vsMain"
         );
 
-    shader_list[1].type=wct::render::EShaderStageFlag::Fragment;
+    shader_stages[1].type=wct::render::EShaderStageFlag::Fragment;
     
     std::strcpy(
-        shader_list[1].file,
+        shader_stages[1].file,
         "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
         );
 
     std::strcpy(
-        shader_list[1].entry,
+        shader_stages[1].entry,
         "fsMain"
         );
 
-    pipeline_asset->Set_shader_list(shader_list);
+    pipeline_asset->Set_shader_list(shader_stages);
 
     auto descriptors = pipeline_asset->Get_descriptor_list();
 
@@ -121,9 +121,26 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     descriptors[0].type=wct::render::EPipeParamType::Ubo;
     descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
     descriptors[0].size=sizeof(wct::render::WModelUBO);
+
+    // albedo
     descriptors[1].binding=1;
-    descriptors[1].type=wct::render::EPipeParamType::Texture;  // TODO texture color management
+    descriptors[1].type=wct::render::EPipeParamType::Texture;
     descriptors[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
+
+    // emission
+    descriptors[2].binding=2;
+    descriptors[2].type=wct::render::EPipeParamType::Texture;
+    descriptors[2].stage_flags=wct::render::EShaderStageFlag::Fragment;
+
+    // normal map
+    descriptors[3].binding=3;
+    descriptors[3].type=wct::render::EPipeParamType::Texture;
+    descriptors[3].stage_flags=wct::render::EShaderStageFlag::Fragment;
+
+    // normal map
+    descriptors[4].binding=4;
+    descriptors[4].type=wct::render::EPipeParamType::Texture;
+    descriptors[4].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
     pipeline_asset->Set_descriptor_list(descriptors);
 
@@ -140,9 +157,6 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
             {.binding=1, .value=tex_ids[0]}
         }
         );
-    // param_asset->RenderPipelineParameters().texture_params.push_back(
-    //     {.binding=1, .value=tex_ids[0]}
-    //     );
 
     return true;
 }

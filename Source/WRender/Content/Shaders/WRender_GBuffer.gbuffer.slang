@@ -11,14 +11,14 @@ import GBuffer.GBuffer;
 [[vk::binding(1, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> albedo;
 
-// [[vk::binding(2, 1)]]  // binding, set
-// ConstantBuffer<Sampler2D> emission;
+[[vk::binding(2, 1)]]  // binding, set
+ConstantBuffer<Sampler2D> emission;
 
-// [[vk::binding(3, 1)]]  // binding, set
-// ConstantBuffer<Sampler2D> normal;
+[[vk::binding(3, 1)]]  // binding, set
+ConstantBuffer<Sampler2D> normal;
 
-// [[vk::binding(4, 1)]]  // binding, set
-// ConstantBuffer<Sampler2D> mrAO;
+[[vk::binding(4, 1)]]  // binding, set
+ConstantBuffer<Sampler2D> mrAO;
 
 // main functions
 // --------------
