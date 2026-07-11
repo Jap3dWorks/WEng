@@ -42,10 +42,6 @@ public:
 
     template<std::derived_from<WEntity> T>
     WEntityId CreateEntity(const char * in_name) {
-        assert(
-            in_class == WEntity::StaticClass() ||
-            WEntity::StaticClass()->IsBaseOf(in_class)
-            );
 
         auto id = CreateEntityId(T::StaticClass());
 
@@ -103,7 +99,6 @@ public:
 
     template<std::derived_from<WComponent> T>
     void CreateComponent(const WEntityId & in_entity_id) {
-        assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
         assert(entity_db_.Contains(id_entityclass_[in_entity_id], in_entity_id));
 
         UpdateComponentMetadata(T::StaticClass(), in_entity_id);

@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <string_view>
 
-namespace wstr::utils {
+namespace wstr {
 
     inline std::vector<std::string> Split(std::string in_string, const std::string & in_delimiter) {
 
@@ -27,6 +27,7 @@ namespace wstr::utils {
         return result;
     }
 
+
     /**
      * Format an engine based asset path.
      * @param asset_directory, Asset engine based directory. Should start with /Content.
@@ -42,8 +43,8 @@ namespace wstr::utils {
         // TODO can I use string_view here?
         assert(asset_directory.starts_with("/Content"));
 
-        std::string p_name = wstr::utils::Split(
-            wstr::utils::Split(package_name, ".")[0], "/"
+        std::string p_name = wstr::Split(
+            wstr::Split(package_name, ".")[0], "/"
             ).back();
 
         while(asset_directory.ends_with("/")) {
@@ -55,10 +56,38 @@ namespace wstr::utils {
     }
 
     /**
+     * Return splitted asset path.
+     * delimiters are [/ \ : .]
+     * No string copies are performed.
+     */
+    WNODISCARD inline
+    std::vector<std::string_view> SplitAssetPath(std::string_view in_asset_path) {
+        std::vector<std::string_view> result;
+        constexpr std::string_view delimiters = "/\\:.";
+
+        std::size_t start = 0;
+        while (start < in_asset_path.size()) {
+            auto end = in_asset_path.find_first_of(delimiters, start);
+            if (end == std::string_view::npos) {
+                result.push_back(in_asset_path.substr(start));
+                break;
+            }
+            if (end > start) {
+                result.push_back(in_asset_path.substr(start, end - start));
+            }
+            start = end + 1;
+        }
+
+        return result;
+    }
+
+
+    /**
      * Translate a engine based path (starts with /Content) with the system path.
      * @param in_path, the path to be translated.
      */
-    inline std::string SystemPath(
+    WNODISCARD inline
+    std::string SystemPath(
         std::string in_path
         )
     {

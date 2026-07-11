@@ -225,3 +225,30 @@ int main()
 : Update container with moved data.
 : Data move constructor!
 : Data move operator!
+
+* Reference wrapper
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
+#include <functional>
+#include <optional>
+
+struct A {
+    std::uint32_t a_{};
+
+    // std::optional<std::uint32_t &> GetA() { return a_; }
+
+    std::optional<std::reference_wrapper<std::uint32_t>> GetA() { return a_; }    
+
+};
+
+int main() {
+    std::uint32_t b=10;
+    std::reference_wrapper<std::uint32_t> a{b};
+
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:

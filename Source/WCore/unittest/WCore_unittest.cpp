@@ -1,12 +1,15 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TWAllocator.hpp"
+#include <functional>
+#include <string_view>
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include "WCore/TRef.hpp"
-// #include "WCore/TFunction.hpp"
+#include "WString/WString.hpp"
+
 #include "WLog.hpp"
 
 #include <vector>
@@ -51,17 +54,27 @@ bool TWAllocator_1_Test() {
 }
 
 bool TObjectDataBase_Test() {
-    WFLOG("--Init Test--");
-    
-    TObjectDataBase<A, B, WId<>::IdType> od{};
 
-    od.CreateAt(1);
-    od.CreateAt(2);
-    od.CreateAt(3);
+    WFLOG("-- Init TObjectDataBase_Test --");
+    
+    TObjectDataBase<A, B, WId<>::IdType> od{
+        [](WId<>::IdType const &) ->A {return {};},
+        [](A const & )->void {}
+    };
+
+    od.InsertAt<A>(1, {});
+    od.InsertAt<A>(2, {});
+    od.InsertAt<A>(3, {});
+
+    WFLOG("od Count: {}", od.Count());
 
     TObjectDataBase<A, B, WId<>::IdType> od2 = od;
 
+    WFLOG("od2 Count: {}", od2.Count());
+
     std::unique_ptr<IObjectDataBase<B,WId<>::IdType>>od3 = od.Clone();
+
+    WFLOG("od3 Count: {}", od3->Count());
 
     od3->BForEach([](B * b) -> void {
         WFLOG("Print od3 Item.");
@@ -71,12 +84,34 @@ bool TObjectDataBase_Test() {
 
 }
 
+bool SplitAssetPath_Test() {
+
+    WFLOG("-- SplitAssetPath test --");
+
+    std::vector<std::string_view> expected {
+        "Content", "Assets", "Textures", "texture01", "texture01"
+    };
+
+    std::string_view s = "Content/Assets/Textures\\texture01:texture01";
+
+    auto result = wstr::SplitAssetPath(s);
+
+    WFLOG("Split path result: {}", result);
+    WFLOG("Expected result: {}", expected);
+
+    return expected == result;
+
+}
+
 TEST_CASE("WCore") {
     SECTION("TWAllocator") {
         CHECK(TWAllocator_1_Test());
     }
     SECTION("TObjectDataBase") {
         CHECK(TObjectDataBase_Test());
+    }
+    SECTION("WString") {
+        CHECK(SplitAssetPath_Test());
     }
 }
 

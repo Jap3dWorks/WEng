@@ -58,8 +58,6 @@ target_link_libraries(
         # Xi
 )
 
-# add_library(WRender::WRender ALIAS WRender)
-
 include(ShaderUtils)
 
 add_slang_shader_target(

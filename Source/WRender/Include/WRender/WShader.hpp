@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WString/WStringUtils.hpp"
+#include "WString/WString.hpp"
 
 // #include <cstdint>
 #include <format>
@@ -13,7 +13,7 @@
 namespace wrd::shader {
 
     inline std::vector<char> ReadShader(const std::string & in_shader_path) {
-        // std::string systempath = wstr::utils::SystemPath(in_shader_path);
+        // std::string systempath = wstr::SystemPath(in_shader_path);
 
         std::string shadercompiled;
         std::string extension;

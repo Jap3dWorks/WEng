@@ -119,7 +119,8 @@ bool WObjectDb_WClass_Test() {
     TWRef<WEntity> a1 = man.Get<WEntity>(1);
     
     WFLOG("Create a2");
-    man.CreateAt(WEntity::StaticClass(), 2);
+    man.CreateAt<WEntity>(2);
+    
     TWRef<WObject> a2 = man.Get(WEntity::StaticClass(),
                                 2);
 

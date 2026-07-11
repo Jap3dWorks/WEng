@@ -32,6 +32,7 @@ endif()
 
 message(STATUS "Found slangc: ${SLANGC_EXECUTABLE}")
 
+# TODO add include paths or compile flags
 function(add_slang_shader_target TARGET)
     cmake_parse_arguments(
         PARSE_ARGV 1
@@ -93,6 +94,7 @@ function(add_slang_shader_target TARGET)
         add_custom_command(
             OUTPUT ${PIPELINE_SPV}
             COMMAND ${SLANGC_EXECUTABLE}
+                -I${CMAKE_SOURCE_DIR}/Source/WRender/Content/Shaders
                 ${SHADER_SOURCE}
                 -target spirv
                 -profile spirv_1_4

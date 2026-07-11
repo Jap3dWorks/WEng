@@ -39,7 +39,7 @@ public:
     virtual void BForEach(std::function<void(B*)> in_function)=0;
     virtual void BForEachIdValue(std::function<void(const IdBase &, B *)>)=0;
 
-    virtual void const * BData() const;
+    virtual void const * BData() const=0;
     
 };
 

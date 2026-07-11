@@ -10,7 +10,7 @@
 #include "WCoreTypes/WTexture.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WString/WStringUtils.hpp"
+#include "WString/WString.hpp"
 #include "fastgltf/core.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
@@ -578,7 +578,7 @@ namespace {
                 );
 
             text_names.push_back(
-                wstr::utils::CleanBasename(img.name)
+                wstr::CleanBasename(img.name)
                 );
 
             if(image_samplers[idx].IsValid()) {
@@ -802,7 +802,7 @@ namespace {
         
         for (std::uint32_t i=0; i<in_levels.size(); i++) {
             in_asset_db.CreateFrom<was::Level>(
-                wstr::utils::AssetPath(
+                wstr::AssetPath(
                     std::string(in_assets_path),
                     std::string(in_names[i]),
                     std::string(in_names[i])
@@ -828,7 +828,7 @@ namespace {
         for(std::size_t i=0; i<in_textures.size(); i++) {
 
             auto assetid = asset_db.CreateFrom<WTextureAsset>(
-                wstr::utils::AssetPath(
+                wstr::AssetPath(
                     std::string(in_assets_path),
                     std::string(in_names[i]),
                     std::string(in_names[i])
@@ -856,7 +856,7 @@ namespace {
         for(std::size_t i=0; i<in_parameters.size(); i++) {
             auto assetid = in_asset_db
                 .CreateFrom<WRenderPipelineParametersAsset>(
-                    wstr::utils::AssetPath(
+                    wstr::AssetPath(
                         std::string(in_asset_directory),
                         std::string(in_names[i]),
                         std::string(in_names[i])
@@ -880,7 +880,7 @@ namespace {
         for (std::size_t i=0; i<in_static_meshes.size(); i++) {
             auto assetid = in_asset_db
                 .CreateFrom<WStaticMeshAsset>(
-                    wstr::utils::AssetPath(
+                    wstr::AssetPath(
                         std::string(in_asset_directory),
                         std::string(in_names[i]),
                         std::string(in_names[i])

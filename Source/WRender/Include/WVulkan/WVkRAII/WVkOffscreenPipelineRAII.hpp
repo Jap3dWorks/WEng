@@ -11,7 +11,7 @@
 #include "WVulkan/WVkRAII/_WVkOffscreenPipelineRAII_.hpp"
 
 #include "WRender/WShader.hpp"
-#include "WString/WStringUtils.hpp"
+#include "WString/WString.hpp"
 #include <vulkan/vulkan_core.h>
 
 /**
@@ -180,7 +180,7 @@ private:
         VkDescriptorSetLayout in_global_set_layout
         ) {
         std::vector<char> shadercode = wrd::shader::ReadShader(
-            wstr::utils::SystemPath(std::string(shader_path_))
+            wstr::SystemPath(std::string(shader_path_))
             );
 
         VkShaderModule shader_module = wvk::shader::CreateShaderModule(

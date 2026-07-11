@@ -57,7 +57,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
         obj_importer.Import(
             engine.AssetManager(),
             "Content/Assets/Models/viking_room.obj", 
-            "/Content/Assets/viking_room.viking_room"
+            "/Content/Assets/viking_room:viking_room"
             );
 
     out_model.static_mesh = geo_ids[0];
@@ -68,13 +68,13 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     std::vector<WAssetId> tex_ids = texture_importer.Import(
         engine.AssetManager(),
         "Content/Assets/Textures/viking_room.png", 
-        "/Content/Assets/viking_texture.viking_texture"
+        "/Content/Assets/viking_texture:viking_texture"
         );
 
     // Create Render Pipeline Asset (material)
 
     WAssetId pipelineid = engine.AssetManager()
-        .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA.PipelineA");
+        .Create<WRenderPipelineAsset>("/Content/Assets/PipelineA:PipelineA");
 
     out_model.pipeline_asset = pipelineid;
 
@@ -147,7 +147,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
     // Create Pipeline Parameter Asset
 
     WAssetId paramid = engine.AssetManager()
-        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA.ParamA");
+        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamA:ParamA");
 
     out_model.param_asset = paramid;
 
@@ -162,7 +162,7 @@ bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
 }
 
 bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
-    WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur.PPBlur");
+    WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur:PPBlur");
 
     WRenderPipelineAsset * pipeline_asset =
         engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
@@ -195,11 +195,8 @@ bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
 
     WAssetId paramid =
         engine.AssetManager().Create<WRenderPipelineParametersAsset>(
-            "/Content/Assets/PPBlurParam.PPBlurParam"
+            "/Content/Assets/PPBlurParam:PPBlurParam"
             );
-
-    // WRenderPipelineParametersAsset * paramass =
-    //     engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
 
     camera.SetPostprocessAssignment(0, pipid, paramid);
 
@@ -215,7 +212,7 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
         obj_importer.Import(
             engine.AssetManager(),
             "Content/Assets/Models/monkey.obj", 
-            "/Content/Assets/monkey.monkey"
+            "/Content/Assets/monkey:monkey"
             );
 
     out_model.static_mesh = geo_ids[0];
@@ -225,12 +222,12 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
     std::vector<WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
                                                         "Content/Assets/Textures/orange.png",
-                                                        "/Content/Assets/orange.orange");
+                                                        "/Content/Assets/orange:orange");
 
     out_model.pipeline_asset = in_render_pipeline;
 
     WAssetId paramid = engine.AssetManager()
-        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamB.ParamB");
+        .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamB:ParamB");
 
     out_model.param_asset = paramid;
 
@@ -247,34 +244,31 @@ bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_r
 
 bool InputAssets(WEngine & in_engine) {
     WAssetId cameramapping = in_engine.AssetManager().Create<WInputMappingAsset>(
-        "/Content/Input/CameraMapping.CameraMapping"
+        "/Content/Input/CameraMapping:CameraMapping"
         );
 
     WAssetId frontaction = in_engine.AssetManager().Create<WActionAsset>(
-        "/Content/Input/FrontAction.FrontAction"
+        "/Content/Input/FrontAction:FrontAction"
         );
 
     WAssetId backaction = in_engine.AssetManager().Create<WActionAsset>(
-        "/Content/Input/BackAction.BackAction"
+        "/Content/Input/BackAction:BackAction"
         );
 
     WAssetId leftaction = in_engine.AssetManager().Create<WActionAsset>(
-        "/Content/Input/LeftAction.LeftAction"
+        "/Content/Input/LeftAction:LeftAction"
         );
 
     WAssetId rightaction = in_engine.AssetManager().Create<WActionAsset>(
-        "/Content/Input/RightAction.RightAction"
+        "/Content/Input/RightAction:RightAction"
         );
 
     WAssetId mousemovement = in_engine.AssetManager().Create<WActionAsset>(
-        "/Content/Input/MouseMovement.MouseMovement"
+        "/Content/Input/MouseMovement:MouseMovement"
         );
 
     auto * mapping_asset = in_engine.AssetManager()
         .Get<WInputMappingAsset>(cameramapping);
-
-    // WInputMapStruct & input_map = in_engine.AssetManager()
-    //     .Get<WInputMappingAsset>(cameramapping)->InputMap();
 
     WInputMap input_map = mapping_asset->Get_input_map();
 
@@ -302,7 +296,9 @@ bool SetupLevel(WEngine & in_engine,
     // WLevelId levelid = in_engine.LevelRegister().Create();
     // WLevel & level = in_engine.LevelRegister().Get(levelid);
 
-    WAssetId levelid = in_engine.AssetManager().Create<was::Level>("/Content/Level/Level01.Level01");
+    WAssetId levelid = in_engine.AssetManager().Create<was::Level>(
+        "/Content/Level/Level01:Level01"
+        );
 
     was::Level * level = in_engine.AssetManager().Get<was::Level>(levelid);
 
@@ -335,14 +331,9 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId eid = level->CreateEntity<WEntity>();
     level->CreateComponent<WTransformComponent>(eid);
     WTransformComponent & ctcmp = level->GetComponent<WTransformComponent>(eid);
-    // WTransformStruct & ts = level->GetComponent<WTransformComponent>(eid).TransformStruct();
     ctcmp.Set_rotation_order(ERotationOrder::zxy);
-    // ts.rotation_order = ERotationOrder::zxy;
     ctcmp.Set_position({0.0, 0.0, -2.f});
     ctcmp.Set_rotation({-3.1415 * 0.5, -3.1415 * 0.5, 0.f});
-    // ts.position.z = -2.0f;
-    // ts.rotation.x = -3.1415 * 0.5;
-    // ts.rotation.y = -3.1415 * 0.5 ;
 
     level->CreateComponent<WStaticMeshComponent>(eid);    
 
@@ -357,14 +348,9 @@ bool SetupLevel(WEngine & in_engine,
     WEntityId monkey_id = level->CreateEntity<WEntity>();
     level->CreateComponent<WTransformComponent>(monkey_id);
     auto * monkey_tc = &level->GetComponent<WTransformComponent>(monkey_id);
-    // WTransformStruct & monkey_ts = level->GetComponent<WTransformComponent>(monkey_id).TransformStruct();
     monkey_tc->Set_rotation_order(ERotationOrder::zxy);
-    // monkey_ts.rotation_order = ERotationOrder::zxy;
     monkey_tc->Set_position({0.0, 0.5, -2.0});
-    // monkey_ts.position.z = -2.0;
-    // monkey_ts.position.y = 0.5;
     monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.15f);
-    // monkey_ts.scale *= 0.15;
 
     level->CreateComponent<WStaticMeshComponent>(monkey_id);
 
@@ -372,22 +358,16 @@ bool SetupLevel(WEngine & in_engine,
 
     monkeysm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
     monkeysm.SetPipelineAssignment(0,
-                                         in_monkey_dt.pipeline_asset,
-                                         in_monkey_dt.param_asset);
+                                   in_monkey_dt.pipeline_asset,
+                                   in_monkey_dt.param_asset);
 
     // Monkey 2
     WEntityId monkey2_id = level->CreateEntity<WEntity>();
     level->CreateComponent<WTransformComponent>(monkey2_id);
     monkey_tc = &level->GetComponent<WTransformComponent>(monkey2_id);
-    // WTransformStruct & monkey2_ts = level->GetComponent<WTransformComponent>(monkey2_id).TransformStruct();
     monkey_tc->Set_rotation_order(ERotationOrder::zxy);
-    // monkey2_ts.rotation_order = ERotationOrder::zxy;
     monkey_tc->Set_position({0.2, 0.65, -2.0});
-    // monkey2_ts.position.z = -2.0;
-    // monkey2_ts.position.y = 0.65;
-    // monkey2_ts.position.x = 0.2;
     monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.25f);
-    // monkey2_ts.scale *= 0.25;
 
     level->CreateComponent<WStaticMeshComponent>(monkey2_id);
     auto & monkey2sm = level->GetComponent<WStaticMeshComponent>(monkey2_id);

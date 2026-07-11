@@ -198,7 +198,7 @@ private:
     void InitializePipeline(VkFormat color_format) {
 
         std::vector<char> shadercode = wrd::shader::ReadShader(
-            wstr::utils::SystemPath(std::string(shader_path))
+            wstr::SystemPath(std::string(shader_path))
             );
 
         VkShaderModule shader_module = wvk::shader::CreateShaderModule(

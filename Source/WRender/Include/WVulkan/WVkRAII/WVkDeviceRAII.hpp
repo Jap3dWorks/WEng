@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WVulkan/WVk/WVulkan.hpp"
-#include "WString/WStringUtils.hpp"
+#include "WString/WString.hpp"
 
 #include <vector>
 #include <set>
@@ -102,7 +102,7 @@ public:
         create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
     
         std::vector<const char *> enable_extension_names{};
-        wstr::utils::ToConstCharPtrs(in_device_extensions, enable_extension_names);
+        wstr::ToConstCharPtrs(in_device_extensions, enable_extension_names);
     
         create_info.ppEnabledExtensionNames = enable_extension_names.data();
     
@@ -112,7 +112,7 @@ public:
         if (in_enable_validation_layers)
         {
             create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
-            wstr::utils::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
+            wstr::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
             create_info.ppEnabledLayerNames = enabled_layer_names.data();
         }
         else

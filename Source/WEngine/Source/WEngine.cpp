@@ -39,6 +39,9 @@ WEngine WEngine::DefaultCreate()
 
     result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
 
+    // Default Assets
+    
+
     // TODO Plugins Modules Loading
 
     return result;

@@ -3,6 +3,8 @@
 #include "WCore/WCore.hpp"
 #include "WCore/IdPool.hpp"
 #include "WCore/WId.hpp"
+#include "WCore/TPathTree.hpp"
+#include "WString/WString.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WAssets/Level.hpp"
@@ -53,26 +55,15 @@ public:
         object_manager_.Get<T>(id).Set_asset_id(id);
         object_manager_.Get<T>(id).Set_name(in_fullname);
 
+        InsertPath(in_fullname, id);
+
         return id;
     }
-
-    // WAssetId Create(WClass const * in_class,
-    //                 std::string_view in_fullname) {
-    //     WAssetId id = GetIdPool(in_class).Generate();
-
-    //     id_class_[id] = in_class;
-    
-    //     object_manager_.CreateAt(in_class, id);
-        
-    //     object_manager_.Get(in_class, id)->Set_asset_id(id);
-    //     object_manager_.Get(in_class, id)->Set_name(in_fullname);
-
-    //     return id;
-    // }
 
     template<std::derived_from<WAsset> T>
     WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
         WAssetId asset_id = Create<T>(in_fullname);
+
         T * ptr = Get<T>(asset_id);
 
         *ptr = other;
@@ -85,6 +76,7 @@ public:
     template<std::derived_from<WAsset> T>
     WAssetId CreateFrom(std::string_view in_fullname, T && other) {
         WAssetId asset_id = Create<T>(in_fullname);
+
         T * ptr = Get<T>(asset_id);
 
         *ptr = std::move(other);
@@ -112,6 +104,12 @@ public:
     WAsset * Get(std::string_view asset_name) const;
 
 private:
+
+    void InsertPath(std::string_view in_path, WAssetId in_id) {
+        auto split_path = wstr::SplitAssetPath(in_path);
+
+        path_tree_.Insert(split_path, in_id);
+    }
 
     wcr::IdPool<WAssetId::IdType> & GetIdPool(WClass const * in_class) {
         if (was::Level::StaticClass()->IsEqual(in_class)) {
@@ -144,11 +142,6 @@ private:
 
     std::unordered_map<WAssetId, WClass const *> id_class_{};
 
-    struct NameData{
-        std::string_view name;
-        WAssetId asset_id;
-        WClass const * asset_class;
-    };
-
+    wcr::TPathTree<WAssetId> path_tree_{};
 
 };
