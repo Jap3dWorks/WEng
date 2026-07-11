@@ -8,6 +8,7 @@ namespace wim::importer {
     public:
         
         WImporterGltf() = delete;
+        
         WImporterGltf(const WImporterGltf&) = default;
         WImporterGltf(WImporterGltf&&) noexcept = default;
         WImporterGltf& operator=(const WImporterGltf&) = default;

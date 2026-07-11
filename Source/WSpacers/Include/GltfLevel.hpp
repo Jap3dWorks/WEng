@@ -2,11 +2,14 @@
 
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
+#include "WString/WString.hpp"
 
 #include "WAssets/Level.hpp"
 #include "WImporter/WImporterGltf.hpp"
 #include "WObjectDb/WAssetDb.hpp"
+
 #include <algorithm>
+#include <filesystem>
 
 namespace spacers::gltflevel {
 
@@ -18,7 +21,7 @@ namespace spacers::gltflevel {
             .GetImporter<wim::importer::WImporterGltf>()
             .Import(
                 in_engine.AssetManager(),
-                "Content/Assets/Levels/ABeautifulGame.glb",
+                std::filesystem::absolute("Content/Assets/Levels/ABeautifulGame.glb").string(),
                 "/Content/Assets/ImportedLevels/"
                 );
 

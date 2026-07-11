@@ -158,7 +158,7 @@ namespace {
             WrapTFilter(sampler.wrapT);
     }
 
-    WNODISCARD inline fastgltf::Asset LoadGltf(std::string_view in_file_path) {
+    WNODISCARD inline fastgltf::Asset LoadGltf(std::string_view file_path) {
         fastgltf::Parser parser {};
 
         constexpr auto gltfOptions =
@@ -166,36 +166,36 @@ namespace {
             fastgltf::Options::AllowDouble                 |
             fastgltf::Options::LoadExternalBuffers;
 
-        fastgltf::GltfDataBuffer data;
+        auto data = fastgltf::GltfDataBuffer::FromPath(file_path);
 
-        data.FromPath(in_file_path);
+        assert(data);
 
         fastgltf::Asset asset_gltf;
 
-        auto gltf_type = fastgltf::determineGltfFileType(data);
-        std::filesystem::path path=in_file_path;
+        auto gltf_type = fastgltf::determineGltfFileType(data.get());
+        std::filesystem::path path=file_path;
 
         if (fastgltf::GltfType::glTF == gltf_type) {
-            auto load = parser.loadGltf(data, path.parent_path(), gltfOptions);
+            auto load = parser.loadGltf(data.get(), path.parent_path(), gltfOptions);
             if (load) {
                 asset_gltf = std::move(load.get());
             } else {
                 throw std::runtime_error(
                     std::format(
                         "Failed while loading Gltf file : {}",
-                        in_file_path
+                        file_path
                         )
                     );
             }
         } else if (fastgltf::GltfType::GLB == gltf_type) {
-            auto load = parser.loadGltfBinary(data, path.parent_path(), gltfOptions);
+            auto load = parser.loadGltfBinary(data.get(), path.parent_path(), gltfOptions);
             if (load) {
                 asset_gltf = std::move(load.get());
             } else {
                 throw std::runtime_error(
                     std::format(
                         "Failed while loading Gltf binary file: {}",
-                        in_file_path
+                        file_path
                         )
                     );
             }
@@ -896,14 +896,13 @@ namespace {
 
 std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     WAssetDb & in_asset_db,
-    std::string_view in_file_path,
-    std::string_view in_engine_directory_prefix
+    std::string_view file_path,
+    std::string_view engine_directory_prefix
     ) {
 
-    fastgltf::Asset gltf_asset=LoadGltf(in_file_path);
-    std::uint32_t idx=0;
+    fastgltf::Asset gltf_asset=LoadGltf(file_path);
+    // std::uint32_t idx=0;
 
-    // TODO create a pbr shader
     // Materials and textures
     
     auto [text_assets, text_names] = CollectImages(gltf_asset);
@@ -912,7 +911,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto textures_wids = CreateTextures(
         text_assets,
         text_names,
-        in_engine_directory_prefix,
+        engine_directory_prefix,
         in_asset_db
         );
 
@@ -924,7 +923,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto materials_wid = CreatePipelineParameters(
         mat_assets,
         mat_names,
-        in_engine_directory_prefix,
+        engine_directory_prefix,
         in_asset_db
         );
 
@@ -939,7 +938,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto sm_wid = CreateStaticMeshes(
         sm_assets,
         sm_names,
-        in_engine_directory_prefix,
+        engine_directory_prefix,
         in_asset_db
         );
 
@@ -953,7 +952,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto lvl_wid = CreateLevels(
         level_assets,
         level_names,
-        in_engine_directory_prefix,
+        engine_directory_prefix,
         in_asset_db);
     
     std::vector<WAssetId> result;

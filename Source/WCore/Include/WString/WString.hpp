@@ -11,7 +11,8 @@
 
 namespace wstr {
 
-    inline std::vector<std::string> Split(std::string in_string, const std::string & in_delimiter) {
+    WNODISCARD inline
+    std::vector<std::string> Split(std::string in_string, const std::string & in_delimiter) {
 
         std::vector<std::string> result;
 
@@ -51,7 +52,7 @@ namespace wstr {
             asset_directory.erase(asset_directory.size() - 1, asset_directory.size());
         }
 
-        return std::format("{}/{}.{}", asset_directory, p_name, asset_name);
+        return std::format("{}/{}:{}", asset_directory, p_name, asset_name);
 
     }
 
