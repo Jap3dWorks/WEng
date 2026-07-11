@@ -399,7 +399,8 @@ namespace {
         WAssetId transparent_pipeline,
         std::vector<WAssetId> const & in_parameters
         ) {
-
+        // TODO : transparent pipelines
+        
         std::vector<nullindex::NullableIndex<>> index_sm_map;
         index_sm_map.reserve(in_asset.meshes.size());
 
@@ -431,14 +432,13 @@ namespace {
                 if (primitive.materialIndex) {
                     sm_asset.SetPipelineAssignment(
                         {
-                            // TODO, select valid pipeline
                             gbuffer_pipeline,  
                             in_parameters[primitive.materialIndex.value()]
                         },
                         idx
                         );
                 }
-                
+
                 idx++;
             }
 
@@ -897,7 +897,7 @@ namespace {
 std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     WAssetDb & in_asset_db,
     std::string_view in_file_path,
-    std::string_view in_asset_directory
+    std::string_view in_engine_directory_prefix
     ) {
 
     fastgltf::Asset gltf_asset=LoadGltf(in_file_path);
@@ -912,7 +912,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto textures_wids = CreateTextures(
         text_assets,
         text_names,
-        in_asset_directory,
+        in_engine_directory_prefix,
         in_asset_db
         );
 
@@ -924,7 +924,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto materials_wid = CreatePipelineParameters(
         mat_assets,
         mat_names,
-        in_asset_directory,
+        in_engine_directory_prefix,
         in_asset_db
         );
 
@@ -939,7 +939,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto sm_wid = CreateStaticMeshes(
         sm_assets,
         sm_names,
-        in_asset_directory,
+        in_engine_directory_prefix,
         in_asset_db
         );
 
@@ -953,7 +953,7 @@ std::vector<WAssetId> wim::importer::WImporterGltf::Import(
     auto lvl_wid = CreateLevels(
         level_assets,
         level_names,
-        in_asset_directory,
+        in_engine_directory_prefix,
         in_asset_db);
     
     std::vector<WAssetId> result;

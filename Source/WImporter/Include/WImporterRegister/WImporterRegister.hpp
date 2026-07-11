@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WCore/WCore.hpp"
+#include "WCore/WConcepts.hpp"
 #include "WImporter/WImporter.hpp"
 #include "WCore/TClassKey.hpp"
 
@@ -61,10 +63,13 @@ namespace wim::imp_register {
             }
         }
 
-        template<typename T>
-        void Register() {
+        template<typename T, typename ...Args>
+        void Register(Args && ... args) {
             assert(!reg_.contains( std::type_index(typeid(T)) ));
-            reg_.insert({std::type_index(typeid(T)), std::make_unique<T>()});
+            reg_.insert(
+                {std::type_index(typeid(T)),
+                 std::make_unique<T>(std::forward<Args>(args)...)}
+                );
         }
 
         template<typename T>

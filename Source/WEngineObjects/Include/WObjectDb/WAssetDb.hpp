@@ -89,7 +89,9 @@ public:
     // TODO ptr or reference?
     template<std::derived_from<WAsset> T>
     T * Get(WAssetId const & in_id) const {
-        assert(id_class_.contains(in_id));
+        
+        assert(id_class_.contains(in_id) &&
+               T::StaticClass()->IsEqual(id_class_.at(in_id)));
 
         return static_cast<T*>(object_manager_.Get(
                                    id_class_.at(in_id),
@@ -99,6 +101,18 @@ public:
     WAsset * Get(WAssetId const & in_id) const {
         assert(id_class_.contains(in_id));
         return object_manager_.Get(id_class_.at(in_id), in_id);
+    }
+
+    template<std::derived_from<WAsset> T>
+    T * Get(std::string_view asset_name) const {
+
+        WAsset * result = Get(asset_name);
+        
+        if (!result) return nullptr;
+
+        assert(result->Class()->IsEqual(T::StaticClass()));
+
+        return static_cast<T*> (result);
     }
 
     WAsset * Get(std::string_view asset_name) const;

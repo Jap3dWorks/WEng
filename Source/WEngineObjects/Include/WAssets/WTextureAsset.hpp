@@ -45,14 +45,9 @@ public:
             in_height *
             wct::texture::NumOfChannels(in_format) *
             color_depth_bytes;
-        
-        data_.resize(size);
 
-        std::memcpy(
-            data_.data(),
-            in_ptr,
-            size
-            );
+        data_.assign(in_ptr, in_ptr + size);
+
     }
 
     std::uint8_t const * GetDataPtr() const {

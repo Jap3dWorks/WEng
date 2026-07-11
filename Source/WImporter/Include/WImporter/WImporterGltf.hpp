@@ -7,12 +7,15 @@ namespace wim::importer {
     class WIMPORTER_API WImporterGltf : public WImporter {
     public:
         
-        WImporterGltf() = default;
+        WImporterGltf() = delete;
         WImporterGltf(const WImporterGltf&) = default;
         WImporterGltf(WImporterGltf&&) noexcept = default;
         WImporterGltf& operator=(const WImporterGltf&) = default;
         WImporterGltf& operator=(WImporterGltf&&) noexcept = default;
         virtual ~WImporterGltf() = default;
+
+        WImporterGltf(WAssetId pbr_pipeline, WAssetId transparent_pipeline) :
+            render_pipelines_({pbr_pipeline, transparent_pipeline}) {}
 
     public:
 
@@ -27,20 +30,14 @@ namespace wim::importer {
 
         virtual std::unique_ptr<WImporter> Clone() override;
 
-        constexpr void SetGBufferPipeline(WAssetId in_id) {
-            render_pipelines_.gbuffer = in_id;
-        }
-
-        constexpr void SetTransaprentPipeline(WAssetId in_id) {
-            render_pipelines_.transparent = in_id;
-        }
-
     private:
 
         struct RenderPipelines {
             WAssetId gbuffer{};      // opaque pbr.
             WAssetId transparent{};  // transparent pbr.
         } render_pipelines_{};
+
+        
 
     };
     

@@ -119,6 +119,7 @@ public:
         }
     }
 
+    // TODO do not use const char *, use std::string_view
     template<CCallable<WVkShaderStageInfo,
                        const char*, const char *,
                        wct::render::EShaderStageFlag> TFn>
@@ -133,8 +134,8 @@ public:
             [&result, &in_fn]
             (const wct::render::WShaderInfo & shd) {
                 result.push_back(
-                    in_fn(wstr::SystemPath(shd.file).c_str(),
-                          shd.entry,
+                    in_fn(wstr::SystemPath(shd.file.View()).c_str(),
+                          std::string(shd.entry.View()).c_str(),
                           shd.type)
                     );
             });

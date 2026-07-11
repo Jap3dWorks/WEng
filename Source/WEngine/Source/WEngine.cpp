@@ -3,49 +3,49 @@
 #include "WCore/WCore.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 
-#include "WImporter/WImporterTexture.hpp"
-#include "WImporter/WImporterObj.hpp"
+// #include "WImporter/WImporterTexture.hpp"
+// #include "WImporter/WImporterObj.hpp"
+// #include "WImporterRegister/WImporterRegister.hpp"
 
-#include "WImporterRegister/WImporterRegister.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WEngineObjects/WEntity.hpp"
-#include "WEngineObjects/WComponent.hpp"
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WCameraComponent.hpp"
+// #include "WEngineObjects/WEntity.hpp"
+// #include "WEngineObjects/WComponent.hpp"
+// #include "WComponents/WTransformComponent.hpp"
+// #include "WComponents/WCameraComponent.hpp"
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 
 #include "WEngRender/WEngRender.hpp"
 
-WEngine WEngine::DefaultCreate()
-{
-    WEngine result(std::make_unique<WVkRender>());
+// WEngine WEngine::DefaultCreate()
+// {
+//     WEngine result(std::make_unique<WVkRender>());
 
-    result.ImportersRegister().Register<wim::importer::WImporterObj>();
-    result.ImportersRegister().Register<wim::importer::WImportTexture>();
+//     result.ImportersRegister().Register<wim::importer::WImporterObj>();
+//     result.ImportersRegister().Register<wim::importer::WImportTexture>();
 
-    // Register Wengine systems
+//     // Register Wengine systems
     
-    WSystems::WENGINE_WSYSTEMS_REG(result.state_.systems_reg);
+//     WSystems::WENGINE_WSYSTEMS_REG(result.state_.systems_reg);
 
-    // This must be the first included system
-    result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
+//     // This must be the first included system
+//     result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
 
-    result.AddInitSystem(0, "SystemInit_RenderLevelResources");
+//     result.AddInitSystem(0, "SystemInit_RenderLevelResources");
 
-    result.AddPostSystem(0, "SystemPost_UpdateRenderCamera");
+//     result.AddPostSystem(0, "SystemPost_UpdateRenderCamera");
 
-    result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
+//     result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
 
-    // Default Assets
+//     // Default Assets
     
 
-    // TODO Plugins Modules Loading
+//     // TODO Plugins Modules Loading
 
-    return result;
-}
+//     return result;
+// }
 
 WEngine::WEngine(std::unique_ptr<IRender> && in_render)
 {
@@ -231,9 +231,6 @@ WLevelSystemId WEngine::AddEndSystem(const WAssetId & in_level_id, std::string_v
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
-
-
-
 
 TRef<IRender> WEngine::Render() noexcept
 {

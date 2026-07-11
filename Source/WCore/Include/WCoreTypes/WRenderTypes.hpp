@@ -162,8 +162,10 @@ namespace wct::render {
 
     struct WShaderInfo {
         EShaderStageFlag type{EShaderStageFlag::None};
-        char file[128]{""};   // TODO : use TName based types
-        char entry[16]{"main"};
+        TName<128> file{};
+        // char file[128]{""};   // TODO : use TName based types
+        TName<16> entry{};
+        // char entry[16]{"main"};
     };
 
     using WShaderList = std::array<WShaderInfo, WENG_MAX_PIPELINE_SHADERS>;

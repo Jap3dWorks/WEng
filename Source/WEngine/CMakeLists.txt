@@ -7,6 +7,7 @@ add_library(
         Source/WSystems.cpp
         Source/WSystemsRunner.cpp
         Source/WSystemsRegister.cpp
+        Source/WEngineDefaults.cpp
 )
 
 set_target_properties(

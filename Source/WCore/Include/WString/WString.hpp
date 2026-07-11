@@ -82,13 +82,25 @@ namespace wstr {
     }
 
 
+    // WNODISCARD inline
+    // std::string SystemPath(
+    //     std::string in_path
+    //     )
+    // {
+    //     if (in_path.starts_with("/")) {
+    //         in_path = in_path.substr(1, in_path.length());
+    //     }
+
+    //     return std::filesystem::absolute(in_path).string();
+    // }
+
     /**
      * Translate a engine based path (starts with /Content) with the system path.
      * @param in_path, the path to be translated.
      */
     WNODISCARD inline
     std::string SystemPath(
-        std::string in_path
+        std::string_view in_path
         )
     {
         if (in_path.starts_with("/")) {
@@ -97,6 +109,7 @@ namespace wstr {
 
         return std::filesystem::absolute(in_path).string();
     }
+    
 
     /**
      * @brief converts a vector of std::string_view into a vector of const char *.

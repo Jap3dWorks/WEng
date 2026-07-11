@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -7,6 +8,7 @@
 #include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
+
 #include "WSystems/WSystemsRegister.hpp"
 #include "WSystems/WSystemsRunner.hpp"
 
@@ -42,8 +44,6 @@ public:
 
     WEngine & operator=(WEngine && other);
 
-    static WEngine DefaultCreate();
-
     void Run();
 
     void StartupLevel(const WAssetId & in_id) noexcept;
@@ -58,14 +58,6 @@ public:
     const LevelInfoStruct & LevelInfo() const noexcept {
         return state_.level_info;
     }
-
-    // WLevelDb & LevelRegister() noexcept {
-    //     return state_.level_db;
-    // }
-
-    // const WLevelDb & LevelRegister() const noexcept {
-    //     return state_.level_db;
-    // }
 
     wim::imp_register::WImporterRegister & ImportersRegister() noexcept {
         return state_.importers_register;
@@ -91,6 +83,11 @@ public:
     WLevelSystemId AddPreSystem(const WAssetId & in_level_id, std::string_view in_system_name);
     WLevelSystemId AddPostSystem(const WAssetId & in_level_id, std::string_view in_system_name);
     WLevelSystemId AddEndSystem(const WAssetId & in_level_id, std::string_view in_system_name);
+
+    template<CCallable<void, WSystemsRegister &> RFn>
+    constexpr void RegSystems(RFn && in_fn) {
+        in_fn(state_.systems_reg);
+    }
 
     TRef<IRender> Render() noexcept;
 

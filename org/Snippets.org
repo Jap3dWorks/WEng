@@ -5,7 +5,7 @@
 * Babel Template
 
 #+HEADER: :flags --std=gnu++23
-#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
 
 int main() {
     std::cout << "HI\n";
@@ -252,3 +252,35 @@ int main() {
 #+end_src
 
 #+RESULTS:
+
+* String and String_View
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint>
+#include <string_view>
+#include <filesystem>
+#include <print>
+
+std::string SystemPath(
+    std::string_view in_path
+    )
+{
+    if (in_path.starts_with("/")) {
+        in_path = in_path.substr(1, in_path.length());
+    }
+
+    return std::filesystem::absolute(in_path).string();
+}
+
+int main() {
+
+    std::print("Print Path: {}", SystemPath("/Some/path/example.txt"));
+
+    return 0;
+}
+#+end_src
+
+#+RESULTS:
+: Print Path: /var/mnt/data/Devs/WEng/WEng/org/Some/path/example.txt
+
+
