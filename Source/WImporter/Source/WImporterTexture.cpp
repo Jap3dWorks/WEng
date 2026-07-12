@@ -29,9 +29,9 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
             "texture").c_str()
         );
 
-    auto * asset = in_asset_manager.Get<WTextureAsset>(id);
+    auto & asset = in_asset_manager.Get<WTextureAsset>(id);
 
-    asset->SetTextureData(
+    asset.SetTextureData(
         stbi_image.pixels.get(),
         stbi_image.width,
         stbi_image.height,

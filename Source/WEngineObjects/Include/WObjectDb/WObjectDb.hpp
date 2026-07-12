@@ -40,12 +40,14 @@ public:
 public:
 
     constexpr WObjectDb() = default;
-    
-    virtual ~WObjectDb() = default;
+    ~WObjectDb() = default;
 
     WObjectDb(WObjectDb const & other) :
     db_(),
-    initial_memory_size_(other.initial_memory_size_) {
+    initial_memory_size_(other.initial_memory_size_),
+    storage_events_(this),
+    events_(other.events_)
+    {
         CopyContainersFrom(other);
     }
     
@@ -54,6 +56,7 @@ public:
     constexpr WObjectDb & operator=(WObjectDb const & other) {
         if (this != &other) {
             initial_memory_size_ = other.initial_memory_size_;
+            events_ = other.events_;
             CopyContainersFrom(other);
         }
         return *this;
@@ -85,7 +88,7 @@ public:
     }
 
     /**
-     * @brief get element at in_id.
+     * @brief get element at in_id. Exact T class, no derived classes from T.
      */
     template<std::derived_from<WObjClass> T>
     T & Get(WIdType in_id) const {
@@ -216,11 +219,11 @@ public:
     }
 
     WNODISCARD auto & OnAllocateEvent() {
-        return on_allocate_events_;
+        return events_.on_allocate;
     }
 
     WNODISCARD auto & OnDeallocateEvent() {
-        return on_deallocate_events_;
+        return events_.on_deallocate_events_;
     }
 
 private:
@@ -238,11 +241,12 @@ private:
 
     std::size_t initial_memory_size_{1024};
 
-    TEvent<void(WObjectDb *, WClass const *)> on_allocate_events_{};
-    TEvent<void(WObjectDb *, WClass const *)> on_deallocate_events_{};
+    struct {
+        TEvent<void(WObjectDb *, WClass const *)> on_allocate{};
+        TEvent<void(WObjectDb *, WClass const *)> on_deallocate{};
+    } events_{};
 
     struct StorageEvents {
-
         template<typename T>
         static inline void OnAllocateEventManager(
             void * prev_ptr, std::size_t prev_n,
@@ -255,7 +259,7 @@ private:
 
             object_db->storage_events_.RegPtrReference(new_ptr);
 
-            object_db->on_allocate_events_.Emit(
+            object_db->events_.on_allocate.Emit(
                 object_db, T::StaticClass()
                 );
         }
@@ -271,7 +275,7 @@ private:
 
             object_db->storage_events_.DeregPtrReference(ptr);
 
-            object_db->on_deallocate_events_.Emit(
+            object_db->events_.on_deallocate.Emit(
                 object_db, T::StaticClass()
                 );
         }
@@ -289,7 +293,6 @@ private:
             db_ref_(in_object_db) {
             Initialize();
         }
-    
         StorageEvents(const StorageEvents&) = delete;
         StorageEvents(StorageEvents&&) = delete;
         

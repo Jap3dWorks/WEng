@@ -3,6 +3,7 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 
+#include "WCore/WId.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -19,7 +20,7 @@ class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
 using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId::IdType>;
-using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WAssetIndexId::IdType>;
+using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WTypeAssetIndexId::IdType>;
 
 public:
 
@@ -67,11 +68,11 @@ public:
 
     // Static Mesh
 
-    void LoadStaticMesh(const WAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
+    void LoadStaticMesh(const WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
 
         static_mesh_collection_.CreateAt(
             in_id,
-            [this, &in_mesh] (const WAssetIndexId & in_id) -> WVkMeshInfo {
+            [this, &in_mesh] (const WTypeAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
                 wvk::mesh::CreateMeshBuffers(
                     result,
@@ -91,9 +92,9 @@ public:
             );
     }
 
-    void UnloadStaticMesh(const WAssetIndexId & in_id);
+    void UnloadStaticMesh(const WTypeAssetIndexId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(const WAssetIndexId & in_id) const;
+    const WVkMeshInfo & StaticMeshInfo(const WTypeAssetIndexId & in_id) const;
 
     void Clear();
 

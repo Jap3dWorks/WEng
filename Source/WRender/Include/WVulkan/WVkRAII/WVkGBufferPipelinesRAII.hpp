@@ -94,7 +94,7 @@ public:
     WEntityComponentId CreateBinding(
         const WEntityComponentId & in_component_id,
         const WAssetId & in_pipeline_id,
-        const WAssetIndexId & in_mesh_asset_id,
+        const WTypeAssetIndexId & in_mesh_asset_id,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {

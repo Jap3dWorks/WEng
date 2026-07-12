@@ -58,7 +58,7 @@ public:
     virtual void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
-        const WAssetIndexId & in_mesh_id,
+        const WTypeAssetIndexId & in_mesh_id,
         const WRenderPipelineParametersAsset & in_parameters
         )=0;
 
@@ -91,10 +91,10 @@ public:
 
     virtual void UnloadTexture(const WAssetId & in_id)=0;
 
-    virtual void LoadStaticMesh(const WAssetIndexId & in_id,
+    virtual void LoadStaticMesh(const WTypeAssetIndexId & in_id,
                                 const wct::geometry::WMesh & in_mesh)=0;
 
-    virtual void UnloadStaticMesh(const WAssetIndexId & in_id)=0;
+    virtual void UnloadStaticMesh(const WTypeAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
         const wct::render::WCameraUBO & in_ubo

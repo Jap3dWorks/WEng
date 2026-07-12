@@ -69,7 +69,7 @@ void WVkAssetRenderDataRAII::UnloadTexture(const WAssetId & in_id) {
         );
 }
 
-void WVkAssetRenderDataRAII::UnloadStaticMesh(const WAssetIndexId & in_id) {
+void WVkAssetRenderDataRAII::UnloadStaticMesh(const WTypeAssetIndexId & in_id) {
 
     static_mesh_collection_.Remove(
         in_id,
@@ -85,7 +85,7 @@ const WVkTextureInfo & WVkAssetRenderDataRAII::TextureInfo(const WAssetId & in_i
     return texture_collection_.Get(in_id);
 }
 
-const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const WAssetIndexId & in_id) const {
+const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const WTypeAssetIndexId & in_id) const {
     return static_mesh_collection_.Get(in_id);
 }
 

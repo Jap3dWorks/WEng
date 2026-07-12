@@ -1,6 +1,7 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TWAllocator.hpp"
+#include "WCore/WId.hpp"
 #include <functional>
 #include <string_view>
 
@@ -16,6 +17,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <print>
+#include <bitset> 
 
 struct B{};
 
@@ -103,6 +105,19 @@ bool SplitAssetPath_Test() {
 
 }
 
+bool WIDCompoundNullValue_Test() {
+    WTypeAssetIndexId wid{WID_NULL_V};
+
+    auto idvalue = wid.GetId();
+
+    std::bitset<64> bt {idvalue};
+
+    std::cout << "Value: " << bt <<std::endl;
+    
+    return true;
+}
+
+
 TEST_CASE("WCore") {
     SECTION("TWAllocator") {
         CHECK(TWAllocator_1_Test());
@@ -113,5 +128,9 @@ TEST_CASE("WCore") {
     SECTION("WString") {
         CHECK(SplitAssetPath_Test());
     }
+    SECTION("WId") {
+        CHECK(WIDCompoundNullValue_Test());
+    }
+
 }
 

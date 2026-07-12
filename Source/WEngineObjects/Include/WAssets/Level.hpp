@@ -2,6 +2,7 @@
 
 #include "WCore/WCore.hpp"
 
+#include "WCore/WId.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
@@ -101,16 +102,18 @@ namespace was {
 
         template<std::derived_from<WComponent> T>
         WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
-                                                const WSubIdxId & in_index_id=0) const noexcept {
+                                                const WSubIdxId & in_index_id=WID_NULL_V) const noexcept {
             return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
         }
 
         WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
                                                 const WEntityId & in_entity_id,
-                                                const WSubIdxId & in_index_id=0) const noexcept {
+                                                const WSubIdxId & in_index_id=WID_NULL_V) const noexcept {
+
             assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
 
             WComponentTypeId cid = entity_component_db.GetComponentTypeId(in_component_class);
+            
             return {Get_asset_id(), in_entity_id, cid, in_index_id};
         }
 

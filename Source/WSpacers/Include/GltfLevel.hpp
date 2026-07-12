@@ -25,13 +25,13 @@ namespace spacers::gltflevel {
                 "/Content/Assets/ImportedLevels/"
                 );
 
-        WAssetId level_id{wid_null};
+        WAssetId level_id{WID_NULL_V};
         was::Level * level_asset{nullptr};
 
         for (auto & item : imported_assets) {
             if (in_engine.AssetManager().Get(item)->Class()->IsEqual(was::Level::StaticClass())) {
                 level_id = item;
-                level_asset = in_engine
+                level_asset = &in_engine
                     .AssetManager()
                     .Get<was::Level>(item);
 

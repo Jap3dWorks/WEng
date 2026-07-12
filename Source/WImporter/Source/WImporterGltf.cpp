@@ -226,7 +226,7 @@ namespace {
                     )
                 .or_else(
                     []() -> std::optional<WAssetId>
-                    { return wid_null; }
+                    { return WID_NULL_V; }
                     )
                 .value();
         };
@@ -466,8 +466,8 @@ namespace {
 
         std::visit(
             fastgltf::visitor {
-                [&result](auto& arg) {},
-                [&result](fastgltf::sources::URI& filePath) {
+                [&result](auto const & arg) {},
+                [&result](fastgltf::sources::URI const & filePath) {
                     assert(filePath.fileByteOffset == 0);
                     assert(filePath.uri.isLocalPath());
 
@@ -488,7 +488,7 @@ namespace {
                             );
                     }
                 },
-                [&result](fastgltf::sources::Vector& vector) {
+                [&result](fastgltf::sources::Vector const & vector) {
 
                     auto stbi_image = wim::WLib_wtbi::LoadBuffer(
                         vector.bytes.data(),
@@ -504,15 +504,18 @@ namespace {
                             );
                     }
                 },
-                [&result, &in_asset](fastgltf::sources::BufferView& view) {
+                [&result, &in_asset](fastgltf::sources::BufferView const & view) {
                     auto& bufferView = in_asset.bufferViews[view.bufferViewIndex];
                     auto& buffer = in_asset.buffers[bufferView.bufferIndex];
 
                     std::visit(fastgltf::visitor { 
-                            [](auto& arg) {},
-                            [&result, &bufferView](fastgltf::sources::Vector& vector) {
+                            [](auto const & arg) {},
+                                [&result, &bufferView]<typename T>
+                                requires (std::same_as<T, fastgltf::sources::Vector> ||
+                                    std::same_as<T, fastgltf::sources::Array>)
+                            (T const & container) {
                                 auto stbi_image = wim::WLib_wtbi::LoadBuffer(
-                                    vector.bytes.data() + bufferView.byteOffset,
+                                    container.bytes.data() + bufferView.byteOffset,
                                     bufferView.byteLength
                                     );
 
@@ -529,8 +532,8 @@ namespace {
                         },
                         buffer.data
                         );
+                }
                 },
-            },
             in_image.data
             );
 
@@ -729,7 +732,7 @@ namespace {
                     auto & smcmp = level.GetComponent<WStaticMeshComponent>(entityid);
 
                     smcmp.SetStaticMeshAsset(
-                        *in_asset_db
+                        in_asset_db
                         .Get<WStaticMeshAsset>(sm_wids[sm_id_map[gltfindx].Value()])
                         );
                 }

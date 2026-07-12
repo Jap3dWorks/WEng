@@ -67,7 +67,7 @@ public:
     void CreatePipelineBinding(
         const WEntityComponentId & component_id,
         const WAssetId & pipeline_id,
-        const WAssetIndexId & in_mesh_id,
+        const WTypeAssetIndexId & in_mesh_id,
         const WRenderPipelineParametersAsset & in_param_asset
         // const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
@@ -88,11 +88,11 @@ public:
         asset_render_data_.UnloadTexture(in_id);
     }
 
-    void LoadStaticMesh(const WAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
+    void LoadStaticMesh(const WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 
-    void UnloadStaticMesh(const WAssetIndexId & in_id) override {
+    void UnloadStaticMesh(const WTypeAssetIndexId & in_id) override {
         asset_render_data_.UnloadStaticMesh(in_id);
     }
 

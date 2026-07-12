@@ -93,7 +93,7 @@ void WEngine::Run()
 
     state_.level_info.current_level = state_.startup_info.startup_level;
     state_.level_info.level =
-        *(state_.asset_db.Get<was::Level>(state_.level_info.current_level));
+        (state_.asset_db.Get<was::Level>(state_.level_info.current_level));
 
     LoadLevel(state_.level_info.level);
 
@@ -109,7 +109,7 @@ void WEngine::Run()
             Render()->WaitIdle();
 
             state_.level_info.level =
-                *state_.asset_db.Get<was::Level>(
+                state_.asset_db.Get<was::Level>(
                 state_.level_info.current_level);
 
             LoadLevel(state_.level_info.level);

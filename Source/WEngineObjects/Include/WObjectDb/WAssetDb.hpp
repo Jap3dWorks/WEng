@@ -26,15 +26,10 @@ public:
     using WAssetDbType = WObjectDb<WAsset, WAssetId>;
 
     constexpr WAssetDb() noexcept = default;
-
-    virtual ~WAssetDb() = default;
-
+    ~WAssetDb() = default;
     WAssetDb(WAssetDb const & other) = default;
-    
     WAssetDb(WAssetDb && other) = default;
-
     WAssetDb & operator=(WAssetDb const & other) = default;
-
     WAssetDb & operator=(WAssetDb && other) = default;
 
     template<std::derived_from<WAsset> T, CCallable<void, T&> TFn>
@@ -48,8 +43,8 @@ public:
     WAssetId Create(std::string_view in_fullname) {
         WAssetId id = GetIdPool(T::StaticClass()).Generate();
 
-        id_class_[id] = T::StaticClass();
-    
+        wclass_track_.RegAsset(id, T::StaticClass());
+
         object_manager_.CreateAt<T>(id);
         
         object_manager_.Get<T>(id).Set_asset_id(id);
@@ -64,11 +59,11 @@ public:
     WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
         WAssetId asset_id = Create<T>(in_fullname);
 
-        T * ptr = Get<T>(asset_id);
+        T & ptr = Get<T>(asset_id);
 
-        *ptr = other;
-        ptr -> Set_asset_id(asset_id);
-        ptr -> Set_name(in_fullname);
+        ptr = other;
+        ptr.Set_asset_id(asset_id);
+        ptr.Set_name(in_fullname);
 
         return asset_id;
     }
@@ -77,30 +72,40 @@ public:
     WAssetId CreateFrom(std::string_view in_fullname, T && other) {
         WAssetId asset_id = Create<T>(in_fullname);
 
-        T * ptr = Get<T>(asset_id);
+        T & ptr = Get<T>(asset_id);
 
-        *ptr = std::move(other);
-        ptr -> Set_asset_id(asset_id);
-        ptr -> Set_name(in_fullname);
+        ptr = std::move(other);
+        ptr.Set_asset_id(asset_id);
+        ptr.Set_name(in_fullname);
 
         return asset_id;
     }
 
-    // TODO ptr or reference?
+    /**
+     * Exact T class.
+     */
     template<std::derived_from<WAsset> T>
-    T * Get(WAssetId const & in_id) const {
-        
-        assert(id_class_.contains(in_id) &&
-               T::StaticClass()->IsEqual(id_class_.at(in_id)));
-
-        return static_cast<T*>(object_manager_.Get(
-                                   id_class_.at(in_id),
-                                   in_id));
+    T & Get(WAssetId const & in_id) const {
+        return object_manager_.Get<T>(in_id);
     }
 
-    WAsset * Get(WAssetId const & in_id) const {
-        assert(id_class_.contains(in_id));
-        return object_manager_.Get(id_class_.at(in_id), in_id);
+    WAsset * Get(WTypeAssetIndexId in_id) const {
+
+        WAssetTypeId atype;
+        WAssetId assetid;
+        WSubIdxId indx;
+        in_id.ExtractWIds(atype, assetid, indx);
+
+        WClass const * wclass = wclass_track_.GetWClass(atype);
+
+        return object_manager_.Get(wclass, assetid);
+    }
+
+    WAsset * Get(WAssetId in_id) const {
+        WAssetTypeId atype = wclass_track_.GetAssetTypeId(in_id);
+        WClass const * aclass = wclass_track_.GetWClass(atype);
+
+        return object_manager_.Get(aclass, in_id);
     }
 
     template<std::derived_from<WAsset> T>
@@ -109,6 +114,11 @@ public:
         WAsset * result = Get(asset_name);
         
         if (!result) return nullptr;
+
+        // TODO FIXING
+        auto asssname = result->Get_name();
+        std::string clssname = result->Class()->Name();
+        std::string othername = T::StaticClass()->Name();
 
         assert(result->Class()->IsEqual(T::StaticClass()));
 
@@ -154,7 +164,45 @@ private:
         }
     };
 
-    std::unordered_map<WAssetId, WClass const *> id_class_{};
+    struct {
+        WAssetTypeId::IdType id_counter{0};
+
+        std::vector<WClass const *> class_list{};
+        std::unordered_map<WClass const *,std::uint32_t> wclass_id{};
+        std::unordered_map<WAssetId, WAssetTypeId::IdType> asset_typeid{};
+
+        bool Contains(WClass const * in_class) const {
+            return wclass_id.contains(in_class);
+        }
+
+        void RegAsset(WAssetId assetid, WClass const * in_class) {
+            if (!wclass_id.contains(in_class)) {
+                class_list.push_back(in_class);
+                wclass_id[in_class] = id_counter;
+                
+                id_counter++;
+            }
+
+            asset_typeid[assetid] = wclass_id[in_class];
+            
+        }
+
+        WAssetTypeId GetTypeId(WClass const * in_class) const {
+            return wclass_id.at(in_class);
+        }
+
+        WClass const * GetWClass(WAssetTypeId in_id) const {
+            return class_list[in_id.GetId()];
+        }
+
+        WAssetTypeId GetAssetTypeId(WAssetId in_id) const {
+#ifndef NDEBUG
+            auto idtype = asset_typeid.at(in_id);
+#endif
+            return asset_typeid.at(in_id);
+        }
+
+    } wclass_track_{};
 
     wcr::TPathTree<WAssetId> path_tree_{};
 

@@ -133,7 +133,7 @@ WEngine weng::defaults::DefaultEngine() {
         .Get(weng::defaults::PBR_PIPELINE_ASSET_PATH)->Get_asset_id();
 
     result.ImportersRegister()
-        .Register<wim::importer::WImporterGltf>(pbr_pipeline_wid, wid_null);
+        .Register<wim::importer::WImporterGltf>(pbr_pipeline_wid, WID_NULL_V);
 
     // TODO Plugins Modules Loading
 

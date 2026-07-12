@@ -89,11 +89,11 @@ std::vector<WAssetId> wim::importer::WImporterObj::Import(
         in_asset_manager.Create<WStaticMeshAsset>("StaticMesh")
     };
     
-    WStaticMeshAsset * static_mesh =
+    WStaticMeshAsset & static_mesh =
         in_asset_manager.Get<WStaticMeshAsset>(result[0]);
 
     for (uint32_t i=0; i < meshes.size(); i++) {
-        static_mesh->SetMesh(std::move(meshes[i]), i);
+        static_mesh.SetMesh(std::move(meshes[i]), i);
     }
 
     return result;

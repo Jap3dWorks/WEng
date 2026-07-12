@@ -433,7 +433,7 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
 void WVkRender::CreatePipelineBinding(
     const WEntityComponentId & component_id,
     const WAssetId & pipeline_id,
-    const WAssetIndexId & in_assetindex_id,
+    const WTypeAssetIndexId & in_assetindex_id,
     const WRenderPipelineParametersAsset & in_parameters
     )
 {

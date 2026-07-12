@@ -156,7 +156,7 @@ using TVkDescriptorSetUBOBindingFrames =
 struct WVkPipelineBindingInfo
 {
     WAssetId pipeline_id{0};
-    WAssetIndexId mesh_asset_id{0};
+    WTypeAssetIndexId mesh_asset_id{0};
 
     std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescriptorSetTextureBinding> textures{};
