@@ -1,8 +1,8 @@
 #include "WSystems/WSystemsRunner.hpp"
 #include "WCore/WCore.hpp"
 
-WLevelSystemId WSystemsRunner::AddInitSystem(const WAssetId & in_level_id,
-                                        const WSystemId & in_system_id,
+wid::WLevelSystemId WSystemsRunner::AddInitSystem(const wid::WAssetId & in_level_id,
+                                        const wid::WSystemId & in_system_id,
                                         const WSystemFn & in_system) {
     return AddSystem(init_systems_,
                      ESystemLocation::PRE,
@@ -11,8 +11,8 @@ WLevelSystemId WSystemsRunner::AddInitSystem(const WAssetId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddPreSystem(const WAssetId & in_level_id,
-                                       const WSystemId & in_system_id,
+wid::WLevelSystemId WSystemsRunner::AddPreSystem(const wid::WAssetId & in_level_id,
+                                       const wid::WSystemId & in_system_id,
                                        const WSystemFn & in_system) {
     return AddSystem(pre_systems_,
                      ESystemLocation::PRE,
@@ -21,8 +21,8 @@ WLevelSystemId WSystemsRunner::AddPreSystem(const WAssetId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddPostSystem(const WAssetId & in_level_id,
-                                        const WSystemId & in_system_id,
+wid::WLevelSystemId WSystemsRunner::AddPostSystem(const wid::WAssetId & in_level_id,
+                                        const wid::WSystemId & in_system_id,
                                         const WSystemFn & in_system) {
     return AddSystem(post_systems_,
                      ESystemLocation::POST,
@@ -31,8 +31,8 @@ WLevelSystemId WSystemsRunner::AddPostSystem(const WAssetId & in_level_id,
                      in_system);
 }
 
-WLevelSystemId WSystemsRunner::AddEndSystem(const WAssetId & in_level_id,
-                                       const WSystemId & in_system_id,
+wid::WLevelSystemId WSystemsRunner::AddEndSystem(const wid::WAssetId & in_level_id,
+                                       const wid::WSystemId & in_system_id,
                                        const WSystemFn & in_system) {
     return AddSystem(end_systems_,
                      ESystemLocation::END,
@@ -41,9 +41,9 @@ WLevelSystemId WSystemsRunner::AddEndSystem(const WAssetId & in_level_id,
                      in_system);
 }
 
-void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
-    WAssetId lvlid;
-    WSystemId sysid;
+void WSystemsRunner::RemoveSystem(const wid::WLevelSystemId & in_id) {
+    wid::WAssetId lvlid;
+    wid::WSystemId sysid;
 
     in_id.ExtractWIds(lvlid, sysid);
     
@@ -65,7 +65,7 @@ void WSystemsRunner::RemoveSystem(const WLevelSystemId & in_id) {
     systemid_location_.extract(in_id);
 }
 
-void WSystemsRunner::RemoveSystems(const WAssetId & in_level_id) {
+void WSystemsRunner::RemoveSystems(const wid::WAssetId & in_level_id) {
     init_systems_.erase(in_level_id);
     pre_systems_.erase(in_level_id);
     post_systems_.erase(in_level_id);
@@ -81,7 +81,7 @@ void WSystemsRunner::Clear() {
     systemid_location_.clear();
 }
 
-void WSystemsRunner::RunInitSystems(const WAssetId & in_level_id,
+void WSystemsRunner::RunInitSystems(const wid::WAssetId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
     if(!init_systems_.contains(in_level_id)) {
         return;
@@ -92,7 +92,7 @@ void WSystemsRunner::RunInitSystems(const WAssetId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunPreSystems(const WAssetId & in_level_id,
+void WSystemsRunner::RunPreSystems(const wid::WAssetId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
     if (!pre_systems_.contains(in_level_id)) return;
 
@@ -101,7 +101,7 @@ void WSystemsRunner::RunPreSystems(const WAssetId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunPostSystems(const WAssetId & in_level_id,
+void WSystemsRunner::RunPostSystems(const wid::WAssetId & in_level_id,
                                     const WSystemParameters & in_parameters) const {
     if (!post_systems_.contains(in_level_id)) return;
 
@@ -110,7 +110,7 @@ void WSystemsRunner::RunPostSystems(const WAssetId & in_level_id,
     }
 }
 
-void WSystemsRunner::RunEndSystems(const WAssetId & in_level_id,
+void WSystemsRunner::RunEndSystems(const wid::WAssetId & in_level_id,
                                    const WSystemParameters & in_parameters) const {
     if (!end_systems_.contains(in_level_id)) return;
 
@@ -119,13 +119,13 @@ void WSystemsRunner::RunEndSystems(const WAssetId & in_level_id,
     }
 }
 
-WLevelSystemId WSystemsRunner::AddSystem(Systems & out_system,
+wid::WLevelSystemId WSystemsRunner::AddSystem(Systems & out_system,
                                          const ESystemLocation & in_location,
-                                         WAssetId const & in_level_id,
-                                         const WSystemId & in_system_id,
+                                         wid::WAssetId const & in_level_id,
+                                         const wid::WSystemId & in_system_id,
                                          const WSystemFn & in_system) {
 
-    WLevelSystemId lvlsysid{in_level_id, in_system_id};
+    wid::WLevelSystemId lvlsysid{in_level_id, in_system_id};
 
     out_system[in_level_id].Insert(in_system_id.GetId(), in_system);
 

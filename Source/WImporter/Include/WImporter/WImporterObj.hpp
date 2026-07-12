@@ -27,7 +27,7 @@ namespace wim::importer {
 
     public:
 
-        std::vector<WAssetId> Import(
+        std::vector<wid::WAssetId> Import(
             WAssetDb & in_asset_manager,
             std::string_view file_path,
             std::string_view asset_directory) override;

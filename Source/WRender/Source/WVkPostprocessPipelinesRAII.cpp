@@ -36,7 +36,7 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
-    WAssetId in_id,
+    wid::WAssetId in_id,
     const WRenderPipelineAsset & in_pipeline_asset,
     VkDescriptorSetLayout in_global_descriptor,
     VkDescriptorSetLayout in_ppcess_global_descriptor
@@ -84,9 +84,9 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
     pipeline_bindings_[in_id] = {};
 }
 
-WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
-    const WEntityComponentId & in_binding_id,
-    const WAssetId & in_pipeline_id,
+wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
+    const wid::WEntityComponentId & in_binding_id,
+    const wid::WAssetId & in_pipeline_id,
     const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
     const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture
     ) {

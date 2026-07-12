@@ -56,21 +56,21 @@ public:
      * Pipeline binding shares the same WId than the component.
      */
     virtual void CreatePipelineBinding(
-        const WEntityComponentId & component_id,
-        const WAssetId & pipeline_id,
-        const WTypeAssetIndexId & in_mesh_id,
+        const wid::WEntityComponentId & component_id,
+        const wid::WAssetId & pipeline_id,
+        const wid::WTypeAssetIndexId & in_mesh_id,
         const WRenderPipelineParametersAsset & in_parameters
         )=0;
 
     /**
      * @brief Delete the created render pipeline and its binidngs with WId in_id.
      */
-    virtual void DeleteRenderPipeline(const WAssetId & in_id)=0;
+    virtual void DeleteRenderPipeline(const wid::WAssetId & in_id)=0;
 
     /**
      * @brief Delete the create render pipeline binding.
      */
-    virtual void DeletePipelineBinding(const WEntityComponentId & in_id)=0;
+    virtual void DeletePipelineBinding(const wid::WEntityComponentId & in_id)=0;
 
     /** @brief Refresh things like postprocess order */
     virtual void RefreshPipelines()=0;
@@ -86,15 +86,15 @@ public:
     /**
      * @brief Load the registered texture asset with id in_id.
      */
-    virtual void LoadTexture(const WAssetId & in_id,
+    virtual void LoadTexture(const wid::WAssetId & in_id,
                              const WTextureAsset & in_texture)=0;
 
-    virtual void UnloadTexture(const WAssetId & in_id)=0;
+    virtual void UnloadTexture(const wid::WAssetId & in_id)=0;
 
-    virtual void LoadStaticMesh(const WTypeAssetIndexId & in_id,
+    virtual void LoadStaticMesh(const wid::WTypeAssetIndexId & in_id,
                                 const wct::geometry::WMesh & in_mesh)=0;
 
-    virtual void UnloadStaticMesh(const WTypeAssetIndexId & in_id)=0;
+    virtual void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
         const wct::render::WCameraUBO & in_ubo
@@ -104,14 +104,14 @@ public:
      * @brief Updates only for current frame in flight.
      *        Storage inside ubo_write will be consumed in the current call.
      */
-    virtual void UpdateParameterDynamic(const WEntityComponentId & in_id,
+    virtual void UpdateParameterDynamic(const wid::WEntityComponentId & in_id,
                                         const wct::render::WRPParamUbo & ubo_write)=0;
 
     /**
      * @brief Updates for all frames in flight.
      *        Storage inside ubo_write will be in the current call.
      */
-    virtual void UpdateParameterStatic(const WEntityComponentId & in_id,
+    virtual void UpdateParameterStatic(const wid::WEntityComponentId & in_id,
                                        const wct::render::WRPParamUbo & ubo_write)=0;
 
     /**
@@ -139,10 +139,10 @@ public:
     /**
      * @brief Updates each point light inside in_ids list.
      *        This method can update selective lights in the render data.
-     *        Each point light can be located by its WEntityComponentId.
+     *        Each point light can be located by its wid::WEntityComponentId.
      */
     virtual void UpdatePointLights(
-        std::span<WEntityComponentId> in_ids,
+        std::span<wid::WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_point_lights_structs
         )=0;
 
@@ -151,9 +151,9 @@ public:
      *        Previous lighting data is removed.
      */
     virtual void InitializeLights(
-        std::span<WEntityComponentId> in_pl_ids,
+        std::span<wid::WEntityComponentId> in_pl_ids,
         std::span<wct::render::WPointLight> in_point_lights,
-        std::span<WEntityComponentId> in_dl_ids,
+        std::span<wid::WEntityComponentId> in_dl_ids,
         std::span<wct::render::WDirectionalLight> in_directional_lights,
         const wct::render::WAmbientLight & in_ambient_light
         )=0;
@@ -168,7 +168,7 @@ public:
      *        Same functionality than UpdatePointLights
      */
     virtual void UpdateDirectionalLights(
-        std::span<WEntityComponentId> in_ids,
+        std::span<wid::WEntityComponentId> in_ids,
         std::span<wct::render::WDirectionalLight> in_directional_light_structs
         )=0;
 

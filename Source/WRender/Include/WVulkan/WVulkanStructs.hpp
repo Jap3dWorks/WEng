@@ -102,13 +102,13 @@ struct WVkUBOInfo
 
 struct WVkRenderPipelineInfo
 {
-    WAssetId wid;
+    wid::WAssetId wid;
     wct::render::EPipelineType type{wct::render::EPipelineType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
-    WAssetId descriptor_set_layout_id{0};
+    wid::WAssetId descriptor_set_layout_id{0};
 
     // TODO: Pipeline layout bindings description
     wct::render::WPipeParamDescriptorList params_descriptor{};
@@ -155,8 +155,8 @@ using TVkDescriptorSetUBOBindingFrames =
  */
 struct WVkPipelineBindingInfo
 {
-    WAssetId pipeline_id{0};
-    WTypeAssetIndexId mesh_asset_id{0};
+    wid::WAssetId pipeline_id{0};
+    wid::WTypeAssetIndexId mesh_asset_id{0};
 
     std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescriptorSetTextureBinding> textures{};

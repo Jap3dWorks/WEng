@@ -35,7 +35,7 @@ namespace wim::importer {
          * @param asset_directory, Engine based directory path to import to,
          * Should start with /Content.
          */
-        virtual std::vector<WAssetId> Import(
+        virtual std::vector<wid::WAssetId> Import(
             WAssetDb & in_asset_manager,
             std::string_view file_path,
             std::string_view asset_directory) = 0;

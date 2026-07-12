@@ -21,13 +21,13 @@ class WENGINE_API WEngine
 private:
 
     struct LevelInfoStruct {
-        WAssetId current_level{0};
+        wid::WAssetId current_level{0};
         bool loaded{false};
         was::Level level{};
     };
 
     struct StartupInfo {
-        WAssetId startup_level{0};
+        wid::WAssetId startup_level{0};
     };
 
 public:
@@ -46,14 +46,14 @@ public:
 
     void Run();
 
-    void StartupLevel(const WAssetId & in_id) noexcept;
+    void StartupLevel(const wid::WAssetId & in_id) noexcept;
 
-    WAssetId StartupLevel() const noexcept {
+    wid::WAssetId StartupLevel() const noexcept {
         return state_.startup_info.startup_level;
     }
 
     /** Set a level to be loaded when possible */
-    void MarkLoadLevel(const WAssetId & in_level_id);
+    void MarkLoadLevel(const wid::WAssetId & in_level_id);
 
     const LevelInfoStruct & LevelInfo() const noexcept {
         return state_.level_info;
@@ -79,10 +79,10 @@ public:
         return state_.engine_cycle;
     }
 
-    WLevelSystemId AddInitSystem(const WAssetId & in_level_id, std::string_view in_system_name);
-    WLevelSystemId AddPreSystem(const WAssetId & in_level_id, std::string_view in_system_name);
-    WLevelSystemId AddPostSystem(const WAssetId & in_level_id, std::string_view in_system_name);
-    WLevelSystemId AddEndSystem(const WAssetId & in_level_id, std::string_view in_system_name);
+    wid::WLevelSystemId AddInitSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name);
+    wid::WLevelSystemId AddPreSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name);
+    wid::WLevelSystemId AddPostSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name);
+    wid::WLevelSystemId AddEndSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name);
 
     template<CCallable<void, WSystemsRegister &> RFn>
     constexpr void RegSystems(RFn && in_fn) {

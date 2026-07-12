@@ -186,7 +186,7 @@ namespace wct::render {
         T value{};
     };
 
-    using WRPParamAsset = TRPParam<WAssetId>;
+    using WRPParamAsset = TRPParam<wid::WAssetId>;
 
     using WRPParameterList_WAssetId = std::vector<WRPParamAsset>;
     using WRPParameterList_Ubo = std::vector<WRPParamUbo>;
@@ -214,8 +214,8 @@ namespace wct::render {
     // Pipeline Params assignment
 
     struct WPipelineAssignment {
-        WAssetId pipeline{};
-        WAssetId params{};
+        wid::WAssetId pipeline{};
+        wid::WAssetId params{};
     };
 
     template<std::uint8_t Max=WENG_MAX_ASSET_IDS>

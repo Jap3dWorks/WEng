@@ -11,12 +11,12 @@
 // TODO template with max frames in flight as param
 
 class WVkPostprocessPipelinesRAII :
-    public WVkPipelinesBase<WAssetId,
-                            WEntityComponentId,
+    public WVkPipelinesBase<wid::WAssetId,
+                            wid::WEntityComponentId,
                             WENG_MAX_FRAMES_IN_FLIGHT>
 {
 public:
-    using Super = WVkPipelinesBase<WAssetId, WEntityComponentId, frames_in_flight>;
+    using Super = WVkPipelinesBase<wid::WAssetId, wid::WEntityComponentId, frames_in_flight>;
 
 public:
 
@@ -35,14 +35,14 @@ public:
     WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
     void CreatePipeline(
-        WAssetId in_id,
+        wid::WAssetId in_id,
         const WRenderPipelineAsset & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descriptor,
         VkDescriptorSetLayout in_ppcess_global_descriptor
         );
 
-    WEntityComponentId CreateBinding(const WEntityComponentId & in_binding_id,
-                                     const WAssetId & in_pipeline_id,
+    wid::WEntityComponentId CreateBinding(const wid::WEntityComponentId & in_binding_id,
+                                     const wid::WAssetId & in_pipeline_id,
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
                                      const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
 
@@ -54,7 +54,7 @@ public:
     void ComputeBindingOrder();
 
     auto BindingOrderIterator() const {
-        return WIteratorUtils::DefaultIteratorPtr<const WEntityComponentId>(
+        return WIteratorUtils::DefaultIteratorPtr<const wid::WEntityComponentId>(
             &(*binding_order_.begin()),
             &(*binding_order_.end())
             );
@@ -62,7 +62,7 @@ public:
 
 private:
 
-    std::vector<WEntityComponentId> binding_order_{};
+    std::vector<wid::WEntityComponentId> binding_order_{};
 
 };
 

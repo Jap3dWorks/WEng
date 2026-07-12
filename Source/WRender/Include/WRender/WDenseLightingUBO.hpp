@@ -155,7 +155,7 @@ namespace wrd::light {
             controller_(in_lights_data_ref)
             {}
 
-        void Update(WEntityComponentId in_component_id,
+        void Update(wid::WEntityComponentId in_component_id,
                     const T & in_light) {
 
             controller_.Insert(in_component_id, in_light);
@@ -170,7 +170,7 @@ namespace wrd::light {
             #endif
         }
 
-        void Update(std::span<WEntityComponentId> in_ids,
+        void Update(std::span<wid::WEntityComponentId> in_ids,
                     std::span<T> in_point_lights) {
             for(std::uint32_t i=0; i<in_ids.size(); i++) {
                 Update(
@@ -180,7 +180,7 @@ namespace wrd::light {
             }
         }
 
-        void RemoveLight(WEntityComponentId in_component_id) {
+        void RemoveLight(wid::WEntityComponentId in_component_id) {
             controller_.Remove(in_component_id);
             *count_ref_ = controller_.Count();
         }
@@ -191,7 +191,7 @@ namespace wrd::light {
         }
 
 
-        WNODISCARD bool Contains(WEntityComponentId in_id) const {
+        WNODISCARD bool Contains(wid::WEntityComponentId in_id) const {
             return controller_.Contains(in_id);
         }
 
@@ -199,7 +199,7 @@ namespace wrd::light {
             return controller_.Count();
         }
 
-        WNODISCARD std::uint32_t DensePosition(WEntityComponentId in_id) const {
+        WNODISCARD std::uint32_t DensePosition(wid::WEntityComponentId in_id) const {
             return controller_.DensePosition(in_id);
         }
 
@@ -213,7 +213,7 @@ namespace wrd::light {
          */
         WNODISCARD std::tuple<std::uint32_t, std::uint32_t>
         FirstLastDensePosition(
-            std::span<WEntityComponentId> in_ids
+            std::span<wid::WEntityComponentId> in_ids
             ) const {
             assert(!in_ids.empty());
 

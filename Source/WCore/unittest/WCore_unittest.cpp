@@ -59,8 +59,8 @@ bool TObjectDataBase_Test() {
 
     WFLOG("-- Init TObjectDataBase_Test --");
     
-    TObjectDataBase<A, B, WId<>::IdType> od{
-        [](WId<>::IdType const &) ->A {return {};},
+    TObjectDataBase<A, B, wid::WId<>::IdType> od{
+        [](wid::WId<>::IdType const &) ->A {return {};},
         [](A const & )->void {}
     };
 
@@ -70,11 +70,11 @@ bool TObjectDataBase_Test() {
 
     WFLOG("od Count: {}", od.Count());
 
-    TObjectDataBase<A, B, WId<>::IdType> od2 = od;
+    TObjectDataBase<A, B, wid::WId<>::IdType> od2 = od;
 
     WFLOG("od2 Count: {}", od2.Count());
 
-    std::unique_ptr<IObjectDataBase<B,WId<>::IdType>>od3 = od.Clone();
+    std::unique_ptr<IObjectDataBase<B,wid::WId<>::IdType>>od3 = od.Clone();
 
     WFLOG("od3 Count: {}", od3->Count());
 
@@ -106,7 +106,7 @@ bool SplitAssetPath_Test() {
 }
 
 bool WIDCompoundNullValue_Test() {
-    WTypeAssetIndexId wid{WID_NULL_V};
+    wid::WTypeAssetIndexId wid{wid::WID_NULL_V};
 
     auto idvalue = wid.GetId();
 

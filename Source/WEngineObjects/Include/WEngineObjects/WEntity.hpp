@@ -17,7 +17,7 @@ class WCORE_API WEntity : public WObject
 
 public:
 
-    WPROPERTY(WEntityId, entity_id,);
+    WPROPERTY(wid::WEntityId, entity_id,);
     WPROPERTY(WObjectName, name,);
 
 public:

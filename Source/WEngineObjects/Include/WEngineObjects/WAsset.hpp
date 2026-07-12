@@ -17,7 +17,7 @@ class WCORE_API WAsset : public WObject, public ISerializable
 public:
 
     WPROPERTY(WObjectName, name,);
-    WPROPERTY(WAssetId, asset_id,);
+    WPROPERTY(wid::WAssetId, asset_id,);
 
 public:
 

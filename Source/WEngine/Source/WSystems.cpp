@@ -42,9 +42,9 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
-    WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
+    wid::WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
 
-    WEntityId camid;
+    wid::WEntityId camid;
     parameters.level->GetFirstComponent<WCameraComponent>(camid);
 
     parameters.engine->AssetManager().ForEach<WInputMappingAsset>(
@@ -250,7 +250,7 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
-    WEntityId id;
+    wid::WEntityId id;
     auto & ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
     auto & tc = parameters.level->GetComponent<WTransformComponent>(id);
     auto & mc = parameters.level->GetComponent<WMovementComponent>(id);

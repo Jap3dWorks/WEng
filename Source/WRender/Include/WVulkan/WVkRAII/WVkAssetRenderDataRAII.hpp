@@ -19,8 +19,8 @@
 class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
-using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, WAssetId::IdType>;
-using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, WTypeAssetIndexId::IdType>;
+using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wid::WAssetId::IdType>;
+using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, wid::WTypeAssetIndexId::IdType>;
 
 public:
 
@@ -45,10 +45,10 @@ public:
 
     // Texture
 
-    void LoadTexture(const WAssetId & in_id, const WTextureAsset & in_texture) {
+    void LoadTexture(const wid::WAssetId & in_id, const WTextureAsset & in_texture) {
         texture_collection_.CreateAt(
             in_id,
-            [this, &in_texture](const WAssetId & _id) -> WVkTextureInfo {
+            [this, &in_texture](const wid::WAssetId & _id) -> WVkTextureInfo {
                 WVkTextureInfo result;
                 wvk::texture::CreateTexture(
                     result,
@@ -62,17 +62,17 @@ public:
             });
     }
 
-    void UnloadTexture(const WAssetId & in_id);
+    void UnloadTexture(const wid::WAssetId & in_id);
 
-    const WVkTextureInfo & TextureInfo(const WAssetId & in_id) const;
+    const WVkTextureInfo & TextureInfo(const wid::WAssetId & in_id) const;
 
     // Static Mesh
 
-    void LoadStaticMesh(const WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
+    void LoadStaticMesh(const wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
 
         static_mesh_collection_.CreateAt(
             in_id,
-            [this, &in_mesh] (const WTypeAssetIndexId & in_id) -> WVkMeshInfo {
+            [this, &in_mesh] (const wid::WTypeAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
                 wvk::mesh::CreateMeshBuffers(
                     result,
@@ -92,9 +92,9 @@ public:
             );
     }
 
-    void UnloadStaticMesh(const WTypeAssetIndexId & in_id);
+    void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(const WTypeAssetIndexId & in_id) const;
+    const WVkMeshInfo & StaticMeshInfo(const wid::WTypeAssetIndexId & in_id) const;
 
     void Clear();
 
@@ -111,7 +111,7 @@ private:
              
     WVkMeshDb static_mesh_collection_;
 
-    std::unordered_map<WAssetId, std::vector<WSubIdxId>> mesh_indexes_;
+    std::unordered_map<wid::WAssetId, std::vector<wid::WSubIdxId>> mesh_indexes_;
 
 };
 

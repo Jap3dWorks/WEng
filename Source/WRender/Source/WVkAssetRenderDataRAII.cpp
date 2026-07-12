@@ -57,7 +57,7 @@ WVkAssetRenderDataRAII & WVkAssetRenderDataRAII::operator=(WVkAssetRenderDataRAI
     return *this;
 }
 
-void WVkAssetRenderDataRAII::UnloadTexture(const WAssetId & in_id) {
+void WVkAssetRenderDataRAII::UnloadTexture(const wid::WAssetId & in_id) {
     texture_collection_.Remove(
         in_id,
         [this](WVkTextureInfo & in_texture_info) -> void {
@@ -69,7 +69,7 @@ void WVkAssetRenderDataRAII::UnloadTexture(const WAssetId & in_id) {
         );
 }
 
-void WVkAssetRenderDataRAII::UnloadStaticMesh(const WTypeAssetIndexId & in_id) {
+void WVkAssetRenderDataRAII::UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id) {
 
     static_mesh_collection_.Remove(
         in_id,
@@ -81,11 +81,11 @@ void WVkAssetRenderDataRAII::UnloadStaticMesh(const WTypeAssetIndexId & in_id) {
         });    
 }
 
-const WVkTextureInfo & WVkAssetRenderDataRAII::TextureInfo(const WAssetId & in_id) const {
+const WVkTextureInfo & WVkAssetRenderDataRAII::TextureInfo(const wid::WAssetId & in_id) const {
     return texture_collection_.Get(in_id);
 }
 
-const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const WTypeAssetIndexId & in_id) const {
+const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const wid::WTypeAssetIndexId & in_id) const {
     return static_mesh_collection_.Get(in_id);
 }
 

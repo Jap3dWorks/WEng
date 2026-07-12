@@ -129,11 +129,11 @@ WEngine weng::defaults::DefaultEngine() {
 
     // Gltf importer
 
-    WAssetId pbr_pipeline_wid = result.AssetManager()
+    wid::WAssetId pbr_pipeline_wid = result.AssetManager()
         .Get(weng::defaults::PBR_PIPELINE_ASSET_PATH)->Get_asset_id();
 
     result.ImportersRegister()
-        .Register<wim::importer::WImporterGltf>(pbr_pipeline_wid, WID_NULL_V);
+        .Register<wim::importer::WImporterGltf>(pbr_pipeline_wid, wid::WID_NULL_V);
 
     // TODO Plugins Modules Loading
 

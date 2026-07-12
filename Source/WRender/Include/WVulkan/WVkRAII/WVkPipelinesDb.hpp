@@ -16,8 +16,8 @@
 #include <utility>
 #include <vulkan/vulkan_core.h>
 
-template<CIsWId WPipelineIdType=WAssetId,
-         CIsWId WBindingIdType=WEntityComponentId,
+template<wid::CIsWId WPipelineIdType=wid::WAssetId,
+         wid::CIsWId WBindingIdType=wid::WEntityComponentId,
          std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesDb {
 public:
@@ -33,7 +33,7 @@ public:
         FramesInFlight
         >;
 
-    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, WEntityComponentId::IdType>;
+    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, wid::WEntityComponentId::IdType>;
 
 public:
 

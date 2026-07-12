@@ -16,7 +16,7 @@
 //     return id;
 // }
 
-WEntity * was::Level::GetEntity(const WEntityId & in_id) const {
+WEntity * was::Level::GetEntity(const wid::WEntityId & in_id) const {
     return entity_component_db.GetEntity(in_id);
 }
 
@@ -38,7 +38,7 @@ std::string was::Level::WEntityPath(const WClass * in_class) const {
         std::format("{}", entity_component_db.EntityCount(in_class));
 }
 
-std::string was::Level::ComponentPath(const WEntityId & in_entity_id,
+std::string was::Level::ComponentPath(const wid::WEntityId & in_entity_id,
                                   const WClass * in_class) const {
 
     TWRef<WEntity> actor = entity_component_db.GetEntity(in_entity_id);

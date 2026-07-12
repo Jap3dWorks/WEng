@@ -20,7 +20,7 @@
 /**
  * @brief This class is a container for WObjects and derived types.
  */
-template<CWObjectDerived WObjClass, CIsWId WIdType=WId<>>
+template<CWObjectDerived WObjClass, wid::CIsWId WIdType=wid::WId<>>
 class WENGINEOBJECTS_API WObjectDb {
 
 public:

@@ -15,12 +15,12 @@ namespace wim::importer {
         WImporterGltf& operator=(WImporterGltf&&) noexcept = default;
         virtual ~WImporterGltf() = default;
 
-        WImporterGltf(WAssetId pbr_pipeline, WAssetId transparent_pipeline) :
+        WImporterGltf(wid::WAssetId pbr_pipeline, wid::WAssetId transparent_pipeline) :
             render_pipelines_({pbr_pipeline, transparent_pipeline}) {}
 
     public:
 
-        std::vector<WAssetId> Import(
+        std::vector<wid::WAssetId> Import(
             WAssetDb & in_asset_manager,
             std::string_view file_path,
             std::string_view asset_directory
@@ -34,8 +34,8 @@ namespace wim::importer {
     private:
 
         struct RenderPipelines {
-            WAssetId gbuffer{};      // opaque pbr.
-            WAssetId transparent{};  // transparent pbr.
+            wid::WAssetId gbuffer{};      // opaque pbr.
+            wid::WAssetId transparent{};  // transparent pbr.
         } render_pipelines_{};
 
         

@@ -17,9 +17,9 @@ private:
 
 using EventType = TEvent<void(const WInputValuesStruct &, WActionAsset const *, WEngine *)>;
 
-    using MappingAssetsSTackType = TStack<WAssetId>;
+    using MappingAssetsSTackType = TStack<wid::WAssetId>;
 
-    using ActionEventsType = std::unordered_map<WAssetId, EventType>;
+    using ActionEventsType = std::unordered_map<wid::WAssetId, EventType>;
 
 public:
 
@@ -37,7 +37,7 @@ public:
 
     void Emit(const WInputValuesStruct & in_input, WEngine * in_engine);
 
-    WEventId BindAction(const WAssetId & in_action, EventType::FnType && in_fn) {
+    wid::WEventId BindAction(const wid::WAssetId & in_action, EventType::FnType && in_fn) {
         if (!action_events_.contains(in_action)) {
             action_events_[in_action]={};
         }
@@ -45,19 +45,19 @@ public:
         return action_events_[in_action].Subscribe(std::move(in_fn));
     }
 
-    void ClearAction(const WAssetId & in_action) {
+    void ClearAction(const wid::WAssetId & in_action) {
         action_events_[in_action].Clear();
     }
 
-    void UnbindAction(const WAssetId & in_action, const WEventId & in_event) {
+    void UnbindAction(const wid::WAssetId & in_action, const wid::WEventId & in_event) {
         action_events_[in_action].Unsubscribe(in_event);
     }
 
-    void PutInputMapping(const WAssetId & in_asset) {
+    void PutInputMapping(const wid::WAssetId & in_asset) {
         mapping_assets_stack_.Put(in_asset);
     }
 
-    const WAssetId & TopInputMapping() const {
+    const wid::WAssetId & TopInputMapping() const {
         return mapping_assets_stack_.Top();
     }
 
@@ -65,14 +65,14 @@ public:
         mapping_assets_stack_.Pop();
     }
 
-    bool ContainsInputMapping(const WAssetId & in_id) {
+    bool ContainsInputMapping(const wid::WAssetId & in_id) {
         return mapping_assets_stack_.Contains(in_id);
     }
 
     /**
      * @Brief returns InputMapping priority value, 0 higgest priority.
      */
-    std::size_t PriorityInputMapping(const WAssetId & in_value) {
+    std::size_t PriorityInputMapping(const wid::WAssetId & in_value) {
         return mapping_assets_stack_.Position(in_value);
     }
 

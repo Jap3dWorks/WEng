@@ -34,10 +34,10 @@
 namespace spacers::monkey {
     
     struct ModelAssets {
-        WAssetId static_mesh;
-        WAssetId pipeline_asset;
-        WAssetId param_asset;
-        WEntityId entity;
+        wid::WAssetId static_mesh;
+        wid::WAssetId pipeline_asset;
+        wid::WAssetId param_asset;
+        wid::WEntityId entity;
     };
 
     inline bool LoadVikingRoom(WEngine & engine, ModelAssets & out_model)
@@ -46,7 +46,7 @@ namespace spacers::monkey {
         wim::importer::WImporterObj obj_importer =
             engine.ImportersRegister().GetImporter<wim::importer::WImporterObj>();
 
-        std::vector<WAssetId> geo_ids =
+        std::vector<wid::WAssetId> geo_ids =
             obj_importer.Import(
                 engine.AssetManager(),
                 "Content/Assets/Models/viking_room.obj", 
@@ -58,7 +58,7 @@ namespace spacers::monkey {
         wim::importer::WImportTexture texture_importer =
             engine.ImportersRegister().GetImporter<wim::importer::WImportTexture>();
 
-        std::vector<WAssetId> tex_ids = texture_importer.Import(
+        std::vector<wid::WAssetId> tex_ids = texture_importer.Import(
             engine.AssetManager(),
             "Content/Assets/Textures/viking_room.png", 
             "/Content/Assets/viking_texture:viking_texture"
@@ -77,7 +77,7 @@ namespace spacers::monkey {
 
         // Create Pipeline Parameter Asset
 
-        WAssetId paramid = engine.AssetManager()
+        wid::WAssetId paramid = engine.AssetManager()
             .Create<WRenderPipelineParametersAsset>("/Content/Assets/Params/ParamA:ParamA");
 
         out_model.param_asset = paramid;
@@ -96,7 +96,7 @@ namespace spacers::monkey {
     }
 
     inline bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
-        WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur:PPBlur");
+        wid::WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur:PPBlur");
 
         WRenderPipelineAsset & pipeline_asset =
             engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
@@ -123,7 +123,7 @@ namespace spacers::monkey {
 
         pipeline_asset.Set_descriptor_list(descriptors);
 
-        WAssetId paramid =
+        wid::WAssetId paramid =
             engine.AssetManager().Create<WRenderPipelineParametersAsset>(
                 "/Content/Assets/PPBlurParam:PPBlurParam"
                 );
@@ -133,12 +133,12 @@ namespace spacers::monkey {
         return true;
     }
 
-    inline bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const WAssetId & in_render_pipeline) {
+    inline bool LoadMonkey(WEngine & engine, ModelAssets & out_model, const wid::WAssetId & in_render_pipeline) {
         wim::importer::WImporterObj obj_importer =
             engine.ImportersRegister()
             .GetImporter<wim::importer::WImporterObj>();
 
-        std::vector<WAssetId> geo_ids =
+        std::vector<wid::WAssetId> geo_ids =
             obj_importer.Import(
                 engine.AssetManager(),
                 "Content/Assets/Models/monkey.obj", 
@@ -150,13 +150,13 @@ namespace spacers::monkey {
         wim::importer::WImportTexture tex_importer = engine.ImportersRegister()
             .GetImporter<wim::importer::WImportTexture>();
 
-        std::vector<WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
+        std::vector<wid::WAssetId> tex_ids = tex_importer.Import(engine.AssetManager(),
                                                             "Content/Assets/Textures/orange.png",
                                                             "/Content/Assets/orange:orange");
 
         out_model.pipeline_asset = in_render_pipeline;
 
-        WAssetId paramid = engine.AssetManager()
+        wid::WAssetId paramid = engine.AssetManager()
             .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamB:ParamB");
 
         out_model.param_asset = paramid;
@@ -182,27 +182,27 @@ namespace spacers::monkey {
     }
 
     inline bool InputAssets(WEngine & in_engine) {
-        WAssetId cameramapping = in_engine.AssetManager().Create<WInputMappingAsset>(
+        wid::WAssetId cameramapping = in_engine.AssetManager().Create<WInputMappingAsset>(
             "/Content/Input/CameraMapping:CameraMapping"
             );
 
-        WAssetId frontaction = in_engine.AssetManager().Create<WActionAsset>(
+        wid::WAssetId frontaction = in_engine.AssetManager().Create<WActionAsset>(
             "/Content/Input/FrontAction:FrontAction"
             );
 
-        WAssetId backaction = in_engine.AssetManager().Create<WActionAsset>(
+        wid::WAssetId backaction = in_engine.AssetManager().Create<WActionAsset>(
             "/Content/Input/BackAction:BackAction"
             );
 
-        WAssetId leftaction = in_engine.AssetManager().Create<WActionAsset>(
+        wid::WAssetId leftaction = in_engine.AssetManager().Create<WActionAsset>(
             "/Content/Input/LeftAction:LeftAction"
             );
 
-        WAssetId rightaction = in_engine.AssetManager().Create<WActionAsset>(
+        wid::WAssetId rightaction = in_engine.AssetManager().Create<WActionAsset>(
             "/Content/Input/RightAction:RightAction"
             );
 
-        WAssetId mousemovement = in_engine.AssetManager().Create<WActionAsset>(
+        wid::WAssetId mousemovement = in_engine.AssetManager().Create<WActionAsset>(
             "/Content/Input/MouseMovement:MouseMovement"
             );
 
@@ -226,7 +226,7 @@ namespace spacers::monkey {
         return true;
     }
 
-    inline WAssetId ConfigLevel(WEngine & in_engine,
+    inline wid::WAssetId ConfigLevel(WEngine & in_engine,
                          const ModelAssets & in_viking_room,
                          const ModelAssets & in_monkey_dt // ,
                          // const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
@@ -235,7 +235,7 @@ namespace spacers::monkey {
         // WLevelId levelid = in_engine.LevelRegister().Create();
         // WLevel & level = in_engine.LevelRegister().Get(levelid);
 
-        WAssetId levelid = in_engine.AssetManager().Create<was::Level>(
+        wid::WAssetId levelid = in_engine.AssetManager().Create<was::Level>(
             "/Content/Level/Level01:Level01"
             );
 
@@ -249,7 +249,7 @@ namespace spacers::monkey {
 
         // Camera
 
-        WEntityId cid = level.CreateEntity<WEntity>();
+        wid::WEntityId cid = level.CreateEntity<WEntity>();
         level.CreateComponent<WTransformComponent>(cid);
         level.CreateComponent<WCameraComponent>(cid);
         level.CreateComponent<WMovementComponent>(cid);     // parametrized movement
@@ -267,7 +267,7 @@ namespace spacers::monkey {
 
         // Models
         // Viking Room
-        WEntityId eid = level.CreateEntity<WEntity>();
+        wid::WEntityId eid = level.CreateEntity<WEntity>();
         level.CreateComponent<WTransformComponent>(eid);
         WTransformComponent & ctcmp = level.GetComponent<WTransformComponent>(eid);
         ctcmp.Set_rotation_order(ERotationOrder::zxy);
@@ -284,7 +284,7 @@ namespace spacers::monkey {
             );
 
         // Monkey 1
-        WEntityId monkey_id = level.CreateEntity<WEntity>();
+        wid::WEntityId monkey_id = level.CreateEntity<WEntity>();
         level.CreateComponent<WTransformComponent>(monkey_id);
         auto * monkey_tc = &level.GetComponent<WTransformComponent>(monkey_id);
         monkey_tc->Set_rotation_order(ERotationOrder::zxy);
@@ -301,7 +301,7 @@ namespace spacers::monkey {
                                        in_monkey_dt.param_asset);
 
         // Monkey 2
-        WEntityId monkey2_id = level.CreateEntity<WEntity>();
+        wid::WEntityId monkey2_id = level.CreateEntity<WEntity>();
         level.CreateComponent<WTransformComponent>(monkey2_id);
         monkey_tc = &level.GetComponent<WTransformComponent>(monkey2_id);
         monkey_tc->Set_rotation_order(ERotationOrder::zxy);
@@ -320,7 +320,7 @@ namespace spacers::monkey {
         // Lights
         // ------
     
-        WEntityId point_light_1 = level.CreateEntity<WEntity>();
+        wid::WEntityId point_light_1 = level.CreateEntity<WEntity>();
         level.CreateComponent<WTransformComponent>(point_light_1);
         level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
         auto * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1);
@@ -335,7 +335,7 @@ namespace spacers::monkey {
         light_ptr->Set_radius(1.5);
         light_ptr->Set_active(true);
 
-        WEntityId ambient_light = level.CreateEntity<WEntity>();
+        wid::WEntityId ambient_light = level.CreateEntity<WEntity>();
         level.CreateComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         auto * ambient_ptr = &level.GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
@@ -348,7 +348,7 @@ namespace spacers::monkey {
 
     }
 
-    inline WAssetId CreateMonkeyLevel(WEngine & in_engine) {
+    inline wid::WAssetId CreateMonkeyLevel(WEngine & in_engine) {
                 std::vector<wct::render::WPipelineAssignment> ppcsst_assignments;
 
         ModelAssets viking_room;

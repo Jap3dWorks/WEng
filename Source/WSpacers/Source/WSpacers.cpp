@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
         WEngine engine = weng::defaults::DefaultEngine();
 
-        WAssetId monkey_level_id = spacers::monkey::CreateMonkeyLevel(engine);
+        wid::WAssetId monkey_level_id = spacers::monkey::CreateMonkeyLevel(engine);
         // WAssetId gltflevel = spacers::gltflevel::CreateLevel(engine);
 
         engine.StartupLevel(monkey_level_id);

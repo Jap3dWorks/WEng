@@ -11,8 +11,8 @@
 #include <cstdint>
 #include <unordered_set>
 
-template<typename WPipelineIdType=WAssetId,
-         typename WBindingIdType=WEntityComponentId,
+template<typename WPipelineIdType=wid::WAssetId,
+         typename WBindingIdType=wid::WEntityComponentId,
          std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesBase {
 public:

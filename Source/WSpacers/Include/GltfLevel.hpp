@@ -15,8 +15,8 @@ namespace spacers::gltflevel {
 
     inline void SetupLighting(was::Level * out_level) {}
 
-    inline WAssetId CreateLevel(WEngine & in_engine) {
-        std::vector<WAssetId> imported_assets = in_engine
+    inline wid::WAssetId CreateLevel(WEngine & in_engine) {
+        std::vector<wid::WAssetId> imported_assets = in_engine
             .ImportersRegister()
             .GetImporter<wim::importer::WImporterGltf>()
             .Import(
@@ -25,7 +25,7 @@ namespace spacers::gltflevel {
                 "/Content/Assets/ImportedLevels/"
                 );
 
-        WAssetId level_id{WID_NULL_V};
+        wid::WAssetId level_id{wid::WID_NULL_V};
         was::Level * level_asset{nullptr};
 
         for (auto & item : imported_assets) {

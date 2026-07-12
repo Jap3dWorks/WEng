@@ -13,15 +13,15 @@
  * @brief Graphics Pipelines outputs the GBuffers.
  */
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkGBufferPipelinesRAII : public WVkPipelinesBase<WAssetId,
-                                                        WEntityComponentId,
+class WVkGBufferPipelinesRAII : public WVkPipelinesBase<wid::WAssetId,
+                                                        wid::WEntityComponentId,
                                                         FramesInFlight>
 {
 
 public:
 
-    using Super = WVkPipelinesBase<WAssetId,
-                                   WEntityComponentId,
+    using Super = WVkPipelinesBase<wid::WAssetId,
+                                   wid::WEntityComponentId,
                                    FramesInFlight>;
 
     using Super::Super;
@@ -41,7 +41,7 @@ public:
         ) noexcept =default;
 
     void CreatePipeline(
-        const WAssetId & in_id,
+        const wid::WAssetId & in_id,
         const WRenderPipelineAsset & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descset_layout
         ) {
@@ -91,10 +91,10 @@ public:
 
 public:
 
-    WEntityComponentId CreateBinding(
-        const WEntityComponentId & in_component_id,
-        const WAssetId & in_pipeline_id,
-        const WTypeAssetIndexId & in_mesh_asset_id,
+    wid::WEntityComponentId CreateBinding(
+        const wid::WEntityComponentId & in_component_id,
+        const wid::WAssetId & in_pipeline_id,
+        const wid::WTypeAssetIndexId & in_mesh_asset_id,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {

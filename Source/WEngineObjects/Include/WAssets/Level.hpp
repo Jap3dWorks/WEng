@@ -27,16 +27,16 @@ namespace was {
         void Close(WEngine * in_engine) ;
 
         template<std::derived_from<WEntity> T>
-        WEntityId CreateEntity() {
+            wid::WEntityId CreateEntity() {
             std::string actor_path = WEntityPath(T::StaticClass());
 
-            WEntityId id = entity_component_db
+            wid::WEntityId id = entity_component_db
                 .CreateEntity<T>(actor_path.c_str());
 
             return id;
         }
 
-        WEntity * GetEntity(const WEntityId & in_id) const ;
+        WEntity * GetEntity(const wid::WEntityId & in_id) const ;
 
         /**
          * @brief Run in_predicate for each in_class actor (derived from in_class).
@@ -47,7 +47,7 @@ namespace was {
         }
 
         template<std::derived_from<WComponent> T>
-            WEntityComponentId CreateComponent(const WEntityId & in_entity_id) {
+            wid::WEntityComponentId CreateComponent(const wid::WEntityId & in_entity_id) {
             std::string component_path=ComponentPath(in_entity_id, T::StaticClass());
 
             entity_component_db.CreateComponent<T>(in_entity_id);
@@ -57,21 +57,21 @@ namespace was {
 
         }
 
-        WEntityComponentId CreateComponent(const WEntityId & in_entity_id,
+        wid::WEntityComponentId CreateComponent(const wid::WEntityId & in_entity_id,
                                            const WClass * in_class) ;
 
         template<std::derived_from<WComponent> T>
-        T & GetComponent(const WEntityId & in_entity_id) const {
+            T & GetComponent(const wid::WEntityId & in_entity_id) const {
             return entity_component_db.GetComponent<T>(in_entity_id);
         }
 
         WComponent * GetComponent(const WClass * in_class,
-                                  const WEntityId & in_component_id) const {
+                                  const wid::WEntityId & in_component_id) const {
             return entity_component_db.GetComponent(in_class,
                                                      in_component_id);
         }
 
-        WComponent * GetComponent(const WEntityComponentId & in_component_id) const {
+        WComponent * GetComponent(const wid::WEntityComponentId & in_component_id) const {
             return entity_component_db.GetComponent(in_component_id);
         }
 
@@ -80,11 +80,11 @@ namespace was {
         // It will be more flexible and useful.
 
         template<std::derived_from<WComponent> T>
-        T & GetFirstComponent(WEntityId & out_id) const {
+            T & GetFirstComponent(wid::WEntityId & out_id) const {
             return entity_component_db.GetFirstComponent<T>(out_id);
         }
 
-        WComponent * GetFirstComponent(const WClass * in_class, WEntityId & out_id) const {
+        WComponent * GetFirstComponent(const WClass * in_class, wid::WEntityId & out_id) const {
             return entity_component_db.GetFirstComponent(in_class, out_id);
         }
 
@@ -101,18 +101,18 @@ namespace was {
         }
 
         template<std::derived_from<WComponent> T>
-        WEntityComponentId GetEntityComponentId(const WEntityId & in_entity_id,
-                                                const WSubIdxId & in_index_id=WID_NULL_V) const noexcept {
+            wid::WEntityComponentId GetEntityComponentId(const wid::WEntityId & in_entity_id,
+                                                         const wid::WSubIdxId & in_index_id=wid::WID_NULL_V) const noexcept {
             return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
         }
 
-        WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
-                                                const WEntityId & in_entity_id,
-                                                const WSubIdxId & in_index_id=WID_NULL_V) const noexcept {
+        wid::WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
+                                                     const wid::WEntityId & in_entity_id,
+                                                     const wid::WSubIdxId & in_index_id=wid::WID_NULL_V) const noexcept {
 
             assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
 
-            WComponentTypeId cid = entity_component_db.GetComponentTypeId(in_component_class);
+            wid::WComponentTypeId cid = entity_component_db.GetComponentTypeId(in_component_class);
             
             return {Get_asset_id(), in_entity_id, cid, in_index_id};
         }
@@ -121,7 +121,7 @@ namespace was {
 
         std::string WEntityPath(const WClass* in_class) const;
 
-        std::string ComponentPath(const WEntityId & in_entity_id,
+        std::string ComponentPath(const wid::WEntityId & in_entity_id,
                                   const WClass * in_class) const;
 
     private:

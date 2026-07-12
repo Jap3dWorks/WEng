@@ -10,7 +10,7 @@
 
 wim::importer::WImportTexture::WImportTexture() noexcept {}
 
-std::vector<WAssetId> wim::importer::WImportTexture::Import(
+std::vector<wid::WAssetId> wim::importer::WImportTexture::Import(
     WAssetDb & in_asset_manager,
     std::string_view file_path,
     std::string_view asset_directory)
@@ -22,7 +22,7 @@ std::vector<WAssetId> wim::importer::WImportTexture::Import(
         throw std::runtime_error("Failed to load texture image!");
     }
 
-    WAssetId id = in_asset_manager.Create<WTextureAsset>(
+    wid::WAssetId id = in_asset_manager.Create<WTextureAsset>(
         wstr::AssetPath(
             std::string(asset_directory),
             std::string(file_path),

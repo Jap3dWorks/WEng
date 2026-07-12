@@ -23,7 +23,7 @@ class WENGINEOBJECTS_API WAssetDb {
     
 public:
 
-    using WAssetDbType = WObjectDb<WAsset, WAssetId>;
+using WAssetDbType = WObjectDb<WAsset, wid::WAssetId>;
 
     constexpr WAssetDb() noexcept = default;
     ~WAssetDb() = default;
@@ -40,8 +40,8 @@ public:
     }
 
     template<std::derived_from<WAsset> T>
-    WAssetId Create(std::string_view in_fullname) {
-        WAssetId id = GetIdPool(T::StaticClass()).Generate();
+    wid::WAssetId Create(std::string_view in_fullname) {
+        wid::WAssetId id = GetIdPool(T::StaticClass()).Generate();
 
         wclass_track_.RegAsset(id, T::StaticClass());
 
@@ -56,8 +56,8 @@ public:
     }
 
     template<std::derived_from<WAsset> T>
-    WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
-        WAssetId asset_id = Create<T>(in_fullname);
+    wid::WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
+        wid::WAssetId asset_id = Create<T>(in_fullname);
 
         T & ptr = Get<T>(asset_id);
 
@@ -69,8 +69,8 @@ public:
     }
 
     template<std::derived_from<WAsset> T>
-    WAssetId CreateFrom(std::string_view in_fullname, T && other) {
-        WAssetId asset_id = Create<T>(in_fullname);
+    wid::WAssetId CreateFrom(std::string_view in_fullname, T && other) {
+        wid::WAssetId asset_id = Create<T>(in_fullname);
 
         T & ptr = Get<T>(asset_id);
 
@@ -85,15 +85,15 @@ public:
      * Exact T class.
      */
     template<std::derived_from<WAsset> T>
-    T & Get(WAssetId const & in_id) const {
+    T & Get(wid::WAssetId const & in_id) const {
         return object_manager_.Get<T>(in_id);
     }
 
-    WAsset * Get(WTypeAssetIndexId in_id) const {
+    WAsset * Get(wid::WTypeAssetIndexId in_id) const {
 
-        WAssetTypeId atype;
-        WAssetId assetid;
-        WSubIdxId indx;
+        wid::WAssetTypeId atype;
+        wid::WAssetId assetid;
+        wid::WSubIdxId indx;
         in_id.ExtractWIds(atype, assetid, indx);
 
         WClass const * wclass = wclass_track_.GetWClass(atype);
@@ -101,8 +101,8 @@ public:
         return object_manager_.Get(wclass, assetid);
     }
 
-    WAsset * Get(WAssetId in_id) const {
-        WAssetTypeId atype = wclass_track_.GetAssetTypeId(in_id);
+    WAsset * Get(wid::WAssetId in_id) const {
+        wid::WAssetTypeId atype = wclass_track_.GetAssetTypeId(in_id);
         WClass const * aclass = wclass_track_.GetWClass(atype);
 
         return object_manager_.Get(aclass, in_id);
@@ -129,13 +129,13 @@ public:
 
 private:
 
-    void InsertPath(std::string_view in_path, WAssetId in_id) {
+    void InsertPath(std::string_view in_path, wid::WAssetId in_id) {
         auto split_path = wstr::SplitAssetPath(in_path);
 
         path_tree_.Insert(split_path, in_id);
     }
 
-    wcr::IdPool<WAssetId::IdType> & GetIdPool(WClass const * in_class) {
+    wcr::IdPool<wid::WAssetId::IdType> & GetIdPool(WClass const * in_class) {
         if (was::Level::StaticClass()->IsEqual(in_class)) {
             return id_level_pool_;
         }
@@ -146,36 +146,36 @@ private:
 
     WAssetDbType object_manager_{};
     
-    wcr::IdPool<WAssetId::IdType> id_level_pool_{
+    wcr::IdPool<wid::WAssetId::IdType> id_level_pool_{
         {
             {
                 .first=1,
-                .last = WEntityComponentId::BitMaskV<WAssetId>
+                .last = wid::WEntityComponentId::BitMaskV<wid::WAssetId>
             }
         }
     };
 
-    wcr::IdPool<WAssetId::IdType> id_pool_{
+    wcr::IdPool<wid::WAssetId::IdType> id_pool_{
         {
             {
-                .first=WEntityComponentId::BitMaskV<WAssetId> + 1,
-                .last=std::numeric_limits<WAssetId::IdType>::max()
+                .first=wid::WEntityComponentId::BitMaskV<wid::WAssetId> + 1,
+                .last=std::numeric_limits<wid::WAssetId::IdType>::max()
             }
         }
     };
 
     struct {
-        WAssetTypeId::IdType id_counter{0};
+        wid::WAssetTypeId::IdType id_counter{0};
 
         std::vector<WClass const *> class_list{};
         std::unordered_map<WClass const *,std::uint32_t> wclass_id{};
-        std::unordered_map<WAssetId, WAssetTypeId::IdType> asset_typeid{};
+        std::unordered_map<wid::WAssetId, wid::WAssetTypeId::IdType> asset_typeid{};
 
         bool Contains(WClass const * in_class) const {
             return wclass_id.contains(in_class);
         }
 
-        void RegAsset(WAssetId assetid, WClass const * in_class) {
+        void RegAsset(wid::WAssetId assetid, WClass const * in_class) {
             if (!wclass_id.contains(in_class)) {
                 class_list.push_back(in_class);
                 wclass_id[in_class] = id_counter;
@@ -187,15 +187,15 @@ private:
             
         }
 
-        WAssetTypeId GetTypeId(WClass const * in_class) const {
+        wid::WAssetTypeId GetTypeId(WClass const * in_class) const {
             return wclass_id.at(in_class);
         }
 
-        WClass const * GetWClass(WAssetTypeId in_id) const {
+        WClass const * GetWClass(wid::WAssetTypeId in_id) const {
             return class_list[in_id.GetId()];
         }
 
-        WAssetTypeId GetAssetTypeId(WAssetId in_id) const {
+        wid::WAssetTypeId GetAssetTypeId(wid::WAssetId in_id) const {
 #ifndef NDEBUG
             auto idtype = asset_typeid.at(in_id);
 #endif
@@ -204,6 +204,6 @@ private:
 
     } wclass_track_{};
 
-    wcr::TPathTree<WAssetId> path_tree_{};
+    wcr::TPathTree<wid::WAssetId> path_tree_{};
 
 };

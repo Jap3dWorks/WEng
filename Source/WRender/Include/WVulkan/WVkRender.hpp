@@ -65,34 +65,34 @@ public:
         ) override;
 
     void CreatePipelineBinding(
-        const WEntityComponentId & component_id,
-        const WAssetId & pipeline_id,
-        const WTypeAssetIndexId & in_mesh_id,
+        const wid::WEntityComponentId & component_id,
+        const wid::WAssetId & pipeline_id,
+        const wid::WTypeAssetIndexId & in_mesh_id,
         const WRenderPipelineParametersAsset & in_param_asset
         // const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
 
-    void DeleteRenderPipeline(const WAssetId & in_id) override;
+    void DeleteRenderPipeline(const wid::WAssetId & in_id) override;
 
-    void DeletePipelineBinding(const WEntityComponentId & in_id) override;
+    void DeletePipelineBinding(const wid::WEntityComponentId & in_id) override;
 
     void RefreshPipelines() override;
 
-    void LoadTexture(const WAssetId & in_id,
+    void LoadTexture(const wid::WAssetId & in_id,
                      const WTextureAsset & in_texture) override
     {
         asset_render_data_.LoadTexture(in_id, in_texture);
     }
 
-    void UnloadTexture(const WAssetId & in_id) override {
+    void UnloadTexture(const wid::WAssetId & in_id) override {
         asset_render_data_.UnloadTexture(in_id);
     }
 
-    void LoadStaticMesh(const WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
+    void LoadStaticMesh(const wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 
-    void UnloadStaticMesh(const WTypeAssetIndexId & in_id) override {
+    void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id) override {
         asset_render_data_.UnloadStaticMesh(in_id);
     }
 
@@ -100,7 +100,7 @@ public:
      * @brief Updates only for current frame in flight
      */
     void UpdateParameterDynamic(
-        const WEntityComponentId & in_component_id,
+        const wid::WEntityComponentId & in_component_id,
         const wct::render::WRPParamUbo & ubo_write
         ) override;
 
@@ -108,7 +108,7 @@ public:
      * @brief Updates for all frames in flight
      */
     void UpdateParameterStatic(
-        const WEntityComponentId & in_component_id,
+        const wid::WEntityComponentId & in_component_id,
         const wct::render::WRPParamUbo & ubo_write
         ) override;
 
@@ -143,9 +143,9 @@ public:
     // ------
 
     void InitializeLights(
-        std::span<WEntityComponentId> in_pl_ids,
+        std::span<wid::WEntityComponentId> in_pl_ids,
         std::span<wct::render::WPointLight> in_point_lights,
-        std::span<WEntityComponentId> in_dl_ids,
+        std::span<wid::WEntityComponentId> in_dl_ids,
         std::span<wct::render::WDirectionalLight> in_directional_lights,
         const wct::render::WAmbientLight & in_ambient_light
         ) override;
@@ -153,12 +153,12 @@ public:
     void ClearLights() override;
 
     void UpdatePointLights(
-        std::span<WEntityComponentId> in_ids,
+        std::span<wid::WEntityComponentId> in_ids,
         std::span<wct::render::WPointLight> in_point_lights_structs
         ) override;
 
     void UpdateDirectionalLights(
-        std::span<WEntityComponentId> in_ids,
+        std::span<wid::WEntityComponentId> in_ids,
         std::span<wct::render::WDirectionalLight> in_directional_light_structs
         ) override;
 
@@ -237,8 +237,8 @@ private:
     std::size_t semaphore_index_{0};
 
     struct PipelinesTrack {
-        std::unordered_map<WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
-        std::unordered_map<WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
+        std::unordered_map<wid::WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
+        std::unordered_map<wid::WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
     } pipeline_track_{};
 
 

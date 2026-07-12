@@ -388,9 +388,9 @@ void WVkRender::CreateRenderPipeline(
 
 }
 
-void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
+void WVkRender::DeleteRenderPipeline(const wid::WAssetId & in_id) {
 
-    auto clearbindingfn = [this](const WEntityComponentId & binding) {
+    auto clearbindingfn = [this](const wid::WEntityComponentId & binding) {
         pipeline_track_.binding_pipetype.erase(binding);
     };
 
@@ -431,9 +431,9 @@ void WVkRender::DeleteRenderPipeline(const WAssetId & in_id) {
 }
 
 void WVkRender::CreatePipelineBinding(
-    const WEntityComponentId & component_id,
-    const WAssetId & pipeline_id,
-    const WTypeAssetIndexId & in_assetindex_id,
+    const wid::WEntityComponentId & component_id,
+    const wid::WAssetId & pipeline_id,
+    const wid::WTypeAssetIndexId & in_assetindex_id,
     const WRenderPipelineParametersAsset & in_parameters
     )
 {
@@ -508,7 +508,7 @@ void WVkRender::CreatePipelineBinding(
     
 }
 
-void WVkRender::DeletePipelineBinding(const WEntityComponentId & in_id) {
+void WVkRender::DeletePipelineBinding(const wid::WEntityComponentId & in_id) {
 
     wct::render::pipeline_type_dispatcher<
         wct::render::EPipelineType::Graphics,
@@ -554,7 +554,7 @@ void WVkRender::UpdateUboCamera(
 }
 
 void WVkRender::UpdateParameterDynamic(
-									   const WEntityComponentId & in_component_id,
+									   const wid::WEntityComponentId & in_component_id,
 									   const wct::render::WRPParamUbo & ubo_write
     ) {
   
@@ -593,7 +593,7 @@ void WVkRender::UpdateParameterDynamic(
 }
 
 void WVkRender::UpdateParameterStatic(
-    const WEntityComponentId & in_component_id,
+    const wid::WEntityComponentId & in_component_id,
     const wct::render::WRPParamUbo & ubo_write
     ) {
     
@@ -1212,9 +1212,9 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
 // ------
 
 void WVkRender::InitializeLights(
-    std::span<WEntityComponentId> in_pl_ids,
+    std::span<wid::WEntityComponentId> in_pl_ids,
     std::span<wct::render::WPointLight> in_point_lights,
-    std::span<WEntityComponentId> in_dl_ids,
+    std::span<wid::WEntityComponentId> in_dl_ids,
     std::span<wct::render::WDirectionalLight> in_directional_lights,
     const wct::render::WAmbientLight & in_ambient_light
     ) {
@@ -1254,7 +1254,7 @@ namespace {
         WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptor,
         std::uint8_t frame_index,
         DenseController & dense_controller,
-        std::span<WEntityComponentId> in_ids,
+        std::span<wid::WEntityComponentId> in_ids,
         std::span<LightType> in_lights
         ) {
     
@@ -1289,7 +1289,7 @@ namespace {
 }
 
 void WVkRender::UpdatePointLights(
-    std::span<WEntityComponentId> in_ids,
+    std::span<wid::WEntityComponentId> in_ids,
     std::span<wct::render::WPointLight> in_point_lights
     ) {
     if (in_ids.empty()) return;
@@ -1304,7 +1304,7 @@ void WVkRender::UpdatePointLights(
 }
 
 void WVkRender::UpdateDirectionalLights(
-    std::span<WEntityComponentId> in_ids,
+    std::span<wid::WEntityComponentId> in_ids,
     std::span<wct::render::WDirectionalLight> in_directional_lights
     ) {
     if (in_ids.empty()) return;

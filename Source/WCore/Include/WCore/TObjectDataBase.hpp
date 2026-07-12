@@ -17,11 +17,9 @@ public:
 
     virtual std::unique_ptr<IObjectDataBase> Clone() const=0;
     // virtual 
-    /** Create and assign an WIdClass */
+
     virtual IdBase Create() = 0;
-    /** Create at WIdClass */
     virtual void CreateAt(const IdBase &)=0;
-    /** Insert At WIdClass */
     virtual void InsertAt(const IdBase &, B* &)=0;
     virtual void Remove(const IdBase &) =0;
     virtual void Clear() = 0;

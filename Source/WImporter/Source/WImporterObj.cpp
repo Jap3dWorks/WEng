@@ -13,7 +13,7 @@
 
 wim::importer::WImporterObj::WImporterObj() noexcept {}
 
-std::vector<WAssetId> wim::importer::WImporterObj::Import(
+std::vector<wid::WAssetId> wim::importer::WImporterObj::Import(
     WAssetDb & in_asset_manager,
     std::string_view file_path,
     std::string_view asset_directory
@@ -85,7 +85,7 @@ std::vector<WAssetId> wim::importer::WImporterObj::Import(
         }
     }
 
-    std::vector<WAssetId> result {
+    std::vector<wid::WAssetId> result {
         in_asset_manager.Create<WStaticMeshAsset>("StaticMesh")
     };
     
