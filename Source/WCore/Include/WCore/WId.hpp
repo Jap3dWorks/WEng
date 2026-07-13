@@ -18,7 +18,6 @@ namespace wid {
 
    /**
     * @brief Basic identifier token
-    * TODO: namespace.
     */
     template<typename T=std::size_t, typename Flag=WIdDefaultFlag, T NullValue=0>
     class WCORE_API WId
@@ -308,6 +307,20 @@ namespace wid {
         template<WEntityComponentId_Subtype T>
             static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
+        static inline constexpr void ValidateWIds(
+            WAssetId level_id,
+            WEntityId entity_id,
+            WComponentTypeId component_id,
+            WSubIdxId subidx_id) {
+            _ValidateWIds_<BitsSizeV<WAssetId>,
+                           BitsSizeV<WEntityId>,
+                           BitsSizeV<WComponentTypeId>,
+                           BitsSizeV<WSubIdxId>>
+                (
+                    level_id, entity_id, component_id, subidx_id
+                    );
+        }
+
     };
 
     /**
@@ -328,23 +341,18 @@ namespace wid {
         constexpr WEntityComponentId& operator=(WEntityComponentId&&) noexcept = default;
         ~WEntityComponentId() = default;
 
-        WEntityComponentId(WAssetId in_asset_id,
+        WEntityComponentId(WAssetId in_level_id,
                            WEntityId in_entity_id,
                            WComponentTypeId in_component_id,
                            WSubIdxId in_subIdx_id) {
-
-            _ValidateWIds_<
-                WEntityComponentId_Meta::BitsSizeV<WAssetId>,
-                WEntityComponentId_Meta::BitsSizeV<WEntityId>,
-                WEntityComponentId_Meta::BitsSizeV<WComponentTypeId>,
-                WEntityComponentId_Meta::BitsSizeV<WSubIdxId>>
-                (
-                    in_asset_id, in_entity_id, in_component_id, in_subIdx_id
-                    );
-
+            
+            WEntityComponentId_Meta::ValidateWIds(in_level_id,
+                                                  in_entity_id,
+                                                  in_component_id,
+                                                  in_subIdx_id);
             id_ = 0;
 
-            id_ |= WEntityComponentId_Meta::BitMaskV<WAssetId> & in_asset_id.GetId();
+            id_ |= WEntityComponentId_Meta::BitMaskV<WAssetId> & in_level_id.GetId();
 
             id_ <<= WEntityComponentId_Meta::BitsSizeV<WEntityId>;
             id_ |=  WEntityComponentId_Meta::BitMaskV<WEntityId> & in_entity_id.GetId();
@@ -356,7 +364,7 @@ namespace wid {
             id_ |= WEntityComponentId_Meta::BitMaskV<WSubIdxId> & in_subIdx_id.GetId();
         }
 
-        void ExtractWIds(WAssetId & out_asset_id,
+        void ExtractWIds(WAssetId & out_level_id,
                          WEntityId & out_entity_id,
                          WComponentTypeId & out_component_id,
                          WSubIdxId & out_subidx_id) const {
@@ -383,7 +391,7 @@ namespace wid {
             asset_id &= ~WEntityComponentId_Meta::BitMaskV<WAssetId>;
             asset_id |= WEntityComponentId_Meta::BitMaskV<WAssetId> & idcpy;
 
-            out_asset_id = asset_id;
+            out_level_id = asset_id;
             out_entity_id = entity_id;
             out_component_id = component_id;
             out_subidx_id = subidx_id;
@@ -436,7 +444,7 @@ namespace wid {
         template<WAssetIndexId_Subtype T>
         static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
-        static constexpr void ValidateWIds(WAssetTypeId asset_type_id,
+        static inline constexpr void ValidateWIds(WAssetTypeId asset_type_id,
                                            WAssetId asset_id,
                                            WSubIdxId subidx_id) {
             _ValidateWIds_<
@@ -554,7 +562,7 @@ namespace wid {
             SWidSize<WAssetId, LEVEL_BITS_SIZE>,
             SWidSize<WSystemId, SYSTEM_BITS_SIZE>>();
 
-        static constexpr void ValidateWIds(WAssetId asset_id, WSystemId system_id) {
+        static inline constexpr void ValidateWIds(WAssetId asset_id, WSystemId system_id) {
             _ValidateWIds_<
                 BitsSizeV<WAssetId>,
                 BitsSizeV<WSystemId>
