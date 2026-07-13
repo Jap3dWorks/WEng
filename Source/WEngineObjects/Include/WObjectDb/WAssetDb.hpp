@@ -12,6 +12,7 @@
 #include <concepts>
 #include <limits>
 #include <unordered_map>
+#include <format>
 
 class WAsset;
 
@@ -115,22 +116,57 @@ using WAssetDbType = WObjectDb<WAsset, wid::WAssetId>;
         
         if (!result) return nullptr;
 
-        // TODO FIXING
-        auto asssname = result->Get_name();
-        std::string clssname = result->Class()->Name();
-        std::string othername = T::StaticClass()->Name();
-
         assert(result->Class()->IsEqual(T::StaticClass()));
 
         return static_cast<T*> (result);
     }
 
-    WAsset * Get(std::string_view asset_name) const;
+    WAsset * Get(std::string_view asset_path) const;
+
+    bool ExistsAsset(std::string_view asset_path) const;
+
+    /**
+     * Returns a valid package and asset name for the input directory.
+     * Avoid collission names.
+     */
+    template<std::derived_from<WAsset> T>
+    std::array<std::string, 2> GenValidAssetName(
+        std::string_view directory,
+        std::string_view package,
+        std::string_view asset_name
+        ) {
+
+        assert(directory.starts_with("/Content/"));
+
+        std::uint32_t counter=0;
+        std::string new_package;
+
+        if (package.empty()) {
+            new_package = T::StaticClass()->Name();
+        }
+        else {
+            new_package = package;
+        }
+
+        if (asset_name.empty())
+            asset_name = package;
+
+        std::string candidate = wstr::AssetPath(directory, new_package, asset_name);
+
+        while(ExistsAsset(candidate)) {
+            new_package =
+                std::format("{}{:02d}", T::StaticClass()->Name(), counter++);
+
+            candidate = wstr::AssetPath(directory, new_package, asset_name);
+        }
+
+        return {new_package, std::string{asset_name}};
+    }
 
 private:
 
-    void InsertPath(std::string_view in_path, wid::WAssetId in_id) {
-        auto split_path = wstr::SplitAssetPath(in_path);
+    void InsertPath(std::string_view asset_path, wid::WAssetId in_id) {
+        auto split_path = wstr::SplitAssetPath(asset_path);
 
         path_tree_.Insert(split_path, in_id);
     }
@@ -196,9 +232,11 @@ private:
         }
 
         wid::WAssetTypeId GetAssetTypeId(wid::WAssetId in_id) const {
+
 #ifndef NDEBUG
             auto idtype = asset_typeid.at(in_id);
 #endif
+            
             return asset_typeid.at(in_id);
         }
 

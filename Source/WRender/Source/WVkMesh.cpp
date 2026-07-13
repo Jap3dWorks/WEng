@@ -31,9 +31,9 @@ void wvk::mesh::CreateMeshBuffers(
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
-    void * data;
+    void * data = nullptr;
     vkMapMemory(in_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-    memcpy(data, vertex_buffer, static_cast<size_t>(buffer_size));
+    memcpy(data, vertex_buffer, static_cast<std::size_t>(buffer_size));
     vkUnmapMemory(in_device, staging_buffer_memory);
 
     wvk::buffer::CreateVkBuffer(
@@ -59,6 +59,8 @@ void wvk::mesh::CreateMeshBuffers(
 
     // index buffer
 
+    buffer_size=index_buffer_size;
+
     wvk::buffer::CreateVkBuffer(
         staging_buffer,
         staging_buffer_memory,
@@ -69,8 +71,9 @@ void wvk::mesh::CreateMeshBuffers(
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         );
 
+    data = nullptr;
     vkMapMemory(in_device, staging_buffer_memory, 0, buffer_size, 0, &data);
-    memcpy(data, index_buffer, static_cast<size_t>(buffer_size));
+    memcpy(data, index_buffer, static_cast<std::size_t>(buffer_size));
     vkUnmapMemory(in_device, staging_buffer_memory);
 
     wvk::buffer::CreateVkBuffer(

@@ -28,7 +28,6 @@ namespace wstr {
         return result;
     }
 
-
     /**
      * Format an engine based asset path.
      * @param asset_directory, Asset engine based directory. Should start with /Content.
@@ -36,7 +35,7 @@ namespace wstr {
      *   if you introduce a file_path, package_name will use the last token without extension.
      * @param asset_name, asset name.
      */
-    inline std::string AssetPath(
+    [[deprecated]] inline std::string AssetPath(
         std::string asset_directory, // TODO use string_view if it is possible.
         std::string const & package_name,
         std::string const & asset_name
@@ -57,43 +56,66 @@ namespace wstr {
     }
 
     /**
+     * Format an engine based asset path.
+     * @param asset_directory, Asset engine based directory. Should start with /Content.
+     * @param package_name, package name, package is like the file that contains the assets.
+     *   if you introduce a file_path, package_name will use the last token without extension.
+     * @param asset_name, asset name.
+     */
+    inline std::string AssetPath(
+        std::string_view asset_directory,
+        std::string_view package_name,
+        std::string_view asset_name
+        ) {
+        assert(asset_directory.starts_with("/Content/"));
+
+        while(asset_directory.ends_with("/")) {
+            asset_directory = asset_directory.substr(0, asset_directory.size()-1);
+        }
+
+        return std::format("{}/{}:{}", asset_directory, package_name, asset_name);
+
+    }
+
+    inline bool IsValidAssetPathFormat(std::string_view asset_path) {
+        if (!asset_path.starts_with("/Content/"))
+            return false;
+
+        auto end = asset_path.find_first_of(":", 0);
+        if (end == std::string_view::npos)
+            return false;
+
+        if (asset_path[9] == ':')
+            return false;
+
+        return asset_path.find_first_of(":/", end+1) == std::string_view::npos;
+    }
+
+    /**
      * Return splitted asset path.
-     * delimiters are [/ \ : .]
+     * delimiters are [/ \ :]
      * No string copies are performed.
      */
     WNODISCARD inline
-    std::vector<std::string_view> SplitAssetPath(std::string_view in_asset_path) {
+    std::vector<std::string_view> SplitAssetPath(std::string_view asset_path) {
         std::vector<std::string_view> result;
-        constexpr std::string_view delimiters = "/\\:.";
+        constexpr std::string_view delimiters = "/\\:";
 
         std::size_t start = 0;
-        while (start < in_asset_path.size()) {
-            auto end = in_asset_path.find_first_of(delimiters, start);
+        while (start < asset_path.size()) {
+            auto end = asset_path.find_first_of(delimiters, start);
             if (end == std::string_view::npos) {
-                result.push_back(in_asset_path.substr(start));
+                result.push_back(asset_path.substr(start));
                 break;
             }
             if (end > start) {
-                result.push_back(in_asset_path.substr(start, end - start));
+                result.push_back(asset_path.substr(start, end - start));
             }
             start = end + 1;
         }
 
         return result;
     }
-
-
-    // WNODISCARD inline
-    // std::string SystemPath(
-    //     std::string in_path
-    //     )
-    // {
-    //     if (in_path.starts_with("/")) {
-    //         in_path = in_path.substr(1, in_path.length());
-    //     }
-
-    //     return std::filesystem::absolute(in_path).string();
-    // }
 
     /**
      * Translate a engine based path (starts with /Content) with the system path.

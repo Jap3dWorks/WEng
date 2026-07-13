@@ -41,7 +41,6 @@ void wvk::buffer::CreateVkBuffer(
 
     vkBindBufferMemory(device, out_buffer, out_buffer_memory, 0);
 
-    // WFLOG("Create new Buffer {}", static_cast<void*>(out_buffer));
 }
 
 WVkUBOInfo wvk::buffer::CreateUBO(

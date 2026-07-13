@@ -12,7 +12,7 @@
 namespace wid {
     
     struct _WID_NULL_T_{};
-    inline constexpr _WID_NULL_T_ const WID_NULL_V{};
+    inline constexpr _WID_NULL_T_ const NULL_V{};
 
     struct WIdDefaultFlag{};
 
@@ -201,7 +201,7 @@ namespace wid {
 
         template<CIsWId T>
         inline constexpr bool IsValidWid(T val, std::uint8_t bits_size) {
-            T nullid{WID_NULL_V};
+            T nullid{NULL_V};
             return (val.GetId() & ~GenBitMask(bits_size)) ==
                 (nullid.GetId() & ~GenBitMask(bits_size));
         }
@@ -232,7 +232,7 @@ namespace wid {
 
         template<typename T>
         constexpr std::size_t GetNullId() {
-            return T(WID_NULL_V).GetId();
+            return T(NULL_V).GetId();
         }
 
         template<typename... SWidSizes>
@@ -371,10 +371,10 @@ namespace wid {
 
             IdType idcpy = id_;
 
-            WAssetId::IdType asset_id = WAssetId(WID_NULL_V).GetId();
-            WEntityId::IdType entity_id = WEntityId(WID_NULL_V).GetId();
-            WComponentTypeId::IdType component_id = WComponentTypeId(WID_NULL_V).GetId();
-            WSubIdxId::IdType subidx_id = WSubIdxId(WID_NULL_V).GetId();
+            WAssetId::IdType asset_id = WAssetId(NULL_V).GetId();
+            WEntityId::IdType entity_id = WEntityId(NULL_V).GetId();
+            WComponentTypeId::IdType component_id = WComponentTypeId(NULL_V).GetId();
+            WSubIdxId::IdType subidx_id = WSubIdxId(NULL_V).GetId();
 
             subidx_id &= ~WEntityComponentId_Meta::BitMaskV<WSubIdxId>;
             subidx_id |= WEntityComponentId_Meta::BitMaskV<WSubIdxId> & idcpy;
@@ -502,9 +502,9 @@ namespace wid {
                          WSubIdxId & out_subidx) const {
             IdType idcpy = id_;
 
-            WAssetTypeId::IdType asset_type_id = WAssetTypeId(WID_NULL_V).GetId();
-            WAssetId::IdType asset_id = WAssetId(WID_NULL_V).GetId();
-            WSubIdxId::IdType subidx = WSubIdxId(WID_NULL_V).GetId();
+            WAssetTypeId::IdType asset_type_id = WAssetTypeId(NULL_V).GetId();
+            WAssetId::IdType asset_id = WAssetId(NULL_V).GetId();
+            WSubIdxId::IdType subidx = WSubIdxId(NULL_V).GetId();
 
             subidx &= ~WTypeAssetIndexId_Meta::BitMaskV<WSubIdxId>;
             subidx |= WTypeAssetIndexId_Meta::BitMaskV<WSubIdxId> & idcpy;
@@ -601,8 +601,8 @@ namespace wid {
         void ExtractWIds(WAssetId out_asset_id, WSystemId out_system_id) const {
             IdType idcpy = id_;
 
-            WAssetId::IdType asset_id=WAssetId(WID_NULL_V).GetId();
-            WSystemId::IdType system_id=WSystemId(WID_NULL_V).GetId();
+            WAssetId::IdType asset_id=WAssetId(NULL_V).GetId();
+            WSystemId::IdType system_id=WSystemId(NULL_V).GetId();
 
             system_id &= ~WLevelSystemId_Meta::BitMaskV<WSystemId>;
             system_id |= WLevelSystemId_Meta::BitMaskV<WSystemId> & idcpy;

@@ -102,13 +102,13 @@ namespace was {
 
         template<std::derived_from<WComponent> T>
             wid::WEntityComponentId GetEntityComponentId(const wid::WEntityId & in_entity_id,
-                                                         const wid::WSubIdxId & in_index_id=wid::WID_NULL_V) const noexcept {
+                                                         const wid::WSubIdxId & in_index_id=wid::NULL_V) const noexcept {
             return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
         }
 
         wid::WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
                                                      const wid::WEntityId & in_entity_id,
-                                                     const wid::WSubIdxId & in_index_id=wid::WID_NULL_V) const noexcept {
+                                                     const wid::WSubIdxId & in_index_id=wid::NULL_V) const noexcept {
 
             assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
 

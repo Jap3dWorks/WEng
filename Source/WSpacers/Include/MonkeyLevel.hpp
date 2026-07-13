@@ -96,7 +96,8 @@ namespace spacers::monkey {
     }
 
     inline bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
-        wid::WAssetId pipid = engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPBlur:PPBlur");
+        wid::WAssetId pipid =
+            engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPDebug:PPDebug");
 
         WRenderPipelineAsset & pipeline_asset =
             engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
@@ -125,7 +126,7 @@ namespace spacers::monkey {
 
         wid::WAssetId paramid =
             engine.AssetManager().Create<WRenderPipelineParametersAsset>(
-                "/Content/Assets/PPBlurParam:PPBlurParam"
+                "/Content/Assets/PPDebugParam:PPDebugParam"
                 );
 
         camera.SetPostprocessAssignment(0, pipid, paramid);
@@ -228,12 +229,8 @@ namespace spacers::monkey {
 
     inline wid::WAssetId ConfigLevel(WEngine & in_engine,
                          const ModelAssets & in_viking_room,
-                         const ModelAssets & in_monkey_dt // ,
-                         // const std::vector<WRenderPipelineAssignmentStruct> & in_ppcss_assgnm
+                         const ModelAssets & in_monkey_dt
         ) {
-
-        // WLevelId levelid = in_engine.LevelRegister().Create();
-        // WLevel & level = in_engine.LevelRegister().Get(levelid);
 
         wid::WAssetId levelid = in_engine.AssetManager().Create<was::Level>(
             "/Content/Level/Level01:Level01"
@@ -244,8 +241,6 @@ namespace spacers::monkey {
         in_engine.AddInitSystem(levelid, "SystemInit_CameraInput");
         in_engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
         in_engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
-
-        // in_engine.StartupLevel(levelid);
 
         // Camera
 
@@ -258,7 +253,7 @@ namespace spacers::monkey {
         WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
         cameracomp.Set_render_id(1); // The renderable camera
         WTransformComponent * tcmp = &level.GetComponent<WTransformComponent>(cid);
-        // WTransformStruct & cts = level.GetComponent<WTransformComponent>(cid).TransformStruct();
+
         tcmp->Set_rotation({0.0f, 0.0f, 0.0f});
         tcmp->Set_position({0.0, 0.0f, .5f});
 

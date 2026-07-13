@@ -221,12 +221,13 @@ namespace {
                 .and_then(
                     [&textures]
                     (fastgltf::TextureInfo const & value) -> std::optional<wid::WAssetId> {
+                        if (value.textureIndex >= textures.size()) return wid::NULL_V;
                         return textures[value.textureIndex];
                     }
                     )
                 .or_else(
                     []() -> std::optional<wid::WAssetId>
-                    { return wid::WID_NULL_V; }
+                    { return wid::NULL_V; }
                     )
                 .value();
         };
@@ -340,6 +341,8 @@ namespace {
             const fastgltf::Accessor & pos_accessor =
                 in_asset.accessors.at(in_primitive.findAttribute("POSITION")->accessorIndex);
 
+            result.vertices.resize(pos_accessor.count);
+
             fastgltf::iterateAccessorWithIndex<glm::vec3>(
                 in_asset, pos_accessor,
                 [&vertex=result.vertices]
@@ -397,7 +400,7 @@ namespace {
         fastgltf::Asset const & in_asset,
         wid::WAssetId gbuffer_pipeline,
         wid::WAssetId transparent_pipeline,
-        std::vector<wid::WAssetId> const & in_parameters
+        std::vector<wid::WAssetId> const & parameters
         ) {
         // TODO : transparent pipelines
         
@@ -430,13 +433,16 @@ namespace {
                     );
 
                 if (primitive.materialIndex) {
-                    sm_asset.SetPipelineAssignment(
-                        {
-                            gbuffer_pipeline,  
-                            in_parameters[primitive.materialIndex.value()]
-                        },
-                        idx
-                        );
+                    if (primitive.materialIndex.value() < parameters.size()) {
+
+                        sm_asset.SetPipelineAssignment(
+                            {
+                                gbuffer_pipeline,  
+                                parameters[primitive.materialIndex.value()]
+                            },
+                            idx
+                            );                        
+                    }
                 }
 
                 idx++;
@@ -727,6 +733,7 @@ namespace {
 
             if (in_asset.nodes[node].meshIndex.has_value()) {
                 std::size_t gltfindx = in_asset.nodes[node].meshIndex.value();
+                
                 if (sm_id_map[gltfindx].IsValid()) {
                     auto smcmpid = level.CreateComponent<WStaticMeshComponent>(entityid);
                     auto & smcmp = level.GetComponent<WStaticMeshComponent>(entityid);
@@ -794,23 +801,32 @@ namespace {
 
     WNODISCARD inline
     std::vector<wid::WAssetId> CreateLevels(
-        std::vector<was::Level> & in_levels,
-        std::vector<std::string_view> const & in_names,
-        std::string_view in_assets_path,
-        WAssetDb & in_asset_db
+        std::vector<was::Level> & levels,
+        std::vector<std::string_view> const & names,
+        std::string_view assets_directory,
+        WAssetDb & asset_db
         ) {
 
         std::vector<wid::WAssetId> result{};
-        result.reserve(in_levels.size());
+        result.reserve(levels.size());
         
-        for (std::uint32_t i=0; i<in_levels.size(); i++) {
-            in_asset_db.CreateFrom<was::Level>(
-                wstr::AssetPath(
-                    std::string(in_assets_path),
-                    std::string(in_names[i]),
-                    std::string(in_names[i])
-                    ),
-                std::move(in_levels[i])
+        for (std::uint32_t i=0; i<levels.size(); i++) {
+
+            std::array<std::string, 2> name =
+                asset_db.GenValidAssetName<was::Level>(
+                    assets_directory,
+                    names[i],
+                    names[i]);
+
+            result.push_back(
+                asset_db.CreateFrom<was::Level>(
+                    wstr::AssetPath(
+                        assets_directory,
+                        name[0],
+                        name[1]
+                        ),
+                    std::move(levels[i])
+                    )
                 );
         }
 
@@ -821,7 +837,7 @@ namespace {
     std::vector<wid::WAssetId> CreateTextures(
         std::vector<WTextureAsset> & in_textures,
         std::vector<std::string_view> const & in_names,
-        std::string_view in_assets_path,
+        std::string_view assets_directory,
         WAssetDb & asset_db
         ) {
 
@@ -830,16 +846,22 @@ namespace {
 
         for(std::size_t i=0; i<in_textures.size(); i++) {
 
-            auto assetid = asset_db.CreateFrom<WTextureAsset>(
-                wstr::AssetPath(
-                    std::string(in_assets_path),
-                    std::string(in_names[i]),
-                    std::string(in_names[i])
-                    ),
-                std::move(in_textures[i])
+            std::array<std::string, 2> name =
+                asset_db.GenValidAssetName<WTextureAsset>(
+                    assets_directory,
+                    in_names[i],
+                    in_names[i]);
+            
+            result.push_back(
+                asset_db.CreateFrom<WTextureAsset>(
+                    wstr::AssetPath(
+                        assets_directory,
+                        name[0],
+                        name[1]
+                        ),
+                    std::move(in_textures[i])
+                    )
                 );
-
-            result.push_back(assetid);
         }
 
         return result;
@@ -847,54 +869,67 @@ namespace {
     
     WNODISCARD inline
     std::vector<wid::WAssetId> CreatePipelineParameters(
-        std::vector<WRenderPipelineParametersAsset> & in_parameters,
-        std::vector<std::string_view> const & in_names,
-        std::string_view in_asset_directory,
-        WAssetDb & in_asset_db
+        std::vector<WRenderPipelineParametersAsset> & parameters,
+        std::vector<std::string_view> const & names,
+        std::string_view asset_directory,
+        WAssetDb & asset_db
         ) {
 
         std::vector<wid::WAssetId> result;
-        result.reserve(in_parameters.size());
+        result.reserve(parameters.size());
 
-        for(std::size_t i=0; i<in_parameters.size(); i++) {
-            auto assetid = in_asset_db
+        for(std::size_t i=0; i<parameters.size(); i++) {
+
+            std::array<std::string, 2> name =
+                asset_db.GenValidAssetName<WRenderPipelineParametersAsset>(
+                    asset_directory,
+                    names[i],
+                    names[i]);
+
+            result.push_back(
+                asset_db
                 .CreateFrom<WRenderPipelineParametersAsset>(
                     wstr::AssetPath(
-                        std::string(in_asset_directory),
-                        std::string(in_names[i]),
-                        std::string(in_names[i])
+                        asset_directory,
+                        name[0], name[1]
                         ),
-                    std::move(in_parameters[i])
-                    );
+                    std::move(parameters[i])
+                    )
+                );
         }
         return result;
     }
 
     WNODISCARD inline
     std::vector<wid::WAssetId> CreateStaticMeshes(
-        std::vector<WStaticMeshAsset> const & in_static_meshes,
-        std::vector<std::basic_string_view<char>> const & in_names,
-        std::string_view in_asset_directory,
-        WAssetDb & in_asset_db
+        std::vector<WStaticMeshAsset> const & static_meshes,
+        std::vector<std::basic_string_view<char>> const & names,
+        std::string_view asset_directory,
+        WAssetDb & asset_db
         ) {
         std::vector<wid::WAssetId> result;
-        result.reserve(in_static_meshes.size());
+        result.reserve(static_meshes.size());
 
-        for (std::size_t i=0; i<in_static_meshes.size(); i++) {
-            auto assetid = in_asset_db
+        for (std::size_t i=0; i<static_meshes.size(); i++) {
+
+            std::array<std::string, 2> name =
+                asset_db.GenValidAssetName<WStaticMeshAsset>(
+                    asset_directory,
+                    names[i],
+                    names[i]);
+
+            result.push_back(
+                asset_db
                 .CreateFrom<WStaticMeshAsset>(
                     wstr::AssetPath(
-                        std::string(in_asset_directory),
-                        std::string(in_names[i]),
-                        std::string(in_names[i])
+                        asset_directory,
+                        name[0], name[1]
                         ),
-                    std::move(in_static_meshes[i])
-                    );
+                    std::move(static_meshes[i])
+                    ));
         }
         return result;
     }
-
-
 }
 
 std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
@@ -904,7 +939,6 @@ std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
     ) {
 
     fastgltf::Asset gltf_asset=LoadGltf(file_path);
-    // std::uint32_t idx=0;
 
     // Materials and textures
     
