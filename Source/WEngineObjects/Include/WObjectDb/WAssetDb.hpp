@@ -150,7 +150,7 @@ private:
         {
             {
                 .first=1,
-                .last = wid::WEntityComponentId::BitMaskV<wid::WAssetId>
+                .last = wid::WEntityComponentId_Meta::BitMaskV<wid::WAssetId>
             }
         }
     };
@@ -158,7 +158,7 @@ private:
     wcr::IdPool<wid::WAssetId::IdType> id_pool_{
         {
             {
-                .first=wid::WEntityComponentId::BitMaskV<wid::WAssetId> + 1,
+                .first=wid::WEntityComponentId_Meta::BitMaskV<wid::WAssetId> + 1,
                 .last=std::numeric_limits<wid::WAssetId::IdType>::max()
             }
         }

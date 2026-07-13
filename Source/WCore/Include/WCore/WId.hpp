@@ -9,7 +9,6 @@
 #include <cassert>
 #include <array>
 
-// TODO wid namespace
 namespace wid {
     
     struct _WID_NULL_T_{};
@@ -209,15 +208,15 @@ namespace wid {
         }
 
         template<std::size_t ... Sizes, typename ...WIdTypes>
-        inline void ValidateWIds() {}
+        inline void _ValidateWIds_() {}
 
         template<std::size_t N, std::size_t ... Sizes, typename WIdType, typename ...WIdTypes>
-        inline void ValidateWIds(WIdType id_type, WIdTypes ... id_types ) {
+        inline void _ValidateWIds_(WIdType id_type, WIdTypes ... id_types ) {
 
             static_assert(sizeof...(Sizes) == sizeof...(WIdTypes));
 
             if (IsValidWid(id_type, N)) {
-                ValidateWIds<Sizes...>(id_types...);
+                _ValidateWIds_<Sizes...>(id_types...);
             }
             else {
                 throw std::runtime_error(
@@ -268,24 +267,7 @@ namespace wid {
         std::is_same_v<T,WComponentTypeId> ||
         std::is_same_v<T,WSubIdxId>;
 
-    struct _WEntityComponentId_Flag_{};
-
-    /**
-     * WEntityComponentId id class.
-     */
-    class WCORE_API WEntityComponentId :
-        public WId<std::uint64_t,
-                   _WEntityComponentId_Flag_,
-                   ComputeCompoundNull<
-                       SWidSize<WAssetId, 16>,
-                       SWidSize<WEntityId, 22>,
-                       SWidSize<WComponentTypeId, 8>,
-                       SWidSize<WSubIdxId, 5>>()
-                   > {
-    public:
-    
-        using WId::WId;
-
+    struct WEntityComponentId_Meta{
         static constexpr std::uint8_t LEVEL_BITS_SIZE{16};
         static constexpr std::uint8_t ENTITY_BITS_SIZE{22};
         static constexpr std::uint8_t COMPONENT_BITS_SIZE{8};
@@ -297,6 +279,12 @@ namespace wid {
         };
 
         static_assert(WID_BITS_SIZE <= WID_COMPOUND_BITS_MAX);
+
+        static constexpr std::uint64_t NULL_VALUE = ComputeCompoundNull<
+            SWidSize<WAssetId, LEVEL_BITS_SIZE>,
+            SWidSize<WEntityId, ENTITY_BITS_SIZE>,
+            SWidSize<WComponentTypeId, COMPONENT_BITS_SIZE>,
+            SWidSize<WSubIdxId, SUBINDEX_BITS_SIZE>>();
 
         template<WEntityComponentId_Subtype T>
             static constexpr std::uint8_t GetBitsSize() {
@@ -320,41 +308,52 @@ namespace wid {
         template<WEntityComponentId_Subtype T>
             static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
+    };
+
+    /**
+     * WEntityComponentId id class.
+     */
+    class WCORE_API WEntityComponentId :
+        public WId<std::uint64_t,
+                   WEntityComponentId_Meta,
+                   WEntityComponentId_Meta::NULL_VALUE> {
     public:
+    
+        using WId::WId;
 
         constexpr WEntityComponentId() noexcept = default;
         constexpr WEntityComponentId(const WEntityComponentId&) noexcept = default;
         constexpr WEntityComponentId(WEntityComponentId&&) noexcept = default;
         constexpr WEntityComponentId& operator=(const WEntityComponentId&) noexcept = default;
         constexpr WEntityComponentId& operator=(WEntityComponentId&&) noexcept = default;
-        virtual ~WEntityComponentId() = default;
+        ~WEntityComponentId() = default;
 
         WEntityComponentId(WAssetId in_asset_id,
                            WEntityId in_entity_id,
                            WComponentTypeId in_component_id,
                            WSubIdxId in_subIdx_id) {
 
-            ValidateWIds<
-                BitsSizeV<WAssetId>,
-                BitsSizeV<WEntityId>,
-                BitsSizeV<WComponentTypeId>,
-                BitsSizeV<WSubIdxId>>
+            _ValidateWIds_<
+                WEntityComponentId_Meta::BitsSizeV<WAssetId>,
+                WEntityComponentId_Meta::BitsSizeV<WEntityId>,
+                WEntityComponentId_Meta::BitsSizeV<WComponentTypeId>,
+                WEntityComponentId_Meta::BitsSizeV<WSubIdxId>>
                 (
                     in_asset_id, in_entity_id, in_component_id, in_subIdx_id
                     );
 
             id_ = 0;
 
-            id_ |= BitMaskV<WAssetId> & in_asset_id.GetId();
+            id_ |= WEntityComponentId_Meta::BitMaskV<WAssetId> & in_asset_id.GetId();
 
-            id_ <<= BitsSizeV<WEntityId>;
-            id_ |=  BitMaskV<WEntityId> & in_entity_id.GetId();
+            id_ <<= WEntityComponentId_Meta::BitsSizeV<WEntityId>;
+            id_ |=  WEntityComponentId_Meta::BitMaskV<WEntityId> & in_entity_id.GetId();
 
-            id_ <<= BitsSizeV<WComponentTypeId>;
-            id_ |= BitMaskV<WComponentTypeId> & in_component_id.GetId();
+            id_ <<= WEntityComponentId_Meta::BitsSizeV<WComponentTypeId>;
+            id_ |= WEntityComponentId_Meta::BitMaskV<WComponentTypeId> & in_component_id.GetId();
 
-            id_ <<= BitsSizeV<WSubIdxId>;
-            id_ |= BitMaskV<WSubIdxId> & in_subIdx_id.GetId();
+            id_ <<= WEntityComponentId_Meta::BitsSizeV<WSubIdxId>;
+            id_ |= WEntityComponentId_Meta::BitMaskV<WSubIdxId> & in_subIdx_id.GetId();
         }
 
         void ExtractWIds(WAssetId & out_asset_id,
@@ -369,20 +368,20 @@ namespace wid {
             WComponentTypeId::IdType component_id = WComponentTypeId(WID_NULL_V).GetId();
             WSubIdxId::IdType subidx_id = WSubIdxId(WID_NULL_V).GetId();
 
-            subidx_id &= ~BitMaskV<WSubIdxId>;
-            subidx_id |= BitMaskV<WSubIdxId> & idcpy;
-            idcpy >>= BitsSizeV<WSubIdxId>;
+            subidx_id &= ~WEntityComponentId_Meta::BitMaskV<WSubIdxId>;
+            subidx_id |= WEntityComponentId_Meta::BitMaskV<WSubIdxId> & idcpy;
+            idcpy >>= WEntityComponentId_Meta::BitsSizeV<WSubIdxId>;
 
-            component_id &= ~BitMaskV<WComponentTypeId>;
-            component_id |= BitMaskV<WComponentTypeId> & idcpy;
-            idcpy >>= BitsSizeV<WComponentTypeId>;
+            component_id &= ~WEntityComponentId_Meta::BitMaskV<WComponentTypeId>;
+            component_id |= WEntityComponentId_Meta::BitMaskV<WComponentTypeId> & idcpy;
+            idcpy >>= WEntityComponentId_Meta::BitsSizeV<WComponentTypeId>;
 
-            entity_id &= ~BitMaskV<WEntityId>;
-            entity_id |= BitMaskV<WEntityId> & idcpy;
-            idcpy >>= BitsSizeV<WEntityId>;
+            entity_id &= ~WEntityComponentId_Meta::BitMaskV<WEntityId>;
+            entity_id |= WEntityComponentId_Meta::BitMaskV<WEntityId> & idcpy;
+            idcpy >>= WEntityComponentId_Meta::BitsSizeV<WEntityId>;
 
-            asset_id &= ~BitMaskV<WAssetId>;
-            asset_id |= BitMaskV<WAssetId> & idcpy;
+            asset_id &= ~WEntityComponentId_Meta::BitMaskV<WAssetId>;
+            asset_id |= WEntityComponentId_Meta::BitMaskV<WAssetId> & idcpy;
 
             out_asset_id = asset_id;
             out_entity_id = entity_id;
@@ -402,22 +401,7 @@ namespace wid {
         std::is_same_v<T, WAssetId> ||
         std::is_same_v<T, WSubIdxId>;
 
-    struct _WAssetIndexId_Flag_{};
-
-/**
- * 
- */
-    class WCORE_API WTypeAssetIndexId : public WId<std::uint64_t,
-                                                   _WAssetIndexId_Flag_,
-                                                   ComputeCompoundNull<
-                                                       SWidSize<WAssetTypeId, 16>,
-                                                       SWidSize<WAssetId, 32>,
-                                                       SWidSize<WSubIdxId, 5>>()
-                                                   > {
-    public:
-
-        using WId::WId;
-
+    struct WTypeAssetIndexId_Meta{
         static constexpr std::uint8_t ASSET_TYPE_BITS_SIZE{16};
         static constexpr std::uint8_t ASSET_BITS_SIZE{32};
         static constexpr std::uint8_t SUBINDEX_BITS_SIZE{5};
@@ -427,26 +411,57 @@ namespace wid {
 
         static_assert(WID_BITS_SIZE <= WID_COMPOUND_BITS_MAX);
 
+        static constexpr std::uint64_t NULL_VALUE = ComputeCompoundNull<
+            SWidSize<WAssetTypeId, ASSET_TYPE_BITS_SIZE>,
+            SWidSize<WAssetId, ASSET_TYPE_BITS_SIZE>,
+            SWidSize<WSubIdxId, SUBINDEX_BITS_SIZE>>();
+
+
         template<WAssetIndexId_Subtype T>
-            static constexpr std::uint8_t GetBitsSize() {
+        static constexpr std::uint8_t GetBitsSize() {
             if constexpr(std::is_same_v<T, WAssetTypeId>) {
-                return ASSET_TYPE_BITS_SIZE;
+                return WTypeAssetIndexId_Meta::ASSET_TYPE_BITS_SIZE;
             }
             else if constexpr(std::is_same_v<T, WAssetId>) {
-                return ASSET_BITS_SIZE;
+                return WTypeAssetIndexId_Meta::ASSET_BITS_SIZE;
             }
             else {
-                return SUBINDEX_BITS_SIZE;
+                return WTypeAssetIndexId_Meta::SUBINDEX_BITS_SIZE;
             }
         }
 
         template<WAssetIndexId_Subtype T>
-            static constexpr std::uint8_t BitsSizeV = GetBitsSize<T>();
+        static constexpr std::uint8_t BitsSizeV = GetBitsSize<T>();
 
         template<WAssetIndexId_Subtype T>
-            static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
+        static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
+        static constexpr void ValidateWIds(WAssetTypeId asset_type_id,
+                                           WAssetId asset_id,
+                                           WSubIdxId subidx_id) {
+            _ValidateWIds_<
+                BitsSizeV<WAssetTypeId>,
+                BitsSizeV<WAssetId>,
+                BitsSizeV<WSubIdxId>>
+                (
+                    asset_type_id,
+                    asset_id,
+                    subidx_id
+                    );
+        }
+    
+    };
+
+    /**
+     * 
+     */
+    class WCORE_API WTypeAssetIndexId :
+        public WId<std::uint64_t,
+                   WTypeAssetIndexId_Meta,
+                   WTypeAssetIndexId_Meta::NULL_VALUE> {
     public:
+
+        using WId::WId;
 
         constexpr WTypeAssetIndexId() noexcept = default;
         constexpr WTypeAssetIndexId(WTypeAssetIndexId const &) noexcept = default;
@@ -455,46 +470,44 @@ namespace wid {
         constexpr WTypeAssetIndexId& operator=(WTypeAssetIndexId&&) noexcept = default;
         ~WTypeAssetIndexId() = default;
 
-        WTypeAssetIndexId(WAssetTypeId in_asset_type_id, WAssetId in_asset_id, WSubIdxId in_subidx) {
+        WTypeAssetIndexId(WAssetTypeId in_asset_type_id,
+                          WAssetId in_asset_id,
+                          WSubIdxId in_subidx) {
 
-            ValidateWIds<
-                BitsSizeV<WAssetTypeId>,
-                BitsSizeV<WAssetId>,
-                BitsSizeV<WSubIdxId>>
-                (
-                    in_asset_type_id,
-                    in_asset_id,
-                    in_subidx
-                    );
+            WTypeAssetIndexId_Meta::ValidateWIds(
+                in_asset_type_id, in_asset_id, in_subidx
+                );
 
             id_ = 0;
 
-            id_ |= BitMaskV<WAssetTypeId> & in_asset_type_id.GetId();
+            id_ |= WTypeAssetIndexId_Meta::BitMaskV<WAssetTypeId> & in_asset_type_id.GetId();
 
-            id_ <<= BitsSizeV<WAssetId>;
-            id_ |= BitMaskV<WAssetId> & in_asset_id.GetId();
+            id_ <<= WTypeAssetIndexId_Meta::BitsSizeV<WAssetId>;
+            id_ |= WTypeAssetIndexId_Meta::BitMaskV<WAssetId> & in_asset_id.GetId();
 
-            id_ <<= BitsSizeV<WSubIdxId>;
-            id_ |= BitMaskV<WSubIdxId> & in_asset_id.GetId();
+            id_ <<= WTypeAssetIndexId_Meta::BitsSizeV<WSubIdxId>;
+            id_ |= WTypeAssetIndexId_Meta::BitMaskV<WSubIdxId> & in_asset_id.GetId();
         }
 
-        void ExtractWIds(WAssetTypeId & out_asset_type_id, WAssetId & out_asset_id, WSubIdxId & out_subidx) const {
+        void ExtractWIds(WAssetTypeId & out_asset_type_id,
+                         WAssetId & out_asset_id,
+                         WSubIdxId & out_subidx) const {
             IdType idcpy = id_;
 
             WAssetTypeId::IdType asset_type_id = WAssetTypeId(WID_NULL_V).GetId();
             WAssetId::IdType asset_id = WAssetId(WID_NULL_V).GetId();
             WSubIdxId::IdType subidx = WSubIdxId(WID_NULL_V).GetId();
 
-            subidx &= ~BitMaskV<WSubIdxId>;
-            subidx |= BitMaskV<WSubIdxId> & idcpy;
-            idcpy >>= BitsSizeV<WSubIdxId>;
+            subidx &= ~WTypeAssetIndexId_Meta::BitMaskV<WSubIdxId>;
+            subidx |= WTypeAssetIndexId_Meta::BitMaskV<WSubIdxId> & idcpy;
+            idcpy >>= WTypeAssetIndexId_Meta::BitsSizeV<WSubIdxId>;
 
-            asset_id &= ~BitMaskV<WAssetId>;
-            asset_id |= BitMaskV<WAssetId> & idcpy;
-            idcpy >>= BitsSizeV<WAssetId>;
+            asset_id &= ~WTypeAssetIndexId_Meta::BitMaskV<WAssetId>;
+            asset_id |= WTypeAssetIndexId_Meta::BitMaskV<WAssetId> & idcpy;
+            idcpy >>= WTypeAssetIndexId_Meta::BitsSizeV<WAssetId>;
 
-            asset_type_id &= ~BitMaskV<WAssetTypeId>;
-            asset_type_id |= BitMaskV<WAssetTypeId> & idcpy; 
+            asset_type_id &= ~WTypeAssetIndexId_Meta::BitMaskV<WAssetTypeId>;
+            asset_type_id |= WTypeAssetIndexId_Meta::BitMaskV<WAssetTypeId> & idcpy; 
 
             out_asset_type_id = asset_type_id;
             out_asset_id = asset_id;
@@ -510,20 +523,11 @@ namespace wid {
         std::is_same_v<T, WAssetId> ||
         std::is_same_v<T, WSystemId>;
 
-    struct _WLevelSystemId_Flag_{};
-
-    class WLevelSystemId : public WId<std::uint64_t,
-                                      _WLevelSystemId_Flag_,
-                                      ComputeCompoundNull<
-                                          SWidSize<WAssetId, WEntityComponentId::BitsSizeV<WAssetId>>,
-                                          SWidSize<WSystemId, 16>
-                                          >()                                  
-                                      > {
-    public:
-
-        using WId::WId;
-
-        static constexpr std::uint8_t LEVEL_BITS_SIZE{ WEntityComponentId::BitsSizeV<WAssetId> };
+    struct WLevelSystemId_Meta{
+        static constexpr std::uint8_t LEVEL_BITS_SIZE{
+            WEntityComponentId_Meta::BitsSizeV<WAssetId>
+        };
+        
         static constexpr std::uint8_t SYSTEM_BITS_SIZE{16};
 
         static constexpr std::uint8_t WID_BITS_SIZE{LEVEL_BITS_SIZE + SYSTEM_BITS_SIZE};
@@ -533,10 +537,10 @@ namespace wid {
         template<WLevelSystemId_Subtype T>
         static constexpr std::uint8_t GetBitsSize() {
             if constexpr(std::is_same_v<T,WAssetId>) {
-                return LEVEL_BITS_SIZE;
+                return WLevelSystemId_Meta::LEVEL_BITS_SIZE;
             }
             else {
-                return SYSTEM_BITS_SIZE;
+                return WLevelSystemId_Meta::SYSTEM_BITS_SIZE;
             }
         } 
 
@@ -546,7 +550,27 @@ namespace wid {
         template<WLevelSystemId_Subtype T>
         static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
+        static constexpr std::uint64_t NULL_VALUE = ComputeCompoundNull<
+            SWidSize<WAssetId, LEVEL_BITS_SIZE>,
+            SWidSize<WSystemId, SYSTEM_BITS_SIZE>>();
+
+        static constexpr void ValidateWIds(WAssetId asset_id, WSystemId system_id) {
+            _ValidateWIds_<
+                BitsSizeV<WAssetId>,
+                BitsSizeV<WSystemId>
+                > (
+                    asset_id, system_id
+                    );
+        }
+    };
+
+    class WLevelSystemId :
+        public WId<std::uint64_t,
+                   WLevelSystemId_Meta,
+                   WLevelSystemId_Meta::NULL_VALUE>{
     public:
+
+        using WId::WId;
 
         constexpr WLevelSystemId() noexcept = default;
         constexpr WLevelSystemId(WLevelSystemId const &) noexcept = default;
@@ -556,21 +580,14 @@ namespace wid {
         ~WLevelSystemId() = default;
 
         WLevelSystemId(WAssetId in_asset_id, WSystemId in_system_id) {
-        
-            ValidateWIds<
-                BitsSizeV<WAssetId>,
-                BitsSizeV<WSystemId>
-                > (
-                    in_asset_id, in_system_id
-                    );
-
+            WLevelSystemId_Meta::ValidateWIds(in_asset_id, in_system_id);
 
             id_ = 0;
 
-            id_ |= BitMaskV<WAssetId> & in_asset_id.GetId();
+            id_ |= WLevelSystemId_Meta::BitMaskV<WAssetId> & in_asset_id.GetId();
 
-            id_ <<= BitsSizeV<WSystemId>;
-            id_ |= BitMaskV<WSystemId> & in_system_id.GetId();
+            id_ <<= WLevelSystemId_Meta::BitsSizeV<WSystemId>;
+            id_ |= WLevelSystemId_Meta::BitMaskV<WSystemId> & in_system_id.GetId();
         }
 
         void ExtractWIds(WAssetId out_asset_id, WSystemId out_system_id) const {
@@ -579,18 +596,16 @@ namespace wid {
             WAssetId::IdType asset_id=WAssetId(WID_NULL_V).GetId();
             WSystemId::IdType system_id=WSystemId(WID_NULL_V).GetId();
 
-            system_id &= ~BitMaskV<WSystemId>;
-            system_id |= BitMaskV<WSystemId> & idcpy;
-            idcpy >>= BitsSizeV<WSystemId>;
+            system_id &= ~WLevelSystemId_Meta::BitMaskV<WSystemId>;
+            system_id |= WLevelSystemId_Meta::BitMaskV<WSystemId> & idcpy;
+            idcpy >>= WLevelSystemId_Meta::BitsSizeV<WSystemId>;
 
-            asset_id &= ~BitMaskV<WAssetId>;
-            asset_id |= BitMaskV<WAssetId> ^ idcpy;
+            asset_id &= ~WLevelSystemId_Meta::BitMaskV<WAssetId>;
+            asset_id |= WLevelSystemId_Meta::BitMaskV<WAssetId> & idcpy;
 
             out_asset_id = asset_id;
             out_system_id = system_id;
-
         }
-
     };
 
 // ------
@@ -604,9 +619,9 @@ namespace wid {
         // 0b00 is free
     };
 
-/**
- * WEngId General id class
- */
+    /**
+     * WEngId General id class
+     */
     class WCORE_API WEngId {
     public:
 
