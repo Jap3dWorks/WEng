@@ -7,7 +7,12 @@ namespace weng::defaults {
     WEngine DefaultEngine();
 
     inline constexpr
-    std::string_view const NULL_RGBA_TEXTURE_ASSET_PATH {
+    std::string_view const NULL_RGBA_TEXTURE_ASSET_PATH{
+        "/Content/Assets/Textures/null_rgba_texture:null_rgba_texture"
+    };
+
+    inline constexpr
+    std::string_view const NULL_TEXTURE_ASSET_PATH {
         "/Content/Assets/Textures/null_texture:null_texture"
     };
 
@@ -26,6 +31,11 @@ namespace weng::defaults {
     inline constexpr
     std::string_view const PBR_PIPELINE_ASSET_PATH{
         "/Content/Assets/Pipelines/pbr_pipeline:pbr_pipeline"
+    };
+
+    inline constexpr
+    std::string_view const PBR_PIPE_PARAMS_NULL_ASSET_PATH {
+        "/Content/Assets/Pipelines/pbr_pparams_null:pbr_pparams_null"
     };
 
     inline constexpr

@@ -157,10 +157,14 @@ namespace wng::render {
                     [&in_component,
                      &render_pipelines,
                      &texture_assets,
-                     &in_asset_db](WStaticMeshAsset * _sm, const wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
-                        
+                     &in_asset_db](WStaticMeshAsset * _sm,
+                                   const wid::WSubIdxId & _id,
+                                   wct::geometry::WMesh& _m) {
+
+                        // TODO Get assignment by id
                         wct::render::WPipelineAssignment pipassign =
-                            in_component->GetPipelineAssignment(0);
+                            // in_component->GetPipelineAssignment(0);
+                            in_component->GetPipelineAssignment(_id);
                         
                         if(pipassign.pipeline.IsValid() && pipassign.params.IsValid()) {
                             

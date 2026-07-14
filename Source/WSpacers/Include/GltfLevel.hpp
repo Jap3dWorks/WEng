@@ -68,7 +68,7 @@ namespace spacers::gltflevel {
             ->GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
-        ambient_ptr->Set_intensity(0.25);
+        ambient_ptr->Set_intensity(1);
         ambient_ptr->Set_active(true);
     }
 

@@ -123,6 +123,8 @@ using WAssetDbType = WObjectDb<WAsset, wid::WAssetId>;
 
     WAsset * Get(std::string_view asset_path) const;
 
+    wid::WAssetId GetId(std::string_view asset_path) const;
+    
     bool ExistsAsset(std::string_view asset_path) const;
 
     /**
@@ -153,7 +155,7 @@ using WAssetDbType = WObjectDb<WAsset, wid::WAssetId>;
 
         std::string candidate = wstr::AssetPath(directory, new_package, asset_name);
 
-        while(ExistsAsset(candidate)) {
+        while(GetId(candidate).IsValid()) {
             new_package =
                 std::format("{}{:02d}", T::StaticClass()->Name(), counter++);
 

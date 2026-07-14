@@ -1,5 +1,6 @@
 #include "WEngine/WEngineDefaults.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
@@ -26,10 +27,29 @@ namespace {
             wct::texture::ETextureFormat::RGBA8_SRGB
             );
 
-        auto wid=out_db.CreateFrom<WTextureAsset>(
+        out_db.CreateFrom<WTextureAsset>(
+            weng::defaults::NULL_TEXTURE_ASSET_PATH,
+            std::move(texture_asset)
+            );
+
+        // --
+
+        color_data.assign(2*2*4, 255);
+        std::ranges::fill(color_data.begin() + 4, color_data.begin() + 8, 127);
+        std::ranges::fill(color_data.begin() + 8, color_data.begin() + 12, 0);
+
+        texture_asset = {};
+        texture_asset.SetTextureData(
+            color_data.data(), 2, 2,
+            wct::texture::ETextureFormat::RGBA8_SRGB
+            );
+
+        out_db.CreateFrom<WTextureAsset>(
             weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
+        
+        // --
 
         color_data.assign(2 * 2 * 4, 127);
         std::ranges::fill(color_data.end() - 4, color_data.end(), 255);
@@ -40,7 +60,7 @@ namespace {
             wct::texture::ETextureFormat::RGBA8_SNORM
             );
 
-        wid=out_db.CreateFrom<WTextureAsset>(
+        out_db.CreateFrom<WTextureAsset>(
             weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
@@ -95,6 +115,20 @@ namespace {
         out_db.CreateFrom<WRenderPipelineAsset>(
             weng::defaults::PBR_PIPELINE_ASSET_PATH,
             std::move(pipeline_asset)
+            );
+
+        // TODO default pipeline parameters
+        WRenderPipelineParametersAsset params{};
+        params.Set_texture_list({
+                {1, out_db.GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)},
+                {2, out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)},
+                {3, out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)},
+                {4, out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)},
+            });
+
+        out_db.CreateFrom<WRenderPipelineParametersAsset>(
+            weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH,
+            params
             );
     }
 
@@ -173,12 +207,15 @@ WEngine weng::defaults::DefaultEngine() {
     DefaultInputAssets(result.AssetManager());
 
     // Gltf importer
-
-    wid::WAssetId pbr_pipeline_wid = result.AssetManager()
-        .Get(weng::defaults::PBR_PIPELINE_ASSET_PATH)->Get_asset_id();
-
     result.ImportersRegister()
-        .Register<wim::importer::WImporterGltf>(pbr_pipeline_wid, wid::NULL_V);
+        .Register<wim::importer::WImporterGltf>(
+            result.AssetManager().GetId(weng::defaults::PBR_PIPELINE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH),
+            wid::NULL_V,
+            result.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+            );
 
     // TODO Plugins Modules Loading
 

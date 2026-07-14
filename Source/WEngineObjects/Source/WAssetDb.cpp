@@ -9,23 +9,25 @@ WAsset * WAssetDb::Get(std::string_view asset_name) const {
     auto split_path = wstr::SplitAssetPath(asset_name);
     auto opt_wid = path_tree_.Lookup(split_path);
 
-    if (opt_wid.has_value()) {
-        wid::WAssetTypeId atype = wclass_track_
-            .GetAssetTypeId(opt_wid.value().get());
+    wid::WAssetId aid = GetId(asset_name);
 
-        wid::WTypeAssetIndexId idvalue{atype,
-                                       opt_wid.value().get(),
-                                       wid::NULL_V};
-
-        return Get(idvalue);
+    if (aid) {
+        return Get(aid);
     }
-    
-    return nullptr;
+    else return nullptr;
 }
 
-bool WAssetDb::ExistsAsset(std::string_view asset_path) const {
+wid::WAssetId WAssetDb::GetId(std::string_view asset_path) const {
     auto split_path = wstr::SplitAssetPath(asset_path);
-    return path_tree_.Lookup(split_path).has_value();
+    auto opt_wid = path_tree_.Lookup(split_path);
+
+    return opt_wid
+        .and_then(
+            [](auto & itm) -> std::optional<wid::WAssetId>{
+                return itm.get();
+            })
+        .value_or(wid::NULL_V);
 }
+
 
 

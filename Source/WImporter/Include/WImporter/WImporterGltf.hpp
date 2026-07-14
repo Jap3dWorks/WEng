@@ -15,8 +15,24 @@ namespace wim::importer {
         WImporterGltf& operator=(WImporterGltf&&) noexcept = default;
         virtual ~WImporterGltf() = default;
 
-        WImporterGltf(wid::WAssetId pbr_pipeline, wid::WAssetId transparent_pipeline) :
-            render_pipelines_({pbr_pipeline, transparent_pipeline}) {}
+        WImporterGltf(wid::WAssetId pbr_opaque,
+                      wid::WAssetId pbr_param,
+                      wid::WAssetId transparent_pipeline,
+                      wid::WAssetId null_texture,
+                      wid::WAssetId null_rgba,
+                      wid::WAssetId null_normal) :
+            render_pipelines_(
+                {pbr_opaque,
+                 pbr_param,
+                 transparent_pipeline,
+                 
+                }),
+            textures_(
+                {null_texture,
+                 null_rgba,
+                 null_normal}
+                )
+        {}
 
     public:
 
@@ -34,11 +50,17 @@ namespace wim::importer {
     private:
 
         struct RenderPipelines {
-            wid::WAssetId gbuffer{};      // opaque pbr.
+            wid::WAssetId pbr_opaque{};
+            wid::WAssetId pbr_param{};
             wid::WAssetId transparent{};  // transparent pbr.
         } render_pipelines_{};
 
-        
+        struct TextureAssets {
+            wid::WAssetId null_texture{};
+            wid::WAssetId null_rgba{};
+            wid::WAssetId null_normal{};
+            
+        } textures_{};
 
     };
     

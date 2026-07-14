@@ -65,7 +65,7 @@ namespace spacers::monkey {
             );
 
         WAsset * null_texture = engine.AssetManager()
-            .Get(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::NULL_TEXTURE_ASSET_PATH);
 
         WAsset * null_normal = engine.AssetManager()
             .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);
@@ -163,7 +163,7 @@ namespace spacers::monkey {
         out_model.param_asset = paramid;
 
         WAsset * null_texture = engine.AssetManager()
-            .Get(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::NULL_TEXTURE_ASSET_PATH);
 
         WAsset * null_normal = engine.AssetManager()
             .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);

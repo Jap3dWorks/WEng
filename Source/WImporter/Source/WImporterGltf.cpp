@@ -5,6 +5,7 @@
 #include "WComponents/Light/WDirectionalLightComponent.hpp"
 #include "WComponents/Light/WPointLightComponent.hpp"
 #include "WComponents/WStaticMeshComponent.hpp"
+#include "WCore/WId.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
@@ -208,87 +209,83 @@ namespace {
         return asset_gltf;
     }
 
-    WNODISCARD inline  WRenderPipelineParametersAsset CollectMaterial(
+    WNODISCARD inline
+    WRenderPipelineParametersAsset CollectMaterial(
         fastgltf::Asset const & in_asset,
         std::vector<wid::WAssetId> const & textures,
-        fastgltf::Material const & in_material
+        fastgltf::Material const & in_material,
+        wid::WAssetId null_texture=wid::NULL_V,
+        wid::WAssetId null_rgba=wid::NULL_V,
+        wid::WAssetId null_normal=wid::NULL_V
         ) {
         WRenderPipelineParametersAsset result{};
 
-        auto GetWAssetId = [&textures]
-            (auto & tex_info) -> wid::WAssetId {
+        auto GetTextureId = [&textures]
+            (auto & tex_info, wid::WAssetId fallback) -> wid::WAssetId {
             return tex_info
                 .and_then(
-                    [&textures]
+                    [&textures, &fallback]
                     (fastgltf::TextureInfo const & value) -> std::optional<wid::WAssetId> {
-                        if (value.textureIndex >= textures.size()) return wid::NULL_V;
-                        return textures[value.textureIndex];
+                        if (value.textureIndex >= textures.size())
+                            return fallback;
+                        else
+                            return textures[value.textureIndex];
                     }
                     )
                 .or_else(
-                    []() -> std::optional<wid::WAssetId>
-                    { return wid::NULL_V; }
+                    [&fallback]() -> std::optional<wid::WAssetId>
+                    { return fallback; }
                     )
                 .value();
         };
 
         wct::render::WRPParameterList_WAssetId texture_params{};
-        texture_params.reserve(4);
         
-        if (wid::WAssetId albedo_wid = GetWAssetId(
-            in_material.pbrData.baseColorTexture
-                )) {
-            texture_params.emplace_back(
-                1,  // pbr binding constant
-                albedo_wid
-                );
-        }
-
-        if (in_material.emissiveTexture) {
-            if (wid::WAssetId emissive_wid = GetWAssetId(
-                    in_material.emissiveTexture
-                    )) {
-                texture_params.emplace_back(
-                    2, emissive_wid
-                    );
-            }
-        }
-
-        if (wid::WAssetId normal_wid = GetWAssetId(
-                in_material.normalTexture
-                )) {
-            texture_params.emplace_back(
-                3, // pbr binding constant
-                normal_wid
-                );
-        }
+        texture_params.emplace_back(1,
+                                    GetTextureId(
+                                        in_material
+                                        .pbrData
+                                        .baseColorTexture,
+                                        null_rgba));
+        
+        texture_params.emplace_back(2,
+                                    GetTextureId(
+                                        in_material
+                                        .emissiveTexture,
+                                        null_texture));
+        
+        texture_params.emplace_back(3,
+                                    GetTextureId(
+                                        in_material
+                                        .normalTexture,
+                                        null_normal));
 
         if (in_material.packedOcclusionRoughnessMetallicTextures) {
-
-            if(wid::WAssetId mrAO = GetWAssetId(
-                   in_material
-                   .packedOcclusionRoughnessMetallicTextures
-                   ->roughnessMetallicOcclusionTexture
-                   )) {
-                texture_params.emplace_back(
-                    4,
-                    mrAO
-                    );
-            }
-            
+            texture_params.emplace_back(
+                4,
+                GetTextureId(in_material
+                             .packedOcclusionRoughnessMetallicTextures
+                             ->roughnessMetallicOcclusionTexture,
+                             null_texture));
         }
-
+        else {
+            texture_params.emplace_back(4, null_texture);
+        }
+            
         // TODO pbr values into UBO
 
         result.Set_texture_list(texture_params);
 
-        return {};
+        return result;
     }
 
     WNODISCARD inline
     auto CollectMaterials(
         fastgltf::Asset const & in_asset,
-        std::vector<wid::WAssetId> const & in_textures
+        std::vector<wid::WAssetId> const & in_textures,
+        wid::WAssetId null_texture=wid::NULL_V,
+        wid::WAssetId null_rgba=wid::NULL_V,
+        wid::WAssetId null_normal=wid::NULL_V
         ){
         
         std::vector<WRenderPipelineParametersAsset> assets;
@@ -302,7 +299,10 @@ namespace {
                 CollectMaterial(
                     in_asset,
                     in_textures,
-                    mat
+                    mat,
+                    null_texture,
+                    null_rgba,
+                    null_normal
                     )
                 );
 
@@ -392,6 +392,8 @@ namespace {
             }
         }
 
+        // ...
+
         return result;
     }
 
@@ -399,6 +401,7 @@ namespace {
     auto CollectStaticMeshes(
         fastgltf::Asset const & in_asset,
         wid::WAssetId gbuffer_pipeline,
+        wid::WAssetId null_pipe_params,
         wid::WAssetId transparent_pipeline,
         std::vector<wid::WAssetId> const & parameters
         ) {
@@ -420,7 +423,7 @@ namespace {
             std::size_t idx=0;
             
             while(idx < mesh.primitives.size() &&
-                  idx < sm_asset.Get_meshes().size()) {
+                  idx < sm_asset.Get_meshes().max_size()) {
 
                 auto & primitive = mesh.primitives[idx];
 
@@ -432,17 +435,23 @@ namespace {
                     idx
                     );
 
-                if (primitive.materialIndex) {
-                    if (primitive.materialIndex.value() < parameters.size()) {
-
-                        sm_asset.SetPipelineAssignment(
-                            {
-                                gbuffer_pipeline,  
-                                parameters[primitive.materialIndex.value()]
-                            },
-                            idx
-                            );                        
-                    }
+                if (primitive.materialIndex &&
+                    primitive.materialIndex.value() < parameters.size()) {
+                    sm_asset.SetPipelineAssignment(
+                        {
+                            gbuffer_pipeline,  
+                            parameters[primitive.materialIndex.value()]
+                        },
+                        idx
+                        );
+                }
+                else {
+                    sm_asset.SetPipelineAssignment(
+                        {gbuffer_pipeline,
+                         null_pipe_params
+                        },
+                        idx
+                        );
                 }
 
                 idx++;
@@ -516,9 +525,9 @@ namespace {
 
                     std::visit(fastgltf::visitor { 
                             [](auto const & arg) {},
-                                [&result, &bufferView]<typename T>
-                                requires (std::same_as<T, fastgltf::sources::Vector> ||
-                                    std::same_as<T, fastgltf::sources::Array>)
+                            [&result, &bufferView]<typename T>
+                            requires (std::same_as<T, fastgltf::sources::Vector> ||
+                                std::same_as<T, fastgltf::sources::Array>)
                             (T const & container) {
                                 auto stbi_image = wim::WLib_wtbi::LoadBuffer(
                                     container.bytes.data() + bufferView.byteOffset,
@@ -581,7 +590,9 @@ namespace {
         text_names.reserve(in_asset.images.size());
 
         std::size_t idx=0;
+
         for (auto & img : in_asset.images) {
+
             text_assets.push_back(
                 CollectImage(in_asset, img)
                 );
@@ -954,7 +965,10 @@ std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
 
     auto [mat_assets, mat_names] =CollectMaterials(
         gltf_asset,
-        textures_wids
+        textures_wids,
+        textures_.null_texture,
+        textures_.null_rgba,
+        textures_.null_normal
         );
 
     auto materials_wid = CreatePipelineParameters(
@@ -967,7 +981,8 @@ std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
     // Collect meshes
     auto [sm_index_map, sm_assets, sm_names] = CollectStaticMeshes(
         gltf_asset,
-        render_pipelines_.gbuffer,
+        render_pipelines_.pbr_opaque,
+        render_pipelines_.pbr_param,
         render_pipelines_.transparent,
         materials_wid
         );
