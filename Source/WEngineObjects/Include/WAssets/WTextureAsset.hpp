@@ -62,7 +62,7 @@ public:
 
     inline void AddRGBAPadding() {
         size_t channels = wct::texture::NumOfChannels(format);
-        if (channels == 4) return;   // already has alpha
+        if (channels == 4) return;
 
         assert(channels == 3 && "Only RGB (3 channels) to RGBA conversion is supported");
         size_t pixel_count = static_cast<size_t>(width) * height;

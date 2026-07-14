@@ -41,6 +41,9 @@ std::vector<wid::WAssetId> wim::importer::WImportTexture::Import(
         stbi_image.format
         );
 
+    if (wct::texture::NumOfChannels(asset.Get_format()) == 3)
+        asset.AddRGBAPadding();
+
     return { id };
 }
 

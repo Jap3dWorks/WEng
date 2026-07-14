@@ -17,37 +17,22 @@ void wvk::texture::CreateTexture(
     )
 {
     
-    WTextureAsset texture_rgba;
-    
-    const WTextureAsset * texture_ptr;
-
-    VkFormat vulkan_format;
-
     // Textures must be RGBA, graphic cards prefer RGBA padding.
     //  I've experienced some render errores using RGB textures.
 
     auto num_channels = wct::texture::NumOfChannels(texture_struct.Get_format());
-    
-    if (4==num_channels)
-    {
-        texture_ptr = &texture_struct;
-        vulkan_format = wvk::texture::ToVkFormat(texture_struct.Get_format());
-    }
-    else
-    {
-        texture_rgba = texture_struct;
-        texture_rgba.AddRGBAPadding();
-        texture_ptr = &texture_rgba;
-        vulkan_format = wvk::texture::ToVkFormat(texture_rgba.Get_format());
-    }
+    VkFormat vulkan_format = wvk::texture::ToVkFormat(texture_struct.Get_format());
 
     out_texture_info.mip_levels =
         static_cast<uint32_t>(
             std::floor(
                 std::log2(
-                    std::max(texture_ptr->Get_width(), texture_ptr->Get_height())))) + 1;
+                    std::max(texture_struct.Get_width(), texture_struct.Get_height())))) + 1;
 
-    VkDeviceSize image_size = texture_ptr->Get_height() * texture_ptr->Get_width() * 4;
+    VkDeviceSize image_size =
+        texture_struct.Get_height() *
+        texture_struct.Get_width() *
+        num_channels;
 
     // staging buffers are host accesible ram
     VkBuffer staging_buffer;
@@ -66,8 +51,8 @@ void wvk::texture::CreateTexture(
     vkMapMemory(in_device, staging_buffer_memory, 0, image_size, 0, &data);
     memcpy(
         data,
-        texture_ptr->GetDataPtr(),
-        std::min(texture_ptr->GetDataSize(), static_cast<size_t>(image_size))
+        texture_struct.GetDataPtr(),
+        std::min(texture_struct.GetDataSize(), static_cast<size_t>(image_size))
         );
     vkUnmapMemory(in_device, staging_buffer_memory);
 
@@ -76,8 +61,8 @@ void wvk::texture::CreateTexture(
         out_texture_info.memory,
         in_device,
         in_physical_device,
-        texture_ptr->Get_width(),
-        texture_ptr->Get_height(),
+        texture_struct.Get_width(),
+        texture_struct.Get_height(),
         out_texture_info.mip_levels,
         VK_SAMPLE_COUNT_1_BIT,
         vulkan_format,
@@ -100,8 +85,8 @@ void wvk::texture::CreateTexture(
     wvk::image::CopyBufferToImage(
         staging_buffer,
         out_texture_info.image,
-        texture_ptr->Get_width(),
-        texture_ptr->Get_height(),
+        texture_struct.Get_width(),
+        texture_struct.Get_height(),
         in_device,
         in_command_pool,
         in_graphics_queue
@@ -110,8 +95,8 @@ void wvk::texture::CreateTexture(
     wvk::image::GenerateMipmaps(
         out_texture_info.image,
         vulkan_format,
-        texture_ptr->Get_width(),
-        texture_ptr->Get_height(),
+        texture_struct.Get_width(),
+        texture_struct.Get_height(),
         out_texture_info.mip_levels,
         in_device,
         in_physical_device,
