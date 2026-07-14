@@ -27,8 +27,8 @@ int main(int argc, char** argv)
         wid::WAssetId monkey_level_id = spacers::monkey::CreateMonkeyLevel(engine);
         wid::WAssetId gltflevel = spacers::gltflevel::CreateLevel(engine);
 
-        // engine.StartupLevel(monkey_level_id);
-        engine.StartupLevel(gltflevel);
+        engine.StartupLevel(monkey_level_id);
+        // engine.StartupLevel(gltflevel);
 
         WFLOG("[INFO] Initialize While Loop");
 

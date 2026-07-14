@@ -10,6 +10,8 @@
 #include "WEngRender/WEngRender.hpp"
 #include "WUtils/WMath.hpp"
 #include "WEngine/WEngine.hpp"
+#include "WEngine/WEngineDefaults.hpp"
+
 #include <glm/geometric.hpp>
 
 
@@ -42,41 +44,35 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
-    wid::WAssetId mapping, frontaction, backaction, leftaction, rightaction, mousemovement;
 
     wid::WEntityId camid;
     parameters.level->GetFirstComponent<WCameraComponent>(camid);
 
-    parameters.engine->AssetManager().ForEach<WInputMappingAsset>(
-        [&mapping](WInputMappingAsset & a){
-        mapping = a.Get_asset_id();
-    });
+    auto & asset_manager = parameters.engine->AssetManager();
 
-    // TODO: Get assets by Name, store in a GeneralTree?
-    parameters.engine->AssetManager().ForEach<WActionAsset>(
-        [&frontaction,
-         &backaction,
-         &leftaction,
-         &rightaction,
-         &mousemovement] (WActionAsset & a) {
-            std::string name(a.Get_name().View());
+    wid::WAssetId mapping = asset_manager
+        .Get(weng::defaults::CAMERA_MAPPING_ASSET_PATH)
+        ->Get_asset_id();
 
-            if(name.contains("Front")) {
-                frontaction = a.Get_asset_id();
-            }
-            else if(name.contains("Back")) {
-                backaction = a.Get_asset_id();
-            }
-            else if (name.contains("Left")) {
-                leftaction = a.Get_asset_id();
-            }
-            else if(name.contains("Right")) {
-                rightaction = a.Get_asset_id();
-            }
-            else if(name.contains("MouseMovement")) {
-                mousemovement = a.Get_asset_id();
-            }
-    });
+    wid::WAssetId frontaction = asset_manager
+        .Get(weng::defaults::FRONT_ACTION_ASSET_PATH)
+        ->Get_asset_id();
+
+    wid::WAssetId backaction = asset_manager
+        .Get(weng::defaults::BACK_ACTION_ASSET_PATH)
+        ->Get_asset_id();
+
+    wid::WAssetId leftaction = asset_manager
+        .Get(weng::defaults::LEFT_ACTION_ASSET_PATH)
+        ->Get_asset_id();
+
+    wid::WAssetId rightaction = asset_manager
+        .Get(weng::defaults::RIGHT_ACTION_ASSET_PATH)
+        ->Get_asset_id();
+
+    wid::WAssetId mousemovement = asset_manager
+        .Get(weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH)
+        ->Get_asset_id();
 
     parameters.engine->InputMappingRegister().PutInputMapping(mapping);
 

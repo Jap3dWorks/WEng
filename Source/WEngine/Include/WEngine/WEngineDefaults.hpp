@@ -17,6 +17,7 @@ namespace weng::defaults {
     };
 
     // TODO default geometries.
+
     inline constexpr
     std::string_view const PBR_PIPELINE_SHADER_PATH{
         "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
@@ -25,6 +26,36 @@ namespace weng::defaults {
     inline constexpr
     std::string_view const PBR_PIPELINE_ASSET_PATH{
         "/Content/Assets/Pipelines/pbr_pipeline:pbr_pipeline"
+    };
+
+    inline constexpr
+    std::string_view const CAMERA_MAPPING_ASSET_PATH{
+        "/Content/Input/CameraMapping:CameraMapping"
+    };
+
+    inline constexpr
+    std::string_view const FRONT_ACTION_ASSET_PATH{
+        "/Content/Input/CameraMapping:CameraMapping"
+    };
+
+    inline constexpr
+    std::string_view const BACK_ACTION_ASSET_PATH{
+        "/Content/Input/BackAction:BackAction"        
+    };
+
+    inline constexpr
+    std::string_view const LEFT_ACTION_ASSET_PATH{
+        "/Content/Input/LeftAction:LeftAction"        
+    };
+
+    inline constexpr
+    std::string_view const RIGHT_ACTION_ASSET_PATH{
+        "/Content/Input/RightAction:RightAction"        
+    };
+
+    inline constexpr
+    std::string_view const MOUSE_MOVEMENT_ACTION_ASSET_PATH{
+        "/Content/Input/MouseMovement:MouseMovement"        
     };
 
 }

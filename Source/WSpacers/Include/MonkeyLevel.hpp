@@ -182,51 +182,6 @@ namespace spacers::monkey {
         return true;
     }
 
-    inline bool InputAssets(WEngine & in_engine) {
-        wid::WAssetId cameramapping = in_engine.AssetManager().Create<WInputMappingAsset>(
-            "/Content/Input/CameraMapping:CameraMapping"
-            );
-
-        wid::WAssetId frontaction = in_engine.AssetManager().Create<WActionAsset>(
-            "/Content/Input/FrontAction:FrontAction"
-            );
-
-        wid::WAssetId backaction = in_engine.AssetManager().Create<WActionAsset>(
-            "/Content/Input/BackAction:BackAction"
-            );
-
-        wid::WAssetId leftaction = in_engine.AssetManager().Create<WActionAsset>(
-            "/Content/Input/LeftAction:LeftAction"
-            );
-
-        wid::WAssetId rightaction = in_engine.AssetManager().Create<WActionAsset>(
-            "/Content/Input/RightAction:RightAction"
-            );
-
-        wid::WAssetId mousemovement = in_engine.AssetManager().Create<WActionAsset>(
-            "/Content/Input/MouseMovement:MouseMovement"
-            );
-
-        auto & mapping_asset = in_engine.AssetManager()
-            .Get<WInputMappingAsset>(cameramapping);
-
-        WInputMap input_map = mapping_asset.Get_input_map();
-
-        input_map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
-        input_map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};
-        input_map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
-        input_map[{EInputKey::Key_S, EInputMode::Release}] = {backaction};
-        input_map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
-        input_map[{EInputKey::Key_A, EInputMode::Release}] = {leftaction};
-        input_map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
-        input_map[{EInputKey::Key_D, EInputMode::Release}] = {rightaction};
-        input_map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
-
-        mapping_asset.Set_input_map(input_map);
-
-        return true;
-    }
-
     inline wid::WAssetId ConfigLevel(WEngine & in_engine,
                          const ModelAssets & in_viking_room,
                          const ModelAssets & in_monkey_dt
@@ -354,8 +309,6 @@ namespace spacers::monkey {
 
         LoadVikingRoom(in_engine, viking_room);
         LoadMonkey(in_engine, monkey_1, viking_room.pipeline_asset);
-
-        InputAssets(in_engine);
 
         WFLOG("[INFO] Setup Init Level.");
        

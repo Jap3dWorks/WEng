@@ -98,6 +98,49 @@ namespace {
             );
     }
 
+    void DefaultInputAssets(WAssetDb & asset_db) {
+        wid::WAssetId cameramapping = asset_db.Create<WInputMappingAsset>(
+            weng::defaults::CAMERA_MAPPING_ASSET_PATH
+            );
+
+        wid::WAssetId frontaction = asset_db.Create<WActionAsset>(
+            weng::defaults::FRONT_ACTION_ASSET_PATH
+            );
+
+        wid::WAssetId backaction = asset_db.Create<WActionAsset>(
+            weng::defaults::BACK_ACTION_ASSET_PATH
+            );
+
+        wid::WAssetId leftaction = asset_db.Create<WActionAsset>(
+            weng::defaults::LEFT_ACTION_ASSET_PATH
+            );
+
+        wid::WAssetId rightaction = asset_db.Create<WActionAsset>(
+            weng::defaults::RIGHT_ACTION_ASSET_PATH
+            );
+
+        wid::WAssetId mousemovement = asset_db.Create<WActionAsset>(
+            weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH
+            );
+
+        auto & mapping_asset = asset_db
+            .Get<WInputMappingAsset>(cameramapping);
+
+        WInputMap input_map = mapping_asset.Get_input_map();
+
+        input_map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
+        input_map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};
+        input_map[{EInputKey::Key_S, EInputMode::Press}] = {backaction};
+        input_map[{EInputKey::Key_S, EInputMode::Release}] = {backaction};
+        input_map[{EInputKey::Key_A, EInputMode::Press}] = {leftaction};
+        input_map[{EInputKey::Key_A, EInputMode::Release}] = {leftaction};
+        input_map[{EInputKey::Key_D, EInputMode::Press}] = {rightaction};
+        input_map[{EInputKey::Key_D, EInputMode::Release}] = {rightaction};
+        input_map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
+
+        mapping_asset.Set_input_map(input_map);
+
+    }
 }
 
 
@@ -126,6 +169,8 @@ WEngine weng::defaults::DefaultEngine() {
     DefaultTextures(result.AssetManager());
 
     DefaultRenderPipelines(result.AssetManager());
+
+    DefaultInputAssets(result.AssetManager());
 
     // Gltf importer
 
