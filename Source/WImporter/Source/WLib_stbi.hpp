@@ -45,7 +45,7 @@ namespace wim::WLib_wtbi {
             &width,
             &height,
             &num_channels,
-            STBI_rgb_alpha  // Load as rgba
+            0
             );
 
         return {

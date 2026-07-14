@@ -566,6 +566,9 @@ namespace {
                 CollectImage(in_asset, img)
                 );
 
+            // Ensure the texture has an alpha channel (RGBA) for correct material sampling
+            text_assets.back().AddRGBAPadding();
+
             text_names.push_back(
                 wstr::CleanBasename(img.name)
                 );

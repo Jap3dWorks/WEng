@@ -4,6 +4,7 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 
 #include "WTextureAsset.WEngine.hpp"
@@ -60,37 +61,24 @@ public:
     }
 
     inline void AddRGBAPadding() {
+        size_t channels = wct::texture::NumOfChannels(format);
+        if (channels == 4) return;   // already has alpha
 
-        wct::texture::ETextureFormat all_channels_format =
-            format | 
-            wct::texture::ETextureFormat::R |
-            wct::texture::ETextureFormat::G |
-            wct::texture::ETextureFormat::B |
-            wct::texture::ETextureFormat::A;
-
-        std::uint8_t color_depth_bytes = wct::texture::ColorDepth(format) / 8;
-
+        assert(channels == 3 && "Only RGB (3 channels) to RGBA conversion is supported");
         size_t pixel_count = static_cast<size_t>(width) * height;
-        size_t bytes_per_channel = pixel_count;
-        size_t old_planes = wct::texture::NumOfChannels(format);
-
-        if (old_planes == 4) return;
-
-        // Allocate new vector for 4 planes
-        std::vector<uint8_t> new_data(pixel_count * 4 * color_depth_bytes);
+        std::vector<uint8_t> rgba(pixel_count * 4, 255);
 
         const uint8_t* src = data_.data();
-        uint8_t* dst = new_data.data();
-        std::memcpy(dst, src, bytes_per_channel * old_planes * color_depth_bytes);
+        uint8_t* dst = rgba.data();
+        for (size_t i = 0; i < pixel_count; ++i) {
+            dst[4*i + 0] = src[3*i + 0];
+            dst[4*i + 1] = src[3*i + 1];
+            dst[4*i + 2] = src[3*i + 2];
+            dst[4*i + 3] = 255;
+        }
 
-        // Fill alpha plane with 255
-        std::fill(dst + bytes_per_channel * old_planes * color_depth_bytes,
-                  dst + bytes_per_channel * 4 * color_depth_bytes,
-                  255);
-
-        // Replace and update format
-        data_ = std::move(new_data);
-        format = all_channels_format;
-    }    
+        data_ = std::move(rgba);
+        format = format | wct::texture::ETextureFormat::A;
+    }
 };
 
