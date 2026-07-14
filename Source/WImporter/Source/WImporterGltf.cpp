@@ -25,6 +25,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/type_trait.hpp>
 
+#include <limits>
 #include <stdexcept>
 #include <type_traits>
 
@@ -52,41 +53,12 @@ template <>
 struct fastgltf::ElementTraits<glm::vec4> :
     fastgltf::ElementTraitsBase<glm::vec4, AccessorType::Vec4, float> {};
 
-namespace nullindex {
-
-    struct _NullIndexType_ {};
-
-    template<typename T=std::size_t, T NullValue=std::numeric_limits<T>::max()>
-    struct NullableIndex {
-
-        NullableIndex(T in_val) :
-            value(in_val) {}
-
-        constexpr NullableIndex(_NullIndexType_) :
-            value(NullValue) {}
-
-        NullableIndex() = default;
-        NullableIndex(const NullableIndex&) = default;
-        NullableIndex(NullableIndex&&) = default;
-        NullableIndex& operator=(const NullableIndex&) = default;
-        NullableIndex& operator=(NullableIndex&&) = default;
-        virtual ~NullableIndex() = default;
-
-        WNODISCARD bool IsValid() const { return value != NullValue; }
-        WNODISCARD operator bool() const {return IsValid(); }
-
-        WNODISCARD T const & Value() const { return value; }
-        WNODISCARD T const &  operator*() const { return value; }
-
-    private:
-        
-        T value{NullValue};
-    };
-
-    constexpr const _NullIndexType_ Null={};
-}
-
 namespace {
+
+    template<typename T=std::size_t>
+    using NullableIndex = wid::WId<T,
+                                   wid::WIdDefaultFlag,
+                                   std::numeric_limits<T>::max()>;
 
     WNODISCARD constexpr wct::texture::ESampler MagFilter(fastgltf::Filter mag_filter) noexcept {
         switch(mag_filter) {
@@ -405,9 +377,7 @@ namespace {
         wid::WAssetId transparent_pipeline,
         std::vector<wid::WAssetId> const & parameters
         ) {
-        // TODO : transparent pipelines
-        
-        std::vector<nullindex::NullableIndex<>> index_sm_map;
+        std::vector<NullableIndex<>> index_sm_map{};
         index_sm_map.reserve(in_asset.meshes.size());
 
         std::vector<WStaticMeshAsset> sm_assets;
@@ -420,19 +390,18 @@ namespace {
 
             WStaticMeshAsset sm_asset{};
 
-            std::size_t idx=0;
-            
-            while(idx < mesh.primitives.size() &&
-                  idx < sm_asset.Get_meshes().max_size()) {
+            std::size_t prim_indx=0;
+            while(prim_indx < mesh.primitives.size() &&
+                  prim_indx < sm_asset.Get_meshes().max_size()) {
 
-                auto & primitive = mesh.primitives[idx];
+                auto & primitive = mesh.primitives[prim_indx];
 
                 sm_asset.SetMesh(
                     CollectMeshPrimitive(
                         in_asset,
                         primitive
                         ),
-                    idx
+                    prim_indx
                     );
 
                 if (primitive.materialIndex &&
@@ -442,7 +411,7 @@ namespace {
                             gbuffer_pipeline,  
                             parameters[primitive.materialIndex.value()]
                         },
-                        idx
+                        prim_indx
                         );
                 }
                 else {
@@ -450,20 +419,20 @@ namespace {
                         {gbuffer_pipeline,
                          null_pipe_params
                         },
-                        idx
+                        prim_indx
                         );
                 }
 
-                idx++;
+                prim_indx++;
             }
 
-            if (idx > 0) {
+            if (prim_indx > 0) {
                 index_sm_map.push_back(sm_assets.size());
-                sm_assets.push_back(sm_asset);
+                sm_assets.push_back(std::move(sm_asset));
                 sm_names.push_back(mesh.name);
             }
             else {
-                index_sm_map.push_back(nullindex::Null);
+                index_sm_map.push_back(wid::NULL_V);
             }
         }
 
@@ -562,16 +531,16 @@ namespace {
         using OptIndex = decltype(decltype(in_asset.textures)::value_type::samplerIndex);
         using IndexType = std::decay_t<decltype(std::declval<OptIndex>().value())>;
 
-        std::vector<nullindex::NullableIndex<IndexType>> image_samplers;
+        std::vector<NullableIndex<IndexType>> image_samplers;
         image_samplers.resize(in_asset.images.size(), {});
 
         for(auto & tx : in_asset.textures) {
             if (tx.imageIndex.has_value()) {
                 image_samplers[tx.imageIndex.value()] =
                     tx.samplerIndex
-                    .and_then([](auto & v ) -> std::optional<nullindex::NullableIndex<IndexType>>
+                    .and_then([](auto & v ) -> std::optional<NullableIndex<IndexType>>
                               { return v ;})
-                    .value_or(nullindex::Null);
+                    .value_or(wid::NULL_V);
             }
         }
         return image_samplers;
@@ -602,7 +571,7 @@ namespace {
                 );
 
             if(image_samplers[idx].IsValid()) {
-                auto sampleridx = image_samplers[idx].Value();
+                auto sampleridx = image_samplers[idx].GetId();
                 text_assets[idx].Set_sampler(
                     ToESampler(in_asset.samplers[sampleridx])
                     );
@@ -723,7 +692,7 @@ namespace {
     was::Level CollectLevel(
         fastgltf::Scene const & in_scene,
         fastgltf::Asset const & in_asset,
-        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
+        std::vector<NullableIndex<>> const & sm_id_map,
         std::vector<wid::WAssetId> const & sm_wids,
         WAssetDb const & in_asset_db
         ) {
@@ -751,7 +720,7 @@ namespace {
 
                     smcmp.SetStaticMeshAsset(
                         in_asset_db
-                        .Get<WStaticMeshAsset>(sm_wids[sm_id_map[gltfindx].Value()])
+                        .Get<WStaticMeshAsset>(sm_wids[sm_id_map[gltfindx].GetId()])
                         );
                 }
             }
@@ -783,7 +752,7 @@ namespace {
     WNODISCARD inline
     auto CollectLevels(
         fastgltf::Asset const & in_asset,
-        std::vector<nullindex::NullableIndex<>> const & sm_id_map,
+        std::vector<NullableIndex<>> const & sm_id_map,
         std::vector<wid::WAssetId> const & sm_wids,
         WAssetDb const & in_asset_db
         ) {

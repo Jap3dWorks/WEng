@@ -25,7 +25,9 @@ void wvk::texture::CreateTexture(
 
     // Textures must be RGBA, graphic cards prefer RGBA padding.
     //  I've experienced some render errores using RGB textures.
+
     auto num_channels = wct::texture::NumOfChannels(texture_struct.Get_format());
+    
     if (4==num_channels)
     {
         texture_ptr = &texture_struct;
@@ -35,7 +37,6 @@ void wvk::texture::CreateTexture(
     {
         texture_rgba = texture_struct;
         texture_rgba.AddRGBAPadding();
-        // texture_rgba = wct::texture::AddRGBAPadding(texture_struct);
         texture_ptr = &texture_rgba;
         vulkan_format = wvk::texture::ToVkFormat(texture_rgba.Get_format());
     }

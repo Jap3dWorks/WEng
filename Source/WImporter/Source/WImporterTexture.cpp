@@ -22,11 +22,14 @@ std::vector<wid::WAssetId> wim::importer::WImportTexture::Import(
         throw std::runtime_error("Failed to load texture image!");
     }
 
+    auto valid_names = in_asset_manager
+        .GenValidAssetName<WTextureAsset>(asset_directory, "texture", "texture");
+
     wid::WAssetId id = in_asset_manager.Create<WTextureAsset>(
         wstr::AssetPath(
-            std::string(asset_directory),
-            std::string(file_path),
-            "texture").c_str()
+            asset_directory,
+            valid_names[0],
+            valid_names[1])
         );
 
     auto & asset = in_asset_manager.Get<WTextureAsset>(id);

@@ -21,8 +21,6 @@
 
 namespace spacers::gltflevel {
 
-    
-
     inline void ConfigLevel(WEngine & engine, was::Level * level) {
         auto levelid = level->Get_asset_id();
         

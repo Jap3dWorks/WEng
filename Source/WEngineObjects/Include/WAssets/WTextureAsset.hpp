@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WTexture.hpp"
+#include <algorithm>
 #include <cstring>
 
 #include "WTextureAsset.WEngine.hpp"
@@ -67,22 +68,28 @@ public:
             wct::texture::ETextureFormat::B |
             wct::texture::ETextureFormat::A;
 
-        size_t tex_size = height * width; // TODO * depth
-
         std::uint8_t color_depth_bytes = wct::texture::ColorDepth(format) / 8;
 
-        data_.resize(tex_size * 4 * color_depth_bytes, 255);
+        size_t pixel_count = static_cast<size_t>(width) * height;
+        size_t bytes_per_channel = pixel_count;
+        size_t old_planes = wct::texture::NumOfChannels(format);
 
-        int num_channels = wct::texture::NumOfChannels(format);
+        if (old_planes == 4) return;
 
-        for (int i=num_channels; i < 4; i++) {
-            std::memcpy(
-                data_.data() + (tex_size * i * color_depth_bytes),
-                data_.data(),
-                tex_size * color_depth_bytes
-                );
-        }
+        // Allocate new vector for 4 planes
+        std::vector<uint8_t> new_data(pixel_count * 4 * color_depth_bytes);
 
+        const uint8_t* src = data_.data();
+        uint8_t* dst = new_data.data();
+        std::memcpy(dst, src, bytes_per_channel * old_planes * color_depth_bytes);
+
+        // Fill alpha plane with 255
+        std::fill(dst + bytes_per_channel * old_planes * color_depth_bytes,
+                  dst + bytes_per_channel * 4 * color_depth_bytes,
+                  255);
+
+        // Replace and update format
+        data_ = std::move(new_data);
         format = all_channels_format;
     }    
 };
