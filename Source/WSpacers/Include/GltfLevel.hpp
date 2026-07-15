@@ -16,7 +16,6 @@
 #include "WComponents/WMovementComponent.hpp"
 #include "WComponents/Light/WAmbientLightComponent.hpp"
 
-
 #include <algorithm>
 #include <filesystem>
 
@@ -46,17 +45,20 @@ namespace spacers::gltflevel {
 
         // postprocess
 
-        WAsset * debugshader = engine
-            .AssetManager()
-            .Get("/Content/Assets/PPDebug:PPDebug");
+        if constexpr (true) {
 
-        WAsset * debugparams = engine
-            .AssetManager()
-            .Get("/Content/Assets/PPDebugParam:PPDebugParam");
+            WAsset * debugshader = engine
+                .AssetManager()
+                .Get("/Content/Assets/PPDebug:PPDebug");
 
-        cameracomp.SetPostprocessAssignment(0,
-                                            debugshader->Get_asset_id(),
-                                            debugparams->Get_asset_id());
+            WAsset * debugparams = engine
+                .AssetManager()
+                .Get("/Content/Assets/PPDebugParam:PPDebugParam");
+
+            cameracomp.SetPostprocessAssignment(0,
+                                                debugshader->Get_asset_id(),
+                                                debugparams->Get_asset_id());
+        }
     }
 
     inline void SetupLighting(was::Level * level) {
@@ -67,7 +69,7 @@ namespace spacers::gltflevel {
             ->GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
-        ambient_ptr->Set_intensity(1);
+        ambient_ptr->Set_intensity(0.5);
         ambient_ptr->Set_active(true);
 
         wid::WEntityId dir_light = level->CreateEntity<WEntity>();
@@ -77,13 +79,13 @@ namespace spacers::gltflevel {
         auto * dir_ptr = &level
             ->GetComponent<wcm::light::WDirectionalLightComponent>(dir_light);
         
-        dir_ptr->Set_intensity(10);
+        dir_ptr->Set_intensity(2);
 
         auto* trns_ptr = &level
-            ->GetComponent<WTransformComponent>(dir_light);
+            ->GetComponent<WTransformComponent>
+            (dir_light);
 
-        trns_ptr->Set_rotation({1.55, 1.55, 0});
-        
+        trns_ptr->Set_rotation({0.0, 0.75, -0.75});
     }
 
     inline wid::WAssetId CreateLevel(WEngine & in_engine) {

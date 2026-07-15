@@ -44,8 +44,6 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
 
     output.albedo = albedo.Sample(vert_in.tex_coord);
 
-    // output.albedo = float4(0, vert_in.tex_coord.y, 0, 1);
-    
     output.emission = emission.Sample(vert_in.tex_coord);
 
     // Compute normal from texture with vertex normal.
@@ -57,7 +55,7 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
 
     output.mrAO = mrAO.Sample(vert_in.tex_coord);
 
-    // TODO output texcoords and tangents
+    // TODO output texcoords and tangents output
 
     output.extra01 = float4(0.f);
 

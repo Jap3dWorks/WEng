@@ -49,6 +49,19 @@ float4 fsMain(VSOffscreenOutput vertexOutput) : SV_TARGET
             radius_weight; 
     }
 
+    for (uint i=0; i < lighting_ubo.directional_lights_count; i++) {
+        float3 ldir = lighting_ubo.directional_lights[i].direction.xyz;
+        
+        float lnrm = clamp(
+            dot(-nrm,
+                lighting_ubo.directional_lights[i].direction.xyz),
+            0,
+            1);
+
+        color += alb * lnrm * lighting_ubo.directional_lights[i].color.xyz;
+
+    }
+
     return float4(color, 1.f);
 
 }

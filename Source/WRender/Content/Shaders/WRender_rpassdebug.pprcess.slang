@@ -34,6 +34,7 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return previous.Sample(uv);
         }
         else {
+            // return mrAO.Sample(uv);
             return albedo.Sample(uv);
         }
     }
@@ -45,38 +46,6 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return ws_position.Sample(uv);
         }
     }
-        
-    // float width, height;
-
-    // color.GetDimensions(width, height);
-
-    // float aspect = width / height;
-
-    // float pxlw = 1.f / width;
-    // float pxlh = 1.f / height;
-
-    // const int range = 1;
-    // const int samples_count = (range * 2 + 1) * (range * 2 + 1);
-    
-    // float3 samples[samples_count]={0};
-
-    // int idx=0;
-    // for(int i=-range ; i <= range; i++) {
-    //     for (int j=-range; j<=range; j++) {
-    //         float2 coord = float2(pxlw * i, pxlh * j);
-    //         samples[idx] = color.Sample(vertIn.tex_coord + coord).xyz;
-    //         idx++;
-    //     }
-    // }
-
-    // float3 color = float3(0.0, 0.0, 0.0);
-    // for(int i=0; i<samples_count; i++) {
-    //     color+=samples[i];
-    // }
-
-    // color /= samples_count;
-
-    // return float4(color, 1.f);
 }
 
 
