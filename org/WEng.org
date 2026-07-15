@@ -91,6 +91,8 @@ Se declaran en WCore para evitar las dependencias cruzadas entre módulos.
       - Lighting types (lights)
 - wcr::idpool
       - Weng Core
+- wcr::debug
+      - debug utilities.
 
 ** WImporter
 *** Objective

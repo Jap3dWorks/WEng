@@ -211,7 +211,7 @@ WEngine weng::defaults::DefaultEngine() {
         .Register<wim::importer::WImporterGltf>(
             result.AssetManager().GetId(weng::defaults::PBR_PIPELINE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH),
-            wid::NULL_V,
+            wid::null_id,
             result.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)

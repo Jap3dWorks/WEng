@@ -246,7 +246,7 @@ namespace wng::render {
                             );
 
                         wid::WTypeAssetIndexId assidx {
-                            wid::NULL_V, _sma->Get_asset_id(), _id
+                            wid::null_id, _sma->Get_asset_id(), _id
                         };
 
                         in_render->CreatePipelineBinding(
@@ -406,7 +406,7 @@ namespace wng::render {
             in_asset_db.Get<WStaticMeshAsset>(id).ForEachMesh(
                 [&in_render](WStaticMeshAsset * _sm, const wid::WSubIdxId & _id, wct::geometry::WMesh & _m) {
                     in_render->UnloadStaticMesh(
-                        {wid::NULL_V, _sm->Get_asset_id(), _id}
+                        {wid::null_id, _sm->Get_asset_id(), _id}
                         );
                 }
                 );            

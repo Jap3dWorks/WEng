@@ -20,6 +20,7 @@
 #include "WComponents/WTransformComponent.hpp"
 #include "WComponents/WCameraComponent.hpp"
 #include "fastgltf/util.hpp"
+#include "WLog.hpp"
 
 #include <WLib_stbi.hpp>
 #include <glm/glm.hpp>
@@ -127,7 +128,7 @@ namespace {
     inline wct::texture::ESampler ToESampler(fastgltf::Sampler const & sampler) {
         return MinFilter(sampler.minFilter.value_or(fastgltf::Filter::Linear)) |
             MagFilter(sampler.minFilter.value_or(fastgltf::Filter::Linear))    |
-            WrapSFilter(sampler.wrapS) |
+            WrapSFilter(sampler.wrapS)                                         |
             WrapTFilter(sampler.wrapT);
     }
 
@@ -184,31 +185,27 @@ namespace {
     WNODISCARD inline
     WRenderPipelineParametersAsset CollectMaterial(
         fastgltf::Asset const & in_asset,
+        std::vector<NullableIndex<>> const & textures_map,
         std::vector<wid::WAssetId> const & textures,
         fastgltf::Material const & in_material,
-        wid::WAssetId null_texture=wid::NULL_V,
-        wid::WAssetId null_rgba=wid::NULL_V,
-        wid::WAssetId null_normal=wid::NULL_V
+        wid::WAssetId null_texture=wid::null_id,
+        wid::WAssetId null_rgba=wid::null_id,
+        wid::WAssetId null_normal=wid::null_id
         ) {
         WRenderPipelineParametersAsset result{};
 
-        auto GetTextureId = [&textures]
+        auto GetTextureId = [&textures, &textures_map]
             (auto & tex_info, wid::WAssetId fallback) -> wid::WAssetId {
             return tex_info
                 .and_then(
-                    [&textures, &fallback]
+                    [&textures, &textures_map, &fallback]
                     (fastgltf::TextureInfo const & value) -> std::optional<wid::WAssetId> {
-                        if (value.textureIndex >= textures.size())
-                            return fallback;
+                        if(textures_map[value.textureIndex].IsValid())
+                            return textures[textures_map[value.textureIndex].GetId()];
                         else
-                            return textures[value.textureIndex];
+                            return fallback;
                     }
-                    )
-                .or_else(
-                    [&fallback]() -> std::optional<wid::WAssetId>
-                    { return fallback; }
-                    )
-                .value();
+                    ).value_or(fallback);
         };
 
         wct::render::WRPParameterList_WAssetId texture_params{};
@@ -254,10 +251,11 @@ namespace {
     WNODISCARD inline
     auto CollectMaterials(
         fastgltf::Asset const & in_asset,
-        std::vector<wid::WAssetId> const & in_textures,
-        wid::WAssetId null_texture=wid::NULL_V,
-        wid::WAssetId null_rgba=wid::NULL_V,
-        wid::WAssetId null_normal=wid::NULL_V
+        std::vector<NullableIndex<>> const & textures_map,
+        std::vector<wid::WAssetId> const & texture_wids,
+        wid::WAssetId null_texture=wid::null_id,
+        wid::WAssetId null_rgba=wid::null_id,
+        wid::WAssetId null_normal=wid::null_id
         ){
         
         std::vector<WRenderPipelineParametersAsset> assets;
@@ -270,7 +268,8 @@ namespace {
             assets.push_back(
                 CollectMaterial(
                     in_asset,
-                    in_textures,
+                    textures_map,
+                    texture_wids,
                     mat,
                     null_texture,
                     null_rgba,
@@ -432,7 +431,7 @@ namespace {
                 sm_names.push_back(mesh.name);
             }
             else {
-                index_sm_map.push_back(wid::NULL_V);
+                index_sm_map.push_back(wid::null_id);
             }
         }
 
@@ -525,65 +524,75 @@ namespace {
     }
 
     WNODISCARD inline
-    auto CollectImageSamplersIndex(
+    auto CollectTextureSamplersIndex(
         fastgltf::Asset const & in_asset
         ) {
         using OptIndex = decltype(decltype(in_asset.textures)::value_type::samplerIndex);
         using IndexType = std::decay_t<decltype(std::declval<OptIndex>().value())>;
 
-        std::vector<NullableIndex<IndexType>> image_samplers;
-        image_samplers.resize(in_asset.images.size(), {});
+        std::vector<NullableIndex<IndexType>> texture_samplers;
+        texture_samplers.resize(in_asset.textures.size(), {});
 
         for(auto & tx : in_asset.textures) {
-            if (tx.imageIndex.has_value()) {
-                image_samplers[tx.imageIndex.value()] =
-                    tx.samplerIndex
-                    .and_then([](auto & v ) -> std::optional<NullableIndex<IndexType>>
-                              { return v ;})
-                    .value_or(wid::NULL_V);
-            }
+            tx.samplerIndex
+                .and_then([](auto& v) ->std::optional<NullableIndex<IndexType>>
+                          {return v;})
+                .value_or(wid::null_id);
+
+            // if (tx.imageIndex.has_value()) {
+            //     image_samplers[tx.imageIndex.value()] =
+            //         tx.samplerIndex
+            //         .and_then([](auto & v ) -> std::optional<NullableIndex<IndexType>>
+            //                   { return v ;})
+            //         .value_or(wid::null_id);
+            // }
         }
-        return image_samplers;
+        return texture_samplers;
     }
 
     WNODISCARD inline
-    auto CollectImages(
+    auto CollectTextures(
         fastgltf::Asset const & in_asset
         ) {
-        auto image_samplers = CollectImageSamplersIndex(in_asset);
+        std::vector<NullableIndex<>> text_assets_map{};
+        text_assets_map.resize(in_asset.textures.size(), wid::null_id);
 
         std::vector<WTextureAsset> text_assets{};
-        text_assets.reserve(in_asset.images.size());
+        text_assets.reserve(in_asset.textures.size());
 
         std::vector<std::string_view> text_names{};
-        text_names.reserve(in_asset.images.size());
+        text_names.reserve(in_asset.textures.size());
 
         std::size_t idx=0;
 
-        for (auto & img : in_asset.images) {
+        for (auto & text : in_asset.textures) {
+            if (text.imageIndex.has_value()) {
+                auto imgidx = text.imageIndex.value();
 
-            text_assets.push_back(
-                CollectImage(in_asset, img)
-                );
+                auto const & img = in_asset.images[imgidx];
 
-            // Ensure the texture has an alpha channel (RGBA) for correct material sampling
-            text_assets.back().AddRGBAPadding();
+                text_assets.push_back(CollectImage(in_asset, img));
 
-            text_names.push_back(
-                wstr::CleanBasename(img.name)
-                );
+                text_assets.back().AddRGBAPadding();
+                
+                text_names.push_back(wstr::CleanBasename(text.name));
 
-            if(image_samplers[idx].IsValid()) {
-                auto sampleridx = image_samplers[idx].GetId();
-                text_assets[idx].Set_sampler(
-                    ToESampler(in_asset.samplers[sampleridx])
-                    );
-            }
-        
+                if (text.samplerIndex.has_value()) {
+                    auto sampleridx = text.samplerIndex.value();
+                    
+                    text_assets.back().Set_sampler(
+                        ToESampler(in_asset.samplers[sampleridx])
+                        );
+                }
+                text_assets_map[idx] = text_assets.size()-1;
+            } 
+
             idx++;
         }
 
-        return std::tuple{std::move(text_assets), std::move(text_names)};
+        return std::tuple{std::move(text_assets_map),
+                          std::move(text_assets),
+                          std::move(text_names)};
     }
 
 
@@ -682,10 +691,10 @@ namespace {
 
                     component.Set_near_clipping(value.znear);
                 },
-                [](fastgltf::Camera::Orthographic const & value) {
+                    [](fastgltf::Camera::Orthographic const & value) {
 
-                }
-                },
+                    }
+                    },
             in_camera.camera
             );
         
@@ -703,7 +712,7 @@ namespace {
         was::Level level{};
         level.Set_name(in_scene.name.c_str());
         
-        for (auto & node : in_scene.nodeIndices) {
+        for (auto & nodeindex : in_scene.nodeIndices) {
             auto entityid = level.CreateEntity<WEntity>();
 
             auto trnsfid = level.CreateComponent<WTransformComponent>(entityid);
@@ -711,11 +720,11 @@ namespace {
 
             CollectTransformComponent(
                 transform,
-                in_asset.nodes[node]
+                in_asset.nodes[nodeindex]
                 );
 
-            if (in_asset.nodes[node].meshIndex.has_value()) {
-                std::size_t gltfindx = in_asset.nodes[node].meshIndex.value();
+            if (in_asset.nodes[nodeindex].meshIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[nodeindex].meshIndex.value();
                 
                 if (sm_id_map[gltfindx].IsValid()) {
                     auto smcmpid = level.CreateComponent<WStaticMeshComponent>(entityid);
@@ -728,8 +737,8 @@ namespace {
                 }
             }
 
-            if (in_asset.nodes[node].lightIndex.has_value()) {
-                std::size_t gltfindx = in_asset.nodes[node].lightIndex.value();
+            if (in_asset.nodes[nodeindex].lightIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[nodeindex].lightIndex.value();
 
                 CollectLightComponent(
                     entityid,
@@ -738,8 +747,8 @@ namespace {
                     );
             }
 
-            if (in_asset.nodes[node].cameraIndex.has_value()) {
-                std::size_t gltfindx = in_asset.nodes[node].cameraIndex.value();
+            if (in_asset.nodes[nodeindex].cameraIndex.has_value()) {
+                std::size_t gltfindx = in_asset.nodes[nodeindex].cameraIndex.value();
 
                 CollectCameraComponent(
                     entityid,
@@ -925,18 +934,19 @@ std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
 
     // Materials and textures
     
-    auto [text_assets, text_names] = CollectImages(gltf_asset);
+    auto [textures_map, text_assets, textures_names] = CollectTextures(gltf_asset);
 
     // Create Texture Assets
     auto textures_wids = CreateTextures(
         text_assets,
-        text_names,
+        textures_names,
         engine_directory_prefix,
         in_asset_db
         );
 
     auto [mat_assets, mat_names] =CollectMaterials(
         gltf_asset,
+        textures_map,
         textures_wids,
         textures_.null_texture,
         textures_.null_rgba,

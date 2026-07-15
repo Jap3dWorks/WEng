@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WComponents/Light/WDirectionalLightComponent.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 #include "WString/WString.hpp"
@@ -68,6 +69,21 @@ namespace spacers::gltflevel {
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
         ambient_ptr->Set_intensity(1);
         ambient_ptr->Set_active(true);
+
+        wid::WEntityId dir_light = level->CreateEntity<WEntity>();
+        level->CreateComponent<wcm::light::WDirectionalLightComponent>(dir_light);
+        level->CreateComponent<WTransformComponent>(dir_light);
+
+        auto * dir_ptr = &level
+            ->GetComponent<wcm::light::WDirectionalLightComponent>(dir_light);
+        
+        dir_ptr->Set_intensity(10);
+
+        auto* trns_ptr = &level
+            ->GetComponent<WTransformComponent>(dir_light);
+
+        trns_ptr->Set_rotation({1.55, 1.55, 0});
+        
     }
 
     inline wid::WAssetId CreateLevel(WEngine & in_engine) {
@@ -80,7 +96,7 @@ namespace spacers::gltflevel {
                 "/Content/Assets/BeautifulGame/"
                 );
 
-        wid::WAssetId level_id{wid::NULL_V};
+        wid::WAssetId level_id{wid::null_id};
         was::Level * level_asset{nullptr};
 
         for (auto & item : imported_assets) {

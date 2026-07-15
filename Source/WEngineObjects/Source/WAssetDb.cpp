@@ -26,7 +26,7 @@ wid::WAssetId WAssetDb::GetId(std::string_view asset_path) const {
             [](auto & itm) -> std::optional<wid::WAssetId>{
                 return itm.get();
             })
-        .value_or(wid::NULL_V);
+        .value_or(wid::null_id);
 }
 
 
