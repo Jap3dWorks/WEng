@@ -8,20 +8,19 @@ import GBuffer.GBuffer;
 // Set 1 is reserved for local UBOs.
 // Set 1 binding 0 contains model_ubo.
 
-// TODO add scalar values
-// [[vk::binding(1,1)]]
-// ConstantBuffer<PBRScalar> pbr_scalars;
-
-[[vk::binding(1, 1)]]  // binding, set
-ConstantBuffer<Sampler2D> albedo;
+[[vk::binding(1,1)]]
+ConstantBuffer<PBRScalar> pbr_scalars;
 
 [[vk::binding(2, 1)]]  // binding, set
-ConstantBuffer<Sampler2D> emission;
+ConstantBuffer<Sampler2D> albedo;
 
 [[vk::binding(3, 1)]]  // binding, set
-ConstantBuffer<Sampler2D> normal;
+ConstantBuffer<Sampler2D> emission;
 
 [[vk::binding(4, 1)]]  // binding, set
+ConstantBuffer<Sampler2D> normal;
+
+[[vk::binding(5, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> mrAO;
 
 // main functions

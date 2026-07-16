@@ -55,18 +55,22 @@ namespace wct::render {
         float far_clipping{100.f};
     };
 
-    struct PBRScalar {
-        glm::vec4 albedo{};
-        glm::vec4 emission{};
-        glm::vec4 mr{};
+    struct PBRScalarUBO {
+        glm::vec4 albedo{0.3,0.3,0.3,0};
+        glm::vec4 emission{0,0,0,0};
+        glm::vec4 mr{.2, .8, .0, .0};
+    };
+
+    struct CommonBindings {
+        static constexpr std::uint8_t MODEL_UBO{0};
     };
 
     struct PBRBindings {
-        // static constexpr std::uint8_t PBR_SCALAR_UBO{1};
-        static constexpr std::uint8_t ALBEDO_TEXTURE{1};
-        static constexpr std::uint8_t EMISSION_TEXTURE{2};
-        static constexpr std::uint8_t NORMAL_TEXTURE{3};
-        static constexpr std::uint8_t MRAO_TEXTURE{4};
+        static constexpr std::uint8_t PBR_SCALAR_UBO{1};
+        static constexpr std::uint8_t ALBEDO_TEXTURE{2};
+        static constexpr std::uint8_t EMISSION_TEXTURE{3};
+        static constexpr std::uint8_t NORMAL_TEXTURE{4};
+        static constexpr std::uint8_t MRAO_TEXTURE{5};
     };
 
     inline constexpr std::uint8_t MAX_PIPELINE_SHADERS=8;

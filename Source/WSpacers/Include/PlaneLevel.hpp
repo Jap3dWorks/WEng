@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 #include "WString/WString.hpp"
@@ -99,10 +100,22 @@ namespace spacers::plane {
 
         param.Set_texture_list(
             {
-                {1, level_data.texture_id},
-                {2, engine.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)},
-                {3, engine.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)},
-                {4, engine.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)}
+                {
+                    wct::render::PBRBindings::ALBEDO_TEXTURE,
+                    level_data.texture_id
+                },
+                {
+                    wct::render::PBRBindings::EMISSION_TEXTURE,
+                    engine.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
+                },
+                {
+                    wct::render::PBRBindings::NORMAL_TEXTURE,
+                    engine.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+                },
+                {
+                    wct::render::PBRBindings::MRAO_TEXTURE,
+                    engine.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                }
             }
             );
 

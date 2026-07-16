@@ -78,7 +78,7 @@ public:
         render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
-    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::WPipeParamDescriptorList &> ConfigInfoFn>
+    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::RPipeParamDescLayList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const VkDevice & in_device,
                              const wct::render::RPipeParamDescLayList & params,

@@ -161,9 +161,7 @@ namespace wng::render {
                                    const wid::WSubIdxId & _id,
                                    wct::geometry::WMesh& _m) {
 
-                        // TODO Get assignment by id
                         wct::render::RPipeAssignment pipassign =
-                            // in_component->GetPipelineAssignment(0);
                             in_component->GetPipelineAssignment(_id);
                         
                         if(pipassign.pipeline.IsValid() && pipassign.params.IsValid()) {
@@ -219,7 +217,7 @@ namespace wng::render {
         // Initialize Render Pipelines
         for (const wid::WAssetId & id : render_pipelines) {
             auto & render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
-            in_render->CreateRenderPipeline(&render_pipeline); // TODO Use the data struct
+            in_render->CreateRenderPipeline(&render_pipeline);
         }
 
         // Pipeline Bindings
@@ -266,11 +264,12 @@ namespace wng::render {
                         std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(&grpubo);
 
                         wct::render::RPipeParamUbo ubodt{
-                            .binding=0,
+                            .binding=wct::render::CommonBindings::MODEL_UBO,
                             .data=std::span<std::uint8_t>(
                                                           ptr,
                                                           ptr + sizeof(grpubo)),
-                            .offset=0};
+                            .offset=0
+                        };
                         
                         in_render->UpdateParameterStatic(ecid, ubodt);
                     }

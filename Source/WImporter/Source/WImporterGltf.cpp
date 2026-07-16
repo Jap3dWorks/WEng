@@ -210,35 +210,40 @@ namespace {
 
         wct::render::RPipeParamList_WAssetId texture_params{};
         
-        texture_params.emplace_back(1,
-                                    GetTextureId(
-                                        in_material
-                                        .pbrData
-                                        .baseColorTexture,
-                                        null_rgba));
+        texture_params.emplace_back(
+            wct::render::PBRBindings::ALBEDO_TEXTURE,
+            GetTextureId(
+                in_material
+                .pbrData
+                .baseColorTexture,
+                null_rgba));
         
-        texture_params.emplace_back(2,
-                                    GetTextureId(
-                                        in_material
-                                        .emissiveTexture,
-                                        null_texture));
+        texture_params.emplace_back(
+            wct::render::PBRBindings::EMISSION_TEXTURE,
+            GetTextureId(
+                in_material
+                .emissiveTexture,
+                null_texture));
         
-        texture_params.emplace_back(3,
-                                    GetTextureId(
-                                        in_material
-                                        .normalTexture,
-                                        null_normal));
+        texture_params.emplace_back(
+            wct::render::PBRBindings::NORMAL_TEXTURE,
+            GetTextureId(
+                in_material
+                .normalTexture,
+                null_normal));
 
         if (in_material.packedOcclusionRoughnessMetallicTextures) {
             texture_params.emplace_back(
-                4,
+                wct::render::PBRBindings::MRAO_TEXTURE,
                 GetTextureId(in_material
                              .packedOcclusionRoughnessMetallicTextures
                              ->roughnessMetallicOcclusionTexture,
                              null_texture));
         }
         else {
-            texture_params.emplace_back(4, null_texture);
+            texture_params.emplace_back(
+                wct::render::PBRBindings::MRAO_TEXTURE,
+                null_texture);
         }
             
         // TODO pbr values into UBO

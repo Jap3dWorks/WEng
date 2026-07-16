@@ -2,6 +2,7 @@
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WCore/WId.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WTextureAsset.hpp"
@@ -85,30 +86,39 @@ namespace {
 
         auto descriptors = pipeline_asset.Get_descriptor_list();
 
-        descriptors[0].binding=0;
+        // Model UBO
+        descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;
         descriptors[0].type=wct::render::ERPipeParamType::Ubo;
         descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
         descriptors[0].size=sizeof(wct::render::ModelUBO);
 
-        // albedo
-        descriptors[1].binding=1;
-        descriptors[1].type=wct::render::ERPipeParamType::Texture;
-        descriptors[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
+        // PBR scalar params UBO
+        descriptors[1].binding=wct::render::PBRBindings::PBR_SCALAR_UBO;
+        descriptors[1].type=wct::render::ERPipeParamType::Ubo;
+        descriptors[1].stage_flags=
+            wct::render::EShaderStageFlag::Vertex |
+            wct::render::EShaderStageFlag::Fragment ;
+        descriptors[1].size=sizeof(wct::render::PBRScalarUBO);
 
-        // emission
-        descriptors[2].binding=2;
+        // albedo
+        descriptors[2].binding=wct::render::PBRBindings::ALBEDO_TEXTURE;
         descriptors[2].type=wct::render::ERPipeParamType::Texture;
         descriptors[2].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
-        // normal map
-        descriptors[3].binding=3;
+        // emission
+        descriptors[3].binding=wct::render::PBRBindings::EMISSION_TEXTURE;
         descriptors[3].type=wct::render::ERPipeParamType::Texture;
         descriptors[3].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         // normal map
-        descriptors[4].binding=4;
+        descriptors[4].binding=wct::render::PBRBindings::NORMAL_TEXTURE;
         descriptors[4].type=wct::render::ERPipeParamType::Texture;
         descriptors[4].stage_flags=wct::render::EShaderStageFlag::Fragment;
+
+        // normal map
+        descriptors[5].binding=wct::render::PBRBindings::MRAO_TEXTURE;
+        descriptors[5].type=wct::render::ERPipeParamType::Texture;
+        descriptors[5].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         pipeline_asset.Set_descriptor_list(descriptors);
         
@@ -118,12 +128,31 @@ namespace {
             );
 
         // TODO default pipeline parameters
+
         WRenderPipelineParametersAsset params{};
+        
+        params.Set_ubo_list(
+            {
+                
+            }
+            );
         params.Set_texture_list({
-                {1, out_db.GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)},
-                {2, out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)},
-                {3, out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)},
-                {4, out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)},
+                {
+                    wct::render::PBRBindings::ALBEDO_TEXTURE,
+                    out_db.GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
+                },
+                {
+                    wct::render::PBRBindings::EMISSION_TEXTURE,
+                    out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                },
+                {
+                    wct::render::PBRBindings::NORMAL_TEXTURE,
+                    out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+                },
+                {
+                    wct::render::PBRBindings::MRAO_TEXTURE,
+                    out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                },
             });
 
         out_db.CreateFrom<WRenderPipelineParametersAsset>(
