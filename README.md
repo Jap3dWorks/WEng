@@ -70,7 +70,6 @@ Source/
 ├── WImporter
 ├── WRender
 ├── WSandBox
-├── WSpacers
 └── WWindow
 ```
 
@@ -139,6 +138,7 @@ During the build process, Emacs processes these Org files to generate portions o
 The project uses:
 
 * **Make** as the build orchestration layer
+* **Emacs Org mode** as the templating autogeneration system
 * **CMake** for project configuration
 * **Ninja** as the build generator
 * **Clang** as the primary compiler
