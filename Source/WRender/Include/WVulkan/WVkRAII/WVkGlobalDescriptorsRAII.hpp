@@ -71,7 +71,7 @@ public:
 
     void UpdateCameraUBO(
         std::uint8_t in_frame_index,
-        const wct::render::WCameraUBO & in_camera_ubo
+        const wct::render::CameraUBO & in_camera_ubo
         ) {
         void * ptr = wvk::buffer::MapUBO(
             camera_ubo_[in_frame_index],
@@ -81,7 +81,7 @@ public:
         std::memcpy(
             ptr,
             &in_camera_ubo,
-            sizeof(wct::render::WCameraUBO)
+            sizeof(wct::render::CameraUBO)
             );
     
         wvk::buffer::UnmapUBO(
@@ -112,7 +112,7 @@ public:
 
     void UpdateLightingUBO(
         std::uint8_t in_frame_index,
-        const wct::render::WLightingUBO & in_lighting_ubo
+        const wct::render::LightingUBO & in_lighting_ubo
         ) {
         memcpy(
             wvk::buffer::MapUBO(
@@ -120,7 +120,7 @@ public:
                 device_
                 ),
             &in_lighting_ubo,
-            sizeof(wct::render::WLightingUBO)
+            sizeof(wct::render::LightingUBO)
             );
 
         wvk::buffer::UnmapUBO(
@@ -151,7 +151,7 @@ public:
     }
 
     void StaticUpdateLightingUBO(
-        const wct::render::WLightingUBO & in_lighting_ubo
+        const wct::render::LightingUBO & in_lighting_ubo
         ) {
         for(std::uint8_t i=0; i<FramesInFlight; i++) {
             UpdateLightingUBO(
@@ -199,13 +199,13 @@ private:
                 );
 
             camera_ubo_[i] = wvk::buffer::CreateUBO(
-                sizeof(wct::render::WCameraUBO),
+                sizeof(wct::render::CameraUBO),
                 device_,
                 in_physical_device
                 );
 
             lighting_ubo_[i] = wvk::buffer::CreateUBO(
-                sizeof(wct::render::WLightingUBO),
+                sizeof(wct::render::LightingUBO),
                 device_,
                 in_physical_device
                 );

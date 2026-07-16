@@ -85,10 +85,22 @@ namespace spacers::monkey {
         auto & param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
         param_asset.Set_texture_list(
             {
-                {.binding=1, .value=tex_ids[0]},
-                {.binding=2, .value=null_texture->Get_asset_id()},
-                {.binding=3, .value=null_normal->Get_asset_id()},
-                {.binding=4, .value=null_texture->Get_asset_id()}
+                {
+                    .binding=wct::render::PBRBindings::ALBEDO_TEXTURE,
+                    .value=tex_ids[0]
+                },
+                {
+                    .binding=wct::render::PBRBindings::EMISSION_TEXTURE,
+                    .value=null_texture->Get_asset_id()
+                },
+                {
+                    .binding=wct::render::PBRBindings::NORMAL_TEXTURE,
+                    .value=null_normal->Get_asset_id()
+                },
+                {
+                    .binding=wct::render::PBRBindings::MRAO_TEXTURE,
+                    .value=null_texture->Get_asset_id()
+                }
             }
             );
 
@@ -102,7 +114,7 @@ namespace spacers::monkey {
         WRenderPipelineAsset & pipeline_asset =
             engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
 
-        pipeline_asset.Set_pipeline_type(wct::render::EPipelineType::Postprocess);
+        pipeline_asset.Set_pipeline_type(wct::render::ERPipeType::Postprocess);
 
         auto shader_list = pipeline_asset.Get_shader_list();
         shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
@@ -118,9 +130,9 @@ namespace spacers::monkey {
         auto descriptors = pipeline_asset.Get_descriptor_list();
 
         descriptors[0].binding = 0;
-        descriptors[0].type = wct::render::EPipeParamType::Ubo;
+        descriptors[0].type = wct::render::ERPipeParamType::Ubo;
         descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
-        descriptors[0].size = sizeof(wct::render::WPostprocessUBO);
+        descriptors[0].size = sizeof(wct::render::PostprocessUBO);
 
         pipeline_asset.Set_descriptor_list(descriptors);
 
@@ -172,10 +184,22 @@ namespace spacers::monkey {
 
         param_asset.Set_texture_list(
             {
-                {.binding=1, .value=tex_ids[0]},
-                {.binding=2, .value=null_texture->Get_asset_id()},
-                {.binding=3, .value=null_normal->Get_asset_id()},
-                {.binding=4, .value=null_texture->Get_asset_id()}
+                {
+                    .binding=wct::render::PBRBindings::ALBEDO_TEXTURE,
+                    .value=tex_ids[0]
+                },
+                {
+                    .binding=wct::render::PBRBindings::EMISSION_TEXTURE,
+                    .value=null_texture->Get_asset_id()
+                },
+                {
+                    .binding=wct::render::PBRBindings::NORMAL_TEXTURE,
+                    .value=null_normal->Get_asset_id()
+                },
+                {
+                    .binding=wct::render::PBRBindings::MRAO_TEXTURE,
+                    .value=null_texture->Get_asset_id()
+                }
             }
             );
 
@@ -299,7 +323,7 @@ namespace spacers::monkey {
     }
 
     inline wid::WAssetId CreateMonkeyLevel(WEngine & in_engine) {
-                std::vector<wct::render::WPipelineAssignment> ppcsst_assignments;
+                std::vector<wct::render::RPipeAssignment> ppcsst_assignments;
 
         ModelAssets viking_room;
         ModelAssets monkey_1;

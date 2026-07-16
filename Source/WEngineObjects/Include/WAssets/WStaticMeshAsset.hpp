@@ -23,7 +23,7 @@ public:
         std::array<wct::geometry::WMesh, MAX_MESH_COUNT>;
 
     using PipelineAssignments =
-        wct::render::WPipelineAssignments<MAX_MESH_COUNT>;
+        wct::render::RPipeAssignments<MAX_MESH_COUNT>;
 
 public:
 
@@ -69,14 +69,14 @@ public:
     }
 
     constexpr void SetPipelineAssignment(
-        wct::render::WPipelineAssignment in_assignment,
+        wct::render::RPipeAssignment in_assignment,
         wid::WSubIdxId in_index
         ) {
         pipeline_assignments[in_index.GetId()] =
             std::move(in_assignment);
     }
 
-    constexpr wct::render::WPipelineAssignment GetPipelineAssignment(
+    constexpr wct::render::RPipeAssignment GetPipelineAssignment(
         wid::WSubIdxId in_index
         ) const {
         return pipeline_assignments[in_index.GetId()];

@@ -25,7 +25,7 @@ namespace weng::defaults {
 
     inline constexpr
     std::string_view const PBR_PIPELINE_SHADER_PATH{
-        "/Content/Shaders/WRender_GBuffer.gbuffer.spv"
+        "/Content/Shaders/WRender_PBR.gbuffer.spv"
     };
 
     inline constexpr

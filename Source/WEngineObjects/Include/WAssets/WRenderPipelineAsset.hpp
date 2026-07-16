@@ -11,9 +11,9 @@ class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
 
 public:
 
-    WPROPERTY(wct::render::EPipelineType, pipeline_type, wct::render::EPipelineType::GBuffer);
-    WPROPERTY(wct::render::WShaderList, shader_list,);
-    WPROPERTY(wct::render::WPipeParamDescriptorList, descriptor_list,);
+    WPROPERTY(wct::render::ERPipeType, pipeline_type, wct::render::ERPipeType::GBuffer);
+    WPROPERTY(wct::render::ShaderList, shader_list,);
+    WPROPERTY(wct::render::RPipeParamDescLayList, descriptor_list,);
 
 private:
 

@@ -81,7 +81,7 @@ public:
     template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::WPipeParamDescriptorList &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const VkDevice & in_device,
-                             const wct::render::WPipeParamDescriptorList & params,
+                             const wct::render::RPipeParamDescLayList & params,
                              ConfigInfoFn && config_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;
@@ -123,7 +123,7 @@ public:
     template<CCallable<WVkShaderStageInfo,
                        const char*, const char *,
                        wct::render::EShaderStageFlag> TFn>
-    std::vector<WVkShaderStageInfo> BuildShaders(const wct::render::WShaderList & in_data,
+    std::vector<WVkShaderStageInfo> BuildShaders(const wct::render::ShaderList & in_data,
                                                  TFn && in_fn) {
         std::vector<WVkShaderStageInfo> result;
 
@@ -132,7 +132,7 @@ public:
         wct::render::ForEach(
             in_data,
             [&result, &in_fn]
-            (const wct::render::WShaderInfo & shd) {
+            (const wct::render::ShaderInfo & shd) {
                 result.push_back(
                     in_fn(wstr::SystemPath(shd.file.View()).c_str(),
                           std::string(shd.entry.View()).c_str(),

@@ -37,7 +37,7 @@ public:
         pipeline_assignments[in_id.GetId()].params=in_param_id;
     }
 
-    wct::render::WPipelineAssignment GetPipelineAssignment(const wid::WSubIdxId & in_id=0) const {
+    wct::render::RPipeAssignment GetPipelineAssignment(const wid::WSubIdxId & in_id=0) const {
         return pipeline_assignments[in_id.GetId()];
     }
   

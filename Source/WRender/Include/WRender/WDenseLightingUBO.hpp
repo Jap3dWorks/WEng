@@ -104,7 +104,7 @@ namespace wrd::light {
         }
 
         void Update(std::size_t in_id,
-                    wct::render::WPointLight point_light) {
+                    wct::render::PointLight point_light) {
             light_set_.Insert(in_id, point_light);
         }
 
@@ -254,15 +254,15 @@ namespace wrd::light {
     public:
 
         using  PointLightDC = WLightDenseController<
-            wct::render::WPointLight,
-            wct::render::WLightingUBO::MAX_POINT_LIGHTS,
-            decltype(wct::render::WLightingUBO::point_lights_count)
+            wct::render::PointLight,
+            wct::render::LightingUBO::MAX_POINT_LIGHTS,
+            decltype(wct::render::LightingUBO::point_lights_count)
             >;
 
         using DirectionalLightDC = WLightDenseController<
-            wct::render::WDirectionalLight,
-            wct::render::WLightingUBO::MAX_DIRECTIONAL_LIGHTS,
-            decltype(wct::render::WLightingUBO::directional_lights_count)
+            wct::render::DirectionalLight,
+            wct::render::LightingUBO::MAX_DIRECTIONAL_LIGHTS,
+            decltype(wct::render::LightingUBO::directional_lights_count)
             >;
 
         WDenseLightingUBO() :
@@ -289,17 +289,17 @@ namespace wrd::light {
             return {lighting_ubo_.directional_lights, lighting_ubo_.directional_lights_count};
         }
 
-        void UpdateAmbientLight(const wct::render::WAmbientLight & in_light) {
+        void UpdateAmbientLight(const wct::render::AmbientLight & in_light) {
             lighting_ubo_.ambient_light = in_light;
         }
 
-        const wct::render::WLightingUBO & LightingUbo() const {
+        const wct::render::LightingUBO & LightingUbo() const {
             return lighting_ubo_;
         }
 
     private:
 
-        wct::render::WLightingUBO lighting_ubo_{};
+        wct::render::LightingUBO lighting_ubo_{};
         
     };
 }

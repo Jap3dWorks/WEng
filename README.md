@@ -190,4 +190,4 @@ The project is intended to grow over time rather than reach a fixed endpoint, se
 
 This project is currently under development.
 
-A license will be added before the first stable public release.
+

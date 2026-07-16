@@ -101,7 +101,7 @@ public:
      */
     void UpdateParameterDynamic(
         const wid::WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUbo & ubo_write
+        const wct::render::RPipeParamUbo & ubo_write
         ) override;
 
     /**
@@ -109,7 +109,7 @@ public:
      */
     void UpdateParameterStatic(
         const wid::WEntityComponentId & in_component_id,
-        const wct::render::WRPParamUbo & ubo_write
+        const wct::render::RPipeParamUbo & ubo_write
         ) override;
 
     void UnloadAllResources() override;
@@ -119,7 +119,7 @@ public:
     void Rescale(const std::uint32_t & in_width,
                  const std::uint32_t & in_height) override;
 
-    wct::render::WRenderSize RenderSize() const override { return render_size_; }
+    wct::render::RenderSize RenderSize() const override { return render_size_; }
 
     WNODISCARD VkDevice Device() const noexcept
     { return device_.Device(); }
@@ -136,7 +136,7 @@ public:
     // ------
 
     void UpdateUboCamera(
-        const wct::render::WCameraUBO & in_ubo
+        const wct::render::CameraUBO & in_ubo
         ) override;
 
     // Lights
@@ -144,26 +144,26 @@ public:
 
     void InitializeLights(
         std::span<wid::WEntityComponentId> in_pl_ids,
-        std::span<wct::render::WPointLight> in_point_lights,
+        std::span<wct::render::PointLight> in_point_lights,
         std::span<wid::WEntityComponentId> in_dl_ids,
-        std::span<wct::render::WDirectionalLight> in_directional_lights,
-        const wct::render::WAmbientLight & in_ambient_light
+        std::span<wct::render::DirectionalLight> in_directional_lights,
+        const wct::render::AmbientLight & in_ambient_light
         ) override;
 
     void ClearLights() override;
 
     void UpdatePointLights(
         std::span<wid::WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_point_lights_structs
+        std::span<wct::render::PointLight> in_point_lights_structs
         ) override;
 
     void UpdateDirectionalLights(
         std::span<wid::WEntityComponentId> in_ids,
-        std::span<wct::render::WDirectionalLight> in_directional_light_structs
+        std::span<wct::render::DirectionalLight> in_directional_light_structs
         ) override;
 
     void UpdateAmbientLight(
-        const wct::render::WAmbientLight & in_ambient_light
+        const wct::render::AmbientLight & in_ambient_light
         ) override;
 
 private:
@@ -237,14 +237,14 @@ private:
     std::size_t semaphore_index_{0};
 
     struct PipelinesTrack {
-        std::unordered_map<wid::WAssetId, wct::render::EPipelineType> pipeline_pipetype{};
-        std::unordered_map<wid::WEntityComponentId, wct::render::EPipelineType> binding_pipetype{};
+        std::unordered_map<wid::WAssetId, wct::render::ERPipeType> pipeline_pipetype{};
+        std::unordered_map<wid::WEntityComponentId, wct::render::ERPipeType> binding_pipetype{};
     } pipeline_track_{};
 
 
     uint32_t frame_index_{0};
     
-    wct::render::WRenderSize render_size_{
+    wct::render::RenderSize render_size_{
         800, 600
     };
 

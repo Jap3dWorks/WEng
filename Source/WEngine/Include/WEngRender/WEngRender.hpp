@@ -39,7 +39,7 @@ namespace wng::render {
 
         // Point Lights
 
-        decltype(wct::render::WLightingUBO::point_lights) point_lights;
+        decltype(wct::render::LightingUBO::point_lights) point_lights;
         std::array<wid::WEntityComponentId, point_lights.size()> pl_ids;
         std::uint32_t pl_count=0;
 
@@ -69,7 +69,7 @@ namespace wng::render {
 
         // Directional Lights
 
-        decltype(wct::render::WLightingUBO::directional_lights) directional_lights;
+        decltype(wct::render::LightingUBO::directional_lights) directional_lights;
         std::array<wid::WEntityComponentId, directional_lights.size()> dl_ids;
         std::uint32_t dl_count=0;
 
@@ -103,7 +103,7 @@ namespace wng::render {
 
         // Ambient Light
 
-        wct::render::WAmbientLight amb_light;
+        wct::render::AmbientLight amb_light;
         in_level->ForEachComponent<wcm::light::WAmbientLightComponent>(
             [&amb_light](auto * cmp) {
                 amb_light = wrd::light::ToAmbientLight(*cmp);
@@ -162,7 +162,7 @@ namespace wng::render {
                                    wct::geometry::WMesh& _m) {
 
                         // TODO Get assignment by id
-                        wct::render::WPipelineAssignment pipassign =
+                        wct::render::RPipeAssignment pipassign =
                             // in_component->GetPipelineAssignment(0);
                             in_component->GetPipelineAssignment(_id);
                         
@@ -260,12 +260,12 @@ namespace wng::render {
                             ->GetComponent<WTransformComponent>
                             (in_component->Get_entity_id());
 
-                        wct::render::WModelUBO grpubo =
+                        wct::render::ModelUBO grpubo =
                           wrd::render::ToUBOGraphicsStruct(*transform_component);
 
                         std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(&grpubo);
 
-                        wct::render::WRPParamUbo ubodt{
+                        wct::render::RPipeParamUbo ubodt{
                             .binding=0,
                             .data=std::span<std::uint8_t>(
                                                           ptr,

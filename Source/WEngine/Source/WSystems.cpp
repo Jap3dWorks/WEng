@@ -281,7 +281,7 @@ START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
                     cam->Get_entity_id()
                     );
 
-            wct::render::WRenderSize rsize = parameters.engine->Render()->RenderSize();
+            wct::render::RenderSize rsize = parameters.engine->Render()->RenderSize();
 
             parameters.engine->Render()->UpdateUboCamera(
                 wrd::render::ToUBOCameraStruct(

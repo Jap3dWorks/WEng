@@ -2,6 +2,8 @@ module Postprocess;
 
 import "../GlobalUBO/GlobalUBO.slang";
 
+// Postprocess Global descriptor
+
 [[vk::binding(0,2)]]  // binding 0, set 2
 public uniform Sampler2D previous;
 
@@ -20,7 +22,7 @@ public uniform Sampler2D normal;
 [[vk::binding(5,2)]]
 public uniform Sampler2D ws_position;
 
-[[vk::binding(6,3)]]
+[[vk::binding(6,2)]]
 public uniform Sampler2D mrAO;
 
 [[vk::binding(7,2)]]

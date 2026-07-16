@@ -8,7 +8,7 @@
 
 namespace wrd::light {
 
-    inline constexpr wct::render::WPointLight ToPointLight(
+    inline constexpr wct::render::PointLight ToPointLight(
         const WTransformComponent & in_transform,
         const wcm::light::WPointLightComponent & in_light
         ) {
@@ -19,7 +19,7 @@ namespace wrd::light {
         };
     }
 
-    inline constexpr wct::render::WDirectionalLight ToDirectionalLight(
+    inline constexpr wct::render::DirectionalLight ToDirectionalLight(
         const WTransformComponent & in_transform,
         const wcm::light::WDirectionalLightComponent & in_light
         )
@@ -30,7 +30,7 @@ namespace wrd::light {
         };
     }
 
-    inline constexpr wct::render::WAmbientLight ToAmbientLight(
+    inline constexpr wct::render::AmbientLight ToAmbientLight(
         const wcm::light::WAmbientLightComponent & in_light
         )
     {

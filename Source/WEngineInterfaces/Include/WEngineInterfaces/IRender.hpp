@@ -97,7 +97,7 @@ public:
     virtual void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id)=0;
 
     virtual void UpdateUboCamera(
-        const wct::render::WCameraUBO & in_ubo
+        const wct::render::CameraUBO & in_ubo
         )=0;
 
     /**
@@ -105,14 +105,14 @@ public:
      *        Storage inside ubo_write will be consumed in the current call.
      */
     virtual void UpdateParameterDynamic(const wid::WEntityComponentId & in_id,
-                                        const wct::render::WRPParamUbo & ubo_write)=0;
+                                        const wct::render::RPipeParamUbo & ubo_write)=0;
 
     /**
      * @brief Updates for all frames in flight.
      *        Storage inside ubo_write will be in the current call.
      */
     virtual void UpdateParameterStatic(const wid::WEntityComponentId & in_id,
-                                       const wct::render::WRPParamUbo & ubo_write)=0;
+                                       const wct::render::RPipeParamUbo & ubo_write)=0;
 
     /**
      * @brief Unload all render resources.
@@ -130,7 +130,7 @@ public:
     // Render Data
     // -----------
 
-    virtual wct::render::WRenderSize RenderSize() const =0;
+    virtual wct::render::RenderSize RenderSize() const =0;
     virtual void Rescale(const std::uint32_t & in_width, const std::uint32_t & in_height)=0;
 
     // Lighting
@@ -143,7 +143,7 @@ public:
      */
     virtual void UpdatePointLights(
         std::span<wid::WEntityComponentId> in_ids,
-        std::span<wct::render::WPointLight> in_point_lights_structs
+        std::span<wct::render::PointLight> in_point_lights_structs
         )=0;
 
     /**
@@ -152,10 +152,10 @@ public:
      */
     virtual void InitializeLights(
         std::span<wid::WEntityComponentId> in_pl_ids,
-        std::span<wct::render::WPointLight> in_point_lights,
+        std::span<wct::render::PointLight> in_point_lights,
         std::span<wid::WEntityComponentId> in_dl_ids,
-        std::span<wct::render::WDirectionalLight> in_directional_lights,
-        const wct::render::WAmbientLight & in_ambient_light
+        std::span<wct::render::DirectionalLight> in_directional_lights,
+        const wct::render::AmbientLight & in_ambient_light
         )=0;
 
     /**
@@ -169,7 +169,7 @@ public:
      */
     virtual void UpdateDirectionalLights(
         std::span<wid::WEntityComponentId> in_ids,
-        std::span<wct::render::WDirectionalLight> in_directional_light_structs
+        std::span<wct::render::DirectionalLight> in_directional_light_structs
         )=0;
 
     /**
@@ -177,7 +177,7 @@ public:
      *        Only one ambient light is suported.
      */
     virtual void UpdateAmbientLight(
-        const wct::render::WAmbientLight & in_ambient_light
+        const wct::render::AmbientLight & in_ambient_light
         )=0;
 
 };

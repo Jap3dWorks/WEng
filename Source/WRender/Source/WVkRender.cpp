@@ -354,9 +354,9 @@ void WVkRender::CreateRenderPipeline(
     ) {
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess>
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess>
         (
             render_pipeline->Get_pipeline_type(),
             [&,this](){
@@ -395,9 +395,9 @@ void WVkRender::DeleteRenderPipeline(const wid::WAssetId & in_id) {
     };
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess
         >
         (pipeline_track_.pipeline_pipetype[in_id],
          [&,this]() {
@@ -475,9 +475,9 @@ void WVkRender::CreatePipelineBinding(
     }
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess
         >
         (pipeline_track_.pipeline_pipetype[pipeline_id],
          [&,this](){
@@ -511,9 +511,9 @@ void WVkRender::CreatePipelineBinding(
 void WVkRender::DeletePipelineBinding(const wid::WEntityComponentId & in_id) {
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess>
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess>
         (
             pipeline_track_.binding_pipetype[in_id],
             [&,this](){ gbuffers_pipelines_.DeleteBinding(in_id); },
@@ -545,7 +545,7 @@ void WVkRender::UnloadAllResources() {
 }
 
 void WVkRender::UpdateUboCamera(
-    const wct::render::WCameraUBO & camera_ubo
+    const wct::render::CameraUBO & camera_ubo
     ) {
     global_descriptors_.UpdateCameraUBO(
         frame_index_,
@@ -555,7 +555,7 @@ void WVkRender::UpdateUboCamera(
 
 void WVkRender::UpdateParameterDynamic(
 									   const wid::WEntityComponentId & in_component_id,
-									   const wct::render::WRPParamUbo & ubo_write
+									   const wct::render::RPipeParamUbo & ubo_write
     ) {
   
     WVkDescriptorSetUBOWriteStruct ubowrt{
@@ -568,9 +568,9 @@ void WVkRender::UpdateParameterDynamic(
   
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess
         >
         (
             pipeline_track_.binding_pipetype[in_component_id],
@@ -594,7 +594,7 @@ void WVkRender::UpdateParameterDynamic(
 
 void WVkRender::UpdateParameterStatic(
     const wid::WEntityComponentId & in_component_id,
-    const wct::render::WRPParamUbo & ubo_write
+    const wct::render::RPipeParamUbo & ubo_write
     ) {
     
     WVkDescriptorSetUBOWriteStruct ubowrt {
@@ -605,9 +605,9 @@ void WVkRender::UpdateParameterStatic(
     };
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::EPipelineType::Graphics,
-        wct::render::EPipelineType::GBuffer,
-        wct::render::EPipelineType::Postprocess
+        wct::render::ERPipeType::Graphics,
+        wct::render::ERPipeType::GBuffer,
+        wct::render::ERPipeType::Postprocess
         > (
             pipeline_track_.binding_pipetype[in_component_id],
             [&, this](){
@@ -1213,10 +1213,10 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
 
 void WVkRender::InitializeLights(
     std::span<wid::WEntityComponentId> in_pl_ids,
-    std::span<wct::render::WPointLight> in_point_lights,
+    std::span<wct::render::PointLight> in_point_lights,
     std::span<wid::WEntityComponentId> in_dl_ids,
-    std::span<wct::render::WDirectionalLight> in_directional_lights,
-    const wct::render::WAmbientLight & in_ambient_light
+    std::span<wct::render::DirectionalLight> in_directional_lights,
+    const wct::render::AmbientLight & in_ambient_light
     ) {
     lighting_UBO_.Clear();
 
@@ -1283,20 +1283,20 @@ namespace {
         global_descriptor.UpdateLightingUBO(
             frame_index,
             ptr,
-            sizeof(wct::render::WPointLight) * (last + 1 - first)
+            sizeof(wct::render::PointLight) * (last + 1 - first)
             );
     }
 }
 
 void WVkRender::UpdatePointLights(
     std::span<wid::WEntityComponentId> in_ids,
-    std::span<wct::render::WPointLight> in_point_lights
+    std::span<wct::render::PointLight> in_point_lights
     ) {
     if (in_ids.empty()) return;
 
     auto dense_controller = lighting_UBO_.PointLightDenseController();
     
-    UpdateLightUBO<wct::render::WPointLight>(
+    UpdateLightUBO<wct::render::PointLight>(
         global_descriptors_,
         frame_index_,
         dense_controller,
@@ -1305,13 +1305,13 @@ void WVkRender::UpdatePointLights(
 
 void WVkRender::UpdateDirectionalLights(
     std::span<wid::WEntityComponentId> in_ids,
-    std::span<wct::render::WDirectionalLight> in_directional_lights
+    std::span<wct::render::DirectionalLight> in_directional_lights
     ) {
     if (in_ids.empty()) return;
 
     auto dense_controller = lighting_UBO_.DirectionalLightDenseController();
 
-    UpdateLightUBO<wct::render::WDirectionalLight>(
+    UpdateLightUBO<wct::render::DirectionalLight>(
         global_descriptors_,
         frame_index_,
         dense_controller,
@@ -1319,20 +1319,20 @@ void WVkRender::UpdateDirectionalLights(
 }
 
 void WVkRender::UpdateAmbientLight(
-    const wct::render::WAmbientLight & in_ambient_light
+    const wct::render::AmbientLight & in_ambient_light
     ) {
     lighting_UBO_.UpdateAmbientLight(in_ambient_light);
 
-    const wct::render::WLightingUBO & ubo = lighting_UBO_.LightingUbo();
+    const wct::render::LightingUBO & ubo = lighting_UBO_.LightingUbo();
 
     std::uint8_t * ptr = reinterpret_cast<std::uint8_t*>(
-        const_cast<wct::render::WLightingUBO*>(&ubo)
-        ) + offsetof(wct::render::WLightingUBO, ambient_light);
+        const_cast<wct::render::LightingUBO*>(&ubo)
+        ) + offsetof(wct::render::LightingUBO, ambient_light);
 
     global_descriptors_.UpdateLightingUBO(
         frame_index_,
         ptr,
-        sizeof(wct::render::WLightingUBO::ambient_light)
+        sizeof(wct::render::LightingUBO::ambient_light)
         );
 }
 

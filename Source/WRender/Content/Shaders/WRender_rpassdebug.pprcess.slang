@@ -34,8 +34,8 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return previous.Sample(uv);
         }
         else {
-            // return mrAO.Sample(uv);
-            return albedo.Sample(uv);
+            return mrAO.Sample(uv);
+            // return albedo.Sample(uv);
         }
     }
     else {

@@ -18,7 +18,7 @@ class WENGINEOBJECTS_API WCameraComponent : public WComponent {
 public:
 
     using WPostprocessAssignments =
-        wct::render::WPipelineAssignments<WENG_MAX_ASSET_IDS>;
+        wct::render::RPipeAssignments<WENG_MAX_ASSET_IDS>;
 
 public:
 
@@ -44,14 +44,14 @@ public:
         postprocess_pipelines[in_id.GetId()].params=in_param_id;
     }
 
-    wct::render::WPipelineAssignment GetPostprocessAssignment(const wid::WSubIdxId & in_id=0) const {
+    wct::render::RPipeAssignment GetPostprocessAssignment(const wid::WSubIdxId & in_id=0) const {
         return postprocess_pipelines[in_id.GetId()];
     }
 
     template<CCallable<void,
                        const WCameraComponent *,
                        const wid::WSubIdxId &,
-                       const wct::render::WPipelineAssignment &> TFn>
+                       const wct::render::RPipeAssignment &> TFn>
     void ForEachPostprocessAssignment(TFn && in_fn) const {
         std::uint8_t idx = 0;
         for(const auto & assignment : postprocess_pipelines) {

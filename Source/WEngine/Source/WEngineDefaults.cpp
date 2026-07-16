@@ -69,7 +69,7 @@ namespace {
     void DefaultRenderPipelines(WAssetDb & out_db) {
         WRenderPipelineAsset pipeline_asset{};
 
-        pipeline_asset.Set_pipeline_type(wct::render::EPipelineType::GBuffer);
+        pipeline_asset.Set_pipeline_type(wct::render::ERPipeType::GBuffer);
 
         auto shader_stages = pipeline_asset.Get_shader_list();
 
@@ -86,28 +86,28 @@ namespace {
         auto descriptors = pipeline_asset.Get_descriptor_list();
 
         descriptors[0].binding=0;
-        descriptors[0].type=wct::render::EPipeParamType::Ubo;
+        descriptors[0].type=wct::render::ERPipeParamType::Ubo;
         descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
-        descriptors[0].size=sizeof(wct::render::WModelUBO);
+        descriptors[0].size=sizeof(wct::render::ModelUBO);
 
         // albedo
         descriptors[1].binding=1;
-        descriptors[1].type=wct::render::EPipeParamType::Texture;
+        descriptors[1].type=wct::render::ERPipeParamType::Texture;
         descriptors[1].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         // emission
         descriptors[2].binding=2;
-        descriptors[2].type=wct::render::EPipeParamType::Texture;
+        descriptors[2].type=wct::render::ERPipeParamType::Texture;
         descriptors[2].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         // normal map
         descriptors[3].binding=3;
-        descriptors[3].type=wct::render::EPipeParamType::Texture;
+        descriptors[3].type=wct::render::ERPipeParamType::Texture;
         descriptors[3].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         // normal map
         descriptors[4].binding=4;
-        descriptors[4].type=wct::render::EPipeParamType::Texture;
+        descriptors[4].type=wct::render::ERPipeParamType::Texture;
         descriptors[4].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         pipeline_asset.Set_descriptor_list(descriptors);

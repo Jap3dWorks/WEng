@@ -208,7 +208,7 @@ namespace {
                     ).value_or(fallback);
         };
 
-        wct::render::WRPParameterList_WAssetId texture_params{};
+        wct::render::RPipeParamList_WAssetId texture_params{};
         
         texture_params.emplace_back(1,
                                     GetTextureId(

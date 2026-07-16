@@ -6,7 +6,11 @@ import GBuffer.GBuffer;
 // Set 0 binding 1 contiains lighting_ubo.
 
 // Set 1 is reserved for local UBOs.
-// Set 1 binding 0 contains graphic_ubo.
+// Set 1 binding 0 contains model_ubo.
+
+// TODO add scalar values
+// [[vk::binding(1,1)]]
+// ConstantBuffer<PBRScalar> pbr_scalars;
 
 [[vk::binding(1, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> albedo;
@@ -27,9 +31,9 @@ ConstantBuffer<Sampler2D> mrAO;
 VSGBufferOutput vsMain(VSGBufferInput input) {
     VSGBufferOutput output;
 
-    output.normal = normalize(mul(float3x3(graphic_ubo.normal_matrix), input.normal));
+    output.normal = normalize(mul(float3x3(model_ubo.normal_matrix), input.normal));
 
-    float4 wp = mul(graphic_ubo.model, float4(input.position, 1.0));
+    float4 wp = mul(model_ubo.model, float4(input.position, 1.0));
 
     output.pos = mul(camera_ubo.proj, mul(camera_ubo.view, wp));
     output.world_pos = wp.xyz;

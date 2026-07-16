@@ -109,7 +109,7 @@ namespace wvk::descriptor {
     }
 
     inline std::vector<VkDescriptorSetLayoutBinding> ToDescriptorSetLayoutBinding(
-        const wct::render::WPipeParamDescriptorList & in_param_list
+        const wct::render::RPipeParamDescLayList & in_param_list
         ) {
         std::vector<VkDescriptorSetLayoutBinding> result;
 
@@ -123,11 +123,11 @@ namespace wvk::descriptor {
 
                 switch(_prm.type) {
 
-                case wct::render::EPipeParamType::Ubo:
+                case wct::render::ERPipeParamType::Ubo:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
                     break;
 
-                case wct::render::EPipeParamType::Texture:
+                case wct::render::ERPipeParamType::Texture:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                     break;
                 
@@ -153,7 +153,7 @@ namespace wvk::descriptor {
      */
     inline void UpdateDescriptorSetLayout(
         WVkDescriptorSetLayoutInfo & out_dsl,
-        const wct::render::WPipeParamDescriptorList & in_param_list
+        const wct::render::RPipeParamDescLayList & in_param_list
         ) {
 
         out_dsl.bindings = ToDescriptorSetLayoutBinding(in_param_list);

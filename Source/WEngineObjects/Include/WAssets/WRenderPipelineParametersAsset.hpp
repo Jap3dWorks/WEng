@@ -13,8 +13,8 @@ class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
 
 public:
 
-    WPROPERTY(wct::render::WRPParameterList_Ubo, ubo_list,);
-    WPROPERTY(wct::render::WRPParameterList_WAssetId, texture_list,);
+    WPROPERTY(wct::render::RPipeParamList_Ubo, ubo_list,);
+    WPROPERTY(wct::render::RPipeParamList_WAssetId, texture_list,);
 
 public:
 

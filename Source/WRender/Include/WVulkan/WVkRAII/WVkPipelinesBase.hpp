@@ -225,7 +225,7 @@ protected:
     }
 
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
-        const wct::render::WPipeParamDescriptorList & in_param_descriptors,
+        const wct::render::RPipeParamDescLayList & in_param_descriptors,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
         ) {
 
@@ -240,8 +240,8 @@ protected:
         wct::render::ForEach(
             in_param_descriptors,
             [&bindings, &result, this]
-            (const wct::render::WPipeParamDescriptorInfo & ubopd) {
-                if(ubopd.type == wct::render::EPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
+            (const wct::render::RPipeParamDescLayInfo & ubopd) {
+                if(ubopd.type == wct::render::ERPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
                         bindings[ubopd.binding][frm]={};
@@ -282,11 +282,11 @@ protected:
     }
 
     std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
-        const wct::render::WPipeParamDescriptorList & in_param_descriptors,
+        const wct::render::RPipeParamDescLayList & in_param_descriptors,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
         ) {
 
-        std::vector<wct::render::WPipeParamDescriptorInfo> result;
+        std::vector<wct::render::RPipeParamDescLayInfo> result;
         result.reserve(in_param_descriptors.size());
         
         std::unordered_map<std::uint8_t, WVkDescriptorSetTextureWriteStruct> bindings{};
@@ -294,8 +294,8 @@ protected:
         wct::render::ForEach(
             in_param_descriptors,
             [&bindings]
-            (const wct::render::WPipeParamDescriptorInfo & _ubopd) {
-                if(_ubopd.type == wct::render::EPipeParamType::Texture &&
+            (const wct::render::RPipeParamDescLayInfo & _ubopd) {
+                if(_ubopd.type == wct::render::ERPipeParamType::Texture &&
                    !bindings.contains(_ubopd.binding)) {
                     bindings[_ubopd.binding]={};
                     bindings[_ubopd.binding].binding = _ubopd.binding;
@@ -320,7 +320,7 @@ protected:
     }
 
     inline bool ValidateBindingParams(
-        const wct::render::WPipeParamDescriptorList & in_pipeline_params,
+        const wct::render::RPipeParamDescLayList & in_pipeline_params,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
         const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures) {
 

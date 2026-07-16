@@ -103,7 +103,7 @@ struct WVkUBOInfo
 struct WVkRenderPipelineInfo
 {
     wid::WAssetId wid;
-    wct::render::EPipelineType type{wct::render::EPipelineType::Graphics};
+    wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
@@ -111,7 +111,7 @@ struct WVkRenderPipelineInfo
     wid::WAssetId descriptor_set_layout_id{0};
 
     // TODO: Pipeline layout bindings description
-    wct::render::WPipeParamDescriptorList params_descriptor{};
+    wct::render::RPipeParamDescLayList params_descriptor{};
 };
 
 // Pipeline Bindings

@@ -1,11 +1,17 @@
 module GBuffer;
 
-public struct GraphicUBO {
+public struct ModelUBO {
     public float4x4 model;
     public float4x4 normal_matrix;
 };
 
-// TODO vert color
+public struct PBRScalar {
+    float4 albedo;    // alpha 1 enhabled.
+    float4 emission;  // same
+    float4 mr;        // same
+};
+
+// TODO vert tangent
 public struct VSGBufferInput {
     public float3 position;
     public float2 tex_coord;
@@ -30,5 +36,5 @@ public struct FSGBUFferOutput {
 };
 
 [[vk::binding(0, 1)]] // binding, set
-public ConstantBuffer<GraphicUBO> graphic_ubo;
+public ConstantBuffer<ModelUBO> model_ubo;
 
