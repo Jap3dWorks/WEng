@@ -83,6 +83,7 @@ Core technologies currently used by the project include:
 
 * C++23
 * Vulkan
+* Slang
 * GLFW
 * fastgltf
 * stb
