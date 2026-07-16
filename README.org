@@ -1,9 +1,0 @@
-#+TITLE: Readme
-
-* Introduction 
-
-WEng is a for fun project based in c++, cmake and Vulkan
-The intention is to create a simply modular Game Engine for learning porpuses.
-
-WEng itself will be a set of libraries that you could use to create an executable.
-
