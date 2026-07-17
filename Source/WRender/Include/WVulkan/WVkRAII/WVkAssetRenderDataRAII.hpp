@@ -103,7 +103,7 @@ public:
 
     const WVkMeshInfo & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
 
-    void LoadUBO(wcr::wid::WEngId id, wct::render::RPipeParamUbo const & ubo);
+    void LoadUBO(wcr::wid::WEngId id, std::size_t ubo_size, void * initial_data_ptr);
 
     void UnloadUBO(wcr::wid::WEngId id);
 
