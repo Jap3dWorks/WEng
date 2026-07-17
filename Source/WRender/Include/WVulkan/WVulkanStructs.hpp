@@ -14,6 +14,8 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
+// TODO namespace : wvk::types | wvk::structs
+
 struct WVkRenderDebugInfo
 {
     bool enable_validation_layers{false};

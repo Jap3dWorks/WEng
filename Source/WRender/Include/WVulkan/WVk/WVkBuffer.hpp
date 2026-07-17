@@ -32,7 +32,7 @@ namespace wvk::buffer {
 
     void Destroy(
         WVkUBOInfo & out_ubo_info,
-        VkDevice in_device
+        VkDevice device
         );
 
     inline void CopyVkBuffer(

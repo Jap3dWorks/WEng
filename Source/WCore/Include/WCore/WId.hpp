@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LinkDef.hpp"
+#include "WCore/WCoreMacros.hpp"
 
 #include <cstdint>
 #include <stdexcept>
@@ -695,6 +696,9 @@ namespace wcr::wid {
         assert(Kind() == EObjectKind::System);
         return { id_data_ & ~KindMask };
     }
+
+    WNODISCARD constexpr 
+    std::uint64_t GetId() const { return id_data_; }
 
     constexpr explicit operator std::uint64_t() const noexcept { return id_data_; }
 

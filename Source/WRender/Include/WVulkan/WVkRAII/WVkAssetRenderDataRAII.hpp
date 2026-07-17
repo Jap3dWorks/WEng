@@ -25,7 +25,7 @@ using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetI
 using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
 // WARNING UBOs can be frame dependent
-using WVkUBOInfo = TObjectDataBase<WVkUBOInfo, void, wcr::wid::WEngId::IdType>;
+using WVkUBODb = TObjectDataBase<WVkUBOInfo, void, wcr::wid::WEngId::IdType>;
 
 public:
 
@@ -70,7 +70,9 @@ public:
 
     void UnloadTexture(const wcr::wid::WAssetId & in_id);
 
-    const WVkTextureInfo & TextureInfo(const wcr::wid::WAssetId & in_id) const;
+    WNODISCARD WVkTextureInfo const & TextureInfo(const wcr::wid::WAssetId & id) const {
+        return texture_collection_.Get(id.GetId());
+    }
 
     // Static Mesh
 
@@ -103,13 +105,28 @@ public:
 
     const WVkMeshInfo & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
 
-    void LoadUBO(wcr::wid::WEngId id, std::size_t ubo_size, void * initial_data_ptr);
-
-    void UnloadUBO(wcr::wid::WEngId id);
-
-    WVkUBOInfo const & GetUBO(wcr::wid::WEngId id) const;
+    // --
 
     void Clear();
+
+    // UBOs
+
+    /**
+     * Create an UBO buffer associated to input wid
+     */
+    WNODISCARD
+    std::size_t CreateUBO(wcr::wid::WEngId wid, std::size_t ubo_size, void * initial_data_ptr) {
+        return ubo_data_.CreateUBO(vkn_.device, vkn_.physical_device,
+                                   wid, ubo_size, initial_data_ptr);
+    }
+
+    void DestroyUBOs(wcr::wid::WEngId wid) {
+        ubo_data_.DestroyUBOs(wid, vkn_.device);
+    }
+
+    WVkUBOInfo const & GetUBO(std::size_t id) const {
+        return ubo_data_.ubo_collection.Get(id);
+    }
 
 private:
 
@@ -124,9 +141,26 @@ private:
 
     WVkTextureDb texture_collection_{};
     WVkMeshDb static_mesh_collection_{};
-    WVkUBOInfo ubo_collection_{};
-    // ubo db;
 
+    struct UboData {
+        WVkUBODb ubo_collection{};
+
+        std::unordered_map<
+            wcr::wid::WEngId,
+            std::variant<std::size_t, std::vector<std::size_t>>
+            > wengid_ubos{};
+
+        void Clear(VkDevice device);
+
+        void Reg(wcr::wid::WEngId wid, std::size_t ubo_id);
+
+        std::size_t CreateUBO(VkDevice device, VkPhysicalDevice pdevice,
+                       wcr::wid::WEngId id,
+                       std::size_t ubo_size, void* initial_data);
+
+        void DestroyUBOs(wcr::wid::WEngId wid, VkDevice device);
+        
+    } ubo_data_{};
 
 };
 

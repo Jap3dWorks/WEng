@@ -170,6 +170,7 @@ public:
     }
 
     void RemoveBinding( const WBindingIdType & in_id, const VkDevice & in_device) {
+        // TODO do not remove ubos, let it to AssetRenderDataRAII
         bindings.Remove(in_id,
                         [di_=in_device](auto & b) {
                             for(auto& ubofrm: b.ubos) {
@@ -211,6 +212,7 @@ public:
             [di_=in_device](auto & b) {
                 for(auto& ubofrm: b.ubos) {
                     for(auto& ubo : ubofrm) {
+                        // TODO do not remove ubos, let it to AssetRenderDataRAII
                         wvk::buffer::Destroy(ubo.ubo_info, di_);
                     }
                 }
