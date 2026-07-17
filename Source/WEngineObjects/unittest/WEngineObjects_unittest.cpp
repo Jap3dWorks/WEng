@@ -77,7 +77,7 @@ bool WClass_Derived_Test() {
 
 bool WObjectDb_TWRef_Test() {
     WFLOG("START");
-    WObjectDb<WAsset, wid::WAssetId> man;
+    WObjectDb<WAsset, wcr::wid::WAssetId> man;
 
     man.InitialMemorySize(1);
 
@@ -112,7 +112,7 @@ bool WObjectDb_TWRef_Test() {
 bool WObjectDb_WClass_Test() {
     WFLOG("Start");
     
-    WObjectDb<WEntity, wid::WEntityId> man;
+    WObjectDb<WEntity, wcr::wid::WEntityId> man;
 
     WFLOG("Create a1");
     man.CreateAt<WEntity>(1);
@@ -129,20 +129,20 @@ bool WObjectDb_WClass_Test() {
 
 bool WEntityComponentDb_Test() {
 
-    std::unique_ptr<IObjectDataBase<WComponent, wid::WEntityId::IdType>> smdb =
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> smdb =
         WStaticMeshComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, wid::WEntityId::IdType>();
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
-    std::unique_ptr<IObjectDataBase<WComponent, wid::WEntityId::IdType>> tdb =
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> tdb =
         WTransformComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, wid::WEntityId::IdType>();
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
-    std::unique_ptr<IObjectDataBase<WComponent, wid::WEntityId::IdType>> cdb =
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> cdb =
         WCameraComponent::StaticClass()
         ->DbBuilder()
-        .Create<WComponent, wid::WEntityId::IdType>();
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
     smdb->Create();
     smdb->Create();
@@ -188,7 +188,7 @@ bool WEntityComponentDb_Test() {
 
     WEntityComponentDb db;
 
-    wid::WEntityId eid = db.CreateEntity<WEntity>("E1");
+    wcr::wid::WEntityId eid = db.CreateEntity<WEntity>("E1");
 
     db.CreateComponent<WTransformComponent>(eid);
     db.CreateComponent<WCameraComponent>(eid);

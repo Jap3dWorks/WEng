@@ -19,7 +19,7 @@
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkRenderCommandPoolRAII.hpp"
+#include "WVulkan/WVkRAII/WVkCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
@@ -65,34 +65,34 @@ public:
         ) override;
 
     void CreatePipelineBinding(
-        const wid::WEntityComponentId & component_id,
-        const wid::WAssetId & pipeline_id,
-        const wid::WTypeAssetIndexId & in_mesh_id,
+        const wcr::wid::WEntityComponentId & component_id,
+        const wcr::wid::WAssetId & pipeline_id,
+        const wcr::wid::WTypeAssetIndexId & in_mesh_id,
         const WRenderPipelineParametersAsset & in_param_asset
         // const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
 
-    void DeleteRenderPipeline(const wid::WAssetId & in_id) override;
+    void DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) override;
 
-    void DeletePipelineBinding(const wid::WEntityComponentId & in_id) override;
+    void DeletePipelineBinding(const wcr::wid::WEntityComponentId & in_id) override;
 
     void RefreshPipelines() override;
 
-    void LoadTexture(const wid::WAssetId & in_id,
+    void LoadTexture(const wcr::wid::WAssetId & in_id,
                      const WTextureAsset & in_texture) override
     {
         asset_render_data_.LoadTexture(in_id, in_texture);
     }
 
-    void UnloadTexture(const wid::WAssetId & in_id) override {
+    void UnloadTexture(const wcr::wid::WAssetId & in_id) override {
         asset_render_data_.UnloadTexture(in_id);
     }
 
-    void LoadStaticMesh(const wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
+    void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 
-    void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id) override {
+    void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id) override {
         asset_render_data_.UnloadStaticMesh(in_id);
     }
 
@@ -100,7 +100,7 @@ public:
      * @brief Updates only for current frame in flight
      */
     void UpdateParameterDynamic(
-        const wid::WEntityComponentId & in_component_id,
+        const wcr::wid::WEntityComponentId & in_component_id,
         const wct::render::RPipeParamUbo & ubo_write
         ) override;
 
@@ -108,7 +108,7 @@ public:
      * @brief Updates for all frames in flight
      */
     void UpdateParameterStatic(
-        const wid::WEntityComponentId & in_component_id,
+        const wcr::wid::WEntityComponentId & in_component_id,
         const wct::render::RPipeParamUbo & ubo_write
         ) override;
 
@@ -127,8 +127,8 @@ public:
     WNODISCARD constexpr size_t FramesInFlight() const noexcept
     { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
-    WNODISCARD const WVkRenderCommandPoolRAII & RenderCommandPool() const noexcept
-    { return render_command_pool_; }
+    WNODISCARD const WVkCommandPoolRAII & RenderCommandPool() const noexcept
+    { return command_pool_; }
 
     void ClearPipelines() override;
 
@@ -143,9 +143,9 @@ public:
     // ------
 
     void InitializeLights(
-        std::span<wid::WEntityComponentId> in_pl_ids,
+        std::span<wcr::wid::WEntityComponentId> in_pl_ids,
         std::span<wct::render::PointLight> in_point_lights,
-        std::span<wid::WEntityComponentId> in_dl_ids,
+        std::span<wcr::wid::WEntityComponentId> in_dl_ids,
         std::span<wct::render::DirectionalLight> in_directional_lights,
         const wct::render::AmbientLight & in_ambient_light
         ) override;
@@ -153,12 +153,12 @@ public:
     void ClearLights() override;
 
     void UpdatePointLights(
-        std::span<wid::WEntityComponentId> in_ids,
+        std::span<wcr::wid::WEntityComponentId> in_ids,
         std::span<wct::render::PointLight> in_point_lights_structs
         ) override;
 
     void UpdateDirectionalLights(
-        std::span<wid::WEntityComponentId> in_ids,
+        std::span<wcr::wid::WEntityComponentId> in_ids,
         std::span<wct::render::DirectionalLight> in_directional_light_structs
         ) override;
 
@@ -222,8 +222,8 @@ private:
     WVkSwapchainPipelineRAII<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 
-    WVkRenderCommandPoolRAII render_command_pool_{};
-    WVkCommandBufferInfo render_command_buffer_{};
+    WVkCommandPoolRAII command_pool_{};
+    WVkCommandPoolRAII::CommandBuffers<WENG_MAX_FRAMES_IN_FLIGHT> render_command_buffers_{};
 
     WVkGlobalDescriptorsRAII<WENG_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
     WVkPostprocessGlobalDescriptorRAII<WENG_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
@@ -237,8 +237,8 @@ private:
     std::size_t semaphore_index_{0};
 
     struct PipelinesTrack {
-        std::unordered_map<wid::WAssetId, wct::render::ERPipeType> pipeline_pipetype{};
-        std::unordered_map<wid::WEntityComponentId, wct::render::ERPipeType> binding_pipetype{};
+        std::unordered_map<wcr::wid::WAssetId, wct::render::ERPipeType> pipeline_pipetype{};
+        std::unordered_map<wcr::wid::WEntityComponentId, wct::render::ERPipeType> binding_pipetype{};
     } pipeline_track_{};
 
 

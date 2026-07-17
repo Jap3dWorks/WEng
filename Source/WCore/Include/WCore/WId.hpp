@@ -9,7 +9,7 @@
 #include <cassert>
 #include <array>
 
-namespace wid {
+namespace wcr::wid {
     
     struct _WID_NULL_T_{};
     inline constexpr _WID_NULL_T_ const null_id{};
@@ -193,7 +193,7 @@ namespace wid {
 
     namespace {
 
-        inline constexpr std::uint8_t const WID_COMPOUND_BITS_MAX{61};
+        inline constexpr std::uint8_t const WID_COMPOUND_BITS_MAX{60};
 
         inline constexpr std::size_t GenBitMask(std::uint8_t bits_size) {
             return ~(std::numeric_limits<std::size_t>::max() <<  bits_size);
@@ -719,7 +719,7 @@ namespace wid {
 
 namespace std
 {
-    template <wid::CIsWId T>
+    template <wcr::wid::CIsWId T>
     struct hash<T>
     {
         std::size_t operator()(T const & in_wid) const
@@ -732,9 +732,9 @@ namespace std
 
 namespace std {
     template<>
-    struct hash<wid::WEngId> {
-        std::size_t operator()(const wid::WEngId& id) const noexcept {
-            return wid::WEngId::Hash{}(id);
+    struct hash<wcr::wid::WEngId> {
+        std::size_t operator()(const wcr::wid::WEngId& id) const noexcept {
+            return wcr::wid::WEngId::Hash{}(id);
         }
     };
 }

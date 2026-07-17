@@ -6,8 +6,8 @@ WSystemsRegister::WSystemsRegister() :
 {
 }
 
-wid::WSystemId WSystemsRegister::RegSystem(const char * in_name, const WSystemFn & in_system) {
-    wid::WSystemId id = id_pool_.Generate();
+wcr::wid::WSystemId WSystemsRegister::RegSystem(const char * in_name, const WSystemFn & in_system) {
+    wcr::wid::WSystemId id = id_pool_.Generate();
 
     system_set_.Insert(id.GetId(), in_system);
 

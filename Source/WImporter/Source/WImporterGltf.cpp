@@ -57,8 +57,8 @@ struct fastgltf::ElementTraits<glm::vec4> :
 namespace {
 
     template<typename T=std::size_t>
-    using NullableIndex = wid::WId<T,
-                                   wid::WIdDefaultFlag,
+    using NullableIndex = wcr::wid::WId<T,
+                                   wcr::wid::WIdDefaultFlag,
                                    std::numeric_limits<T>::max()>;
 
     WNODISCARD constexpr wct::texture::ESampler MagFilter(fastgltf::Filter mag_filter) noexcept {
@@ -186,20 +186,20 @@ namespace {
     WRenderPipelineParametersAsset CollectMaterial(
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & textures_map,
-        std::vector<wid::WAssetId> const & textures,
+        std::vector<wcr::wid::WAssetId> const & textures,
         fastgltf::Material const & in_material,
-        wid::WAssetId null_texture=wid::null_id,
-        wid::WAssetId null_rgba=wid::null_id,
-        wid::WAssetId null_normal=wid::null_id
+        wcr::wid::WAssetId null_texture=wcr::wid::null_id,
+        wcr::wid::WAssetId null_rgba=wcr::wid::null_id,
+        wcr::wid::WAssetId null_normal=wcr::wid::null_id
         ) {
         WRenderPipelineParametersAsset result{};
 
         auto GetTextureId = [&textures, &textures_map]
-            (auto & tex_info, wid::WAssetId fallback) -> wid::WAssetId {
+            (auto & tex_info, wcr::wid::WAssetId fallback) -> wcr::wid::WAssetId {
             return tex_info
                 .and_then(
                     [&textures, &textures_map, &fallback]
-                    (fastgltf::TextureInfo const & value) -> std::optional<wid::WAssetId> {
+                    (fastgltf::TextureInfo const & value) -> std::optional<wcr::wid::WAssetId> {
                         if(textures_map[value.textureIndex].IsValid())
                             return textures[textures_map[value.textureIndex].GetId()];
                         else
@@ -257,10 +257,10 @@ namespace {
     auto CollectMaterials(
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & textures_map,
-        std::vector<wid::WAssetId> const & texture_wids,
-        wid::WAssetId null_texture=wid::null_id,
-        wid::WAssetId null_rgba=wid::null_id,
-        wid::WAssetId null_normal=wid::null_id
+        std::vector<wcr::wid::WAssetId> const & texture_wids,
+        wcr::wid::WAssetId null_texture=wcr::wid::null_id,
+        wcr::wid::WAssetId null_rgba=wcr::wid::null_id,
+        wcr::wid::WAssetId null_normal=wcr::wid::null_id
         ){
         
         std::vector<WRenderPipelineParametersAsset> assets;
@@ -376,10 +376,10 @@ namespace {
     WNODISCARD inline
     auto CollectStaticMeshes(
         fastgltf::Asset const & in_asset,
-        wid::WAssetId gbuffer_pipeline,
-        wid::WAssetId null_pipe_params,
-        wid::WAssetId transparent_pipeline,
-        std::vector<wid::WAssetId> const & parameters
+        wcr::wid::WAssetId gbuffer_pipeline,
+        wcr::wid::WAssetId null_pipe_params,
+        wcr::wid::WAssetId transparent_pipeline,
+        std::vector<wcr::wid::WAssetId> const & parameters
         ) {
         std::vector<NullableIndex<>> index_sm_map{};
         index_sm_map.reserve(in_asset.meshes.size());
@@ -436,7 +436,7 @@ namespace {
                 sm_names.push_back(mesh.name);
             }
             else {
-                index_sm_map.push_back(wid::null_id);
+                index_sm_map.push_back(wcr::wid::null_id);
             }
         }
 
@@ -542,14 +542,14 @@ namespace {
             tx.samplerIndex
                 .and_then([](auto& v) ->std::optional<NullableIndex<IndexType>>
                           {return v;})
-                .value_or(wid::null_id);
+                .value_or(wcr::wid::null_id);
 
             // if (tx.imageIndex.has_value()) {
             //     image_samplers[tx.imageIndex.value()] =
             //         tx.samplerIndex
             //         .and_then([](auto & v ) -> std::optional<NullableIndex<IndexType>>
             //                   { return v ;})
-            //         .value_or(wid::null_id);
+            //         .value_or(wcr::wid::null_id);
             // }
         }
         return texture_samplers;
@@ -560,7 +560,7 @@ namespace {
         fastgltf::Asset const & in_asset
         ) {
         std::vector<NullableIndex<>> text_assets_map{};
-        text_assets_map.resize(in_asset.textures.size(), wid::null_id);
+        text_assets_map.resize(in_asset.textures.size(), wcr::wid::null_id);
 
         std::vector<WTextureAsset> text_assets{};
         text_assets.reserve(in_asset.textures.size());
@@ -643,7 +643,7 @@ namespace {
 
     inline
     void CollectLightComponent(
-        wid::WEntityId in_entity,
+        wcr::wid::WEntityId in_entity,
         was::Level & out_level,
         fastgltf::Light const & in_light
         ) {
@@ -680,7 +680,7 @@ namespace {
 
     inline
     void CollectCameraComponent(
-        wid::WEntityId in_entity,
+        wcr::wid::WEntityId in_entity,
         was::Level & out_level,
         fastgltf::Camera const & in_camera
         ) {
@@ -710,7 +710,7 @@ namespace {
         fastgltf::Scene const & in_scene,
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & sm_id_map,
-        std::vector<wid::WAssetId> const & sm_wids,
+        std::vector<wcr::wid::WAssetId> const & sm_wids,
         WAssetDb const & in_asset_db
         ) {
         
@@ -770,7 +770,7 @@ namespace {
     auto CollectLevels(
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & sm_id_map,
-        std::vector<wid::WAssetId> const & sm_wids,
+        std::vector<wcr::wid::WAssetId> const & sm_wids,
         WAssetDb const & in_asset_db
         ) {
         std::vector<was::Level> levels;
@@ -797,14 +797,14 @@ namespace {
     }
 
     WNODISCARD inline
-    std::vector<wid::WAssetId> CreateLevels(
+    std::vector<wcr::wid::WAssetId> CreateLevels(
         std::vector<was::Level> & levels,
         std::vector<std::string_view> const & names,
         std::string_view assets_directory,
         WAssetDb & asset_db
         ) {
 
-        std::vector<wid::WAssetId> result{};
+        std::vector<wcr::wid::WAssetId> result{};
         result.reserve(levels.size());
         
         for (std::uint32_t i=0; i<levels.size(); i++) {
@@ -831,14 +831,14 @@ namespace {
     }
 
     WNODISCARD inline
-    std::vector<wid::WAssetId> CreateTextures(
+    std::vector<wcr::wid::WAssetId> CreateTextures(
         std::vector<WTextureAsset> & in_textures,
         std::vector<std::string_view> const & in_names,
         std::string_view assets_directory,
         WAssetDb & asset_db
         ) {
 
-        std::vector<wid::WAssetId> result;
+        std::vector<wcr::wid::WAssetId> result;
         result.reserve(in_textures.size());
 
         for(std::size_t i=0; i<in_textures.size(); i++) {
@@ -865,14 +865,14 @@ namespace {
     }
     
     WNODISCARD inline
-    std::vector<wid::WAssetId> CreatePipelineParameters(
+    std::vector<wcr::wid::WAssetId> CreatePipelineParameters(
         std::vector<WRenderPipelineParametersAsset> & parameters,
         std::vector<std::string_view> const & names,
         std::string_view asset_directory,
         WAssetDb & asset_db
         ) {
 
-        std::vector<wid::WAssetId> result;
+        std::vector<wcr::wid::WAssetId> result;
         result.reserve(parameters.size());
 
         for(std::size_t i=0; i<parameters.size(); i++) {
@@ -898,13 +898,13 @@ namespace {
     }
 
     WNODISCARD inline
-    std::vector<wid::WAssetId> CreateStaticMeshes(
+    std::vector<wcr::wid::WAssetId> CreateStaticMeshes(
         std::vector<WStaticMeshAsset> const & static_meshes,
         std::vector<std::basic_string_view<char>> const & names,
         std::string_view asset_directory,
         WAssetDb & asset_db
         ) {
-        std::vector<wid::WAssetId> result;
+        std::vector<wcr::wid::WAssetId> result;
         result.reserve(static_meshes.size());
 
         for (std::size_t i=0; i<static_meshes.size(); i++) {
@@ -929,7 +929,7 @@ namespace {
     }
 }
 
-std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
+std::vector<wcr::wid::WAssetId> wim::importer::WImporterGltf::Import(
     WAssetDb & in_asset_db,
     std::string_view file_path,
     std::string_view engine_directory_prefix
@@ -994,7 +994,7 @@ std::vector<wid::WAssetId> wim::importer::WImporterGltf::Import(
         engine_directory_prefix,
         in_asset_db);
     
-    std::vector<wid::WAssetId> result;
+    std::vector<wcr::wid::WAssetId> result;
     result.reserve(textures_wids.size() +
                    materials_wid.size() +
                    sm_wid.size() +

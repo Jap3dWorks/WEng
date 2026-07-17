@@ -23,7 +23,7 @@
 
 namespace spacers::plane {
     struct LevelData {
-        wid::WAssetId texture_id;
+        wcr::wid::WAssetId texture_id;
     };
 
     inline wct::geometry::WMesh Plane() {
@@ -64,7 +64,7 @@ namespace spacers::plane {
     }
 
 
-    inline std::vector<wid::WAssetId> ImportAssets(WEngine & engine) {
+    inline std::vector<wcr::wid::WAssetId> ImportAssets(WEngine & engine) {
         
         wim::importer::WImportTexture texture_importer =
             engine.ImportersRegister().GetImporter<wim::importer::WImportTexture>();
@@ -82,11 +82,11 @@ namespace spacers::plane {
 
         smasset.SetMesh(Plane(), 0);
 
-        wid::WAssetId smid = engine.AssetManager().CreateFrom<WStaticMeshAsset>(
+        wcr::wid::WAssetId smid = engine.AssetManager().CreateFrom<WStaticMeshAsset>(
             "/Content/planelevel/smplane00:smplane00",
             smasset);
 
-        wid::WEntityId entt = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId entt = level->CreateEntity<WEntity>();
         level->CreateComponent<WTransformComponent>(entt);
         level->CreateComponent<WStaticMeshComponent>(entt);
 
@@ -139,7 +139,7 @@ namespace spacers::plane {
 
         // Camera
 
-        wid::WEntityId cid = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId cid = level->CreateEntity<WEntity>();
         level->CreateComponent<WTransformComponent>(cid);
         level->CreateComponent<WCameraComponent>(cid);
         level->CreateComponent<WMovementComponent>(cid);     // parametrized movement
@@ -168,7 +168,7 @@ namespace spacers::plane {
     }
 
     inline void SetupLighting(was::Level * level) {
-        wid::WEntityId ambient_light = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId ambient_light = level->CreateEntity<WEntity>();
         level->CreateComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         auto * ambient_ptr = &level
@@ -179,8 +179,8 @@ namespace spacers::plane {
         ambient_ptr->Set_active(true);
     }
 
-    inline wid::WAssetId CreateLevel(WEngine & in_engine) {
-        wid::WAssetId level_id = in_engine.AssetManager().Create<was::Level>(
+    inline wcr::wid::WAssetId CreateLevel(WEngine & in_engine) {
+        wcr::wid::WAssetId level_id = in_engine.AssetManager().Create<was::Level>(
             "/Content/planelevel/level01:level01"
             );
 

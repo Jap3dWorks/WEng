@@ -29,13 +29,13 @@ public:
         WDbBuilder r;
 
         if constexpr (std::is_convertible_v<T*,WAsset*>) {
-            r.RegisterBuilder<T, WAsset, wid::WAssetId::IdType>();
+            r.RegisterBuilder<T, WAsset, wcr::wid::WAssetId::IdType>();
         }
         if constexpr (std::is_convertible_v<T*,WEntity*>) {
-            r.RegisterBuilder<T, WEntity, wid::WEntityId::IdType>();
+            r.RegisterBuilder<T, WEntity, wcr::wid::WEntityId::IdType>();
         }
         if constexpr(std::is_convertible_v<T*, WComponent*>) {
-            r.RegisterBuilder<T, WComponent, wid::WEntityId::IdType>();
+            r.RegisterBuilder<T, WComponent, wcr::wid::WEntityId::IdType>();
         }
 
         return r;

@@ -84,13 +84,22 @@ namespace wvk::render {
         std::vector<VkWriteDescriptorSet> write_ds{};
         write_ds.reserve(ubo_binding.size() + in_textures_binding.size());
 
+        std::vector<VkDescriptorBufferInfo> buff_info{};
+        buff_info.reserve(ubo_binding.size());
+
         for(auto & frames : ubo_binding) {
             write_ds.push_back({});
+            buff_info.push_back({
+                    .buffer=frames[in_frame_index].ubo_info.buffer,
+                    .offset=0,
+                    .range=frames[in_frame_index].ubo_info.range
+                }
+                );
             
             wvk::descriptor::UpdateWriteDescriptorSet_UBO(
                 write_ds.back(),
                 frames[in_frame_index].binding,
-                frames[in_frame_index].buffer_info,
+                &buff_info.back(),
                 descriptor_set
                 );
         }

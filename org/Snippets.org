@@ -226,6 +226,39 @@ int main()
 : Data move constructor!
 : Data move operator!
 
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+
+#include <string>
+
+struct A {
+    std::size_t * ptr{nullptr};
+    std::string name{"DefaultName"};
+};
+
+int main() {
+
+    std::size_t value = 4;
+
+    A a{};
+    a.ptr = &value;
+    a.name = "NewName";
+
+    A b{std::move(a)};
+
+    std::println("a ptr value: {}", reinterpret_cast<std::size_t>(a.ptr));
+    std::println("a name value: {}", a.name);
+
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: a ptr value: 140728961716088
+: a name value: 
+
+
 * Reference wrapper
 
 #+HEADER: :flags --std=gnu++23
@@ -283,4 +316,56 @@ int main() {
 #+RESULTS:
 : Print Path: /var/mnt/data/Devs/WEng/WEng/org/Some/path/example.txt
 
+* Variants
 
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <variant>
+#include <span>
+#include <vector>
+
+struct UboStruct {
+    std::uint32_t binding{0};
+    std::variant<std::span<std::uint8_t>, std::vector<std::uint8_t>> data{};
+    std::size_t offset{0};
+};
+
+template<typename ...Args>
+struct MyVisitor : Args ... {
+    using Args::operator() ...;
+};
+
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+
+int main() {
+    std::vector<std::uint8_t> data{1,2,3,4,5,6,};
+
+    UboStruct ubo;
+    ubo.data = data;
+
+    std::visit(
+        MyVisitor(
+            [](std::span<std::uint8_t> const & v) { std::print("Span variant!\n"); },
+            [](std::vector<std::uint8_t> const & v) { std::print("Vector variant!\n"); }
+            ),
+        ubo.data
+        );
+
+    ubo.data = std::span(data);
+    std::visit(
+        MyVisitor(
+            [](std::span<std::uint8_t> const & v) { std::print("Span variant!\n"); },
+            [](std::vector<std::uint8_t> const & v) { std::print("Vector variant!\n"); }
+            ),
+        ubo.data
+        );
+
+    return 0;
+}
+#+end_src
+
+#+RESULTS:
+: Vector variant!
+: Span variant!

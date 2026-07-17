@@ -43,7 +43,8 @@ struct WVkInstanceCreator {
         std::vector<const char*> enabled_layers_names{};
         if (in_enable_validation_layers)
         {
-            create_info.enabledLayerCount = static_cast<std::uint32_t>(in_validation_layers.size());
+            create_info.enabledLayerCount =
+                static_cast<std::uint32_t>(in_validation_layers.size());
         
             wstr::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
 

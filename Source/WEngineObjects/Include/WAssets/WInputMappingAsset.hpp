@@ -7,7 +7,7 @@
 
 #include "WInputMappingAsset.WEngine.hpp"
 
-using WInputMap = std::unordered_map<WInput, std::vector<wid::WAssetId>>;
+using WInputMap = std::unordered_map<WInput, std::vector<wcr::wid::WAssetId>>;
 
 class WENGINEOBJECTS_API WInputMappingAsset : public WAsset {
 

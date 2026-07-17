@@ -32,15 +32,15 @@ public:
 
 public:
     
-    constexpr void SetMesh(wct::geometry::WMesh const & in_mesh, wid::WSubIdxId const & in_id=0) {
+    constexpr void SetMesh(wct::geometry::WMesh const & in_mesh, wcr::wid::WSubIdxId const & in_id=0) {
         meshes[in_id.GetId()] = in_mesh;
     }
 
-    constexpr void SetMesh(wct::geometry::WMesh && in_mesh, wid::WSubIdxId const & in_id=0) noexcept {
+    constexpr void SetMesh(wct::geometry::WMesh && in_mesh, wcr::wid::WSubIdxId const & in_id=0) noexcept {
         meshes[in_id.GetId()] = std::move(in_mesh);
     }
 
-    constexpr wct::geometry::WMesh const & GetMesh(wid::WSubIdxId const & in_index=0) const noexcept {
+    constexpr wct::geometry::WMesh const & GetMesh(wcr::wid::WSubIdxId const & in_index=0) const noexcept {
         return meshes[in_index.GetId()];
     }
 
@@ -57,7 +57,7 @@ public:
         return r;
     }
 
-    template<CCallable<void, WStaticMeshAsset *, wid::WSubIdxId, wct::geometry::WMesh&> F>
+    template<CCallable<void, WStaticMeshAsset *, wcr::wid::WSubIdxId, wct::geometry::WMesh&> F>
     void ForEachMesh(F && in_fn) {
         for(std::uint32_t i=0; i<meshes.size(); i++) {
             wct::geometry::WMesh & m = meshes[i];
@@ -70,14 +70,14 @@ public:
 
     constexpr void SetPipelineAssignment(
         wct::render::RPipeAssignment in_assignment,
-        wid::WSubIdxId in_index
+        wcr::wid::WSubIdxId in_index
         ) {
         pipeline_assignments[in_index.GetId()] =
             std::move(in_assignment);
     }
 
     constexpr wct::render::RPipeAssignment GetPipelineAssignment(
-        wid::WSubIdxId in_index
+        wcr::wid::WSubIdxId in_index
         ) const {
         return pipeline_assignments[in_index.GetId()];
     }

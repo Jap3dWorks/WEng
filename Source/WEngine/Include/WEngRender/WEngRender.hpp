@@ -40,7 +40,7 @@ namespace wng::render {
         // Point Lights
 
         decltype(wct::render::LightingUBO::point_lights) point_lights;
-        std::array<wid::WEntityComponentId, point_lights.size()> pl_ids;
+        std::array<wcr::wid::WEntityComponentId, point_lights.size()> pl_ids;
         std::uint32_t pl_count=0;
 
         in_level->ForEachComponent<wcm::light::WPointLightComponent>(
@@ -70,7 +70,7 @@ namespace wng::render {
         // Directional Lights
 
         decltype(wct::render::LightingUBO::directional_lights) directional_lights;
-        std::array<wid::WEntityComponentId, directional_lights.size()> dl_ids;
+        std::array<wcr::wid::WEntityComponentId, directional_lights.size()> dl_ids;
         std::uint32_t dl_count=0;
 
         in_level->ForEachComponent<wcm::light::WDirectionalLightComponent>(
@@ -126,11 +126,11 @@ namespace wng::render {
         const WAssetDb & in_asset_db
         ) {
 
-        TSparseSet<wid::WAssetId> static_meshes;
+        TSparseSet<wcr::wid::WAssetId> static_meshes;
         static_meshes.Reserve(64);
-        TSparseSet<wid::WAssetId> texture_assets;
+        TSparseSet<wcr::wid::WAssetId> texture_assets;
         texture_assets.Reserve(64);
-        TSparseSet<wid::WAssetId> render_pipelines;
+        TSparseSet<wcr::wid::WAssetId> render_pipelines;
         render_pipelines.Reserve(64);
 
         in_level->ForEachComponent<WStaticMeshComponent>(
@@ -139,7 +139,7 @@ namespace wng::render {
              &texture_assets,
              &in_asset_db](WStaticMeshComponent * in_component) {
                 
-                wid::WAssetId smid = in_component->Get_static_mesh_asset();
+                wcr::wid::WAssetId smid = in_component->Get_static_mesh_asset();
                 
                 if(smid.IsValid()) {
                     static_meshes.Insert(smid.GetId(), smid);
@@ -158,7 +158,7 @@ namespace wng::render {
                      &render_pipelines,
                      &texture_assets,
                      &in_asset_db](WStaticMeshAsset * _sm,
-                                   const wid::WSubIdxId & _id,
+                                   const wcr::wid::WSubIdxId & _id,
                                    wct::geometry::WMesh& _m) {
 
                         wct::render::RPipeAssignment pipassign =
@@ -176,7 +176,7 @@ namespace wng::render {
 
                             for(uint32_t i=0; i < texture_list.size(); i++)
                             {
-                                wid::WAssetId tid = texture_list[i].value;
+                                wcr::wid::WAssetId tid = texture_list[i].value;
                                 texture_assets.Insert(tid.GetId(), tid);
                             }
                             
@@ -194,14 +194,14 @@ namespace wng::render {
             );
 
         // Load Meshes
-        for (const wid::WAssetId & id : static_meshes) {
+        for (const wcr::wid::WAssetId & id : static_meshes) {
             auto & static_mesh = in_asset_db.Get<WStaticMeshAsset>(id);
             
             static_mesh.ForEachMesh(
                 [&in_render]
-                (WStaticMeshAsset* _sma, const wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                (WStaticMeshAsset* _sma, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
                     
-                    wid::WTypeAssetIndexId asset_index {{}, _sma->Get_asset_id(), _id};
+                    wcr::wid::WTypeAssetIndexId asset_index {{}, _sma->Get_asset_id(), _id};
 
                     in_render->LoadStaticMesh(asset_index, _m);
                 }
@@ -209,13 +209,13 @@ namespace wng::render {
         }
 
         // Load Textures
-        for (const wid::WAssetId & id : texture_assets) {
+        for (const wcr::wid::WAssetId & id : texture_assets) {
             auto & texture_asset = in_asset_db.Get<WTextureAsset>(id);
             in_render->LoadTexture(id, texture_asset);
         }
 
         // Initialize Render Pipelines
-        for (const wid::WAssetId & id : render_pipelines) {
+        for (const wcr::wid::WAssetId & id : render_pipelines) {
             auto & render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
             in_render->CreateRenderPipeline(&render_pipeline);
         }
@@ -226,25 +226,25 @@ namespace wng::render {
              &in_asset_db,
              &in_level]
             (WStaticMeshComponent* in_component) {
-                const wid::WAssetId & sm_id = in_component->Get_static_mesh_asset();
+                const wcr::wid::WAssetId & sm_id = in_component->Get_static_mesh_asset();
                 WStaticMeshAsset & sm_asset = in_asset_db.Get<WStaticMeshAsset>(sm_id);
 
                 sm_asset.ForEachMesh(
                     [&in_asset_db,
                      &in_level,
                      &in_render,
-                     &in_component](WStaticMeshAsset* _sma, const wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                     &in_component](WStaticMeshAsset* _sma, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
                         
                         auto & param = in_asset_db.Get<WRenderPipelineParametersAsset>(
                             in_component->GetPipelineAssignment(_id).params
                             );
 
-                        wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                        wcr::wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
                             in_component->Get_entity_id(), _id
                             );
 
-                        wid::WTypeAssetIndexId assidx {
-                            wid::null_id, _sma->Get_asset_id(), _id
+                        wcr::wid::WTypeAssetIndexId assidx {
+                            wcr::wid::null_id, _sma->Get_asset_id(), _id
                         };
 
                         in_render->CreatePipelineBinding(
@@ -279,7 +279,7 @@ namespace wng::render {
 
         // Temporal solution, only one camera.
         // other cameras with RenderId() > 1 could render into textures.
-        wid::WEntityId camera_entt{};
+        wcr::wid::WEntityId camera_entt{};
         in_level->ForEachComponent<WCameraComponent>(
             [&camera_entt](WCameraComponent * _cam){
                 if (!camera_entt && _cam->Get_render_id().IsValid()) {
@@ -289,19 +289,19 @@ namespace wng::render {
             );
 
         if(camera_entt.IsValid()) {
-            TSparseSet<wid::WAssetId> cam_render_pipelines;
+            TSparseSet<wcr::wid::WAssetId> cam_render_pipelines;
             cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
 
             in_level->GetComponent<WCameraComponent>(camera_entt).ForEachPostprocessAssignment(
                 [&cam_render_pipelines](
                      const WCameraComponent * _cmp,
-                     const wid::WSubIdxId & _idx,
+                     const wcr::wid::WSubIdxId & _idx,
                      const auto & _assgn) {
                     cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
                 }
                 );
 
-            for (const wid::WAssetId & id : cam_render_pipelines) {
+            for (const wcr::wid::WAssetId & id : cam_render_pipelines) {
                 auto & render_pipeline = in_asset_db.Get<WRenderPipelineAsset>(id);
                 in_render->CreateRenderPipeline(&render_pipeline); // TODO Use the data struct
             }
@@ -312,10 +312,10 @@ namespace wng::render {
                  &in_render,
                  &in_asset_db](
                     const WCameraComponent * _cmp,
-                    const wid::WSubIdxId & _idx,
+                    const wcr::wid::WSubIdxId & _idx,
                     const auto & _assgn
                     ) {
-                    wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                    wcr::wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
                         _cmp->Get_entity_id(), _idx
                         );
 
@@ -339,11 +339,11 @@ namespace wng::render {
         const WAssetDb & in_asset_db
         ) {
 
-        TSparseSet<wid::WAssetId> static_meshes;
+        TSparseSet<wcr::wid::WAssetId> static_meshes;
         static_meshes.Reserve(64);
-        TSparseSet<wid::WAssetId> texture_assets;
+        TSparseSet<wcr::wid::WAssetId> texture_assets;
         texture_assets.Reserve(64);
-        TSparseSet<wid::WEntityComponentId> pipeline_bindings;
+        TSparseSet<wcr::wid::WEntityComponentId> pipeline_bindings;
         pipeline_bindings.Reserve(64);
         
         in_level->ForEachComponent<WStaticMeshComponent>(
@@ -370,7 +370,7 @@ namespace wng::render {
                      &texture_assets,
                      &in_level,
                      &pipeline_bindings]
-                    (WStaticMeshAsset * _sm, const wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                    (WStaticMeshAsset * _sm, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
 
                         auto & pipeline_parameters =
                             in_asset_db.Get<WRenderPipelineParametersAsset>(
@@ -383,7 +383,7 @@ namespace wng::render {
                         auto texture_list = pipeline_parameters.Get_texture_list();
 
                         for(uint8_t i=0; i < texture_list.size(); i++) {
-                            wid::WAssetId t_id = texture_list[i].value;
+                            wcr::wid::WAssetId t_id = texture_list[i].value;
                     
                             texture_assets.Insert(
                                 t_id.GetId(),
@@ -391,7 +391,7 @@ namespace wng::render {
                                 );
                         }
 
-                        wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
+                        wcr::wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
                             _component->Get_entity_id(), _id
                             );
 
@@ -403,9 +403,9 @@ namespace wng::render {
         
         for(auto & id : static_meshes) {
             in_asset_db.Get<WStaticMeshAsset>(id).ForEachMesh(
-                [&in_render](WStaticMeshAsset * _sm, const wid::WSubIdxId & _id, wct::geometry::WMesh & _m) {
+                [&in_render](WStaticMeshAsset * _sm, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh & _m) {
                     in_render->UnloadStaticMesh(
-                        {wid::null_id, _sm->Get_asset_id(), _id}
+                        {wcr::wid::null_id, _sm->Get_asset_id(), _id}
                         );
                 }
                 );            

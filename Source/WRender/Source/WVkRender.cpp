@@ -13,6 +13,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkRender.hpp"
 #include "WWindow/WWindow.hpp"
+#include "WCore/TVisitor.hpp"
 
 #include "WLog.hpp"
 
@@ -131,7 +132,7 @@ void WVkRender::Initialize()
     
     // Create Render Command Pool
 
-    render_command_pool_ = WVkRenderCommandPoolRAII( 
+    command_pool_ = WVkCommandPoolRAII( 
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Value()
@@ -141,7 +142,7 @@ void WVkRender::Initialize()
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
-        render_command_pool_.Value()
+        command_pool_.Value()
         );
 
     WFLOG("[DEBUG] Initialize Global Descriptor Set.");
@@ -192,27 +193,18 @@ void WVkRender::Initialize()
         swapchain_.Format()
     };
 
-    render_command_buffer_ =
-        render_command_pool_.
-        CreateCommandBuffer();
+    render_command_buffers_ =
+        command_pool_.
+        CreateCommandBuffers();
 
     render_sync_ = {device_.Device(),
                    swapchain_.Images().size()};
     
-    // sync_semaphores_ = wvk::render::CreateSyncSemaphore<SyncSemaphores>(
-    //     swapchain_.Images().size(),
-    //     device_.Device()
-    //     );
-
-    // sync_fences_ = wvk::render::CreateSyncFences<WENG_MAX_FRAMES_IN_FLIGHT>(
-    //     device_.Device()
-    //     );
-
     asset_render_data_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
-        render_command_pool_.Value()
+        command_pool_.Value()
     };
 
     wvk::render::UpdatePPcessGlobalDescriptorSet(
@@ -261,31 +253,31 @@ void WVkRender::Draw()
     // Begin command buffer
 
     wvk::render::BeginRenderCommandBuffer(
-        render_command_buffer_[frame_index_]
+        render_command_buffers_[frame_index_]
         );
 
     RecordGBuffersRenderCommandBuffer(
-        render_command_buffer_[frame_index_],
+        render_command_buffers_[frame_index_],
         frame_index_);
 
     RecordOffscreenRenderCommandBuffer(
-        render_command_buffer_[frame_index_],
+        render_command_buffers_[frame_index_],
         frame_index_);
 
     RecordPostprocessRenderCommandBuffer(
-        render_command_buffer_[frame_index_],
+        render_command_buffers_[frame_index_],
         frame_index_,
         image_index
         );
 
     RecordTonemappingRenderCommandBuffer(
-        render_command_buffer_[frame_index_],
+        render_command_buffers_[frame_index_],
         frame_index_,
         image_index
         );
 
     RecordSwapChainRenderCommandBuffer(
-        render_command_buffer_[frame_index_],
+        render_command_buffers_[frame_index_],
         frame_index_,
         image_index
         );
@@ -293,7 +285,7 @@ void WVkRender::Draw()
     // End Command buffer
 
     wvk::render::EndRenderCommandBuffer(
-        render_command_buffer_[frame_index_]
+        render_command_buffers_[frame_index_]
         );
 
     VkSubmitInfo submit_info = wvk::types::VkSubmitInfo();
@@ -308,7 +300,7 @@ void WVkRender::Draw()
 
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers =
-        &render_command_buffer_[frame_index_];
+        &render_command_buffers_[frame_index_];
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores =
@@ -388,9 +380,9 @@ void WVkRender::CreateRenderPipeline(
 
 }
 
-void WVkRender::DeleteRenderPipeline(const wid::WAssetId & in_id) {
+void WVkRender::DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) {
 
-    auto clearbindingfn = [this](const wid::WEntityComponentId & binding) {
+    auto clearbindingfn = [this](const wcr::wid::WEntityComponentId & binding) {
         pipeline_track_.binding_pipetype.erase(binding);
     };
 
@@ -431,9 +423,9 @@ void WVkRender::DeleteRenderPipeline(const wid::WAssetId & in_id) {
 }
 
 void WVkRender::CreatePipelineBinding(
-    const wid::WEntityComponentId & component_id,
-    const wid::WAssetId & pipeline_id,
-    const wid::WTypeAssetIndexId & in_assetindex_id,
+    const wcr::wid::WEntityComponentId & component_id,
+    const wcr::wid::WAssetId & pipeline_id,
+    const wcr::wid::WTypeAssetIndexId & in_assetindex_id,
     const WRenderPipelineParametersAsset & in_parameters
     )
 {
@@ -441,7 +433,7 @@ void WVkRender::CreatePipelineBinding(
 
     auto texture_params = in_parameters.Get_texture_list();
 
-    std::vector<WVkDescriptorSetTextureWriteStruct> textures{};
+    std::vector<WVkDescriptorSetTextureBinding> textures{};
     textures.resize(texture_params.size());
 
     for(std::uint32_t i=0; i < texture_params.size(); i++) {
@@ -466,12 +458,20 @@ void WVkRender::CreatePipelineBinding(
 
     for(std::uint32_t i=0; i < ubo_params.size(); i++) {
         const auto & ubop = ubo_params[i];
-        ubos[i] = {
-            .binding = ubop.binding,
-            .data = ubop.data.data(),
-            .size = ubop.data.size(),
-            .offset = ubop.offset
-        };
+
+        std::visit (
+            wcr::TVisitor(
+                [&ubos, &i, &ubop](auto const & ubo) {
+                    ubos[i] = {
+                        .binding = ubop.binding,
+                        .data = ubo.data(),
+                        .size = ubo.size(),
+                        .offset = ubop.offset
+                    };
+                }
+                ),
+            ubop.data
+            );
     }
 
     wct::render::pipeline_type_dispatcher<
@@ -508,7 +508,7 @@ void WVkRender::CreatePipelineBinding(
     
 }
 
-void WVkRender::DeletePipelineBinding(const wid::WEntityComponentId & in_id) {
+void WVkRender::DeletePipelineBinding(const wcr::wid::WEntityComponentId & in_id) {
 
     wct::render::pipeline_type_dispatcher<
         wct::render::ERPipeType::Graphics,
@@ -554,18 +554,32 @@ void WVkRender::UpdateUboCamera(
 }
 
 void WVkRender::UpdateParameterDynamic(
-									   const wid::WEntityComponentId & in_component_id,
+									   const wcr::wid::WEntityComponentId & in_component_id,
 									   const wct::render::RPipeParamUbo & ubo_write
     ) {
-  
-    WVkDescriptorSetUBOWriteStruct ubowrt{
-        .binding = ubo_write.binding,
-        .data = ubo_write.data.data(),
-        .size = ubo_write.data.size(),
-        .offset = ubo_write.offset
-    };
 
-  
+    WVkDescriptorSetUBOWriteStruct ubowrt;
+    
+    std::visit(
+        wcr::TVisitor(
+            [&ubowrt, &ubo_write](auto const & ubodata) {
+                ubowrt = {
+                    .binding = ubo_write.binding,
+                    .data = ubodata.data(),
+                    .size = ubodata.size(),
+                    .offset = ubo_write.offset
+                };
+            }
+            ),
+        ubo_write.data
+        );
+
+    // WVkDescriptorSetUBOWriteStruct ubowrt{
+    //     .binding = ubo_write.binding,
+    //     .data = ubo_write.data.data(),
+    //     .size = ubo_write.data.size(),
+    //     .offset = ubo_write.offset
+    // };
 
     wct::render::pipeline_type_dispatcher<
         wct::render::ERPipeType::Graphics,
@@ -593,16 +607,25 @@ void WVkRender::UpdateParameterDynamic(
 }
 
 void WVkRender::UpdateParameterStatic(
-    const wid::WEntityComponentId & in_component_id,
+    const wcr::wid::WEntityComponentId & in_component_id,
     const wct::render::RPipeParamUbo & ubo_write
     ) {
-    
-    WVkDescriptorSetUBOWriteStruct ubowrt {
-        .binding = ubo_write.binding,
-        .data = ubo_write.data.data(),
-        .size = ubo_write.data.size(),
-        .offset = ubo_write.offset
-    };
+
+    WVkDescriptorSetUBOWriteStruct ubowrt;
+
+    std::visit(
+        wcr::TVisitor(
+            [&ubowrt, &ubo_write](auto const & ubodata) {
+                ubowrt = {
+                    .binding = ubo_write.binding,
+                    .data = ubodata.data(),
+                    .size = ubodata.size(),
+                    .offset = ubo_write.offset
+                };
+            }
+            ),
+        ubo_write.data
+        );
 
     wct::render::pipeline_type_dispatcher<
         wct::render::ERPipeType::Graphics,
@@ -736,7 +759,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         const WVkRenderPipelineInfo & render_pipeline =
             gbuffers_pipelines_.Pipeline(pipeline_id);
 
-        vkCmdBindPipeline(render_command_buffer_[in_frame_index],
+        vkCmdBindPipeline(render_command_buffers_[in_frame_index],
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           render_pipeline.pipeline);
 
@@ -1212,9 +1235,9 @@ void WVkRender::RecordSwapChainRenderCommandBuffer(
 // ------
 
 void WVkRender::InitializeLights(
-    std::span<wid::WEntityComponentId> in_pl_ids,
+    std::span<wcr::wid::WEntityComponentId> in_pl_ids,
     std::span<wct::render::PointLight> in_point_lights,
-    std::span<wid::WEntityComponentId> in_dl_ids,
+    std::span<wcr::wid::WEntityComponentId> in_dl_ids,
     std::span<wct::render::DirectionalLight> in_directional_lights,
     const wct::render::AmbientLight & in_ambient_light
     ) {
@@ -1254,7 +1277,7 @@ namespace {
         WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptor,
         std::uint8_t frame_index,
         DenseController & dense_controller,
-        std::span<wid::WEntityComponentId> in_ids,
+        std::span<wcr::wid::WEntityComponentId> in_ids,
         std::span<LightType> in_lights
         ) {
     
@@ -1289,7 +1312,7 @@ namespace {
 }
 
 void WVkRender::UpdatePointLights(
-    std::span<wid::WEntityComponentId> in_ids,
+    std::span<wcr::wid::WEntityComponentId> in_ids,
     std::span<wct::render::PointLight> in_point_lights
     ) {
     if (in_ids.empty()) return;
@@ -1304,7 +1327,7 @@ void WVkRender::UpdatePointLights(
 }
 
 void WVkRender::UpdateDirectionalLights(
-    std::span<wid::WEntityComponentId> in_ids,
+    std::span<wcr::wid::WEntityComponentId> in_ids,
     std::span<wct::render::DirectionalLight> in_directional_lights
     ) {
     if (in_ids.empty()) return;

@@ -31,33 +31,33 @@ public:
     // Focus Distance
     WPROPERTY(float, focus_distance, 0)
 
-    WPROPERTY(wid::WRenderId, render_id, 0);
+    WPROPERTY(wcr::wid::WRenderId, render_id, 0);
 
     WPROPERTY(WPostprocessAssignments, postprocess_pipelines, );
 
 public:    
 
-    void SetPostprocessAssignment(const wid::WSubIdxId & in_id,
-                                  const wid::WAssetId & in_pipeline_id,
-                                  const wid::WAssetId & in_param_id) {
+    void SetPostprocessAssignment(const wcr::wid::WSubIdxId & in_id,
+                                  const wcr::wid::WAssetId & in_pipeline_id,
+                                  const wcr::wid::WAssetId & in_param_id) {
         postprocess_pipelines[in_id.GetId()].pipeline=in_pipeline_id;
         postprocess_pipelines[in_id.GetId()].params=in_param_id;
     }
 
-    wct::render::RPipeAssignment GetPostprocessAssignment(const wid::WSubIdxId & in_id=0) const {
+    wct::render::RPipeAssignment GetPostprocessAssignment(const wcr::wid::WSubIdxId & in_id=0) const {
         return postprocess_pipelines[in_id.GetId()];
     }
 
     template<CCallable<void,
                        const WCameraComponent *,
-                       const wid::WSubIdxId &,
+                       const wcr::wid::WSubIdxId &,
                        const wct::render::RPipeAssignment &> TFn>
     void ForEachPostprocessAssignment(TFn && in_fn) const {
         std::uint8_t idx = 0;
         for(const auto & assignment : postprocess_pipelines) {
             if(!assignment.pipeline.IsValid()) break;
 
-            std::forward<TFn>(in_fn)(this, wid::WSubIdxId(idx), assignment);
+            std::forward<TFn>(in_fn)(this, wcr::wid::WSubIdxId(idx), assignment);
             idx++;
         }
     }

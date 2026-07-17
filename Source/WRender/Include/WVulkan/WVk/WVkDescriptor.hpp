@@ -162,18 +162,18 @@ namespace wvk::descriptor {
 
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,
-        const uint32_t & in_binding,
-        const VkDescriptorBufferInfo & in_buffer_info,
-        const VkDescriptorSet & dst_set
+        uint32_t binding,
+        VkDescriptorBufferInfo * buffer_info,
+        VkDescriptorSet dst_set
         )
     {
         out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        out_write_descriptor_set.dstBinding = in_binding;
+        out_write_descriptor_set.dstBinding = binding;
         out_write_descriptor_set.dstSet = dst_set;
         out_write_descriptor_set.dstArrayElement = 0;
         out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         out_write_descriptor_set.descriptorCount = 1;
-        out_write_descriptor_set.pBufferInfo = &in_buffer_info;
+        out_write_descriptor_set.pBufferInfo = buffer_info;
         out_write_descriptor_set.pImageInfo = VK_NULL_HANDLE;
         out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }

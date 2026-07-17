@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 
@@ -102,13 +103,13 @@ struct WVkUBOInfo
 
 struct WVkRenderPipelineInfo
 {
-    wid::WAssetId wid;
+    wcr::wid::WAssetId wid;
     wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
-    wid::WAssetId descriptor_set_layout_id{0};
+    wcr::wid::WAssetId descriptor_set_layout_id{0};
 
     // TODO: Pipeline layout bindings description
     wct::render::RPipeParamDescLayList params_descriptor{};
@@ -118,45 +119,49 @@ struct WVkRenderPipelineInfo
 // -----------------
 
 struct WVkDescriptorSetUBOWriteStruct {
-    std::uint32_t binding{0};
+    std::uint32_t binding{0}; // TODO remove binding from here
     
     const void * data{nullptr};
     std::size_t size{0};
-    std::size_t offset{0};
-
-    std::size_t range{0};
+    /** Offset applied to mapped pointer when a vulkan buffer is mapped. */
+    std::size_t offset{0};      
 };
 
-// DEPRECATED
-struct WVkDescriptorSetTextureWriteStruct {
+struct WVkDescriptorSetTextureBinding {
     std::uint32_t binding{0};
-    VkDescriptorImageInfo image_info{.sampler=VK_NULL_HANDLE,
-                                     .imageView=VK_NULL_HANDLE,
-                                     .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    VkDescriptorImageInfo image_info{
+        .sampler=VK_NULL_HANDLE,
+        .imageView=VK_NULL_HANDLE,
+        .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    };
 };
 
-struct WVkDescriptorSetUBOBinding {
-    uint32_t binding{0};
-    WVkUBOInfo ubo_info{};
-    VkDescriptorBufferInfo buffer_info{}; // TODO: required?
+struct DELETE_WVkDescriptorSetUBOBinding {
+    std::uint32_t binding{0};
+    WVkUBOInfo ubo_info{}; // <- TODO remove
+
     
-    std::size_t size{0};
+    // ubos by frame
+    VkDescriptorBufferInfo buffer_info;
 };
 
-using WVkDescriptorSetTextureBinding =
-    WVkDescriptorSetTextureWriteStruct;
+template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
+struct WVkDescriptorSetUBOBinding {
+    std::uint32_t binding{0};
+    std::array<VkDescriptorBufferInfo, FramesInFlight> ubo_info{};
+};
 
 template<std::uint32_t Frames>
 using TVkDescriptorSetUBOBindingFrames =
-    std::array<WVkDescriptorSetUBOBinding, Frames>;
+    std::array<DELETE_WVkDescriptorSetUBOBinding, Frames>;
 
 /**
  * @brief Render Pipeline Bindings data
  */
 struct WVkPipelineBindingInfo
 {
-    wid::WAssetId pipeline_id{0};
-    wid::WTypeAssetIndexId mesh_asset_id{0};
+    wcr::wid::WAssetId pipeline_id{0};
+    wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
 
     std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescriptorSetTextureBinding> textures{};

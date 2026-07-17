@@ -11,8 +11,8 @@
 #include <cstdint>
 #include <unordered_set>
 
-template<typename WPipelineIdType=wid::WAssetId,
-         typename WBindingIdType=wid::WEntityComponentId,
+template<typename WPipelineIdType=wcr::wid::WAssetId,
+         typename WBindingIdType=wcr::wid::WEntityComponentId,
          std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkPipelinesBase {
 public:
@@ -168,6 +168,7 @@ public:
             );
     }
 
+    // TODO ubo updates using WVKAssetRenderDataRAII
     void UpdateBinding(const WBindingIdType & in_binding_id,
                        const std::uint32_t & in_frame_index,
                        const WVkDescriptorSetUBOWriteStruct & ubo_write
@@ -187,10 +188,10 @@ public:
 
         void * ptr = wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
         wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
-        // wvk::buffer::UpdateUBO((*ubo)[in_frame_index].ubo_info, ubo_write.data, ubo_write.size, ubo_write.offset);
         wvk::buffer::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
     }
 
+    // TODO ubo updates using WVKAssetRenderDataRAII
     void UpdateBinding(const WBindingIdType & in_binding_id,
                        const WVkDescriptorSetUBOWriteStruct & ubo_write
         ) {
@@ -226,6 +227,7 @@ protected:
 
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
+        // TODO accept UBOBindings not UBOWrite
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
         ) {
 
@@ -241,27 +243,21 @@ protected:
             in_param_descriptors,
             [&bindings, &result, this]
             (const wct::render::RPipeParamDescLayInfo & ubopd) {
-                if(ubopd.type == wct::render::ERPipeParamType::Ubo && !bindings.contains(ubopd.binding)) {
+                if(ubopd.type == wct::render::ERPipeParamType::Ubo &&
+                   !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
                         bindings[ubopd.binding][frm]={};
                         bindings[ubopd.binding][frm].binding = ubopd.binding;
+
+                        // TODO Do not create UBOs Here, store UBOS by id in WVkAssetRenderData
 
                         bindings[ubopd.binding][frm].ubo_info = wvk::buffer::CreateUBO(
                             ubopd.size,
                             device_,
                             physical_device_
                             );
-
-                        bindings[ubopd.binding][frm].buffer_info.buffer =
-                            bindings[ubopd.binding][frm].ubo_info.buffer;
-                        
-                        bindings[ubopd.binding][frm].buffer_info.offset = 0;
-
-                        bindings[ubopd.binding][frm].buffer_info.range =
-                            bindings[ubopd.binding][frm].ubo_info.range;
                     }
-            
                     result.push_back(bindings[ubopd.binding]);
                 }
             });
@@ -283,23 +279,23 @@ protected:
 
     std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
-        const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
+        const std::vector<WVkDescriptorSetTextureBinding> & in_textures
         ) {
 
         std::vector<wct::render::RPipeParamDescLayInfo> result;
         result.reserve(in_param_descriptors.size());
         
-        std::unordered_map<std::uint8_t, WVkDescriptorSetTextureWriteStruct> bindings{};
+        std::unordered_map<std::uint8_t, WVkDescriptorSetTextureBinding> bindings{};
 
         wct::render::ForEach(
             in_param_descriptors,
             [&bindings]
             (const wct::render::RPipeParamDescLayInfo & _ubopd) {
-                if(_ubopd.type == wct::render::ERPipeParamType::Texture &&
-                   !bindings.contains(_ubopd.binding)) {
+                if (_ubopd.type == wct::render::ERPipeParamType::Texture &&
+                    !bindings.contains(_ubopd.binding)) {
                     bindings[_ubopd.binding]={};
                     bindings[_ubopd.binding].binding = _ubopd.binding;
-                    bindings[_ubopd.binding].image_info = {}; // TODO: default image or something
+                    bindings[_ubopd.binding].image_info = {};
                 }
             });
 
@@ -322,7 +318,7 @@ protected:
     inline bool ValidateBindingParams(
         const wct::render::RPipeParamDescLayList & in_pipeline_params,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-        const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures) {
+        const std::vector<WVkDescriptorSetTextureBinding> & in_textures) {
 
         std::unordered_set<std::uint8_t> pipebindings{};
         

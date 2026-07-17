@@ -222,7 +222,7 @@ private:
                 wvk::descriptor::UpdateWriteDescriptorSet_UBO(
                     write_descriptors[j],
                     j, // binding 0 and 1
-                    buffer_infos[j],
+                    &buffer_infos[j],
                     descriptors_[i]
                     );
                 ++j;

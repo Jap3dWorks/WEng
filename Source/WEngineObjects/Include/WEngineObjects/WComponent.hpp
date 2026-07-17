@@ -14,7 +14,7 @@ public:
 
 public:
 
-    WPROPERTY(wid::WEntityId, entity_id, 0);
+    WPROPERTY(wcr::wid::WEntityId, entity_id, 0);
 
 private:
 

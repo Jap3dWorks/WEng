@@ -30,7 +30,7 @@ namespace spacers::gltflevel {
 
         // Camera
 
-        wid::WEntityId cid = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId cid = level->CreateEntity<WEntity>();
         level->CreateComponent<WTransformComponent>(cid);
         level->CreateComponent<WCameraComponent>(cid);
         level->CreateComponent<WMovementComponent>(cid);     // parametrized movement
@@ -62,7 +62,7 @@ namespace spacers::gltflevel {
     }
 
     inline void SetupLighting(was::Level * level) {
-        wid::WEntityId ambient_light = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId ambient_light = level->CreateEntity<WEntity>();
         level->CreateComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         auto * ambient_ptr = &level
@@ -72,7 +72,7 @@ namespace spacers::gltflevel {
         ambient_ptr->Set_intensity(0.5);
         ambient_ptr->Set_active(true);
 
-        wid::WEntityId dir_light = level->CreateEntity<WEntity>();
+        wcr::wid::WEntityId dir_light = level->CreateEntity<WEntity>();
         level->CreateComponent<wcm::light::WDirectionalLightComponent>(dir_light);
         level->CreateComponent<WTransformComponent>(dir_light);
 
@@ -88,8 +88,8 @@ namespace spacers::gltflevel {
         trns_ptr->Set_rotation({0.0, 0.75, -0.75});
     }
 
-    inline wid::WAssetId CreateLevel(WEngine & in_engine) {
-        std::vector<wid::WAssetId> imported_assets = in_engine
+    inline wcr::wid::WAssetId CreateLevel(WEngine & in_engine) {
+        std::vector<wcr::wid::WAssetId> imported_assets = in_engine
             .ImportersRegister()
             .GetImporter<wim::importer::WImporterGltf>()
             .Import(
@@ -98,7 +98,7 @@ namespace spacers::gltflevel {
                 "/Content/Assets/BeautifulGame/"
                 );
 
-        wid::WAssetId level_id{wid::null_id};
+        wcr::wid::WAssetId level_id{wcr::wid::null_id};
         was::Level * level_asset{nullptr};
 
         for (auto & item : imported_assets) {

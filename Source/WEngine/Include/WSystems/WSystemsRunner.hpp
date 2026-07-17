@@ -13,7 +13,7 @@
 class WENGINE_API WSystemsRunner {
 private:
 
-    using Systems = std::unordered_map<wid::WAssetId, TSparseSet<WSystemFn>>;
+    using Systems = std::unordered_map<wcr::wid::WAssetId, TSparseSet<WSystemFn>>;
 
 public:
 
@@ -31,42 +31,42 @@ public:
 
     // Systems
 
-    wid::WLevelSystemId AddInitSystem(
-        wid::WAssetId const & in_level_id,
-        wid::WSystemId const & in_system_id,
+    wcr::wid::WLevelSystemId AddInitSystem(
+        wcr::wid::WAssetId const & in_level_id,
+        wcr::wid::WSystemId const & in_system_id,
         WSystemFn const & in_fn);
 
-    wid::WLevelSystemId AddPreSystem(
-        wid::WAssetId const & in_level_id,
-        wid::WSystemId const & in_system_id,
+    wcr::wid::WLevelSystemId AddPreSystem(
+        wcr::wid::WAssetId const & in_level_id,
+        wcr::wid::WSystemId const & in_system_id,
         WSystemFn const & in_fn);
 
-    wid::WLevelSystemId AddPostSystem(
-        wid::WAssetId const & in_level,
-        wid::WSystemId const & in_system_id,
+    wcr::wid::WLevelSystemId AddPostSystem(
+        wcr::wid::WAssetId const & in_level,
+        wcr::wid::WSystemId const & in_system_id,
         WSystemFn const & in_fn);
 
-    wid::WLevelSystemId AddEndSystem(
-        wid::WAssetId const & in_level,
-        wid::WSystemId const & in_system_id,
+    wcr::wid::WLevelSystemId AddEndSystem(
+        wcr::wid::WAssetId const & in_level,
+        wcr::wid::WSystemId const & in_system_id,
         WSystemFn const & in_fn);
     
 
-    void RemoveSystem(const wid::WLevelSystemId & in_id);
+    void RemoveSystem(const wcr::wid::WLevelSystemId & in_id);
 
-    void RemoveSystems(const wid::WAssetId & in_level_id);
+    void RemoveSystems(const wcr::wid::WAssetId & in_level_id);
 
     void Clear();
 
     // Run Systems
 
-    void RunInitSystems(const wid::WAssetId & levelid, const WSystemParameters &) const;
+    void RunInitSystems(const wcr::wid::WAssetId & levelid, const WSystemParameters &) const;
 
-    void RunPreSystems(const wid::WAssetId & levelid, const WSystemParameters &) const;
+    void RunPreSystems(const wcr::wid::WAssetId & levelid, const WSystemParameters &) const;
 
-    void RunPostSystems(const wid::WAssetId & levelid, const WSystemParameters &) const;
+    void RunPostSystems(const wcr::wid::WAssetId & levelid, const WSystemParameters &) const;
 
-    void RunEndSystems(const wid::WAssetId & levelid, const WSystemParameters &) const;
+    void RunEndSystems(const wcr::wid::WAssetId & levelid, const WSystemParameters &) const;
 
 private:
 
@@ -77,10 +77,10 @@ private:
         END
     };
 
-    wid::WLevelSystemId AddSystem(Systems & out_system,
+    wcr::wid::WLevelSystemId AddSystem(Systems & out_system,
                              const ESystemLocation & in_location,
-                             wid::WAssetId const & in_level_id,
-                             const wid::WSystemId & in_system_id,
+                             wcr::wid::WAssetId const & in_level_id,
+                             const wcr::wid::WSystemId & in_system_id,
                              const WSystemFn & in_system);
 
     Systems init_systems_;
@@ -88,6 +88,6 @@ private:
     Systems post_systems_;
     Systems end_systems_;
 
-    std::unordered_map<wid::WLevelSystemId, ESystemLocation> systemid_location_;
+    std::unordered_map<wcr::wid::WLevelSystemId, ESystemLocation> systemid_location_;
 
 };

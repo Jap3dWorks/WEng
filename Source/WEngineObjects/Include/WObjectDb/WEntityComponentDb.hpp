@@ -14,9 +14,9 @@
 class WENGINEOBJECTS_API WEntityComponentDb {
 public:
 
-    using WEntityDbType = WObjectDb<WEntity, wid::WEntityId>;
+    using WEntityDbType = WObjectDb<WEntity, wcr::wid::WEntityId>;
 
-    using WComponentDbType = WObjectDb<WComponent, wid::WEntityId>;
+    using WComponentDbType = WObjectDb<WComponent, wcr::wid::WEntityId>;
 
 public:
 
@@ -41,7 +41,7 @@ public:
 public:
 
     template<std::derived_from<WEntity> T>
-    wid::WEntityId CreateEntity(const char * in_name) {
+    wcr::wid::WEntityId CreateEntity(const char * in_name) {
 
         auto id = CreateEntityId(T::StaticClass());
 
@@ -54,26 +54,26 @@ public:
     }
 
     template<std::derived_from<WEntity> T>
-    void InsertEntity(const wid::WEntityId & in_id, const char * in_name) {
+    void InsertEntity(const wcr::wid::WEntityId & in_id, const char * in_name) {
         entity_db_.CreateAt<T>(in_id);
         UpdateEntityData(T::StaticClass(), in_id, in_name);
         entity_id_pool_.ExtractFromPool(in_id.GetId());
     }
 
-    WEntity * GetEntity(const wid::WEntityId & in_id) const {
+    WEntity * GetEntity(const wcr::wid::WEntityId & in_id) const {
         assert(id_entityclass_.contains(in_id));
 
         return entity_db_.Get(id_entityclass_.at(in_id), in_id);
     }
 
-    WEntity * GetFirstEntity(const WClass * in_class, wid::WEntityId & out_id) const {
+    WEntity * GetFirstEntity(const WClass * in_class, wcr::wid::WEntityId & out_id) const {
         auto result =  entity_db_.GetFirst(in_class, out_id);
 
         return result;
     }
 
     template<std::derived_from<WEntity> T>
-    T * GetFirstEntity(wid::WEntityId & out_id) const {
+    T * GetFirstEntity(wcr::wid::WEntityId & out_id) const {
         auto result =  entity_db_.GetFirst<T>(out_id);
 
         return result;
@@ -98,7 +98,7 @@ public:
     }
 
     template<std::derived_from<WComponent> T>
-    void CreateComponent(const wid::WEntityId & in_entity_id) {
+    void CreateComponent(const wcr::wid::WEntityId & in_entity_id) {
         assert(entity_db_.Contains(id_entityclass_[in_entity_id], in_entity_id));
 
         UpdateComponentMetadata(T::StaticClass(), in_entity_id);
@@ -114,41 +114,41 @@ public:
     //  * @brief Create component for entity id.
     //  */
     // void CreateComponent(const WClass * in_class,
-    //                      const wid::WEntityId & in_entity_id);
+    //                      const wcr::wid::WEntityId & in_entity_id);
 
     TWRef<WComponent> GetComponentRef(const WClass * in_class,
-                                      const wid::WEntityId & in_entity_id) const {
+                                      const wcr::wid::WEntityId & in_entity_id) const {
         return GetComponent(in_class, in_entity_id);
     }
 
     template<std::derived_from<WComponent> T>
-    T & GetComponent(const wid::WEntityId & in_entity_id) const {
+    T & GetComponent(const wcr::wid::WEntityId & in_entity_id) const {
         return component_db_.Get<T>(in_entity_id);
     }
 
     WComponent * GetComponent(const WClass * in_class,
-                              const wid::WEntityId & in_entity_id) const {
+                              const wcr::wid::WEntityId & in_entity_id) const {
         assert(component_db_.Contains(in_class, in_entity_id));
         return component_db_.Get(in_class, in_entity_id);
     }
 
-    WComponent * GetComponent(const wid::WEntityComponentId & in_entity_component_id) const {
-        wid::WAssetId lid;
-        wid::WEntityId eid;
-        wid::WComponentTypeId cid;
-        wid::WSubIdxId idxid;
+    WComponent * GetComponent(const wcr::wid::WEntityComponentId & in_entity_component_id) const {
+        wcr::wid::WAssetId lid;
+        wcr::wid::WEntityId eid;
+        wcr::wid::WComponentTypeId cid;
+        wcr::wid::WSubIdxId idxid;
 
         in_entity_component_id.ExtractWIds(lid, eid, cid, idxid);
 
         return GetComponent(id_componentclass_.at(cid), eid);
     }
 
-    WComponent * GetFirstComponent(const WClass * in_class, wid::WEntityId & out_id) const {
+    WComponent * GetFirstComponent(const WClass * in_class, wcr::wid::WEntityId & out_id) const {
         return component_db_.GetFirst(in_class, out_id);
     }
 
     template<std::derived_from<WComponent> T>
-    T & GetFirstComponent(wid::WEntityId & out_id) const {
+    T & GetFirstComponent(wcr::wid::WEntityId & out_id) const {
         return component_db_.GetFirst<T>(out_id);
     }
 
@@ -170,38 +170,38 @@ public:
     }
 
     template<std::derived_from<WComponent> T>
-    wid::WComponentTypeId GetComponentTypeId() const {
+    wcr::wid::WComponentTypeId GetComponentTypeId() const {
         return GetComponentTypeId(T::StaticClass());
     }
 
-    wid::WComponentTypeId GetComponentTypeId(const WClass * in_class) const {
+    wcr::wid::WComponentTypeId GetComponentTypeId(const WClass * in_class) const {
         assert(WComponent::StaticClass()->IsBaseOf(in_class));
         return componentclass_id_.at(in_class);
     }
 
 private:
 
-    wid::WEntityId CreateEntityId(const WClass * in_class);
+    wcr::wid::WEntityId CreateEntityId(const WClass * in_class);
 
-    void UpdateComponentMetadata(const WClass * in_component_class, const wid::WEntityId & in_Id);
+    void UpdateComponentMetadata(const WClass * in_component_class, const wcr::wid::WEntityId & in_Id);
 
-    void UpdateEntityData(const WClass * in_entity_class, const wid::WEntityId & in_id, const char * in_name);
+    void UpdateEntityData(const WClass * in_entity_class, const wcr::wid::WEntityId & in_id, const char * in_name);
 
     WEntityDbType entity_db_{};
 
     WComponentDbType component_db_{};
 
-    wcr::IdPool<wid::WEntityId::IdType> entity_id_pool_{};
+    wcr::IdPool<wcr::wid::WEntityId::IdType> entity_id_pool_{};
 
     // Track where the Entity is stored
-    std::unordered_map<wid::WEntityId, const WClass *> id_entityclass_{};
+    std::unordered_map<wcr::wid::WEntityId, const WClass *> id_entityclass_{};
 
     // Track which components has each entity
-    std::unordered_map<wid::WEntityId, std::unordered_set<const WClass *>> entity_components_{};
+    std::unordered_map<wcr::wid::WEntityId, std::unordered_set<const WClass *>> entity_components_{};
 
     // Each component class has a unique 8 bit id
-    std::unordered_map<const WClass *, wid::WComponentTypeId> componentclass_id_{};
-    std::unordered_map<wid::WComponentTypeId, const WClass*> id_componentclass_{};  // <- TODO use an array
-    wcr::IdPool<wid::WComponentTypeId::IdType> component_class_id_pool_{};
+    std::unordered_map<const WClass *, wcr::wid::WComponentTypeId> componentclass_id_{};
+    std::unordered_map<wcr::wid::WComponentTypeId, const WClass*> id_componentclass_{};  // <- TODO use an array
+    wcr::IdPool<wcr::wid::WComponentTypeId::IdType> component_class_id_pool_{};
 
 };

@@ -11,12 +11,12 @@
 // TODO template with max frames in flight as param
 
 class WVkPostprocessPipelinesRAII :
-    public WVkPipelinesBase<wid::WAssetId,
-                            wid::WEntityComponentId,
+    public WVkPipelinesBase<wcr::wid::WAssetId,
+                            wcr::wid::WEntityComponentId,
                             WENG_MAX_FRAMES_IN_FLIGHT>
 {
 public:
-    using Super = WVkPipelinesBase<wid::WAssetId, wid::WEntityComponentId, frames_in_flight>;
+    using Super = WVkPipelinesBase<wcr::wid::WAssetId, wcr::wid::WEntityComponentId, frames_in_flight>;
 
 public:
 
@@ -35,16 +35,16 @@ public:
     WVkPostprocessPipelinesRAII & operator=(WVkPostprocessPipelinesRAII && other) noexcept;
 
     void CreatePipeline(
-        wid::WAssetId in_id,
+        wcr::wid::WAssetId in_id,
         const WRenderPipelineAsset & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descriptor,
         VkDescriptorSetLayout in_ppcess_global_descriptor
         );
 
-    wid::WEntityComponentId CreateBinding(const wid::WEntityComponentId & in_binding_id,
-                                     const wid::WAssetId & in_pipeline_id,
+    wcr::wid::WEntityComponentId CreateBinding(const wcr::wid::WEntityComponentId & in_binding_id,
+                                     const wcr::wid::WAssetId & in_pipeline_id,
                                      const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-                                     const std::vector<WVkDescriptorSetTextureWriteStruct> & in_texture);
+                                     const std::vector<WVkDescriptorSetTextureBinding> & in_texture);
 
     /**
      * @Brief Computes pipeline bindings order, order is relevant because 
@@ -54,7 +54,7 @@ public:
     void ComputeBindingOrder();
 
     auto BindingOrderIterator() const {
-        return WIteratorUtils::DefaultIteratorPtr<const wid::WEntityComponentId>(
+        return WIteratorUtils::DefaultIteratorPtr<const wcr::wid::WEntityComponentId>(
             &(*binding_order_.begin()),
             &(*binding_order_.end())
             );
@@ -62,7 +62,7 @@ public:
 
 private:
 
-    std::vector<wid::WEntityComponentId> binding_order_{};
+    std::vector<wcr::wid::WEntityComponentId> binding_order_{};
 
 };
 

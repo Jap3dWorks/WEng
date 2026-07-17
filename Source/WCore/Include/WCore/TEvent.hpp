@@ -45,19 +45,19 @@ public:
         return true;
     }
 
-    wid::WEventId Subscribe(const FnType & in_fn) {
-        wid::WEventId id = id_pool_.Generate();
+    wcr::wid::WEventId Subscribe(const FnType & in_fn) {
+        wcr::wid::WEventId id = id_pool_.Generate();
         subscribers_.Insert(id.GetId(), in_fn);
         return id;
     }
 
-    wid::WEventId Subscribe(FnType && in_fn) {
-        wid::WEventId id = id_pool_.Generate();
+    wcr::wid::WEventId Subscribe(FnType && in_fn) {
+        wcr::wid::WEventId id = id_pool_.Generate();
         subscribers_.Insert(id.GetId(), std::move(in_fn));
         return id;
     }
 
-    void Unsubscribe(const wid::WEventId & in_id) {
+    void Unsubscribe(const wcr::wid::WEventId & in_id) {
         subscribers_.Remove(in_id.GetId());
     }
 
@@ -69,6 +69,6 @@ private:
 
     TSparseSet<FnType> subscribers_{};
 
-    wcr::IdPool<wid::WEventId::IdType> id_pool_{};
+    wcr::IdPool<wcr::wid::WEventId::IdType> id_pool_{};
 
 };

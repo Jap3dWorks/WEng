@@ -38,7 +38,7 @@
 //     component->Set_entity_id(in_entity_id);
 // }
 
-wid::WEntityId WEntityComponentDb::CreateEntityId(const WClass * in_class) {
+wcr::wid::WEntityId WEntityComponentDb::CreateEntityId(const WClass * in_class) {
     assert(WEntity::StaticClass() == in_class ||
            WEntity::StaticClass()->IsBaseOf(in_class));
 
@@ -49,7 +49,7 @@ wid::WEntityId WEntityComponentDb::CreateEntityId(const WClass * in_class) {
 
 }
 
-void WEntityComponentDb::UpdateComponentMetadata(const WClass * in_component_class, const wid::WEntityId & in_id) {
+void WEntityComponentDb::UpdateComponentMetadata(const WClass * in_component_class, const wcr::wid::WEntityId & in_id) {
     if (!entity_components_.contains(in_id)) {
         entity_components_[in_id] = {};
     }
@@ -58,14 +58,14 @@ void WEntityComponentDb::UpdateComponentMetadata(const WClass * in_component_cla
 
     // Update component class id
     if (!componentclass_id_.contains(in_component_class)) {
-        wid::WComponentTypeId id = component_class_id_pool_.Generate();
+        wcr::wid::WComponentTypeId id = component_class_id_pool_.Generate();
         componentclass_id_[in_component_class] = id;
         id_componentclass_[id] = in_component_class;
     }
 }
 
 void WEntityComponentDb::UpdateEntityData(const WClass * in_entity_class,
-                                          const wid::WEntityId & in_id,
+                                          const wcr::wid::WEntityId & in_id,
                                           // TODO WObjectName
                                           const char * in_name) {
 

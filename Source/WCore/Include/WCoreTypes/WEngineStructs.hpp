@@ -96,7 +96,7 @@ struct WInputValuesStruct {
 };
 
 struct WActionDataStruct {
-    wid::WAssetId input_map_asset;
-    wid::WAssetId action_asset;
+    wcr::wid::WAssetId input_map_asset;
+    wcr::wid::WAssetId action_asset;
 };
 

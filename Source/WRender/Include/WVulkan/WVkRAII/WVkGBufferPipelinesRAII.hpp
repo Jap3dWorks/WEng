@@ -13,15 +13,15 @@
  * @brief Graphics Pipelines outputs the GBuffers.
  */
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkGBufferPipelinesRAII : public WVkPipelinesBase<wid::WAssetId,
-                                                        wid::WEntityComponentId,
+class WVkGBufferPipelinesRAII : public WVkPipelinesBase<wcr::wid::WAssetId,
+                                                        wcr::wid::WEntityComponentId,
                                                         FramesInFlight>
 {
 
 public:
 
-    using Super = WVkPipelinesBase<wid::WAssetId,
-                                   wid::WEntityComponentId,
+    using Super = WVkPipelinesBase<wcr::wid::WAssetId,
+                                   wcr::wid::WEntityComponentId,
                                    FramesInFlight>;
 
     using Super::Super;
@@ -41,7 +41,7 @@ public:
         ) noexcept =default;
 
     void CreatePipeline(
-        const wid::WAssetId & in_id,
+        const wcr::wid::WAssetId & in_id,
         const WRenderPipelineAsset & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descset_layout
         ) {
@@ -51,12 +51,11 @@ public:
             );
 
         // pipeparams
-        // one Ubo should be required as first binding (0)
+        // one Ubo (Model Ubo) should be required as first binding (0)
         Super::pipelines_db_.CreateDescSetLayout(
             in_id,
             Super::Device(),
             in_pipeline_struct.Get_descriptor_list(),
-            // in_pipeline_struct.params_descriptor,
             wvk::descriptor::UpdateDescriptorSetLayout
             );
 
@@ -91,12 +90,12 @@ public:
 
 public:
 
-    wid::WEntityComponentId CreateBinding(
-        const wid::WEntityComponentId & in_component_id,
-        const wid::WAssetId & in_pipeline_id,
-        const wid::WTypeAssetIndexId & in_mesh_asset_id,
+    wcr::wid::WEntityComponentId CreateBinding(
+        const wcr::wid::WEntityComponentId & in_component_id,
+        const wcr::wid::WAssetId & in_pipeline_id,
+        const wcr::wid::WTypeAssetIndexId & in_mesh_asset_id,
         const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-        const std::vector<WVkDescriptorSetTextureWriteStruct> & in_textures
+        const std::vector<WVkDescriptorSetTextureBinding> & in_textures
         ) {
         WVkRenderPipelineInfo pipeline_info = Super::Pipeline(in_pipeline_id);
 

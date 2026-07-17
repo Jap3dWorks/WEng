@@ -10,7 +10,7 @@
 
 wim::importer::WImportTexture::WImportTexture() noexcept {}
 
-std::vector<wid::WAssetId> wim::importer::WImportTexture::Import(
+std::vector<wcr::wid::WAssetId> wim::importer::WImportTexture::Import(
     WAssetDb & in_asset_manager,
     std::string_view file_path,
     std::string_view asset_directory)
@@ -25,7 +25,7 @@ std::vector<wid::WAssetId> wim::importer::WImportTexture::Import(
     auto valid_names = in_asset_manager
         .GenValidAssetName<WTextureAsset>(asset_directory, "texture", "texture");
 
-    wid::WAssetId id = in_asset_manager.Create<WTextureAsset>(
+    wcr::wid::WAssetId id = in_asset_manager.Create<WTextureAsset>(
         wstr::AssetPath(
             asset_directory,
             valid_names[0],

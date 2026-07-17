@@ -12,6 +12,7 @@
 #include "WVulkan/WVk/WVkTexture.hpp"
 
 #include "WVulkan/WVulkanStructs.hpp"
+#include <vulkan/vulkan_core.h>
 
 /**
  * @brief Manage the lifetime of asset render data like geometries and textures.
@@ -19,12 +20,15 @@
 class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
-using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wid::WAssetId::IdType>;
-using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, wid::WTypeAssetIndexId::IdType>;
+using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
+using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
+
+// WARNING UBOs can be frame dependent
+using WVkUBOInfo = TObjectDataBase<WVkUBOInfo, void, wcr::wid::WEngId::IdType>;
 
 public:
 
-    WVkAssetRenderDataRAII();
+    WVkAssetRenderDataRAII()=default;
 
     WVkAssetRenderDataRAII(
         const VkDevice & in_device_info,
@@ -33,7 +37,7 @@ public:
         const VkCommandPool & in_command_pool_info
         );
 
-    virtual ~WVkAssetRenderDataRAII();
+    ~WVkAssetRenderDataRAII();
 
     WVkAssetRenderDataRAII(const WVkAssetRenderDataRAII & other) = delete;
 
@@ -45,34 +49,36 @@ public:
 
     // Texture
 
-    void LoadTexture(const wid::WAssetId & in_id, const WTextureAsset & in_texture) {
+    void LoadTexture(const wcr::wid::WAssetId & in_id, const WTextureAsset & in_texture) {
+        
         texture_collection_.CreateAt(
-            in_id,
-            [this, &in_texture](const wid::WAssetId & _id) -> WVkTextureInfo {
+            in_id.GetId(),
+            [this, &in_texture](const wcr::wid::WAssetId & _id) -> WVkTextureInfo {
                 WVkTextureInfo result;
                 wvk::texture::CreateTexture(
                     result,
                     in_texture,
-                    device_,
-                    physical_device_,
-                    graphics_queue_,
-                    command_pool_
+                    vkn_.device,
+                    vkn_.physical_device,
+                    vkn_.graphics_queue,
+                    vkn_.command_pool
                     );
                 return result;
             });
     }
 
-    void UnloadTexture(const wid::WAssetId & in_id);
+    void UnloadTexture(const wcr::wid::WAssetId & in_id);
 
-    const WVkTextureInfo & TextureInfo(const wid::WAssetId & in_id) const;
+    const WVkTextureInfo & TextureInfo(const wcr::wid::WAssetId & in_id) const;
 
     // Static Mesh
 
-    void LoadStaticMesh(const wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) {
+    void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
+                        const wct::geometry::WMesh & in_mesh) {
 
         static_mesh_collection_.CreateAt(
             in_id,
-            [this, &in_mesh] (const wid::WTypeAssetIndexId & in_id) -> WVkMeshInfo {
+            [this, &in_mesh] (const wcr::wid::WTypeAssetIndexId & in_id) -> WVkMeshInfo {
                 WVkMeshInfo result;
                 wvk::mesh::CreateMeshBuffers(
                     result,
@@ -81,10 +87,10 @@ public:
                     in_mesh.indices.data(),
                     sizeof(decltype(in_mesh.indices)::value_type) * in_mesh.indices.size(),
                     in_mesh.indices.size(),
-                    device_,
-                    physical_device_,
-                    graphics_queue_,
-                    command_pool_
+                    vkn_.device,
+                    vkn_.physical_device,
+                    vkn_.graphics_queue,
+                    vkn_.command_pool
                     );
                 
                 return result;
@@ -92,26 +98,31 @@ public:
             );
     }
 
-    void UnloadStaticMesh(const wid::WTypeAssetIndexId & in_id);
+    void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(const wid::WTypeAssetIndexId & in_id) const;
+    // Load UBO
+
+    // Unload UBO
+
+    const WVkMeshInfo & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
 
     void Clear();
 
 private:
 
     void Destroy();
-    
-    VkDevice device_;
-    VkPhysicalDevice physical_device_;
-    VkQueue graphics_queue_;
-    VkCommandPool command_pool_;
 
-    WVkTextureDb texture_collection_;
-             
-    WVkMeshDb static_mesh_collection_;
+    struct Vkn {
+        VkDevice device{VK_NULL_HANDLE};
+        VkPhysicalDevice physical_device{VK_NULL_HANDLE};
+        VkQueue graphics_queue{VK_NULL_HANDLE};
+        VkCommandPool command_pool{VK_NULL_HANDLE};
+    } vkn_{} ;
 
-    std::unordered_map<wid::WAssetId, std::vector<wid::WSubIdxId>> mesh_indexes_;
+    WVkTextureDb texture_collection_{};
+    WVkMeshDb static_mesh_collection_{};
+    // ubo db;
+
 
 };
 

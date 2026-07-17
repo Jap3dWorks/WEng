@@ -45,32 +45,32 @@ END_DEFINE_WSYSTEM()
 
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
-    wid::WEntityId camid;
+    wcr::wid::WEntityId camid;
     parameters.level->GetFirstComponent<WCameraComponent>(camid);
 
     auto & asset_manager = parameters.engine->AssetManager();
 
-    wid::WAssetId mapping = asset_manager
+    wcr::wid::WAssetId mapping = asset_manager
         .Get(weng::defaults::CAMERA_MAPPING_ASSET_PATH)
         ->Get_asset_id();
 
-    wid::WAssetId frontaction = asset_manager
+    wcr::wid::WAssetId frontaction = asset_manager
         .Get(weng::defaults::FRONT_ACTION_ASSET_PATH)
         ->Get_asset_id();
 
-    wid::WAssetId backaction = asset_manager
+    wcr::wid::WAssetId backaction = asset_manager
         .Get(weng::defaults::BACK_ACTION_ASSET_PATH)
         ->Get_asset_id();
 
-    wid::WAssetId leftaction = asset_manager
+    wcr::wid::WAssetId leftaction = asset_manager
         .Get(weng::defaults::LEFT_ACTION_ASSET_PATH)
         ->Get_asset_id();
 
-    wid::WAssetId rightaction = asset_manager
+    wcr::wid::WAssetId rightaction = asset_manager
         .Get(weng::defaults::RIGHT_ACTION_ASSET_PATH)
         ->Get_asset_id();
 
-    wid::WAssetId mousemovement = asset_manager
+    wcr::wid::WAssetId mousemovement = asset_manager
         .Get(weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH)
         ->Get_asset_id();
 
@@ -246,7 +246,7 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
-    wid::WEntityId id;
+    wcr::wid::WEntityId id;
     auto & ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
     auto & tc = parameters.level->GetComponent<WTransformComponent>(id);
     auto & mc = parameters.level->GetComponent<WMovementComponent>(id);

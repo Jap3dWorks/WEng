@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <utility>
+#include <variant>
 
 namespace wct::render {
 
@@ -189,10 +190,19 @@ namespace wct::render {
 // Pipeline Parameters Structs
 // ---------------------------
 
+    using UBORef = std::span<std::uint8_t>;
+    using UBOData = std::vector<std::uint8_t>;
+
     /** Render Pipeline Param Ubo Struct */
     struct RPipeParamUbo {
         std::uint16_t binding{0};
-        std::span<std::uint8_t> data{};
+
+        std::variant<UBORef, UBOData> data{};
+
+        /**
+         * Offset is applied to locate the memory address on VkBuffer when mapped.
+         * It allows to update a segment of the entire buffer.   
+         */
         std::size_t offset{0};
     };
 
@@ -202,7 +212,7 @@ namespace wct::render {
         T value{};
     };
 
-    using RPipeParamAsset = TRPipeParam<wid::WAssetId>;
+    using RPipeParamAsset = TRPipeParam<wcr::wid::WAssetId>;
 
     using RPipeParamList_WAssetId = std::vector<RPipeParamAsset>;
     using RPipeParamList_Ubo = std::vector<RPipeParamUbo>;
@@ -230,8 +240,8 @@ namespace wct::render {
     // Pipeline Params assignment
 
     struct RPipeAssignment {
-        wid::WAssetId pipeline{};
-        wid::WAssetId params{};
+        wcr::wid::WAssetId pipeline{};
+        wcr::wid::WAssetId params{};
     };
 
     template<std::uint8_t Max=WENG_MAX_ASSET_IDS>

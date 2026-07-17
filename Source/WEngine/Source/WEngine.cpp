@@ -142,7 +142,7 @@ void WEngine::Run()
     UnloadLevel(state_.level_info.level);
 }
 
-void WEngine::MarkLoadLevel(const wid::WAssetId & in_level) {
+void WEngine::MarkLoadLevel(const wcr::wid::WAssetId & in_level) {
     state_.level_info.current_level = in_level;
     state_.level_info.loaded = false;
 }
@@ -171,32 +171,32 @@ void WEngine::UnloadLevel(was::Level & in_level) {
     
 }
 
-void WEngine::StartupLevel(const wid::WAssetId& in_id) noexcept {
+void WEngine::StartupLevel(const wcr::wid::WAssetId& in_id) noexcept {
     state_.startup_info.startup_level = in_id;
 }
 
-// WLevelSystemId WEngine::AddInitSystem(const wid::WAssetId & in_level_id, const char * in_system_name) {
+// WLevelSystemId WEngine::AddInitSystem(const wcr::wid::WAssetId & in_level_id, const char * in_system_name) {
 //     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
 //     return state_.systems_runner.AddInitSystem(
 //         in_level_id, wsid, state_.systems_reg.Get(wsid)
 //         );
 // }
 
-// WLevelSystemId WEngine::AddPreSystem(const wid::WAssetId & in_level_id, const char * in_system_name) {
+// WLevelSystemId WEngine::AddPreSystem(const wcr::wid::WAssetId & in_level_id, const char * in_system_name) {
 //     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
 //     return state_.systems_runner.AddPreSystem(
 //         in_level_id, wsid, state_.systems_reg.Get(wsid)
 //         );
 // }
 
-// WLevelSystemId WEngine::AddPostSystem(const wid::WAssetId & in_level_id, const char * in_system_name) {
+// WLevelSystemId WEngine::AddPostSystem(const wcr::wid::WAssetId & in_level_id, const char * in_system_name) {
 //     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
 //     return state_.systems_runner.AddPostSystem(
 //         in_level_id, wsid, state_.systems_reg.Get(wsid)
 //         );
 // }
 
-// WLevelSystemId WEngine::AddEndSystem(const wid::WAssetId & in_level_id, const char * in_system_name) {
+// WLevelSystemId WEngine::AddEndSystem(const wcr::wid::WAssetId & in_level_id, const char * in_system_name) {
 //     WSystemId wsid = state_.systems_reg.GetId(in_system_name);
 //     return state_.systems_runner.AddEndSystem(
 //         in_level_id, wsid, state_.systems_reg.Get(wsid)
@@ -204,29 +204,29 @@ void WEngine::StartupLevel(const wid::WAssetId& in_id) noexcept {
 // }
 
 
-wid::WLevelSystemId WEngine::AddInitSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+wcr::wid::WLevelSystemId WEngine::AddInitSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
+    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddInitSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-wid::WLevelSystemId WEngine::AddPreSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+wcr::wid::WLevelSystemId WEngine::AddPreSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
+    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddPreSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-wid::WLevelSystemId WEngine::AddPostSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+wcr::wid::WLevelSystemId WEngine::AddPostSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
+    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddPostSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
 }
 
-wid::WLevelSystemId WEngine::AddEndSystem(const wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
+wcr::wid::WLevelSystemId WEngine::AddEndSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
+    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
     return state_.systems_runner.AddEndSystem(
         in_level_id, wsid, state_.systems_reg.Get(wsid)
         );
