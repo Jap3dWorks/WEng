@@ -187,8 +187,8 @@ namespace wct::render {
 
     using ShaderList = std::array<ShaderInfo, MAX_PIPELINE_SHADERS>;
 
-// Pipeline Parameters Structs
-// ---------------------------
+   // Pipeline Parameters Structs
+   // ---------------------------
 
     using UBORef = std::span<std::uint8_t>;
     using UBOData = std::vector<std::uint8_t>;

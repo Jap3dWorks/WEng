@@ -404,7 +404,7 @@ namespace wcr::wid {
 // -------------
 
     template<typename T>
-    concept WAssetIndexId_Subtype =
+    concept WTypeAssetIndexId_Subtype =
         std::is_same_v<T, WAssetTypeId> ||
         std::is_same_v<T, WAssetId> ||
         std::is_same_v<T, WSubIdxId>;
@@ -425,7 +425,7 @@ namespace wcr::wid {
             SWidSize<WSubIdxId, SUBINDEX_BITS_SIZE>>();
 
 
-        template<WAssetIndexId_Subtype T>
+        template<WTypeAssetIndexId_Subtype T>
         static constexpr std::uint8_t GetBitsSize() {
             if constexpr(std::is_same_v<T, WAssetTypeId>) {
                 return WTypeAssetIndexId_Meta::ASSET_TYPE_BITS_SIZE;
@@ -438,10 +438,10 @@ namespace wcr::wid {
             }
         }
 
-        template<WAssetIndexId_Subtype T>
+        template<WTypeAssetIndexId_Subtype T>
         static constexpr std::uint8_t BitsSizeV = GetBitsSize<T>();
 
-        template<WAssetIndexId_Subtype T>
+        template<WTypeAssetIndexId_Subtype T>
         static constexpr std::size_t BitMaskV = GenBitMask(BitsSizeV<T>);
 
         static inline constexpr void ValidateWIds(WAssetTypeId asset_type_id,

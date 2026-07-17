@@ -5,6 +5,7 @@
 
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkMesh.hpp"
@@ -47,8 +48,8 @@ public:
 
     WVkAssetRenderDataRAII & operator=(WVkAssetRenderDataRAII && other);
 
-    // Texture
-
+    // Texture TODO wcr::wid::WTypeAssetIndex
+    
     void LoadTexture(const wcr::wid::WAssetId & in_id, const WTextureAsset & in_texture) {
         
         texture_collection_.CreateAt(
@@ -100,11 +101,13 @@ public:
 
     void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id);
 
-    // Load UBO
-
-    // Unload UBO
-
     const WVkMeshInfo & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
+
+    void LoadUBO(wcr::wid::WEngId id, wct::render::RPipeParamUbo const & ubo);
+
+    void UnloadUBO(wcr::wid::WEngId id);
+
+    WVkUBOInfo const & GetUBO(wcr::wid::WEngId id) const;
 
     void Clear();
 
@@ -121,6 +124,7 @@ private:
 
     WVkTextureDb texture_collection_{};
     WVkMeshDb static_mesh_collection_{};
+    WVkUBOInfo ubo_collection_{};
     // ubo db;
 
 

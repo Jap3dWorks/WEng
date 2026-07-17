@@ -140,7 +140,6 @@ struct DELETE_WVkDescriptorSetUBOBinding {
     std::uint32_t binding{0};
     WVkUBOInfo ubo_info{}; // <- TODO remove
 
-    
     // ubos by frame
     VkDescriptorBufferInfo buffer_info;
 };
