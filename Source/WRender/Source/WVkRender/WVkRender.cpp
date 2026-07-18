@@ -425,7 +425,7 @@ void WVkRender::DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) {
 
 void WVkRender::CreatePipelineBinding(
     const wcr::wid::WEntityComponentId & component_id,
-    const wcr::wid::WTypeAssetIndexId & mesh_asset_id,
+    const wcr::wid::WTypeAssetIndexId & renderable_asset_id, // like a submesh
     const WRenderPipelineAsset & pipeline,
     const WRenderPipelineParametersAsset & parameters
     )
@@ -436,8 +436,6 @@ void WVkRender::CreatePipelineBinding(
         parameters,
         asset_render_data_
         );
-
-    auto ubo_params = parameters.Get_ubo_list();
 
     auto ubo_bindings = wvk::render::pipe_bindings::CollectUBOBindings<FramesInFlight()>(
         component_id,
@@ -455,14 +453,14 @@ void WVkRender::CreatePipelineBinding(
          [&,this](){
              gbuffers_pipelines_.CreateBindingSet(component_id,
                                                   pipeline.Get_asset_id(),
-                                                  mesh_asset_id,
+                                                  renderable_asset_id,
                                                   ubo_bindings,
                                                   textures_bindings);
          },
          [&,this](){
              gbuffers_pipelines_.CreateBindingSet(component_id,
                                                   pipeline.Get_asset_id(),
-                                                  mesh_asset_id,
+                                                  renderable_asset_id,
                                                   ubo_bindings,
                                                   textures_bindings);
          },

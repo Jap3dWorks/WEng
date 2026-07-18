@@ -408,18 +408,29 @@ int main() {
 
 int main() {
 
-    auto lmb = []
+    std::uint32_t val{0};
+    auto lmb = [&]
         <std::uint8_t A, std::uint8_t B>
-        () {};
+        ()
+        {
+            val++;
+        };
 
-    lmb.operator()<1,2>();
-    // lmb<3,4>();
+    std::uint8_t c{0};
 
-    std::cout << "HI\n";
+    switch(c) {
+        case 0:
+            lmb.operator()<1,2>();
+            break;
+    default:
+        break;
+    }
+
+    std::println("{}", val);
     return 0;
 }
 
 #+end_src
 
 #+RESULTS:
-: HI
+: 1
