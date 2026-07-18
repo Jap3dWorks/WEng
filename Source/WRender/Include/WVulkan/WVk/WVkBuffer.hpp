@@ -14,24 +14,24 @@ namespace wvk::buffer {
         VkMemoryPropertyFlags properties
         );
 
-    WVkUBOInfo CreateUBO(
+    WVkUBO CreateUBO(
         VkDeviceSize in_size,
         VkDevice in_device,
         VkPhysicalDevice in_physical_device
         );
 
     void * MapUBO(
-        const WVkUBOInfo & in_ubo,
+        const WVkUBO & in_ubo,
         VkDevice in_device
         );
 
     void UnmapUBO(
-        const WVkUBOInfo & in_ubo,
+        const WVkUBO & in_ubo,
         VkDevice in_device
         );
 
     void Destroy(
-        WVkUBOInfo & out_ubo_info,
+        WVkUBO & out_ubo_info,
         VkDevice device
         );
 

@@ -53,7 +53,7 @@ namespace WVkPostprocessPipeUtils {
 
     }
 
-    inline void CreatePostprocessPipeline(WVkRenderPipelineInfo & out_pipeline_info,
+    inline void CreatePostprocessPipeline(WVkRenderPipeline & out_pipeline_info,
                                           const VkDevice & in_device,
                                           const std::vector<VkDescriptorSetLayout> & in_desc_lay,
                                           const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {

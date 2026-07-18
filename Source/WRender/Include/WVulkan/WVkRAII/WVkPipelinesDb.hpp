@@ -23,7 +23,7 @@ class WVkPipelinesDb {
 public:
 
     using WVkPipelineDb =
-        TObjectDataBase<WVkRenderPipelineInfo, void, typename WPipelineIdType::IdType>;
+        TObjectDataBase<WVkRenderPipeline, void, typename WPipelineIdType::IdType>;
 
     using WVkDescSetLayoutDb =
         TObjectDataBase<WVkDescriptorSetLayoutInfo, void, typename  WPipelineIdType::IdType>;
@@ -33,7 +33,15 @@ public:
         FramesInFlight
         >;
 
-    using WVkPipelineBindingDb = TObjectDataBase<DELETE_WVkPipelineBindingInfo, void, wcr::wid::WEntityComponentId::IdType>;
+    using WVkPipelineBindingDb =
+        TObjectDataBase<DELETE_WVkPipelineBindingInfo,
+                        void,
+                        wcr::wid::WEntityComponentId::IdType>;
+
+    using PipeBindingsDb =
+        TObjectDataBase<WVkPipelineBinding<FramesInFlight>,
+                        void,
+                        wcr::wid::WEntityComponentId::IdType>;
 
 public:
 
@@ -52,7 +60,7 @@ public:
 public:
 
     template<CCallable<void,
-                       WVkRenderPipelineInfo &,
+                       WVkRenderPipeline &,
                        const VkDevice &,
                        const WVkDescriptorSetLayoutInfo &,
                        const std::vector<WVkShaderStageInfo> &> TCrtFn>
@@ -63,7 +71,7 @@ public:
                         TCrtFn && in_create_fn
         ) {
         
-        WVkRenderPipelineInfo render_pipeline_info;
+        WVkRenderPipeline render_pipeline_info;
 
         std::forward<TCrtFn>(in_create_fn)(
             render_pipeline_info,
@@ -227,5 +235,6 @@ public:
     WVkDescSetLayoutDb descriptor_set_layouts{};
     WVkDescriptorPoolDb descriptor_pools{};
     WVkPipelineBindingDb bindings{};
+    PipeBindingsDb pipe_bindings{};
 
 };

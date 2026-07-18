@@ -22,10 +22,10 @@ class WRENDER_API WVkAssetRenderDataRAII {
 private:
 
 using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
-using WVkMeshDb = TObjectDataBase<WVkMeshInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
+using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
 // WARNING UBOs can be frame dependent
-using WVkUBODb = TObjectDataBase<WVkUBOInfo, void, wcr::wid::WEngId::IdType>;
+using WVkUBODb = TObjectDataBase<WVkUBO, void, wcr::wid::WEngId::IdType>;
 
 public:
 
@@ -81,8 +81,8 @@ public:
 
         static_mesh_collection_.CreateAt(
             in_id,
-            [this, &in_mesh] (const wcr::wid::WTypeAssetIndexId & in_id) -> WVkMeshInfo {
-                WVkMeshInfo result;
+            [this, &in_mesh] (const wcr::wid::WTypeAssetIndexId & in_id) -> WVkMesh {
+                WVkMesh result;
                 wvk::mesh::CreateMeshBuffers(
                     result,
                     in_mesh.vertices.data(),
@@ -103,7 +103,7 @@ public:
 
     void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id);
 
-    const WVkMeshInfo & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
+    const WVkMesh & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
 
     // --
 
@@ -124,9 +124,15 @@ public:
         ubo_data_.DestroyUBOs(wid, vkn_.device);
     }
 
-    WVkUBOInfo const & GetUBO(std::size_t id) const {
+    bool ContainsUBOs(wcr::wid::WEngId wid) const {
+        return ubo_data_.wid_ubos_map.contains(wid);
+    }
+
+    WVkUBO const & GetUBO(std::size_t id) const {
         return ubo_data_.ubo_collection.Get(id);
     }
+
+    std::vector<WVkUBO> GetUBOs(wcr::wid::WEngId wid) const;
 
 private:
 
@@ -148,7 +154,7 @@ private:
         std::unordered_map<
             wcr::wid::WEngId,
             std::variant<std::size_t, std::vector<std::size_t>>
-            > wengid_ubos{};
+            > wid_ubos_map{};
 
         void Clear(VkDevice device);
 

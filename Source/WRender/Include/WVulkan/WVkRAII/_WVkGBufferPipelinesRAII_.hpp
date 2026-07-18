@@ -94,7 +94,7 @@ namespace wvr::gbuffer_pipelines {
     }
 
     inline void CreatePipeline(
-        WVkRenderPipelineInfo & out_render_pipeline,
+        WVkRenderPipeline & out_render_pipeline,
         const VkDevice & in_device,
         const std::vector<VkDescriptorSetLayout> & in_desc_layouts,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos

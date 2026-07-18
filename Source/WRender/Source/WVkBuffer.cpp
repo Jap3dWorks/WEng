@@ -43,12 +43,12 @@ void wvk::buffer::CreateVkBuffer(
 
 }
 
-WVkUBOInfo wvk::buffer::CreateUBO(
+WVkUBO wvk::buffer::CreateUBO(
     VkDeviceSize in_size,
     VkDevice in_device,
     VkPhysicalDevice in_physical_device
     ) {
-    WVkUBOInfo result;
+    WVkUBO result;
     result.range = in_size;
 
     CreateVkBuffer(
@@ -65,7 +65,7 @@ WVkUBOInfo wvk::buffer::CreateUBO(
 }
 
 void * wvk::buffer::MapUBO(
-    const WVkUBOInfo & in_ubo,
+    const WVkUBO & in_ubo,
     VkDevice in_device
     ) {
     void * ptr;
@@ -83,7 +83,7 @@ void * wvk::buffer::MapUBO(
 }
 
 void wvk::buffer::UnmapUBO(
-    const WVkUBOInfo & in_ubo,
+    const WVkUBO & in_ubo,
     VkDevice in_device
     ) {
     vkUnmapMemory(
@@ -93,7 +93,7 @@ void wvk::buffer::UnmapUBO(
 }
 
 void wvk::buffer::Destroy(
-    WVkUBOInfo & out_ubo_info,
+    WVkUBO & out_ubo_info,
     VkDevice in_device
     ) {
 

@@ -317,8 +317,8 @@ private:
 
     VkDescriptorPool descriptor_pool_{VK_NULL_HANDLE};
     VkDescriptorSetLayout descset_layout_info_{VK_NULL_HANDLE};
-    std::array<WVkUBOInfo, FramesInFlight> camera_ubo_{};
-    std::array<WVkUBOInfo, FramesInFlight> lighting_ubo_{};
+    std::array<WVkUBO, FramesInFlight> camera_ubo_{};
+    std::array<WVkUBO, FramesInFlight> lighting_ubo_{};
 
     std::array<VkDescriptorSet, FramesInFlight> descriptors_{};
 };

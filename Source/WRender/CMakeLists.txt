@@ -3,9 +3,9 @@ add_library(
     WRender 
     SHARED 
         CompileGenerated/CompileGenerated.cpp
-        Source/WVkRender.cpp
+        Source/WVkRender/WVkRender.cpp
         Source/WVulkan.cpp
-	    Source/WVkRenderCommandPoolRAII.cpp
+	    Source/WVkCommandPoolRAII.cpp
         Source/WVkAssetRenderDataRAII.cpp
         Source/WVkPostprocessPipelinesRAII.cpp
         Source/WVkSurfaceRAII.cpp

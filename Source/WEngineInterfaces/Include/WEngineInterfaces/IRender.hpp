@@ -57,9 +57,9 @@ public:
      */
     virtual void CreatePipelineBinding(
         const wcr::wid::WEntityComponentId & component_id,
-        const wcr::wid::WAssetId & pipeline_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_id,
-        const WRenderPipelineParametersAsset & in_parameters
+        WRenderPipelineAsset const & pipeline_id,
+        WRenderPipelineParametersAsset const & in_parameters
         )=0;
 
     /**

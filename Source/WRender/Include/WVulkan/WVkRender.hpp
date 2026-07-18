@@ -45,6 +45,9 @@ class WRENDER_API WVkRender : public IRender
 {
 public:
 
+    WNODISCARD static inline constexpr size_t FramesInFlight() noexcept
+    { return WENG_MAX_FRAMES_IN_FLIGHT; }
+
     WVkRender() noexcept=default;
 
     ~WVkRender() override=default;
@@ -66,10 +69,9 @@ public:
 
     void CreatePipelineBinding(
         const wcr::wid::WEntityComponentId & component_id,
-        const wcr::wid::WAssetId & pipeline_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_id,
+        const WRenderPipelineAsset & pipeline_id,
         const WRenderPipelineParametersAsset & in_param_asset
-        // const wct::render::WRenderPipelineParameters & in_parameters
         ) override;
 
     void DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) override;
@@ -123,9 +125,6 @@ public:
 
     WNODISCARD VkDevice Device() const noexcept
     { return device_.Device(); }
-
-    WNODISCARD constexpr size_t FramesInFlight() const noexcept
-    { return WENG_MAX_FRAMES_IN_FLIGHT; }
 
     WNODISCARD const WVkCommandPoolRAII & RenderCommandPool() const noexcept
     { return command_pool_; }

@@ -17,6 +17,38 @@ int main() {
 #+RESULTS:
 : HI
 
+
+* Vector To Array
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <array>
+#include <vector>
+#include <ranges>
+
+int main() {
+    std::array<std::uint32_t, 3> arrayvals;
+
+    std::ranges::copy(std::vector{1,2,3,4,5} | std::views::take(arrayvals.size()), arrayvals.begin());
+    // std::fill(vk_ubos.begin() + std::min(ubos.size(), vk_ubos.size()), vk_ubos.end(), WVkUBO{});
+
+    for(auto v : arrayvals) {
+        std::println("{}", v);
+    }
+
+    std::cout << "HI\n";
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: 1
+: 2
+: 3
+: HI
+
+
 * Inherit Using A::A
 
 #+HEADER: :flags --std=gnu++23
@@ -258,7 +290,6 @@ int main() {
 : a ptr value: 140728961716088
 : a name value: 
 
-
 * Reference wrapper
 
 #+HEADER: :flags --std=gnu++23
@@ -369,3 +400,26 @@ int main() {
 #+RESULTS:
 : Vector variant!
 : Span variant!
+
+* Lambdas template
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+
+int main() {
+
+    auto lmb = []
+        <std::uint8_t A, std::uint8_t B>
+        () {};
+
+    lmb.operator()<1,2>();
+    // lmb<3,4>();
+
+    std::cout << "HI\n";
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: HI

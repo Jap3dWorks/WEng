@@ -1,7 +1,7 @@
 #include "WVulkan/WVk/WVkPipeline.hpp"
 
 void wvk::pipeline::Destroy(
-    WVkRenderPipelineInfo & pipeline_info,
+    WVkRenderPipeline & pipeline_info,
     const VkDevice & in_device
     )
 {

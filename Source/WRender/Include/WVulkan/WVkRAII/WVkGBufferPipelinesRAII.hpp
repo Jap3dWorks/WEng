@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WId.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
@@ -90,14 +91,37 @@ public:
 
 public:
 
-    wcr::wid::WEntityComponentId CreateBinding(
+    void CreateBindingSet(
+        wcr::wid::WEntityComponentId binding_set_id,
+        wcr::wid::WAssetId in_pipeline_id,
+        wcr::wid::WTypeAssetIndexId in_mesh_asset_id,
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> in_ubos,
+        std::vector<WVkDescSetTextureBinding> in_textures
+        ){
+        WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
+
+        Super::pipelines_db_.pipe_bindings.InsertAt(
+            binding_set_id,
+            WVkPipelineBinding{
+                .pipeline_id = in_pipeline_id,
+                .mesh_asset_id = in_mesh_asset_id,
+                .ubos = std::move(in_ubos),
+                .textures = std::move(in_textures)
+            }
+            );
+
+        Super::pipeline_bindings_[in_pipeline_id]
+            .Insert(binding_set_id.GetId(), binding_set_id);
+    }
+
+    [[deprecated]] wcr::wid::WEntityComponentId CreateBinding(
         const wcr::wid::WEntityComponentId & in_component_id,
         const wcr::wid::WAssetId & in_pipeline_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_asset_id,
         const std::vector<WVkDescSetUBOWrite> & in_ubos,
         const std::vector<WVkDescSetTextureBinding> & in_textures
         ) {
-        WVkRenderPipelineInfo pipeline_info = Super::Pipeline(in_pipeline_id);
+        WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
 
         Super::pipelines_db_.bindings.InsertAt(
             in_component_id,

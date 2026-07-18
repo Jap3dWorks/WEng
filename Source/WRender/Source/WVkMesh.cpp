@@ -2,7 +2,7 @@
 #include "WVulkan/WVk/WVkBuffer.hpp"
 
 void wvk::mesh::CreateMeshBuffers(
-    WVkMeshInfo & out_mesh_info,
+    WVkMesh & out_mesh_info,
     const void * vertex_buffer,
     const std::uint32_t & vertex_buffer_size,
     const void * index_buffer,
@@ -103,7 +103,7 @@ void wvk::mesh::CreateMeshBuffers(
 }
 
 void wvk::mesh::Destroy(
-    WVkMeshInfo & out_mesh_info,
+    WVkMesh & out_mesh_info,
     const VkDevice & in_device
     ) {
     

@@ -63,7 +63,7 @@ void WVkAssetRenderDataRAII::UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId 
 
     static_mesh_collection_.Remove(
         in_id,
-        [this] (WVkMeshInfo & in_mesh_info) -> void {
+        [this] (WVkMesh & in_mesh_info) -> void {
             wvk::mesh::Destroy(
                 in_mesh_info,
                 vkn_.device
@@ -71,7 +71,7 @@ void WVkAssetRenderDataRAII::UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId 
         });    
 }
 
-const WVkMeshInfo & WVkAssetRenderDataRAII::StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const {
+const WVkMesh & WVkAssetRenderDataRAII::StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const {
     return static_mesh_collection_.Get(in_id);
 }
 
@@ -87,7 +87,7 @@ void WVkAssetRenderDataRAII::Clear() {
             );
 
         static_mesh_collection_.Clear(
-            [this] (WVkMeshInfo & in_mesh_info) -> void {
+            [this] (WVkMesh & in_mesh_info) -> void {
                 wvk::mesh::Destroy(
                     in_mesh_info,
                     vkn_.device
@@ -108,6 +108,26 @@ void WVkAssetRenderDataRAII::Destroy() {
     }
 }
 
+std::vector<WVkUBO> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) const {
+    std::vector<WVkUBO> result;
+
+    std::visit(
+        wcr::TVisitor(
+            [this, &result] (std::size_t idx) {
+                result.push_back(ubo_data_.ubo_collection.Get(idx));
+            },
+            [this, &result] (std::vector<size_t> idxes) {
+                for (auto i : idxes) {
+                    result.push_back(ubo_data_.ubo_collection.Get(i));
+                }
+            }
+            ),
+        ubo_data_.wid_ubos_map.at(wid)
+        );
+
+    return result;
+}
+
 std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
     VkDevice device, VkPhysicalDevice pdevice,
     wcr::wid::WEngId id,
@@ -116,7 +136,7 @@ std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
     std::size_t ubo_id = ubo_collection.Create(
         [device, pdevice, &ubo_size, &initial_data, this]
         (std::size_t id) {
-            WVkUBOInfo ubo = wvk::buffer::CreateUBO(
+            WVkUBO ubo = wvk::buffer::CreateUBO(
                 ubo_size,
                 device,
                 pdevice
@@ -143,43 +163,43 @@ std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
 
 void WVkAssetRenderDataRAII::UboData::Clear(VkDevice device) {
     ubo_collection.Clear(
-        [this, &device](WVkUBOInfo & ubo_info) -> void {
+        [this, &device](WVkUBO & ubo_info) -> void {
             wvk::buffer::Destroy(
                 ubo_info, device
                 );
         }
         );
 
-    wengid_ubos.clear();
+    wid_ubos_map.clear();
 }
 
 void WVkAssetRenderDataRAII::UboData::Reg(wcr::wid::WEngId wid, std::size_t ubo_id) {
-    if (!wengid_ubos.contains(wid)) {
-        wengid_ubos[wid]=ubo_id;
+    if (!wid_ubos_map.contains(wid)) {
+        wid_ubos_map[wid]=ubo_id;
     } else {
         std::visit(
             wcr::TVisitor(
                 [this, wid, ubo_id](std::size_t old_id) {
-                    wengid_ubos[wid]=std::vector{old_id, ubo_id};
+                    wid_ubos_map[wid]=std::vector{old_id, ubo_id};
                 },
                 [this, ubo_id](std::vector<std::size_t> & vector_ids) {
                     vector_ids.push_back(ubo_id);
                 }
                 ),
-            wengid_ubos[wid]
+            wid_ubos_map[wid]
             );
     }
 }
 
 void WVkAssetRenderDataRAII::UboData::DestroyUBOs(wcr::wid::WEngId wid, VkDevice device) {
-    auto & ubo_ids = wengid_ubos[wid];
+    auto & ubo_ids = wid_ubos_map[wid];
 
     std::visit(
         wcr::TVisitor(
             [this, device](std::size_t ubo_id) {
                 ubo_collection.Remove(
                     ubo_id,
-                    [this, device] (WVkUBOInfo & ubo_info) {
+                    [this, device] (WVkUBO & ubo_info) {
                         wvk::buffer::Destroy(ubo_info, device);
                     }
                     );
@@ -191,7 +211,7 @@ void WVkAssetRenderDataRAII::UboData::DestroyUBOs(wcr::wid::WEngId wid, VkDevice
                     [this, device](std::size_t ubo_id) {
                         ubo_collection.Remove(
                             ubo_id,
-                            [this, device](WVkUBOInfo & ubo_info) {
+                            [this, device](WVkUBO & ubo_info) {
                                 wvk::buffer::Destroy(ubo_info, device);
                             });
                     });
@@ -200,6 +220,6 @@ void WVkAssetRenderDataRAII::UboData::DestroyUBOs(wcr::wid::WEngId wid, VkDevice
         ubo_ids
         );
 
-    wengid_ubos.erase(wid);
+    wid_ubos_map.erase(wid);
 }
 

@@ -91,11 +91,11 @@ wcr::wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
     const std::vector<WVkDescSetTextureBinding> & in_texture
     ) {
 
-    WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);
+    WVkRenderPipeline pipeline_info = Pipeline(in_pipeline_id);
 
     pipelines_db_.bindings.InsertAt(
         in_binding_id,
-        WVkPipelineBindingInfo{
+        DELETE_WVkPipelineBindingInfo{
             in_pipeline_id,
             {},
                 InitUboDescriptorBindings(pipeline_info.params_descriptor,

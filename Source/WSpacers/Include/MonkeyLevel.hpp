@@ -130,7 +130,7 @@ namespace spacers::monkey {
         auto descriptors = pipeline_asset.Get_descriptor_list();
 
         descriptors[0].binding = 0;
-        descriptors[0].type = wct::render::ERPipeParamType::Ubo;
+        descriptors[0].type = wct::render::ERPipeParamType::UBOEntity_Dynamic;
         descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
         descriptors[0].size = sizeof(wct::render::PostprocessUBO);
 

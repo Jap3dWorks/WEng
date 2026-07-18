@@ -165,8 +165,18 @@ namespace wct::render {
     enum class ERPipeParamType {
         None,
         Texture,
-        Ubo
+        UBO_Static,        // 1 buffer for parameter asset
+        UBO_Dynamic,       // 1 buffer for frame in flight and parameter asset
+        UBOEntity_Dynamic, // 1 buffer for frame in flight and entity
+        UBOEntity_Static,  // 1 buffer for entity
     };
+
+    inline constexpr bool IsUBOParamType(ERPipeParamType param_type) {
+        return param_type == ERPipeParamType::UBO_Static     ||
+            param_type == ERPipeParamType::UBO_Dynamic       ||
+            param_type == ERPipeParamType::UBOEntity_Dynamic ||
+            param_type == ERPipeParamType::UBOEntity_Static;
+    }
 
     struct RPipeParamDescLayInfo {
         std::uint8_t binding{0};

@@ -7,7 +7,7 @@ namespace wvk::mesh {
      * @brief Create a vulkan  mesh
      */
     void CreateMeshBuffers(
-        WVkMeshInfo & out_mesh_info,
+        WVkMesh & out_mesh_info,
         const void * vertex_buffer,
         const std::uint32_t & vertes_buffer_size,
         const void * index_buffer,
@@ -20,7 +20,7 @@ namespace wvk::mesh {
         );
 
     void Destroy(
-        WVkMeshInfo & out_mesh_info,
+        WVkMesh & out_mesh_info,
         const VkDevice & in_device_info
         );
     

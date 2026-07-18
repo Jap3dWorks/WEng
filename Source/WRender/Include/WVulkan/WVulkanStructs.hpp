@@ -66,18 +66,18 @@ struct WVkShaderStageInfo
 //     VkExtent2D extent{};
 // };
 
-struct WVkSwapChainInfo
-{
-    VkFormat format;
-    VkExtent2D extent;
-    VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
+// struct WVkSwapChain
+// {
+//     VkFormat format;
+//     VkExtent2D extent;
+//     VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
     
-    std::vector<VkImage> images;
-    std::vector<VkImageView> views;
-    std::vector<VkDeviceMemory> memory;
+//     std::vector<VkImage> images;
+//     std::vector<VkImageView> views;
+//     std::vector<VkDeviceMemory> memory;
     
-    // std::uint32_t image_count{};
-};
+//     // std::uint32_t image_count{};
+// };
 
 struct WVkDescriptorSetLayoutInfo
 {
@@ -87,7 +87,7 @@ struct WVkDescriptorSetLayoutInfo
     VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
 };
 
-struct WVkMeshInfo
+struct WVkMesh
 {
     VkBuffer vertex_buffer {VK_NULL_HANDLE};
     VkDeviceMemory vertex_buffer_memory {VK_NULL_HANDLE};
@@ -96,14 +96,14 @@ struct WVkMeshInfo
     uint32_t index_count {0};
 };
 
-struct WVkUBOInfo
+struct WVkUBO
 {
     VkBuffer buffer{VK_NULL_HANDLE};
     VkDeviceMemory device_memory{VK_NULL_HANDLE};
     VkDeviceSize range{1};
 };
 
-struct WVkRenderPipelineInfo
+struct WVkRenderPipeline
 {
     wcr::wid::WAssetId wid;
     wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
@@ -141,7 +141,7 @@ struct WVkDescSetTextureBinding {
 
 struct [[deprecated]] DELETE_WVkDescriptorSetUBOBinding {
     std::uint32_t binding{0};
-    WVkUBOInfo ubo_info{}; // <- TODO remove
+    WVkUBO ubo_info{}; // <- TODO remove
 
     // ubos by frame
     VkDescriptorBufferInfo buffer_info;
@@ -174,7 +174,7 @@ struct [[deprecated]] DELETE_WVkPipelineBindingInfo
 
 template<std::uint8_t Frames>
 struct WVkPipelineBinding {
-    wcr::wid::WTypeAssetIndexId pipeline_id{0};
+    wcr::wid::WAssetId pipeline_id{0};
     wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
 
     std::vector<WVkDescSetUBOBinding<Frames>> ubos{};

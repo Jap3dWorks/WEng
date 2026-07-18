@@ -64,7 +64,7 @@ public:
         return * this;
     }
 
-    const WVkMeshInfo & RenderPlane() const noexcept {
+    const WVkMesh & RenderPlane() const noexcept {
         return render_plane_;
     }
 
@@ -128,7 +128,7 @@ private:
 
     VkDevice device_{VK_NULL_HANDLE};
 
-    WVkMeshInfo render_plane_{};
+    WVkMesh render_plane_{};
 
     VkSampler sampler_{VK_NULL_HANDLE};
 

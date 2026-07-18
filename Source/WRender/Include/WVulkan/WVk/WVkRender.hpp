@@ -57,12 +57,13 @@ namespace wvk::render {
 
     }
 
+    template<std::uint8_t FramesInFlight>
     inline VkDescriptorSet CreateRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,
         const std::uint32_t & in_frame_index,
-        const std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> & ubo_binding,
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> const & ubo_binding,
         const std::vector<WVkDescSetTextureBinding> & in_textures_binding
         ) {
         VkDescriptorSet descriptor_set;
@@ -1072,7 +1073,6 @@ namespace wvk::render {
                 );
         }
     }
-
 
 }
 

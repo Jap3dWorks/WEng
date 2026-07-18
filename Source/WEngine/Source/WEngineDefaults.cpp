@@ -86,15 +86,15 @@ namespace {
 
         auto descriptors = pipeline_asset.Get_descriptor_list();
 
-        // Model UBO
+        // Model UBO (reserved)
         descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;
-        descriptors[0].type=wct::render::ERPipeParamType::Ubo;
+        descriptors[0].type=wct::render::ERPipeParamType::UBOEntity_Dynamic;
         descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
         descriptors[0].size=sizeof(wct::render::ModelUBO);
 
         // PBR scalar params UBO
         descriptors[1].binding=wct::render::PBRBindings::PBR_SCALAR_UBO;
-        descriptors[1].type=wct::render::ERPipeParamType::Ubo;
+        descriptors[1].type=wct::render::ERPipeParamType::UBO_Static;
         descriptors[1].stage_flags=
             wct::render::EShaderStageFlag::Vertex |
             wct::render::EShaderStageFlag::Fragment ;

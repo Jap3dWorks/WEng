@@ -4,7 +4,7 @@
 namespace wvk::pipeline {
     
     void Destroy(
-        WVkRenderPipelineInfo &pipeline_info,
+        WVkRenderPipeline &pipeline_info,
         const VkDevice & device);
 
 }

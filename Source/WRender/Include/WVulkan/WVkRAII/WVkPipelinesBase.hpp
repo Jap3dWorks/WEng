@@ -121,7 +121,7 @@ public:
             });
     }
 
-    WNODISCARD const WVkRenderPipelineInfo & Pipeline(const WPipelineIdType & in_id) const {
+    WNODISCARD const WVkRenderPipeline & Pipeline(const WPipelineIdType & in_id) const {
         return pipelines_db_.pipelines.Get(in_id);
     }
 
@@ -134,11 +134,15 @@ public:
         return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }
 
-    WNODISCARD const DELETE_WVkPipelineBindingInfo & Binding(const WBindingIdType & in_id) const {
+    [[deprecated]] WNODISCARD const DELETE_WVkPipelineBindingInfo & Binding(const WBindingIdType & in_id) const {
         return pipelines_db_.bindings.Get(in_id);
     }
 
-    template<CCallable<void, const WPipelineIdType &, WVkRenderPipelineInfo&> TFn>
+    WNODISCARD WVkPipelineBinding<FramesInFlight> const & GetBinding(WBindingIdType id) const {
+        return pipelines_db_.pipe_bindings.Get(id);
+    }
+
+    template<CCallable<void, const WPipelineIdType &, WVkRenderPipeline&> TFn>
     void ForEachPipeline(TFn && in_fn) const {
         pipelines_db_.pipelines.ForEachIdValue(std::forward<TFn>(in_fn));
     }
@@ -150,7 +154,7 @@ public:
         }
     }
 
-    template<CCallable<void, const WVkPipelineBindingInfo &> TFn>
+    template<CCallable<void, DELETE_WVkPipelineBindingInfo const &> TFn>
     void ForEachBinding(const WPipelineIdType & in_pipeline_id, TFn && in_fn) const {
         for (const auto & wid : pipeline_bindings_.at(in_pipeline_id)) {
             std::forward<TFn>(in_fn)(pipelines_db_.bindings.Get(wid));
@@ -265,8 +269,7 @@ protected:
     //                 result.push_back(bindings[ubopd.binding]);
     //             }
     //         });
-        
-    }
+    //     }
 
     [[deprecated]]
     std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
@@ -287,7 +290,7 @@ protected:
             in_param_descriptors,
             [&bindings, &result, this]
             (const wct::render::RPipeParamDescLayInfo & ubopd) {
-                if(ubopd.type == wct::render::ERPipeParamType::Ubo &&
+                if(ubopd.type == wct::render::ERPipeParamType::UBOEntity_Dynamic &&
                    !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
@@ -327,7 +330,7 @@ protected:
 
     std::vector<WVkDescSetTextureBinding> InitTextureDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
-        const std::vector<WVkDescSetTextureBinding> & in_textures
+        std::vector<WVkDescSetTextureBinding> const & in_textures
         ) {
 
         std::vector<wct::render::RPipeParamDescLayInfo> result;
