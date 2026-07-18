@@ -62,7 +62,7 @@ namespace wvk::render {
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,
         const std::uint32_t & in_frame_index,
-        const std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> & ubo_binding,
+        const std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> & ubo_binding,
         const std::vector<WVkDescSetTextureBinding> & in_textures_binding
         ) {
         VkDescriptorSet descriptor_set;

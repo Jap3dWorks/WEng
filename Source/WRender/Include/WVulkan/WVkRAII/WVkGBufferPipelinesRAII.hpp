@@ -101,7 +101,7 @@ public:
 
         Super::pipelines_db_.bindings.InsertAt(
             in_component_id,
-            WVkPipelineBindingInfo{in_pipeline_id,
+            DELETE_WVkPipelineBindingInfo{in_pipeline_id,
                                    in_mesh_asset_id,
                                    Super::InitUboDescriptorBindings(
                                        pipeline_info.params_descriptor,

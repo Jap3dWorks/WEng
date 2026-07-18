@@ -33,7 +33,7 @@ public:
         FramesInFlight
         >;
 
-    using WVkPipelineBindingDb = TObjectDataBase<WVkPipelineBindingInfo, void, wcr::wid::WEntityComponentId::IdType>;
+    using WVkPipelineBindingDb = TObjectDataBase<DELETE_WVkPipelineBindingInfo, void, wcr::wid::WEntityComponentId::IdType>;
 
 public:
 

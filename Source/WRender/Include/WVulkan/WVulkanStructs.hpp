@@ -139,7 +139,7 @@ struct WVkDescSetTextureBinding {
     };
 };
 
-struct DELETE_WVkDescriptorSetUBOBinding {
+struct [[deprecated]] DELETE_WVkDescriptorSetUBOBinding {
     std::uint32_t binding{0};
     WVkUBOInfo ubo_info{}; // <- TODO remove
 
@@ -154,18 +154,30 @@ struct WVkDescSetUBOBinding {
 };
 
 template<std::uint32_t Frames>
-using TVkDescriptorSetUBOBindingFrames =
+using DELETE_TVkDescriptorSetUBOBindingFrames =
     std::array<DELETE_WVkDescriptorSetUBOBinding, Frames>;
+
+// template<std::uint8_t Frames>
+// using VkDescSetUBOBindings = std::array<WVkDescSetUBOBinding, Frames>;
 
 /**
  * @brief Render Pipeline Bindings data
  */
-struct WVkPipelineBindingInfo
+struct [[deprecated]] DELETE_WVkPipelineBindingInfo
 {
     wcr::wid::WAssetId pipeline_id{0};
     wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
 
-    std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
+    std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
+    std::vector<WVkDescSetTextureBinding> textures{};
+};
+
+template<std::uint8_t Frames>
+struct WVkPipelineBinding {
+    wcr::wid::WTypeAssetIndexId pipeline_id{0};
+    wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
+
+    std::vector<WVkDescSetUBOBinding<Frames>> ubos{};
     std::vector<WVkDescSetTextureBinding> textures{};
 };
 

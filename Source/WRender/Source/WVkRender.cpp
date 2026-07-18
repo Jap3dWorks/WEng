@@ -966,7 +966,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
     std::uint32_t idx=0;
     for(auto pbindingid : ppcss_pipelines_.BindingOrderIterator()) {
 
-        WVkPipelineBindingInfo ppcess_binding =
+        DELETE_WVkPipelineBindingInfo ppcess_binding =
             ppcss_pipelines_.Binding(pbindingid);
         WVkRenderPipelineInfo ppcess_pipeline =
             ppcss_pipelines_.Pipeline(ppcess_binding.pipeline_id);

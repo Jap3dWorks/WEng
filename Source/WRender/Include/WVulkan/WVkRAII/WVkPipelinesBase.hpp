@@ -134,7 +134,7 @@ public:
         return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }
 
-    WNODISCARD const WVkPipelineBindingInfo & Binding(const WBindingIdType & in_id) const {
+    WNODISCARD const DELETE_WVkPipelineBindingInfo & Binding(const WBindingIdType & in_id) const {
         return pipelines_db_.bindings.Get(in_id);
     }
 
@@ -175,7 +175,7 @@ public:
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
 
-        TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
+        DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
         for ( auto & b : binding.ubos) {
             if(b[0].binding == ubo_write.binding) {
@@ -197,7 +197,7 @@ public:
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
 
-        TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
+        DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
         for ( auto & b : binding.ubos) {
             if(b[0].binding == ubo_write.binding) {
@@ -225,7 +225,51 @@ protected:
         return physical_device_;
     }
 
-    std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
+    
+    // std::vector<WVkDescSetUBOBinding<FramesInFlight>> InitUboDescriptorBindings(
+    //     wct::render::RPipeParamDescLayList const & param_descriptors,
+    //     std::vector<WVkDescSetUBOBinding<FramesInFlight>> const & ubo_bindings
+    //     ) {
+    //     std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
+    //     result.reserve(param_descriptors.size());
+
+    //     wct::render::ForEach(
+    //         param_descriptors,
+    //         [&result, this]
+    //         (const wct::render::RPipeParamDescLayInfo & ubo_param_desc) {
+    //             if(ubo_param_desc.type == wct::render::ERPipeParamType::Ubo
+    //                // !bindings.contains(ubopd.binding)
+    //                 ) {
+
+    //                 WVkDescSetUBOBinding<FramesInFlight> ubo_binding{};
+    //                 // VkDescriptorBufferInfo{}.
+
+    //                 for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+    //                     ubo_binding.ubo_info[frm].buffer = ubo_param_desc;
+                        
+    //                         // .ubo_param_desc.binding;
+    //                     // result.push_back()
+    //                     // bindin
+
+    //                     // bindings[ubopd.binding][frm]={};
+    //                     // bindings[ubopd.binding][frm].binding = ubopd.binding;
+
+    //                     // TODO Do not create UBOs Here, store UBOS by id in WVkAssetRenderData
+
+    //                     bindings[ubopd.binding][frm].ubo_info = wvk::buffer::CreateUBO(
+    //                         ubopd.size,
+    //                         device_,
+    //                         physical_device_
+    //                         );
+    //                 }
+    //                 result.push_back(bindings[ubopd.binding]);
+    //             }
+    //         });
+        
+    }
+
+    [[deprecated]]
+    std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
         // TODO accept UBOBindings not UBOWrite
         const std::vector<WVkDescSetUBOWrite> & in_ubos
@@ -233,10 +277,10 @@ protected:
 
         std::unordered_map<
             std::uint8_t,
-            TVkDescriptorSetUBOBindingFrames<FramesInFlight>
+            DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>
             > bindings;
 
-        std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
+        std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
         result.reserve(in_param_descriptors.size());
 
         wct::render::ForEach(
