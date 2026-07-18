@@ -290,7 +290,7 @@ protected:
             in_param_descriptors,
             [&bindings, &result, this]
             (const wct::render::RPipeParamDescLayInfo & ubopd) {
-                if(ubopd.type == wct::render::ERPipeParamType::UBOEntity_Dynamic &&
+                if(ubopd.type == wct::render::ERPipeParamType::UBO_Entity_Dynamic &&
                    !bindings.contains(ubopd.binding)) {
 
                     for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {

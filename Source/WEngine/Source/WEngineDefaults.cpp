@@ -88,7 +88,7 @@ namespace {
 
         // Model UBO (reserved)
         descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;
-        descriptors[0].type=wct::render::ERPipeParamType::UBOEntity_Dynamic;
+        descriptors[0].type=wct::render::ERPipeParamType::UBO_Entity_Dynamic;
         descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
         descriptors[0].size=sizeof(wct::render::ModelUBO);
 

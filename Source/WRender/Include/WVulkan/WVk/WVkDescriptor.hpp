@@ -123,7 +123,7 @@ namespace wvk::descriptor {
 
                 switch(_prm.type) {
 
-                case wct::render::ERPipeParamType::UBOEntity_Dynamic:
+                case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
                     break;
 

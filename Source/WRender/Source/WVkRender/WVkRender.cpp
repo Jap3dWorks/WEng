@@ -1,5 +1,6 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#include "WCore/WId.hpp"
 #endif
 
 #include "WVulkan/WVkRender.hpp"
@@ -549,6 +550,11 @@ void WVkRender::UpdateParameterDynamic(
     //     .size = ubo_write.data.size(),
     //     .offset = ubo_write.offset
     // };
+
+    // update the ubo data
+    auto ubos = asset_render_data_.GetUBOs(wcr::wid::WEngId::FromEntityComponent(in_component_id));
+
+    // TODO update the current frame index buffer
 
     wct::render::pipeline_type_dispatcher<
         wct::render::ERPipeType::Graphics,

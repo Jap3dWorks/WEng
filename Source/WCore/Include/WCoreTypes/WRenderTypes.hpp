@@ -165,17 +165,19 @@ namespace wct::render {
     enum class ERPipeParamType {
         None,
         Texture,
-        UBO_Static,        // 1 buffer for parameter asset
-        UBO_Dynamic,       // 1 buffer for frame in flight and parameter asset
-        UBOEntity_Dynamic, // 1 buffer for frame in flight and entity
-        UBOEntity_Static,  // 1 buffer for entity
+        UBO_Static,            // 1 buffer for parameter asset
+        UBO_Dynamic,           // 1 buffer for frame in flight and parameter asset
+        UBO_Entity_Static,     // 1 buffer for entity  (e.g ubo model)
+        UBO_Entity_Dynamic,    // 1 buffer for frame in flight and entity
+        UBO_Component_Static,  // 1 buffer for component subindex
+        UBO_Component_Dynamic, // 1 buffer for frame and component subindex (e.g effects controlled by a component)
     };
 
     inline constexpr bool IsUBOParamType(ERPipeParamType param_type) {
         return param_type == ERPipeParamType::UBO_Static     ||
             param_type == ERPipeParamType::UBO_Dynamic       ||
-            param_type == ERPipeParamType::UBOEntity_Dynamic ||
-            param_type == ERPipeParamType::UBOEntity_Static;
+            param_type == ERPipeParamType::UBO_Entity_Dynamic ||
+            param_type == ERPipeParamType::UBO_Entity_Static;
     }
 
     struct RPipeParamDescLayInfo {
@@ -183,7 +185,7 @@ namespace wct::render {
         ERPipeParamType type{ERPipeParamType::None};
         EShaderStageFlag stage_flags{EShaderStageFlag::None};
     
-        /** @brief UBO range, total UBO size. */
+        /** @brief total UBO size. */
         std::size_t size{0};
     };
 

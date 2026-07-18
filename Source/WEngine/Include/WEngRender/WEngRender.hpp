@@ -233,10 +233,14 @@ namespace wng::render {
                     [&in_asset_db,
                      &in_level,
                      &in_render,
-                     &in_component](WStaticMeshAsset* _sma, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                     &in_component](WStaticMeshAsset* _sma, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh & _m) {
                         
                         auto & param = in_asset_db.Get<WRenderPipelineParametersAsset>(
                             in_component->GetPipelineAssignment(_id).params
+                            );
+
+                        auto & pipeline = in_asset_db.Get<WRenderPipelineAsset>(
+                            in_component->GetPipelineAssignment(_id).pipeline
                             );
 
                         wcr::wid::WEntityComponentId ecid = in_level->GetEntityComponentId<WStaticMeshComponent>(
@@ -249,31 +253,38 @@ namespace wng::render {
 
                         in_render->CreatePipelineBinding(
                             ecid,
-                            in_component->GetPipelineAssignment(_id).pipeline,
                             assidx,
+                            pipeline,
                             param
                             );
 
-                        auto * transform_component = &in_level
-                            ->GetComponent<WTransformComponent>
-                            (in_component->Get_entity_id());
+                    });
 
-                        wct::render::ModelUBO grpubo =
-                          wrd::render::ToUBOGraphicsStruct(*transform_component);
+                    auto * transform_component = &in_level
+                        ->GetComponent<WTransformComponent>
+                        (in_component->Get_entity_id());
 
-                        std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(&grpubo);
+                    wct::render::ModelUBO grpubo =
+                        wrd::render::ToUBOGraphicsStruct(*transform_component);
 
-                        wct::render::RPipeParamUbo ubodt{
-                            .binding=wct::render::CommonBindings::MODEL_UBO,
-                            .data=std::span<std::uint8_t>(
-                                                          ptr,
-                                                          ptr + sizeof(grpubo)),
-                            .offset=0
-                        };
-                        
-                        in_render->UpdateParameterStatic(ecid, ubodt);
-                    }
-                    );
+                    std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(&grpubo);
+
+                    wct::render::RPipeParamUbo ubodt{
+                        .binding=wct::render::CommonBindings::MODEL_UBO,
+                        .data=std::span<std::uint8_t>(
+                            ptr,
+                            ptr + sizeof(grpubo)),
+                        .offset=0
+                    };
+
+                    wcr::wid::WEntityComponentId enttid {
+                        in_level->Get_asset_id(),
+                        in_component->Get_entity_id(),
+                        wcr::wid::null_id,
+                        wcr::wid::null_id
+                    };
+
+                    in_render->UpdateParameterStatic(enttid, ubodt);
             }
             );
 
