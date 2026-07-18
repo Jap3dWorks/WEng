@@ -171,7 +171,7 @@ public:
     // TODO ubo updates using WVKAssetRenderDataRAII
     void UpdateBinding(const WBindingIdType & in_binding_id,
                        const std::uint32_t & in_frame_index,
-                       const WVkDescriptorSetUBOWriteStruct & ubo_write
+                       const WVkDescSetUBOWrite & ubo_write
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
 
@@ -193,7 +193,7 @@ public:
 
     // TODO ubo updates using WVKAssetRenderDataRAII
     void UpdateBinding(const WBindingIdType & in_binding_id,
-                       const WVkDescriptorSetUBOWriteStruct & ubo_write
+                       const WVkDescSetUBOWrite & ubo_write
         ) {
         auto & binding = pipelines_db_.bindings.Get(in_binding_id);
 
@@ -228,7 +228,7 @@ protected:
     std::vector<TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
         // TODO accept UBOBindings not UBOWrite
-        const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos
+        const std::vector<WVkDescSetUBOWrite> & in_ubos
         ) {
 
         std::unordered_map<
@@ -267,9 +267,13 @@ protected:
                 void * ptr = wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
                 wvk::buffer::UpdateUBO(
                     ptr,
-                    in_ubos[ubo.binding].data,
-                    in_ubos[ubo.binding].size,
-                    in_ubos[ubo.binding].offset);
+                    ubo.data,
+                    ubo.size,
+                    ubo.offset
+                    // in_ubos[ubo.binding].data,
+                    // in_ubos[ubo.binding].size,
+                    // in_ubos[ubo.binding].offset
+                    );
                 wvk::buffer::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
             }
         }
@@ -277,15 +281,15 @@ protected:
         return result;
     }
 
-    std::vector<WVkDescriptorSetTextureBinding> InitTextureDescriptorBindings(
+    std::vector<WVkDescSetTextureBinding> InitTextureDescriptorBindings(
         const wct::render::RPipeParamDescLayList & in_param_descriptors,
-        const std::vector<WVkDescriptorSetTextureBinding> & in_textures
+        const std::vector<WVkDescSetTextureBinding> & in_textures
         ) {
 
         std::vector<wct::render::RPipeParamDescLayInfo> result;
         result.reserve(in_param_descriptors.size());
         
-        std::unordered_map<std::uint8_t, WVkDescriptorSetTextureBinding> bindings{};
+        std::unordered_map<std::uint8_t, WVkDescSetTextureBinding> bindings{};
 
         wct::render::ForEach(
             in_param_descriptors,
@@ -305,7 +309,7 @@ protected:
             bindings[wrt.binding].image_info.sampler = wrt.image_info.sampler;
         }
 
-        std::vector<WVkDescriptorSetTextureBinding> tx{};
+        std::vector<WVkDescSetTextureBinding> tx{};
         tx.reserve(bindings.size());
 
         for(auto&p : bindings) {
@@ -317,8 +321,8 @@ protected:
 
     inline bool ValidateBindingParams(
         const wct::render::RPipeParamDescLayList & in_pipeline_params,
-        const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-        const std::vector<WVkDescriptorSetTextureBinding> & in_textures) {
+        const std::vector<WVkDescSetUBOWrite> & in_ubos,
+        const std::vector<WVkDescSetTextureBinding> & in_textures) {
 
         std::unordered_set<std::uint8_t> pipebindings{};
         

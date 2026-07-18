@@ -87,8 +87,8 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
 wcr::wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
     const wcr::wid::WEntityComponentId & in_binding_id,
     const wcr::wid::WAssetId & in_pipeline_id,
-    const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-    const std::vector<WVkDescriptorSetTextureBinding> & in_texture
+    const std::vector<WVkDescSetUBOWrite> & in_ubos,
+    const std::vector<WVkDescSetTextureBinding> & in_texture
     ) {
 
     WVkRenderPipelineInfo pipeline_info = Pipeline(in_pipeline_id);

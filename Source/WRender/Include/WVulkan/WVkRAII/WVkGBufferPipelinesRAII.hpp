@@ -94,8 +94,8 @@ public:
         const wcr::wid::WEntityComponentId & in_component_id,
         const wcr::wid::WAssetId & in_pipeline_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_asset_id,
-        const std::vector<WVkDescriptorSetUBOWriteStruct> & in_ubos,
-        const std::vector<WVkDescriptorSetTextureBinding> & in_textures
+        const std::vector<WVkDescSetUBOWrite> & in_ubos,
+        const std::vector<WVkDescSetTextureBinding> & in_textures
         ) {
         WVkRenderPipelineInfo pipeline_info = Super::Pipeline(in_pipeline_id);
 

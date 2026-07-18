@@ -101,7 +101,6 @@ void WVkAssetRenderDataRAII::Clear() {
 void WVkAssetRenderDataRAII::Destroy() {
     if (vkn_.device != VK_NULL_HANDLE) {
         Clear();
-
         vkn_.device = VK_NULL_HANDLE;
         vkn_.physical_device = VK_NULL_HANDLE;
         vkn_.graphics_queue = VK_NULL_HANDLE;
@@ -163,8 +162,8 @@ void WVkAssetRenderDataRAII::UboData::Reg(wcr::wid::WEngId wid, std::size_t ubo_
                 [this, wid, ubo_id](std::size_t old_id) {
                     wengid_ubos[wid]=std::vector{old_id, ubo_id};
                 },
-                [this, ubo_id](std::vector<std::size_t> & ids) {
-                    ids.push_back(ubo_id);
+                [this, ubo_id](std::vector<std::size_t> & vector_ids) {
+                    vector_ids.push_back(ubo_id);
                 }
                 ),
             wengid_ubos[wid]

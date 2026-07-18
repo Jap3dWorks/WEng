@@ -433,7 +433,7 @@ void WVkRender::CreatePipelineBinding(
 
     auto texture_params = in_parameters.Get_texture_list();
 
-    std::vector<WVkDescriptorSetTextureBinding> textures{};
+    std::vector<WVkDescSetTextureBinding> textures{};
     textures.resize(texture_params.size());
 
     for(std::uint32_t i=0; i < texture_params.size(); i++) {
@@ -453,16 +453,16 @@ void WVkRender::CreatePipelineBinding(
 
     auto ubo_params = in_parameters.Get_ubo_list();
 
-    std::vector<WVkDescriptorSetUBOWriteStruct> ubos{};
-    ubos.resize(ubo_params.size());
+    std::vector<WVkDescSetUBOWrite> ubowrite{};
+    ubowrite.resize(ubo_params.size());
 
     for(std::uint32_t i=0; i < ubo_params.size(); i++) {
         const auto & ubop = ubo_params[i];
 
         std::visit (
             wcr::TVisitor(
-                [&ubos, &i, &ubop](auto const & ubo) {
-                    ubos[i] = {
+                [&ubowrite, &i, &ubop](auto const & ubo) {
+                    ubowrite[i] = {
                         .binding = ubop.binding,
                         .data = ubo.data(),
                         .size = ubo.size(),
@@ -484,21 +484,21 @@ void WVkRender::CreatePipelineBinding(
              gbuffers_pipelines_.CreateBinding(component_id,
                                                pipeline_id,
                                                in_assetindex_id,
-                                               ubos,
+                                               ubowrite,
                                                textures);
          },
          [&,this](){
              gbuffers_pipelines_.CreateBinding(component_id,
                                                pipeline_id,
                                                in_assetindex_id,
-                                               ubos,
+                                               ubowrite,
                                                textures);
              
          },
          [&,this](){
              ppcss_pipelines_.CreateBinding(component_id,
                                             pipeline_id,
-                                            ubos,
+                                            ubowrite,
                                             textures);
          }
             );
@@ -558,7 +558,7 @@ void WVkRender::UpdateParameterDynamic(
 									   const wct::render::RPipeParamUbo & ubo_write
     ) {
 
-    WVkDescriptorSetUBOWriteStruct ubowrt;
+    WVkDescSetUBOWrite ubowrt;
     
     std::visit(
         wcr::TVisitor(
@@ -611,7 +611,7 @@ void WVkRender::UpdateParameterStatic(
     const wct::render::RPipeParamUbo & ubo_write
     ) {
 
-    WVkDescriptorSetUBOWriteStruct ubowrt;
+    WVkDescSetUBOWrite ubowrt;
 
     std::visit(
         wcr::TVisitor(

@@ -120,8 +120,9 @@ struct WVkRenderPipelineInfo
 // Pipeline Bindings
 // -----------------
 
-struct WVkDescriptorSetUBOWriteStruct {
-    std::uint32_t binding{0}; // TODO remove binding from here
+// TODO is this struct required?
+struct WVkDescSetUBOWrite {
+    std::uint32_t binding{0};
     
     const void * data{nullptr};
     std::size_t size{0};
@@ -129,7 +130,7 @@ struct WVkDescriptorSetUBOWriteStruct {
     std::size_t offset{0};      
 };
 
-struct WVkDescriptorSetTextureBinding {
+struct WVkDescSetTextureBinding {
     std::uint32_t binding{0};
     VkDescriptorImageInfo image_info{
         .sampler=VK_NULL_HANDLE,
@@ -147,7 +148,7 @@ struct DELETE_WVkDescriptorSetUBOBinding {
 };
 
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-struct WVkDescriptorSetUBOBinding {
+struct WVkDescSetUBOBinding {
     std::uint32_t binding{0};
     std::array<VkDescriptorBufferInfo, FramesInFlight> ubo_info{};
 };
@@ -165,6 +166,6 @@ struct WVkPipelineBindingInfo
     wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
 
     std::vector<TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
-    std::vector<WVkDescriptorSetTextureBinding> textures{};
+    std::vector<WVkDescSetTextureBinding> textures{};
 };
 
