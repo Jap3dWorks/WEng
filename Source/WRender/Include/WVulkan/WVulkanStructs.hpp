@@ -14,7 +14,8 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
-// TODO namespace : wvk::types | wvk::structs
+// RENAME WVulkanDataTypes.hpp
+// TODO namespace : wvk::datatypes | wvk::structs
 
 struct WVkRenderDebugInfo
 {
@@ -105,16 +106,16 @@ struct WVkUBO
 
 struct WVkRenderPipeline
 {
-    wcr::wid::WAssetId wid;
+    // wcr::wid::WAssetId wid;
     wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
 
-    wcr::wid::WAssetId descriptor_set_layout_id{0};
+    // wcr::wid::WAssetId descriptor_set_layout_id{0};
 
     // TODO: Pipeline layout bindings description
-    wct::render::RPipeParamDescLayList params_descriptor{};
+    // wct::render::RPipeParamDescLayList params_descriptor{};
 };
 
 // Pipeline Bindings

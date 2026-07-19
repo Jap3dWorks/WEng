@@ -80,8 +80,8 @@ public:
 
         pipelines.InsertAt(in_pipeline_id, render_pipeline_info);
 
-        render_pipeline_info.wid = in_pipeline_id;
-        render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
+        // render_pipeline_info.wid = in_pipeline_id;
+        // render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
     template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::RPipeParamDescLayList &> ConfigInfoFn>

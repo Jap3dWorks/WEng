@@ -44,9 +44,9 @@ public:
         ) noexcept =default;
 
     void CreatePipeline(
-        const wcr::wid::WAssetId & in_id,
+        const wcr::wid::WAssetId & pipeline_id,
         const WRenderPipelineAsset & pipeline_asset,
-        VkDescriptorSetLayout in_global_descset_layout
+        VkDescriptorSetLayout global_descset_layout
         ) {
         std::vector<WVkShaderStageInfo> shaders = Super::pipelines_db_.BuildShaders(
             pipeline_asset.Get_shader_list(),
@@ -56,39 +56,39 @@ public:
         // pipeparams
         // one Ubo (Model Ubo) should be required as first binding (0)
         Super::pipelines_db_.CreateDescSetLayout(
-            in_id,
+            pipeline_id,
             Super::Device(),
             pipeline_asset.Get_descriptor_list(),
             wvk::descriptor::UpdateDescriptorSetLayout
             );
 
         Super::pipelines_db_.CreatePipeline(
-            in_id,
+            pipeline_id,
             Super::Device(),
-            in_id,
+            pipeline_id,
             shaders,
-            [this, &pipeline_asset, in_global_descset_layout]
-            (auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
+            [this, &pipeline_asset, global_descset_layout]
+            (auto& _out_rp, auto const &_dvc, auto const &_desclay, auto const & _shdrs) {
 
                 wvr::gbuffer_pipelines::CreatePipeline(
-                    _rp,
+                    _out_rp,
                     _dvc,
                     {
-                        in_global_descset_layout,
+                        global_descset_layout,
                         _desclay.descset_layout
                     },
                     _shdrs
                     );
-                _rp.params_descriptor = pipeline_asset.Get_descriptor_list();
+                // _out_rp.params_descriptor = pipeline_asset.Get_descriptor_list();
             }
             );
 
         Super::pipelines_db_.CreateDescSetPool(
-            in_id,
+            pipeline_id,
             Super::Device(),
             wvr::gbuffer_pipelines::CreateDescSetPool);
 
-        Super::pipeline_bindings_[in_id] = {};
+        Super::pipeline_bindings_[pipeline_id] = {};
     }
 
     void CreateBindingSet(

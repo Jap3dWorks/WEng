@@ -72,7 +72,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
                 _shdrs
                 );
 
-            _rp.params_descriptor = in_pipeline_asset.Get_descriptor_list();
+            // _rp.params_descriptor = in_pipeline_asset.Get_descriptor_list();
         }
         );
 

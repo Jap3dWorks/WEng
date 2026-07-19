@@ -174,10 +174,12 @@ namespace wct::render {
     };
 
     inline constexpr bool IsUBOParamType(ERPipeParamType param_type) {
-        return param_type == ERPipeParamType::UBO_Static     ||
-            param_type == ERPipeParamType::UBO_Dynamic       ||
-            param_type == ERPipeParamType::UBO_Entity_Dynamic ||
-            param_type == ERPipeParamType::UBO_Entity_Static;
+        return param_type == ERPipeParamType::UBO_Static        ||
+            param_type == ERPipeParamType::UBO_Dynamic          ||
+            param_type == ERPipeParamType::UBO_Entity_Dynamic   ||
+            param_type == ERPipeParamType::UBO_Entity_Static    ||
+            param_type == ERPipeParamType::UBO_Component_Static ||
+            param_type == ERPipeParamType::UBO_Component_Dynamic;
     }
 
     struct RPipeParamDescLayInfo {
