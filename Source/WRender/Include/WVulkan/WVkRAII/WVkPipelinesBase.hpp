@@ -134,11 +134,13 @@ public:
         return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }
 
-    [[deprecated]] WNODISCARD const DELETE_WVkPipelineBindingInfo & Binding(const WBindingIdType & in_id) const {
+    [[deprecated]] WNODISCARD
+    DELETE_WVkPipelineBindingInfo const & Binding(const WBindingIdType & in_id) const {
         return pipelines_db_.bindings.Get(in_id);
     }
 
-    WNODISCARD WVkPipelineBinding<FramesInFlight> const & GetBinding(WBindingIdType id) const {
+    WNODISCARD
+    WVkPipelineBinding<FramesInFlight> const & GetBinding(WBindingIdType id) const {
         return pipelines_db_.pipe_bindings.Get(id);
     }
 
@@ -228,7 +230,6 @@ protected:
     VkPhysicalDevice PhysicalDevice() const {
         return physical_device_;
     }
-
     
     // std::vector<WVkDescSetUBOBinding<FramesInFlight>> InitUboDescriptorBindings(
     //     wct::render::RPipeParamDescLayList const & param_descriptors,
@@ -271,100 +272,100 @@ protected:
     //         });
     //     }
 
-    [[deprecated]]
-    std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
-        const wct::render::RPipeParamDescLayList & in_param_descriptors,
-        // TODO accept UBOBindings not UBOWrite
-        const std::vector<WVkDescSetUBOWrite> & in_ubos
-        ) {
+    // [[deprecated]]
+    // std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> InitUboDescriptorBindings(
+    //     const wct::render::RPipeParamDescLayList & in_param_descriptors,
+    //     // TODO accept UBOBindings not UBOWrite
+    //     const std::vector<WVkDescSetUBOWrite> & in_ubos
+    //     ) {
 
-        std::unordered_map<
-            std::uint8_t,
-            DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>
-            > bindings;
+    //     std::unordered_map<
+    //         std::uint8_t,
+    //         DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>
+    //         > bindings;
 
-        std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
-        result.reserve(in_param_descriptors.size());
+    //     std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight>> result;
+    //     result.reserve(in_param_descriptors.size());
 
-        wct::render::ForEach(
-            in_param_descriptors,
-            [&bindings, &result, this]
-            (const wct::render::RPipeParamDescLayInfo & ubopd) {
-                if(ubopd.type == wct::render::ERPipeParamType::UBO_Entity_Dynamic &&
-                   !bindings.contains(ubopd.binding)) {
+    //     wct::render::ForEach(
+    //         in_param_descriptors,
+    //         [&bindings, &result, this]
+    //         (const wct::render::RPipeParamDescLayInfo & ubopd) {
+    //             if(ubopd.type == wct::render::ERPipeParamType::UBO_Entity_Dynamic &&
+    //                !bindings.contains(ubopd.binding)) {
 
-                    for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                        bindings[ubopd.binding][frm]={};
-                        bindings[ubopd.binding][frm].binding = ubopd.binding;
+    //                 for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+    //                     bindings[ubopd.binding][frm]={};
+    //                     bindings[ubopd.binding][frm].binding = ubopd.binding;
 
-                        // TODO Do not create UBOs Here, store UBOS by id in WVkAssetRenderData
+    //                     // TODO Do not create UBOs Here, store UBOS by id in WVkAssetRenderData
 
-                        bindings[ubopd.binding][frm].ubo_info = wvk::buffer::CreateUBO(
-                            ubopd.size,
-                            device_,
-                            physical_device_
-                            );
-                    }
-                    result.push_back(bindings[ubopd.binding]);
-                }
-            });
+    //                     bindings[ubopd.binding][frm].ubo_info = wvk::buffer::CreateUBO(
+    //                         ubopd.size,
+    //                         device_,
+    //                         physical_device_
+    //                         );
+    //                 }
+    //                 result.push_back(bindings[ubopd.binding]);
+    //             }
+    //         });
         
-        for(auto & ubo : in_ubos) {
-            for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
-                void * ptr = wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
-                wvk::buffer::UpdateUBO(
-                    ptr,
-                    ubo.data,
-                    ubo.size,
-                    ubo.offset
-                    // in_ubos[ubo.binding].data,
-                    // in_ubos[ubo.binding].size,
-                    // in_ubos[ubo.binding].offset
-                    );
-                wvk::buffer::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
-            }
-        }
+    //     for(auto & ubo : in_ubos) {
+    //         for (std::uint32_t frm=0; frm<FramesInFlight; frm++) {
+    //             void * ptr = wvk::buffer::MapUBO(bindings[ubo.binding][frm].ubo_info, device_);
+    //             wvk::buffer::UpdateUBO(
+    //                 ptr,
+    //                 ubo.data,
+    //                 ubo.size,
+    //                 ubo.offset
+    //                 // in_ubos[ubo.binding].data,
+    //                 // in_ubos[ubo.binding].size,
+    //                 // in_ubos[ubo.binding].offset
+    //                 );
+    //             wvk::buffer::UnmapUBO(bindings[ubo.binding][frm].ubo_info, device_);                
+    //         }
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
 
-    std::vector<WVkDescSetTextureBinding> InitTextureDescriptorBindings(
-        const wct::render::RPipeParamDescLayList & in_param_descriptors,
-        std::vector<WVkDescSetTextureBinding> const & in_textures
-        ) {
+    // std::vector<WVkDescSetTextureBinding> InitTextureDescriptorBindings(
+    //     const wct::render::RPipeParamDescLayList & in_param_descriptors,
+    //     std::vector<WVkDescSetTextureBinding> const & in_textures
+    //     ) {
 
-        std::vector<wct::render::RPipeParamDescLayInfo> result;
-        result.reserve(in_param_descriptors.size());
+    //     std::vector<wct::render::RPipeParamDescLayInfo> result;
+    //     result.reserve(in_param_descriptors.size());
         
-        std::unordered_map<std::uint8_t, WVkDescSetTextureBinding> bindings{};
+    //     std::unordered_map<std::uint8_t, WVkDescSetTextureBinding> bindings{};
 
-        wct::render::ForEach(
-            in_param_descriptors,
-            [&bindings]
-            (const wct::render::RPipeParamDescLayInfo & _ubopd) {
-                if (_ubopd.type == wct::render::ERPipeParamType::Texture &&
-                    !bindings.contains(_ubopd.binding)) {
-                    bindings[_ubopd.binding]={};
-                    bindings[_ubopd.binding].binding = _ubopd.binding;
-                    bindings[_ubopd.binding].image_info = {};
-                }
-            });
+    //     wct::render::ForEach(
+    //         in_param_descriptors,
+    //         [&bindings]
+    //         (const wct::render::RPipeParamDescLayInfo & _ubopd) {
+    //             if (_ubopd.type == wct::render::ERPipeParamType::Texture &&
+    //                 !bindings.contains(_ubopd.binding)) {
+    //                 bindings[_ubopd.binding]={};
+    //                 bindings[_ubopd.binding].binding = _ubopd.binding;
+    //                 bindings[_ubopd.binding].image_info = {};
+    //             }
+    //         });
 
-        for(auto& wrt : in_textures) {
-            bindings[wrt.binding].image_info.imageLayout = wrt.image_info.imageLayout;
-            bindings[wrt.binding].image_info.imageView = wrt.image_info.imageView;
-            bindings[wrt.binding].image_info.sampler = wrt.image_info.sampler;
-        }
+    //     for(auto& wrt : in_textures) {
+    //         bindings[wrt.binding].image_info.imageLayout = wrt.image_info.imageLayout;
+    //         bindings[wrt.binding].image_info.imageView = wrt.image_info.imageView;
+    //         bindings[wrt.binding].image_info.sampler = wrt.image_info.sampler;
+    //     }
 
-        std::vector<WVkDescSetTextureBinding> tx{};
-        tx.reserve(bindings.size());
+    //     std::vector<WVkDescSetTextureBinding> tx{};
+    //     tx.reserve(bindings.size());
 
-        for(auto&p : bindings) {
-            tx.push_back(p.second);
-        }
+    //     for(auto&p : bindings) {
+    //         tx.push_back(p.second);
+    //     }
 
-        return tx;
-    }
+    //     return tx;
+    // }
 
     inline bool ValidateBindingParams(
         const wct::render::RPipeParamDescLayList & in_pipeline_params,

@@ -53,7 +53,7 @@ namespace was {
             entity_component_db.CreateComponent<T>(in_entity_id);
 
             // WEntityComponentId
-            return GetEntityComponentId<T>(in_entity_id, 0);
+            return EntityComponentId<T>(in_entity_id, 0);
 
         }
 
@@ -101,23 +101,35 @@ namespace was {
         }
 
         template<std::derived_from<WComponent> T>
-            wcr::wid::WEntityComponentId GetEntityComponentId(const wcr::wid::WEntityId & in_entity_id,
-                                                         const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
-            return GetEntityComponentId(T::StaticClass(), in_entity_id, in_index_id);
+        wcr::wid::WComponentTypeId GetComponentTypeId() const {
+            return entity_component_db.GetComponentTypeId<T>();
         }
 
-        wcr::wid::WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
-                                                     const wcr::wid::WEntityId & in_entity_id,
-                                                     const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
+        // wcr::wid::WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
+        //                                                   const wcr::wid::WEntityId & in_entity_id,
+        //                                                   const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
 
-            assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
+        //     assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
 
-            wcr::wid::WComponentTypeId cid = entity_component_db.GetComponentTypeId(in_component_class);
+        //     wcr::wid::WComponentTypeId cid =
+        //         entity_component_db.GetComponentTypeId(in_component_class);
             
-            return {Get_asset_id(), in_entity_id, cid, in_index_id};
-        }
+        //     return {Get_asset_id(), in_entity_id, cid, in_index_id};
+        // }
 
     private:
+
+        template<std::derived_from<WComponent> T>
+        wcr::wid::WEntityComponentId EntityComponentId(const wcr::wid::WEntityId & in_entity_id,
+                                                       const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
+            return {
+                Get_asset_id(), in_entity_id, GetComponentTypeId<T>(), in_index_id
+            };
+
+        }
+
+
+
 
         std::string WEntityPath(const WClass* in_class) const;
 

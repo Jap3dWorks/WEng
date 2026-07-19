@@ -65,10 +65,11 @@ public:
             .Insert(binding_set_id.GetId(), binding_set_id);
     }
 
-    [[deprecated]] wcr::wid::WEntityComponentId CreateBinding(const wcr::wid::WEntityComponentId & in_binding_id,
-                                     const wcr::wid::WAssetId & in_pipeline_id,
-                                     const std::vector<WVkDescSetUBOWrite> & in_ubos,
-                                     const std::vector<WVkDescSetTextureBinding> & in_texture);
+    // [[deprecated]]
+    // wcr::wid::WEntityComponentId CreateBinding(const wcr::wid::WEntityComponentId & in_binding_id,
+    //                                  const wcr::wid::WAssetId & in_pipeline_id,
+    //                                  const std::vector<WVkDescSetUBOWrite> & in_ubos,
+    //                                  const std::vector<WVkDescSetTextureBinding> & in_texture);
 
     /**
      * @Brief Computes pipeline bindings order, order is relevant because 

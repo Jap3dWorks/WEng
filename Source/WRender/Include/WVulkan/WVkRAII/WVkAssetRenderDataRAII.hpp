@@ -115,7 +115,7 @@ public:
      * Create an UBO buffer associated to input wid
      */
     WNODISCARD
-    std::size_t CreateUBO(wcr::wid::WEngId wid, std::size_t ubo_size, void * initial_data_ptr) {
+    std::size_t CreateUBO(wcr::wid::WEngId wid, std::size_t ubo_size, void const * initial_data_ptr) {
         return ubo_data_.CreateUBO(vkn_.device, vkn_.physical_device,
                                    wid, ubo_size, initial_data_ptr);
     }
@@ -162,7 +162,7 @@ private:
 
         std::size_t CreateUBO(VkDevice device, VkPhysicalDevice pdevice,
                        wcr::wid::WEngId id,
-                       std::size_t ubo_size, void* initial_data);
+                       std::size_t ubo_size, void const * initial_data);
 
         void DestroyUBOs(wcr::wid::WEngId wid, VkDevice device);
         

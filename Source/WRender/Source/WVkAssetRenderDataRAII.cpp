@@ -131,7 +131,8 @@ std::vector<WVkUBO> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) const 
 std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
     VkDevice device, VkPhysicalDevice pdevice,
     wcr::wid::WEngId id,
-    std::size_t ubo_size, void* initial_data) {
+    std::size_t ubo_size,
+    void const * initial_data) {
 
     std::size_t ubo_id = ubo_collection.Create(
         [device, pdevice, &ubo_size, &initial_data, this]

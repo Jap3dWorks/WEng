@@ -84,30 +84,30 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
     pipeline_bindings_[in_id] = {};
 }
 
-wcr::wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
-    const wcr::wid::WEntityComponentId & in_binding_id,
-    const wcr::wid::WAssetId & in_pipeline_id,
-    const std::vector<WVkDescSetUBOWrite> & in_ubos,
-    const std::vector<WVkDescSetTextureBinding> & in_texture
-    ) {
+// wcr::wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
+//     const wcr::wid::WEntityComponentId & in_binding_id,
+//     const wcr::wid::WAssetId & in_pipeline_id,
+//     const std::vector<WVkDescSetUBOWrite> & in_ubos,
+//     const std::vector<WVkDescSetTextureBinding> & in_texture
+//     ) {
 
-    WVkRenderPipeline pipeline_info = Pipeline(in_pipeline_id);
+//     WVkRenderPipeline pipeline_info = Pipeline(in_pipeline_id);
 
-    pipelines_db_.bindings.InsertAt(
-        in_binding_id,
-        DELETE_WVkPipelineBindingInfo{
-            in_pipeline_id,
-            {},
-                InitUboDescriptorBindings(pipeline_info.params_descriptor,
-                                          in_ubos),
-                InitTextureDescriptorBindings(pipeline_info.params_descriptor,
-                                              in_texture)}
-        );
+//     pipelines_db_.bindings.InsertAt(
+//         in_binding_id,
+//         DELETE_WVkPipelineBindingInfo{
+//             in_pipeline_id,
+//             {},
+//                 InitUboDescriptorBindings(pipeline_info.params_descriptor,
+//                                           in_ubos),
+//                 InitTextureDescriptorBindings(pipeline_info.params_descriptor,
+//                                               in_texture)}
+//         );
 
-    pipeline_bindings_[in_pipeline_id].Insert(in_binding_id.GetId(), in_binding_id);
+//     pipeline_bindings_[in_pipeline_id].Insert(in_binding_id.GetId(), in_binding_id);
 
-    return in_binding_id;
-}
+//     return in_binding_id;
+// }
 
 void WVkPostprocessPipelinesRAII::ComputeBindingOrder() {
     binding_order_.clear();

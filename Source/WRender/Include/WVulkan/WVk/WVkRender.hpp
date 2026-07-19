@@ -91,15 +91,15 @@ namespace wvk::render {
         for(auto & frames : ubo_binding) {
             write_ds.push_back({});
             buff_info.push_back({
-                    .buffer=frames[in_frame_index].ubo_info.buffer,
+                    .buffer=frames.ubo_info[in_frame_index].buffer,
                     .offset=0,
-                    .range=frames[in_frame_index].ubo_info.range
+                    .range=frames.ubo_info[in_frame_index].range
                 }
                 );
             
             wvk::descriptor::UpdateWriteDescriptorSet_UBO(
                 write_ds.back(),
-                frames[in_frame_index].binding,
+                frames.binding,
                 &buff_info.back(),
                 descriptor_set
                 );

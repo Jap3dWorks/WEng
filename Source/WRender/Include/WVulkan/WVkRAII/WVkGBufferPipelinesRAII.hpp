@@ -89,8 +89,6 @@ public:
         Super::pipeline_bindings_[in_id] = {};
     }
 
-public:
-
     void CreateBindingSet(
         wcr::wid::WEntityComponentId binding_set_id,
         wcr::wid::WAssetId in_pipeline_id,
@@ -114,31 +112,31 @@ public:
             .Insert(binding_set_id.GetId(), binding_set_id);
     }
 
-    [[deprecated]] wcr::wid::WEntityComponentId CreateBinding(
-        const wcr::wid::WEntityComponentId & in_component_id,
-        const wcr::wid::WAssetId & in_pipeline_id,
-        const wcr::wid::WTypeAssetIndexId & in_mesh_asset_id,
-        const std::vector<WVkDescSetUBOWrite> & in_ubos,
-        const std::vector<WVkDescSetTextureBinding> & in_textures
-        ) {
-        WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
+    // [[deprecated]] wcr::wid::WEntityComponentId CreateBinding(
+    //     const wcr::wid::WEntityComponentId & in_component_id,
+    //     const wcr::wid::WAssetId & in_pipeline_id,
+    //     const wcr::wid::WTypeAssetIndexId & in_mesh_asset_id,
+    //     const std::vector<WVkDescSetUBOWrite> & in_ubos,
+    //     const std::vector<WVkDescSetTextureBinding> & in_textures
+    //     ) {
+    //     WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
 
-        Super::pipelines_db_.bindings.InsertAt(
-            in_component_id,
-            DELETE_WVkPipelineBindingInfo{in_pipeline_id,
-                                   in_mesh_asset_id,
-                                   Super::InitUboDescriptorBindings(
-                                       pipeline_info.params_descriptor,
-                                       in_ubos),
-                                   Super::InitTextureDescriptorBindings(
-                                       pipeline_info.params_descriptor,
-                                       in_textures)}
-            );
+    //     Super::pipelines_db_.bindings.InsertAt(
+    //         in_component_id,
+    //         DELETE_WVkPipelineBindingInfo{in_pipeline_id,
+    //                                in_mesh_asset_id,
+    //                                Super::InitUboDescriptorBindings(
+    //                                    pipeline_info.params_descriptor,
+    //                                    in_ubos),
+    //                                Super::InitTextureDescriptorBindings(
+    //                                    pipeline_info.params_descriptor,
+    //                                    in_textures)}
+    //         );
 
-        Super::pipeline_bindings_[in_pipeline_id].Insert(in_component_id.GetId(), in_component_id);
+    //     Super::pipeline_bindings_[in_pipeline_id].Insert(in_component_id.GetId(), in_component_id);
 
-        return in_component_id;
-    }
+    //     return in_component_id;
+    // }
 
  };
 

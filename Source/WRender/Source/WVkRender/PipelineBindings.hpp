@@ -67,24 +67,28 @@ namespace wvk::render::pipe_bindings {
             wcr::wid::WEntityId entity;
             wcr::wid::WComponentTypeId component;
             wcr::wid::WSubIdxId indx;
+
             component_id.ExtractWIds(level, entity, component, indx);
 
-            return wcr::wid::WEntityComponentId {level, entity, wcr::wid::null_id, wcr::wid::null_id};
+            return wcr::wid::WEntityComponentId {level,
+                                                 entity,
+                                                 wcr::wid::null_id,
+                                                 wcr::wid::null_id};
         };
 
-        auto get_ubo_data_ptr = [](const wct::render::RPipeParamUbo& ubo_param) -> const void* {
-            return std::visit(
+        auto get_ubo_data_ptr = [](wct::render::RPipeParamUbo const * ubo_param) -> const void* {
+            return std::visit<const void *> (
                 wcr::TVisitor([](const auto& data) -> const void* {
-                    return static_cast<const void*>(data.data());
+                    return static_cast<void const *>(data.data());
                 }),
-                ubo_param.data
+                ubo_param->data
                 );
         };        
 
         auto CreateUBOBinding =
             [&]
             <std::uint8_t Frames, std::uint8_t UBOs>
-            (wct::render::RPipeParamDescLayInfo & desc, wcr::wid::WEngId wid)
+            (wct::render::RPipeParamDescLayInfo const & desc, wcr::wid::WEngId wid)
             -> WVkDescSetUBOBinding<FramesInFlight>
             {
 
@@ -92,7 +96,9 @@ namespace wvk::render::pipe_bindings {
 
                 if (!asset_render_data.ContainsUBOs(wid)) {
 
-                    void * ptr = get_ubo_data_ptr(binding_param[desc.binding]);
+                    void const * ptr = get_ubo_data_ptr(
+                        binding_param[desc.binding]
+                        );
 
                     for (std::uint8_t i=0; i<UBOs; i++) {
                         
@@ -114,11 +120,13 @@ namespace wvk::render::pipe_bindings {
                 WVkDescSetUBOBinding<FramesInFlight> result{};
                 result.binding = desc.binding;
 
-                for (std::uint8_t i=0; i<Frames; i++) {
+                for (std::size_t i=0; i<Frames; i++) {
+                    std::size_t minidx = std::min(i, vk_ubos.size()-1);
+
                     result.ubo_info[i] = {
-                        .buffer=vk_ubos[std::min(i, vk_ubos.size()-1)].buffer,
+                        .buffer=vk_ubos[minidx].buffer,
                         .offset=0,
-                        .range=vk_ubos[std::min(i, vk_ubos.size()-1)].range
+                        .range=vk_ubos[minidx].range
                     };
                 }
 
