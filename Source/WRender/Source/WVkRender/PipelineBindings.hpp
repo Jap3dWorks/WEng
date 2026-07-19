@@ -128,7 +128,6 @@ namespace wvk::render::pipe_bindings {
         std::vector<WVkDescSetUBOBinding<FramesInFlight>> result{};
         result.reserve(ubo_params.size());
 
-
         for (auto & descriptor : pipeline.Get_descriptor_list()) {
 
             switch(descriptor.type) {
@@ -163,13 +162,13 @@ namespace wvk::render::pipe_bindings {
                         )
                     );
 
-
                 break;
 
             case wct::render::ERPipeParamType::UBO_Entity_Static: 
                 
                 result.push_back(
-                    CreateUBOBinding.template operator()<FramesInFlight, 1> (
+                    CreateUBOBinding
+                    .template operator()<FramesInFlight, 1> (
                         descriptor,
                         wcr::wid::WEngId::FromEntityComponent(
                             get_entity_id(entity_component_id)
@@ -181,7 +180,8 @@ namespace wvk::render::pipe_bindings {
 
             case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
                 result.push_back(
-                    CreateUBOBinding.template operator()<FramesInFlight, FramesInFlight> (
+                    CreateUBOBinding
+                    .template operator()<FramesInFlight, FramesInFlight> (
                         descriptor,
                         wcr::wid::WEngId::FromEntityComponent(
                             get_entity_id(entity_component_id)
@@ -193,7 +193,8 @@ namespace wvk::render::pipe_bindings {
                 
             case wct::render::ERPipeParamType::UBO_Component_Static:
                 result.push_back(
-                    CreateUBOBinding.template operator()<FramesInFlight, 1> (
+                    CreateUBOBinding
+                    .template operator()<FramesInFlight, 1> (
                         descriptor,
                         wcr::wid::WEngId::FromEntityComponent(
                             entity_component_id
@@ -205,7 +206,8 @@ namespace wvk::render::pipe_bindings {
 
             case wct::render::ERPipeParamType::UBO_Component_Dynamic:
                 result.push_back(
-                    CreateUBOBinding.template operator()<FramesInFlight, FramesInFlight> (
+                    CreateUBOBinding
+                    .template operator()<FramesInFlight, FramesInFlight> (
                         descriptor,
                         wcr::wid::WEngId::FromEntityComponent(
                             entity_component_id
@@ -219,7 +221,6 @@ namespace wvk::render::pipe_bindings {
                 continue;
                 
             }
-
         }
 
         return result;
