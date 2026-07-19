@@ -6,9 +6,9 @@ public struct ModelUBO {
 };
 
 public struct PBRScalar {
-    float4 albedo;    // alpha 1 enhabled.
-    float4 emission;  // same
-    float4 mr;        // same
+    public float4 albedo;    // alpha 1 enhabled.
+    public float4 emission;  // same
+    public float4 mr;        // same
 };
 
 // TODO vert tangent

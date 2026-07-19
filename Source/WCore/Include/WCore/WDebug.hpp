@@ -12,3 +12,7 @@ namespace wcr::debug {
 
 #define WCORE_DEBUG_ONLY(_X) if constexpr(wcr::debug::kDebug) {X;}
 
+
+#define WCORE_DEBUG_ONLY_INIT if constexpr(wcr::debug::kDebug) {
+
+#define WCORE_DEBUG_ONLY_END }

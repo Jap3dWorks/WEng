@@ -1,7 +1,9 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
+#include "WCore/WDebug.hpp"
 #include "WCore/WId.hpp"
+#include "WLog.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
@@ -29,7 +31,7 @@ public:
 
     WVkGBufferPipelinesRAII() noexcept=default;
 
-    virtual ~WVkGBufferPipelinesRAII() override = default;
+    ~WVkGBufferPipelinesRAII() override = default;
 
     WVkGBufferPipelinesRAII(const WVkGBufferPipelinesRAII&)=delete;
     WVkGBufferPipelinesRAII & operator=(const WVkGBufferPipelinesRAII&) = delete;
@@ -43,11 +45,11 @@ public:
 
     void CreatePipeline(
         const wcr::wid::WAssetId & in_id,
-        const WRenderPipelineAsset & in_pipeline_struct,
+        const WRenderPipelineAsset & pipeline_asset,
         VkDescriptorSetLayout in_global_descset_layout
         ) {
         std::vector<WVkShaderStageInfo> shaders = Super::pipelines_db_.BuildShaders(
-            in_pipeline_struct.Get_shader_list(),
+            pipeline_asset.Get_shader_list(),
             wvr::gbuffer_pipelines::BuildShaderStageInfo
             );
 
@@ -56,7 +58,7 @@ public:
         Super::pipelines_db_.CreateDescSetLayout(
             in_id,
             Super::Device(),
-            in_pipeline_struct.Get_descriptor_list(),
+            pipeline_asset.Get_descriptor_list(),
             wvk::descriptor::UpdateDescriptorSetLayout
             );
 
@@ -65,7 +67,7 @@ public:
             Super::Device(),
             in_id,
             shaders,
-            [this, &in_pipeline_struct, in_global_descset_layout]
+            [this, &pipeline_asset, in_global_descset_layout]
             (auto& _rp, const auto &_dvc, const auto &_desclay, const auto & _shdrs) {
 
                 wvr::gbuffer_pipelines::CreatePipeline(
@@ -77,7 +79,7 @@ public:
                     },
                     _shdrs
                     );
-                _rp.params_descriptor = in_pipeline_struct.Get_descriptor_list();
+                _rp.params_descriptor = pipeline_asset.Get_descriptor_list();
             }
             );
 
@@ -98,7 +100,15 @@ public:
         ){
         WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
 
-        Super::pipelines_db_.pipe_bindings.InsertAt(
+
+        WCORE_DEBUG_ONLY_INIT
+            for(auto & ubo : in_ubos) {
+                WFLOG("UBO Binding: {}", ubo.binding);
+            }
+        WCORE_DEBUG_ONLY_END
+
+
+        Super::pipelines_db_.pipe_bindings.Insert(
             binding_set_id,
             WVkPipelineBinding{
                 .pipeline_id = in_pipeline_id,

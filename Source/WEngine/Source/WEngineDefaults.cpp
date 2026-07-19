@@ -130,10 +130,15 @@ namespace {
         // TODO default pipeline parameters
 
         WRenderPipelineParametersAsset params{};
-        
+
+        wct::render::PBRScalarUBO scalar_ubo{};
+
         params.Set_ubo_list(
             {
-                
+                {
+                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::ToUBOData(&scalar_ubo)
+                }
             }
             );
         params.Set_texture_list({
@@ -202,7 +207,6 @@ namespace {
         input_map[{EInputKey::Mouse_Move, EInputMode::None}] = {mousemovement};
 
         mapping_asset.Set_input_map(input_map);
-
     }
 }
 

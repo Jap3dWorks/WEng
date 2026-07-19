@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WCore/WId.hpp"
+#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WCore/TVisitor.hpp"
@@ -8,6 +10,7 @@
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WVulkan/WVk/WVkBuffer.hpp"
 
 #include <ranges>
 #include <iterator>
@@ -15,7 +18,7 @@
 
 namespace wvk::render::pipe_bindings {
 
-    WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectPipelineBindings(
+    WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectTextureBindings(
         WRenderPipelineParametersAsset const & parameters,
         WVkAssetRenderDataRAII & asset_render_data
         ) {
@@ -92,41 +95,43 @@ namespace wvk::render::pipe_bindings {
             -> WVkDescSetUBOBinding<FramesInFlight>
             {
 
-                std::array<WVkUBO, UBOs> vk_ubos{};
+                std::array<std::size_t, UBOs> indexes{};
 
                 if (!asset_render_data.ContainsUBOs(wid)) {
 
-                    void const * ptr = get_ubo_data_ptr(
-                        binding_param[desc.binding]
-                        );
+                    void const * ptr = binding_param.contains(desc.binding)
+                        ? get_ubo_data_ptr(binding_param[desc.binding])
+                        : nullptr;
 
                     for (std::uint8_t i=0; i<UBOs; i++) {
-                        
-                        std::size_t uboindx = asset_render_data.CreateUBO(
+
+                        indexes[i] = asset_render_data.CreateUBO(
                             wid,
                             desc.size,
                             ptr
                             );
-
-                        vk_ubos[i] = asset_render_data.GetUBO(uboindx);
                     }
                 }
                 else {
                     std::ranges::copy(
-                        asset_render_data.GetUBOs(wid) | std::views::take(vk_ubos.size()),
-                        vk_ubos.begin());
+                        asset_render_data.GetUBOs(wid) | std::views::take(indexes.size()),
+                        indexes.begin());
                 }
 
                 WVkDescSetUBOBinding<FramesInFlight> result{};
                 result.binding = desc.binding;
 
                 for (std::size_t i=0; i<Frames; i++) {
-                    std::size_t minidx = std::min(i, vk_ubos.size()-1);
+                    std::size_t minidx = std::min(i, indexes.size()-1);
+                    WVkUBO ubo = asset_render_data.GetUBO(indexes[minidx]);
 
-                    result.ubo_info[i] = {
-                        .buffer=vk_ubos[minidx].buffer,
-                        .offset=0,
-                        .range=vk_ubos[minidx].range
+                    result.ubo_desc[i] = {
+                        .index = indexes[minidx],
+                        .desc_buffer = {
+                            .buffer = ubo.buffer,
+                            .range = ubo.range,
+                            .offset = 0
+                        }
                     };
                 }
 
@@ -233,5 +238,108 @@ namespace wvk::render::pipe_bindings {
 
         return result;
     }
+
+    template<std::uint8_t FramesInFlight>
+    inline void CreateBindingSet(
+        wct::render::ERPipeType pipeline_type,
+        wcr::wid::WEntityComponentId binding_set_id,
+        wcr::wid::WTypeAssetIndexId renderable_asset_id,
+        wcr::wid::WAssetId pipeline_id,
+        WVkGBufferPipelinesRAII<FramesInFlight> & gbuffers_pipelines,
+        WVkPostprocessPipelinesRAII & postprocess_pipelines,
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> ubo_bindings,
+        std::vector<WVkDescSetTextureBinding> texture_bindings
+        ) {
+        switch(pipeline_type) {
+        case wct::render::ERPipeType::Postprocess:
+            postprocess_pipelines.CreateBindingSet(
+                binding_set_id,
+                pipeline_id,
+                std::move(ubo_bindings),
+                std::move(texture_bindings)
+                );
+            break;
+
+        default:
+            gbuffers_pipelines.CreateBindingSet(
+                binding_set_id,
+                pipeline_id,
+                renderable_asset_id,
+                ubo_bindings,
+                texture_bindings
+                );
+        }
+    }
+
+    template<std::uint8_t FramesInFlight>
+    inline WVkDescSetUBOBinding<FramesInFlight> GetUboBinding(
+        wcr::wid::WEntityComponentId binding_set_id,
+        std::uint8_t binding,
+        wct::render::ERPipeType pipe_type,
+        WVkGBufferPipelinesRAII<FramesInFlight> const & gbuffers_pipelines,
+        WVkPostprocessPipelinesRAII const & postprocess_pipelines
+        ) {
+        switch(pipe_type) {
+        case wct::render::ERPipeType::Postprocess:
+            return postprocess_pipelines
+                .GetUBOBinding(binding_set_id, binding);
+            break;
+        default:
+            return gbuffers_pipelines
+                .GetUBOBinding(binding_set_id, binding);
+        }
+
+    }
+
+    inline WVkDescSetUBOWrite GetUboWrite(wct::render::RPipeParamUbo const & ubo_pipe_param) {
+        return std::visit(
+            wcr::TVisitor(
+                [&ubo_pipe_param](auto const & ubodata) -> WVkDescSetUBOWrite {
+                    return {
+                        .binding = ubo_pipe_param.binding,
+                        .data = ubodata.data(),
+                        .size = ubodata.size(),
+                        .offset = ubo_pipe_param.offset
+                    };
+                }
+                ),
+            ubo_pipe_param.data
+            );
+    }
+
+    template<std::uint8_t FramesInFlight>
+    inline void UpdateParamStatic(
+        WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
+        WVkDescSetUBOWrite & ubo_write,
+        WVkAssetRenderDataRAII & asset_render_data,
+        VkDevice device
+        ) {
+        for(auto & uboidx : std::ranges::unique(ubo_binding.ubo_desc,
+                                                [](auto & a, auto & b)
+                                                    { return a.index == b.index; }))
+        {
+            WVkUBO ubo = asset_render_data.GetUBO(uboidx.index);
+
+            void * ptr = wvk::buffer::MapUBO(ubo, device);
+            wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+            wvk::buffer::UnmapUBO(ubo, device);
+        }
+    }
+
+    template<std::uint8_t FramesInFlight>
+    inline void UpdateParamDynamic(
+        WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
+        WVkDescSetUBOWrite & ubo_write,
+        WVkAssetRenderDataRAII & asset_render_data,
+        VkDevice device,
+        std::uint8_t frame_index
+        ) {
+            WVkUBO ubo = asset_render_data.GetUBO(ubo_binding.ubo_desc[frame_index].index);
+
+            void * ptr = wvk::buffer::MapUBO(ubo, device);
+            wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+            wvk::buffer::UnmapUBO(ubo, device);
+    }
+
 
 }

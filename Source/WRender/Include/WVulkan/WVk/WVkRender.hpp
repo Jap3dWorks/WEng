@@ -64,7 +64,7 @@ namespace wvk::render {
         const VkDescriptorSetLayout & in_desc_lay,
         const std::uint32_t & in_frame_index,
         std::vector<WVkDescSetUBOBinding<FramesInFlight>> const & ubo_binding,
-        const std::vector<WVkDescSetTextureBinding> & in_textures_binding
+        std::vector<WVkDescSetTextureBinding> const & in_textures_binding
         ) {
         VkDescriptorSet descriptor_set;
         VkDescriptorSetAllocateInfo alloc_info{};
@@ -85,22 +85,13 @@ namespace wvk::render {
         std::vector<VkWriteDescriptorSet> write_ds{};
         write_ds.reserve(ubo_binding.size() + in_textures_binding.size());
 
-        std::vector<VkDescriptorBufferInfo> buff_info{};
-        buff_info.reserve(ubo_binding.size());
-
-        for(auto & frames : ubo_binding) {
+        for(auto & ubo_desc : ubo_binding) {
             write_ds.push_back({});
-            buff_info.push_back({
-                    .buffer=frames.ubo_info[in_frame_index].buffer,
-                    .offset=0,
-                    .range=frames.ubo_info[in_frame_index].range
-                }
-                );
-            
+
             wvk::descriptor::UpdateWriteDescriptorSet_UBO(
                 write_ds.back(),
-                frames.binding,
-                &buff_info.back(),
+                ubo_desc.binding,
+                &(ubo_desc.ubo_desc[in_frame_index].desc_buffer),
                 descriptor_set
                 );
         }

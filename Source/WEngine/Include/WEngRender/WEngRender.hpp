@@ -346,7 +346,7 @@ namespace wng::render {
                         in_level->Get_asset_id(),
                         _cmp->Get_entity_id(),
                         // TODO MeshComponent? should be camera component?
-                        in_level->GetComponentTypeId<WCameraComponent>(),
+                        in_level->GetComponentTypeId<WStaticMeshComponent>(),
                         _idx
                     };
 

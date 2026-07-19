@@ -108,17 +108,17 @@ void WVkAssetRenderDataRAII::Destroy() {
     }
 }
 
-std::vector<WVkUBO> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) const {
-    std::vector<WVkUBO> result;
+std::vector<std::size_t> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) const {
+    std::vector<std::size_t> result;
 
     std::visit(
         wcr::TVisitor(
             [this, &result] (std::size_t idx) {
-                result.push_back(ubo_data_.ubo_collection.Get(idx));
+                result.push_back(idx);
             },
             [this, &result] (std::vector<size_t> idxes) {
                 for (auto i : idxes) {
-                    result.push_back(ubo_data_.ubo_collection.Get(i));
+                    result.push_back(i);
                 }
             }
             ),

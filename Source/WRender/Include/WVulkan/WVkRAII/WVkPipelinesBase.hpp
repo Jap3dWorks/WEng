@@ -156,12 +156,12 @@ public:
         }
     }
 
-    template<CCallable<void, DELETE_WVkPipelineBindingInfo const &> TFn>
-    void ForEachBinding(const WPipelineIdType & in_pipeline_id, TFn && in_fn) const {
-        for (const auto & wid : pipeline_bindings_.at(in_pipeline_id)) {
-            std::forward<TFn>(in_fn)(pipelines_db_.bindings.Get(wid));
-        }
-    }
+    // template<CCallable<void, DELETE_WVkPipelineBindingInfo const &> TFn>
+    // void ForEachBinding(const WPipelineIdType & in_pipeline_id, TFn && in_fn) const {
+    //     for (const auto & wid : pipeline_bindings_.at(in_pipeline_id)) {
+    //         std::forward<TFn>(in_fn)(pipelines_db_.bindings.Get(wid));
+    //     }
+    // }
 
     auto IterPipelines() const {
         return pipelines_db_.pipelines.IterIndexes();
@@ -174,52 +174,62 @@ public:
             );
     }
 
-    // TODO ubo updates using WVKAssetRenderDataRAII
-    void UpdateBinding(const WBindingIdType & in_binding_id,
-                       const std::uint32_t & in_frame_index,
-                       const WVkDescSetUBOWrite & ubo_write
-        ) {
-        auto & binding = pipelines_db_.bindings.Get(in_binding_id);
-
-        DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
-
-        for ( auto & b : binding.ubos) {
-            if(b[0].binding == ubo_write.binding) {
-                ubo = &b;
-                break;
+    WVkDescSetUBOBinding<FramesInFlight> GetUBOBinding (
+        WBindingIdType binding_set_id, std::uint8_t binding
+        )  const {
+        for (auto & b : pipelines_db_.pipe_bindings.Get(binding_set_id).ubos) {
+            if (b.binding == binding) {
+                return b;
             }
         }
-
-        if(!ubo) return;
-
-        void * ptr = wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
-        wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
-        wvk::buffer::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
     }
 
-    // TODO ubo updates using WVKAssetRenderDataRAII
-    void UpdateBinding(const WBindingIdType & in_binding_id,
-                       const WVkDescSetUBOWrite & ubo_write
-        ) {
-        auto & binding = pipelines_db_.bindings.Get(in_binding_id);
+    // // TODO ubo updates using WVKAssetRenderDataRAII
+    // void UpdateBinding(const WBindingIdType & in_binding_id,
+    //                    const std::uint32_t & in_frame_index,
+    //                    const WVkDescSetUBOWrite & ubo_write
+    //     ) {
+    //     auto & binding = pipelines_db_.bindings.Get(in_binding_id);
 
-        DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
+    //     DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
 
-        for ( auto & b : binding.ubos) {
-            if(b[0].binding == ubo_write.binding) {
-                ubo = &b;
-                break;
-            }
-        }
+    //     for ( auto & b : binding.ubos) {
+    //         if(b[0].binding == ubo_write.binding) {
+    //             ubo = &b;
+    //             break;
+    //         }
+    //     }
 
-        if(!ubo) return;
+    //     if(!ubo) return;
 
-        for(auto & b: (*ubo)) {
-            void * ptr = wvk::buffer::MapUBO(b.ubo_info, device_);
-            wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
-            wvk::buffer::UnmapUBO(b.ubo_info, device_);            
-        }
-    }
+    //     void * ptr = wvk::buffer::MapUBO((*ubo)[in_frame_index].ubo_info, device_);
+    //     wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+    //     wvk::buffer::UnmapUBO((*ubo)[in_frame_index].ubo_info, device_);
+    // }
+
+    // // TODO ubo updates using WVKAssetRenderDataRAII
+    // void UpdateBinding(const WBindingIdType & in_binding_id,
+    //                    const WVkDescSetUBOWrite & ubo_write
+    //     ) {
+    //     auto & binding = pipelines_db_.bindings.Get(in_binding_id);
+
+    //     DELETE_TVkDescriptorSetUBOBindingFrames<FramesInFlight> * ubo = nullptr;
+
+    //     for ( auto & b : binding.ubos) {
+    //         if(b.binding == ubo_write.binding) {
+    //             ubo = &b;
+    //             break;
+    //         }
+    //     }
+
+    //     if(!ubo) return;
+
+    //     for(auto & b: (*ubo)) {
+    //         void * ptr = wvk::buffer::MapUBO(b.ubo_info, device_);
+    //         wvk::buffer::UpdateUBO(ptr, ubo_write.data, ubo_write.size, ubo_write.offset);
+    //         wvk::buffer::UnmapUBO(b.ubo_info, device_);            
+    //     }
+    // }
 
 protected:
 

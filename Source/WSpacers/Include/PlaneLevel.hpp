@@ -154,17 +154,17 @@ namespace spacers::plane {
 
         // postprocess
 
-        WAsset * debugshader = engine
-            .AssetManager()
-            .Get("/Content/Assets/PPDebug:PPDebug");
+        // WAsset * debugshader = engine
+        //     .AssetManager()
+        //     .Get("/Content/Assets/PPDebug:PPDebug");
 
-        WAsset * debugparams = engine
-            .AssetManager()
-            .Get("/Content/Assets/PPDebugParam:PPDebugParam");
+        // WAsset * debugparams = engine
+        //     .AssetManager()
+        //     .Get("/Content/Assets/PPDebugParam:PPDebugParam");
 
-        cameracomp.SetPostprocessAssignment(0,
-                                            debugshader->Get_asset_id(),
-                                            debugparams->Get_asset_id());
+        // cameracomp.SetPostprocessAssignment(0,
+        //                                     debugshader->Get_asset_id(),
+        //                                     debugparams->Get_asset_id());
     }
 
     inline void SetupLighting(was::Level * level) {

@@ -51,7 +51,7 @@ public:
         ){
         WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
 
-        Super::pipelines_db_.pipe_bindings.InsertAt(
+        Super::pipelines_db_.pipe_bindings.Insert(
             binding_set_id,
             WVkPipelineBinding{
                 .pipeline_id = in_pipeline_id,
@@ -64,12 +64,6 @@ public:
         Super::pipeline_bindings_[in_pipeline_id]
             .Insert(binding_set_id.GetId(), binding_set_id);
     }
-
-    // [[deprecated]]
-    // wcr::wid::WEntityComponentId CreateBinding(const wcr::wid::WEntityComponentId & in_binding_id,
-    //                                  const wcr::wid::WAssetId & in_pipeline_id,
-    //                                  const std::vector<WVkDescSetUBOWrite> & in_ubos,
-    //                                  const std::vector<WVkDescSetTextureBinding> & in_texture);
 
     /**
      * @Brief Computes pipeline bindings order, order is relevant because 

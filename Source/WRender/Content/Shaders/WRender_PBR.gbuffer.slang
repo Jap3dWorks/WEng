@@ -30,9 +30,13 @@ ConstantBuffer<Sampler2D> mrAO;
 VSGBufferOutput vsMain(VSGBufferInput input) {
     VSGBufferOutput output;
 
-    output.normal = normalize(mul(float3x3(model_ubo.normal_matrix), input.normal));
+    float3x3 normal_matrix = float3x3(model_ubo.normal_matrix);
 
-    float4 wp = mul(model_ubo.model, float4(input.position, 1.0));
+    output.normal = normalize(mul(normal_matrix, input.normal));
+
+    float4x4 model = model_ubo.model;
+    
+    float4 wp = mul(model, float4(input.position, 1.0));
 
     output.pos = mul(camera_ubo.proj, mul(camera_ubo.view, wp));
     output.world_pos = wp.xyz;

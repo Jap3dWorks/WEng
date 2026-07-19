@@ -111,10 +111,10 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
 
 void WVkPostprocessPipelinesRAII::ComputeBindingOrder() {
     binding_order_.clear();
-    binding_order_.resize(pipelines_db_.bindings.Count());
+    binding_order_.resize(pipelines_db_.pipe_bindings.Count());
 
     std::uint32_t idx = 0;
-    for(const auto & bid : pipelines_db_.bindings.IterIndexes()) {
+    for(const auto & bid : pipelines_db_.pipe_bindings.IterIndexes()) {
         binding_order_[idx] = bid;
         idx++;
     }

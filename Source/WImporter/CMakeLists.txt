@@ -116,9 +116,9 @@ install(
         PATTERN "*.h"
 )
 
-install(
-    DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/Content
-    DESTINATION
-      .
-)
+# install(
+#     DIRECTORY
+#       ${CMAKE_CURRENT_SOURCE_DIR}/Content
+#     DESTINATION
+#       .
+# )

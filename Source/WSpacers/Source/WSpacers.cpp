@@ -30,9 +30,9 @@ int main(int argc, char** argv)
         wcr::wid::WAssetId gltflevel = spacers::gltflevel::CreateLevel(engine);
         wcr::wid::WAssetId planelevel = spacers::plane::CreateLevel(engine);
 
-        // engine.StartupLevel(monkey_level_id);
+        engine.StartupLevel(monkey_level_id);
         // engine.StartupLevel(planelevel);
-        engine.StartupLevel(gltflevel);
+        // engine.StartupLevel(gltflevel);
 
         WFLOG("[INFO] Initialize While Loop");
 

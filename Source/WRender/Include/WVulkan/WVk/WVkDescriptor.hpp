@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WCoreMacros.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 
@@ -123,17 +124,16 @@ namespace wvk::descriptor {
 
                 switch(_prm.type) {
 
-                case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
-                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
-                    break;
+                case wct::render::ERPipeParamType::None:
+                    return;
 
                 case wct::render::ERPipeParamType::Texture:
                     bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                     break;
                 
                 default:
-                    return;
-                                  
+                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;                
+                    break;
                 }
 
                 bndng.binding = _prm.binding;
@@ -163,7 +163,7 @@ namespace wvk::descriptor {
     constexpr void UpdateWriteDescriptorSet_UBO(
         VkWriteDescriptorSet & out_write_descriptor_set,
         uint32_t binding,
-        VkDescriptorBufferInfo * buffer_info,
+        VkDescriptorBufferInfo const * buffer_info,
         VkDescriptorSet dst_set
         )
     {

@@ -205,9 +205,15 @@ namespace wct::render {
     using UBORef = std::span<std::uint8_t>;
     using UBOData = std::vector<std::uint8_t>;
 
+    template<typename T>
+    inline UBOData ToUBOData(T const * ptr) {
+        auto begin = reinterpret_cast<std::uint8_t const *>(ptr);
+        return UBOData(begin, begin + sizeof(T));
+    }
+
     /** Render Pipeline Param Ubo Struct */
     struct RPipeParamUbo {
-        std::uint16_t binding{0};
+        std::uint8_t binding{0};
 
         std::variant<UBORef, UBOData> data{};
 
@@ -220,7 +226,7 @@ namespace wct::render {
 
     template<typename T>
     struct TRPipeParam {
-        std::uint16_t binding{0};
+        std::uint8_t binding{0};
         T value{};
     };
 

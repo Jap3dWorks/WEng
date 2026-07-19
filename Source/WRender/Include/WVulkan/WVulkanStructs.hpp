@@ -122,7 +122,7 @@ struct WVkRenderPipeline
 
 // TODO is this struct required?
 struct WVkDescSetUBOWrite {
-    std::uint32_t binding{0};
+    std::uint8_t binding{0};
     
     const void * data{nullptr};
     std::size_t size{0};
@@ -131,7 +131,8 @@ struct WVkDescSetUBOWrite {
 };
 
 struct WVkDescSetTextureBinding {
-    std::uint32_t binding{0};
+    std::uint8_t binding{0};
+
     VkDescriptorImageInfo image_info{
         .sampler=VK_NULL_HANDLE,
         .imageView=VK_NULL_HANDLE,
@@ -147,10 +148,19 @@ struct [[deprecated]] DELETE_WVkDescriptorSetUBOBinding {
     VkDescriptorBufferInfo buffer_info;
 };
 
+
+struct WVkDescUBOInfo {
+    std::size_t index{0};
+
+    VkDescriptorBufferInfo desc_buffer; // <- avoid search buffer during rendering
+};
+
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 struct WVkDescSetUBOBinding {
-    std::uint32_t binding{0};
-    std::array<VkDescriptorBufferInfo, FramesInFlight> ubo_info{};
+    std::uint8_t binding{0};
+
+    // std::array<VkDescriptorBufferInfo, FramesInFlight> ubo_info{};
+    std::array<WVkDescUBOInfo, FramesInFlight> ubo_desc{};
 };
 
 template<std::uint32_t Frames>

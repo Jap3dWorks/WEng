@@ -141,7 +141,7 @@ namespace spacers::monkey {
                 "/Content/Assets/PPDebugParam:PPDebugParam"
                 );
 
-        camera.SetPostprocessAssignment(0, pipid, paramid);
+        // camera.SetPostprocessAssignment(0, pipid, paramid);
 
         return true;
     }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/TSparseSet.hpp"
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -33,21 +34,18 @@ public:
         FramesInFlight
         >;
 
-    using WVkPipelineBindingDb =
-        TObjectDataBase<DELETE_WVkPipelineBindingInfo,
-                        void,
-                        wcr::wid::WEntityComponentId::IdType>;
+    using PipeBindingsDb=TSparseSet<WVkPipelineBinding<FramesInFlight>>;
 
-    using PipeBindingsDb =
-        TObjectDataBase<WVkPipelineBinding<FramesInFlight>,
-                        void,
-                        wcr::wid::WEntityComponentId::IdType>;
+    // using PipeBindingsDb =
+    //     TObjectDataBase<WVkPipelineBinding<FramesInFlight>,
+    //                     void,
+    //                     wcr::wid::WEntityComponentId::IdType>;
 
 public:
 
     WVkPipelinesDb() noexcept = default;
 
-    virtual ~WVkPipelinesDb() = default;
+    ~WVkPipelinesDb() = default;
 
     WVkPipelinesDb(const WVkPipelinesDb &) = delete;
 
@@ -177,20 +175,11 @@ public:
         }
     }
 
-    void RemoveBinding( const WBindingIdType & in_id, const VkDevice & in_device) {
-        // TODO do not remove ubos, let it to AssetRenderDataRAII
-        bindings.Remove(in_id,
-                        [di_=in_device](auto & b) {
-                            for(auto& ubofrm: b.ubos) {
-                                for(auto& ubo:ubofrm) {
-                                    wvk::buffer::Destroy(ubo.ubo_info, di_);
-                                }
-                            }
-                        }
-            );
+    void RemoveBinding(const WBindingIdType & in_id, const VkDevice & in_device) {
+        pipe_bindings.Remove(in_id);
     }
 
-    void Clear(const VkDevice & in_device) {
+    void Clear(VkDevice in_device) {
         
         for(std::uint32_t i=0; i < FramesInFlight; i++) {
             descriptor_pools[i].Clear(
@@ -216,16 +205,7 @@ public:
                     );
             });
 
-        bindings.Clear(
-            [di_=in_device](auto & b) {
-                for(auto& ubofrm: b.ubos) {
-                    for(auto& ubo : ubofrm) {
-                        // TODO do not remove ubos, let it to AssetRenderDataRAII
-                        wvk::buffer::Destroy(ubo.ubo_info, di_);
-                    }
-                }
-            }
-            );
+        pipe_bindings.Clear();
 
     }
 
@@ -234,7 +214,6 @@ public:
     WVkPipelineDb pipelines{};
     WVkDescSetLayoutDb descriptor_set_layouts{};
     WVkDescriptorPoolDb descriptor_pools{};
-    WVkPipelineBindingDb bindings{};
     PipeBindingsDb pipe_bindings{};
 
 };
