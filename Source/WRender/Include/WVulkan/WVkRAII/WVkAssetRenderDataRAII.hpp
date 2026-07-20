@@ -112,14 +112,14 @@ public:
     // UBOs
 
     /**
-     * Create an UBO buffer associated to input wid
+     * Create an UBO buffer associated to input ubo_set_id
      */
     WNODISCARD
-    std::size_t CreateUBO(wcr::wid::WEngId wid,
+    std::size_t CreateUBO(wcr::wid::WEngId ubo_set_id,
                           std::size_t ubo_size,
                           void const * initial_data_ptr) {
         return ubo_data_.CreateUBO(vkn_.device, vkn_.physical_device,
-                                   wid, ubo_size, initial_data_ptr);
+                                   ubo_set_id, ubo_size, initial_data_ptr);
     }
 
     void DestroyUBOs(wcr::wid::WEngId wid) {
@@ -127,7 +127,7 @@ public:
     }
 
     bool ContainsUBOs(wcr::wid::WEngId wid) const {
-        return ubo_data_.wid_ubos_map.contains(wid);
+        return ubo_data_.ubo_sets.contains(wid);
     }
 
     WVkUBO const & GetUBO(std::size_t id) const {
@@ -156,11 +156,11 @@ private:
         std::unordered_map<
             wcr::wid::WEngId,
             std::variant<std::size_t, std::vector<std::size_t>>
-            > wid_ubos_map{};
+            > ubo_sets{};
 
         void Clear(VkDevice device);
 
-        void Reg(wcr::wid::WEngId wid, std::size_t ubo_id);
+        void Reg(wcr::wid::WEngId set_id, std::size_t ubo_id);
 
         std::size_t CreateUBO(VkDevice device, VkPhysicalDevice pdevice,
                        wcr::wid::WEngId id,

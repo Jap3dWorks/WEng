@@ -681,7 +681,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
 
             // Create descriptor
             VkDescriptorSet descriptorset =
-                wvk::render::CreateRenderDescriptor<FramesInFlight()> (
+                wvk::render::CreateDescriptorSet(
                     device_.Device(),
                     gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index),
                     gbuffers_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
@@ -926,7 +926,7 @@ void WVkRender::RecordPostprocessRenderCommandBuffer(
             );
 
         // TODO is it required to be recreated each frame?
-        VkDescriptorSet pp_descriptor = wvk::render::CreateRenderDescriptor(
+        VkDescriptorSet pp_descriptor = wvk::render::CreateDescriptorSet(
             device_.Device(),
             ppcess_dpool,
             ppcess_dsetlay.descset_layout,

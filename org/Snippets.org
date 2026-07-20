@@ -17,7 +17,6 @@ int main() {
 #+RESULTS:
 : HI
 
-
 * Vector To Array
 
 #+HEADER: :flags --std=gnu++23
@@ -47,7 +46,6 @@ int main() {
 : 2
 : 3
 : HI
-
 
 * Inherit Using A::A
 
@@ -434,3 +432,40 @@ int main() {
 
 #+RESULTS:
 : 1
+
+* Ranges
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+
+#include <ranges>
+#include <vector>
+#include <algorithm>
+
+int main() {
+
+    std::vector<uint32_t> l {1,2,3,4,4,4,4,5} ;
+
+    std::ranges::sort(l);
+    auto ret = std::ranges::unique(l);
+
+    for(auto i : l) {
+        std::println("Value {}", i);
+    }
+
+    std::cout << "HI\n";
+    return 0;
+}
+
+#+end_src
+
+#+RESULTS:
+: Value 1
+: Value 2
+: Value 3
+: Value 4
+: Value 5
+: Value 4
+: Value 4
+: Value 5
+: HI

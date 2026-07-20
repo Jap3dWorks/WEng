@@ -47,7 +47,7 @@ namespace was {
         }
 
         template<std::derived_from<WComponent> T>
-            wcr::wid::WEntityComponentId CreateComponent(const wcr::wid::WEntityId & in_entity_id) {
+        wcr::wid::WEntityComponentId CreateComponent(const wcr::wid::WEntityId & in_entity_id) {
             std::string component_path=ComponentPath(in_entity_id, T::StaticClass());
 
             entity_component_db.CreateComponent<T>(in_entity_id);

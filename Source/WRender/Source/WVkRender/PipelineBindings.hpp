@@ -312,9 +312,18 @@ namespace wvk::render::pipe_bindings {
         WVkAssetRenderDataRAII & asset_render_data,
         VkDevice device
         ) {
-        for(auto & uboidx : std::ranges::unique(ubo_binding.ubo_desc,
-                                                [](auto & a, auto & b)
-                                                    { return a.index == b.index; }))
+
+        auto ubos = ubo_binding.ubo_desc;
+
+        std::ranges::sort(ubos, [](auto & a, auto & b)
+            {return a.index < b.index;}
+            );
+        
+        auto [first, last] = std::ranges::unique(ubos, [](auto & a, auto & b)
+            {return a.index == b.index; }
+            );
+
+        for(auto & uboidx : std::ranges::subrange(ubos.begin(), first))
         {
             WVkUBO ubo = asset_render_data.GetUBO(uboidx.index);
 

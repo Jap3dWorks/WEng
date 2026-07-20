@@ -58,7 +58,7 @@ namespace wvk::render {
     }
 
     template<std::uint8_t FramesInFlight>
-    inline VkDescriptorSet CreateRenderDescriptor(
+    inline VkDescriptorSet CreateDescriptorSet(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,

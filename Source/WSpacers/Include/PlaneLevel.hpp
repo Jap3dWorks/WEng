@@ -98,6 +98,16 @@ namespace spacers::plane {
 
         WRenderPipelineParametersAsset param{};
 
+        wct::render::UBOData ubo_data{};
+        param.Set_ubo_list(
+            {
+                {
+                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::ToUBOData(&ubo_data)
+                }  
+            }
+            );
+
         param.Set_texture_list(
             {
                 {
