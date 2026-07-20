@@ -17,13 +17,31 @@ VSTonemappingOutput vsMain(VSTonemappingInput input)
     return output;
 }
 
+
+float3 ACESFilm(float3 x)
+{
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    return saturate((x * (a * x + b)) / (x * (c * x + d) + e));
+}
+
+
 [shader("fragment")]
 float4 fsMain(VSTonemappingOutput vert_out) : SV_TARGET
 {
+    return hdr_color.Sample(vert_out.fragTexCoord);
+    
+    float4 texColor = hdr_color.Sample(vert_out.fragTexCoord);
+    float3 hdr = texColor.rgb;
 
-    float3 hdr = hdr_color.Sample(vert_out.fragTexCoord).rgb;
+    // Apply ACES filmic tonemapping (PBR-appropriate)
+    float3 mapped = ACESFilm(hdr);
 
-    return float4(hdr, 1.0);
+    // Gamma correction (linear → sRGB)
+    float3 gamma = pow(mapped, 1.0f / 2.2f);
 
+    return float4(gamma, texColor.a);
 }
-

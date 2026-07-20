@@ -34,10 +34,7 @@ VSGBufferOutput vsMain(VSGBufferInput input) {
 
     output.normal = normalize(mul(normal_matrix, input.normal));
 
-    // float4x4 model = float4x4(1.f);
-    float4x4 model = model_ubo.model;
-    
-    float4 wp = mul(model, float4(input.position, 1.0));
+    float4 wp = mul(model_ubo.model, float4(input.position, 1.0));
 
     output.pos = mul(camera_ubo.proj, mul(camera_ubo.view, wp));
     output.world_pos = wp.xyz;
