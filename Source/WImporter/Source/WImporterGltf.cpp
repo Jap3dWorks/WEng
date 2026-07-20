@@ -194,77 +194,130 @@ namespace {
         ) {
         WRenderPipelineParametersAsset result{};
 
-        auto ValidGltfTexture = [&textures_map]
-            (auto & tex_val) -> bool {
-            return textures_map[tex_val.textureIndex].IsValid();
-        };
-
-        auto GetTextureId = [&textures, &textures_map]
-            (auto & tex_info, wcr::wid::WAssetId fallback) -> wcr::wid::WAssetId {
-            return tex_info
-                .and_then(
-                    [&textures, &textures_map, &fallback]
-                    (fastgltf::TextureInfo const & value) -> std::optional<wcr::wid::WAssetId> {
-                        if(textures_map[value.textureIndex].IsValid())
-                            return textures[textures_map[value.textureIndex].GetId()];
-                        else
-                            return fallback;
-                    }
-                    ).value_or(fallback);
-        };
-
         wct::render::PBRScalarUBO pbr_scalars{};
-
-        wct::render::RPipeParamList_Ubo values_params{};
 
         wct::render::RPipeParamList_WAssetId texture_params{};
 
-        if (ValidGltfTexture(in_material.pbrData.baseColorTexture)) {
-            // texture
-        } else {
-            // value
-            // pbr_scalars.albedo = in_material.pbrData.baseColorFactor;
-        }
+        auto CollectGltfTex =
+            [&textures_map, &textures]
+            (
+                auto const & gltf_tex_val,
+                wct::render::RPipeParamList_WAssetId & out_tex_params,
+                std::uint8_t tex_binding,
+                wcr::wid::WAssetId fallback
+                ) {
+                out_tex_params.emplace_back(
+                    tex_binding,
+                    gltf_tex_val.and_then(
+                        [&textures, &textures_map, &fallback]
+                        (fastgltf::TextureInfo const & value)
+                        -> std::optional<wcr::wid::WAssetId> {
+                            if(textures_map[value.textureIndex].IsValid())
+                                return textures[textures_map[value.textureIndex].GetId()];
+                            else
+                                return fallback;
+                        }
+                        ).value_or(fallback)
+                    );
+            };
 
-        texture_params.emplace_back(
+        auto CollectGltfParams =
+            [&textures_map, &textures, &CollectGltfTex]
+            (
+                fastgltf::Optional<fastgltf::TextureInfo> const & gltf_tex_val,
+                auto const & gltf_pbr_val,
+                wct::render::RPipeParamList_WAssetId & out_tex_params,
+                glm::vec4 & out_pbr_scalar,
+                std::uint8_t tex_binding,
+                wcr::wid::WAssetId fallback
+                )
+            {
+            if (gltf_tex_val.has_value()) {
+                out_pbr_scalar[3]=0.f;
+
+                CollectGltfTex(
+                    gltf_tex_val,
+                    out_tex_params,
+                    tex_binding,
+                    fallback
+                    );
+                
+            } else {
+                out_tex_params.emplace_back(
+                    tex_binding,
+                    fallback
+                    );
+
+                out_pbr_scalar[0]=gltf_pbr_val.x();
+                out_pbr_scalar[1]=gltf_pbr_val.y();
+                out_pbr_scalar[2]=gltf_pbr_val.z();
+                out_pbr_scalar[3]=1.f;
+            }
+
+        };
+
+        CollectGltfParams(
+            in_material.pbrData.baseColorTexture,
+            in_material.pbrData.baseColorFactor,
+            texture_params,
+            pbr_scalars.albedo,
             wct::render::PBRBindings::ALBEDO_TEXTURE,
-            GetTextureId(
-                in_material
-                .pbrData
-                .baseColorTexture,
-                null_rgba));
-        
-        texture_params.emplace_back(
-            wct::render::PBRBindings::EMISSION_TEXTURE,
-            GetTextureId(
-                in_material
-                .emissiveTexture,
-                null_texture));
-        
-        texture_params.emplace_back(
-            wct::render::PBRBindings::NORMAL_TEXTURE,
-            GetTextureId(
-                in_material
-                .normalTexture,
-                null_normal));
+            null_rgba
+            );
 
+        CollectGltfParams(
+            in_material.emissiveTexture,
+            in_material.emissiveFactor,
+            texture_params,
+            pbr_scalars.emission,
+            wct::render::PBRBindings::EMISSION_TEXTURE,
+            null_texture
+            );
+
+        CollectGltfTex(
+            in_material.normalTexture,
+            texture_params,
+            wct::render::PBRBindings::NORMAL_TEXTURE,
+            null_normal
+            );
+        
         if (in_material.packedOcclusionRoughnessMetallicTextures) {
-            texture_params.emplace_back(
+            CollectGltfParams(
+                in_material
+                  .packedOcclusionRoughnessMetallicTextures
+                  ->roughnessMetallicOcclusionTexture,
+                fastgltf::math::nvec3{
+                    in_material.pbrData.metallicFactor,
+                    in_material.pbrData.roughnessFactor,
+                    0.f
+                },
+                texture_params,
+                pbr_scalars.mr,
                 wct::render::PBRBindings::MRAO_TEXTURE,
-                GetTextureId(in_material
-                             .packedOcclusionRoughnessMetallicTextures
-                             ->roughnessMetallicOcclusionTexture,
-                             null_texture));
+                null_texture
+                );
         }
         else {
+            pbr_scalars.mr={
+                in_material.pbrData.metallicFactor,
+                in_material.pbrData.roughnessFactor,
+                0.f, 1.f
+            };
+            
             texture_params.emplace_back(
                 wct::render::PBRBindings::MRAO_TEXTURE,
                 null_texture);
         }
             
-        // TODO pbr values into UBO
-
-        
+        result.Set_ubo_list(
+            {
+                {
+                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::ToUBOData(pbr_scalars)
+                }
+                
+            }
+            );
 
         result.Set_texture_list(texture_params);
 
