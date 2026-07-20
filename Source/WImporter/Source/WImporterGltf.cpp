@@ -194,6 +194,11 @@ namespace {
         ) {
         WRenderPipelineParametersAsset result{};
 
+        auto ValidGltfTexture = [&textures_map]
+            (auto & tex_val) -> bool {
+            return textures_map[tex_val.textureIndex].IsValid();
+        };
+
         auto GetTextureId = [&textures, &textures_map]
             (auto & tex_info, wcr::wid::WAssetId fallback) -> wcr::wid::WAssetId {
             return tex_info
@@ -208,8 +213,19 @@ namespace {
                     ).value_or(fallback);
         };
 
+        wct::render::PBRScalarUBO pbr_scalars{};
+
+        wct::render::RPipeParamList_Ubo values_params{};
+
         wct::render::RPipeParamList_WAssetId texture_params{};
-        
+
+        if (ValidGltfTexture(in_material.pbrData.baseColorTexture)) {
+            // texture
+        } else {
+            // value
+            // pbr_scalars.albedo = in_material.pbrData.baseColorFactor;
+        }
+
         texture_params.emplace_back(
             wct::render::PBRBindings::ALBEDO_TEXTURE,
             GetTextureId(
@@ -247,6 +263,8 @@ namespace {
         }
             
         // TODO pbr values into UBO
+
+        
 
         result.Set_texture_list(texture_params);
 

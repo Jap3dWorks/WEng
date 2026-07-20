@@ -131,13 +131,11 @@ namespace {
 
         WRenderPipelineParametersAsset params{};
 
-        wct::render::PBRScalarUBO scalar_ubo{};
-
         params.Set_ubo_list(
             {
                 {
                     wct::render::PBRBindings::PBR_SCALAR_UBO,
-                    wct::render::ToUBOData(&scalar_ubo)
+                    wct::render::ToUBOData(wct::render::PBRScalarUBO{})
                 }
             }
             );

@@ -57,9 +57,9 @@ namespace wct::render {
     };
 
     struct PBRScalarUBO {
-        glm::vec4 albedo{0.3,0.3,0.3,0};
-        glm::vec4 emission{0,0,0,0};
-        glm::vec4 mr{.2, .8, .0, .0};
+        glm::vec4 albedo{0.0, 0.0, 0.0, 0.0};
+        glm::vec4 emission{0.0, 0.0, 0.0, 0.0};
+        glm::vec4 mr{.2, .8, .0, 1.0};
     };
 
     struct CommonBindings {
@@ -208,8 +208,8 @@ namespace wct::render {
     using UBOData = std::vector<std::uint8_t>;
 
     template<typename T>
-    inline UBOData ToUBOData(T const * ptr) {
-        auto begin = reinterpret_cast<std::uint8_t const *>(ptr);
+    inline UBOData ToUBOData(T const & value) {
+        auto begin = reinterpret_cast<std::uint8_t const *>(&value);
         return UBOData(begin, begin + sizeof(T));
     }
 
