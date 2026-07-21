@@ -1,4 +1,4 @@
-module Offscreen;
+module Lighting;
 
 [[vk::binding(0,1)]]            // binding 0, set 1
 public uniform Sampler2D albedo;
@@ -21,12 +21,12 @@ public uniform Sampler2D depth;  // future depth + stencil
 [[vk::binding(6,1)]]
 public uniform Sampler2D extra01;
 
-public struct VSOffscreenInput {
+public struct VSLightingInput {
     public float2 position;
     public float2 tex_coord;
 };
 
-public struct VSOffscreenOutput
+public struct VSLightingOutput
 {
     public float4 position : SV_Position;
     public float2 tex_coord;

@@ -47,13 +47,9 @@ VSGBufferOutput vsMain(VSGBufferInput input) {
 FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
     FSGBUFferOutput output;
 
-    output.albedo =
-        float4(pbr_scalars.albedo.xyz * pbr_scalars.albedo.w, 0.f) +
-        albedo.Sample(vert_in.tex_coord);
+    output.albedo = float4(pbr_scalars.albedo.rgb, 1.f) * albedo.Sample(vert_in.tex_coord);
 
-    output.emission =
-        float4(pbr_scalars.emission.xyz * pbr_scalars.emission.w, 0.f) +
-        emission.Sample(vert_in.tex_coord);
+    output.emission = float4(pbr_scalars.emission.rgb, 1.f) * emission.Sample(vert_in.tex_coord);
 
     // Compute normal from texture with vertex normal.
     // tangent is required to perform this operation
@@ -62,9 +58,7 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
 
     output.ws_position = float4(vert_in.world_pos, 1.f);
 
-    output.mrAO =
-        float4(pbr_scalars.mr.xy * pbr_scalars.mr.w, 0, 0) +
-        mrAO.Sample(vert_in.tex_coord);
+    output.mrAO = float4(pbr_scalars.mr.rg, 1.f, 1.f) * mrAO.Sample(vert_in.tex_coord);
 
     // TODO output texcoords and tangents output
 

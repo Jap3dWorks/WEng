@@ -9,18 +9,18 @@
 #include <cstdint>
 
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkAttachmentsOffscreenRAII {
+class WVkAttachmentsLightingRAII {
 
 public:
 
-    WVkAttachmentsOffscreenRAII() = default;
-    WVkAttachmentsOffscreenRAII(const WVkAttachmentsOffscreenRAII&) = delete;
-    WVkAttachmentsOffscreenRAII(WVkAttachmentsOffscreenRAII&&) = default;
-    WVkAttachmentsOffscreenRAII& operator=(const WVkAttachmentsOffscreenRAII&) = delete;
-    WVkAttachmentsOffscreenRAII& operator=(WVkAttachmentsOffscreenRAII&&) = default;
-    ~WVkAttachmentsOffscreenRAII() = default;
+    WVkAttachmentsLightingRAII() = default;
+    WVkAttachmentsLightingRAII(const WVkAttachmentsLightingRAII&) = delete;
+    WVkAttachmentsLightingRAII(WVkAttachmentsLightingRAII&&) = default;
+    WVkAttachmentsLightingRAII& operator=(const WVkAttachmentsLightingRAII&) = delete;
+    WVkAttachmentsLightingRAII& operator=(WVkAttachmentsLightingRAII&&) = default;
+    ~WVkAttachmentsLightingRAII() = default;
 
-    WVkAttachmentsOffscreenRAII(
+    WVkAttachmentsLightingRAII(
         VkDevice in_device,
         VkPhysicalDevice in_physical_device,
         VkExtent2D in_extent,

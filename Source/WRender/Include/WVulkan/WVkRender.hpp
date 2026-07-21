@@ -6,7 +6,7 @@
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 // #include "WCoreTypes/WTexture.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsLightingRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
@@ -17,7 +17,7 @@
 #include "WVulkan/WVkRAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkOffscreenPipelineRAII.hpp"
+#include "WVulkan/WVkRAII/WVkLightingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkCommandPoolRAII.hpp"
 #include "WEngineInterfaces/IRender.hpp"
@@ -178,7 +178,7 @@ private:
         const std::uint32_t & in_frame_index
         );
 
-    void RecordOffscreenRenderCommandBuffer(
+    void RecordLightingRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
         const std::uint32_t & in_frame_index
         );
@@ -214,7 +214,7 @@ private:
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
-    WVkAttachmentsOffscreenRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
+    WVkAttachmentsLightingRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
     WVkAttachmentsPostprocessRAII<WENG_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
     WVkAttachmentsTonemappingRAII<WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
@@ -229,7 +229,7 @@ private:
 
     WVkGBufferPipelinesRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
-    WVkOffscreenPipelineRAII<> offscreen_pipeline_{};
+    WVkLightingPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
     WVkRenderSyncRAII<WENG_MAX_FRAMES_IN_FLIGHT> render_sync_{};

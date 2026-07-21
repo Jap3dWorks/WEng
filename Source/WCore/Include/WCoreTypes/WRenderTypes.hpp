@@ -118,7 +118,7 @@ namespace wct::render {
     {
         Graphics,       // DEPRECATED use GBuffer for opaque pass
         GBuffer,        // GBuffer generation shader
-        Offscreen,      // Offscreen render using GBuffers
+        Lighting,      // Lighting render using GBuffers
         Transparency,   // Alpha Blending
         Postprocess,    // Camera shader pipelines
         Compute,        // GPU

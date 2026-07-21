@@ -8,7 +8,7 @@
 // #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
-#include "WVulkan/WVkRAII/_WVkOffscreenPipelineRAII_.hpp"
+#include "WVulkan/WVkRAII/_WVkLightingPipelineRAII_.hpp"
 
 #include "WRender/WShader.hpp"
 #include "WString/WString.hpp"
@@ -18,13 +18,13 @@
  * @brief Offsccreen pipeline outputs the render using GBuffers.
  */
 template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
-class WVkOffscreenPipelineRAII {
+class WVkLightingPipelineRAII {
 
 public:
 
-    WVkOffscreenPipelineRAII() noexcept = default;
+    WVkLightingPipelineRAII() noexcept = default;
 
-    WVkOffscreenPipelineRAII(
+    WVkLightingPipelineRAII(
         const VkDevice & in_device,
         VkDescriptorSetLayout in_global_desc_layout) :
         device_(in_device)
@@ -36,14 +36,14 @@ public:
             InitializeRenderPipeline(in_global_desc_layout);
         }
 
-    ~WVkOffscreenPipelineRAII() {
+    ~WVkLightingPipelineRAII() {
         Destroy();
     }
 
-    WVkOffscreenPipelineRAII(const WVkOffscreenPipelineRAII &)=delete;
-    WVkOffscreenPipelineRAII & operator=(const WVkOffscreenPipelineRAII &)=delete;
+    WVkLightingPipelineRAII(const WVkLightingPipelineRAII &)=delete;
+    WVkLightingPipelineRAII & operator=(const WVkLightingPipelineRAII &)=delete;
 
-    WVkOffscreenPipelineRAII(WVkOffscreenPipelineRAII && other) noexcept :
+    WVkLightingPipelineRAII(WVkLightingPipelineRAII && other) noexcept :
         device_(std::move(other.device_)),
         descpool_info_(std::move(other.descpool_info_)),
         descset_layout_(std::move(other.descset_layout_)),
@@ -57,7 +57,7 @@ public:
             other.pipeline_layout_ = VK_NULL_HANDLE;
         }
 
-    WVkOffscreenPipelineRAII & operator=(WVkOffscreenPipelineRAII && other) noexcept {
+    WVkLightingPipelineRAII & operator=(WVkLightingPipelineRAII && other) noexcept {
         if (this != &other) {
             Destroy();
 
@@ -263,7 +263,7 @@ private:
                 pipeline_layout_
             );
 
-        VkFormat color_format = WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT;
+        VkFormat color_format = WENG_VK_LIGHTING_RENDER_COLOR_FORMAT;
 
         pipeline_ = wvk::render_plane::VkPipeline(
             &color_format,
@@ -313,7 +313,7 @@ private:
     VkPipeline pipeline_{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
 
-    const std::string_view shader_path_{WENG_VK_OFFSCREEN_SHADER_PATH};
+    const std::string_view shader_path_{WENG_VK_LIGHTING_SHADER_PATH};
 
 };
 

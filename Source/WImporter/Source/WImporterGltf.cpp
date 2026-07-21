@@ -231,30 +231,27 @@ namespace {
                 std::uint8_t tex_binding,
                 wcr::wid::WAssetId fallback
                 )
-            {
-            if (gltf_tex_val.has_value()) {
-                out_pbr_scalar[3]=0.f;
+                {
+                    out_pbr_scalar[0]=gltf_pbr_val.x();
+                    out_pbr_scalar[1]=gltf_pbr_val.y();
+                    out_pbr_scalar[2]=gltf_pbr_val.z();
+                    out_pbr_scalar[3]=1.f;
 
-                CollectGltfTex(
-                    gltf_tex_val,
-                    out_tex_params,
-                    tex_binding,
-                    fallback
-                    );
+                    if (gltf_tex_val.has_value()) {
+                        CollectGltfTex(
+                            gltf_tex_val,
+                            out_tex_params,
+                            tex_binding,
+                            fallback
+                            );
                 
-            } else {
-                out_tex_params.emplace_back(
-                    tex_binding,
-                    fallback
-                    );
-
-                out_pbr_scalar[0]=gltf_pbr_val.x();
-                out_pbr_scalar[1]=gltf_pbr_val.y();
-                out_pbr_scalar[2]=gltf_pbr_val.z();
-                out_pbr_scalar[3]=1.f;
-            }
-
-        };
+                    } else {
+                        out_tex_params.emplace_back(
+                            tex_binding,
+                            fallback
+                            );
+                    }
+                };
 
         CollectGltfParams(
             in_material.pbrData.baseColorTexture,
@@ -289,7 +286,7 @@ namespace {
                 fastgltf::math::nvec3{
                     in_material.pbrData.metallicFactor,
                     in_material.pbrData.roughnessFactor,
-                    0.f
+                    1.f
                 },
                 texture_params,
                 pbr_scalars.mr,
@@ -301,7 +298,7 @@ namespace {
             pbr_scalars.mr={
                 in_material.pbrData.metallicFactor,
                 in_material.pbrData.roughnessFactor,
-                0.f, 1.f
+                1.f, 1.f
             };
             
             texture_params.emplace_back(

@@ -34,14 +34,14 @@ float4 fsMain(VSTonemappingOutput vert_out) : SV_TARGET
 {
     return hdr_color.Sample(vert_out.fragTexCoord);
     
-    float4 texColor = hdr_color.Sample(vert_out.fragTexCoord);
-    float3 hdr = texColor.rgb;
+    // float4 texColor = hdr_color.Sample(vert_out.fragTexCoord);
+    // float3 hdr = texColor.rgb;
 
-    // Apply ACES filmic tonemapping (PBR-appropriate)
-    float3 mapped = ACESFilm(hdr);
+    // // Apply ACES filmic tonemapping (PBR-appropriate)
+    // float3 mapped = ACESFilm(hdr);
 
-    // Gamma correction (linear → sRGB)
-    float3 gamma = pow(mapped, 1.0f / 2.2f);
+    // // Gamma correction (linear → sRGB)
+    // float3 gamma = pow(mapped, 1.0f / 2.2f);
 
-    return float4(gamma, texColor.a);
+    // return float4(gamma, texColor.a);
 }

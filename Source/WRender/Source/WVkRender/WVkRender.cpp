@@ -105,13 +105,13 @@ void WVkRender::Initialize()
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
     };
 
-    // Offscreen Attachments
+    // Lighting Attachments
 
     offscreen_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
+        WENG_VK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     // Postprocess Attachments
@@ -167,7 +167,7 @@ void WVkRender::Initialize()
         device_.PhysicalDevice()
     };
 
-    WFLOG("[DEBUG] Initialize Offscreen Pipeline.");
+    WFLOG("[DEBUG] Initialize Lighting Pipeline.");
 
     offscreen_pipeline_ = {
         device_.Device(),
@@ -262,7 +262,7 @@ void WVkRender::Draw()
         render_command_buffers_[frame_index_],
         frame_index_);
 
-    RecordOffscreenRenderCommandBuffer(
+    RecordLightingRenderCommandBuffer(
         render_command_buffers_[frame_index_],
         frame_index_);
 
@@ -603,7 +603,7 @@ void WVkRender::RecreateSwapChain() {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_OFFSCREEN_RENDER_COLOR_FORMAT        
+        WENG_VK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     postprocess_attachments_ = {
@@ -751,17 +751,17 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         );
 }
 
-void WVkRender::RecordOffscreenRenderCommandBuffer(
+void WVkRender::RecordLightingRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,
     const std::uint32_t & in_frame_index
     ) {
     
-    wvk::render::RndCmd_TransitionOffscreenWriteLayout(
+    wvk::render::RndCmd_TransitionLightingWriteLayout(
         in_command_buffer,
         offscreen_attachments_.Color(in_frame_index).Image()
         );
 
-    wvk::render::RndCmd_BeginOffscreenRendering(
+    wvk::render::RndCmd_BeginLightingRendering(
         in_command_buffer,
         offscreen_attachments_.Color(in_frame_index).View(),
         offscreen_attachments_.Extent()
@@ -785,7 +785,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
 
     // DescriptorSet
     // TODO do not recreate each frame, create descriptorsSets only once.
-    VkDescriptorSet descriptorset = wvk::render::CreateOffscreenRenderDescriptor(
+    VkDescriptorSet descriptorset = wvk::render::CreateLightingRenderDescriptor(
         device_.Device(),
         offscreen_pipeline_.DescriptorPool(in_frame_index),
         offscreen_pipeline_.DescriptorSetLayout(),
@@ -843,7 +843,7 @@ void WVkRender::RecordOffscreenRenderCommandBuffer(
 
     vkCmdEndRendering(in_command_buffer);
     
-    wvk::render::RndCmd_TransitionOffscreenReadLayout(
+    wvk::render::RndCmd_TransitionLightingReadLayout(
         in_command_buffer,
         offscreen_attachments_.Color(in_frame_index).Image()
         );

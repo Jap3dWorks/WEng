@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsOffscreenRAII.hpp"
+#include "WVulkan/WVkRAII/WVkAttachmentsLightingRAII.hpp"
 #include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/WVkRAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
@@ -118,7 +118,7 @@ namespace wvk::render {
         return descriptor_set;
     }
 
-    inline VkDescriptorSet CreateOffscreenRenderDescriptor(
+    inline VkDescriptorSet CreateLightingRenderDescriptor(
         const VkDevice & vk_device,
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,
@@ -645,7 +645,7 @@ namespace wvk::render {
             );
     }
 
-    inline void RndCmd_TransitionOffscreenWriteLayout(
+    inline void RndCmd_TransitionLightingWriteLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_color
         ) {
@@ -661,7 +661,7 @@ namespace wvk::render {
             );
     }
 
-    inline void RndCmd_TransitionOffscreenReadLayout(
+    inline void RndCmd_TransitionLightingReadLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_color
         ) {
@@ -678,7 +678,7 @@ namespace wvk::render {
 
     }
 
-    inline void RndCmd_BeginOffscreenRendering(
+    inline void RndCmd_BeginLightingRendering(
         const VkCommandBuffer & in_command_buffer,
         const VkImageView & in_color_view,
         const VkExtent2D & in_extent
@@ -988,7 +988,7 @@ namespace wvk::render {
     inline void UpdatePPcessGlobalDescriptorSet(
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
         const WVkAttachmentsGBuffersRAII<FramesInFlight> & gbffr_attach,
-        const WVkAttachmentsOffscreenRAII<FramesInFlight> & offscrn_attach,
+        const WVkAttachmentsLightingRAII<FramesInFlight> & offscrn_attach,
         VkSampler in_sampler,
         std::uint8_t in_frm_indx
         ) {
@@ -1049,7 +1049,7 @@ namespace wvk::render {
     inline void UpdatePPcessGlobalDescriptorSet(
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
         const WVkAttachmentsGBuffersRAII<FramesInFlight> & gbffr_attach,
-        const WVkAttachmentsOffscreenRAII<FramesInFlight> & offscrn_attach,
+        const WVkAttachmentsLightingRAII<FramesInFlight> & offscrn_attach,
         VkSampler in_sampler
         ) {
 
