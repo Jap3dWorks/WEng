@@ -29,7 +29,7 @@ public:
         VkFormat in_color_format,
         VkFormat in_emission_format,
         VkFormat in_normal_format,
-        VkFormat in_mrAO_format,
+        VkFormat in_orm_format,
         VkFormat in_depth_format,
         VkFormat in_extra01_format
         ) : extent_(in_extent) {
@@ -41,7 +41,7 @@ public:
             in_color_format,
             in_emission_format,
             in_normal_format,
-            in_mrAO_format,
+            in_orm_format,
             in_depth_format,
             in_extra01_format
             );
@@ -59,8 +59,8 @@ public:
         return frame_attachments_[frame_index].normal;
     }
 
-    WNODISCARD const WVkAttachmentRAII & MrAO(std::uint8_t frame_index) const noexcept {
-        return frame_attachments_[frame_index].mrAO;
+    WNODISCARD const WVkAttachmentRAII & ORM(std::uint8_t frame_index) const noexcept {
+        return frame_attachments_[frame_index].orm;
     }
 
     WNODISCARD const WVkAttachmentRAII & Depth(std::uint8_t frame_index) const noexcept {
@@ -84,7 +84,7 @@ private:
         VkFormat in_color_format,
         VkFormat in_emission_format,
         VkFormat in_normal_format,
-        VkFormat in_mrAO_format,
+        VkFormat in_orm_format,
         VkFormat in_depth_format,
         VkFormat in_extra01_format
         ) {
@@ -114,11 +114,11 @@ private:
                 in_extent
                 );
 
-            // mrAO
-            attchs.mrAO = WVkAttachmentRAII(
+            // orm
+            attchs.orm = WVkAttachmentRAII(
                 in_device,
                 in_physical_device,
-                in_mrAO_format,
+                in_orm_format,
                 in_extent
                 );
 
@@ -148,7 +148,7 @@ private:
         WVkAttachmentRAII albedo{};
         WVkAttachmentRAII emission{};
         WVkAttachmentRAII normal{};
-        WVkAttachmentRAII mrAO{};          // /metallic/roughness/ambientOclusion
+        WVkAttachmentRAII orm{};          // /metallic/roughness/ambientOclusion
         WVkAttachmentRAII depth{};
         WVkAttachmentRAII extra01{};
     }; 

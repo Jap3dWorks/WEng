@@ -160,7 +160,7 @@ namespace wvr::gbuffer_pipelines {
             WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,      // albedo
             WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,   // emission
             WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,     // normal
-            WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,       // metallic roughness AO
+            WENG_VK_GBUFFER_RENDER_ORM_FORMAT,       // metallic roughness AO
             WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT     // extra 01
         };
 

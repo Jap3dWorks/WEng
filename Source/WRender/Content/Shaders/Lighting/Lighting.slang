@@ -10,7 +10,7 @@ public uniform Sampler2D emission;
 public uniform Sampler2D normal;
 
 [[vk::binding(3,1)]]
-public uniform Sampler2D mrAO;
+public uniform Sampler2D orm;
 
 [[vk::binding(4,1)]]
 public uniform Sampler2D depth;  // future depth + stencil

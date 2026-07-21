@@ -19,7 +19,7 @@ public:
     static inline const std::uint8_t EMISSION_BINDING{3};    
     static inline const std::uint8_t NORMAL_BINDING{4};
     // static inline const std::uint8_t WS_POSITION_BINDING{5};
-    static inline const std::uint8_t MRAO_BINDING{5};
+    static inline const std::uint8_t ORM_BINDING{5};
     static inline const std::uint8_t DEPTH_BINDING{6};
     static inline const std::uint8_t EXTRA01_BINDING{7};
 
@@ -189,7 +189,7 @@ private:
             buildbinding(EMISSION_BINDING),
             buildbinding(NORMAL_BINDING),
             // buildbinding(WS_POSITION_BINDING),
-            buildbinding(MRAO_BINDING),
+            buildbinding(ORM_BINDING),
             buildbinding(DEPTH_BINDING),
             buildbinding(EXTRA01_BINDING)
         };

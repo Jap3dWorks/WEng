@@ -23,7 +23,7 @@ public uniform Sampler2D normal;
 // public uniform Sampler2D ws_position;
 
 [[vk::binding(5,2)]]
-public uniform Sampler2D mrAO;
+public uniform Sampler2D orm;
 
 [[vk::binding(6,2)]]
 public uniform Sampler2D depth;

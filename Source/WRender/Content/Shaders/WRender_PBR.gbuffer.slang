@@ -21,7 +21,7 @@ ConstantBuffer<Sampler2D> emission;
 ConstantBuffer<Sampler2D> normal;
 
 [[vk::binding(5, 1)]]  // binding, set
-ConstantBuffer<Sampler2D> mrAO;
+ConstantBuffer<Sampler2D> orm;
 
 // main functions
 // --------------
@@ -57,8 +57,11 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
     output.normal = float4(vert_in.normal, 1.f);
     
     // temp solution bacause of black AO
-    // output.mrAO = float4(pbr_scalars.mr.rg, 1.f, 1.f) * mrAO.Sample(vert_in.tex_coord);
-    output.mrAO = float4(pbr_scalars.mr.rg * mrAO.Sample(vert_in.tex_coord).rg, 1.f, 1.f);
+    float4 ormsample = orm.Sample(vert_in.tex_coord);
+    output.orm = float4(ormsample.r, pbr_scalars.rm.rg * ormsample.gb, 1.f);
+    // output.orm = float4(1.f, pbr_scalars.rm.rg, 1.f);
+    // output.orm = float4(1.f, 0.5, 0.5, 1.f);
+
 
     // TODO output texcoords and tangents output
 

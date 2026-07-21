@@ -151,7 +151,7 @@ private:
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
 
-        // albedo,emission,normal,ws_position,mrAO,depth,(extra01)
+        // albedo,emission,normal,ws_position,orm,depth,(extra01)
 
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> dsl_bindings;
         for(std::uint32_t i=0; i<dsl_bindings.size(); i++) {

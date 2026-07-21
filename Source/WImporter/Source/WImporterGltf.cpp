@@ -282,27 +282,27 @@ namespace {
             CollectGltfParams(
                 in_material
                   .packedOcclusionRoughnessMetallicTextures
-                  ->roughnessMetallicOcclusionTexture,
+                  ->occlusionRoughnessMetallicTexture,
                 fastgltf::math::nvec3{
-                    in_material.pbrData.metallicFactor,
                     in_material.pbrData.roughnessFactor,
+                    in_material.pbrData.metallicFactor,
                     1.f
                 },
                 texture_params,
-                pbr_scalars.mr,
-                wct::render::PBRBindings::MRAO_TEXTURE,
+                pbr_scalars.rm,
+                wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
         }
         else {
-            pbr_scalars.mr={
-                in_material.pbrData.metallicFactor,
+            pbr_scalars.rm={
                 in_material.pbrData.roughnessFactor,
+                in_material.pbrData.metallicFactor,
                 1.f, 1.f
             };
             
             texture_params.emplace_back(
-                wct::render::PBRBindings::MRAO_TEXTURE,
+                wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture);
         }
             

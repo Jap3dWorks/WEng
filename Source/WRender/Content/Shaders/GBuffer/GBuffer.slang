@@ -8,7 +8,7 @@ public struct ModelUBO {
 public struct PBRScalar {
     public float4 albedo;    // alpha 1 enhabled.
     public float4 emission;  // same
-    public float4 mr;        // same
+    public float4 rm;        // same
 };
 
 // TODO vert tangent
@@ -29,7 +29,7 @@ public struct FSGBUFferOutput {
     public float4 albedo      : SV_TARGET0;
     public float4 emission    : SV_TARGET1;
     public float4 normal      : SV_TARGET2;
-    public float4 mrAO        : SV_TARGET3;
+    public float4 orm         : SV_TARGET3;
     public float4 extra01     : SV_TARGET4;
 };
 

@@ -114,7 +114,7 @@ namespace {
         descriptors[4].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
         // normal map
-        descriptors[5].binding=wct::render::PBRBindings::MRAO_TEXTURE;
+        descriptors[5].binding=wct::render::PBRBindings::ORM_TEXTURE;
         descriptors[5].type=wct::render::ERPipeParamType::Texture;
         descriptors[5].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
@@ -151,7 +151,7 @@ namespace {
                     out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
-                    wct::render::PBRBindings::MRAO_TEXTURE,
+                    wct::render::PBRBindings::ORM_TEXTURE,
                     out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
                 },
             });

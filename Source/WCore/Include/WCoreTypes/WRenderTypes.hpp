@@ -61,7 +61,7 @@ namespace wct::render {
     struct PBRScalarUBO {
         glm::vec4 albedo{0.0, 0.0, 0.0, 0.0};
         glm::vec4 emission{0.0, 0.0, 0.0, 0.0};
-        glm::vec4 mr{.2, .8, .0, 1.0};
+        glm::vec4 rm{0.2, .8, 1.0, 1.0};
     };
 
     struct CommonBindings {
@@ -73,7 +73,7 @@ namespace wct::render {
         static constexpr std::uint8_t ALBEDO_TEXTURE{2};
         static constexpr std::uint8_t EMISSION_TEXTURE{3};
         static constexpr std::uint8_t NORMAL_TEXTURE{4};
-        static constexpr std::uint8_t MRAO_TEXTURE{5};
+        static constexpr std::uint8_t ORM_TEXTURE{5};
     };
 
     inline constexpr std::uint8_t MAX_PIPELINE_SHADERS=8;

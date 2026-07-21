@@ -123,7 +123,7 @@ namespace spacers::plane {
                     engine.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
-                    wct::render::PBRBindings::MRAO_TEXTURE,
+                    wct::render::PBRBindings::ORM_TEXTURE,
                     engine.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
                 }
             }

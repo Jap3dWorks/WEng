@@ -78,14 +78,14 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
     float3 alb = albedo.Sample(uv).rgb;
     float3 ems = emission.Sample(uv).rgb;
 
-    float2 mr = mrAO.Sample(uv).rg;
+    float2 mr = orm.Sample(uv).rg;
     mr.r = max(mr.r, 0.04);
     mr.g = max(mr.g, 0.04);
 
     // mr.r = .5;
     // mr.g = .5;
 
-    float ao = mrAO.Sample(uv).b;
+    float ao = orm.Sample(uv).b;
 
     float3 campos = float3(camera_ubo.px, camera_ubo.py, camera_ubo.pz);
     float3 V = normalize(campos - wpos);

@@ -99,7 +99,7 @@ void WVkRender::Initialize()
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
-        WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_ORM_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
     };
@@ -592,7 +592,7 @@ void WVkRender::RecreateSwapChain() {
         WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
         WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
         WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
-        WENG_VK_GBUFFER_RENDER_MRAO_FORMAT,
+        WENG_VK_GBUFFER_RENDER_ORM_FORMAT,
         WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
         WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT
     };
@@ -639,7 +639,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_attachments_.Albedo(in_frame_index).Image(),
         gbuffers_attachments_.Emission(in_frame_index).Image(),
         gbuffers_attachments_.Normal(in_frame_index).Image(),
-        gbuffers_attachments_.MrAO(in_frame_index).Image(),
+        gbuffers_attachments_.ORM(in_frame_index).Image(),
         gbuffers_attachments_.Depth(in_frame_index).Image(),
         gbuffers_attachments_.Extra01(in_frame_index).Image()
         );
@@ -649,7 +649,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_attachments_.Albedo(in_frame_index).View(),
         gbuffers_attachments_.Emission(in_frame_index).View(),
         gbuffers_attachments_.Normal(in_frame_index).View(),
-        gbuffers_attachments_.MrAO(in_frame_index).View(),
+        gbuffers_attachments_.ORM(in_frame_index).View(),
         gbuffers_attachments_.Depth(in_frame_index).View(),
         gbuffers_attachments_.Extra01(in_frame_index).View(),
         gbuffers_attachments_.Extent()
@@ -740,7 +740,7 @@ void WVkRender::RecordGBuffersRenderCommandBuffer(
         gbuffers_attachments_.Albedo(in_frame_index).Image(),
         gbuffers_attachments_.Emission(in_frame_index).Image(),
         gbuffers_attachments_.Normal(in_frame_index).Image(),
-        gbuffers_attachments_.MrAO(in_frame_index).Image(),
+        gbuffers_attachments_.ORM(in_frame_index).Image(),
         gbuffers_attachments_.Depth(in_frame_index).Image(),
         gbuffers_attachments_.Extra01(in_frame_index).Image()
         );
@@ -788,7 +788,7 @@ void WVkRender::RecordLightingRenderCommandBuffer(
         gbuffers_attachments_.Albedo(in_frame_index).View(),
         gbuffers_attachments_.Emission(in_frame_index).View(),
         gbuffers_attachments_.Normal(in_frame_index).View(),
-        gbuffers_attachments_.MrAO(in_frame_index).View(),
+        gbuffers_attachments_.ORM(in_frame_index).View(),
         gbuffers_attachments_.Depth(in_frame_index).View(),
         gbuffers_attachments_.Extra01(in_frame_index).View()
         );

@@ -98,7 +98,7 @@ namespace spacers::monkey {
                     .value=null_normal->Get_asset_id()
                 },
                 {
-                    .binding=wct::render::PBRBindings::MRAO_TEXTURE,
+                    .binding=wct::render::PBRBindings::ORM_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 }
             }
@@ -197,7 +197,7 @@ namespace spacers::monkey {
                     .value=null_normal->Get_asset_id()
                 },
                 {
-                    .binding=wct::render::PBRBindings::MRAO_TEXTURE,
+                    .binding=wct::render::PBRBindings::ORM_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 }
             }

@@ -126,7 +126,7 @@ namespace wvk::render {
         const VkImageView & in_albedo_view,
         const VkImageView & in_emission_view,
         const VkImageView & in_normal_view,
-        const VkImageView & in_mrAO_view,
+        const VkImageView & in_orm_view,
         const VkImageView & in_depth_view,
         const VkImageView & in_extra01_view
         ) {
@@ -152,7 +152,7 @@ namespace wvk::render {
         for (const VkImageView & vw : {in_albedo_view,
                                        in_emission_view,
                                        in_normal_view,
-                                       in_mrAO_view,
+                                       in_orm_view,
                                        in_depth_view,
                                        in_extra01_view
                                        }) {
@@ -382,7 +382,7 @@ namespace wvk::render {
         const VkImage & in_albedo,
         const VkImage & in_emission,
         const VkImage & in_normal,
-        const VkImage & in_mrAO,
+        const VkImage & in_orm,
         const VkImage & in_depth,
         const VkImage & in_extra01
         ) {
@@ -422,7 +422,7 @@ namespace wvk::render {
 
         RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
-            in_mrAO,
+            in_orm,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             {},
@@ -461,7 +461,7 @@ namespace wvk::render {
         const VkImage & in_emission,
         const VkImage & in_normal,
         // const VkImage & in_ws_position,
-        const VkImage & in_mrAO,
+        const VkImage & in_orm,
         const VkImage & in_depth,
         const VkImage & in_extra01
         ) {
@@ -512,7 +512,7 @@ namespace wvk::render {
 
         wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,
-            in_mrAO,
+            in_orm,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -550,7 +550,7 @@ namespace wvk::render {
         const VkImageView & in_albedo_view,
         const VkImageView & in_emission_view,
         const VkImageView & in_normal_view,
-        const VkImageView & in_mrAO_view,
+        const VkImageView & in_orm_view,
         const VkImageView & in_depth_view,
         const VkImageView & in_extra01_view,
         const VkExtent2D & in_extent
@@ -582,13 +582,13 @@ namespace wvk::render {
         normal_attach.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         normal_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
 
-        // mrAO attachment
-        auto mrao_attach = wvk::types::CreateVkRenderingAttachmentInfo();
-        mrao_attach.imageView = in_mrAO_view;
-        mrao_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        mrao_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        mrao_attach.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        mrao_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
+        // orm attachment
+        auto orm_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        orm_attach.imageView = in_orm_view;
+        orm_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        orm_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        orm_attach.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        orm_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // extra01 attachment
         auto extra01_attach = wvk::types::CreateVkRenderingAttachmentInfo();
@@ -602,7 +602,7 @@ namespace wvk::render {
             std::move(albedo_attach),
             std::move(emission_attach),
             std::move(normal_attach),
-            std::move(mrao_attach),
+            std::move(orm_attach),
             std::move(extra01_attach)
         };
 
@@ -1005,7 +1005,7 @@ namespace wvk::render {
             to_desc_info(gbffr_attach.Albedo(in_frm_indx).View()),
             to_desc_info(gbffr_attach.Emission(in_frm_indx).View()),
             to_desc_info(gbffr_attach.Normal(in_frm_indx).View()),
-            to_desc_info(gbffr_attach.MrAO(in_frm_indx).View()),
+            to_desc_info(gbffr_attach.ORM(in_frm_indx).View()),
             to_depth_desc_info(gbffr_attach.Depth(in_frm_indx).View()),
             to_desc_info(gbffr_attach.Extra01(in_frm_indx).View())
         };
