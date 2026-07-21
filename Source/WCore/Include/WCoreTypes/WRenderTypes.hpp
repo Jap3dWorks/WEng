@@ -48,6 +48,8 @@ namespace wct::render {
     struct CameraUBO {
         glm::mat4 proj{};
         glm::mat4 view{1};
+        glm::mat4 inv_proj{};
+        glm::mat4 inv_view{1};
         glm::vec3 pos{1};
         glm::vec3 rot{0};  // pitch, yaw, roll
         glm::vec3 scale{1};

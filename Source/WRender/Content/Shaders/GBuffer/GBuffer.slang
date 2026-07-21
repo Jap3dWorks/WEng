@@ -23,16 +23,14 @@ public struct VSGBufferOutput {
     public float4 pos        : SV_POSITION;
     public float2 tex_coord  : TEXCOORD0;
     public float3 normal     : TEXCOORD1;
-    public float3 world_pos  : TEXCOORD2;
 };
 
 public struct FSGBUFferOutput {
     public float4 albedo      : SV_TARGET0;
     public float4 emission    : SV_TARGET1;
     public float4 normal      : SV_TARGET2;
-    public float4 ws_position : SV_TARGET3;
-    public float4 mrAO        : SV_TARGET4;
-    public float4 extra01     : SV_TARGET5;
+    public float4 mrAO        : SV_TARGET3;
+    public float4 extra01     : SV_TARGET4;
 };
 
 [[vk::binding(0, 1)]] // binding, set

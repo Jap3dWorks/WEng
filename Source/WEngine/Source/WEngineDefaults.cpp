@@ -34,11 +34,8 @@ namespace {
             );
 
         // --
-
         
         color_data.assign(2*2*4, 255);
-        // std::ranges::fill(color_data.begin() + 4, color_data.begin() + 8, 127);
-        // std::ranges::fill(color_data.begin() + 8, color_data.begin() + 12, 0);
 
         texture_asset = {};
         texture_asset.SetTextureData(

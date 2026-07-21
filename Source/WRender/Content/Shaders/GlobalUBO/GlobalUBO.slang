@@ -2,20 +2,22 @@ module GlobalUBO;
 
 // Camera stuffs
 public struct CameraUBO {
-  public float4x4 proj;
-  public float4x4 view;
-  public float px;
-  public float py;
-  public float pz;
-  public float pitch;
-  public float yaw;
-  public float roll;
-  public float sx;
-  public float sy;
-  public float sz;
-  public float field_of_view;
-  public float near_clipping;
-  public float far_clipping;
+    public float4x4 proj;
+    public float4x4 view;
+    public float4x4 inv_proj;
+    public float4x4 inv_view;
+    public float px;
+    public float py;
+    public float pz;
+    public float pitch;
+    public float yaw;
+    public float roll;
+    public float sx;
+    public float sy;
+    public float sz;
+    public float field_of_view;
+    public float near_clipping;
+    public float far_clipping;
 };
 
 // Lighting Types

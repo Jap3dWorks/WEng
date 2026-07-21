@@ -18,12 +18,12 @@ public:
     static inline const std::uint8_t ALBEDO_BINDING{2};
     static inline const std::uint8_t EMISSION_BINDING{3};    
     static inline const std::uint8_t NORMAL_BINDING{4};
-    static inline const std::uint8_t WS_POSITION_BINDING{5};
-    static inline const std::uint8_t MRAO_BINDING{6};
-    static inline const std::uint8_t DEPTH_BINDING{7};
-    static inline const std::uint8_t EXTRA01_BINDING{8};
+    // static inline const std::uint8_t WS_POSITION_BINDING{5};
+    static inline const std::uint8_t MRAO_BINDING{5};
+    static inline const std::uint8_t DEPTH_BINDING{6};
+    static inline const std::uint8_t EXTRA01_BINDING{7};
 
-    static inline const std::uint8_t BINDING_COUNT{9};
+    static inline const std::uint8_t BINDING_COUNT{8};
 
 public:    
 
@@ -180,13 +180,15 @@ private:
             };
         };
 
+        // VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
+
         std::array bindings {
             buildbinding(PREV_BINDING),
             buildbinding(COLOR_BINDING),
             buildbinding(ALBEDO_BINDING),
             buildbinding(EMISSION_BINDING),
             buildbinding(NORMAL_BINDING),
-            buildbinding(WS_POSITION_BINDING),
+            // buildbinding(WS_POSITION_BINDING),
             buildbinding(MRAO_BINDING),
             buildbinding(DEPTH_BINDING),
             buildbinding(EXTRA01_BINDING)

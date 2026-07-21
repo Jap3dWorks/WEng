@@ -37,7 +37,7 @@ VSGBufferOutput vsMain(VSGBufferInput input) {
     float4 wp = mul(model_ubo.model, float4(input.position, 1.0));
 
     output.pos = mul(camera_ubo.proj, mul(camera_ubo.view, wp));
-    output.world_pos = wp.xyz;
+
     output.tex_coord = input.tex_coord;
 
     return output;
@@ -55,10 +55,10 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
     // tangent is required to perform this operation
     
     output.normal = float4(vert_in.normal, 1.f);
-
-    output.ws_position = float4(vert_in.world_pos, 1.f);
-
-    output.mrAO = float4(pbr_scalars.mr.rg, 1.f, 1.f) * mrAO.Sample(vert_in.tex_coord);
+    
+    // temp solution bacause of black AO
+    // output.mrAO = float4(pbr_scalars.mr.rg, 1.f, 1.f) * mrAO.Sample(vert_in.tex_coord);
+    output.mrAO = float4(pbr_scalars.mr.rg * mrAO.Sample(vert_in.tex_coord).rg, 1.f, 1.f);
 
     // TODO output texcoords and tangents output
 

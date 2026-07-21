@@ -50,6 +50,19 @@ float3 FresnelSchlick(float cosTheta, float3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+float3 WPos(float depth, float2 uv, float4x4 view, float4x4 inv_view, float4x4 inv_proj) {
+
+    // Convert UV to clip-space coordinates [-1, +1]
+    float4 clip_pos = float4(uv * 2.0 - 1.0, depth, 1.0);
+
+    // Clip space -> View space
+    float4 view_pos = mul(inv_proj, clip_pos);
+    view_pos.xyz /= view_pos.w;
+
+    // View space -> World space
+    return mul(inv_view, float4(view_pos.xyz, 1.0)).xyz;
+}
+
 static const float PI = 3.14159265359;
 
 [shader("fragment")]
@@ -58,12 +71,21 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
     float2 uv = vertexOutput.tex_coord;
 
     // Read G-Buffers
-    float3 wpos = ws_position.Sample(uv).xyz;
-    float3 nrm = normal.Sample(uv).xyz;
-    float3 alb = albedo.Sample(uv).xyz;
-    float3 ems = emission.Sample(uv).xyz;
-    float2 mr = mrAO.Sample(uv).xy;
-    float ao = mrAO.Sample(uv).z;
+    float dpt = depth.Sample(uv).r;
+    float3 wpos = WPos(dpt, uv, camera_ubo.view, camera_ubo.inv_view, camera_ubo.inv_proj);
+
+    float3 nrm = normal.Sample(uv).rgb;
+    float3 alb = albedo.Sample(uv).rgb;
+    float3 ems = emission.Sample(uv).rgb;
+
+    float2 mr = mrAO.Sample(uv).rg;
+    mr.r = max(mr.r, 0.04);
+    mr.g = max(mr.g, 0.04);
+
+    // mr.r = .5;
+    // mr.g = .5;
+
+    float ao = mrAO.Sample(uv).b;
 
     float3 campos = float3(camera_ubo.px, camera_ubo.py, camera_ubo.pz);
     float3 V = normalize(campos - wpos);
@@ -96,12 +118,14 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         float3 F = FresnelSchlick(HdotV, F0);
 
         float3 specular = (D * G * F) / (4.0 * NdotV * NdotL + 1e-4);
+
         float3 kD = (1.0 - F) * (1.0 - mr.x);
 
         Lo += (kD * alb / PI + specular) * radiance * NdotL;
     }
 
     float3 color = lighting_ubo.ambient_light.color.rgb * alb * ao + Lo + ems;
+    // float3 color = lighting_ubo.ambient_light.color.rgb * alb + Lo + ems;
 
     // PBR directional
     for (uint i=0; i < lighting_ubo.directional_lights_count; i++) {
@@ -122,5 +146,5 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         color += (kD * alb / PI + specular) * radiance * NdotL;
     }
 
-    return float4(color + camera_ubo.py, 1.0);
+    return float4(color, 1.0);
 }

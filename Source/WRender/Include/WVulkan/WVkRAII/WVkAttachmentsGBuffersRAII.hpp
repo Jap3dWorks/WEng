@@ -12,7 +12,9 @@ template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
 class WVkAttachmentsGBuffersRAII {
 
 public:
-    
+
+    // TODO Read write layouts of each attachment.
+
     WVkAttachmentsGBuffersRAII() = default;
     WVkAttachmentsGBuffersRAII(const WVkAttachmentsGBuffersRAII&) = delete;
     WVkAttachmentsGBuffersRAII& operator=(const WVkAttachmentsGBuffersRAII&) = delete;
@@ -27,7 +29,6 @@ public:
         VkFormat in_color_format,
         VkFormat in_emission_format,
         VkFormat in_normal_format,
-        VkFormat in_ws_position_format,
         VkFormat in_mrAO_format,
         VkFormat in_depth_format,
         VkFormat in_extra01_format
@@ -40,7 +41,6 @@ public:
             in_color_format,
             in_emission_format,
             in_normal_format,
-            in_ws_position_format,
             in_mrAO_format,
             in_depth_format,
             in_extra01_format
@@ -57,10 +57,6 @@ public:
 
     WNODISCARD const  WVkAttachmentRAII & Normal(std::uint8_t frame_index) const noexcept {
         return frame_attachments_[frame_index].normal;
-    }
-
-    WNODISCARD const WVkAttachmentRAII & WsPosition(std::uint8_t frame_index) const noexcept {
-        return frame_attachments_[frame_index].ws_position;
     }
 
     WNODISCARD const WVkAttachmentRAII & MrAO(std::uint8_t frame_index) const noexcept {
@@ -88,7 +84,6 @@ private:
         VkFormat in_color_format,
         VkFormat in_emission_format,
         VkFormat in_normal_format,
-        VkFormat in_ws_position_format,
         VkFormat in_mrAO_format,
         VkFormat in_depth_format,
         VkFormat in_extra01_format
@@ -116,14 +111,6 @@ private:
                 in_device,
                 in_physical_device,
                 in_normal_format,
-                in_extent
-                );
-
-            // ws_position
-            attchs.ws_position = WVkAttachmentRAII(
-                in_device,
-                in_physical_device,
-                in_ws_position_format,
                 in_extent
                 );
 
@@ -161,7 +148,6 @@ private:
         WVkAttachmentRAII albedo{};
         WVkAttachmentRAII emission{};
         WVkAttachmentRAII normal{};
-        WVkAttachmentRAII ws_position{};
         WVkAttachmentRAII mrAO{};          // /metallic/roughness/ambientOclusion
         WVkAttachmentRAII depth{};
         WVkAttachmentRAII extra01{};
@@ -169,8 +155,5 @@ private:
     std::array<Attachments, FramesInFlight> frame_attachments_{};
 
     VkExtent2D extent_{};
-
-    // TODO remove
-    // struct WVkGBuffersRenderStruct
 
 };

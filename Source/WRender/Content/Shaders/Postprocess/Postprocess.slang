@@ -19,13 +19,13 @@ public uniform Sampler2D emission;
 [[vk::binding(4,2)]]
 public uniform Sampler2D normal;
 
-[[vk::binding(5,2)]]
-public uniform Sampler2D ws_position;
+// [[vk::binding(5,2)]]
+// public uniform Sampler2D ws_position;
 
-[[vk::binding(6,2)]]
+[[vk::binding(5,2)]]
 public uniform Sampler2D mrAO;
 
-[[vk::binding(7,2)]]
+[[vk::binding(6,2)]]
 public uniform Sampler2D depth;
 
 // TODO input render textures

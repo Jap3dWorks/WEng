@@ -69,7 +69,7 @@ namespace spacers::gltflevel {
             ->GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
 
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
-        ambient_ptr->Set_intensity(0.01);
+        ambient_ptr->Set_intensity(0.2f);
         ambient_ptr->Set_active(true);
 
         wcr::wid::WEntityId dir_light = level->CreateEntity<WEntity>();
@@ -79,7 +79,7 @@ namespace spacers::gltflevel {
         auto * dir_ptr = &level
             ->GetComponent<wcm::light::WDirectionalLightComponent>(dir_light);
         
-        dir_ptr->Set_intensity(2.f);
+        dir_ptr->Set_intensity(5.f);
 
         auto* trns_ptr = &level
             ->GetComponent<WTransformComponent>

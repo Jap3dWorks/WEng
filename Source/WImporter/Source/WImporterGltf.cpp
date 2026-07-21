@@ -612,13 +612,6 @@ namespace {
                           {return v;})
                 .value_or(wcr::wid::null_id);
 
-            // if (tx.imageIndex.has_value()) {
-            //     image_samplers[tx.imageIndex.value()] =
-            //         tx.samplerIndex
-            //         .and_then([](auto & v ) -> std::optional<NullableIndex<IndexType>>
-            //                   { return v ;})
-            //         .value_or(wcr::wid::null_id);
-            // }
         }
         return texture_samplers;
     }
