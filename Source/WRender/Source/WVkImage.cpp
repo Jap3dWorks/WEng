@@ -118,8 +118,6 @@ void wvk::image::TransitionImageLayout(
         new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
         )
     {
-        WFLOG("From VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTINAL");
-        
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
