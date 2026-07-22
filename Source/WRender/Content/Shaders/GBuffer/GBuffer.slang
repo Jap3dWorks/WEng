@@ -5,10 +5,11 @@ public struct ModelUBO {
     public float4x4 normal_matrix;
 };
 
+// TODO Normal multiplier
 public struct PBRScalar {
-    public float4 albedo;    // alpha 1 enhabled.
-    public float4 emission;  // same
-    public float4 rm;        // same
+    public float4 albedo;     // multiplier for the input albedo
+    public float4 emission;   // same
+    public float4 orm;        // same
 };
 
 // TODO vert tangent

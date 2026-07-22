@@ -34,7 +34,7 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return previous.Sample(uv);
         }
         else {
-            return orm.Sample(uv).r;
+            return orm.Sample(uv).b;
         }
     }
     else {
@@ -42,7 +42,7 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return normal.Sample(uv);
         }
         else {
-            return depth.Sample(uv) * 0.1;
+            return depth.Sample(uv).r * 0.1;
         }
     }
 }

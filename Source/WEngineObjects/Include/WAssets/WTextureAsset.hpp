@@ -22,8 +22,8 @@ public:
     WPROPERTY(std::uint32_t, width,);
     WPROPERTY(std::uint32_t, height,);
     WPROPERTY(wct::texture::ESampler, sampler,
-              wct::texture::ESampler::MIN_BILINEAR |
-              wct::texture::ESampler::MAG_BILINEAR |
+              wct::texture::ESampler::MIN_LINEAR   |
+              wct::texture::ESampler::MAG_LINEAR   |
               wct::texture::ESampler::WRAPS_REPEAT |
               wct::texture::ESampler::WRAPT_REPEAT
         );

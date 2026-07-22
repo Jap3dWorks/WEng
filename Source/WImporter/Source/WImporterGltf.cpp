@@ -278,32 +278,52 @@ namespace {
             null_normal
             );
         
-        if (in_material.packedOcclusionRoughnessMetallicTextures) {
+        if (in_material.pbrData.metallicRoughnessTexture) {
+            // OMR : oclussion roughness metallic
+            
+            CollectGltfParams(
+                in_material.pbrData.metallicRoughnessTexture,
+                fastgltf::math::nvec3{
+                    1.f,
+                    in_material.pbrData.roughnessFactor,
+                    in_material.pbrData.metallicFactor
+                },
+                texture_params,
+                pbr_scalars.orm,
+                wct::render::PBRBindings::ORM_TEXTURE,
+                null_texture
+                );
+        }
+        else if (in_material.packedOcclusionRoughnessMetallicTextures) {
             CollectGltfParams(
                 in_material
                   .packedOcclusionRoughnessMetallicTextures
                   ->occlusionRoughnessMetallicTexture,
                 fastgltf::math::nvec3{
+                    1.f,
                     in_material.pbrData.roughnessFactor,
-                    in_material.pbrData.metallicFactor,
-                    1.f
+                    in_material.pbrData.metallicFactor
                 },
                 texture_params,
-                pbr_scalars.rm,
+                pbr_scalars.orm,
                 wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
         }
         else {
-            pbr_scalars.rm={
+            WFLOG("No orm texture detected!");
+            
+            pbr_scalars.orm={
+                1.f,
                 in_material.pbrData.roughnessFactor,
                 in_material.pbrData.metallicFactor,
-                1.f, 1.f
+                1.f
             };
             
             texture_params.emplace_back(
                 wct::render::PBRBindings::ORM_TEXTURE,
-                null_texture);
+                null_texture
+                );
         }
             
         result.Set_ubo_list(

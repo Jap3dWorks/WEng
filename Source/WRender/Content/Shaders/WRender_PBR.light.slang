@@ -78,19 +78,13 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
     float3 alb = albedo.Sample(uv).rgb;
     float3 ems = emission.Sample(uv).rgb;
 
-    float2 mr = orm.Sample(uv).rg;
-    mr.r = max(mr.r, 0.04);
-    mr.g = max(mr.g, 0.04);
-
-    // mr.r = .5;
-    // mr.g = .5;
-
-    float ao = orm.Sample(uv).b;
+    float2 rm = orm.Sample(uv).gb;
+    float ao = orm.Sample(uv).r;
 
     float3 campos = float3(camera_ubo.px, camera_ubo.py, camera_ubo.pz);
     float3 V = normalize(campos - wpos);
 
-    float3 F0 = lerp(float3(0.04, 0.04, 0.04), alb, mr.x);
+    float3 F0 = lerp(float3(0.04, 0.04, 0.04), alb, rm.y);
 
     // Acumulator
     float3 Lo = float3(0.0, 0.0, 0.0);
@@ -113,13 +107,13 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         float NdotH = max(dot(nrm, H), 0.0);
         float HdotV = max(dot(H, V), 0.0);
 
-        float D = DistributionGGX(NdotH, mr.y);
-        float G = GeometrySmith(NdotV, NdotL, mr.y);
+        float D = DistributionGGX(NdotH, rm.x);
+        float G = GeometrySmith(NdotV, NdotL, rm.x);
         float3 F = FresnelSchlick(HdotV, F0);
 
         float3 specular = (D * G * F) / (4.0 * NdotV * NdotL + 1e-4);
 
-        float3 kD = (1.0 - F) * (1.0 - mr.x);
+        float3 kD = (1.0 - F) * (1.0 - rm.y);
 
         Lo += (kD * alb / PI + specular) * radiance * NdotL;
     }
@@ -135,12 +129,12 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         float NdotH = max(dot(nrm, H), 0.0);
         float HdotV = max(dot(H, V), 0.0);
 
-        float D = DistributionGGX(NdotH, mr.y);
-        float G = GeometrySmith(max(dot(nrm, V), 0.0), NdotL, mr.y);
+        float D = DistributionGGX(NdotH, rm.x);
+        float G = GeometrySmith(max(dot(nrm, V), 0.0), NdotL, rm.x);
         float3 F = FresnelSchlick(HdotV, F0);
 
         float3 specular = (D * G * F) / (4.0 * max(dot(nrm, V), 0.0) * NdotL + 1e-4);
-        float3 kD = (1.0 - F) * (1.0 - mr.x);
+        float3 kD = (1.0 - F) * (1.0 - rm.y);
         float3 radiance = lighting_ubo.directional_lights[i].color.rgb;
 
         color += (kD * alb / PI + specular) * radiance * NdotL;

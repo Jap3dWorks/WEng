@@ -18,14 +18,13 @@
 namespace {
 
     void DefaultTextures(WAssetDb & out_db) {
-        std::vector<std::uint8_t> color_data {
-            2 * 2 * 4,
-            255};
+        std::vector<std::uint8_t> color_data {};
+        color_data.assign(2*2*4, 255);
 
         WTextureAsset texture_asset{};
         texture_asset.SetTextureData(
             color_data.data(), 2, 2,
-            wct::texture::ETextureFormat::RGBA8_UNORM
+            wct::texture::ETextureFormat::RGBA8_SRGB
             );
 
         out_db.CreateFrom<WTextureAsset>(

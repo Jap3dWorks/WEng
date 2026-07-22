@@ -61,7 +61,7 @@ namespace wct::render {
     struct PBRScalarUBO {
         glm::vec4 albedo{0.0, 0.0, 0.0, 0.0};
         glm::vec4 emission{0.0, 0.0, 0.0, 0.0};
-        glm::vec4 rm{0.2, .8, 1.0, 1.0};
+        glm::vec4 orm{1.0, .8, .2, 1.0};
     };
 
     struct CommonBindings {
