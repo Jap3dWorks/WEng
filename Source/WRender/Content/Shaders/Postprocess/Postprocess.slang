@@ -19,17 +19,16 @@ public uniform Sampler2D emission;
 [[vk::binding(4,2)]]
 public uniform Sampler2D normal;
 
-// [[vk::binding(5,2)]]
-// public uniform Sampler2D ws_position;
-
 [[vk::binding(5,2)]]
 public uniform Sampler2D orm;
 
 [[vk::binding(6,2)]]
 public uniform Sampler2D depth;
 
+[[vk::binding(7,2)]]
+public uniform Sampler2D extra01;
+
 // TODO input render textures
-//  rm (roughness/metallic)
 //  extras 1 and 2
 
 

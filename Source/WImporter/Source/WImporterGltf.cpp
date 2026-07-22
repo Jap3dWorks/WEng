@@ -1,4 +1,6 @@
+#include "WCore/TVisitor.hpp"
 #include "WCore/WCore.hpp"
+#include "WCore/WDebug.hpp"
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/Level.hpp"
@@ -29,6 +31,8 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
+#include <unordered_set>
+#include <ranges>
 
 std::vector<std::string_view> wim::importer::WImporterGltf::Extensions() const noexcept {
     return {".gltf", ".glb"};
@@ -183,7 +187,8 @@ namespace {
     }
 
     WNODISCARD inline
-    WRenderPipelineParametersAsset CollectMaterial(
+    // WRenderPipelineParametersAsset CollectMaterial(
+    auto CollectMaterial(
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & textures_map,
         std::vector<wcr::wid::WAssetId> const & textures,
@@ -198,62 +203,103 @@ namespace {
 
         wct::render::RPipeParamList_WAssetId texture_params{};
 
-        auto CollectGltfTex =
+        wcr::TVisitor CollectPbrVal {
+            [](float & out_val, float gltf_val ) {
+                out_val = gltf_val;
+            },
+            [](glm::vec4 & out_val, fastgltf::math::nvec2 const & gltf_val) {
+                out_val[0]=gltf_val.x();
+                out_val[1]=gltf_val.y();
+            },
+            [](glm::vec4 & out_val, fastgltf::math::nvec3 const & gltf_val) {
+                out_val[0]=gltf_val.x();
+                out_val[1]=gltf_val.y();
+                out_val[2]=gltf_val.z();
+            },
+            [](glm::vec4 & out_val, fastgltf::math::nvec4 const & gltf_val) {
+                out_val[0]=gltf_val.x();
+                out_val[1]=gltf_val.y();
+                out_val[2]=gltf_val.z();
+                out_val[3]=gltf_val.w();
+            }
+        };
+
+        auto GetGltfTexture =
             [&textures_map, &textures]
             (
                 auto const & gltf_tex_val,
-                wct::render::RPipeParamList_WAssetId & out_tex_params,
                 std::uint8_t tex_binding,
                 wcr::wid::WAssetId fallback
                 ) {
-                out_tex_params.emplace_back(
-                    tex_binding,
-                    gltf_tex_val.and_then(
-                        [&textures, &textures_map, &fallback]
-                        (fastgltf::TextureInfo const & value)
-                        -> std::optional<wcr::wid::WAssetId> {
-                            if(textures_map[value.textureIndex].IsValid())
-                                return textures[textures_map[value.textureIndex].GetId()];
-                            else
-                                return fallback;
-                        }
-                        ).value_or(fallback)
-                    );
+                return gltf_tex_val.and_then(
+                    [&textures, &textures_map, &fallback]
+                    (auto const & value)
+                    -> std::optional<wcr::wid::WAssetId> {
+                        if(textures_map[value.textureIndex].IsValid())
+                            return textures[textures_map[value.textureIndex].GetId()];
+                        else
+                            return fallback;
+                    }
+                    ).value_or(fallback);
             };
 
         auto CollectGltfParams =
-            [&textures_map, &textures, &CollectGltfTex]
+            [&textures_map, &textures, &GetGltfTexture, &CollectPbrVal]
+            <typename TextType>
+            requires std::is_same_v<TextType, fastgltf::TextureInfo> ||
+                std::is_same_v<TextType, fastgltf::NormalTextureInfo>
             (
-                fastgltf::Optional<fastgltf::TextureInfo> const & gltf_tex_val,
+                fastgltf::Optional<TextType> const & gltf_tex_val,
                 auto const & gltf_pbr_val,
                 wct::render::RPipeParamList_WAssetId & out_tex_params,
-                glm::vec4 & out_pbr_scalar,
+                auto & out_pbr_scalar,
                 std::uint8_t tex_binding,
                 wcr::wid::WAssetId fallback
                 )
                 {
-                    out_pbr_scalar[0]=gltf_pbr_val.x();
-                    out_pbr_scalar[1]=gltf_pbr_val.y();
-                    out_pbr_scalar[2]=gltf_pbr_val.z();
-                    out_pbr_scalar[3]=1.f;
+                    if constexpr(std::is_same_v<TextType, fastgltf::TextureInfo>) {
+                        CollectPbrVal(out_pbr_scalar, gltf_pbr_val);
+                    }
 
                     if (gltf_tex_val.has_value()) {
-                        CollectGltfTex(
-                            gltf_tex_val,
-                            out_tex_params,
-                            tex_binding,
-                            fallback
+                        wcr::wid::WAssetId text_id =
+                            GetGltfTexture(
+                                gltf_tex_val,
+                                tex_binding,
+                                fallback
+                                );
+                        
+                        out_tex_params.emplace_back(
+                            tex_binding, text_id
                             );
-                
+
+                        if constexpr(std::is_same_v<TextType, fastgltf::NormalTextureInfo>) {
+                            CollectPbrVal(
+                                out_pbr_scalar,
+                                gltf_tex_val.value().scale
+                                );
+                        }
+                        
+                        return text_id;
+                        
                     } else {
                         out_tex_params.emplace_back(
                             tex_binding,
                             fallback
                             );
+                        
+                        return fallback;
                     }
                 };
 
-        CollectGltfParams(
+        std::unordered_map<
+            wcr::wid::WAssetId,
+            wct::texture::ETextureFormat
+            > texture_formats;
+        
+        wcr::wid::WAssetId unorm_text;
+
+        CollectGltfParams. template operator()<fastgltf::TextureInfo>(
             in_material.pbrData.baseColorTexture,
             in_material.pbrData.baseColorFactor,
             texture_params,
@@ -262,7 +308,7 @@ namespace {
             null_rgba
             );
 
-        CollectGltfParams(
+        CollectGltfParams. template operator() <fastgltf::TextureInfo>(
             in_material.emissiveTexture,
             in_material.emissiveFactor,
             texture_params,
@@ -271,17 +317,25 @@ namespace {
             null_texture
             );
 
-        CollectGltfTex(
+        unorm_text = CollectGltfParams. template operator()<fastgltf::NormalTextureInfo>(
             in_material.normalTexture,
+            float(),
             texture_params,
+            pbr_scalars.orm_nscale.w,
             wct::render::PBRBindings::NORMAL_TEXTURE,
             null_normal
             );
-        
+
+        if (unorm_text != null_normal) {
+            texture_formats[unorm_text] = wct::texture::ETextureFormat::RGBA8_UNORM;
+        }
+
+        unorm_text = null_texture;
+
         if (in_material.pbrData.metallicRoughnessTexture) {
             // OMR : oclussion roughness metallic
             
-            CollectGltfParams(
+            unorm_text = CollectGltfParams. template operator()<fastgltf::TextureInfo>(
                 in_material.pbrData.metallicRoughnessTexture,
                 fastgltf::math::nvec3{
                     1.f,
@@ -289,13 +343,13 @@ namespace {
                     in_material.pbrData.metallicFactor
                 },
                 texture_params,
-                pbr_scalars.orm,
+                pbr_scalars.orm_nscale,
                 wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
         }
         else if (in_material.packedOcclusionRoughnessMetallicTextures) {
-            CollectGltfParams(
+            unorm_text = CollectGltfParams. template operator()<fastgltf::TextureInfo>(
                 in_material
                   .packedOcclusionRoughnessMetallicTextures
                   ->occlusionRoughnessMetallicTexture,
@@ -305,40 +359,39 @@ namespace {
                     in_material.pbrData.metallicFactor
                 },
                 texture_params,
-                pbr_scalars.orm,
+                pbr_scalars.orm_nscale,
                 wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
         }
         else {
             WFLOG("No orm texture detected!");
-            
-            pbr_scalars.orm={
-                1.f,
-                in_material.pbrData.roughnessFactor,
-                in_material.pbrData.metallicFactor,
-                1.f
-            };
-            
+            pbr_scalars.orm_nscale[0] = 1.f;
+            pbr_scalars.orm_nscale[1] = in_material.pbrData.roughnessFactor;
+            pbr_scalars.orm_nscale[2] = in_material.pbrData.metallicFactor;
+
             texture_params.emplace_back(
                 wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
         }
-            
+
+        if (unorm_text != null_texture) {
+            texture_formats[unorm_text] = wct::texture::ETextureFormat::RGBA8_UNORM;
+        }
+
         result.Set_ubo_list(
             {
                 {
                     wct::render::PBRBindings::PBR_SCALAR_UBO,
                     wct::render::ToUBOData(pbr_scalars)
                 }
-                
             }
             );
 
         result.Set_texture_list(texture_params);
 
-        return result;
+        return std::tuple{std::move(result), std::move(texture_formats)};
     }
 
     WNODISCARD inline
@@ -357,8 +410,11 @@ namespace {
         std::vector<std::string_view> names;
         names.reserve(in_asset.materials.size());
 
+        std::unordered_map<wcr::wid::WAssetId,
+                           wct::texture::ETextureFormat> formats{};
+
         for(auto & mat : in_asset.materials) {
-            assets.push_back(
+            auto [param_asset, texture_formats] =
                 CollectMaterial(
                     in_asset,
                     textures_map,
@@ -367,14 +423,29 @@ namespace {
                     null_texture,
                     null_rgba,
                     null_normal
-                    )
-                );
+                    );
+            
+            assets.push_back(param_asset);
 
             names.push_back(mat.name);
+            formats.merge(texture_formats);
         }
         
         return std::tuple{std::move(assets),
-                          std::move(names)};
+                          std::move(names),
+                          std::move(formats)
+        };
+    }
+
+    inline
+    void UpdateTextureFormats(
+        std::unordered_map<wcr::wid::WAssetId, wct::texture::ETextureFormat> const & formats,
+        WAssetDb const & asset_db
+        ) {
+        for(auto & p : formats) {
+            auto & texture = asset_db.Get<WTextureAsset>(p.first);
+            texture.Set_format(p.second);
+        }
     }
 
     WNODISCARD inline
@@ -384,6 +455,23 @@ namespace {
         ) {
 
         wct::geometry::WMesh result;
+
+        WCORE_DEBUG_ONLY(
+            std::string attributes = "";
+            if (in_primitive.attributes.size() > 0) {
+                attributes += in_primitive.attributes[0].name.c_str();
+                std::for_each(
+                    in_primitive.attributes.begin() + 1, in_primitive.attributes.end(),
+                    [&attributes](auto & attr){
+                        attributes += ", ";
+                        attributes += attr.name.c_str();
+                    }
+                    );
+            }
+
+            WFLOG("Primitive Attributes: {}", attributes);
+
+            )
 
         {
             const fastgltf::Accessor& index_accessor =
@@ -417,15 +505,31 @@ namespace {
         }
 
         // Get normals
-        auto normals = in_primitive.findAttribute("NORMAL");
-        if (normals != in_primitive.attributes.end()) {
-            fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                in_asset, in_asset.accessors[normals->accessorIndex],
-                [&vertex=result.vertices]
-                (auto && normal, std::size_t index) {
-                    vertex[index].normal = normal;
-                }
-                );
+        {
+            auto normals = in_primitive.findAttribute("NORMAL");
+            if (normals != in_primitive.attributes.end()) {
+                fastgltf::iterateAccessorWithIndex<glm::vec3>(
+                    in_asset, in_asset.accessors[normals->accessorIndex],
+                    [&vertex=result.vertices]
+                    (auto && normal, std::size_t index) {
+                        vertex[index].normal = normal;
+                    }
+                    );
+            }
+        }
+
+        // Get Tangents
+        {
+            auto tangents = in_primitive.findAttribute("TANGENT");
+            if (tangents != in_primitive.attributes.end()) {
+                fastgltf::iterateAccessorWithIndex<glm::vec4>(
+                    in_asset, in_asset.accessors[tangents->accessorIndex],
+                    [&vertex=result.vertices]
+                    (auto && tangent, std::size_t index) {
+                        vertex[index].tangent = tangent;
+                    }
+                    );
+            }
         }
 
         // Get Tex Coords 0
@@ -455,8 +559,6 @@ namespace {
                     );
             }
         }
-
-        // ...
 
         return result;
     }
@@ -653,6 +755,7 @@ namespace {
 
         for (auto & text : in_asset.textures) {
             if (text.imageIndex.has_value()) {
+
                 auto imgidx = text.imageIndex.value();
 
                 auto const & img = in_asset.images[imgidx];
@@ -660,7 +763,7 @@ namespace {
                 text_assets.push_back(CollectImage(in_asset, img));
 
                 text_assets.back().AddRGBAPadding();
-                
+
                 text_names.push_back(wstr::CleanBasename(text.name));
 
                 if (text.samplerIndex.has_value()) {
@@ -1011,7 +1114,7 @@ namespace {
 }
 
 std::vector<wcr::wid::WAssetId> wim::importer::WImporterGltf::Import(
-    WAssetDb & in_asset_db,
+    WAssetDb & asset_db,
     std::string_view file_path,
     std::string_view engine_directory_prefix
     ) {
@@ -1027,10 +1130,10 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImporterGltf::Import(
         text_assets,
         textures_names,
         engine_directory_prefix,
-        in_asset_db
+        asset_db
         );
 
-    auto [mat_assets, mat_names] =CollectMaterials(
+    auto [mat_assets, mat_names, texture_formats] =CollectMaterials(
         gltf_asset,
         textures_map,
         textures_wids,
@@ -1039,11 +1142,14 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImporterGltf::Import(
         textures_.null_normal
         );
 
+    // update texture formats
+    UpdateTextureFormats(texture_formats, asset_db);
+
     auto materials_wid = CreatePipelineParameters(
         mat_assets,
         mat_names,
         engine_directory_prefix,
-        in_asset_db
+        asset_db
         );
 
     // Collect meshes
@@ -1059,21 +1165,21 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImporterGltf::Import(
         sm_assets,
         sm_names,
         engine_directory_prefix,
-        in_asset_db
+        asset_db
         );
 
     auto [level_assets, level_names] = CollectLevels(
         gltf_asset,
         sm_index_map,
         sm_wid,
-        in_asset_db
+        asset_db
         );
 
     auto lvl_wid = CreateLevels(
         level_assets,
         level_names,
         engine_directory_prefix,
-        in_asset_db);
+        asset_db);
     
     std::vector<wcr::wid::WAssetId> result;
     result.reserve(textures_wids.size() +

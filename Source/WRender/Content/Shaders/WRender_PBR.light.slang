@@ -78,8 +78,8 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
     float3 alb = albedo.Sample(uv).rgb;
     float3 ems = emission.Sample(uv).rgb;
 
-    float2 rm = orm.Sample(uv).gb;
     float ao = orm.Sample(uv).r;
+    float2 rm = orm.Sample(uv).gb;
 
     float3 campos = float3(camera_ubo.px, camera_ubo.py, camera_ubo.pz);
     float3 V = normalize(campos - wpos);
@@ -119,7 +119,6 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
     }
 
     float3 color = lighting_ubo.ambient_light.color.rgb * alb * ao + Lo + ems;
-    // float3 color = lighting_ubo.ambient_light.color.rgb * alb + Lo + ems;
 
     // PBR directional
     for (uint i=0; i < lighting_ubo.directional_lights_count; i++) {

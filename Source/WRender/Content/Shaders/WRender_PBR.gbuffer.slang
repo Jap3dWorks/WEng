@@ -32,13 +32,15 @@ VSGBufferOutput vsMain(VSGBufferInput input) {
 
     float3x3 normal_matrix = float3x3(model_ubo.normal_matrix);
 
-    output.normal = normalize(mul(normal_matrix, input.normal));
-
     float4 wp = mul(model_ubo.model, float4(input.position, 1.0));
 
     output.pos = mul(camera_ubo.proj, mul(camera_ubo.view, wp));
 
     output.tex_coord = input.tex_coord;
+
+    output.normal = normalize(mul(normal_matrix, input.normal));
+    output.tangent = normalize(mul(normal_matrix, input.tangent.xyz));
+    output.bitangent = input.tangent.w * cross(output.normal, output.tangent);
 
     return output;
 }
@@ -52,15 +54,15 @@ FSGBUFferOutput fsMain(VSGBufferOutput vert_in) : SV_TARGET {
     output.emission = float4(pbr_scalars.emission.rgb, 1.f) * emission.Sample(vert_in.tex_coord);
 
     // Compute normal from texture with vertex normal.
-    // tangent is required to perform this operation
+    float3x3 tbn = float3x3(vert_in.tangent, vert_in.bitangent, vert_in.normal);
+    float3 snrm = normalize(normal.Sample(vert_in.tex_coord).rgb * 2.f - 1.f);
+    output.normal = float4(mul(snrm, tbn), 1.f);
     
-    output.normal = float4(vert_in.normal, 1.f);
-    
-    output.orm = float4(pbr_scalars.orm.rgb * orm.Sample(vert_in.tex_coord).rgb, 1.f);
+    output.orm = float4(pbr_scalars.orm_nscale.rgb * orm.Sample(vert_in.tex_coord).rgb, 1.f);
 
     // TODO output texcoords and tangents output
 
-    output.extra01 = float4(0.f);
+    output.extra01=float4(vert_in.tangent,1.f);
 
     return output;
 }

@@ -58,31 +58,42 @@ namespace wvr::gbuffer_pipelines {
 
         if (in_shader_type == wct::render::EShaderStageFlag::Vertex)
         {
-            result.attribute_descriptors.resize(4);
-
             // Geometry data structure
 
-            result.attribute_descriptors[0].binding = 0;
-            result.attribute_descriptors[0].location = 0;
-            result.attribute_descriptors[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[0].offset = offsetof(wct::geometry::WVertex, position);
-
-            result.attribute_descriptors[1].binding = 0;
-            result.attribute_descriptors[1].location = 1;
-            result.attribute_descriptors[1].format = VK_FORMAT_R32G32_SFLOAT;
-            result.attribute_descriptors[1].offset = offsetof(wct::geometry::WVertex, tex_coords);
-
-            result.attribute_descriptors[2].binding = 0;
-            result.attribute_descriptors[2].location = 2;
-            result.attribute_descriptors[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-            result.attribute_descriptors[2].offset = offsetof(wct::geometry::WVertex, color);
-
-            result.attribute_descriptors[3].binding = 0;
-            result.attribute_descriptors[3].location = 3;
-            result.attribute_descriptors[3].format = VK_FORMAT_R32G32B32_SFLOAT;
-            result.attribute_descriptors[3].offset = offsetof(wct::geometry::WVertex, normal);
-
-            // more vertex data bindings here
+            // TODO location constants
+            
+            result.attribute_descriptors = {
+                {
+                    .location = 0,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, position)
+                },
+                {
+                    .location = 1,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, tex_coords),
+                },
+                {
+                    .location = 2,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32A32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, color),
+                },
+                {
+                    .location = 3,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, normal),
+                },
+                {
+                    .location = 4,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32B32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, tangent),
+                }
+            };
 
             result.binding_descriptors.resize(1);
             result.binding_descriptors[0].binding = 0;

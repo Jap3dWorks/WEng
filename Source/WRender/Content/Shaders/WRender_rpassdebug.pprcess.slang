@@ -34,7 +34,7 @@ float4 fsMain(VSPostprocessOutput vertIn) : SV_TARGET
             return previous.Sample(uv);
         }
         else {
-            return orm.Sample(uv).b;
+            return extra01.Sample(uv);
         }
     }
     else {

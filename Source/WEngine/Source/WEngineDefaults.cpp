@@ -24,7 +24,7 @@ namespace {
         WTextureAsset texture_asset{};
         texture_asset.SetTextureData(
             color_data.data(), 2, 2,
-            wct::texture::ETextureFormat::RGBA8_SRGB
+            wct::texture::ETextureFormat::RGBA8_UNORM
             );
 
         out_db.CreateFrom<WTextureAsset>(

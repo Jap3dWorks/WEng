@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WComponents/Light/WDirectionalLightComponent.hpp"
+#include "WCore/WDebug.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 #include "WString/WString.hpp"
@@ -45,20 +46,20 @@ namespace spacers::gltflevel {
 
         // postprocess
 
-        if constexpr (true) {
-
+        WCORE_DEBUG_ONLY(
             WAsset * debugshader = engine
-                .AssetManager()
-                .Get("/Content/Assets/PPDebug:PPDebug");
+            .AssetManager()
+            .Get("/Content/Assets/PPDebug:PPDebug");
 
             WAsset * debugparams = engine
-                .AssetManager()
-                .Get("/Content/Assets/PPDebugParam:PPDebugParam");
+            .AssetManager()
+            .Get("/Content/Assets/PPDebugParam:PPDebugParam");
 
             cameracomp.SetPostprocessAssignment(0,
                                                 debugshader->Get_asset_id(),
                                                 debugparams->Get_asset_id());
-        }
+            
+            )
     }
 
     inline void SetupLighting(was::Level * level) {
