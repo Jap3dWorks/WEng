@@ -4,24 +4,21 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
-#include "WString/WString.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WImporter/WImporterTexture.hpp"
 
 #include "WAssets/Level.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WStaticMeshComponent.hpp"
-#include "WComponents/WCameraComponent.hpp"
-#include "WComponents/WCameraInputComponent.hpp"
-#include "WComponents/WMovementComponent.hpp"
-#include "WComponents/Light/WAmbientLightComponent.hpp"
-
-#include <algorithm>
-#include <filesystem>
+#include "WComponents/Transform.hpp"
+#include "WComponents/StaticMesh.hpp"
+#include "WComponents/Camera.hpp"
+#include "WComponents/CameraInput.hpp"
+#include "WComponents/Movement.hpp"
+#include "WComponents/Light/Ambient.hpp"
 
 namespace spacers::plane {
+    
     struct LevelData {
         wcr::wid::WAssetId texture_id;
     };
@@ -87,10 +84,10 @@ namespace spacers::plane {
             smasset);
 
         wcr::wid::WEntityId entt = level->CreateEntity<WEntity>();
-        level->CreateComponent<WTransformComponent>(entt);
-        level->CreateComponent<WStaticMeshComponent>(entt);
+        level->CreateComponent<wcm::Transform>(entt);
+        level->CreateComponent<wcm::StaticMesh>(entt);
 
-        auto & smcmp = level->GetComponent<WStaticMeshComponent>(entt);
+        auto & smcmp = level->GetComponent<wcm::StaticMesh>(entt);
 
         smcmp.SetStaticMeshAsset(
             engine.AssetManager().Get<WStaticMeshAsset>(smid)
@@ -150,14 +147,14 @@ namespace spacers::plane {
         // Camera
 
         wcr::wid::WEntityId cid = level->CreateEntity<WEntity>();
-        level->CreateComponent<WTransformComponent>(cid);
-        level->CreateComponent<WCameraComponent>(cid);
-        level->CreateComponent<WMovementComponent>(cid);     // parametrized movement
-        level->CreateComponent<WCameraInputComponent>(cid);  // User input
+        level->CreateComponent<wcm::Transform>(cid);
+        level->CreateComponent<wcm::Camera>(cid);
+        level->CreateComponent<wcm::Movement>(cid);     // parametrized movement
+        level->CreateComponent<wcm::CameraInput>(cid);  // User input
 
-        WCameraComponent & cameracomp = level->GetComponent<WCameraComponent>(cid);
+        wcm::Camera & cameracomp = level->GetComponent<wcm::Camera>(cid);
         cameracomp.Set_render_id(1); // The renderable camera
-        WTransformComponent * tcmp = &level->GetComponent<WTransformComponent>(cid);
+        wcm::Transform * tcmp = &level->GetComponent<wcm::Transform>(cid);
 
         tcmp->Set_rotation({0.0f, 0.0f, 0.0f});
         tcmp->Set_position({0.0, 0.0f, .5f});
@@ -179,10 +176,10 @@ namespace spacers::plane {
 
     inline void SetupLighting(was::Level * level) {
         wcr::wid::WEntityId ambient_light = level->CreateEntity<WEntity>();
-        level->CreateComponent<wcm::light::WAmbientLightComponent>(ambient_light);
+        level->CreateComponent<wcm::light::Ambient>(ambient_light);
 
         auto * ambient_ptr = &level
-            ->GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
+            ->GetComponent<wcm::light::Ambient>(ambient_light);
 
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
         ambient_ptr->Set_intensity(1);

@@ -4,7 +4,9 @@
 
 * Macros
 
-#+NAME: define-wclass-macros
+** Common
+
+#+NAME: wclass-macro-define-wclass
 #+begin_src C++
 #ifndef _WCLASS_
 #define _WCLASS_ WObject
@@ -27,21 +29,21 @@
 #endif
 #+end_src
 
-#+NAME: define-dconcat
+#+NAME: wclass-macro-define-dconcat
 #+begin_src C++
 #ifndef WENG_DCONCAT
 #define WENG_DCONCAT(A,B) A##B
 #endif
 #+end_src
 
-#+NAME: define-mp
+#+NAME: wclass-macro-define-mp
 #+begin_src C++
 #ifndef WENG_MP
 #define WENG_MP(x) x
 #endif
 #+end_src
 
-#+NAME: define-wclassname-macros
+#+NAME: wclass-macro-define-wclassname
 #+begin_src C++
 #ifndef WENG_CLASSNAME
 #define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
@@ -60,23 +62,6 @@
 #endif
 #+end_src
 
-** DEFINE_WCLASS
-:PROPERTIES:
-:CUSTOM_ID: define_wclass
-:END:
-
-El contenido de DEFINE_WCLASS debe ser compilado como un .cpp.
-
-#+NAME: define_wclass
-#+HEADER: :noweb yes :eval no :main no
-#+begin_src C++
-<<define-wclassname-macros>>
-
-const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
-    return & wrf::wclass::WENG_CLASSNAME_CLSS_VAR(_WCLASS_);
-}
-#+end_src
-
 * PublicGenerated
 ** WClass.WEngine
 :PROPERTIES:
@@ -88,8 +73,10 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 - Temporal WPROPERTY solution, more info check [[file:org/WEng.hpp::#WPROPERTY]]
 
 #+NAME: wclass-wengine-hpp
-#+HEADER: :var wclass="WObject" :var pwclass="WObject" :var weng-api="WENGINEOBJECTS"
-#+HEADER: :var namespace="" :var pnamespace="" :noweb yes
+#+HEADER: :var namespace=""   :var wclass-name="WObject"
+#+HEADER: :var parent-namespace="" :var parent-wclass-name="WObject"
+#+HEADER: :var wapi="WENGINEOBJECTS"
+#+HEADER: :noweb yes
 #+begin_src elisp
 (concat
  "
@@ -142,7 +129,7 @@ private:                                                                     \\
 #define _WENG_API_ %s_API
 #define _WCLASS_NAMESPACE_ %s
 #define _PWCLASS_NAMESPACE_ %s
-" wclass pwclass (upcase weng-api) (downcase namespace) (downcase pnamespace))
+" wclass-name parent-wclass-name (upcase wapi) (downcase namespace) (downcase parent-namespace))
 
  "
 #ifdef _WCLASS_DECLARATION_
@@ -161,15 +148,15 @@ private:                                                                     \\
          (if (string-empty-p namespace)
              "class _WCLASS_;"
            "namespace _WCLASS_NAMESPACE_ { class _WCLASS_; }")
-         (if (string-empty-p pnamespace)
+         (if (string-empty-p parent-namespace)
              "class _PWCLASS_;"
            "namespace _PWCLASS_NAMESPACE_ { class _PWCLASS_; }"
            ))
 
  "
-<<define-dconcat>>
-<<define-mp>>
-<<define-wclassname-macros>>
+<<wclass-macro-define-dconcat>>
+<<wclass-macro-define-mp>>
+<<wclass-macro-define-wclassname>>
 "
 
  "
@@ -202,13 +189,13 @@ namespace wrf::wclass {
 
 Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
 
-#+NAME: compile-generated-cpp
+#+NAME: wclass-compile-generated-cpp
 #+HEADER: :noweb yes
 #+begin_src elisp :var wobject-module="WEngineObjects" :var wobject="WObject"
 (concat
 (format "#include \"%s/%s.hpp\"" wobject-module wobject)
 " 
-<<define-wclassname-macros>>
+<<wclass-macro-define-wclassname>>
 "
 "
 const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {

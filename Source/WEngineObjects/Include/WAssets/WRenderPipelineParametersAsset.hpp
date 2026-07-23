@@ -5,7 +5,7 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
-#include "WRenderPipelineParametersAsset.WEngine.hpp"
+#include "WRenderPipelineParametersAsset.WEng.hpp"
 
 class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
 

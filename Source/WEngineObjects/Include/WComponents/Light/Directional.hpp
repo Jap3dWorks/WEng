@@ -5,11 +5,11 @@
 
 #include <glm/glm.hpp>
 
-#include "WDirectionalLightComponent.WEngine.hpp"
+#include "wcm::light::Directional.WEng.hpp"
 
 namespace wcm::light {
 
-    class WENGINEOBJECTS_API WDirectionalLightComponent : public WComponent {
+    class WENGINEOBJECTS_API Directional : public WComponent {
 
         WOBJECT_BODY;
 

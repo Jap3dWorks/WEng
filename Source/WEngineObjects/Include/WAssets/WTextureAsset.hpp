@@ -7,7 +7,7 @@
 #include <cassert>
 #include <cstring>
 
-#include "WTextureAsset.WEngine.hpp"
+#include "WTextureAsset.WEng.hpp"
 
 using WTextureData = std::vector<uint8_t>;
 

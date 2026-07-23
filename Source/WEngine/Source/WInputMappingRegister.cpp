@@ -4,16 +4,16 @@ void WInputMappingRegister::Emit(const WInputValuesStruct & in_input, WEngine * 
 {
     for (auto & mid : mapping_assets_stack_) {
             
-        WInputMappingAsset & asset = in_engine->AssetManager().Get<WInputMappingAsset>(mid);
+        was::InputMapping & asset = in_engine->AssetManager().Get<was::InputMapping>(mid);
 
         // const WInputMapStruct & inputmap =
-        //     in_engine->AssetManager().Get<WInputMappingAsset>(mid)->InputMap();
+        //     in_engine->AssetManager().Get<InputMapping>(mid)->InputMap();
 
         if (asset.Get_input_map().contains(in_input.input)) {
             for(const auto &aid : asset.Get_input_map().at(in_input.input)) {
                 action_events_[aid].Emit(
                     in_input,
-                    &in_engine->AssetManager().Get<WActionAsset>(aid),
+                    &in_engine->AssetManager().Get<was::Action>(aid),
                     in_engine
                     );
             }

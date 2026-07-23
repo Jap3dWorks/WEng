@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "WObject.WEngine.hpp"
+#include "WObject.WEng.hpp"
 
 WCLASS()
 class WENGINEOBJECTS_API WObject

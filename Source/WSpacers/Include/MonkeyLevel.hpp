@@ -1,10 +1,10 @@
 #pragma once
 
-#include "WAssets/WInputMappingAsset.hpp"
+#include "WAssets/InputMapping.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WComponents/Light/WPointLightComponent.hpp"
-#include "WComponents/WCameraInputComponent.hpp"
-#include "WComponents/WMovementComponent.hpp"
+#include "WComponents/Light/Point.hpp"
+#include "WComponents/CameraInput.hpp"
+#include "WComponents/Movement.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 #include "WLog.hpp"
 #include "WCore/WCore.hpp"
@@ -21,12 +21,10 @@
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/WRenderPipelineAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WStaticMeshComponent.hpp"
-#include "WComponents/WCameraComponent.hpp"
-#include "WComponents/WCameraInputComponent.hpp"
-#include "WComponents/WMovementComponent.hpp"
-#include "WComponents/Light/WAmbientLightComponent.hpp"
+#include "WComponents/Transform.hpp"
+#include "WComponents/StaticMesh.hpp"
+#include "WComponents/Camera.hpp"
+#include "WComponents/Light/Ambient.hpp"
 #include "WCoreTypes/WMathStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
@@ -107,7 +105,7 @@ namespace spacers::monkey {
         return true;
     }
 
-    inline bool SetPostprocessPipelines(WEngine & engine, WCameraComponent & camera) {
+    inline bool SetPostprocessPipelines(WEngine & engine, wcm::Camera & camera) {
         wcr::wid::WAssetId pipid =
             engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPDebug:PPDebug");
 
@@ -224,14 +222,14 @@ namespace spacers::monkey {
         // Camera
 
         wcr::wid::WEntityId cid = level.CreateEntity<WEntity>();
-        level.CreateComponent<WTransformComponent>(cid);
-        level.CreateComponent<WCameraComponent>(cid);
-        level.CreateComponent<WMovementComponent>(cid);     // parametrized movement
-        level.CreateComponent<WCameraInputComponent>(cid);  // User input
+        level.CreateComponent<wcm::Transform>(cid);
+        level.CreateComponent<wcm::Camera>(cid);
+        level.CreateComponent<wcm::Movement>(cid);     // parametrized movement
+        level.CreateComponent<wcm::CameraInput>(cid);  // User input
 
-        WCameraComponent & cameracomp = level.GetComponent<WCameraComponent>(cid);
+        wcm::Camera & cameracomp = level.GetComponent<wcm::Camera>(cid);
         cameracomp.Set_render_id(1); // The renderable camera
-        WTransformComponent * tcmp = &level.GetComponent<WTransformComponent>(cid);
+        wcm::Transform * tcmp = &level.GetComponent<wcm::Transform>(cid);
 
         tcmp->Set_rotation({0.0f, 0.0f, 0.0f});
         tcmp->Set_position({0.0, 0.0f, .5f});
@@ -242,16 +240,16 @@ namespace spacers::monkey {
         // Models
         // Viking Room
         wcr::wid::WEntityId eid = level.CreateEntity<WEntity>();
-        level.CreateComponent<WTransformComponent>(eid);
-        WTransformComponent & ctcmp = level.GetComponent<WTransformComponent>(eid);
+        level.CreateComponent<wcm::Transform>(eid);
+        wcm::Transform & ctcmp = level.GetComponent<wcm::Transform>(eid);
         ctcmp.Set_rotation_order(ERotationOrder::zxy);
         ctcmp.Set_position({0.0, 0.0, -2.f});
         ctcmp.Set_rotation({-3.1415 * 0.5, -3.1415 * 0.5, 0.f});
 
-        level.CreateComponent<WStaticMeshComponent>(eid);    
+        level.CreateComponent<wcm::StaticMesh>(eid);    
 
-        WStaticMeshComponent & smcomponent =
-            level.GetComponent<WStaticMeshComponent>(eid);
+        wcm::StaticMesh & smcomponent =
+            level.GetComponent<wcm::StaticMesh>(eid);
         smcomponent.Set_static_mesh_asset(in_viking_room.static_mesh);
         smcomponent.SetPipelineAssignment(
             0, in_viking_room.pipeline_asset, in_viking_room.param_asset
@@ -259,15 +257,15 @@ namespace spacers::monkey {
 
         // Monkey 1
         wcr::wid::WEntityId monkey_id = level.CreateEntity<WEntity>();
-        level.CreateComponent<WTransformComponent>(monkey_id);
-        auto * monkey_tc = &level.GetComponent<WTransformComponent>(monkey_id);
+        level.CreateComponent<wcm::Transform>(monkey_id);
+        auto * monkey_tc = &level.GetComponent<wcm::Transform>(monkey_id);
         monkey_tc->Set_rotation_order(ERotationOrder::zxy);
         monkey_tc->Set_position({0.0, 0.5, -2.0});
         monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.15f);
 
-        level.CreateComponent<WStaticMeshComponent>(monkey_id);
+        level.CreateComponent<wcm::StaticMesh>(monkey_id);
 
-        auto & monkeysm = level.GetComponent<WStaticMeshComponent>(monkey_id);
+        auto & monkeysm = level.GetComponent<wcm::StaticMesh>(monkey_id);
 
         monkeysm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
         monkeysm.SetPipelineAssignment(0,
@@ -276,14 +274,14 @@ namespace spacers::monkey {
 
         // Monkey 2
         wcr::wid::WEntityId monkey2_id = level.CreateEntity<WEntity>();
-        level.CreateComponent<WTransformComponent>(monkey2_id);
-        monkey_tc = &level.GetComponent<WTransformComponent>(monkey2_id);
+        level.CreateComponent<wcm::Transform>(monkey2_id);
+        monkey_tc = &level.GetComponent<wcm::Transform>(monkey2_id);
         monkey_tc->Set_rotation_order(ERotationOrder::zxy);
         monkey_tc->Set_position({0.2, 0.65, -2.0});
         monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.25f);
 
-        level.CreateComponent<WStaticMeshComponent>(monkey2_id);
-        auto & monkey2sm = level.GetComponent<WStaticMeshComponent>(monkey2_id);
+        level.CreateComponent<wcm::StaticMesh>(monkey2_id);
+        auto & monkey2sm = level.GetComponent<wcm::StaticMesh>(monkey2_id);
 
         monkey2sm.Set_static_mesh_asset(in_monkey_dt.static_mesh);
         monkey2sm.SetPipelineAssignment(0,
@@ -295,24 +293,24 @@ namespace spacers::monkey {
         // ------
     
         wcr::wid::WEntityId point_light_1 = level.CreateEntity<WEntity>();
-        level.CreateComponent<WTransformComponent>(point_light_1);
-        level.CreateComponent<wcm::light::WPointLightComponent>(point_light_1);
-        auto * transform_ptr = &level.GetComponent<WTransformComponent>(point_light_1);
+        level.CreateComponent<wcm::Transform>(point_light_1);
+        level.CreateComponent<wcm::light::Point>(point_light_1);
+        auto * transform_ptr = &level.GetComponent<wcm::Transform>(point_light_1);
 
         transform_ptr->Set_position({0.0, 1.1, -2.0});
         transform_ptr->Set_scale(transform_ptr->Get_scale() * 0.1f);
 
-        wcm::light::WPointLightComponent * light_ptr =
-            &level.GetComponent<wcm::light::WPointLightComponent>(point_light_1);
+        wcm::light::Point * light_ptr =
+            &level.GetComponent<wcm::light::Point>(point_light_1);
 
         light_ptr->Set_intensity(5.0);
         light_ptr->Set_radius(1.5);
         light_ptr->Set_active(true);
 
         wcr::wid::WEntityId ambient_light = level.CreateEntity<WEntity>();
-        level.CreateComponent<wcm::light::WAmbientLightComponent>(ambient_light);
+        level.CreateComponent<wcm::light::Ambient>(ambient_light);
 
-        auto * ambient_ptr = &level.GetComponent<wcm::light::WAmbientLightComponent>(ambient_light);
+        auto * ambient_ptr = &level.GetComponent<wcm::light::Ambient>(ambient_light);
 
         ambient_ptr->Set_color({0.5, 0.5, 0.5});
         ambient_ptr->Set_intensity(0.25);

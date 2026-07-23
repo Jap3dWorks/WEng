@@ -6,7 +6,7 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 
-#include "was_Level.WEngine.hpp"
+#include "was::Level.WEng.hpp"
 
 namespace was {
 

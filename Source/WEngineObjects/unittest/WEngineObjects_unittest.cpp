@@ -14,9 +14,9 @@
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
-#include "WComponents/WStaticMeshComponent.hpp"
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WCameraComponent.hpp"
+#include "WComponents/StaticMesh.hpp"
+#include "WComponents/Transform.hpp"
+#include "WComponents/Camera.hpp"
 
 #include "WLog.hpp"
 
@@ -130,17 +130,17 @@ bool WObjectDb_WClass_Test() {
 bool WEntityComponentDb_Test() {
 
     std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> smdb =
-        WStaticMeshComponent::StaticClass()
+        wcm::StaticMesh::StaticClass()
         ->DbBuilder()
         .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
     std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> tdb =
-        WTransformComponent::StaticClass()
+        wcm::Transform::StaticClass()
         ->DbBuilder()
         .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
     std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> cdb =
-        WCameraComponent::StaticClass()
+        wcm::Camera::StaticClass()
         ->DbBuilder()
         .Create<WComponent, wcr::wid::WEntityId::IdType>();
 
@@ -178,10 +178,10 @@ bool WEntityComponentDb_Test() {
 
     auto cp3 = cdb->Clone();
     cdb->BForEach([](WComponent * _cmp) {
-        WFLOG("Print Orig WCameraComponent");
+        WFLOG("Print Orig wcm::Camera");
     });
     cp3->BForEach([](WComponent * _cmp) {
-        WFLOG("Print Cloned WCameraComponent");
+        WFLOG("Print Cloned wcm::Camera");
     });
 
     if (cdb->Count() != cp3->Count()) return false;
@@ -190,9 +190,9 @@ bool WEntityComponentDb_Test() {
 
     wcr::wid::WEntityId eid = db.CreateEntity<WEntity>("E1");
 
-    db.CreateComponent<WTransformComponent>(eid);
-    db.CreateComponent<WCameraComponent>(eid);
-    db.CreateComponent<WStaticMeshComponent>(eid);
+    db.CreateComponent<wcm::Transform>(eid);
+    db.CreateComponent<wcm::Camera>(eid);
+    db.CreateComponent<wcm::StaticMesh>(eid);
 
     WEntityComponentDb other = db;
     

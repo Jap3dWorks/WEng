@@ -5,11 +5,11 @@
 
 #include <glm/glm.hpp>
 
-#include "WAmbientLightComponent.WEngine.hpp"
+#include "wcm::light::Ambient.WEng.hpp"
 
 namespace wcm::light {
     
-    class WENGINEOBJECTS_API WAmbientLightComponent : public WComponent {
+    class WENGINEOBJECTS_API Ambient : public WComponent {
 
         WOBJECT_BODY;
 

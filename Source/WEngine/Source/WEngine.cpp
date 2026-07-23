@@ -12,8 +12,8 @@
 #include "WObjectDb/WAssetDb.hpp"
 // #include "WEngineObjects/WEntity.hpp"
 // #include "WEngineObjects/WComponent.hpp"
-// #include "WComponents/WTransformComponent.hpp"
-// #include "WComponents/WCameraComponent.hpp"
+// #include "WComponents/Transform.hpp"
+// #include "WComponents/Camera.hpp"
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 

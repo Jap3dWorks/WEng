@@ -4,9 +4,9 @@
 #include "WImporter/WImporterGltf.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/Level.hpp"
-#include "WComponents/Light/WDirectionalLightComponent.hpp"
-#include "WComponents/Light/WPointLightComponent.hpp"
-#include "WComponents/WStaticMeshComponent.hpp"
+#include "WComponents/Light/Directional.hpp"
+#include "WComponents/Light/Point.hpp"
+#include "WComponents/StaticMesh.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
@@ -19,8 +19,8 @@
 #include "fastgltf/tools.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WCameraComponent.hpp"
+#include "WComponents/Transform.hpp"
+#include "WComponents/Camera.hpp"
 #include "fastgltf/util.hpp"
 #include "WLog.hpp"
 
@@ -787,7 +787,7 @@ namespace {
 
     inline
     void CollectTransformComponent(
-        WTransformComponent & out_transform,
+        wcm::Transform & out_transform,
         fastgltf::Node const & in_node
         ) {
         std::visit(
@@ -834,9 +834,9 @@ namespace {
         auto collect_directional_lgt =
             [&](){
                 // TODO Rename Light components less verbose
-                out_level.CreateComponent<wcm::light::WDirectionalLightComponent>(in_entity);
+                out_level.CreateComponent<wcm::light::Directional>(in_entity);
                 auto & cmp = out_level
-                    .GetComponent<wcm::light::WDirectionalLightComponent>(in_entity);
+                    .GetComponent<wcm::light::Directional>(in_entity);
 
                 cmp.Set_color({in_light.color.x(), in_light.color.y(), in_light.color.z()});
                 cmp.Set_intensity(in_light.intensity);
@@ -844,9 +844,9 @@ namespace {
 
         auto collect_point_lgt =
             [&](){
-                out_level.CreateComponent<wcm::light::WPointLightComponent>(in_entity);
+                out_level.CreateComponent<wcm::light::Point>(in_entity);
                 auto & cmp = out_level
-                    .GetComponent<wcm::light::WPointLightComponent>(in_entity);
+                    .GetComponent<wcm::light::Point>(in_entity);
 
                 cmp.Set_color({in_light.color.x(), in_light.color.y(), in_light.color.z()});
                 cmp.Set_intensity(in_light.intensity);
@@ -868,8 +868,8 @@ namespace {
         was::Level & out_level,
         fastgltf::Camera const & in_camera
         ) {
-        out_level.CreateComponent<WCameraComponent>(in_entity);
-        auto & component = out_level.GetComponent<WCameraComponent>(in_entity);
+        out_level.CreateComponent<wcm::Camera>(in_entity);
+        auto & component = out_level.GetComponent<wcm::Camera>(in_entity);
 
         std::visit(
             fastgltf::visitor{
@@ -904,8 +904,8 @@ namespace {
         for (auto & nodeindex : in_scene.nodeIndices) {
             auto entityid = level.CreateEntity<WEntity>();
 
-            auto trnsfid = level.CreateComponent<WTransformComponent>(entityid);
-            auto & transform = level.GetComponent<WTransformComponent>(entityid);
+            auto trnsfid = level.CreateComponent<wcm::Transform>(entityid);
+            auto & transform = level.GetComponent<wcm::Transform>(entityid);
 
             CollectTransformComponent(
                 transform,
@@ -916,8 +916,8 @@ namespace {
                 std::size_t gltfindx = in_asset.nodes[nodeindex].meshIndex.value();
                 
                 if (sm_id_map[gltfindx].IsValid()) {
-                    auto smcmpid = level.CreateComponent<WStaticMeshComponent>(entityid);
-                    auto & smcmp = level.GetComponent<WStaticMeshComponent>(entityid);
+                    auto smcmpid = level.CreateComponent<wcm::StaticMesh>(entityid);
+                    auto & smcmp = level.GetComponent<wcm::StaticMesh>(entityid);
 
                     smcmp.SetStaticMeshAsset(
                         in_asset_db

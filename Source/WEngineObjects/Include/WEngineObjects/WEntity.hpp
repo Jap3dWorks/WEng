@@ -4,7 +4,7 @@
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WEngineObjects/WObject.hpp"
 
-#include "WEntity.WEngine.hpp"
+#include "WEntity.WEng.hpp"
 
 /**
  * @brief Base class for all actors in the engine. 

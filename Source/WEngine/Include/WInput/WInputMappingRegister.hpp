@@ -4,8 +4,8 @@
 #include "WCore/TEvent.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WAssets/WInputMappingAsset.hpp"
-#include "WAssets/WActionAsset.hpp"
+#include "WAssets/InputMapping.hpp"
+#include "WAssets/Action.hpp"
 #include "WCore/TStack.hpp"
 
 #include <unordered_map>
@@ -15,7 +15,7 @@ class WEngine;
 class WENGINE_API WInputMappingRegister {
 private:
 
-using EventType = TEvent<void(const WInputValuesStruct &, WActionAsset const *, WEngine *)>;
+using EventType = TEvent<void(const WInputValuesStruct &, was::Action const *, WEngine *)>;
 
     using MappingAssetsSTackType = TStack<wcr::wid::WAssetId>;
 

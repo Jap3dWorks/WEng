@@ -3,10 +3,10 @@
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 // #include "WSystems/WSystemsRegister.hpp"
-#include "WComponents/WCameraComponent.hpp"
-#include "WComponents/WTransformComponent.hpp"
-#include "WComponents/WMovementComponent.hpp"
-#include "WComponents/WCameraInputComponent.hpp"
+#include "WComponents/Camera.hpp"
+#include "WComponents/Transform.hpp"
+#include "WComponents/Movement.hpp"
+#include "WComponents/CameraInput.hpp"
 #include "WEngRender/WEngRender.hpp"
 #include "WUtils/WMath.hpp"
 #include "WEngine/WEngine.hpp"
@@ -16,8 +16,8 @@
 
 
 START_DEFINE_WSYSTEM(SystemInit_InitializeTransformsMatrix)
-    parameters.engine->LevelInfo().level.ForEachComponent<WTransformComponent>(
-        [&parameters](WTransformComponent * _transform) {
+    parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
+        [&parameters](wcm::Transform * _transform) {
             // WTransformStruct & ts = _transform->TransformStruct();
             
             _transform
@@ -46,7 +46,7 @@ END_DEFINE_WSYSTEM()
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     wcr::wid::WEntityId camid;
-    parameters.level->GetFirstComponent<WCameraComponent>(camid);
+    parameters.level->GetFirstComponent<wcm::Camera>(camid);
 
     auto & asset_manager = parameters.engine->AssetManager();
 
@@ -78,9 +78,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         frontaction,
-        [camid](const WInputValuesStruct & _v, WActionAsset const * _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
+            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -97,9 +97,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         backaction,
-        [camid](const WInputValuesStruct & _v, WActionAsset const * _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
+            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -116,9 +116,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         leftaction,
-        [camid](const WInputValuesStruct & _v, WActionAsset const * _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
+            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -135,9 +135,9 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         rightaction,
-        [camid](const WInputValuesStruct & _v, WActionAsset const * _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<WCameraInputComponent>(camid);
+            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
             switch(_v.input.mode) {
             case EInputMode::Press:
@@ -154,13 +154,13 @@ START_DEFINE_WSYSTEM(SystemInit_CameraInput)
 
     parameters.engine->InputMappingRegister().BindAction(
         mousemovement,
-        [camid](const WInputValuesStruct & _v, WActionAsset const * _a, WEngine * _e) {
+        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
             auto * transform_component = &_e->LevelInfo()
-                .level.GetComponent<WTransformComponent>(camid);
+                .level.GetComponent<wcm::Transform>(camid);
             
             // WTransformStruct & t = _e->LevelInfo()
-            //     .level.GetComponent<WTransformComponent>(camid)
+            //     .level.GetComponent<wcm::Transform>(camid)
             //     .TransformStruct();
 
             auto rot = transform_component->Get_rotation();
@@ -185,10 +185,10 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
-    parameters.level->ForEachComponent<WMovementComponent>(
-        [&parameters](WMovementComponent * mc){
-            WTransformComponent & tc = parameters.level->
-                GetComponent<WTransformComponent>(mc->Get_entity_id());
+    parameters.level->ForEachComponent<wcm::Movement>(
+        [&parameters](wcm::Movement * mc){
+            wcm::Transform & tc = parameters.level->
+                GetComponent<wcm::Transform>(mc->Get_entity_id());
 
             float amag = std::min(glm::length(mc->Get_acceleration()), mc->Get_max_acceleration());
 
@@ -247,9 +247,9 @@ END_DEFINE_WSYSTEM()
 
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
     wcr::wid::WEntityId id;
-    auto & ic = parameters.level->GetFirstComponent<WCameraInputComponent>(id);
-    auto & tc = parameters.level->GetComponent<WTransformComponent>(id);
-    auto & mc = parameters.level->GetComponent<WMovementComponent>(id);
+    auto & ic = parameters.level->GetFirstComponent<wcm::CameraInput>(id);
+    auto & tc = parameters.level->GetComponent<wcm::Transform>(id);
+    auto & mc = parameters.level->GetComponent<wcm::Movement>(id);
 
     glm::vec3 acc{0};
 
@@ -273,11 +273,11 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
-    parameters.level->ForEachComponent<WCameraComponent> (
-        [&parameters] (WCameraComponent * cam) {
+    parameters.level->ForEachComponent<wcm::Camera> (
+        [&parameters] (wcm::Camera * cam) {
 
-            WTransformComponent & ts =
-                parameters.level->GetComponent<WTransformComponent>(
+            wcm::Transform & ts =
+                parameters.level->GetComponent<wcm::Transform>(
                     cam->Get_entity_id()
                     );
 

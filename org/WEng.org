@@ -172,6 +172,8 @@ The engine class will reference to other modules in the aplication.
 - wng::render
 
 ** WEngineObjects
+Rename to WEngObjects
+
 *** Objective
 
 Módulo que contiene los objetos que forman la estructura de datos del engine.
@@ -186,6 +188,9 @@ Each WObject has a WClass associated. This WClass instance contains relevant dat
 WObject is an object that can be tracked by the engine. WObjects has a kind of reflection implemented.
 
 The WObject and WClass system has its own section.
+
+**** Namespace
+- weo (WEng Objects) 
 
 *** WComponents
 
@@ -202,16 +207,15 @@ Los componentes están asociados a actores. formando así entidades compuestas d
 
 **** Namespace
 
-- wcm::light
-- wcm::transform
-- wcm::geometry
+- wcm : wcomponent namespace
+- wcm::light : lights components namespace
 
 *** WAssets
 
 **** Namespace
 
+- was : assets namespace
 - was::geometry
-- was
   
 
 ** WObject and WClass Template/Reflection

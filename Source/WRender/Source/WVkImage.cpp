@@ -331,6 +331,9 @@ void wvk::image::GenerateMipmaps(
         1, &barrier
         );
 
-    wvk::vulkan::EndSingleTimeCommands(in_device, in_command_pool, in_graphic_queue, command_buffer);
+    wvk::vulkan::EndSingleTimeCommands(in_device,
+                                       in_command_pool,
+                                       in_graphic_queue,
+                                       command_buffer);
 
 }

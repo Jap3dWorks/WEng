@@ -4,7 +4,7 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
-#include "WRenderPipelineAsset.WEngine.hpp"
+#include "WRenderPipelineAsset.WEng.hpp"
 
 class WENGINEOBJECTS_API WRenderPipelineAsset : public WAsset {
     WOBJECT_BODY

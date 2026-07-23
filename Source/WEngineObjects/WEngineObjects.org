@@ -20,8 +20,8 @@
 #+NAME: WObject-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link :mkdirp yes
-#+begin_src C++ :tangle PublicGenerated/WObject.WEngine.hpp
-<<wclass-wengine-hpp("WObject", "WObject", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WObject.WEng.hpp
+<<wclass-wengine-hpp("", "WObject", "", "WObject", "WENGINEOBJECTS")>>
 <<wobject-wobject-body-macro("WObject")>>
 #+end_src
 
@@ -29,7 +29,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link :mkdirp yes
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WEngineObjects", "WObject")>>
+<<wclass-compile-generated-cpp("WEngineObjects", "WObject")>>
 #+end_src
 
 ** WAsset
@@ -40,8 +40,8 @@
 #+NAME: WAsset-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WAsset.WEngine.hpp
-<<wclass-wengine-hpp("WAsset", "WObject", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WAsset.WEng.hpp
+<<wclass-wengine-hpp("", "WAsset", "", "WObject", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WAsset")>>
 #+end_src
 
@@ -50,7 +50,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WEngineObjects", "WAsset")>>
+<<wclass-compile-generated-cpp("WEngineObjects", "WAsset")>>
 #+end_src
 
 ** WComponent
@@ -61,8 +61,8 @@
 #+NAME: WComponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WComponent.WEngine.hpp
-<<wclass-wengine-hpp("WComponent", "WObject", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WComponent.WEng.hpp
+<<wclass-wengine-hpp("", "WComponent", "", "WObject", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WComponent")>>
 #+end_src
 
@@ -70,7 +70,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WEngineObjects", "WComponent")>>
+<<wclass-compile-generated-cpp("WEngineObjects", "WComponent")>>
 #+end_src
 
 ** WEntity
@@ -81,8 +81,8 @@
 #+NAME: WEntity-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WEntity.WEngine.hpp
-<<wclass-wengine-hpp("WEntity", "WObject", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WEntity.WEng.hpp
+<<wclass-wengine-hpp("","WEntity", "", "WObject", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WEntity")>>
 #+end_src
 
@@ -90,48 +90,48 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WEngineObjects", "WEntity")>>
+<<wclass-compile-generated-cpp("WEngineObjects", "WEntity")>>
 #+end_src
 
 * WAssets
-** WActionAsset
+** Action
 :PROPERTIES:
 :CUSTOM_ID: WActionAsset
 :END:
 
-#+NAME: WActionAsset-wengine-hpp
+#+NAME: was::Action-weng-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WActionAsset.WEngine.hpp
-<<wclass-wengine-hpp("WActionAsset", "WAsset", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WActionAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::Action.WEng.hpp
+<<wclass-wengine-hpp("was", "Action", "", "WAsset", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Action")>>
 #+end_src
 
 #+NAME: wactionasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WActionAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "Action")>>
 #+end_src
 
-** WInputMappingAsset
+** InputMapping
 :PROPERTIES:
 :CUSTOM_ID: WInputMappingAsset
 :END:
 
-#+NAME: WInputMappingAsset-wengine-hpp
+#+NAME: was::InputMapping-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WInputMappingAsset.WEngine.hpp
-<<wclass-wengine-hpp("WInputMappingAsset", "WAsset", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WInputMappingAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::InputMapping.WEng.hpp
+<<wclass-wengine-hpp("was", "InputMapping", "", "WAsset", "WENGINEOBJECTS")>>
+<<wobject-body-macro("InputMapping")>>
 #+end_src
 
-#+NAME: winputmappingasset-compilegenerated-cpp
+#+NAME: was::InputMapping-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WInputMappingAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "InputMapping")>>
 #+end_src
 
 ** WRenderPipelineAsset
@@ -142,8 +142,8 @@
 #+NAME: WRenderPipelineAsset-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WRenderPipelineAsset.WEngine.hpp
-<<wclass-wengine-hpp("WRenderPipelineAsset", "WAsset", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WRenderPipelineAsset.WEng.hpp
+<<wclass-wengine-hpp("", "WRenderPipelineAsset","", "WAsset", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WRenderPipelineAsset")>>
 #+end_src
 
@@ -151,7 +151,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WRenderPipelineAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "WRenderPipelineAsset")>>
 #+end_src
 
 ** WRenderPipelineParametersAsset
@@ -162,8 +162,8 @@
 #+NAME: WRenderPipelineParametersAsset-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WRenderPipelineParametersAsset.WEngine.hpp
-<<wclass-wengine-hpp("WRenderPipelineParametersAsset", "WAsset", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WRenderPipelineParametersAsset.WEng.hpp
+<<wclass-wengine-hpp("", "WRenderPipelineParametersAsset", "", "WAsset", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WRenderPipelineParametersAsset")>>
 #+end_src
 
@@ -171,7 +171,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WRenderPipelineParametersAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "WRenderPipelineParametersAsset")>>
 #+end_src
 
 ** WStaticMeshAsset
@@ -182,8 +182,8 @@
 #+NAME: WStaticMeshAsset-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WStaticMeshAsset.WEngine.hpp
-<<wclass-wengine-hpp("WStaticMeshAsset", "WAsset", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WStaticMeshAsset.WEng.hpp
+<<wclass-wengine-hpp("", "WStaticMeshAsset", "", "WAsset", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WStaticMeshAsset")>>
 #+end_src
 
@@ -191,7 +191,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WStaticMeshAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "WStaticMeshAsset")>>
 #+end_src
 
 ** WTextureAsset
@@ -202,8 +202,8 @@
 #+NAME: WTextureAsset-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WTextureAsset.WEngine.hpp
-<<wclass-wengine-hpp("WTextureAsset", "WObject", "WENGINEOBJECTS", "")>>
+#+begin_src C++ :tangle PublicGenerated/WTextureAsset.WEng.hpp
+<<wclass-wengine-hpp("", "WTextureAsset", "", "WObject", "WENGINEOBJECTS")>>
 <<wobject-body-macro("WTextureAsset")>>
 #+end_src
 
@@ -211,7 +211,7 @@
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "WTextureAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "WTextureAsset")>>
 #+end_src
 
 ** Level
@@ -219,8 +219,8 @@
 #+NAME: was-level-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/was_Level.WEngine.hpp
-<<wclass-wengine-hpp("Level", "WAsset", "WENGINEOBJECTS", "was")>>
+#+begin_src C++ :tangle PublicGenerated/was::Level.WEng.hpp
+<<wclass-wengine-hpp("was", "Level","", "WAsset", "WENGINEOBJECTS")>>
 <<wobject-body-macro("Level")>>
 #+end_src
 
@@ -228,132 +228,132 @@
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WAssets", "Level")>>
+<<wclass-compile-generated-cpp("WAssets", "Level")>>
 #+end_src
 
 * WComponents
-** WCameraComponent
+** Camera
 :PROPERTIES:
 :CUSTOM_ID: WCameraComponent
 :END:
 
-#+NAME: WCameraComponent-wengine-hpp
+#+NAME: wcm::Camera-WEng-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WCameraComponent.WEngine.hpp
-<<wclass-wengine-hpp("WCameraComponent", "WComponent", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WCameraComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::Camera.WEng.hpp
+<<wclass-wengine-hpp("wcm", "Camera", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Camera")>>
 #+end_src
 
-#+NAME: wcameracomponent-compilegenerated-cpp
+#+NAME: wcm::Camera-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents", "WCameraComponent")>>
+<<wclass-compile-generated-cpp("WComponents", "Camera")>>
 #+end_src
 
-** WCameraInputComponent
+** CameraInput
 :PROPERTIES:
 :CUSTOM_ID: WCameraInputComponent
 :END:
 
-#+NAME: WCameraInputComponent-wengine-hpp
+#+NAME: wcm::CameraInput-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WCameraInputComponent.WEngine.hpp
-<<wclass-wengine-hpp("WCameraInputComponent", "WComponent", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WCameraInputComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::CameraInput.WEng.hpp
+<<wclass-wengine-hpp("wcm", "CameraInput", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("CameraInput")>>
 #+end_src
 
-#+NAME: wcamerainputcomponent-compilegenerated-cpp
+#+NAME: wcm::CameraInput-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents", "WCameraInputComponent")>>
+<<wclass-compile-generated-cpp("WComponents", "CameraInput")>>
 #+end_src
 
-** WMovementComponent
+** Movement
 :PROPERTIES:
 :CUSTOM_ID: WMovementComponent
 :END:
 
-#+NAME: WMovementComponent-wengine-hpp
+#+NAME: wcm::Movement-WEng-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WMovementComponent.WEngine.hpp
-<<wclass-wengine-hpp("WMovementComponent", "WComponent", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WMovementComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::Movement.WEng.hpp
+<<wclass-wengine-hpp("wcm", "Movement", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Movement")>>
 #+end_src
 
-#+NAME: wmovementcomponent-compilegenerated-cpp
+#+NAME: wcm::Movement-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents", "WMovementComponent")>>
+<<wclass-compile-generated-cpp("WComponents", "Movement")>>
 #+end_src
 
-** WStaticMeshComponent 
+** StaticMesh
 :PROPERTIES:
 :CUSTOM_ID: WStaticMeshComponent
 :END:
 
-#+NAME: WStaticMeshComponent-wengine-hpp
+#+NAME: wcm::StaticMesh-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WStaticMeshComponent.WEngine.hpp
-<<wclass-wengine-hpp("WStaticMeshComponent", "WComponent", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WStaticMeshComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::StaticMesh.WEng.hpp
+<<wclass-wengine-hpp("wcm", "StaticMesh", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("StaticMesh")>>
 #+end_src
 
 #+NAME: wstaticmeshcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents", "WStaticMeshComponent")>>
+<<wclass-compile-generated-cpp("WComponents", "StaticMesh")>>
 #+end_src
 
-** WTransformComponent
+** Transform
 :PROPERTIES:
 :CUSTOM_ID: WTransformComponent
 :END:
 
-#+NAME: WTransformComponent-wengine-hpp
+#+NAME: wcm::Transform-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WTransformComponent.WEngine.hpp
-<<wclass-wengine-hpp("WTransformComponent", "WComponent", "WENGINEOBJECTS", "")>>
-<<wobject-body-macro("WTransformComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::Transform.WEng.hpp
+<<wclass-wengine-hpp("wcm", "Transform", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Transform")>>
 #+end_src
 
 #+NAME: wtransformcomponent-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents", "WTransformComponent")>>
+<<wclass-compile-generated-cpp("WComponents", "Transform")>>
 #+end_src
 
 ** light
-*** WAmbientLightComponent
+*** Ambient
 :PROPERTIES:
 :CUSTOM_ID: WAmbientLightComponent
 :END:
 
-#+NAME: wambientlightcomponent-wengine-hpp
+#+NAME: wcm::light::ambient-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WAmbientLightComponent.WEngine.hpp
-<<wclass-wengine-hpp("WAmbientLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
-<<wobject-body-macro("WAmbientLightComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::light::Ambient.WEng.hpp
+<<wclass-wengine-hpp("wcm::light", "Ambient", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Ambient")>>
 #+end_src
 
 #+NAME: wambientlightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents/Light", "WAmbientLightComponent")>>
+<<wclass-compile-generated-cpp("WComponents/Light", "Ambient")>>
 #+end_src
 
-*** WPointLightComponent
+*** Point
 :PROPERTIES:
 :CUSTOM_ID: WPointLightComponent
 :END:
@@ -361,19 +361,19 @@
 #+NAME: wpointlightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WPointLightComponent.WEngine.hpp
-<<wclass-wengine-hpp("WPointLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
-<<wobject-body-macro("WPointLightComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::light::Point.WEng.hpp
+<<wclass-wengine-hpp("wcm::light", "Point", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Point")>>
 #+end_src
 
 #+NAME: wpointlightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents/Light", "WPointLightComponent")>>
+<<wclass-compile-generated-cpp("WComponents/Light", "Point")>>
 #+end_src
 
-*** WDirectionalLightComponent
+*** Directional
 :PROPERTIES:
 :CUSTOM_ID: WDirectionalLightComponent
 :END:
@@ -381,16 +381,16 @@
 #+NAME: wdirectionallightcomponent-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WDirectionalLightComponent.WEngine.hpp
-<<wclass-wengine-hpp("WDirectionalLightComponent", "WComponent", "WENGINEOBJECTS", "wcm::light")>>
-<<wobject-body-macro("WDirectionalLightComponent")>>
+#+begin_src C++ :tangle PublicGenerated/wcm::light::Directional.WEng.hpp
+<<wclass-wengine-hpp("wcm::light", "Directional", "", "WComponent", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Directional")>>
 #+end_src
 
 #+NAME: wdirectionallightcomponent-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<compile-generated-cpp("WComponents/Light", "WDirectionalLightComponent")>>
+<<wclass-compile-generated-cpp("WComponents/Light", "Directional")>>
 #+end_src
 
 * Local Variables

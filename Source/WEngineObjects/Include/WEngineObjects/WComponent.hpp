@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WEngineObjects/WObject.hpp"
 
-#include "WComponent.WEngine.hpp"
+#include "WComponent.WEng.hpp"
 
 class WCORE_API WComponent : public WObject
 {

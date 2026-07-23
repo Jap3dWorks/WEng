@@ -9,7 +9,7 @@
 
 #include <array>
 
-#include "WStaticMeshAsset.WEngine.hpp"
+#include "WStaticMeshAsset.WEng.hpp"
 
 class WENGINEOBJECTS_API WStaticMeshAsset : public WAsset
 {

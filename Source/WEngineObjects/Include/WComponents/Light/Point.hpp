@@ -1,15 +1,14 @@
 #pragma once
 
 #include "WEngineObjects/WComponent.hpp"
-// #include "WCoreTypes/WRenderTypes.hpp"
 
 #include <glm/glm.hpp>
 
-#include "WPointLightComponent.WEngine.hpp"
+#include "wcm::light::Point.WEng.hpp"
 
 namespace wcm::light {
 
-    class WENGINEOBJECTS_API WPointLightComponent : public WComponent {
+    class WENGINEOBJECTS_API Point : public WComponent {
 
         WOBJECT_BODY;
 

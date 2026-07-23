@@ -162,34 +162,34 @@ namespace {
     }
 
     void DefaultInputAssets(WAssetDb & asset_db) {
-        wcr::wid::WAssetId cameramapping = asset_db.Create<WInputMappingAsset>(
+        wcr::wid::WAssetId cameramapping = asset_db.Create<was::InputMapping>(
             weng::defaults::CAMERA_MAPPING_ASSET_PATH
             );
 
-        wcr::wid::WAssetId frontaction = asset_db.Create<WActionAsset>(
+        wcr::wid::WAssetId frontaction = asset_db.Create<was::Action>(
             weng::defaults::FRONT_ACTION_ASSET_PATH
             );
 
-        wcr::wid::WAssetId backaction = asset_db.Create<WActionAsset>(
+        wcr::wid::WAssetId backaction = asset_db.Create<was::Action>(
             weng::defaults::BACK_ACTION_ASSET_PATH
             );
 
-        wcr::wid::WAssetId leftaction = asset_db.Create<WActionAsset>(
+        wcr::wid::WAssetId leftaction = asset_db.Create<was::Action>(
             weng::defaults::LEFT_ACTION_ASSET_PATH
             );
 
-        wcr::wid::WAssetId rightaction = asset_db.Create<WActionAsset>(
+        wcr::wid::WAssetId rightaction = asset_db.Create<was::Action>(
             weng::defaults::RIGHT_ACTION_ASSET_PATH
             );
 
-        wcr::wid::WAssetId mousemovement = asset_db.Create<WActionAsset>(
+        wcr::wid::WAssetId mousemovement = asset_db.Create<was::Action>(
             weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH
             );
 
         auto & mapping_asset = asset_db
-            .Get<WInputMappingAsset>(cameramapping);
+            .Get<was::InputMapping>(cameramapping);
 
-        WInputMap input_map = mapping_asset.Get_input_map();
+        was::InputMap input_map = mapping_asset.Get_input_map();
 
         input_map[{EInputKey::Key_W, EInputMode::Press}] = {frontaction};
         input_map[{EInputKey::Key_W, EInputMode::Release}] = {frontaction};

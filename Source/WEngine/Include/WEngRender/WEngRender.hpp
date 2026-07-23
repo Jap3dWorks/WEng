@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WComponents/WCameraComponent.hpp"
-#include "WComponents/WTransformComponent.hpp"
+#include "WComponents/Camera.hpp"
+#include "WComponents/Transform.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WCore/WCoreMacros.hpp"
@@ -10,10 +10,10 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngineInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WComponents/WStaticMeshComponent.hpp"
-#include "WComponents/Light/WPointLightComponent.hpp"
-#include "WComponents/Light/WDirectionalLightComponent.hpp"
-#include "WComponents/Light/WAmbientLightComponent.hpp"
+#include "WComponents/StaticMesh.hpp"
+#include "WComponents/Light/Point.hpp"
+#include "WComponents/Light/Directional.hpp"
+#include "WComponents/Light/Ambient.hpp"
 #include "WAssets/WStaticMeshAsset.hpp"
 #include "WAssets/WTextureAsset.hpp"
 #include "WAssets/Level.hpp"
@@ -44,13 +44,13 @@ namespace wng::render {
         std::array<wcr::wid::WEntityComponentId, point_lights.size()> pl_ids;
         std::uint32_t pl_count=0;
 
-        in_level->ForEachComponent<wcm::light::WPointLightComponent>(
+        in_level->ForEachComponent<wcm::light::Point>(
             [&in_level, &point_lights, &pl_ids, &pl_count]
-            (wcm::light::WPointLightComponent * cmp) {
+            (wcm::light::Point * cmp) {
                 if (cmp->Get_active()) {
 
                     auto * transform_component =
-                        &in_level->GetComponent<WTransformComponent>
+                        &in_level->GetComponent<wcm::Transform>
                         (cmp->Get_entity_id());
 
                     auto plight = wrd::light::ToPointLight(
@@ -63,7 +63,7 @@ namespace wng::render {
                     pl_ids[pl_count] = {
                         in_level->Get_asset_id(),
                         cmp->Get_entity_id(),
-                        in_level->GetComponentTypeId<wcm::light::WPointLightComponent>(),
+                        in_level->GetComponentTypeId<wcm::light::Point>(),
                         wcr::wid::null_id
                     };
 
@@ -78,13 +78,13 @@ namespace wng::render {
         std::array<wcr::wid::WEntityComponentId, directional_lights.size()> dl_ids;
         std::uint32_t dl_count=0;
 
-        in_level->ForEachComponent<wcm::light::WDirectionalLightComponent>(
+        in_level->ForEachComponent<wcm::light::Directional>(
             [&in_level, &directional_lights, &dl_ids, &dl_count]
-            (wcm::light::WDirectionalLightComponent * cmp) {
+            (wcm::light::Directional * cmp) {
                 if (cmp->Get_active()) {
 
                     auto * transform_cmp = &in_level
-                        ->GetComponent<WTransformComponent>
+                        ->GetComponent<wcm::Transform>
                         (cmp->Get_entity_id());
 
                     auto dlight = wrd::light::ToDirectionalLight(
@@ -99,7 +99,7 @@ namespace wng::render {
                     dl_ids[dl_count] = {
                         in_level->Get_asset_id(),
                         cmp->Get_entity_id(),
-                        in_level->GetComponentTypeId<wcm::light::WDirectionalLightComponent>(),
+                        in_level->GetComponentTypeId<wcm::light::Directional>(),
                         wcr::wid::null_id
                     };
                     
@@ -111,7 +111,7 @@ namespace wng::render {
         // Ambient Light
 
         wct::render::AmbientLight amb_light;
-        in_level->ForEachComponent<wcm::light::WAmbientLightComponent>(
+        in_level->ForEachComponent<wcm::light::Ambient>(
             [&amb_light](auto * cmp) {
                 amb_light = wrd::light::ToAmbientLight(*cmp);
             }
@@ -140,11 +140,11 @@ namespace wng::render {
         TSparseSet<wcr::wid::WAssetId> render_pipelines;
         render_pipelines.Reserve(64);
 
-        in_level->ForEachComponent<WStaticMeshComponent>(
+        in_level->ForEachComponent<wcm::StaticMesh>(
             [&static_meshes,
              &render_pipelines,
              &texture_assets,
-             &in_asset_db](WStaticMeshComponent * in_component) {
+             &in_asset_db](wcm::StaticMesh * in_component) {
                 
                 wcr::wid::WAssetId smid = in_component->Get_static_mesh_asset();
                 
@@ -153,7 +153,7 @@ namespace wng::render {
                 }
                 else {
                     WFLOG_Warning(
-                        "Invalid WStaticMeshAsset in WStaticMeshComponent with id {}.",
+                        "Invalid WStaticMeshAsset in wcm::StaticMesh with id {}.",
                         in_component->Get_entity_id().GetId()
                         );
                 }
@@ -190,7 +190,7 @@ namespace wng::render {
                         }
                         else {
                             WFLOG_Warning(
-                                "Invalid WRenderPipelineAsset in WStaticMeshComponent with id {}.",
+                                "Invalid WRenderPipelineAsset in wcm::StaticMesh with id {}.",
                                 in_component->Get_entity_id().GetId()
                                 );
                             return;
@@ -233,11 +233,11 @@ namespace wng::render {
         }
 
         // Pipeline Bindings
-        in_level->ForEachComponent<WStaticMeshComponent>(
+        in_level->ForEachComponent<wcm::StaticMesh>(
             [&in_render,
              &in_asset_db,
              &in_level]
-            (WStaticMeshComponent* in_component) {
+            (wcm::StaticMesh* in_component) {
 
                 WStaticMeshAsset & sm_asset = in_asset_db.Get<WStaticMeshAsset>(
                     in_component->Get_static_mesh_asset()
@@ -263,7 +263,7 @@ namespace wng::render {
                             {
                                 in_level->Get_asset_id(),
                                 in_component->Get_entity_id(),
-                                in_level->GetComponentTypeId<WStaticMeshComponent>(),
+                                in_level->GetComponentTypeId<wcm::StaticMesh>(),
                                 _id
                             };
 
@@ -287,7 +287,7 @@ namespace wng::render {
                     });
 
                     auto * transform_component = &in_level
-                        ->GetComponent<WTransformComponent>
+                        ->GetComponent<wcm::Transform>
                         (in_component->Get_entity_id());
 
                     wct::render::ModelUBO grpubo =
@@ -307,7 +307,7 @@ namespace wng::render {
                     wcr::wid::WEntityComponentId ecid {
                         in_level->Get_asset_id(),
                         in_component->Get_entity_id(),
-                        in_level->GetComponentTypeId<WStaticMeshComponent>(),
+                        in_level->GetComponentTypeId<wcm::StaticMesh>(),
                         {0}
                     };
 
@@ -322,8 +322,8 @@ namespace wng::render {
         // Temporal solution, only one camera.
         // other cameras with RenderId() > 1 could render into textures.
         wcr::wid::WEntityId camera_entt{};
-        in_level->ForEachComponent<WCameraComponent>(
-            [&camera_entt](WCameraComponent * _cam){
+        in_level->ForEachComponent<wcm::Camera>(
+            [&camera_entt](wcm::Camera * _cam){
                 if (!camera_entt && _cam->Get_render_id().IsValid()) {
                     camera_entt = _cam->Get_entity_id();
                 }
@@ -334,9 +334,9 @@ namespace wng::render {
             TSparseSet<wcr::wid::WAssetId> cam_render_pipelines;
             cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
 
-            in_level->GetComponent<WCameraComponent>(camera_entt).ForEachPostprocessAssignment(
+            in_level->GetComponent<wcm::Camera>(camera_entt).ForEachPostprocessAssignment(
                 [&cam_render_pipelines](
-                     const WCameraComponent * _cmp,
+                     const wcm::Camera * _cmp,
                      const wcr::wid::WSubIdxId & _idx,
                      const auto & _assgn) {
                     cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
@@ -348,14 +348,14 @@ namespace wng::render {
                 in_render->CreateRenderPipeline(&render_pipeline); // TODO Use the data struct
             }
 
-            WCameraComponent & comp = in_level
-                ->GetComponent<WCameraComponent>(camera_entt);
+            wcm::Camera & comp = in_level
+                ->GetComponent<wcm::Camera>(camera_entt);
             
             comp.ForEachPostprocessAssignment(
                 [&in_level,
                  &in_render,
                  &in_asset_db](
-                    const WCameraComponent * _cmp,
+                    const wcm::Camera * _cmp,
                     const wcr::wid::WSubIdxId & _idx,
                     const auto & _assgn
                     ) {
@@ -364,7 +364,7 @@ namespace wng::render {
                         in_level->Get_asset_id(),
                         _cmp->Get_entity_id(),
                         // TODO MeshComponent? should be camera component?
-                        in_level->GetComponentTypeId<WStaticMeshComponent>(),
+                        in_level->GetComponentTypeId<wcm::StaticMesh>(),
                         _idx
                     };
 
@@ -396,14 +396,14 @@ namespace wng::render {
         TSparseSet<wcr::wid::WEntityComponentId> pipeline_bindings;
         pipeline_bindings.Reserve(64);
         
-        in_level->ForEachComponent<WStaticMeshComponent>(
+        in_level->ForEachComponent<wcm::StaticMesh>(
             [&in_render,
              &in_asset_db,
              &static_meshes,
              &texture_assets,
              &pipeline_bindings,
              &in_level
-                ](WStaticMeshComponent * _component) {
+                ](wcm::StaticMesh * _component) {
 
                 static_meshes.Insert(
                     _component->Get_static_mesh_asset().GetId(),
@@ -444,7 +444,7 @@ namespace wng::render {
                         wcr::wid::WEntityComponentId ecid = {
                             in_level->Get_asset_id(),
                             _component->Get_entity_id(),
-                            in_level->GetComponentTypeId<WStaticMeshComponent>(),
+                            in_level->GetComponentTypeId<wcm::StaticMesh>(),
                             _id
                         };
 

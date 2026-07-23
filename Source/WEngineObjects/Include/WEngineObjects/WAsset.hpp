@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "WAsset.WEngine.hpp"
+#include "WAsset.WEng.hpp"
 
 class WCORE_API WAsset : public WObject, public ISerializable
 {

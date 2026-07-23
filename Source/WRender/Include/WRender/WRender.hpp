@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WComponents/WCameraComponent.hpp"
-#include "WComponents/WTransformComponent.hpp"
+#include "WComponents/Camera.hpp"
+#include "WComponents/Transform.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WUtils/WMath.hpp"
 #include <glm/ext/quaternion_transform.hpp>
@@ -13,8 +13,8 @@
 namespace wrd::render {
 
     inline wct::render::CameraUBO ToUBOCameraStruct(
-        WCameraComponent const & camera_component,
-        WTransformComponent const & transform_component,
+        wcm::Camera const & camera_component,
+        wcm::Transform const & transform_component,
         float in_aspect
         ) {
         wct::render::CameraUBO ubo_camera;
@@ -47,7 +47,7 @@ namespace wrd::render {
     }
 
     inline wct::render::ModelUBO ToUBOGraphicsStruct(
-        WTransformComponent const & in_transform
+        wcm::Transform const & in_transform
         // const WTransformStruct & in_transform
         ) {
 
