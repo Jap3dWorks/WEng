@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WGeometry.hpp"
@@ -64,14 +64,14 @@ public:
     void WaitIdle() const override;
 
     void CreateRenderPipeline(
-        WRenderPipelineAsset * in_pipeline_asset
+        was::RenderPipeline * in_pipeline_asset
         ) override;
 
     void CreatePipelineBinding(
         const wcr::wid::WEntityComponentId & component_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_id,
-        const WRenderPipelineAsset & pipeline_id,
-        const WRenderPipelineParametersAsset & in_param_asset
+        const was::RenderPipeline & pipeline_id,
+        const was::RenderPipelineParams & in_param_asset
         ) override;
 
     void DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) override;

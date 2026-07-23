@@ -17,8 +17,8 @@
 #include "fastgltf/core.hpp"
 #include "fastgltf/types.hpp"
 #include "fastgltf/tools.hpp"
-#include "WAssets/WStaticMeshAsset.hpp"
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WComponents/Transform.hpp"
 #include "WComponents/Camera.hpp"
 #include "fastgltf/util.hpp"
@@ -187,7 +187,7 @@ namespace {
     }
 
     WNODISCARD inline
-    // WRenderPipelineParametersAsset CollectMaterial(
+    // was::RenderPipelineParams CollectMaterial(
     auto CollectMaterial(
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & textures_map,
@@ -197,7 +197,7 @@ namespace {
         wcr::wid::WAssetId null_rgba=wcr::wid::null_id,
         wcr::wid::WAssetId null_normal=wcr::wid::null_id
         ) {
-        WRenderPipelineParametersAsset result{};
+        was::RenderPipelineParams result{};
 
         wct::render::PBRScalarUBO pbr_scalars{};
 
@@ -404,7 +404,7 @@ namespace {
         wcr::wid::WAssetId null_normal=wcr::wid::null_id
         ){
         
-        std::vector<WRenderPipelineParametersAsset> assets;
+        std::vector<was::RenderPipelineParams> assets;
         assets.reserve(in_asset.materials.size());
 
         std::vector<std::string_view> names;
@@ -574,7 +574,7 @@ namespace {
         std::vector<NullableIndex<>> index_sm_map{};
         index_sm_map.reserve(in_asset.meshes.size());
 
-        std::vector<WStaticMeshAsset> sm_assets;
+        std::vector<was::StaticMesh> sm_assets;
         sm_assets.reserve(in_asset.meshes.size());
 
         std::vector<std::string_view> sm_names;
@@ -582,7 +582,7 @@ namespace {
 
         for (fastgltf::Mesh const & mesh : in_asset.meshes) {
 
-            WStaticMeshAsset sm_asset{};
+            was::StaticMesh sm_asset{};
 
             std::size_t prim_indx=0;
             while(prim_indx < mesh.primitives.size() &&
@@ -921,7 +921,7 @@ namespace {
 
                     smcmp.SetStaticMeshAsset(
                         in_asset_db
-                        .Get<WStaticMeshAsset>(sm_wids[sm_id_map[gltfindx].GetId()])
+                        .Get<was::StaticMesh>(sm_wids[sm_id_map[gltfindx].GetId()])
                         );
                 }
             }
@@ -1050,7 +1050,7 @@ namespace {
     
     WNODISCARD inline
     std::vector<wcr::wid::WAssetId> CreatePipelineParameters(
-        std::vector<WRenderPipelineParametersAsset> & parameters,
+        std::vector<was::RenderPipelineParams> & parameters,
         std::vector<std::string_view> const & names,
         std::string_view asset_directory,
         WAssetDb & asset_db
@@ -1062,14 +1062,14 @@ namespace {
         for(std::size_t i=0; i<parameters.size(); i++) {
 
             std::array<std::string, 2> name =
-                asset_db.GenValidAssetName<WRenderPipelineParametersAsset>(
+                asset_db.GenValidAssetName<was::RenderPipelineParams>(
                     asset_directory,
                     names[i],
                     names[i]);
 
             result.push_back(
                 asset_db
-                .CreateFrom<WRenderPipelineParametersAsset>(
+                .CreateFrom<was::RenderPipelineParams>(
                     wstr::AssetPath(
                         asset_directory,
                         name[0], name[1]
@@ -1083,7 +1083,7 @@ namespace {
 
     WNODISCARD inline
     std::vector<wcr::wid::WAssetId> CreateStaticMeshes(
-        std::vector<WStaticMeshAsset> const & static_meshes,
+        std::vector<was::StaticMesh> const & static_meshes,
         std::vector<std::basic_string_view<char>> const & names,
         std::string_view asset_directory,
         WAssetDb & asset_db
@@ -1094,14 +1094,14 @@ namespace {
         for (std::size_t i=0; i<static_meshes.size(); i++) {
 
             std::array<std::string, 2> name =
-                asset_db.GenValidAssetName<WStaticMeshAsset>(
+                asset_db.GenValidAssetName<was::StaticMesh>(
                     asset_directory,
                     names[i],
                     names[i]);
 
             result.push_back(
                 asset_db
-                .CreateFrom<WStaticMeshAsset>(
+                .CreateFrom<was::StaticMesh>(
                     wstr::AssetPath(
                         asset_directory,
                         name[0], name[1]

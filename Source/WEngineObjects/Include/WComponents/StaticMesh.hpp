@@ -2,11 +2,8 @@
 
 #include "WCore/WCore.hpp"
 
-#include "WCore/WCoreMacros.hpp"
 #include "WEngineObjects/WComponent.hpp"
-#include "WAssets/WStaticMeshAsset.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
 #include "wcm::StaticMesh.WEng.hpp"
@@ -20,14 +17,14 @@ namespace wcm {
     public:
 
         WPROPERTY(wcr::wid::WAssetId, static_mesh_asset,);
-        WPROPERTY(WStaticMeshAsset::PipelineAssignments, pipeline_assignments,);
+        WPROPERTY(was::StaticMesh::PipelineAssignments, pipeline_assignments,);
 
     public:
 
         /**
          * @brief assigns a static mesh asset and its render pipeline assignments.
          */
-        void SetStaticMeshAsset(WStaticMeshAsset const & in_static_mesh) {
+        void SetStaticMeshAsset(was::StaticMesh const & in_static_mesh) {
             Set_static_mesh_asset(in_static_mesh.Get_asset_id());
             Set_pipeline_assignments(in_static_mesh.Get_pipeline_assignments());
         }

@@ -1,6 +1,6 @@
 #include "WImporter/WImporterObj.hpp"
 #include "WCoreTypes/WGeometry.hpp"
-#include "WAssets/WStaticMeshAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 
 #ifndef TINYOBJLOADER_IMPLEMENTATION
@@ -86,11 +86,11 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImporterObj::Import(
     }
 
     std::vector<wcr::wid::WAssetId> result {
-        in_asset_manager.Create<WStaticMeshAsset>("StaticMesh")
+        in_asset_manager.Create<was::StaticMesh>("StaticMesh")
     };
     
-    WStaticMeshAsset & static_mesh =
-        in_asset_manager.Get<WStaticMeshAsset>(result[0]);
+    was::StaticMesh & static_mesh =
+        in_asset_manager.Get<was::StaticMesh>(result[0]);
 
     for (uint32_t i=0; i < meshes.size(); i++) {
         static_mesh.SetMesh(std::move(meshes[i]), i);

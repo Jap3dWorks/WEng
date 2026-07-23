@@ -37,7 +37,7 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 
 void WVkPostprocessPipelinesRAII::CreatePipeline(
     wcr::wid::WAssetId in_id,
-    const WRenderPipelineAsset & in_pipeline_asset,
+    const was::RenderPipeline & in_pipeline_asset,
     VkDescriptorSetLayout in_global_descriptor,
     VkDescriptorSetLayout in_ppcess_global_descriptor
     ) {

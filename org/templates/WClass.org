@@ -131,6 +131,17 @@ private:                                                                     \\
 #define _PWCLASS_NAMESPACE_ %s
 " wclass-name parent-wclass-name (upcase wapi) (downcase namespace) (downcase parent-namespace))
 
+(format 
+"
+#ifdef _STR_WCLASS_NAMESPACE_
+#undef _STR_WCLASS_NAMESPACE_
+#endif
+
+#define _STR_WCLASS_NAMESPACE_ %s
+"
+(string-replace "::" "__" namespace)
+ )
+
  "
 #ifdef _WCLASS_DECLARATION_
 #undef _WCLASS_DECLARATION_
@@ -164,19 +175,18 @@ _WCLASS_DECLARATION_
 _PWCLASS_DECLARATION_
 "
 
- "
+"
 namespace wrf::wclass {
-    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) =
+
+    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _STR_WCLASS_NAMESPACE_ _WCLASS_ )) =
         WENG_CLASSNAME_STR(_WCLASS_);
+
+    using WENG_CLASSNAME(_STR_WCLASS_NAMESPACE_ _WCLASS_) = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
 "
 
 "
-    using WENG_CLASSNAME(_WCLASS_) = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
-"
-
- "
-    inline constexpr WENG_CLASSNAME(_WCLASS_) WENG_CLASSNAME_CLSS_VAR(_WCLASS_) =
-        WENG_CLASSNAME_STR_VAR(WENG_MP( _WCLASS_ )) ;
+    inline constexpr WENG_CLASSNAME(_STR_WCLASS_NAMESPACE_ _WCLASS_) WENG_CLASSNAME_CLSS_VAR(_STR_WCLASS_NAMESPACE_ _WCLASS_) =
+        WENG_CLASSNAME_STR_VAR(WENG_MP( _STR_WCLASS_NAMESPACE_  _WCLASS_ )) ;
 }
 "
  )
@@ -199,7 +209,7 @@ Content of compile-generated-cpp should be tangled in CompileGenerated/ director
 "
 "
 const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
-    return & wrf::wclass:: WENG_CLASSNAME_CLSS_VAR (_WCLASS_);
+    return & wrf::wclass:: WENG_CLASSNAME_CLSS_VAR (_STR_WCLASS_NAMESPACE_  _WCLASS_);
 }
 "
 )

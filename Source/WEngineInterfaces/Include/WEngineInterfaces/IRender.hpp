@@ -3,15 +3,15 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 
 #include <vector>
 #include <span>
 
-class WRenderPipelineAsset;
+namespace was { class RenderPipeline; }
 
 // class WTextureAsset;
-// class WStaticMeshAsset;
+// class was::StaticMesh;
 // namespace wct::texture { struct WTexture; }
 
 namespace wct::geometry {struct WMesh;}
@@ -45,10 +45,10 @@ public:
     /**
      * @brief Create a render pipeline in graphics card for in_pipeline_asset parameter.
      * The render pipeline create should share the same WId
-     * than the WRenderPipelineAsset * parameter.
+     * than the was::RenderPipeline * parameter.
      */
     virtual void CreateRenderPipeline(
-        WRenderPipelineAsset * in_pipeline_asset
+        was::RenderPipeline * in_pipeline_asset
         )=0;
 
     /**
@@ -58,8 +58,8 @@ public:
     virtual void CreatePipelineBinding(
         const wcr::wid::WEntityComponentId & component_id,
         const wcr::wid::WTypeAssetIndexId & in_mesh_id,
-        WRenderPipelineAsset const & pipeline_id,
-        WRenderPipelineParametersAsset const & in_parameters
+        was::RenderPipeline const & pipeline_id,
+        was::RenderPipelineParams const & in_parameters
         )=0;
 
     /**

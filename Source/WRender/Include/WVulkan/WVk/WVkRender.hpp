@@ -460,7 +460,6 @@ namespace wvk::render {
         const VkImage & in_albedo,
         const VkImage & in_emission,
         const VkImage & in_normal,
-        // const VkImage & in_ws_position,
         const VkImage & in_orm,
         const VkImage & in_depth,
         const VkImage & in_extra01
@@ -498,17 +497,6 @@ namespace wvk::render {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
             );
-
-        // wvk::render::RndCmd_TransitionRenderImageLayout(
-        //     in_command_buffer,
-        //     in_ws_position,
-        //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-        //     VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        //     VK_ACCESS_SHADER_READ_BIT,
-        //     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        //     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
-        //     );
 
         wvk::render::RndCmd_TransitionRenderImageLayout(
             in_command_buffer,

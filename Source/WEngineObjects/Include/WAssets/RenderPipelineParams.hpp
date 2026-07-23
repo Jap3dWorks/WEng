@@ -5,9 +5,11 @@
 #include "WEngineObjects/WAsset.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
-#include "WRenderPipelineParametersAsset.WEng.hpp"
+#include "was::RenderPipelineParams.WEng.hpp"
 
-class WENGINEOBJECTS_API WRenderPipelineParametersAsset : public WAsset {
+namespace was {
+
+class WENGINEOBJECTS_API RenderPipelineParams : public WAsset {
 
     WOBJECT_BODY;
 
@@ -22,3 +24,4 @@ private:
 
 };
 
+}

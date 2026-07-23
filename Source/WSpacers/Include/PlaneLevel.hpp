@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
@@ -75,11 +75,11 @@ namespace spacers::plane {
     }
 
     inline void PopulateMesh(WEngine & engine, was::Level * level, LevelData level_data) {
-        WStaticMeshAsset smasset {};
+        was::StaticMesh smasset {};
 
         smasset.SetMesh(Plane(), 0);
 
-        wcr::wid::WAssetId smid = engine.AssetManager().CreateFrom<WStaticMeshAsset>(
+        wcr::wid::WAssetId smid = engine.AssetManager().CreateFrom<was::StaticMesh>(
             "/Content/planelevel/smplane00:smplane00",
             smasset);
 
@@ -90,10 +90,10 @@ namespace spacers::plane {
         auto & smcmp = level->GetComponent<wcm::StaticMesh>(entt);
 
         smcmp.SetStaticMeshAsset(
-            engine.AssetManager().Get<WStaticMeshAsset>(smid)
+            engine.AssetManager().Get<was::StaticMesh>(smid)
             );
 
-        WRenderPipelineParametersAsset param{};
+        was::RenderPipelineParams param{};
 
         wct::render::UBOData ubo_data{};
         param.Set_ubo_list(

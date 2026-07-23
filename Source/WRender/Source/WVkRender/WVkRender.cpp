@@ -7,7 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -343,7 +343,7 @@ void WVkRender::Draw()
 // ---------
 
 void WVkRender::CreateRenderPipeline(
-    WRenderPipelineAsset * render_pipeline
+    was::RenderPipeline * render_pipeline
     ) {
 
     wct::render::pipeline_type_dispatcher<
@@ -426,8 +426,8 @@ void WVkRender::DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) {
 void WVkRender::CreatePipelineBinding(
     const wcr::wid::WEntityComponentId & component_id,
     const wcr::wid::WTypeAssetIndexId & renderable_asset_id, // like a submesh
-    const WRenderPipelineAsset & pipeline,
-    const WRenderPipelineParametersAsset & parameters
+    const was::RenderPipeline & pipeline,
+    const was::RenderPipelineParams & parameters
     )
 {
     assert(pipeline_track_.pipeline_pipetype.contains(pipeline.Get_asset_id()));

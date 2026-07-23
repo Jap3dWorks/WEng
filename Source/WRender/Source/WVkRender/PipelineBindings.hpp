@@ -7,8 +7,8 @@
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WCore/TVisitor.hpp"
 
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVk/WVkBuffer.hpp"
 
@@ -19,7 +19,7 @@
 namespace wvk::render::pipe_bindings {
 
     WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectTextureBindings(
-        WRenderPipelineParametersAsset const & parameters,
+        was::RenderPipelineParams const & parameters,
         WVkAssetRenderDataRAII & asset_render_data
         ) {
         auto texture_params = parameters.Get_texture_list();
@@ -48,8 +48,8 @@ namespace wvk::render::pipe_bindings {
     template<std::uint8_t FramesInFlight>
     WNODISCARD std::vector<WVkDescSetUBOBinding<FramesInFlight>> CollectUBOBindings(
         wcr::wid::WEntityComponentId entity_component_id,
-        WRenderPipelineAsset const & pipeline,
-        WRenderPipelineParametersAsset const & parameters,
+        was::RenderPipeline const & pipeline,
+        was::RenderPipelineParams const & parameters,
         WVkAssetRenderDataRAII & asset_render_data        
         ) {
 

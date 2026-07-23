@@ -134,64 +134,64 @@
 <<wclass-compile-generated-cpp("WAssets", "InputMapping")>>
 #+end_src
 
-** WRenderPipelineAsset
+** RenderPipeline
 :PROPERTIES:
 :CUSTOM_ID: WRenderPipelineAsset
 :END:
 
-#+NAME: WRenderPipelineAsset-wengine-hpp
+#+NAME: was::RenderPipeline-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WRenderPipelineAsset.WEng.hpp
-<<wclass-wengine-hpp("", "WRenderPipelineAsset","", "WAsset", "WENGINEOBJECTS")>>
-<<wobject-body-macro("WRenderPipelineAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::RenderPipeline.WEng.hpp
+<<wclass-wengine-hpp("was", "RenderPipeline","", "WAsset", "WENGINEOBJECTS")>>
+<<wobject-body-macro("RenderPipeline")>>
 #+end_src
 
-#+NAME: wrenderpipelineasset-compilegenerated-cpp
+#+NAME: was::RenderPipeline-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WAssets", "WRenderPipelineAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "RenderPipeline")>>
 #+end_src
 
-** WRenderPipelineParametersAsset
+** RenderPipelineParams
 :PROPERTIES:
 :CUSTOM_ID: WRenderPipelineParametersAsset
 :END:
 
-#+NAME: WRenderPipelineParametersAsset-wengine-hpp
+#+NAME: was::RenderPipelineParams-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WRenderPipelineParametersAsset.WEng.hpp
-<<wclass-wengine-hpp("", "WRenderPipelineParametersAsset", "", "WAsset", "WENGINEOBJECTS")>>
-<<wobject-body-macro("WRenderPipelineParametersAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::RenderPipelineParams.WEng.hpp
+<<wclass-wengine-hpp("was", "RenderPipelineParams", "", "WAsset", "WENGINEOBJECTS")>>
+<<wobject-body-macro("RenderPipelineParams")>>
 #+end_src
 
-#+NAME: WRenderPipelineParametersAsset-compilegenerated-cpp
+#+NAME: was::RenderPipelineParams-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WAssets", "WRenderPipelineParametersAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "RenderPipelineParams")>>
 #+end_src
 
-** WStaticMeshAsset
+** StaticMesh
 :PROPERTIES:
 :CUSTOM_ID: WStaticMeshAsset
 :END:
 
-#+NAME: WStaticMeshAsset-wengine-hpp
+#+NAME: was::StaticMesh-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WStaticMeshAsset.WEng.hpp
-<<wclass-wengine-hpp("", "WStaticMeshAsset", "", "WAsset", "WENGINEOBJECTS")>>
-<<wobject-body-macro("WStaticMeshAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::StaticMesh.WEng.hpp
+<<wclass-wengine-hpp("was", "StaticMesh", "", "WAsset", "WENGINEOBJECTS")>>
+<<wobject-body-macro("StaticMesh")>>
 #+end_src
 
-#+NAME: wstaticmeshasset-compilegenerated-cpp
+#+NAME: was::StaticMesh-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WAssets", "WStaticMeshAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "StaticMesh")>>
 #+end_src
 
 ** WTextureAsset

@@ -6,7 +6,7 @@
 #include "WLog.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include "_WVkGBufferPipelinesRAII_.hpp"
 
 #include <vector>
@@ -45,7 +45,7 @@ public:
 
     void CreatePipeline(
         const wcr::wid::WAssetId & pipeline_id,
-        const WRenderPipelineAsset & pipeline_asset,
+        const was::RenderPipeline & pipeline_asset,
         VkDescriptorSetLayout global_descset_layout
         ) {
         std::vector<WVkShaderStageInfo> shaders = Super::pipelines_db_.BuildShaders(

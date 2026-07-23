@@ -6,7 +6,7 @@
 #include "WVulkan/WVkRenderConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVkPipelinesBase.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include <vulkan/vulkan_core.h>
 
 // TODO template with max frames in flight as param
@@ -37,7 +37,7 @@ public:
 
     void CreatePipeline(
         wcr::wid::WAssetId in_id,
-        const WRenderPipelineAsset & in_pipeline_struct,
+        const was::RenderPipeline & in_pipeline_struct,
         VkDescriptorSetLayout in_global_descriptor,
         VkDescriptorSetLayout in_ppcess_global_descriptor
         );

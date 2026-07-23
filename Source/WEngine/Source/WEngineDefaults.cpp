@@ -1,6 +1,6 @@
 #include "WEngine/WEngineDefaults.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
@@ -65,7 +65,7 @@ namespace {
     }
 
     void DefaultRenderPipelines(WAssetDb & out_db) {
-        WRenderPipelineAsset pipeline_asset{};
+        was::RenderPipeline pipeline_asset{};
 
         pipeline_asset.Set_pipeline_type(wct::render::ERPipeType::GBuffer);
 
@@ -119,14 +119,14 @@ namespace {
 
         pipeline_asset.Set_descriptor_list(descriptors);
         
-        out_db.CreateFrom<WRenderPipelineAsset>(
+        out_db.CreateFrom<was::RenderPipeline>(
             weng::defaults::PBR_PIPELINE_ASSET_PATH,
             std::move(pipeline_asset)
             );
 
         // TODO default pipeline parameters
 
-        WRenderPipelineParametersAsset params{};
+        was::RenderPipelineParams params{};
 
         params.Set_ubo_list(
             {
@@ -155,7 +155,7 @@ namespace {
                 },
             });
 
-        out_db.CreateFrom<WRenderPipelineParametersAsset>(
+        out_db.CreateFrom<was::RenderPipelineParams>(
             weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH,
             params
             );

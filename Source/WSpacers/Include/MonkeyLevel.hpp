@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WAssets/InputMapping.hpp"
-#include "WAssets/WRenderPipelineParametersAsset.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WComponents/Light/Point.hpp"
 #include "WComponents/CameraInput.hpp"
 #include "WComponents/Movement.hpp"
@@ -12,14 +12,14 @@
 #include "WImporter/WImporterTexture.hpp"
 #include "WImporter/WImporterObj.hpp"
 
-#include "WAssets/WStaticMeshAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
 #include "WAssets/WTextureAsset.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include "WAssets/Level.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WAssets/WRenderPipelineAsset.hpp"
+#include "WAssets/RenderPipeline.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WComponents/Transform.hpp"
 #include "WComponents/StaticMesh.hpp"
@@ -68,19 +68,19 @@ namespace spacers::monkey {
         WAsset * null_normal = engine.AssetManager()
             .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);
 
-        WRenderPipelineAsset * pipeline_asset = engine.AssetManager()
-            .Get<WRenderPipelineAsset>(weng::defaults::PBR_PIPELINE_ASSET_PATH);
+        was::RenderPipeline * pipeline_asset = engine.AssetManager()
+            .Get<was::RenderPipeline>(weng::defaults::PBR_PIPELINE_ASSET_PATH);
 
         out_model.pipeline_asset = pipeline_asset->Get_asset_id();
 
         // Create Pipeline Parameter Asset
 
         wcr::wid::WAssetId paramid = engine.AssetManager()
-            .Create<WRenderPipelineParametersAsset>("/Content/Assets/Params/ParamA:ParamA");
+            .Create<was::RenderPipelineParams>("/Content/Assets/Params/ParamA:ParamA");
 
         out_model.param_asset = paramid;
 
-        auto & param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+        auto & param_asset = engine.AssetManager().Get<was::RenderPipelineParams>(paramid);
         param_asset.Set_texture_list(
             {
                 {
@@ -107,10 +107,10 @@ namespace spacers::monkey {
 
     inline bool SetPostprocessPipelines(WEngine & engine, wcm::Camera & camera) {
         wcr::wid::WAssetId pipid =
-            engine.AssetManager().Create<WRenderPipelineAsset>("/Content/Assets/PPDebug:PPDebug");
+            engine.AssetManager().Create<was::RenderPipeline>("/Content/Assets/PPDebug:PPDebug");
 
-        WRenderPipelineAsset & pipeline_asset =
-            engine.AssetManager().Get<WRenderPipelineAsset>(pipid);
+        was::RenderPipeline & pipeline_asset =
+            engine.AssetManager().Get<was::RenderPipeline>(pipid);
 
         pipeline_asset.Set_pipeline_type(wct::render::ERPipeType::Postprocess);
 
@@ -135,7 +135,7 @@ namespace spacers::monkey {
         pipeline_asset.Set_descriptor_list(descriptors);
 
         wcr::wid::WAssetId paramid =
-            engine.AssetManager().Create<WRenderPipelineParametersAsset>(
+            engine.AssetManager().Create<was::RenderPipelineParams>(
                 "/Content/Assets/PPDebugParam:PPDebugParam"
                 );
 
@@ -168,7 +168,7 @@ namespace spacers::monkey {
         out_model.pipeline_asset = in_render_pipeline;
 
         wcr::wid::WAssetId paramid = engine.AssetManager()
-            .Create<WRenderPipelineParametersAsset>("/Content/Assets/ParamB:ParamB");
+            .Create<was::RenderPipelineParams>("/Content/Assets/ParamB:ParamB");
 
         out_model.param_asset = paramid;
 
@@ -178,7 +178,7 @@ namespace spacers::monkey {
         WAsset * null_normal = engine.AssetManager()
             .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);
 
-        auto & param_asset = engine.AssetManager().Get<WRenderPipelineParametersAsset>(paramid);
+        auto & param_asset = engine.AssetManager().Get<was::RenderPipelineParams>(paramid);
 
         param_asset.Set_texture_list(
             {

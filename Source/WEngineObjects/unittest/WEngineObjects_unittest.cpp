@@ -11,7 +11,7 @@
 #include "WCore/TWAllocator.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WEngineObjects/WAsset.hpp"
-#include "WAssets/WStaticMeshAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
 #include "WEngineObjects/WEntity.hpp"
 #include "WObjectDb/WEntityComponentDb.hpp"
 #include "WComponents/StaticMesh.hpp"
@@ -81,9 +81,9 @@ bool WObjectDb_TWRef_Test() {
 
     man.InitialMemorySize(1);
 
-    man.CreateAt<WStaticMeshAsset>(1);
-    TWRef<WStaticMeshAsset> a =
-        man.Get<WStaticMeshAsset>(1);
+    man.CreateAt<was::StaticMesh>(1);
+    TWRef<was::StaticMesh> a =
+        man.Get<was::StaticMesh>(1);
 
     man.CreateAt<WTextureAsset>(2);
     TWRef<WTextureAsset> t =
@@ -98,7 +98,7 @@ bool WObjectDb_TWRef_Test() {
     void* ptr = a.BPtr();
 
     for (size_t i=0; i<10; i++) {
-        man.CreateAt<WStaticMeshAsset>(i+3);
+        man.CreateAt<was::StaticMesh>(i+3);
     }
 
     WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());

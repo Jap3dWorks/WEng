@@ -2,10 +2,8 @@
 
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkRenderConfig.hpp"
-// #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/WVk/WVkTypes.hpp"
 #include "WVulkan/WVk/WVkDescriptor.hpp"
-// #include "WVulkan/WVk/WVulkan.hpp"
 #include "WVulkan/WVk/WVkShader.hpp"
 #include "WVulkan/WVk/WVkRenderPlane.hpp"
 #include "WVulkan/WVkRAII/_WVkLightingPipelineRAII_.hpp"
@@ -151,7 +149,7 @@ private:
     void InitializeDescSetLayout() {
         // TODO: Uniform Buffer with Render Parameters
 
-        // albedo,emission,normal,ws_position,orm,depth,(extra01)
+        // albedo,emission,normal,orm,depth,(extra01)
 
         std::array<VkDescriptorSetLayoutBinding, WENG_VK_GBUFFERS_COUNT> dsl_bindings;
         for(std::uint32_t i=0; i<dsl_bindings.size(); i++) {
