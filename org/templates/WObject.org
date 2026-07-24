@@ -20,7 +20,7 @@ class WClass;
     constexpr %1$s(%1$s &&) noexcept=default;     \\
     %1$s & operator=(const %1$s &) = default;     \\
     %1$s & operator=(%1$s &&) = default;          \\
-    virtual ~%1$s() = default;                    \\
+    ~%1$s() = default;                            \\
     static const WClass * StaticClass() noexcept; \\
     virtual const WClass * Class() const {        \\
         return %1$s::StaticClass();               \\
@@ -43,7 +43,7 @@ class WClass;
     constexpr %1$s(%1$s &&) noexcept=default;      \\
     %1$s & operator=(const %1$s &) = default;      \\
     %1$s & operator=(%1$s &&) = default;           \\
-    ~%1$s() override = default;                    \\
+    ~%1$s() = default;                             \\
     static const WClass * StaticClass() noexcept ; \\
     const WClass * Class() const override {        \\
         return %1$s::StaticClass();                \\
@@ -56,7 +56,7 @@ class WClass;
 The following babel source block checks if a WObject file exists.
 If not exists creates it with a default template.
 
-#+NAME: create-if-not-exists-wobject-hpp
+#+NAME: wbject-create-if-not-exists-hpp
 #+HEADER: :var module="WEngineObjects" :var name="WObject" :var parent-module=""
 #+HEADER: :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
 #+begin_src elisp

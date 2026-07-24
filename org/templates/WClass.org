@@ -29,36 +29,59 @@
 #endif
 #+end_src
 
-#+NAME: wclass-macro-define-dconcat
+#+NAME: wclass-macro-define-wjoin
 #+begin_src C++
-#ifndef WENG_DCONCAT
-#define WENG_DCONCAT(A,B) A##B
+#ifndef IN_WJOIN1
+#define IN_WJOIN1(A,B) A ## B
+#endif
+
+#ifndef IN_WJOIN2
+#define IN_WJOIN2(A,B) IN_WJOIN1(A,B)
+#endif
+
+#ifndef WJOIN
+#define WJOIN(A,B) IN_WJOIN2(A, B)
 #endif
 #+end_src
 
-#+NAME: wclass-macro-define-mp
+#+NAME: wclass-macro-define-wstr
 #+begin_src C++
-#ifndef WENG_MP
-#define WENG_MP(x) x
+#ifndef IN_WSTR1
+#define IN_WSTR1(A) #A
+#endif
+
+#ifndef IN_WSTR2
+#define IN_WSTR2(A) IN_WSTR1(A)
+#endif
+
+#ifndef WSTR
+#define WSTR(A) IN_WSTR2(A)
+#endif
+#+end_src
+
+#+NAME: wclass-macro-define-expnd
+#+begin_src C++
+#ifndef WEXPND
+#define WEXPND(x) x
 #endif
 #+end_src
 
 #+NAME: wclass-macro-define-wclassname
 #+begin_src C++
-#ifndef WENG_CLASSNAME
-#define WENG_CLASSNAME(_CLS) WENG_DCONCAT(WClass__, _CLS)
+#ifndef WCLASSNAME
+#define WCLASSNAME(_CLS) WJOIN(WClass__, _CLS)
 #endif
 
-#ifndef WENG_CLASSNAME_CLSS_VAR
-#define WENG_CLASSNAME_CLSS_VAR(_CLS) WENG_DCONCAT(_VAR_, _CLS)
+#ifndef WCLASSNAME_CLSS_VAR
+#define WCLASSNAME_CLSS_VAR(_CLS) WJOIN(_VAR_, _CLS)
 #endif
 
-#ifndef WENG_CLASSNAME_STR
-#define WENG_CLASSNAME_STR(_CLS) _STR(_CLS)
+#ifndef WCLASSNAME_STR
+#define WCLASSNAME_STR(_CLS) WSTR(_CLS)
 #endif
 
-#ifndef WENG_CLASSNAME_STR_VAR
-#define WENG_CLASSNAME_STR_VAR(_CLS) WENG_DCONCAT(_NAME_, _CLS)
+#ifndef WCLASSNAME_STR_VAR
+#define WCLASSNAME_STR_VAR(_CLS) WJOIN(_NAME_, _CLS)
 #endif
 #+end_src
 
@@ -82,6 +105,12 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
  "
 #pragma once
 #include \"WClass/WClassFor.hpp\"
+
+<<wclass-macro-define-wstr>>
+<<wclass-macro-define-wjoin>>
+<<wclass-macro-define-expnd>>
+<<wclass-macro-define-wclassname>>
+
 "
  "
 #ifdef WCLASS
@@ -164,29 +193,50 @@ private:                                                                     \\
            "namespace _PWCLASS_NAMESPACE_ { class _PWCLASS_; }"
            ))
 
- "
-<<wclass-macro-define-dconcat>>
-<<wclass-macro-define-mp>>
-<<wclass-macro-define-wclassname>>
 "
-
- "
 _WCLASS_DECLARATION_
 _PWCLASS_DECLARATION_
 "
 
 "
+#ifdef _WCLASSNAME_V_
+#undef _WCLASSNAME_V_
+#endif
+
+#define _WCLASSNAME_V_ WCLASSNAME( \\
+         WJOIN(WJOIN(_STR_WCLASS_NAMESPACE_, __), _WCLASS_))
+
+#ifdef _WCLASSNAME_STR_V_
+#undef _WCLASSNAME_STR_V_
+#endif
+
+#define _WCLASSNAME_STR_V_ WCLASSNAME_STR( \\
+        WJOIN( WJOIN(_STR_WCLASS_NAMESPACE_, __), _WCLASS_))
+
+#ifdef _WCLASSNAME_STR_VAR_V_
+#undef _WCLASSNAME_STR_VAR_V_
+#endif
+
+#define _WCLASSNAME_STR_VAR_V_ WCLASSNAME_STR_VAR(     \\
+        WJOIN( WJOIN(_STR_WCLASS_NAMESPACE_, __),      \\
+        _WCLASS_ ))
+
+#ifdef _WCLASSNAME_CLASS_VAR_V_
+#undef _WCLASSNAME_CLASS_VAR_V_
+#endif
+
+#define _WCLASSNAME_CLASS_VAR_V_ WCLASSNAME_CLSS_VAR( \\
+         WJOIN(WJOIN(_STR_WCLASS_NAMESPACE_, __), _WCLASS_))
+
 namespace wrf::wclass {
 
-    inline constexpr std::string_view WENG_CLASSNAME_STR_VAR(WENG_MP( _STR_WCLASS_NAMESPACE_ _WCLASS_ )) =
-        WENG_CLASSNAME_STR(_WCLASS_);
+    inline constexpr std::string_view _WCLASSNAME_STR_VAR_V_ = _WCLASSNAME_STR_V_;
 
-    using WENG_CLASSNAME(_STR_WCLASS_NAMESPACE_ _WCLASS_) = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
+    using _WCLASSNAME_V_ = WClassFor<_WCLASS_NAMESPACE_ :: _WCLASS_, _PWCLASS_NAMESPACE_ :: _PWCLASS_>;
 "
 
 "
-    inline constexpr WENG_CLASSNAME(_STR_WCLASS_NAMESPACE_ _WCLASS_) WENG_CLASSNAME_CLSS_VAR(_STR_WCLASS_NAMESPACE_ _WCLASS_) =
-        WENG_CLASSNAME_STR_VAR(WENG_MP( _STR_WCLASS_NAMESPACE_  _WCLASS_ )) ;
+    inline constexpr _WCLASSNAME_V_ _WCLASSNAME_CLASS_VAR_V_ = _WCLASSNAME_STR_VAR_V_;
 }
 "
  )
@@ -209,7 +259,7 @@ Content of compile-generated-cpp should be tangled in CompileGenerated/ director
 "
 "
 const WClass * _WCLASS_NAMESPACE_ :: _WCLASS_::StaticClass() noexcept {
-    return & wrf::wclass:: WENG_CLASSNAME_CLSS_VAR (_STR_WCLASS_NAMESPACE_  _WCLASS_);
+    return & wrf::wclass:: _WCLASSNAME_CLASS_VAR_V_;
 }
 "
 )
