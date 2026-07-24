@@ -1,7 +1,7 @@
 #include "WEngine/WEngine.hpp"
 
 #include "WCore/WCore.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WInterfaces/IRender.hpp"
 
 // #include "WImporter/WImporterTexture.hpp"
 // #include "WImporter/WImporterObj.hpp"

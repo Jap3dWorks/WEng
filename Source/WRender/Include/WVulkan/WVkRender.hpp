@@ -20,7 +20,7 @@
 #include "WVulkan/WVkRAII/WVkLightingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkCommandPoolRAII.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WInterfaces/IRender.hpp"
 #include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
 #include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
 #include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"

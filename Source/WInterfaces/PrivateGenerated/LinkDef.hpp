@@ -1,4 +1,4 @@
-// [[file:../WEngineInterfaces.org::LinkDef][LinkDef]]
+// [[file:../WInterfaces.org::LinkDef][LinkDef]]
 #pragma once
 
 #if defined(_WIN32)
@@ -70,6 +70,23 @@
 
 
 #if defined(_WIN32)
+    #ifdef WINTERFACES_EXPORTS
+        #define WINTERFACES_API __declspec(dllexport)
+    #else
+        #define WINTERFACES_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WINTERFACES_EXPORTS
+        #define WINTERFACES_API __attribute__((visibility("default")))
+    #else
+        #define WINTERFACES_API
+    #endif
+#else
+    #define WINTERFACES_API
+#endif
+
+
+#if defined(_WIN32)
     #ifdef WIMPORTER_EXPORTS
         #define WIMPORTER_API __declspec(dllexport)
     #else
@@ -83,23 +100,6 @@
     #endif
 #else
     #define WIMPORTER_API
-#endif
-
-
-#if defined(_WIN32)
-    #ifdef WENGINEINTERFACES_EXPORTS
-        #define WENGINEINTERFACES_API __declspec(dllexport)
-    #else
-        #define WENGINEINTERFACES_API __declspec(dllimport)
-    #endif
-#elif defined(__GNUC__) || defined(__clang__)
-    #ifdef WENGINEINTERFACES_EXPORTS
-        #define WENGINEINTERFACES_API __attribute__((visibility("default")))
-    #else
-        #define WENGINEINTERFACES_API
-    #endif
-#else
-    #define WENGINEINTERFACES_API
 #endif
 
 

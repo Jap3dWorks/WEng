@@ -3,7 +3,7 @@
 #include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WInterfaces/IRender.hpp"
 #include "WImporterRegister/WImporterRegister.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"

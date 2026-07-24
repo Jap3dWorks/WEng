@@ -17,26 +17,26 @@ Modules should be linkable between them and dinamically linkable with the core a
 @startuml
 
 Rectangle WEngine
-Rectangle WEngineInterfaces
+Rectangle WInterfaces
 Rectangle WObjects
 Rectangle WCore
 Rectangle WLevel
 Rectangle WRender
 
-WEngineInterfaces -[dashed]-> WObjects
-WEngineInterfaces -[dashed]-> WCore
+WInterfaces -[dashed]-> WObjects
+WInterfaces -[dashed]-> WCore
 
 WObjects -[dashed]-> WCore
 
 WEngine -[dashed]-> WObjects
-WEngine -[dashed]-> WEngineInterfaces
+WEngine -[dashed]-> WInterfaces
 WEngine -[dashed]-> WCore
 
-WLevel -[dashed]-> WEngineInterfaces
+WLevel -[dashed]-> WInterfaces
 WLevel -[dashed]-> WObjects
 WLevel -[dashed]-> WCore
 
-WRender -[dashed]-> WEngineInterfaces
+WRender -[dashed]-> WInterfaces
 WRender -[dashed]-> WObjects
 WRender -[dashed]-> WCore
 

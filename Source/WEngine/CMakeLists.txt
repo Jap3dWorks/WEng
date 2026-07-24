@@ -36,7 +36,7 @@ target_link_libraries(
         WObjects
         WImporter
         WRender
-        WEngineInterfaces
+        WInterfaces
 )
 
 install(

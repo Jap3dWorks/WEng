@@ -11,7 +11,7 @@
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WString/WString.hpp"
 #include "fastgltf/core.hpp"

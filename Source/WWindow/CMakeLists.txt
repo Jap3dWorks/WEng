@@ -27,7 +27,7 @@ target_link_libraries(
     PRIVATE
         WObjects
         WCore
-        WEngineInterfaces
+        WInterfaces
         glfw
 )
 

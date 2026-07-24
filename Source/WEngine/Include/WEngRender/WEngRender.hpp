@@ -8,7 +8,7 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WEngineInterfaces/IRender.hpp"
+#include "WInterfaces/IRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WComponents/StaticMesh.hpp"
 #include "WComponents/Light/Point.hpp"

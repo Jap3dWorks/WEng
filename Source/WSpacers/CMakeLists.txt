@@ -26,7 +26,7 @@ target_link_libraries(
     PRIVATE
         WCore
         WObjects
-        WEngineInterfaces
+        WInterfaces
         WRender
         WImporter
         WEngine
