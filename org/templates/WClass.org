@@ -251,7 +251,7 @@ Content of compile-generated-cpp should be tangled in CompileGenerated/ director
 
 #+NAME: wclass-compile-generated-cpp
 #+HEADER: :noweb yes
-#+begin_src elisp :var wobject-module="WEngineObjects" :var wobject="WObject"
+#+begin_src elisp :var wobject-module="WObjects" :var wobject="WObject"
 (concat
 (format "#include \"%s/%s.hpp\"" wobject-module wobject)
 " 

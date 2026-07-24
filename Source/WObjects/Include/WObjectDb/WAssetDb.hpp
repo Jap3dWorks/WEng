@@ -1,0 +1,249 @@
+#pragma once
+
+#include "WCore/WCore.hpp"
+#include "WCore/IdPool.hpp"
+#include "WCore/WId.hpp"
+#include "WCore/TPathTree.hpp"
+#include "WString/WString.hpp"
+#include "WObjectDb/WObjectDb.hpp"
+#include "WObjects/WAsset.hpp"
+#include "WAssets/Level.hpp"
+
+#include <concepts>
+#include <limits>
+#include <unordered_map>
+#include <format>
+
+class WAsset;
+
+/**
+ * @brief Facade class for a WObjectDb specialized in the asset management.
+ * Core functionalities are derived to WObjectDb.
+ */
+class WOBJECTS_API WAssetDb {
+    
+public:
+
+using WAssetDbType = WObjectDb<WAsset, wcr::wid::WAssetId>;
+
+    constexpr WAssetDb() noexcept = default;
+    ~WAssetDb() = default;
+    WAssetDb(WAssetDb const & other) = default;
+    WAssetDb(WAssetDb && other) = default;
+    WAssetDb & operator=(WAssetDb const & other) = default;
+    WAssetDb & operator=(WAssetDb && other) = default;
+
+    template<std::derived_from<WAsset> T, CCallable<void, T&> TFn>
+    void ForEach(TFn && in_fn) const {
+        object_manager_.ForEach<T>(
+            std::forward<TFn>(in_fn)
+            );
+    }
+
+    template<std::derived_from<WAsset> T>
+    wcr::wid::WAssetId Create(std::string_view in_fullname) {
+        wcr::wid::WAssetId id = GetIdPool(T::StaticClass()).Generate();
+
+        wclass_track_.RegAsset(id, T::StaticClass());
+
+        object_manager_.CreateAt<T>(id);
+        
+        object_manager_.Get<T>(id).Set_asset_id(id);
+        object_manager_.Get<T>(id).Set_name(in_fullname);
+
+        InsertPath(in_fullname, id);
+
+        return id;
+    }
+
+    template<std::derived_from<WAsset> T>
+    wcr::wid::WAssetId CreateFrom(std::string_view in_fullname, T const & other) {
+        wcr::wid::WAssetId asset_id = Create<T>(in_fullname);
+
+        T & ptr = Get<T>(asset_id);
+
+        ptr = other;
+        ptr.Set_asset_id(asset_id);
+        ptr.Set_name(in_fullname);
+
+        return asset_id;
+    }
+
+    template<std::derived_from<WAsset> T>
+    wcr::wid::WAssetId CreateFrom(std::string_view in_fullname, T && other) {
+        wcr::wid::WAssetId asset_id = Create<T>(in_fullname);
+
+        T & ptr = Get<T>(asset_id);
+
+        ptr = std::move(other);
+        ptr.Set_asset_id(asset_id);
+        ptr.Set_name(in_fullname);
+
+        return asset_id;
+    }
+
+    /**
+     * Exact T class.
+     */
+    template<std::derived_from<WAsset> T>
+    T & Get(wcr::wid::WAssetId const & in_id) const {
+        return object_manager_.Get<T>(in_id);
+    }
+
+    WAsset * Get(wcr::wid::WTypeAssetIndexId in_id) const {
+
+        wcr::wid::WAssetTypeId atype;
+        wcr::wid::WAssetId assetid;
+        wcr::wid::WSubIdxId indx;
+        in_id.ExtractWIds(atype, assetid, indx);
+
+        WClass const * wclass = wclass_track_.GetWClass(atype);
+
+        return object_manager_.Get(wclass, assetid);
+    }
+
+    WAsset * Get(wcr::wid::WAssetId in_id) const {
+        wcr::wid::WAssetTypeId atype = wclass_track_.GetAssetTypeId(in_id);
+        WClass const * aclass = wclass_track_.GetWClass(atype);
+
+        return object_manager_.Get(aclass, in_id);
+    }
+
+    template<std::derived_from<WAsset> T>
+    T * Get(std::string_view asset_name) const {
+
+        WAsset * result = Get(asset_name);
+        
+        if (!result) return nullptr;
+
+        assert(result->Class()->IsEqual(T::StaticClass()));
+
+        return static_cast<T*> (result);
+    }
+
+    WAsset * Get(std::string_view asset_path) const;
+
+    wcr::wid::WAssetId GetId(std::string_view asset_path) const;
+    
+    bool ExistsAsset(std::string_view asset_path) const;
+
+    /**
+     * Returns a valid package and asset name for the input directory.
+     * Avoid collission names.
+     */
+    template<std::derived_from<WAsset> T>
+    std::array<std::string, 2> GenValidAssetName(
+        std::string_view directory,
+        std::string_view package,
+        std::string_view asset_name
+        ) {
+
+        assert(directory.starts_with("/Content/"));
+
+        std::uint32_t counter=0;
+        std::string new_package;
+
+        if (package.empty()) {
+            new_package = T::StaticClass()->Name();
+        }
+        else {
+            new_package = package;
+        }
+
+        if (asset_name.empty())
+            asset_name = package;
+
+        std::string candidate = wstr::AssetPath(directory, new_package, asset_name);
+
+        while(GetId(candidate).IsValid()) {
+            new_package =
+                std::format("{}{:02d}", T::StaticClass()->Name(), counter++);
+
+            candidate = wstr::AssetPath(directory, new_package, asset_name);
+        }
+
+        return {new_package, std::string{asset_name}};
+    }
+
+private:
+
+    void InsertPath(std::string_view asset_path, wcr::wid::WAssetId in_id) {
+        auto split_path = wstr::SplitAssetPath(asset_path);
+
+        path_tree_.Insert(split_path, in_id);
+    }
+
+    wcr::IdPool<wcr::wid::WAssetId::IdType> & GetIdPool(WClass const * in_class) {
+        if (was::Level::StaticClass()->IsEqual(in_class)) {
+            return id_level_pool_;
+        }
+        else {
+            return id_pool_;
+        }
+    }
+
+    WAssetDbType object_manager_{};
+    
+    wcr::IdPool<wcr::wid::WAssetId::IdType> id_level_pool_{
+        {
+            {
+                .first=1,
+                .last = wcr::wid::WEntityComponentId_Meta::BitMaskV<wcr::wid::WAssetId>
+            }
+        }
+    };
+
+    wcr::IdPool<wcr::wid::WAssetId::IdType> id_pool_{
+        {
+            {
+                .first=wcr::wid::WEntityComponentId_Meta::BitMaskV<wcr::wid::WAssetId> + 1,
+                .last=std::numeric_limits<wcr::wid::WAssetId::IdType>::max()
+            }
+        }
+    };
+
+    struct {
+        wcr::wid::WAssetTypeId::IdType id_counter{0};
+
+        std::vector<WClass const *> class_list{};
+        std::unordered_map<WClass const *,std::uint32_t> wclass_id{};
+        std::unordered_map<wcr::wid::WAssetId, wcr::wid::WAssetTypeId::IdType> asset_typeid{};
+
+        bool Contains(WClass const * in_class) const {
+            return wclass_id.contains(in_class);
+        }
+
+        void RegAsset(wcr::wid::WAssetId assetid, WClass const * in_class) {
+            if (!wclass_id.contains(in_class)) {
+                class_list.push_back(in_class);
+                wclass_id[in_class] = id_counter;
+                
+                id_counter++;
+            }
+
+            asset_typeid[assetid] = wclass_id[in_class];
+            
+        }
+
+        wcr::wid::WAssetTypeId GetTypeId(WClass const * in_class) const {
+            return wclass_id.at(in_class);
+        }
+
+        WClass const * GetWClass(wcr::wid::WAssetTypeId in_id) const {
+            return class_list[in_id.GetId()];
+        }
+
+        wcr::wid::WAssetTypeId GetAssetTypeId(wcr::wid::WAssetId in_id) const {
+
+#ifndef NDEBUG
+            auto idtype = asset_typeid.at(in_id);
+#endif
+            
+            return asset_typeid.at(in_id);
+        }
+
+    } wclass_track_{};
+
+    wcr::TPathTree<wcr::wid::WAssetId> path_tree_{};
+
+};

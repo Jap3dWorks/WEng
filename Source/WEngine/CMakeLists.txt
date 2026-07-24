@@ -33,7 +33,7 @@ target_link_libraries(
         WWindow
     PRIVATE
         WCore
-        WEngineObjects
+        WObjects
         WImporter
         WRender
         WEngineInterfaces

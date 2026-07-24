@@ -1,4 +1,4 @@
-// [[file:../WEngineInterfaces.org::LinkDef][LinkDef]]
+// [[file:../WObjects.org::LinkDef][LinkDef]]
 #pragma once
 
 #if defined(_WIN32)

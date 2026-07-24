@@ -1,0 +1,2 @@
+#include "WObjects/WComponent.hpp"
+

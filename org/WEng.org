@@ -18,26 +18,26 @@ Modules should be linkable between them and dinamically linkable with the core a
 
 Rectangle WEngine
 Rectangle WEngineInterfaces
-Rectangle WEngineObjects
+Rectangle WObjects
 Rectangle WCore
 Rectangle WLevel
 Rectangle WRender
 
-WEngineInterfaces -[dashed]-> WEngineObjects
+WEngineInterfaces -[dashed]-> WObjects
 WEngineInterfaces -[dashed]-> WCore
 
-WEngineObjects -[dashed]-> WCore
+WObjects -[dashed]-> WCore
 
-WEngine -[dashed]-> WEngineObjects
+WEngine -[dashed]-> WObjects
 WEngine -[dashed]-> WEngineInterfaces
 WEngine -[dashed]-> WCore
 
 WLevel -[dashed]-> WEngineInterfaces
-WLevel -[dashed]-> WEngineObjects
+WLevel -[dashed]-> WObjects
 WLevel -[dashed]-> WCore
 
 WRender -[dashed]-> WEngineInterfaces
-WRender -[dashed]-> WEngineObjects
+WRender -[dashed]-> WObjects
 WRender -[dashed]-> WCore
 
 @enduml
@@ -171,14 +171,14 @@ The engine class will reference to other modules in the aplication.
 **** Namespaces
 - wng::render
 
-** WEngineObjects
+** WObjects
 Rename to WEngObjects
 
 *** Objective
 
 Módulo que contiene los objetos que forman la estructura de datos del engine.
 
-*** WEngineObjects
+*** WObjects
 **** Objective
 
 This module contains all WObject base classes.

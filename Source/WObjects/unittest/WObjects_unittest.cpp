@@ -1,0 +1,217 @@
+#include "WAssets/Texture.hpp"
+#include "WCore/TObjectDataBase.hpp"
+#include "WCore/WCore.hpp"
+
+#define CATCH_CONFIG_MAIN
+
+#include <catch2/catch.hpp>
+
+#include "WCore/TRef.hpp"
+// #include "WCore/TFunction.hpp"
+#include "WCore/TWAllocator.hpp"
+#include "WObjectDb/WObjectDb.hpp"
+#include "WObjects/WAsset.hpp"
+#include "WAssets/StaticMesh.hpp"
+#include "WObjects/WEntity.hpp"
+#include "WObjectDb/WEntityComponentDb.hpp"
+#include "WComponents/StaticMesh.hpp"
+#include "WComponents/Transform.hpp"
+#include "WComponents/Camera.hpp"
+
+#include "WLog.hpp"
+
+#include <vector>
+#include <cstdio>
+
+bool TWAllocator_in_vector() {
+    WFLOG("START")
+
+    auto allocfn = [](size_t* prev, size_t pn, size_t * ptr, size_t n) -> void {
+        WLOG("Allocating {} size from {} to {}!\n", n, (size_t)prev, (size_t)ptr);
+        prev = ptr;
+    };
+
+    auto deallocfn = [](size_t * ptr, size_t n){
+        for(size_t i=0; i<n; i++) {
+            WLOG("{:d}", (size_t)ptr[i]);
+        }
+    };
+
+    TWAllocator<size_t, decltype(allocfn), decltype(deallocfn)> a;
+
+    a.SetAllocateFn(allocfn);
+
+    a.SetDeallocateFn(deallocfn);
+
+    std::vector<size_t, TWAllocator<size_t, decltype(allocfn), decltype(deallocfn)>> v{a};
+
+    for (size_t i=0; i<10; i++) {
+        v.push_back(i);
+    }
+
+    WFLOG("");
+
+    for (auto& n : v) {
+        WFLOG("{:d}", n);
+    }
+    
+    WFLOG("END");
+
+    return true;
+}
+
+bool WClass_Derived_Test() {
+    WFLOG("START")
+        
+    const WClass * cls1 = WObject::StaticClass();
+    const WClass * cls2 = WObject::StaticClass();
+
+    const WClass * cls3 = WEntity::StaticClass();
+
+    WFLOG("WObject is base of WObject: {}", cls1->IsBaseOf(cls2));
+
+    WFLOG("END")
+
+    return cls1 == cls2 && cls1->IsBaseOf(cls3);
+}
+
+bool WObjectDb_TWRef_Test() {
+    WFLOG("START");
+    WObjectDb<WAsset, wcr::wid::WAssetId> man;
+
+    man.InitialMemorySize(1);
+
+    man.CreateAt<was::StaticMesh>(1);
+    TWRef<was::StaticMesh> a =
+        man.Get<was::StaticMesh>(1);
+
+    man.CreateAt<was::Texture>(2);
+    TWRef<was::Texture> t =
+        man.Get<was::Texture>(2);
+
+    a->Set_name("a");
+    t->Set_name("t");
+
+    WFLOG("Initial \"a\" ptr to: {:d}" , (size_t)a.BPtr());
+    WFLOG("Name: {}", a->Get_name().View());
+
+    void* ptr = a.BPtr();
+
+    for (size_t i=0; i<10; i++) {
+        man.CreateAt<was::StaticMesh>(i+3);
+    }
+
+    WFLOG("Final \"a\" ptr to: {:d}", (size_t)a.BPtr());
+    WFLOG("Name: {}", a->Get_name().View());
+
+    WFLOG("END")
+
+    return ptr != a.BPtr();
+}
+
+bool WObjectDb_WClass_Test() {
+    WFLOG("Start");
+    
+    WObjectDb<WEntity, wcr::wid::WEntityId> man;
+
+    WFLOG("Create a1");
+    man.CreateAt<WEntity>(1);
+    TWRef<WEntity> a1 = man.Get<WEntity>(1);
+    
+    WFLOG("Create a2");
+    man.CreateAt<WEntity>(2);
+    
+    TWRef<WObject> a2 = man.Get(WEntity::StaticClass(),
+                                2);
+
+    return a2->Class()->Name() == "WEntity";
+}
+
+bool WEntityComponentDb_Test() {
+
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> smdb =
+        wcm::StaticMesh::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
+
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> tdb =
+        wcm::Transform::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
+
+    std::unique_ptr<IObjectDataBase<WComponent, wcr::wid::WEntityId::IdType>> cdb =
+        wcm::Camera::StaticClass()
+        ->DbBuilder()
+        .Create<WComponent, wcr::wid::WEntityId::IdType>();
+
+    smdb->Create();
+    smdb->Create();
+    smdb->Create();
+
+    tdb->Create();
+    tdb->Create();
+    tdb->Create();
+
+    cdb->Create();
+    cdb->Create();
+    cdb->Create();
+
+    auto cp = smdb->Clone();
+    smdb->BForEach([](WComponent * _cmp) {
+        WFLOG("PRINT Orig MStaticMeshComponent.");
+    });
+    cp->BForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned MStaticMeshComponent.");
+    });
+
+    if (smdb->Count() != cp->Count()) return false;
+
+    tdb->BForEach([](WComponent * _cmp) {
+        WFLOG("Print Orig MTansformsComponent.");
+    });
+    auto cp2 = tdb->Clone();
+    cp2->BForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned MTransformComponent.");
+    });
+    
+    if (tdb->Count() != cp2->Count()) return false;
+
+    auto cp3 = cdb->Clone();
+    cdb->BForEach([](WComponent * _cmp) {
+        WFLOG("Print Orig wcm::Camera");
+    });
+    cp3->BForEach([](WComponent * _cmp) {
+        WFLOG("Print Cloned wcm::Camera");
+    });
+
+    if (cdb->Count() != cp3->Count()) return false;
+
+    WEntityComponentDb db;
+
+    wcr::wid::WEntityId eid = db.CreateEntity<WEntity>("E1");
+
+    db.CreateComponent<wcm::Transform>(eid);
+    db.CreateComponent<wcm::Camera>(eid);
+    db.CreateComponent<wcm::StaticMesh>(eid);
+
+    WEntityComponentDb other = db;
+    
+    return true;
+}
+
+TEST_CASE("WObjects") {
+    SECTION("TWAllocator") {
+        CHECK(TWAllocator_in_vector());
+    }
+    SECTION("WClass") {
+        CHECK(WClass_Derived_Test());
+    }
+    SECTION("WObjectDb") {
+        CHECK(WObjectDb_TWRef_Test());
+        CHECK(WObjectDb_WClass_Test());
+    }
+    SECTION("WEntityComponentDb") {
+        CHECK(WEntityComponentDb_Test());
+    }
+}
+

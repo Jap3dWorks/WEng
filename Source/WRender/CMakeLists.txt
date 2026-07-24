@@ -43,7 +43,7 @@ target_include_directories(
 target_link_libraries(
     WRender
     PRIVATE
-        WEngineObjects
+        WObjects
         WCore
         WEngineInterfaces
         glm::glm

@@ -18,7 +18,7 @@ Template to create a new WObject class.
    (format "#pragma once
 
 #include \"WCore/WCore.hpp\"
-#include \"WEngineObjects/WObjectMacros.hpp\"
+#include \"WObjects/WObjectMacros.hpp\"
 #include \"%3$s/%4$s.hpp\"
 
 #include \"%2$s.WEngine.hpp\"

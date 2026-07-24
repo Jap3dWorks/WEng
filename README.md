@@ -65,8 +65,8 @@ An important aspect of the project is the use of **Emacs Org Mode** as part of t
 Source/
 ├── WCore
 ├── WEngine
-├── WEngineInterfaces
-├── WEngineObjects
+├── WEngineInterfaces -> WInterfaces
+├── WEngineObjects    -> WObjects
 ├── WImporter
 ├── WRender
 ├── WSandBox

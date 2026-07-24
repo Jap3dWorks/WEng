@@ -68,7 +68,7 @@ target_link_libraries(
     WImporter 
     PRIVATE
         WCore
-        WEngineObjects
+        WObjects
         WEngineInterfaces
         fastgltf
         ktx

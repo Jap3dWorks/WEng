@@ -53,6 +53,23 @@
 
 
 #if defined(_WIN32)
+    #ifdef WOBJECTS_EXPORTS
+        #define WOBJECTS_API __declspec(dllexport)
+    #else
+        #define WOBJECTS_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WOBJECTS_EXPORTS
+        #define WOBJECTS_API __attribute__((visibility("default")))
+    #else
+        #define WOBJECTS_API
+    #endif
+#else
+    #define WOBJECTS_API
+#endif
+
+
+#if defined(_WIN32)
     #ifdef WIMPORTER_EXPORTS
         #define WIMPORTER_API __declspec(dllexport)
     #else
@@ -66,23 +83,6 @@
     #endif
 #else
     #define WIMPORTER_API
-#endif
-
-
-#if defined(_WIN32)
-    #ifdef WENGINEOBJECTS_EXPORTS
-        #define WENGINEOBJECTS_API __declspec(dllexport)
-    #else
-        #define WENGINEOBJECTS_API __declspec(dllimport)
-    #endif
-#elif defined(__GNUC__) || defined(__clang__)
-    #ifdef WENGINEOBJECTS_EXPORTS
-        #define WENGINEOBJECTS_API __attribute__((visibility("default")))
-    #else
-        #define WENGINEOBJECTS_API
-    #endif
-#else
-    #define WENGINEOBJECTS_API
 #endif
 
 

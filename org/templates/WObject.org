@@ -57,7 +57,7 @@ The following babel source block checks if a WObject file exists.
 If not exists creates it with a default template.
 
 #+NAME: wbject-create-if-not-exists-hpp
-#+HEADER: :var module="WEngineObjects" :var name="WObject" :var parent-module=""
+#+HEADER: :var module="WObjects" :var name="WObject" :var parent-module=""
 #+HEADER: :var parent="WObject" :var namespace="weo" :var API="WENGINEOBJECTS"
 #+begin_src elisp
 (let ((file-path (format "Include/%s/%s.hpp" module name)))
