@@ -6,31 +6,31 @@
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 // #include "WCoreTypes/WTexture.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsLightingRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsPostprocessRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsTonemappingRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSwapchainRAII.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
+#include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
+#include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
+#include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
+#include "WVulkan/RAII/WVkSwapchainRAII.hpp"
+#include "WVulkan/WVkConfig.hpp"
 // #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRAII/WVkRenderPlaneRAII.hpp"
-#include "WVulkan/WVkRAII/WVkGlobalDescriptorsRAII.hpp"
-#include "WVulkan/WVkRAII/WVkPostprocessGlobalDescriptorRAII.hpp"
-#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkLightingPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkTonemappingPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkCommandPoolRAII.hpp"
+#include "WVulkan/RAII/WVkRenderPlaneRAII.hpp"
+#include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
+#include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
+#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
+#include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
+#include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 #include "WInterfaces/IRender.hpp"
-#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSwapchainPipelineRAII.hpp"
-#include "WVulkan/WVkRAII/WVkAttachmentsGBuffersRAII.hpp"
-#include "WVulkan/WVkRAII/WVkRenderSyncRAII.hpp"
+#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/RAII/WVkRenderSyncRAII.hpp"
 
 #include "WRender/WDenseLightingUBO.hpp"
 
-#include "WVulkan/WVkRAII/WVkDeviceRAII.hpp"
-#include "WVulkan/WVkRAII/WVkInstanceRAII.hpp"
-#include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
+#include "WVulkan/RAII/WVkDeviceRAII.hpp"
+#include "WVulkan/RAII/WVkInstanceRAII.hpp"
+#include "WVulkan/RAII/WVkSurfaceRAII.hpp"
 
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
@@ -46,7 +46,7 @@ class WRENDER_API WVkRender : public IRender
 public:
 
     WNODISCARD static inline constexpr size_t FramesInFlight() noexcept
-    { return WENG_MAX_FRAMES_IN_FLIGHT; }
+    { return WVK_MAX_FRAMES_IN_FLIGHT; }
 
     WVkRender() noexcept=default;
 
@@ -213,26 +213,26 @@ private:
     WVkAssetRenderDataRAII asset_render_data_{};
     WVkRenderPlaneRAII render_plane_{};
 
-    WVkAttachmentsGBuffersRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
-    WVkAttachmentsLightingRAII<WENG_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
-    WVkAttachmentsPostprocessRAII<WENG_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
-    WVkAttachmentsTonemappingRAII<WENG_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
+    WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
+    WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
+    WVkAttachmentsPostprocessRAII<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
+    WVkAttachmentsTonemappingRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
     WVkSwapchainPipelineRAII<> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
 
     WVkCommandPoolRAII command_pool_{};
-    WVkCommandPoolRAII::CommandBuffers<WENG_MAX_FRAMES_IN_FLIGHT> render_command_buffers_{};
+    WVkCommandPoolRAII::CommandBuffers<WVK_MAX_FRAMES_IN_FLIGHT> render_command_buffers_{};
 
-    WVkGlobalDescriptorsRAII<WENG_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
-    WVkPostprocessGlobalDescriptorRAII<WENG_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
+    WVkGlobalDescriptorsRAII<WVK_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
+    WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
-    WVkGBufferPipelinesRAII<WENG_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    WVkGBufferPipelinesRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
     WVkLightingPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
-    WVkRenderSyncRAII<WENG_MAX_FRAMES_IN_FLIGHT> render_sync_{};
+    WVkRenderSyncRAII<WVK_MAX_FRAMES_IN_FLIGHT> render_sync_{};
     std::size_t semaphore_index_{0};
 
     struct PipelinesTrack {

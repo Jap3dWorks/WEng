@@ -1,4 +1,4 @@
-#include "WVulkan/WVk/WVkSwapChain.hpp"
+#include "WVulkan/Vk/WVkSwapChain.hpp"
 
 #include <algorithm>
 

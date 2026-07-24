@@ -8,11 +8,11 @@
 #include <GLFW/glfw3.h>
 
 #include "WAssets/RenderPipeline.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
+#include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/WVk/WVkRender.hpp"
+#include "WVulkan/Vk/WVkRender.hpp"
 #include "WWindow/WWindow.hpp"
 #include "WCore/TVisitor.hpp"
 #include "PipelineBindings.hpp"
@@ -96,12 +96,12 @@ void WVkRender::Initialize()
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
-        WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
-        WENG_VK_GBUFFER_RENDER_ORM_FORMAT,
-        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT,
+        WVK_GBUFFER_RENDER_COLOR_FORMAT,
+        WVK_GBUFFER_RENDER_EMISSION_FORMAT,
+        WVK_GBUFFER_RENDER_NORMAL_FORMAT,
+        WVK_GBUFFER_RENDER_ORM_FORMAT,
+        WVK_GBUFFER_RENDER_DEPTH_FORMAT,
+        WVK_GBUFFER_RENDER_EXTRA01_FORMAT,
     };
 
     // Lighting Attachments
@@ -110,7 +110,7 @@ void WVkRender::Initialize()
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_LIGHTING_RENDER_COLOR_FORMAT        
+        WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     // Postprocess Attachments
@@ -119,7 +119,7 @@ void WVkRender::Initialize()
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT        
+        WVK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
 
     // tonemapping Attachments
@@ -336,7 +336,7 @@ void WVkRender::Draw()
     }
 
     semaphore_index_ = (semaphore_index_ + 1) % swapchain_.Images().size();
-    frame_index_ = (frame_index_ + 1) % WENG_MAX_FRAMES_IN_FLIGHT;
+    frame_index_ = (frame_index_ + 1) % WVK_MAX_FRAMES_IN_FLIGHT;
 }
 
 // Pipelines
@@ -589,26 +589,26 @@ void WVkRender::RecreateSwapChain() {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_GBUFFER_RENDER_COLOR_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EMISSION_FORMAT,
-        WENG_VK_GBUFFER_RENDER_NORMAL_FORMAT,
-        WENG_VK_GBUFFER_RENDER_ORM_FORMAT,
-        WENG_VK_GBUFFER_RENDER_DEPTH_FORMAT,
-        WENG_VK_GBUFFER_RENDER_EXTRA01_FORMAT
+        WVK_GBUFFER_RENDER_COLOR_FORMAT,
+        WVK_GBUFFER_RENDER_EMISSION_FORMAT,
+        WVK_GBUFFER_RENDER_NORMAL_FORMAT,
+        WVK_GBUFFER_RENDER_ORM_FORMAT,
+        WVK_GBUFFER_RENDER_DEPTH_FORMAT,
+        WVK_GBUFFER_RENDER_EXTRA01_FORMAT
     };
 
     offscreen_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_LIGHTING_RENDER_COLOR_FORMAT        
+        WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     postprocess_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT        
+        WVK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
 
     tonemapping_attachments_ = {

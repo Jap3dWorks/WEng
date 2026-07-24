@@ -143,6 +143,8 @@ General Rendering related code.
 **** Namespaces
 
 - wvk::<label>
+- wvk::raii
+      - directory : WVulkan/WVkRAII
 
 **** WVkRender
 ***** Objective

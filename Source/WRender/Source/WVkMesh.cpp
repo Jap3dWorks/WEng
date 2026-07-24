@@ -1,5 +1,5 @@
-#include "WVulkan/WVk/WVkMesh.hpp"
-#include "WVulkan/WVk/WVkBuffer.hpp"
+#include "WVulkan/Vk/WVkMesh.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
 
 void wvk::mesh::CreateMeshBuffers(
     WVkMesh & out_mesh_info,

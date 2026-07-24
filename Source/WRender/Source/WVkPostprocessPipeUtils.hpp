@@ -2,10 +2,10 @@
 
 #include "WCore/WCore.hpp"
 #include "WLog.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
+#include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVk/WVkShader.hpp"
-#include "WVulkan/WVk/WVkTypes.hpp"
+#include "WVulkan/Vk/WVkShader.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
 #include "WRender/WShader.hpp"
 
 #include <cstddef>
@@ -166,7 +166,7 @@ namespace WVkPostprocessPipeUtils {
         pipeline_create_info.subpass = 0;
         pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 
-        VkFormat color_format = WENG_VK_POSTPROCESS_RENDER_COLOR_FORMAT;
+        VkFormat color_format = WVK_POSTPROCESS_RENDER_COLOR_FORMAT;
 
         VkPipelineRenderingCreateInfo rendering_info{};
         rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

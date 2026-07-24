@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/WVkRenderConfig.hpp"
+#include "WVulkan/WVkConfig.hpp"
 
 #include <cstdint>
 #include <vulkan/vulkan.h>
@@ -156,7 +156,7 @@ struct WVkDescUBOInfo {
     VkDescriptorBufferInfo desc_buffer; // <- avoid search buffer during rendering
 };
 
-template<std::uint8_t FramesInFlight=WENG_MAX_FRAMES_IN_FLIGHT>
+template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
 struct WVkDescSetUBOBinding {
     std::uint8_t binding{0};
 
@@ -179,7 +179,7 @@ struct [[deprecated]] DELETE_WVkPipelineBindingInfo
     wcr::wid::WAssetId pipeline_id{0};
     wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
 
-    std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<WENG_MAX_FRAMES_IN_FLIGHT>> ubos{};
+    std::vector<DELETE_TVkDescriptorSetUBOBindingFrames<WVK_MAX_FRAMES_IN_FLIGHT>> ubos{};
     std::vector<WVkDescSetTextureBinding> textures{};
 };
 

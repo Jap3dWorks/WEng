@@ -1,7 +1,7 @@
-#include "WVulkan/WVkRAII/WVkCommandPoolRAII.hpp"
+#include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 // #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVk/WVkTypes.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
 #include <vulkan/vulkan_core.h>
 
 

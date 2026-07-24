@@ -1,5 +1,5 @@
-#include "WVulkan/WVk/WVkBuffer.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
 #include <stdexcept>
 
 void wvk::buffer::CreateVkBuffer(

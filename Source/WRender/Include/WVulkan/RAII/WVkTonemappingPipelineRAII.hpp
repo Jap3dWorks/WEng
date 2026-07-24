@@ -1,0 +1,305 @@
+#pragma once
+
+#include "WVulkan/WVkConfig.hpp"
+#include "WVulkan/WVulkanStructs.hpp"
+#include "WRender/WShader.hpp"
+#include "WVulkan/Vk/WVkDescriptor.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkShader.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
+#include "WVulkan/Vk/WVkRenderPlane.hpp"
+
+#include <cstdint>
+#include <stdexcept>
+#include <vulkan/vulkan_core.h>
+
+template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
+class WVkTonemappingPipelineRAII {
+
+public:
+
+    WVkTonemappingPipelineRAII() = default;
+
+    WVkTonemappingPipelineRAII(
+        const VkDevice & in_device,
+        const VkFormat & in_color_format) :
+        device_(in_device)
+        {
+            InitializeDescSetLayout();
+            InitializeDescriptorPool();
+            InitializePipeline(in_color_format);
+        }
+
+    virtual ~WVkTonemappingPipelineRAII() {
+        Destroy();
+    }
+
+    WVkTonemappingPipelineRAII(const WVkTonemappingPipelineRAII &) = delete;
+
+    WVkTonemappingPipelineRAII(WVkTonemappingPipelineRAII && other) noexcept :
+        device_(std::move(other.device_)),
+        pipeline_layout_(std::move(other.pipeline_layout_)),
+        pipeline_(std::move(other.pipeline_)),
+        descset_layout_(std::move(other.descset_layout_)),
+        descriptor_pool_(std::move(other.descriptor_pool_))
+        {
+            other.device_ = VK_NULL_HANDLE;
+
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
+            other.pipeline_ = VK_NULL_HANDLE;
+
+            for(std::uint32_t i=0; i<FramesInFlight; i++) {
+                other.descriptor_pool_[i] = VK_NULL_HANDLE;
+            }
+        }
+
+    WVkTonemappingPipelineRAII & operator=(const WVkTonemappingPipelineRAII & other) = delete;
+
+    WVkTonemappingPipelineRAII & operator=(WVkTonemappingPipelineRAII && other) noexcept {
+        if (this != &other) {
+            Destroy();
+            
+            pipeline_ = std::move(other.pipeline_);
+            pipeline_layout_ = std::move(other.pipeline_layout_);
+            descset_layout_ = std::move(other.descset_layout_);
+            descriptor_pool_ = std::move(other.descriptor_pool_);
+            device_ = std::move(other.device_);
+
+            other.pipeline_ = VK_NULL_HANDLE;
+            other.pipeline_layout_ = VK_NULL_HANDLE;
+            other.descset_layout_ = VK_NULL_HANDLE;
+            other.device_ = VK_NULL_HANDLE;
+        }
+
+        return *this;
+    }
+
+    // void Initialize(const VkDevice & in_device,
+    //                 const VkFormat & in_color_format) {
+    //     // TODO constructor
+    //     assert(device_ == VK_NULL_HANDLE);
+
+    //     device_ = in_device;
+
+    //     InitializeDescSetLayout();
+
+    //     InitializeDescriptorPool();
+
+    //     InitializePipeline(in_color_format);
+
+    // }
+
+    const VkPipeline & Pipeline() const noexcept { return pipeline_; }
+
+    const VkPipelineLayout & PipelineLayout() const noexcept {
+        return pipeline_layout_;
+    }
+
+    const VkDescriptorPool & DescriptorPool(const std::uint32_t & in_frame_index) const noexcept {
+        return descriptor_pool_[in_frame_index];
+    }
+
+    const VkDescriptorSetLayout & DescriptorSetLayout() const noexcept {
+        return descset_layout_;
+    }
+
+    void ResetDescriptorPool(const std::uint32_t & in_frame_index) {
+        vkResetDescriptorPool(device_,
+                              descriptor_pool_[in_frame_index],
+                              0);
+    }
+
+private:
+
+    void Destroy() {
+        // TODO private and use destructor
+        if (device_ != VK_NULL_HANDLE) {
+
+            wvk::descriptor::DestroyDescPools(descriptor_pool_, device_);
+
+            if (pipeline_) {
+                vkDestroyPipeline(device_,
+                                  pipeline_,
+                                  nullptr);
+
+                pipeline_=VK_NULL_HANDLE;
+            }
+
+
+            if (pipeline_layout_) {
+                vkDestroyPipelineLayout(device_,
+                                        pipeline_layout_,
+                                        nullptr);
+            
+                pipeline_layout_ = VK_NULL_HANDLE;
+            }
+
+            if (descset_layout_) {
+                vkDestroyDescriptorSetLayout(device_,
+                                             descset_layout_,
+                                             nullptr);
+
+                descset_layout_ = VK_NULL_HANDLE;
+            }
+
+            device_ = VK_NULL_HANDLE;
+        }
+    }
+
+    void InitializeDescSetLayout() {
+
+        // input render image descriptor
+        VkDescriptorSetLayoutBinding sampler_binding{};
+        sampler_binding.binding = 0;
+        sampler_binding.descriptorCount = 1;
+        sampler_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        sampler_binding.pImmutableSamplers = nullptr;
+        sampler_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        VkDescriptorSetLayoutCreateInfo layout_info{};
+        layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layout_info.bindingCount = 1;
+        layout_info.pBindings=&sampler_binding;
+
+        if (vkCreateDescriptorSetLayout(device_,
+                                        &layout_info,
+                                        nullptr,
+                                        &descset_layout_) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create Descriptor Set Layout!");
+        }
+    }
+
+    void InitializeDescriptorPool() {
+        std::array<VkDescriptorPoolSize, 1> pool_sizes;
+        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[0].descriptorCount = 1;
+
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.poolSizeCount = static_cast<std::uint32_t>(
+            pool_sizes.size()
+            );
+        pool_info.pPoolSizes = pool_sizes.data();
+        pool_info.maxSets = 1;
+
+        for (std::uint32_t i=0; i<FramesInFlight; i++) {
+            if (vkCreateDescriptorPool(
+                    device_,
+                    &pool_info,
+                    nullptr,
+                    &descriptor_pool_[i]
+                    )) {
+                throw std::runtime_error("Failed to create descriptor pool!");
+            }
+        }
+    }
+
+    void InitializePipeline(VkFormat color_format) {
+
+        std::vector<char> shadercode = wrd::shader::ReadShader(
+            wstr::SystemPath(std::string(shader_path))
+            );
+
+        VkShaderModule shader_module = wvk::shader::CreateShaderModule(
+            device_,
+            shadercode.data(),
+            shadercode.size()
+            );
+
+        std::array<VkPipelineShaderStageCreateInfo,2> shader_stages;
+        wvk::render_plane::UpdateVkPipelineShaderStageCreateInfo(
+            shader_stages.data(),
+            shader_module
+            );
+
+        std::array<VkVertexInputAttributeDescription,2> attr_desc;
+        wvk::render_plane::UpdateVertexInputAttributeDescriptor(attr_desc.data());
+
+        VkVertexInputBindingDescription binding_desc =
+            wvk::render_plane::VertBindingDescrpt();
+
+        VkPipelineVertexInputStateCreateInfo vertex_input_info =
+            wvk::render_plane::VkPipelineVertexInputStateCreateInfo(
+                binding_desc,
+                attr_desc.data(),
+                static_cast<std::uint32_t>(attr_desc.size())
+                );
+
+        VkPipelineInputAssemblyStateCreateInfo input_assembly =
+            wvk::render_plane::VkPipelineInputAssemblyStateCreateInfo();
+
+        VkPipelineViewportStateCreateInfo viewport_state =
+            wvk::render_plane::VkPipelineViewportStateCreateInfo();
+
+        VkPipelineRasterizationStateCreateInfo rasterizer =
+            wvk::render_plane::VkPipelineRasterizationStateCreateInfo();
+
+        VkPipelineMultisampleStateCreateInfo multisampling =
+            wvk::render_plane::VkPipelineMultisampleStateCreateInfo();
+
+        VkPipelineDepthStencilStateCreateInfo depth_stencil =
+            wvk::render_plane::VkPipelineDepthStencilStateCreateInfo();
+
+        VkPipelineColorBlendAttachmentState color_blend_attachment =
+            wvk::render_plane::VkPipelineColorBlendAttachmentState();
+
+        VkPipelineColorBlendStateCreateInfo color_blending =
+            wvk::render_plane::VkPipelineColorBlendStateCreateInfo(
+                color_blend_attachment
+                );
+
+        std::vector<VkDynamicState> dynamic_states;
+
+        VkPipelineDynamicStateCreateInfo dynamic_state =
+            wvk::render_plane::VkPipelineDynamicStateCreateInfo(
+                dynamic_states
+                );
+
+        pipeline_layout_ = wvk::render_plane::VkPipelineLayout(
+            device_,
+            descset_layout_
+            );
+
+        VkGraphicsPipelineCreateInfo graphics_pipeline_info =
+            wvk::render_plane::VkGraphicsPipelineCreateInfo(
+                static_cast<std::uint32_t>(shader_stages.size()),
+                shader_stages.data(),
+                &vertex_input_info,
+                &input_assembly,
+                &viewport_state,
+                &rasterizer,
+                &multisampling,
+                &depth_stencil,
+                &color_blending,
+                &dynamic_state,
+                pipeline_layout_
+                );
+
+        pipeline_ = wvk::render_plane::VkPipeline(
+            &color_format,
+            1,
+            graphics_pipeline_info,
+            device_
+            );
+
+        vkDestroyShaderModule(device_,
+                              shader_module,
+                              nullptr);
+    }
+
+private:
+
+    VkDevice device_{};
+
+    VkPipeline pipeline_{VK_NULL_HANDLE};
+    VkPipelineLayout pipeline_layout_{VK_NULL_HANDLE};
+    
+    VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
+
+    std::array<VkDescriptorPool, FramesInFlight> descriptor_pool_{};
+    
+    const std::string_view shader_path{WVK_TONEMAPPING_SHADER_PATH};
+
+
+};

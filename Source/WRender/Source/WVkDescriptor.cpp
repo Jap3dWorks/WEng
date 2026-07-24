@@ -1,4 +1,4 @@
-#include "WVulkan/WVk/WVkDescriptor.hpp"
+#include "WVulkan/Vk/WVkDescriptor.hpp"
 
 void wvk::descriptor::Create(
     WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
@@ -61,10 +61,10 @@ void wvk::descriptor::Create(
 
     pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount =
-        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
+        static_cast<uint32_t>(WVK_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
     pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[1].descriptorCount =
-        static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
+        static_cast<uint32_t>(WVK_MAX_FRAMES_IN_FLIGHT) * 20;  // 40 descriptors in this pool
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -72,7 +72,7 @@ void wvk::descriptor::Create(
         pool_sizes.size()
         );
     pool_info.pPoolSizes = pool_sizes.data();
-    pool_info.maxSets = static_cast<uint32_t>(WENG_MAX_FRAMES_IN_FLIGHT * 35); // max sets 70
+    pool_info.maxSets = static_cast<uint32_t>(WVK_MAX_FRAMES_IN_FLIGHT * 35); // max sets 70
 
     if (vkCreateDescriptorPool(
             in_device,

@@ -1,16 +1,16 @@
 #pragma once
 
 #include "WCore/WId.hpp"
-#include "WVulkan/WVkRAII/WVkGBufferPipelinesRAII.hpp"
-#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
 #include "WCore/TVisitor.hpp"
 
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/WVk/WVkBuffer.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
 
 #include <ranges>
 #include <iterator>

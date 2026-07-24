@@ -1,5 +1,5 @@
-#include "WVulkan/WVk/WVkImage.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkImage.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
 
 #include <stdexcept>
 

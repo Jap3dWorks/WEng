@@ -1,7 +1,7 @@
-#include "WVulkan/WVk/WVkTexture.hpp"
+#include "WVulkan/Vk/WVkTexture.hpp"
 #include "WCoreTypes/WTexture.hpp"
-#include "WVulkan/WVk/WVkBuffer.hpp"
-#include "WVulkan/WVk/WVkImage.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
+#include "WVulkan/Vk/WVkImage.hpp"
 
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>

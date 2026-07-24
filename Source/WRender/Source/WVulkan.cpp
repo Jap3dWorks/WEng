@@ -1,10 +1,10 @@
-#include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVk/WVkSwapChain.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkSwapChain.hpp"
 // #include "WLog.hpp"
-// #include "WVulkan/WVk/WVkBuffer.hpp"
+// #include "WVulkan/Vk/WVkBuffer.hpp"
 // #include "WVulkan/WVulkanStructs.hpp"
 // #include "WCoreTypes/WTexture.hpp"
-// #include "WVulkan/WVkRenderConfig.hpp"
+// #include "WVulkan/WVkConfig.hpp"
 
 // #include <algorithm>
 #include <iostream>

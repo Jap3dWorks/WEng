@@ -1,4 +1,4 @@
-#include "WVulkan/WVkRAII/WVkSurfaceRAII.hpp"
+#include "WVulkan/RAII/WVkSurfaceRAII.hpp"
 
 #include "WWindow/WWindow.hpp"
 

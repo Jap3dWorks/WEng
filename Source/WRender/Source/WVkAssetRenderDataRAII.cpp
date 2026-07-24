@@ -1,9 +1,9 @@
-#include "WVulkan/WVkRAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
 #include "WCore/TVisitor.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVk/WVkBuffer.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
 
 #include <algorithm>
 

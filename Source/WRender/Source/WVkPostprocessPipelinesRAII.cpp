@@ -1,11 +1,11 @@
-#include "WVulkan/WVkRAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
-#include "WVulkan/WVk/WVkDescriptor.hpp"
-#include "WVulkan/WVk/WVulkan.hpp"
-#include "WVulkan/WVk/WVkDescriptor.hpp"
-// #include "WVulkan/WVk/WVkTypes.hpp"
-#include "WVulkan/WVk/WVkRenderPlane.hpp"
+#include "WVulkan/Vk/WVkDescriptor.hpp"
+#include "WVulkan/Vk/WVulkan.hpp"
+#include "WVulkan/Vk/WVkDescriptor.hpp"
+// #include "WVulkan/Vk/WVkTypes.hpp"
+#include "WVulkan/Vk/WVkRenderPlane.hpp"
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 

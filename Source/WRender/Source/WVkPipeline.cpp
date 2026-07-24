@@ -1,4 +1,4 @@
-#include "WVulkan/WVk/WVkPipeline.hpp"
+#include "WVulkan/Vk/WVkPipeline.hpp"
 
 void wvk::pipeline::Destroy(
     WVkRenderPipeline & pipeline_info,
