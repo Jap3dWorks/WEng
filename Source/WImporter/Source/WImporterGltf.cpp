@@ -2,7 +2,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WDebug.hpp"
 #include "WImporter/WImporterGltf.hpp"
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WAssets/Level.hpp"
 #include "WComponents/Light/Directional.hpp"
 #include "WComponents/Light/Point.hpp"
@@ -443,7 +443,7 @@ namespace {
         WAssetDb const & asset_db
         ) {
         for(auto & p : formats) {
-            auto & texture = asset_db.Get<WTextureAsset>(p.first);
+            auto & texture = asset_db.Get<was::Texture>(p.first);
             texture.Set_format(p.second);
         }
     }
@@ -636,11 +636,11 @@ namespace {
     }
 
     WNODISCARD inline
-    WTextureAsset CollectImage(
+    was::Texture CollectImage(
         fastgltf::Asset const & in_asset,
         fastgltf::Image const & in_image
         ) {
-        WTextureAsset result;
+        was::Texture result;
 
         std::visit(
             fastgltf::visitor {
@@ -745,7 +745,7 @@ namespace {
         std::vector<NullableIndex<>> text_assets_map{};
         text_assets_map.resize(in_asset.textures.size(), wcr::wid::null_id);
 
-        std::vector<WTextureAsset> text_assets{};
+        std::vector<was::Texture> text_assets{};
         text_assets.reserve(in_asset.textures.size());
 
         std::vector<std::string_view> text_names{};
@@ -1016,7 +1016,7 @@ namespace {
 
     WNODISCARD inline
     std::vector<wcr::wid::WAssetId> CreateTextures(
-        std::vector<WTextureAsset> & in_textures,
+        std::vector<was::Texture> & in_textures,
         std::vector<std::string_view> const & in_names,
         std::string_view assets_directory,
         WAssetDb & asset_db
@@ -1028,13 +1028,13 @@ namespace {
         for(std::size_t i=0; i<in_textures.size(); i++) {
 
             std::array<std::string, 2> name =
-                asset_db.GenValidAssetName<WTextureAsset>(
+                asset_db.GenValidAssetName<was::Texture>(
                     assets_directory,
                     in_names[i],
                     in_names[i]);
             
             result.push_back(
-                asset_db.CreateFrom<WTextureAsset>(
+                asset_db.CreateFrom<was::Texture>(
                     wstr::AssetPath(
                         assets_directory,
                         name[0],

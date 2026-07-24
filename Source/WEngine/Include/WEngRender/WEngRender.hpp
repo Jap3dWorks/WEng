@@ -15,7 +15,7 @@
 #include "WComponents/Light/Directional.hpp"
 #include "WComponents/Light/Ambient.hpp"
 #include "WAssets/StaticMesh.hpp"
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WAssets/Level.hpp"
 #include "WRender/WRender.hpp"
 #include "WRender/WLight.hpp"
@@ -222,7 +222,7 @@ namespace wng::render {
 
         // Load Textures
         for (const wcr::wid::WAssetId & id : texture_assets) {
-            auto & texture_asset = in_asset_db.Get<WTextureAsset>(id);
+            auto & texture_asset = in_asset_db.Get<was::Texture>(id);
             in_render->LoadTexture(id, texture_asset);
         }
 

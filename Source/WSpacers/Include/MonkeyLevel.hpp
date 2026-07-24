@@ -13,7 +13,7 @@
 #include "WImporter/WImporterObj.hpp"
 
 #include "WAssets/StaticMesh.hpp"
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WAssets/Level.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"

@@ -5,7 +5,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WImporter/WImporterTexture.hpp"
 #include "WImporter/WImporterObj.hpp"
@@ -21,13 +21,13 @@ namespace {
         std::vector<std::uint8_t> color_data {};
         color_data.assign(2*2*4, 255);
 
-        WTextureAsset texture_asset{};
+        was::Texture texture_asset{};
         texture_asset.SetTextureData(
             color_data.data(), 2, 2,
             wct::texture::ETextureFormat::RGBA8_UNORM
             );
 
-        out_db.CreateFrom<WTextureAsset>(
+        out_db.CreateFrom<was::Texture>(
             weng::defaults::NULL_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
@@ -42,7 +42,7 @@ namespace {
             wct::texture::ETextureFormat::RGBA8_SRGB
             );
 
-        out_db.CreateFrom<WTextureAsset>(
+        out_db.CreateFrom<was::Texture>(
             weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
@@ -58,7 +58,7 @@ namespace {
             wct::texture::ETextureFormat::RGBA8_SNORM
             );
 
-        out_db.CreateFrom<WTextureAsset>(
+        out_db.CreateFrom<was::Texture>(
             weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );

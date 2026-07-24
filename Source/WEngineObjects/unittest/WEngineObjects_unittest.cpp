@@ -1,4 +1,4 @@
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 
@@ -85,9 +85,9 @@ bool WObjectDb_TWRef_Test() {
     TWRef<was::StaticMesh> a =
         man.Get<was::StaticMesh>(1);
 
-    man.CreateAt<WTextureAsset>(2);
-    TWRef<WTextureAsset> t =
-        man.Get<WTextureAsset>(2);
+    man.CreateAt<was::Texture>(2);
+    TWRef<was::Texture> t =
+        man.Get<was::Texture>(2);
 
     a->Set_name("a");
     t->Set_name("t");

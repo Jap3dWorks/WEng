@@ -50,7 +50,7 @@ public:
 
     // Texture TODO wcr::wid::WTypeAssetIndex
     
-    void LoadTexture(const wcr::wid::WAssetId & in_id, const WTextureAsset & in_texture) {
+    void LoadTexture(const wcr::wid::WAssetId & in_id, const was::Texture & in_texture) {
         
         texture_collection_.CreateAt(
             in_id.GetId(),

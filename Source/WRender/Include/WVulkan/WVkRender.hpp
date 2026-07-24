@@ -81,7 +81,7 @@ public:
     void RefreshPipelines() override;
 
     void LoadTexture(const wcr::wid::WAssetId & in_id,
-                     const WTextureAsset & in_texture) override
+                     const was::Texture & in_texture) override
     {
         asset_render_data_.LoadTexture(in_id, in_texture);
     }

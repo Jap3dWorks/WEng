@@ -194,24 +194,24 @@
 <<wclass-compile-generated-cpp("WAssets", "StaticMesh")>>
 #+end_src
 
-** WTextureAsset
+** Texture
 :PROPERTIES:
 :CUSTOM_ID: WTextureAsset
 :END:
 
-#+NAME: WTextureAsset-wengine-hpp
+#+NAME: was::Texture-wengine-hpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/WTextureAsset.WEng.hpp
-<<wclass-wengine-hpp("", "WTextureAsset", "", "WObject", "WENGINEOBJECTS")>>
-<<wobject-body-macro("WTextureAsset")>>
+#+begin_src C++ :tangle PublicGenerated/was::Texture.WEng.hpp
+<<wclass-wengine-hpp("was", "Texture", "", "WObject", "WENGINEOBJECTS")>>
+<<wobject-body-macro("Texture")>>
 #+end_src
 
 #+NAME: wtextureasset-compilegenerated-cpp
 #+HEADER: :main no :noeval
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WAssets", "WTextureAsset")>>
+<<wclass-compile-generated-cpp("WAssets", "Texture")>>
 #+end_src
 
 ** Level

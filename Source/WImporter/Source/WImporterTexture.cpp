@@ -1,6 +1,6 @@
 #include "WImporter/WImporterTexture.hpp"
 #include "WCoreTypes/WTexture.hpp"
-#include "WAssets/WTextureAsset.hpp"
+#include "WAssets/Texture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WString/WString.hpp"
 #include "WLib_stbi.hpp"
@@ -23,16 +23,16 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImportTexture::Import(
     }
 
     auto valid_names = in_asset_manager
-        .GenValidAssetName<WTextureAsset>(asset_directory, "texture", "texture");
+        .GenValidAssetName<was::Texture>(asset_directory, "texture", "texture");
 
-    wcr::wid::WAssetId id = in_asset_manager.Create<WTextureAsset>(
+    wcr::wid::WAssetId id = in_asset_manager.Create<was::Texture>(
         wstr::AssetPath(
             asset_directory,
             valid_names[0],
             valid_names[1])
         );
 
-    auto & asset = in_asset_manager.Get<WTextureAsset>(id);
+    auto & asset = in_asset_manager.Get<was::Texture>(id);
 
     asset.SetTextureData(
         stbi_image.pixels.get(),

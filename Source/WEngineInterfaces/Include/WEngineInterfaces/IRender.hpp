@@ -1,28 +1,18 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCore/TRef.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
 
-#include <vector>
 #include <span>
 
 namespace was { class RenderPipeline; }
-
-// class WTextureAsset;
-// class was::StaticMesh;
-// namespace wct::texture { struct WTexture; }
 
 namespace wct::geometry {struct WMesh;}
 
 namespace wdw { class WWindow; }
 
-struct WTransformStruct;
-
-class WTextureAsset; 
-
-struct GLFWwindow;
+namespace was { class Texture; }
 
 class IRender {
 public:
@@ -87,7 +77,7 @@ public:
      * @brief Load the registered texture asset with id in_id.
      */
     virtual void LoadTexture(const wcr::wid::WAssetId & in_id,
-                             const WTextureAsset & in_texture)=0;
+                             const was::Texture & in_texture)=0;
 
     virtual void UnloadTexture(const wcr::wid::WAssetId & in_id)=0;
 

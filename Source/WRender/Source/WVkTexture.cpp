@@ -8,7 +8,7 @@
 
 void wvk::texture::CreateTexture(
     WVkTextureInfo & out_texture_info,
-    const WTextureAsset & texture_struct,
+    const was::Texture & texture_struct,
     // const wct::texture::WTexture & texture_struct,
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device,
