@@ -196,5 +196,4 @@ namespace wvk::descriptor {
         out_write_descriptor_set.pNext = VK_NULL_HANDLE;
     }
 
-
 }
