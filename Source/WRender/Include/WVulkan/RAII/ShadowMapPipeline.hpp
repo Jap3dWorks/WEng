@@ -2,6 +2,9 @@
 
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
+#include "WVulkan/RAII/DescriptorSetLayout.hpp"
+#include "WVulkan/RAII/Pipeline.hpp"
+#include "WVulkan/RAII/PipelineLayout.hpp"
 
 #include <string_view>
 #include <vulkan/vulkan_core.h>
@@ -27,9 +30,22 @@ namespace wvk::raii {
         ShadowMapPipeline(
             VkDevice device,
             std::string_view shader_path
-            ) : device_(device) {
-            
-        }
+            ) :
+            descriptor_pool_({device}),
+            descset_lay_(
+                {device},
+                std::array{
+                    VkDescriptorSetLayoutBinding{
+                        .binding=0,
+                        .descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                        .descriptorCount=1,
+                        .stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT,
+                        .pImmutableSamplers=VK_NULL_HANDLE
+                    }
+                })
+            {
+                
+            }
 
     private:
 
@@ -39,12 +55,10 @@ namespace wvk::raii {
 
     private:
 
-        VkDevice device_{VK_NULL_HANDLE};
-
-        wvk::raii::DescriptorPool<2, 0, 2> descriptor_pool_{};
-        VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
-        VkPipeline pipeline_{VK_NULL_HANDLE};
-        VkPipeline pipeline_layout_{VK_NULL_HANDLE};
+        wvk::raii::DescriptorPool<1 * FramesInFlight, 0, 1 * FramesInFlight> descriptor_pool_{};
+        wvk::raii::DescriptorSetLayout<1> descset_lay_{};
+        wvk::raii::PipelineLayout<1>  pipeline_layout_{};
+        wvk::raii::PipelineWrapper pipeline_{};
 
     };
 }

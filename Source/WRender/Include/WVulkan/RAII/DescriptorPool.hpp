@@ -59,7 +59,7 @@ namespace wvk::raii {
             wvk::vulkan::ExecVkProcChecked(
                 vkCreateDescriptorPool,
                 "Failed to create descriptor pool!",
-                device_,
+                device,
                 &pool_info,
                 nullptr,
                 &result
@@ -71,18 +71,15 @@ namespace wvk::raii {
         void Destroy(VkDescriptorPool desc_pool) {
 
             vkDestroyDescriptorPool(
-                device_,
+                device,
                 desc_pool,
                 nullptr
                 );
-
-            device_ = VK_NULL_HANDLE;
-
         }
         
-    private:
+    public:
 
-        VkDevice device_{ VK_NULL_HANDLE };
+        VkDevice device{ VK_NULL_HANDLE };
 
     };
 
