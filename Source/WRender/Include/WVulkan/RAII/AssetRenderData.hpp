@@ -15,38 +15,40 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include <vulkan/vulkan_core.h>
 
+namespace wvk::raii {
+
 /**
  * @brief Manage the lifetime of asset render data like geometries and textures.
  */
-class WRENDER_API WVkAssetRenderDataRAII {
-private:
+    class WRENDER_API AssetRenderData {
+    private:
 
-using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
-using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
+    using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
+    using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
 // WARNING UBOs can be frame dependent
-using WVkUBODb = TObjectDataBase<WVkUBO, void, wcr::wid::WEngId::IdType>;
+    using WVkUBODb = TObjectDataBase<WVkUBO, void, wcr::wid::WEngId::IdType>;
 
-public:
+    public:
 
-    WVkAssetRenderDataRAII()=default;
+    AssetRenderData()=default;
 
-    WVkAssetRenderDataRAII(
+    AssetRenderData(
         const VkDevice & in_device_info,
         const VkPhysicalDevice & in_physical_device,
         const VkQueue & in_graphics_queue,
         const VkCommandPool & in_command_pool_info
         );
 
-    ~WVkAssetRenderDataRAII();
+    ~AssetRenderData();
 
-    WVkAssetRenderDataRAII(const WVkAssetRenderDataRAII & other) = delete;
+    AssetRenderData(const AssetRenderData & other) = delete;
 
-    WVkAssetRenderDataRAII(WVkAssetRenderDataRAII && other);
+    AssetRenderData(AssetRenderData && other);
 
-    WVkAssetRenderDataRAII & operator=(const WVkAssetRenderDataRAII & other) = delete;
+    AssetRenderData & operator=(const AssetRenderData & other) = delete;
 
-    WVkAssetRenderDataRAII & operator=(WVkAssetRenderDataRAII && other);
+    AssetRenderData & operator=(AssetRenderData && other);
 
     // Texture TODO wcr::wid::WTypeAssetIndex
     
@@ -136,7 +138,7 @@ public:
 
     std::vector<std::size_t> GetUBOs(wcr::wid::WEngId wid) const;
 
-private:
+    private:
 
     void Destroy();
 
@@ -163,12 +165,13 @@ private:
         void Reg(wcr::wid::WEngId set_id, std::size_t ubo_id);
 
         std::size_t CreateUBO(VkDevice device, VkPhysicalDevice pdevice,
-                       wcr::wid::WEngId id,
-                       std::size_t ubo_size, void const * initial_data);
+                              wcr::wid::WEngId id,
+                              std::size_t ubo_size, void const * initial_data);
 
         void DestroyUBOs(wcr::wid::WEngId wid, VkDevice device);
         
     } ubo_data_{};
 
-};
+    };
 
+}

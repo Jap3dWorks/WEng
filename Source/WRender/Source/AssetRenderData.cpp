@@ -1,4 +1,4 @@
-#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WCore/TVisitor.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -7,11 +7,11 @@
 
 #include <algorithm>
 
-WVkAssetRenderDataRAII::~WVkAssetRenderDataRAII() {
+wvk::raii::AssetRenderData::~AssetRenderData() {
     Destroy();
 }
 
-WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(
+wvk::raii::AssetRenderData::AssetRenderData(
     const VkDevice & device,
     const VkPhysicalDevice & physical_device,
     const VkQueue & graphics_queue,
@@ -23,7 +23,7 @@ WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(
     ubo_data_()
 {}
 
-WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(WVkAssetRenderDataRAII && other) :
+wvk::raii::AssetRenderData::AssetRenderData(wvk::raii::AssetRenderData && other) :
     vkn_(std::move(other.vkn_)),
     texture_collection_(std::move(other.texture_collection_)),
     static_mesh_collection_(std::move(other.static_mesh_collection_)),
@@ -32,7 +32,7 @@ WVkAssetRenderDataRAII::WVkAssetRenderDataRAII(WVkAssetRenderDataRAII && other) 
     other.vkn_ = {};
 }
 
-WVkAssetRenderDataRAII & WVkAssetRenderDataRAII::operator=(WVkAssetRenderDataRAII && other) {
+wvk::raii::AssetRenderData & wvk::raii::AssetRenderData::operator=(wvk::raii::AssetRenderData && other) {
     if (this != &other) {
         Destroy();
         
@@ -47,7 +47,7 @@ WVkAssetRenderDataRAII & WVkAssetRenderDataRAII::operator=(WVkAssetRenderDataRAI
     return *this;
 }
 
-void WVkAssetRenderDataRAII::UnloadTexture(const wcr::wid::WAssetId & in_id) {
+void wvk::raii::AssetRenderData::UnloadTexture(const wcr::wid::WAssetId & in_id) {
     texture_collection_.Remove(
         in_id.GetId(),
         [this](WVkTextureInfo & in_texture_info) -> void {
@@ -59,7 +59,7 @@ void WVkAssetRenderDataRAII::UnloadTexture(const wcr::wid::WAssetId & in_id) {
         );
 }
 
-void WVkAssetRenderDataRAII::UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id) {
+void wvk::raii::AssetRenderData::UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id) {
 
     static_mesh_collection_.Remove(
         in_id,
@@ -71,11 +71,11 @@ void WVkAssetRenderDataRAII::UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId 
         });    
 }
 
-const WVkMesh & WVkAssetRenderDataRAII::StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const {
+const WVkMesh & wvk::raii::AssetRenderData::StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const {
     return static_mesh_collection_.Get(in_id);
 }
 
-void WVkAssetRenderDataRAII::Clear() {
+void wvk::raii::AssetRenderData::Clear() {
     if (vkn_.device != VK_NULL_HANDLE) {
         texture_collection_.Clear(
             [this](WVkTextureInfo & in_texture_info) -> void {
@@ -98,7 +98,7 @@ void WVkAssetRenderDataRAII::Clear() {
     }
 }
 
-void WVkAssetRenderDataRAII::Destroy() {
+void wvk::raii::AssetRenderData::Destroy() {
     if (vkn_.device != VK_NULL_HANDLE) {
         Clear();
         vkn_.device = VK_NULL_HANDLE;
@@ -108,7 +108,7 @@ void WVkAssetRenderDataRAII::Destroy() {
     }
 }
 
-std::vector<std::size_t> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) const {
+std::vector<std::size_t> wvk::raii::AssetRenderData::GetUBOs(wcr::wid::WEngId wid) const {
     std::vector<std::size_t> result;
 
     std::visit(
@@ -128,7 +128,7 @@ std::vector<std::size_t> WVkAssetRenderDataRAII::GetUBOs(wcr::wid::WEngId wid) c
     return result;
 }
 
-std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
+std::size_t wvk::raii::AssetRenderData::UboData::CreateUBO(
     VkDevice device,
     VkPhysicalDevice pdevice,
     wcr::wid::WEngId ubo_set_id,
@@ -163,7 +163,7 @@ std::size_t WVkAssetRenderDataRAII::UboData::CreateUBO(
     return ubo_id;
 }
 
-void WVkAssetRenderDataRAII::UboData::Clear(VkDevice device) {
+void wvk::raii::AssetRenderData::UboData::Clear(VkDevice device) {
     ubo_collection.Clear(
         [this, &device](WVkUBO & ubo_info) -> void {
             wvk::buffer::Destroy(
@@ -175,7 +175,7 @@ void WVkAssetRenderDataRAII::UboData::Clear(VkDevice device) {
     ubo_sets.clear();
 }
 
-void WVkAssetRenderDataRAII::UboData::Reg(wcr::wid::WEngId ubo_set_id, std::size_t ubo_id) {
+void wvk::raii::AssetRenderData::UboData::Reg(wcr::wid::WEngId ubo_set_id, std::size_t ubo_id) {
     if (!ubo_sets.contains(ubo_set_id)) {
         
         ubo_sets[ubo_set_id]=ubo_id;
@@ -195,7 +195,7 @@ void WVkAssetRenderDataRAII::UboData::Reg(wcr::wid::WEngId ubo_set_id, std::size
     }
 }
 
-void WVkAssetRenderDataRAII::UboData::DestroyUBOs(wcr::wid::WEngId wid, VkDevice device) {
+void wvk::raii::AssetRenderData::UboData::DestroyUBOs(wcr::wid::WEngId wid, VkDevice device) {
     auto & ubo_ids = ubo_sets[wid];
 
     std::visit(

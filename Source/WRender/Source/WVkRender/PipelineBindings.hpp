@@ -4,7 +4,7 @@
 #include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WCore/TVisitor.hpp"
 
 #include "WAssets/RenderPipelineParams.hpp"
@@ -20,7 +20,7 @@ namespace wvk::render::pipe_bindings {
 
     WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectTextureBindings(
         was::RenderPipelineParams const & parameters,
-        WVkAssetRenderDataRAII & asset_render_data
+        wvk::raii::AssetRenderData & asset_render_data
         ) {
         auto texture_params = parameters.Get_texture_list();
 
@@ -50,7 +50,7 @@ namespace wvk::render::pipe_bindings {
         wcr::wid::WEntityComponentId entity_component_id,
         was::RenderPipeline const & pipeline,
         was::RenderPipelineParams const & parameters,
-        WVkAssetRenderDataRAII & asset_render_data        
+        wvk::raii::AssetRenderData & asset_render_data        
         ) {
 
         auto & ubo_params = parameters.Get_ubo_list();
@@ -311,7 +311,7 @@ namespace wvk::render::pipe_bindings {
     inline void UpdateParamStatic(
         WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
         WVkDescSetUBOWrite & ubo_write,
-        WVkAssetRenderDataRAII & asset_render_data,
+        wvk::raii::AssetRenderData & asset_render_data,
         VkDevice device
         ) {
 
@@ -339,7 +339,7 @@ namespace wvk::render::pipe_bindings {
     inline void UpdateParamDynamic(
         WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
         WVkDescSetUBOWrite & ubo_write,
-        WVkAssetRenderDataRAII & asset_render_data,
+        wvk::raii::AssetRenderData & asset_render_data,
         VkDevice device,
         std::uint8_t frame_index
         ) {

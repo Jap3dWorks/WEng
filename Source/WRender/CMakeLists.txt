@@ -6,7 +6,7 @@ add_library(
         Source/WVkRender/WVkRender.cpp
         Source/WVulkan.cpp
 	    Source/WVkCommandPoolRAII.cpp
-        Source/WVkAssetRenderDataRAII.cpp
+        Source/AssetRenderData.cpp
         Source/WVkPostprocessPipelinesRAII.cpp
         Source/WVkSurfaceRAII.cpp
         Source/WVkTexture.cpp

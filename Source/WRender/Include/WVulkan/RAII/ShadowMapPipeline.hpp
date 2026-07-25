@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WVulkan/WVkConfig.hpp"
+#include "WVulkan/RAII/DescriptorPool.hpp"
 
 #include <string_view>
 #include <vulkan/vulkan_core.h>
@@ -40,7 +41,7 @@ namespace wvk::raii {
 
         VkDevice device_{VK_NULL_HANDLE};
 
-        VkDescriptorPool descriptor_pool_{};
+        wvk::raii::DescriptorPool<2, 0, 2> descriptor_pool_{};
         VkDescriptorSetLayout descset_layout_{VK_NULL_HANDLE};
         VkPipeline pipeline_{VK_NULL_HANDLE};
         VkPipeline pipeline_layout_{VK_NULL_HANDLE};

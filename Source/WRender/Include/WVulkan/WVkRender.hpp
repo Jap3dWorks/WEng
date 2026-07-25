@@ -21,7 +21,7 @@
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 #include "WInterfaces/IRender.hpp"
-#include "WVulkan/RAII/WVkAssetRenderDataRAII.hpp"
+#include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkRenderSyncRAII.hpp"
@@ -210,7 +210,7 @@ private:
 
     wdw::WWindow * window_{nullptr};
 
-    WVkAssetRenderDataRAII asset_render_data_{};
+    wvk::raii::AssetRenderData asset_render_data_{};
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
