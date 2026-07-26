@@ -47,7 +47,7 @@ public:
         }
 
         VkSwapchainCreateInfoKHR create_info =
-            wvk::types::CreateVkSwapchainCreateInfoKHR();
+            wvk::types::VkSwapchainCreateInfoKHR();
     
         create_info.surface = in_surface;
         create_info.minImageCount = image_count;

@@ -188,23 +188,16 @@ private:
             shadercode.size()
             );
 
-        std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages;
-        wvk::render_plane::UpdateVkPipelineShaderStageCreateInfo(
-            shader_stages.data(),
+        auto shader_stages = wvk::render_plane::GetPipelineShaderStageCreateInfo(
             shader_module
             );
-
-        std::array<VkVertexInputAttributeDescription, 2> attr_desc;
-        wvk::render_plane::UpdateVertexInputAttributeDescriptor(attr_desc.data());
-
-        VkVertexInputBindingDescription binding_desc =
-            wvk::render_plane::VertBindingDescrpt();
-
+        
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
             wvk::render_plane::VkPipelineVertexInputStateCreateInfo(
-                binding_desc,
-                attr_desc.data(),
-                static_cast<std::uint32_t>(attr_desc.size())
+                wvk::render_plane::VERTEX_INPUT_BINDING_DESCRIPTION[0],
+                wvk::render_plane::VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data(),
+                static_cast<std::uint32_t>(
+                    wvk::render_plane::VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size())
                 );
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly =

@@ -65,29 +65,29 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkApplicationInfo CreateVkApplicationInfo() noexcept {
-        VkApplicationInfo result{};
+    inline constexpr VkApplicationInfo VkApplicationInfo() noexcept {
+        ::VkApplicationInfo result{};
         result.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkInstanceCreateInfo CreateVkInstanceCreateInfo() noexcept {
-        VkInstanceCreateInfo result{};
+    inline constexpr VkInstanceCreateInfo VkInstanceCreateInfo() noexcept {
+        ::VkInstanceCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkDebugUtilsMessengerCreateInfoEXT CreateVkDebugUtilsMessengerCreateInfoEXT() noexcept {
-        VkDebugUtilsMessengerCreateInfoEXT result{};
+    inline constexpr VkDebugUtilsMessengerCreateInfoEXT VkDebugUtilsMessengerCreateInfoEXT() noexcept {
+        ::VkDebugUtilsMessengerCreateInfoEXT result{};
         result.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkSwapchainCreateInfoKHR CreateVkSwapchainCreateInfoKHR() noexcept {
-        VkSwapchainCreateInfoKHR result{};
+    inline constexpr VkSwapchainCreateInfoKHR VkSwapchainCreateInfoKHR() noexcept {
+        ::VkSwapchainCreateInfoKHR result{};
         result.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         result.pNext = VK_NULL_HANDLE;
         return result;
@@ -99,7 +99,7 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkDescriptorImageInfo CreateVkDescriptorImageInfo() noexcept {
+    inline constexpr VkDescriptorImageInfo VkDescriptorImageInfo() noexcept {
         return {};
     }
 
@@ -109,14 +109,14 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkRenderingInfo CreateVkRenderingInfo()  noexcept {
-        VkRenderingInfo result{};
+    inline constexpr VkRenderingInfo VkRenderingInfo()  noexcept {
+        ::VkRenderingInfo result{};
         result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         return result;
     }
 
-    inline constexpr VkRenderingAttachmentInfo CreateVkRenderingAttachmentInfo() noexcept {
-        VkRenderingAttachmentInfo result {};
+    inline constexpr VkRenderingAttachmentInfo VkRenderingAttachmentInfo() noexcept {
+        ::VkRenderingAttachmentInfo result {};
         result.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         return result;
     }
@@ -125,7 +125,7 @@ namespace wvk::types {
         return {};
     }
 
-    inline constexpr VkPipelineColorBlendAttachmentState CreateVkPipelineColorBlendAttachmentState() noexcept {
+    inline constexpr VkPipelineColorBlendAttachmentState VkPipelineColorBlendAttachmentState() noexcept {
         return {};
     }
 
@@ -136,71 +136,71 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkPipelineInputAssemblyStateCreateInfo CreateVkPipelineInputAssemblyStateCreateInfo() noexcept {
-        VkPipelineInputAssemblyStateCreateInfo result{};
+    inline constexpr VkPipelineInputAssemblyStateCreateInfo VkPipelineInputAssemblyStateCreateInfo() noexcept {
+        ::VkPipelineInputAssemblyStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineViewportStateCreateInfo CreateVkPipelineViewportStateCreateInfo() noexcept {
-        VkPipelineViewportStateCreateInfo result{};
+    inline constexpr VkPipelineViewportStateCreateInfo VkPipelineViewportStateCreateInfo() noexcept {
+        ::VkPipelineViewportStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineRasterizationStateCreateInfo CreateVkPipelineRasterizationStateCreateInfo() noexcept {
-        VkPipelineRasterizationStateCreateInfo result{};
+    inline constexpr VkPipelineRasterizationStateCreateInfo VkPipelineRasterizationStateCreateInfo() noexcept {
+        ::VkPipelineRasterizationStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineMultisampleStateCreateInfo CreateVkPipelineMultisampleStateCreateInfo() noexcept {
-        VkPipelineMultisampleStateCreateInfo result{};
+    inline constexpr VkPipelineMultisampleStateCreateInfo VkPipelineMultisampleStateCreateInfo() noexcept {
+        ::VkPipelineMultisampleStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineDepthStencilStateCreateInfo CreateVkPipelineDepthStencilStateCreateInfo() noexcept {
-        VkPipelineDepthStencilStateCreateInfo result{};
+    inline constexpr VkPipelineDepthStencilStateCreateInfo VkPipelineDepthStencilStateCreateInfo() noexcept {
+        ::VkPipelineDepthStencilStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineColorBlendStateCreateInfo CreateVkPipelineColorBlendStateCreateInfo() noexcept {
-        VkPipelineColorBlendStateCreateInfo result{};
+    inline constexpr VkPipelineColorBlendStateCreateInfo VkPipelineColorBlendStateCreateInfo() noexcept {
+        ::VkPipelineColorBlendStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineDynamicStateCreateInfo CreateVkPipelineDynamicStateCreateInfo() noexcept {
-        VkPipelineDynamicStateCreateInfo result{};
+    inline constexpr VkPipelineDynamicStateCreateInfo VkPipelineDynamicStateCreateInfo() noexcept {
+        ::VkPipelineDynamicStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineLayoutCreateInfo CreateVkPipelineLayoutCreateInfo() noexcept {
-        VkPipelineLayoutCreateInfo result{};
+    inline constexpr VkPipelineLayoutCreateInfo VkPipelineLayoutCreateInfo() noexcept {
+        ::VkPipelineLayoutCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkGraphicsPipelineCreateInfo CreateVkGraphicsPipelineCreateInfo() noexcept {
-        VkGraphicsPipelineCreateInfo result{};
+    inline constexpr VkGraphicsPipelineCreateInfo VkGraphicsPipelineCreateInfo() noexcept {
+        ::VkGraphicsPipelineCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;
     }
 
-    inline constexpr VkPipelineRenderingCreateInfo CreateVkPipelineRenderingCreateInfo() noexcept {
-        VkPipelineRenderingCreateInfo result{};
+    inline constexpr VkPipelineRenderingCreateInfo VkPipelineRenderingCreateInfo() noexcept {
+        ::VkPipelineRenderingCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;

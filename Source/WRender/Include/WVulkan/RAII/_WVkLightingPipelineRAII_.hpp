@@ -17,7 +17,7 @@ namespace wvr::offscreen_pipelines {
         ::VkPipelineLayout result;
         
         VkPipelineLayoutCreateInfo pipeline_layout_info =
-            wvk::types::CreateVkPipelineLayoutCreateInfo();
+            wvk::types::VkPipelineLayoutCreateInfo();
 
         pipeline_layout_info.setLayoutCount = in_layouts.size();
         pipeline_layout_info.pSetLayouts = in_layouts.data();

@@ -85,51 +85,56 @@ namespace wvk::render_plane {
     /**
      * helper function to config VkPipelineShaderStageCreateInfo.
      */
-    inline void UpdateVkPipelineShaderStageCreateInfo(
-        VkPipelineShaderStageCreateInfo in_data[2],
-        const VkShaderModule & in_shader_module
+    inline auto GetPipelineShaderStageCreateInfo(
+        // VkPipelineShaderStageCreateInfo in_data[2],
+        VkShaderModule in_shader_module
         ) {
-
-        // VkShaderStageFlagBits
-        in_data[0] = wvk::types::VkPipelineShaderStageCreateInfo();
-        in_data[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        in_data[0].module=in_shader_module;
-        in_data[0].pName="vsMain";
-
-        in_data[1] = wvk::types::VkPipelineShaderStageCreateInfo();
-        in_data[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        in_data[1].module=in_shader_module;
-        in_data[1].pName="fsMain";
+        return std::array {
+            VkPipelineShaderStageCreateInfo {
+                .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .pNext = VK_NULL_HANDLE,
+                .stage=VK_SHADER_STAGE_VERTEX_BIT,
+                .module=in_shader_module,
+                .pName="vsMain"
+            },
+            VkPipelineShaderStageCreateInfo{
+                .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .pNext = VK_NULL_HANDLE,
+                .stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+                .module=in_shader_module,
+                .pName="fsMain"
+            }
+        };
     }
 
-    inline void UpdateVertexInputAttributeDescriptor(
-        VkVertexInputAttributeDescription in_data[2]
-        ) {
-        in_data[0].binding=0;
-        in_data[0].location=0;
-        // in_data[0].format=VK_FORMAT_R32G32B32_SFLOAT; // RG?
-        in_data[0].format=VK_FORMAT_R32G32_SFLOAT;
-        in_data[0].offset=0;  // position
+    // inline void UpdateVertexInputAttributeDescriptor(
+    //     VkVertexInputAttributeDescription in_data[2]
+    //     ) {
+    //     in_data[0].binding=0;
+    //     in_data[0].location=0;
+    //     // in_data[0].format=VK_FORMAT_R32G32B32_SFLOAT; // RG?
+    //     in_data[0].format=VK_FORMAT_R32G32_SFLOAT;
+    //     in_data[0].offset=0;  // position
 
-        in_data[1].binding=0;
-        in_data[1].location=1;
-        in_data[1].format = VK_FORMAT_R32G32_SFLOAT;
-        in_data[1].offset = sizeof(float) * 2; // uv
-    }
+    //     in_data[1].binding=0;
+    //     in_data[1].location=1;
+    //     in_data[1].format = VK_FORMAT_R32G32_SFLOAT;
+    //     in_data[1].offset = sizeof(float) * 2; // uv
+    // }
 
-    inline VkVertexInputBindingDescription VertBindingDescrpt() {
-        VkVertexInputBindingDescription result{};
-        result.binding = 0;
-        result.stride = sizeof(float) * 2 + sizeof(float) * 2;  // position + uv
-        result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    // inline VkVertexInputBindingDescription VertBindingDescrpt() {
+    //     VkVertexInputBindingDescription result{};
+    //     result.binding = 0;
+    //     result.stride = sizeof(float) * 2 + sizeof(float) * 2;  // position + uv
+    //     result.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        return result;
-    }
+    //     return result;
+    // }
 
     inline VkPipelineVertexInputStateCreateInfo VkPipelineVertexInputStateCreateInfo(
-        const VkVertexInputBindingDescription & in_binding_desc,
-        VkVertexInputAttributeDescription * in_attr_desc_data,
-        const std::uint32_t & in_attr_desc_count
+        VkVertexInputBindingDescription const & in_binding_desc,
+        VkVertexInputAttributeDescription const * in_attr_desc_data,
+        std::uint32_t in_attr_desc_count
         )
     {
         
@@ -145,7 +150,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineInputAssemblyStateCreateInfo VkPipelineInputAssemblyStateCreateInfo() {
         ::VkPipelineInputAssemblyStateCreateInfo input_assembly =
-            wvk::types::CreateVkPipelineInputAssemblyStateCreateInfo();
+            wvk::types::VkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
         
@@ -155,7 +160,7 @@ namespace wvk::render_plane {
     inline VkPipelineViewportStateCreateInfo VkPipelineViewportStateCreateInfo()
     {
         ::VkPipelineViewportStateCreateInfo viewport_state =
-            wvk::types::CreateVkPipelineViewportStateCreateInfo();
+            wvk::types::VkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount=1;
         viewport_state.scissorCount=1;
         
@@ -164,7 +169,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineRasterizationStateCreateInfo VkPipelineRasterizationStateCreateInfo() {
         ::VkPipelineRasterizationStateCreateInfo rasterizer =
-            wvk::types::CreateVkPipelineRasterizationStateCreateInfo();
+            wvk::types::VkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -179,7 +184,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineMultisampleStateCreateInfo VkPipelineMultisampleStateCreateInfo() {
         ::VkPipelineMultisampleStateCreateInfo multisampling =
-            wvk::types::CreateVkPipelineMultisampleStateCreateInfo();
+            wvk::types::VkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;  // no msaa
         
@@ -188,7 +193,7 @@ namespace wvk::render_plane {
 
     inline VkPipelineDepthStencilStateCreateInfo VkPipelineDepthStencilStateCreateInfo() {
         ::VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            wvk::types::CreateVkPipelineDepthStencilStateCreateInfo();
+            wvk::types::VkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_FALSE;
         depth_stencil.depthWriteEnable = VK_FALSE;
         
@@ -213,7 +218,7 @@ namespace wvk::render_plane {
         )
     {
         ::VkPipelineColorBlendStateCreateInfo color_blending =
-            wvk::types::CreateVkPipelineColorBlendStateCreateInfo();
+            wvk::types::VkPipelineColorBlendStateCreateInfo();
         color_blending.logicOpEnable = VK_FALSE;
         color_blending.logicOp = VK_LOGIC_OP_COPY;
         color_blending.attachmentCount = 1;
@@ -236,7 +241,7 @@ namespace wvk::render_plane {
         };
 
         ::VkPipelineDynamicStateCreateInfo dynamic_state =
-            wvk::types::CreateVkPipelineDynamicStateCreateInfo();
+            wvk::types::VkPipelineDynamicStateCreateInfo();
         dynamic_state.dynamicStateCount = static_cast<uint32_t>(out_dyn_states.size());
         dynamic_state.pDynamicStates = out_dyn_states.data();
 
@@ -251,7 +256,7 @@ namespace wvk::render_plane {
         ::VkPipelineLayout result;
         
         VkPipelineLayoutCreateInfo pipeline_layout_info =
-            wvk::types::CreateVkPipelineLayoutCreateInfo();
+            wvk::types::VkPipelineLayoutCreateInfo();
 
         pipeline_layout_info.setLayoutCount = 1;         // slayouts.size();
         pipeline_layout_info.pSetLayouts = &in_desc_lay; // slayouts.data();
@@ -281,7 +286,7 @@ namespace wvk::render_plane {
         )
     {
         ::VkGraphicsPipelineCreateInfo pipeline_info =
-            wvk::types::CreateVkGraphicsPipelineCreateInfo();
+            wvk::types::VkGraphicsPipelineCreateInfo();
         pipeline_info.stageCount = in_shader_stages_count;
         pipeline_info.pStages = in_shader_stages;
         pipeline_info.pVertexInputState = in_vertex_input_info;
@@ -309,7 +314,7 @@ namespace wvk::render_plane {
         )
     {
         VkPipelineRenderingCreateInfo rendering_info =
-            wvk::types::CreateVkPipelineRenderingCreateInfo();
+            wvk::types::VkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = in_color_attachment_count;
         rendering_info.pColorAttachmentFormats = in_color_attachment_format;
 

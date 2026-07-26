@@ -74,32 +74,33 @@ namespace wvr::gbuffer_pipelines {
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
             wvk::types::VkPipelineVertexInputStateCreateInfo();
+
         vertex_input_info.vertexBindingDescriptionCount =
             static_cast<uint32_t>(
-                wvk::pipeline::GBUFFER_VERTEX_INPUT_BINDING_DESCRIPTION.size()
+                wvk::pipeline::GEO_VERTEX_INPUT_BINDING_DESCRIPTION.size()
                 );
         vertex_input_info.vertexAttributeDescriptionCount =
             static_cast<uint32_t>(
-                wvk::pipeline::GBUFFER_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
+                wvk::pipeline::GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
                 );
         vertex_input_info.pVertexBindingDescriptions =
-            wvk::pipeline::GBUFFER_VERTEX_INPUT_BINDING_DESCRIPTION.data();
+            wvk::pipeline::GEO_VERTEX_INPUT_BINDING_DESCRIPTION.data();
         vertex_input_info.pVertexAttributeDescriptions =
-            wvk::pipeline::GBUFFER_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
+            wvk::pipeline::GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
         input_assembly = 
-            wvk::types::CreateVkPipelineInputAssemblyStateCreateInfo();
+            wvk::types::VkPipelineInputAssemblyStateCreateInfo();
         input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 
         VkPipelineViewportStateCreateInfo viewport_state =
-            wvk::types::CreateVkPipelineViewportStateCreateInfo();
+            wvk::types::VkPipelineViewportStateCreateInfo();
         viewport_state.viewportCount = 1;
         viewport_state.scissorCount = 1;
 
         VkPipelineRasterizationStateCreateInfo rasterizer =
-            wvk::types::CreateVkPipelineRasterizationStateCreateInfo();
+            wvk::types::VkPipelineRasterizationStateCreateInfo();
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -109,13 +110,13 @@ namespace wvr::gbuffer_pipelines {
         rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling =
-            wvk::types::CreateVkPipelineMultisampleStateCreateInfo();
+            wvk::types::VkPipelineMultisampleStateCreateInfo();
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
         // TODO: Use weng::vk:vkstructs
         VkPipelineDepthStencilStateCreateInfo depth_stencil =
-            wvk::types::CreateVkPipelineDepthStencilStateCreateInfo();
+            wvk::types::VkPipelineDepthStencilStateCreateInfo();
         depth_stencil.depthTestEnable = VK_TRUE;
         depth_stencil.depthWriteEnable = VK_TRUE;
         depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
@@ -135,7 +136,7 @@ namespace wvr::gbuffer_pipelines {
             color_blend_attachments;
         
         for(auto & cblend_attch : color_blend_attachments) {
-            cblend_attch = wvk::types::CreateVkPipelineColorBlendAttachmentState();
+            cblend_attch = wvk::types::VkPipelineColorBlendAttachmentState();
             cblend_attch.colorWriteMask =
                 VK_COLOR_COMPONENT_R_BIT |
                 VK_COLOR_COMPONENT_G_BIT |
@@ -147,7 +148,7 @@ namespace wvr::gbuffer_pipelines {
         }
         
         VkPipelineColorBlendStateCreateInfo color_blend_create_info =
-            wvk::types::CreateVkPipelineColorBlendStateCreateInfo();
+            wvk::types::VkPipelineColorBlendStateCreateInfo();
         color_blend_create_info.logicOpEnable = VK_FALSE;
         color_blend_create_info.logicOp = VK_LOGIC_OP_COPY;
         color_blend_create_info.attachmentCount = color_blend_attachments.size();
@@ -164,17 +165,17 @@ namespace wvr::gbuffer_pipelines {
         };
 
         VkPipelineDynamicStateCreateInfo dynamic_state_create_info =
-            wvk::types::CreateVkPipelineDynamicStateCreateInfo();
+            wvk::types::VkPipelineDynamicStateCreateInfo();
         dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
         dynamic_state_create_info.pDynamicStates = dynamic_states.data();
 
         VkPipelineLayoutCreateInfo pipeline_layout_info =
-            wvk::types::CreateVkPipelineLayoutCreateInfo();
+            wvk::types::VkPipelineLayoutCreateInfo();
         pipeline_layout_info.setLayoutCount = in_desc_layouts.size();
         pipeline_layout_info.pSetLayouts = in_desc_layouts.data();
 
         VkGraphicsPipelineCreateInfo pipeline_create_info =
-            wvk::types::CreateVkGraphicsPipelineCreateInfo();
+            wvk::types::VkGraphicsPipelineCreateInfo();
         pipeline_create_info.stageCount = static_cast<uint32_t>(shader_stages.size());
         pipeline_create_info.pStages = shader_stages.data();
         pipeline_create_info.pVertexInputState = &vertex_input_info;
@@ -193,7 +194,7 @@ namespace wvr::gbuffer_pipelines {
         // Dynamic Rendering
 
         VkPipelineRenderingCreateInfo rendering_info =
-            wvk::types::CreateVkPipelineRenderingCreateInfo();
+            wvk::types::VkPipelineRenderingCreateInfo();
         rendering_info.colorAttachmentCount = color_formats.size();
         rendering_info.pColorAttachmentFormats = color_formats.data();
         rendering_info.depthAttachmentFormat = WVK_GBUFFER_RENDER_DEPTH_FORMAT;

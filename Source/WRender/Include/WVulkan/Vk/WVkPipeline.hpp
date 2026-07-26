@@ -12,7 +12,7 @@ namespace wvk::pipeline {
         const VkDevice & device);
 
 
-    static inline constexpr std::array const GBUFFER_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
+    static inline constexpr std::array const GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
         VkVertexInputAttributeDescription{
             .location = 0,
             .binding = 0,
@@ -45,27 +45,12 @@ namespace wvk::pipeline {
         }
     };
 
-    static inline constexpr std::array const GBUFFER_VERTEX_INPUT_BINDING_DESCRIPTION {
+    static inline constexpr std::array const GEO_VERTEX_INPUT_BINDING_DESCRIPTION {
         VkVertexInputBindingDescription{
             .binding=0,
             .stride=sizeof(wct::geometry::WVertex),
             .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
         }
     };
-
-    // static inline constexpr std::array const PPCESS_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
-    //     VkVertexInputAttributeDescription{
-    //         .binding=0,
-    //         .location=0,
-    //         .format = VK_FORMAT_R32G32_SFLOAT,
-    //         .offset = 0
-    //     },
-    //     VkVertexInputAttributeDescription{
-    //         .binding=0,
-    //         .location=1,
-    //         .format=VK_FORMAT_R32G32_SFLOAT,
-    //         .offset= offsetof(WVkPostprocessVertex, tex_coords)
-    //     }
-    // };
 
 }

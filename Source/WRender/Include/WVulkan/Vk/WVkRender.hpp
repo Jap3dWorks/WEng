@@ -157,7 +157,7 @@ namespace wvk::render {
                                        in_extra01_view
                                        }) {
 
-            image_infos[idx] = wvk::types::CreateVkDescriptorImageInfo();
+            image_infos[idx] = wvk::types::VkDescriptorImageInfo();
             image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             image_infos[idx].imageView = vw;
             image_infos[idx].sampler = in_sampler;
@@ -211,7 +211,7 @@ namespace wvk::render {
                 &alloc_info,
                 &descriptor_set
                 ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to allocate descriptor sets!");
+            throw std::runtime_error("o!");
         }
 
         std::array<VkWriteDescriptorSet, 1> write_ds;
@@ -546,7 +546,7 @@ namespace wvk::render {
 
         // std::array<VkRenderingAttachmentInfo, WENG_VK_GBUFFERS_COUNT - 1> color_attachments;
 
-        auto albedo_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        auto albedo_attach = wvk::types::VkRenderingAttachmentInfo();
         albedo_attach.imageView = in_albedo_view;
         albedo_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         albedo_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -555,7 +555,7 @@ namespace wvk::render {
         albedo_attach.clearValue = {0.18, 0.18, 0.18, 1.f};
 
         // emission attachment
-        auto emission_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        auto emission_attach = wvk::types::VkRenderingAttachmentInfo();
         emission_attach.imageView = in_emission_view;
         emission_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         emission_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -563,7 +563,7 @@ namespace wvk::render {
         emission_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // Normal Attachment
-        auto normal_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        auto normal_attach = wvk::types::VkRenderingAttachmentInfo();
         normal_attach.imageView = in_normal_view;
         normal_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         normal_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -571,7 +571,7 @@ namespace wvk::render {
         normal_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // orm attachment
-        auto orm_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        auto orm_attach = wvk::types::VkRenderingAttachmentInfo();
         orm_attach.imageView = in_orm_view;
         orm_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         orm_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -579,7 +579,7 @@ namespace wvk::render {
         orm_attach.clearValue = {0.f, 0.f, 0.f, 1.f};
 
         // extra01 attachment
-        auto extra01_attach = wvk::types::CreateVkRenderingAttachmentInfo();
+        auto extra01_attach = wvk::types::VkRenderingAttachmentInfo();
         extra01_attach.imageView = in_extra01_view;
         extra01_attach.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         extra01_attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -596,7 +596,7 @@ namespace wvk::render {
 
         // Depth Attachment
         VkRenderingAttachmentInfo depth_attachment =
-            wvk::types::CreateVkRenderingAttachmentInfo();
+            wvk::types::VkRenderingAttachmentInfo();
         depth_attachment.imageView = in_depth_view;
         depth_attachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -604,7 +604,7 @@ namespace wvk::render {
         depth_attachment.clearValue = {1.f, 0.f};
 
         VkRenderingInfo rendering_info =
-            wvk::types::CreateVkRenderingInfo();
+            wvk::types::VkRenderingInfo();
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
         rendering_info.colorAttachmentCount = color_attachments.size();
