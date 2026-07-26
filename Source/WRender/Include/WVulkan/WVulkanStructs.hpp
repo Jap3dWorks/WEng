@@ -13,6 +13,7 @@
 
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
+#include <variant>
 
 // RENAME WVulkanDataTypes.hpp
 // TODO namespace : wvk::datatypes | wvk::structs
@@ -45,40 +46,13 @@ struct WVkTextureInfo
  */
 struct WVkShaderStageInfo
 {
-    std::vector<char> code;
+    std::variant<
+        std::span<std::uint8_t>,
+        std::vector<std::uint8_t>
+        > code;
     wct::render::EShaderStageFlag type;
     std::string entry_point{"main"};
-    
-    std::vector<VkVertexInputBindingDescription> binding_descriptors{};     // vertex size, ...
-    std::vector<VkVertexInputAttributeDescription> attribute_descriptors{}; // vertex attributes, ...
 };
-
-// // DEPRECATED
-// struct WVkRenderTarget {
-//     VkImage image{VK_NULL_HANDLE};
-//     VkDeviceMemory memory{VK_NULL_HANDLE};
-//     VkImageView view{VK_NULL_HANDLE};
-//     VkFormat format{};
-//     VkExtent2D extent{};
-// };
-
-// struct WVkTonemappingRenderStruct {
-//     WVkRenderTarget color{};
-//     VkExtent2D extent{};
-// };
-
-// struct WVkSwapChain
-// {
-//     VkFormat format;
-//     VkExtent2D extent;
-//     VkSwapchainKHR swap_chain{VK_NULL_HANDLE};
-    
-//     std::vector<VkImage> images;
-//     std::vector<VkImageView> views;
-//     std::vector<VkDeviceMemory> memory;
-    
-//     // std::uint32_t image_count{};
-// };
 
 struct WVkDescriptorSetLayoutInfo
 {
@@ -106,16 +80,10 @@ struct WVkUBO
 
 struct WVkRenderPipeline
 {
-    // wcr::wid::WAssetId wid;
     wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
-
-    // wcr::wid::WAssetId descriptor_set_layout_id{0};
-
-    // TODO: Pipeline layout bindings description
-    // wct::render::RPipeParamDescLayList params_descriptor{};
 };
 
 // Pipeline Bindings
@@ -160,16 +128,12 @@ template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
 struct WVkDescSetUBOBinding {
     std::uint8_t binding{0};
 
-    // std::array<VkDescriptorBufferInfo, FramesInFlight> ubo_info{};
     std::array<WVkDescUBOInfo, FramesInFlight> ubo_desc{};
 };
 
 template<std::uint32_t Frames>
 using DELETE_TVkDescriptorSetUBOBindingFrames =
     std::array<DELETE_WVkDescriptorSetUBOBinding, Frames>;
-
-// template<std::uint8_t Frames>
-// using VkDescSetUBOBindings = std::array<WVkDescSetUBOBinding, Frames>;
 
 /**
  * @brief Render Pipeline Bindings data

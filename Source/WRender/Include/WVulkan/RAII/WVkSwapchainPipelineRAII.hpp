@@ -185,7 +185,7 @@ private:
 
     void InitializeRenderPipeline(VkFormat swap_chain_format=VK_FORMAT_B8G8R8A8_SRGB) {
         // shader modules
-        std::vector<char> shadercode = wrd::shader::ReadShader(
+        std::vector<std::uint8_t> shadercode = wrd::shader::ReadShader(
             wstr::SystemPath(std::string(shader_path))
             );
 

@@ -121,7 +121,7 @@ namespace wvk::types {
         return result;
     }
 
-    inline constexpr VkDescriptorSetLayoutBinding CreateVkDescriptorSetLayoutBinding() noexcept {
+    inline constexpr VkDescriptorSetLayoutBinding VkDescriptorSetLayoutBinding() noexcept {
         return {};
     }
 
@@ -129,8 +129,8 @@ namespace wvk::types {
         return {};
     }
 
-    inline constexpr VkPipelineVertexInputStateCreateInfo CreateVkPipelineVertexInputStateCreateInfo() noexcept {
-        VkPipelineVertexInputStateCreateInfo result{};
+    inline constexpr VkPipelineVertexInputStateCreateInfo VkPipelineVertexInputStateCreateInfo() noexcept {
+        ::VkPipelineVertexInputStateCreateInfo result{};
         result.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         result.pNext = VK_NULL_HANDLE;
         return result;

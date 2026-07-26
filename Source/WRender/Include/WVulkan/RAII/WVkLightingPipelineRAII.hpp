@@ -154,7 +154,7 @@ private:
 
         std::array<VkDescriptorSetLayoutBinding, WVK_GBUFFERS_COUNT> dsl_bindings;
         for(std::uint32_t i=0; i<dsl_bindings.size(); i++) {
-            dsl_bindings[i]=wvk::types::CreateVkDescriptorSetLayoutBinding();
+            dsl_bindings[i]=wvk::types::VkDescriptorSetLayoutBinding();
             dsl_bindings[i].binding = i;
             dsl_bindings[i].descriptorCount = 1;
             dsl_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -178,7 +178,7 @@ private:
     void InitializeRenderPipeline(
         VkDescriptorSetLayout in_global_set_layout
         ) {
-        std::vector<char> shadercode = wrd::shader::ReadShader(
+        std::vector<std::uint8_t> shadercode = wrd::shader::ReadShader(
             wstr::SystemPath(std::string(shader_path_))
             );
 

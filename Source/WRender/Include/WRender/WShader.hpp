@@ -12,7 +12,7 @@
 
 namespace wrd::shader {
 
-    inline std::vector<char> ReadShader(const std::string & in_shader_path) {
+    inline std::vector<std::uint8_t> ReadShader(const std::string & in_shader_path) {
         // std::string systempath = wstr::SystemPath(in_shader_path);
 
         std::string shadercompiled;
@@ -71,16 +71,12 @@ namespace wrd::shader {
         }
 
         size_t file_size = (size_t) file.tellg();
-
-        std::vector<char> result(file_size);
-        // result.code.resize(file_size);
+        std::vector<std::uint8_t> tmp(file_size);
 
         file.seekg(0);
-
-        file.read(result.data(), file_size);
-
+        file.read(reinterpret_cast<char*>(tmp.data()), file_size);
         file.close();
 
-        return result;
+        return tmp;
     }
 }

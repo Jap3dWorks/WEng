@@ -13,25 +13,51 @@
  */
 namespace wvk::render_plane {
 
-    inline std::array<float, 16> RenderPlaneVertex() noexcept {
-        return {
-            -1.f, -1.f, 0.f, 0.f,
-            1.f, -1.f, 1.f, 0.f,
-            1.f, 1.f, 1.f, 1.f,
-            -1.f, 1.f, 0.f, 1.f
+    struct Vertex {
+        glm::vec2 position{};
+        glm::vec2 tex_coords{};
+    };
+
+    static inline constexpr std::array const VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
+        VkVertexInputAttributeDescription{
+            .location=0,
+            .binding=0,
+            .format=VK_FORMAT_R32G32_SFLOAT,
+            .offset=0
+        },
+        VkVertexInputAttributeDescription{
+            .location=1,
+            .binding=0,
+            .format=VK_FORMAT_R32G32_SFLOAT,
+            .offset=offsetof(wvk::render_plane::Vertex, tex_coords)
+        }
+    };
+
+    static inline constexpr std::array const VERTEX_INPUT_BINDING_DESCRIPTION {
+        VkVertexInputBindingDescription{
+            .binding=0,
+            .stride=sizeof(wvk::render_plane::Vertex),
+            .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
+        }
+    };
+
+    inline constexpr auto RenderPlaneVertex() noexcept {
+        return std::array {
+            wvk::render_plane::Vertex{{-1.f, -1.f}, {0.f, 0.f}},
+            wvk::render_plane::Vertex{{1.f, -1.f}, {1.f, 0.f}},
+            wvk::render_plane::Vertex{{1.f, 1.f}, {1.f, 1.f}},
+            wvk::render_plane::Vertex{{-1.f, 1.f}, {0.f, 1.f}}
         };
     }
 
-    inline std::array<std::uint32_t, 6> RenderPlaneIndexes() noexcept {
-        return { 2,1,0,0,3,2 };
+    inline constexpr auto RenderPlaneIndexes() noexcept {
+        return std::array<std::uint32_t, 6> { 2,1,0,0,3,2 };
     }
 
     WNODISCARD inline VkSampler CreateRenderPlaneSampler(const VkDevice & in_device) {
         VkSampler result;
         VkSamplerCreateInfo sampler_info{};
         sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        // sampler_info.magFilter = VK_FILTER_LINEAR;
-        // sampler_info.minFilter = VK_FILTER_LINEAR;
         sampler_info.magFilter = VK_FILTER_NEAREST;
         sampler_info.minFilter = VK_FILTER_NEAREST;
         sampler_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -108,7 +134,7 @@ namespace wvk::render_plane {
     {
         
         ::VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            wvk::types::CreateVkPipelineVertexInputStateCreateInfo();
+            wvk::types::VkPipelineVertexInputStateCreateInfo();
         vertex_input_info.vertexBindingDescriptionCount=1;
         vertex_input_info.pVertexBindingDescriptions = &in_binding_desc;
         vertex_input_info.vertexAttributeDescriptionCount=in_attr_desc_count;

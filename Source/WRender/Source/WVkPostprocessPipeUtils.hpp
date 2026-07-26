@@ -2,13 +2,13 @@
 
 #include "WCore/WCore.hpp"
 #include "WLog.hpp"
+#include "WVulkan/Vk/WVkRenderPlane.hpp"
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 #include "WRender/WShader.hpp"
 
-#include <cstddef>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan_core.h>
 
@@ -30,52 +30,32 @@ namespace WVkPostprocessPipeUtils {
         result.entry_point = in_entry_point;
         result.type = in_shader_type;
 
-        if (in_shader_type == wct::render::EShaderStageFlag::Vertex) {
-            result.attribute_descriptors.resize(2);
-
-            result.attribute_descriptors[0].binding=0;
-            result.attribute_descriptors[0].location=0;
-            result.attribute_descriptors[0].format = VK_FORMAT_R32G32_SFLOAT;
-            result.attribute_descriptors[0].offset = 0;
-
-            result.attribute_descriptors[1].binding=0;
-            result.attribute_descriptors[1].location=1;
-            result.attribute_descriptors[1].format=VK_FORMAT_R32G32_SFLOAT;
-            result.attribute_descriptors[1].offset= offsetof(WVkPostprocessVertex, tex_coords);
-
-            result.binding_descriptors.resize(1);
-            result.binding_descriptors[0].binding=0;
-            result.binding_descriptors[0].stride=sizeof(WVkPostprocessVertex);
-            result.binding_descriptors[0].inputRate=VK_VERTEX_INPUT_RATE_VERTEX;
-        }
-
         return result;
-
     }
 
-    inline void CreatePostprocessPipeline(WVkRenderPipeline & out_pipeline_info,
-                                          const VkDevice & in_device,
-                                          const std::vector<VkDescriptorSetLayout> & in_desc_lay,
-                                          const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
+    inline void CreatePostprocessPipeline(
+        WVkRenderPipeline & out_pipeline_info,
+        const VkDevice & in_device,
+        const std::vector<VkDescriptorSetLayout> & in_desc_lay,
+        const std::vector<WVkShaderStageInfo> & in_shader_stage_infos) {
 
-        WVkShaderStageInfo wvertex_stage_info;
-        std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-    
-        std::vector<VkShaderModule> shader_modules =
-            wvk::shader::CreateShaderModules(
-                wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
+        auto [shader_stages, shader_modules] = wvk::shader::CreateShaderModules(
+            in_device, in_shader_stage_infos
+            );
+
+        auto vertex_input_info = wvk::types::VkPipelineVertexInputStateCreateInfo();
+        vertex_input_info.vertexBindingDescriptionCount =
+            static_cast<uint32_t>(
+                wvk::render_plane::VERTEX_INPUT_BINDING_DESCRIPTION.size()
                 );
-
-        VkPipelineVertexInputStateCreateInfo vertex_input_info{};
-        vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
-            wvertex_stage_info.binding_descriptors.size());
-        vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
-            wvertex_stage_info.attribute_descriptors.size());
+        vertex_input_info.vertexAttributeDescriptionCount =
+            static_cast<uint32_t>(
+                wvk::render_plane::VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
+                );
         vertex_input_info.pVertexBindingDescriptions =
-            wvertex_stage_info.binding_descriptors.data();
+            wvk::render_plane::VERTEX_INPUT_BINDING_DESCRIPTION.data();
         vertex_input_info.pVertexAttributeDescriptions =
-            wvertex_stage_info.attribute_descriptors.data();
+            wvk::render_plane::VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly{};
         input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

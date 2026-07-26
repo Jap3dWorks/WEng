@@ -7,6 +7,7 @@
 #include "WVulkan/Vk/WVulkan.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
+#include "WVulkan/Vk/WVkPipeline.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WRender/WShader.hpp"
 #include <array>
@@ -56,51 +57,6 @@ namespace wvr::gbuffer_pipelines {
         result.entry_point = in_entry_point;
         result.type = in_shader_type;
 
-        if (in_shader_type == wct::render::EShaderStageFlag::Vertex)
-        {
-            // Geometry data structure
-
-            // TODO location constants
-            
-            result.attribute_descriptors = {
-                {
-                    .location = 0,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32B32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, position)
-                },
-                {
-                    .location = 1,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, tex_coords),
-                },
-                {
-                    .location = 2,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32B32A32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, color),
-                },
-                {
-                    .location = 3,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32B32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, normal),
-                },
-                {
-                    .location = 4,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32B32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, tangent),
-                }
-            };
-
-            result.binding_descriptors.resize(1);
-            result.binding_descriptors[0].binding = 0;
-            result.binding_descriptors[0].stride = sizeof(wct::geometry::WVertex);
-            result.binding_descriptors[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        }
-
         return result;
     }
 
@@ -111,25 +67,25 @@ namespace wvr::gbuffer_pipelines {
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         ) {
 
-        // TODO write WVkShaderStageInfo and CreateShaderModules better.
-
-        WVkShaderStageInfo wvertex_stage_info;
-        std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-    
-        std::vector<VkShaderModule> shader_modules = wvk::shader::CreateShaderModules(
-            wvertex_stage_info, shader_stages, in_device, in_shader_stage_infos
+        auto [shader_stages, shader_modules] = wvk::shader::CreateShaderModules(
+            in_device,
+            in_shader_stage_infos
             );
 
         VkPipelineVertexInputStateCreateInfo vertex_input_info =
-            wvk::types::CreateVkPipelineVertexInputStateCreateInfo();
-        vertex_input_info.vertexBindingDescriptionCount = static_cast<uint32_t>(
-            wvertex_stage_info.binding_descriptors.size());
-        vertex_input_info.vertexAttributeDescriptionCount = static_cast<uint32_t>(
-            wvertex_stage_info.attribute_descriptors.size());
+            wvk::types::VkPipelineVertexInputStateCreateInfo();
+        vertex_input_info.vertexBindingDescriptionCount =
+            static_cast<uint32_t>(
+                wvk::pipeline::GBUFFER_VERTEX_INPUT_BINDING_DESCRIPTION.size()
+                );
+        vertex_input_info.vertexAttributeDescriptionCount =
+            static_cast<uint32_t>(
+                wvk::pipeline::GBUFFER_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
+                );
         vertex_input_info.pVertexBindingDescriptions =
-            wvertex_stage_info.binding_descriptors.data();
+            wvk::pipeline::GBUFFER_VERTEX_INPUT_BINDING_DESCRIPTION.data();
         vertex_input_info.pVertexAttributeDescriptions =
-            wvertex_stage_info.attribute_descriptors.data();
+            wvk::pipeline::GBUFFER_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
 
         VkPipelineInputAssemblyStateCreateInfo input_assembly;
         input_assembly = 
