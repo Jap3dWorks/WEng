@@ -54,6 +54,6 @@ public struct LightingUBO {
 [[vk::binding(0, 0)]] // binding, set
 public ConstantBuffer<CameraUBO> camera_ubo;
 
-[[vk::binding(1,0)]]
+[[vk::binding(1, 0)]]
 public ConstantBuffer<LightingUBO> lighting_ubo;
 

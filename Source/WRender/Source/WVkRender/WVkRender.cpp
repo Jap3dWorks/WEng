@@ -12,7 +12,7 @@
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/Vk/WVkRender.hpp"
+#include "RenderUtils.hpp"
 #include "WWindow/WWindow.hpp"
 #include "WCore/TVisitor.hpp"
 #include "PipelineBindings.hpp"

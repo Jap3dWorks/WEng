@@ -35,7 +35,8 @@ namespace wvk::raii {
 
         ShadowMapPipeline(
             VkDevice device,
-            std::string_view shader_path
+            std::string_view shader_path,
+            VkDescriptorSetLayout global_layout
             ) :
             descriptor_pool_({device}),
             descset_lay_(
@@ -52,6 +53,7 @@ namespace wvk::raii {
             pipeline_layout_(
                 {device},
                 std::array{
+                    global_layout,
                     *descset_lay_
                 }
                 )
@@ -119,7 +121,8 @@ namespace wvk::raii {
             rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
             rasterizer.lineWidth = 1.0f;
             rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-            rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE; // because of y-flip in the projection matrix
+             // because of y-flip in the projection matrix
+            rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
             rasterizer.depthBiasEnable = VK_FALSE;
 
             VkPipelineMultisampleStateCreateInfo multisampling =
@@ -143,7 +146,8 @@ namespace wvk::raii {
 
             VkPipelineDynamicStateCreateInfo dynamic_state_create_info =
                 wvk::types::VkPipelineDynamicStateCreateInfo();
-            dynamic_state_create_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
+            dynamic_state_create_info.dynamicStateCount =
+                static_cast<uint32_t>(dynamic_states.size());
             dynamic_state_create_info.pDynamicStates = dynamic_states.data();
 
             VkGraphicsPipelineCreateInfo pipeline_create_info =
