@@ -19,7 +19,7 @@ namespace wvk::raii {
             VkPipelineLayout result;
         
             VkPipelineLayoutCreateInfo pipeline_layout_info =
-                wvk::types::CreateVkPipelineLayoutCreateInfo();
+                wvk::types::VkPipelineLayoutCreateInfo();
 
             pipeline_layout_info.setLayoutCount = LayoutsCount;
             pipeline_layout_info.pSetLayouts = layouts.data();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCoreTypes/WGeometry.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
@@ -8,7 +9,14 @@
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
+#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/RAII/WVkSwapchainRAII.hpp"
+#include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/RAII/ShadowMapAttachments.hpp"
+#include "WVulkan/RAII/ShadowMapPipeline.hpp"
+
 #include "WVkRender/RenderUtils.hpp"
+#include "WVkRender/RenderCommands.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
@@ -138,7 +146,36 @@ namespace wvk::render::rec_cmd_bffr {
     }
 
     template<std::uint8_t FramesInFlight>
-    void Lighting(
+    inline void ShadowMap(
+        VkDevice device,
+        VkCommandBuffer command_buffer,
+        std::uint32_t frame_index,
+        wvk::raii::ShadowMapAttachments<FramesInFlight> & attachments,
+        wvk::raii::ShadowMapPipeline<FramesInFlight> & pipeline,
+        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
+        ) {
+
+        wvk::render::rcmd::ShadowMap::AttachmentTransitionWriteLayout(
+            command_buffer,
+            attachments.ShadowMap(frame_index)
+            );
+
+        // beginRendering
+        wvk::render::rcmd::ShadowMap::BeginRendering(
+            command_buffer,
+            attachments.ShadowMap(frame_index),
+            attachments.Extent()
+            );
+
+        // Bind pipeline
+        // Render if for each GBuffer opaque geometry.
+
+        
+    
+    }
+
+    template<std::uint8_t FramesInFlight>
+    inline void Lighting(
         VkDevice device,
         VkCommandBuffer in_command_buffer,
         std::uint32_t in_frame_index,
@@ -162,13 +199,11 @@ namespace wvk::render::rec_cmd_bffr {
 
         pipelines.ResetDescriptorPool(in_frame_index);
 
-        VkPipeline pipeline = pipelines.Pipeline();
-
         // Bind Pipeline
         vkCmdBindPipeline(
             in_command_buffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipeline
+            pipelines.Pipeline()
             );
 
         wvk::render::RndCmd_SetViewportAndScissor(
@@ -446,10 +481,103 @@ namespace wvk::render::rec_cmd_bffr {
         return attachments.Color(in_frame_index).View();
     }
 
-    // void RecordSwapChainRenderCommandBuffer(
-    //     const VkCommandBuffer & in_command_buffer,
-    //     const std::uint32_t & in_frame_index,
-    //     const std::uint32_t & in_image_index
-    //     );
+    template<std::uint8_t FramesInFlight>
+    inline void SwapChain(
+        VkDevice device,
+        VkCommandBuffer in_command_buffer,
+        std::uint32_t in_frame_index,
+        std::uint32_t in_image_index,
+        WVkSwapchainRAII const & swap_chain,
+        WVkSwapchainPipelineRAII<FramesInFlight> & pipeline,
+        VkImageView input_img_view,
+        WVkMesh const & render_plane,
+        VkSampler plane_sampler
+        ) {
+        
+        VkImage swapchain_image = swap_chain.Images()[in_image_index];
+        VkImageView swapchain_imageview = swap_chain.Views()[in_image_index];
 
+        // swap chain image layout to render into it
+        wvk::render::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            swapchain_image,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            {},
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            );
+
+        wvk::render::RndCmd_BeginSwapchainRendering(
+            in_command_buffer,
+            swapchain_imageview,
+            swapchain_imageview,
+            swap_chain.Extent()
+            );
+
+        pipeline.ResetDescriptorPool(in_frame_index);
+
+        VkDescriptorSetLayout dslay = pipeline.DescriptorSetLayout();
+
+        vkCmdBindPipeline(
+            in_command_buffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipeline.Pipeline()
+            );
+
+        wvk::render::RndCmd_SetViewportAndScissor(
+            in_command_buffer,
+            swap_chain.Extent()
+            );
+
+        VkDescriptorSet descriptor = wvk::render::CreateInputRenderDescriptor(
+            device,
+            pipeline.DescriptorPool(in_frame_index),
+            dslay,
+            input_img_view,
+            plane_sampler
+            );
+
+        VkDeviceSize offsets=0;
+
+        vkCmdBindVertexBuffers(in_command_buffer,
+                               0,
+                               1,
+                               &render_plane.vertex_buffer,
+                               &offsets);
+
+        vkCmdBindIndexBuffer(in_command_buffer,
+                             render_plane.index_buffer,
+                             0,
+                             VK_INDEX_TYPE_UINT32);
+
+        vkCmdBindDescriptorSets(in_command_buffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipeline.PipelineLayout(),
+                                0,
+                                1,
+                                &descriptor,
+                                0,
+                                nullptr);
+
+        vkCmdDrawIndexed(in_command_buffer,
+                         render_plane.index_count,
+                         1,
+                         0,0,0);
+
+        vkCmdEndRendering(in_command_buffer);
+
+        // Prepare swapchain images for present
+        wvk::render::RndCmd_TransitionRenderImageLayout(
+            in_command_buffer,
+            swapchain_image,
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            {},
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+            );
+    }
 }

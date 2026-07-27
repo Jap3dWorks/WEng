@@ -83,7 +83,7 @@ void WVkRender::Initialize()
         render_debug_info.validation_layers
         );
 
-    swapchain_ = WVkSwapchainRAII(
+    swap_chain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Value(),
@@ -129,7 +129,7 @@ void WVkRender::Initialize()
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        swapchain_.Format()
+        swap_chain_.Format()
     };
     
     // Create Render Command Pool
@@ -185,14 +185,14 @@ void WVkRender::Initialize()
 
     tonemapping_pipeline_ = {
         device_.Device(),
-        swapchain_.Format()
+        swap_chain_.Format()
     };
     
     WFLOG("[DEBUG] Initialize swap chain pipeline");
 
     swap_chain_pipeline_ = {
         device_.Device(),
-        swapchain_.Format()
+        swap_chain_.Format()
     };
 
     render_command_buffers_ =
@@ -200,7 +200,7 @@ void WVkRender::Initialize()
         CreateCommandBuffers();
 
     render_sync_ = {device_.Device(),
-                   swapchain_.Images().size()};
+                   swap_chain_.Images().size()};
     
     asset_render_data_ = {
         device_.Device(),
@@ -231,7 +231,7 @@ void WVkRender::Draw()
 
     VkResult result = vkAcquireNextImageKHR(
         device_.Device(),
-        swapchain_.Swapchain(),
+        swap_chain_.Swapchain(),
         UINT64_MAX,
         render_sync_.ImageAvailableSemaphore(semaphore_index_),
         VK_NULL_HANDLE,
@@ -284,7 +284,7 @@ void WVkRender::Draw()
         render_plane_.Sampler()
         );
 
-    swap_chain_input_imgview_ref = wvk::render::rec_cmd_bffr::Postprocess(
+    swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Postprocess(
         device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -298,27 +298,27 @@ void WVkRender::Draw()
         render_plane_.Sampler()
         );
 
-    swap_chain_input_imgview_ref = wvk::render::rec_cmd_bffr::Tonemapping(
+    swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Tonemapping(
         device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,
         tonemapping_attachments_,
         tonemapping_pipeline_,
-        swap_chain_input_imgview_ref,
+        swap_chain_input_imgview_,
         render_plane_.RenderPlane(),
         render_plane_.Sampler()
         );
 
-    // RecordTonemappingRenderCommandBuffer(
-    //     render_command_buffers_[frame_index_],
-    //     frame_index_,
-    //     image_index
-    //     );
-
-    RecordSwapChainRenderCommandBuffer(
+    wvk::render::rec_cmd_bffr::SwapChain(
+        device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,
-        image_index
+        image_index,
+        swap_chain_,
+        swap_chain_pipeline_,
+        swap_chain_input_imgview_,
+        render_plane_.RenderPlane(),
+        render_plane_.Sampler()
         );
 
     // End Command buffer
@@ -359,7 +359,7 @@ void WVkRender::Draw()
     present_info.pWaitSemaphores = &render_sync_.RenderFinishedSempahore(image_index);
 
     present_info.swapchainCount = 1;
-    present_info.pSwapchains = &swapchain_.Swapchain();
+    present_info.pSwapchains = &swap_chain_.Swapchain();
     present_info.pImageIndices = &image_index;
     present_info.pResults = VK_NULL_HANDLE;
 
@@ -373,7 +373,7 @@ void WVkRender::Draw()
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    semaphore_index_ = (semaphore_index_ + 1) % swapchain_.Images().size();
+    semaphore_index_ = (semaphore_index_ + 1) % swap_chain_.Images().size();
     frame_index_ = (frame_index_ + 1) % WVK_MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -611,9 +611,9 @@ void WVkRender::RecreateSwapChain() {
 
     // Recreate swap chain and other render targets
 
-    swapchain_ = {};
+    swap_chain_ = {};
 
-    swapchain_ = WVkSwapchainRAII(
+    swap_chain_ = WVkSwapchainRAII(
         device_.Device(),
         device_.PhysicalDevice(),
         surface_.Value(),
@@ -653,7 +653,7 @@ void WVkRender::RecreateSwapChain() {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        swapchain_.Format()
+        swap_chain_.Format()
     };
 
     // update postprocess global descriptors
@@ -663,172 +663,6 @@ void WVkRender::RecreateSwapChain() {
         gbuffers_attachments_,
         lighting_attachments_,
         render_plane_.Sampler()
-        );
-}
-
-// void WVkRender::RecordTonemappingRenderCommandBuffer(
-//     const VkCommandBuffer & in_command_buffer,
-//     const std::uint32_t & in_frame_index,
-//     const std::uint32_t & in_image_index
-//     ) {
-    
-//     wvk::render::RndCmd_TransitionTonemappingWriteLayout(
-//         in_command_buffer,
-//         tonemapping_attachments_.Color(in_frame_index).Image()
-//         // tonemapping_rtargets_[in_frame_index].color.image
-//         );
-
-//     wvk::render::RndCmd_BeginTonemappingRendering(
-//         in_command_buffer,
-//         tonemapping_attachments_.Color(in_frame_index).View(),
-//         tonemapping_attachments_.Extent()
-//         );
-
-//     tonemapping_pipeline_.ResetDescriptorPool(in_frame_index);
-
-//     VkPipeline pipeline = tonemapping_pipeline_.Pipeline();
-
-//     vkCmdBindPipeline(
-//         in_command_buffer,
-//         VK_PIPELINE_BIND_POINT_GRAPHICS,
-//         pipeline
-//         );
-
-//     wvk::render::RndCmd_SetViewportAndScissor(
-//         in_command_buffer,
-//         tonemapping_attachments_.Extent()
-//         );
-
-//     VkDescriptorSet descriptorset =
-//         wvk::render::CreateTonemappingDescriptor(
-//             device_.Device(),
-//             tonemapping_pipeline_.DescriptorPool(in_frame_index),
-//             tonemapping_pipeline_.DescriptorSetLayout(),
-//             render_plane_.Sampler(),
-//             swap_chain_input_imgview_ref
-//             );
-
-//     const WVkMesh & rplane = render_plane_. RenderPlane();
-//     VkDeviceSize offsets = 0;
-
-//     wvk::render::TonemappingBindings(
-//         in_command_buffer,
-//         rplane.vertex_buffer,
-//         rplane.index_buffer,
-//         offsets,
-//         descriptorset,
-//         tonemapping_pipeline_.PipelineLayout()
-//         );
-
-//     vkCmdDrawIndexed(in_command_buffer,
-//                      rplane.index_count,
-//                      1,
-//                      0,
-//                      0,
-//                      0);
-
-//     vkCmdEndRendering(in_command_buffer);
-
-//     wvk::render::RndCmd_TransitionTonemappingReadLayout(
-//         in_command_buffer,
-//         tonemapping_attachments_.Color(in_frame_index).Image()
-//         );
-
-//     swap_chain_input_imgview_ref =
-//         tonemapping_attachments_.Color(in_frame_index).View();
-// }
-
-void WVkRender::RecordSwapChainRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index,
-    const std::uint32_t & in_image_index
-    ) {
-    VkImage swapchain_image = swapchain_.Images()[in_image_index];
-    VkImageView swapchain_imageview = swapchain_.Views()[in_image_index];
-
-    // swap chain image layout to render into it
-    wvk::render::RndCmd_TransitionRenderImageLayout(
-        in_command_buffer,
-        swapchain_image,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        {},
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        );
-
-    wvk::render::RndCmd_BeginSwapchainRendering(
-        in_command_buffer,
-        swapchain_imageview,
-        swapchain_imageview,
-        swapchain_.Extent()
-        );
-
-    swap_chain_pipeline_.ResetDescriptorPool(in_frame_index);
-
-    VkPipeline pipeline = swap_chain_pipeline_.Pipeline();
-    VkDescriptorSetLayout dslay = swap_chain_pipeline_.DescriptorSetLayout();
-
-    vkCmdBindPipeline(
-        in_command_buffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline
-        );
-
-    wvk::render::RndCmd_SetViewportAndScissor(
-        in_command_buffer,
-        swapchain_.Extent()
-        );
-
-    VkDescriptorSet descriptor = wvk::render::CreateInputRenderDescriptor(
-        device_.Device(),
-        swap_chain_pipeline_.DescriptorPool(in_frame_index),
-        dslay,
-        swap_chain_input_imgview_ref,
-        render_plane_.Sampler()
-        );
-
-    auto & render_plane = render_plane_.RenderPlane();
-    VkDeviceSize offsets=0;
-
-    vkCmdBindVertexBuffers(in_command_buffer,
-                           0,
-                           1,
-                           &render_plane.vertex_buffer,
-                           &offsets);
-
-    vkCmdBindIndexBuffer(in_command_buffer,
-                         render_plane.index_buffer,
-                         0,
-                         VK_INDEX_TYPE_UINT32);
-
-    vkCmdBindDescriptorSets(in_command_buffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            swap_chain_pipeline_.PipelineLayout(),
-                            0,
-                            1,
-                            &descriptor,
-                            0,
-                            nullptr);
-
-    vkCmdDrawIndexed(in_command_buffer,
-                     render_plane.index_count,
-                     1,
-                     0,0,0);
-
-    vkCmdEndRendering(in_command_buffer);
-
-    // Prepare swapchain images for present
-    wvk::render::RndCmd_TransitionRenderImageLayout(
-        in_command_buffer,
-        swapchain_image,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-        {},
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
         );
 }
 

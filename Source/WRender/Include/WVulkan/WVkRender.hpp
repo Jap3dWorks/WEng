@@ -2,16 +2,19 @@
 
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
+
+#include "WVulkan/WVkConfig.hpp"
+
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-// #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
+#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/RAII/ShadowMapAttachments.hpp"
+#include "WVulkan/RAII/ShadowMapPipeline.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
-#include "WVulkan/WVkConfig.hpp"
-// #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/RAII/WVkRenderPlaneRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
@@ -23,7 +26,6 @@
 #include "WInterfaces/IRender.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkRenderSyncRAII.hpp"
 
 #include "WRender/WDenseLightingUBO.hpp"
@@ -173,24 +175,12 @@ private:
 
     // TODO move Record commands to an inline library
 
-    // void RecordTonemappingRenderCommandBuffer(
-    //     const VkCommandBuffer & in_command_buffer,
-    //     const std::uint32_t & in_frame_index,
-    //     const std::uint32_t & in_image_index
-    //     );
-
-    void RecordSwapChainRenderCommandBuffer(
-        const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index,
-        const std::uint32_t & in_image_index
-        );
-
     wrd::light::WDenseLightingUBO lighting_UBO_{};
 
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};
     WVkDeviceRAII device_{};
-    WVkSwapchainRAII swapchain_{};
+    WVkSwapchainRAII swap_chain_{};
 
     wdw::WWindow * window_{nullptr};
 
@@ -198,12 +188,13 @@ private:
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
+    wvk::raii::ShadowMapAttachments<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_attachments_{};
     WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_attachments_{};
     WVkAttachmentsPostprocessRAII<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
     WVkAttachmentsTonemappingRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
-    WVkSwapchainPipelineRAII<> swap_chain_pipeline_{};
-    VkImageView swap_chain_input_imgview_ref{VK_NULL_HANDLE};
+    WVkSwapchainPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> swap_chain_pipeline_{};
+    VkImageView swap_chain_input_imgview_{VK_NULL_HANDLE};
 
     WVkCommandPoolRAII command_pool_{};
     WVkCommandPoolRAII::CommandBuffers<WVK_MAX_FRAMES_IN_FLIGHT> render_command_buffers_{};
@@ -212,9 +203,10 @@ private:
     WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
     WVkGBufferPipelinesRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    wvk::raii::ShadowMapPipeline<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipelines_{};
     WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
-    WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
+    WVkTonemappingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_pipeline_{};
 
     WVkRenderSyncRAII<WVK_MAX_FRAMES_IN_FLIGHT> render_sync_{};
     std::size_t semaphore_index_{0};

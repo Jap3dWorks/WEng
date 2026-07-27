@@ -7,7 +7,8 @@
 #include "WVulkan/RAII/Pipeline.hpp"
 #include "WVulkan/RAII/PipelineLayout.hpp"
 #include "WRender/WShader.hpp"
-#include "WVulkan/Vk/WVkRender.hpp"
+#include "WVulkan/Vk/WVkShader.hpp"
+#include "WVulkan/Vk/WVkPipeline.hpp"
 
 #include <string_view>
 #include <vulkan/vulkan_core.h>

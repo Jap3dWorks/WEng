@@ -333,6 +333,7 @@ namespace wvk::render {
         }
     }
 
+    [[deprecated("Use wvk::render::rcmd namespace subprograms.")]]
     inline void RndCmd_TransitionRenderImageLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_image,
