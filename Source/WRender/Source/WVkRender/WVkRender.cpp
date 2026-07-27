@@ -16,6 +16,7 @@
 #include "WWindow/WWindow.hpp"
 #include "WCore/TVisitor.hpp"
 #include "PipelineBindings.hpp"
+#include "RecordDrawCommands.hpp"
 
 #include "WLog.hpp"
 
@@ -106,7 +107,7 @@ void WVkRender::Initialize()
 
     // Lighting Attachments
 
-    offscreen_attachments_ = {
+    lighting_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
@@ -168,7 +169,7 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Lighting Pipeline.");
 
-    offscreen_pipeline_ = {
+    lighting_pipeline_ = {
         device_.Device(),
         global_descriptors_.DescriptorSetLayout()
     };
@@ -211,7 +212,7 @@ void WVkRender::Initialize()
     wvk::render::UpdatePPcessGlobalDescriptorSet(
         ppcess_global_descriptors_,
         gbuffers_attachments_,
-        offscreen_attachments_,
+        lighting_attachments_,
         render_plane_.Sampler()
         );
 }
@@ -257,25 +258,62 @@ void WVkRender::Draw()
         render_command_buffers_[frame_index_]
         );
 
-    RecordGBuffersRenderCommandBuffer(
-        render_command_buffers_[frame_index_],
-        frame_index_);
+    // RecordGBuffersRenderCommandBuffer(
+    //     render_command_buffers_[frame_index_],
+    //     frame_index_);
 
-    RecordLightingRenderCommandBuffer(
-        render_command_buffers_[frame_index_],
-        frame_index_);
-
-    RecordPostprocessRenderCommandBuffer(
+    wvk::render::rec_cmd_bffr::GBuffers(
+        device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,
-        image_index
+        gbuffers_attachments_,
+        gbuffers_pipelines_,
+        asset_render_data_,
+        global_descriptors_
         );
 
-    RecordTonemappingRenderCommandBuffer(
+    wvk::render::rec_cmd_bffr::Lighting(
+        device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,
-        image_index
+        lighting_attachments_,
+        lighting_pipeline_,
+        gbuffers_attachments_,
+        global_descriptors_,
+        render_plane_.RenderPlane(),
+        render_plane_.Sampler()
         );
+
+    swap_chain_input_imgview_ref = wvk::render::rec_cmd_bffr::Postprocess(
+        device_.Device(),
+        render_command_buffers_[frame_index_],
+        frame_index_,
+        postprocess_attachments_,
+        ppcss_pipelines_,
+        lighting_attachments_,
+        gbuffers_attachments_,
+        ppcess_global_descriptors_,
+        global_descriptors_,
+        render_plane_.RenderPlane(),
+        render_plane_.Sampler()
+        );
+
+    swap_chain_input_imgview_ref = wvk::render::rec_cmd_bffr::Tonemapping(
+        device_.Device(),
+        render_command_buffers_[frame_index_],
+        frame_index_,
+        tonemapping_attachments_,
+        tonemapping_pipeline_,
+        swap_chain_input_imgview_ref,
+        render_plane_.RenderPlane(),
+        render_plane_.Sampler()
+        );
+
+    // RecordTonemappingRenderCommandBuffer(
+    //     render_command_buffers_[frame_index_],
+    //     frame_index_,
+    //     image_index
+    //     );
 
     RecordSwapChainRenderCommandBuffer(
         render_command_buffers_[frame_index_],
@@ -597,7 +635,7 @@ void WVkRender::RecreateSwapChain() {
         WVK_GBUFFER_RENDER_EXTRA01_FORMAT
     };
 
-    offscreen_attachments_ = {
+    lighting_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
         {dimensions[0], dimensions[1]},
@@ -623,424 +661,82 @@ void WVkRender::RecreateSwapChain() {
     wvk::render::UpdatePPcessGlobalDescriptorSet(
         ppcess_global_descriptors_,
         gbuffers_attachments_,
-        offscreen_attachments_,
+        lighting_attachments_,
         render_plane_.Sampler()
         );
 }
 
-void WVkRender::RecordGBuffersRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index
-    )
-{
-
-    wvk::render::RndCmd_TransitionGBufferWriteLayout(
-        in_command_buffer,
-        gbuffers_attachments_.Albedo(in_frame_index).Image(),
-        gbuffers_attachments_.Emission(in_frame_index).Image(),
-        gbuffers_attachments_.Normal(in_frame_index).Image(),
-        gbuffers_attachments_.ORM(in_frame_index).Image(),
-        gbuffers_attachments_.Depth(in_frame_index).Image(),
-        gbuffers_attachments_.Extra01(in_frame_index).Image()
-        );
-
-    wvk::render::RndCmd_BeginGBuffersRendering(
-        in_command_buffer,
-        gbuffers_attachments_.Albedo(in_frame_index).View(),
-        gbuffers_attachments_.Emission(in_frame_index).View(),
-        gbuffers_attachments_.Normal(in_frame_index).View(),
-        gbuffers_attachments_.ORM(in_frame_index).View(),
-        gbuffers_attachments_.Depth(in_frame_index).View(),
-        gbuffers_attachments_.Extra01(in_frame_index).View(),
-        gbuffers_attachments_.Extent()
-        );
-
-    for(auto pipeline_id : gbuffers_pipelines_.IterPipelines()) {
-        
-        gbuffers_pipelines_.ResetDescriptorPool(pipeline_id, frame_index_);
-
-        const WVkRenderPipeline & render_pipeline =
-            gbuffers_pipelines_.Pipeline(pipeline_id);
-
-        vkCmdBindPipeline(render_command_buffers_[in_frame_index],
-                          VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          render_pipeline.pipeline);
-
-        wvk::render::RndCmd_SetViewportAndScissor(
-            in_command_buffer,
-            gbuffers_attachments_.Extent()
-            );
-
-        for (auto & bid : gbuffers_pipelines_.IterBindings(pipeline_id)) {
-
-            auto& binding = gbuffers_pipelines_.GetBinding(bid);
-
-            // Create descriptor
-            VkDescriptorSet descriptorset =
-                wvk::render::CreateDescriptorSet(
-                    device_.Device(),
-                    gbuffers_pipelines_.DescriptorPool(pipeline_id, in_frame_index),
-                    gbuffers_pipelines_.DescriptorSetLayout(pipeline_id).descset_layout,
-                    frame_index_,
-                    binding.ubos,
-                    binding.textures
-                    );
-
-            auto& mesh_info =
-                asset_render_data_.StaticMeshInfo(
-                    binding.mesh_asset_id
-                    );
-
-            VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
-            VkDeviceSize offsets[] = {0};
-
-            vkCmdBindVertexBuffers(
-                in_command_buffer,
-                0,
-                1,
-                vertex_buffers,
-                offsets
-                );
-
-            vkCmdBindIndexBuffer(
-                in_command_buffer,
-                mesh_info.index_buffer,
-                0,
-                VK_INDEX_TYPE_UINT32
-                );
-
-            std::array<VkDescriptorSet, 2> descsets =
-                {
-                    global_descriptors_.DescriptorSet(frame_index_),
-                    descriptorset
-                };
-
-            vkCmdBindDescriptorSets(in_command_buffer,
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    render_pipeline.pipeline_layout,
-                                    0,
-                                    static_cast<std::uint32_t>(descsets.size()),
-                                    descsets.data(),
-                                    0,
-                                    nullptr);
-
-            vkCmdDrawIndexed(in_command_buffer,
-                             mesh_info.index_count,
-                             1,
-                             0,
-                             0,
-                             0);
-        }
-    }
+// void WVkRender::RecordTonemappingRenderCommandBuffer(
+//     const VkCommandBuffer & in_command_buffer,
+//     const std::uint32_t & in_frame_index,
+//     const std::uint32_t & in_image_index
+//     ) {
     
-    vkCmdEndRendering(in_command_buffer);
+//     wvk::render::RndCmd_TransitionTonemappingWriteLayout(
+//         in_command_buffer,
+//         tonemapping_attachments_.Color(in_frame_index).Image()
+//         // tonemapping_rtargets_[in_frame_index].color.image
+//         );
 
-    wvk::render::RndCmd_TransitionGBufferReadLayout(
-        in_command_buffer,
-        gbuffers_attachments_.Albedo(in_frame_index).Image(),
-        gbuffers_attachments_.Emission(in_frame_index).Image(),
-        gbuffers_attachments_.Normal(in_frame_index).Image(),
-        gbuffers_attachments_.ORM(in_frame_index).Image(),
-        gbuffers_attachments_.Depth(in_frame_index).Image(),
-        gbuffers_attachments_.Extra01(in_frame_index).Image()
-        );
-}
+//     wvk::render::RndCmd_BeginTonemappingRendering(
+//         in_command_buffer,
+//         tonemapping_attachments_.Color(in_frame_index).View(),
+//         tonemapping_attachments_.Extent()
+//         );
 
-void WVkRender::RecordLightingRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index
-    ) {
-    
-    wvk::render::RndCmd_TransitionLightingWriteLayout(
-        in_command_buffer,
-        offscreen_attachments_.Color(in_frame_index).Image()
-        );
+//     tonemapping_pipeline_.ResetDescriptorPool(in_frame_index);
 
-    wvk::render::RndCmd_BeginLightingRendering(
-        in_command_buffer,
-        offscreen_attachments_.Color(in_frame_index).View(),
-        offscreen_attachments_.Extent()
-        );
+//     VkPipeline pipeline = tonemapping_pipeline_.Pipeline();
 
-    offscreen_pipeline_.ResetDescriptorPool(in_frame_index);
+//     vkCmdBindPipeline(
+//         in_command_buffer,
+//         VK_PIPELINE_BIND_POINT_GRAPHICS,
+//         pipeline
+//         );
 
-    VkPipeline pipeline = offscreen_pipeline_.Pipeline();
+//     wvk::render::RndCmd_SetViewportAndScissor(
+//         in_command_buffer,
+//         tonemapping_attachments_.Extent()
+//         );
 
-    // Bind Pipeline
-    vkCmdBindPipeline(
-        in_command_buffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline
-        );
+//     VkDescriptorSet descriptorset =
+//         wvk::render::CreateTonemappingDescriptor(
+//             device_.Device(),
+//             tonemapping_pipeline_.DescriptorPool(in_frame_index),
+//             tonemapping_pipeline_.DescriptorSetLayout(),
+//             render_plane_.Sampler(),
+//             swap_chain_input_imgview_ref
+//             );
 
-    wvk::render::RndCmd_SetViewportAndScissor(
-        in_command_buffer,
-        offscreen_attachments_.Extent()
-        );
+//     const WVkMesh & rplane = render_plane_. RenderPlane();
+//     VkDeviceSize offsets = 0;
 
-    // DescriptorSet
-    // TODO do not recreate each frame, create descriptorsSets only once.
-    VkDescriptorSet descriptorset = wvk::render::CreateLightingRenderDescriptor(
-        device_.Device(),
-        offscreen_pipeline_.DescriptorPool(in_frame_index),
-        offscreen_pipeline_.DescriptorSetLayout(),
-        render_plane_.Sampler(),
-        gbuffers_attachments_.Albedo(in_frame_index).View(),
-        gbuffers_attachments_.Emission(in_frame_index).View(),
-        gbuffers_attachments_.Normal(in_frame_index).View(),
-        gbuffers_attachments_.ORM(in_frame_index).View(),
-        gbuffers_attachments_.Depth(in_frame_index).View(),
-        gbuffers_attachments_.Extra01(in_frame_index).View()
-        );
+//     wvk::render::TonemappingBindings(
+//         in_command_buffer,
+//         rplane.vertex_buffer,
+//         rplane.index_buffer,
+//         offsets,
+//         descriptorset,
+//         tonemapping_pipeline_.PipelineLayout()
+//         );
 
-    // Draw Commands
-    const WVkMesh & rplane = render_plane_.RenderPlane();
-    
-    VkBuffer vertex_buffers[] = {rplane.vertex_buffer};
-    VkDeviceSize offsets[] = {0};
+//     vkCmdDrawIndexed(in_command_buffer,
+//                      rplane.index_count,
+//                      1,
+//                      0,
+//                      0,
+//                      0);
 
-    vkCmdBindVertexBuffers(
-        in_command_buffer,
-        0,
-        1,
-        vertex_buffers,
-        offsets
-        );
+//     vkCmdEndRendering(in_command_buffer);
 
-    vkCmdBindIndexBuffer(
-        in_command_buffer,
-        rplane.index_buffer,
-        0,
-        VK_INDEX_TYPE_UINT32
-        );
+//     wvk::render::RndCmd_TransitionTonemappingReadLayout(
+//         in_command_buffer,
+//         tonemapping_attachments_.Color(in_frame_index).Image()
+//         );
 
-    std::array<VkDescriptorSet,2> descsets = {
-        global_descriptors_.DescriptorSet(in_frame_index),
-        descriptorset
-    };
-
-    vkCmdBindDescriptorSets(in_command_buffer,
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            offscreen_pipeline_.PipelineLayout(),
-                            0,
-                            static_cast<std::uint32_t>(descsets.size()),
-                            descsets.data(),
-                            0,
-                            nullptr);
-
-    vkCmdDrawIndexed(in_command_buffer,
-                     rplane.index_count,
-                     1,
-                     0,
-                     0,
-                     0);
-
-    vkCmdEndRendering(in_command_buffer);
-    
-    wvk::render::RndCmd_TransitionLightingReadLayout(
-        in_command_buffer,
-        offscreen_attachments_.Color(in_frame_index).Image()
-        );
-    
-}
-
-void WVkRender::RecordPostprocessRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index,
-    const std::uint32_t & in_image_index
-    )
-{
-
-    VkImageView input_view = offscreen_attachments_.Color(in_frame_index).View();
-    VkImage input_img = offscreen_attachments_.Color(in_frame_index).Image();
-    
-    VkImageView dst_view = postprocess_attachments_.Color(in_frame_index).View();
-    VkImage dst_img = postprocess_attachments_.Color(in_frame_index).Image();
-    
-    std::array<VkImageView, 2> pp_views = {input_view, dst_view};
-    std::array<VkImage, 2> pp_images = {input_img, dst_img};
-
-    // TODO Descriptors are being recreated each frame.
-    //  is it required? can I preserve the descriptors between frames?
-    ppcss_pipelines_.ResetDescriptorPools(in_frame_index);
-
-    // Render each postprocess shader
-    std::uint32_t idx=0;
-    for(auto pbindingid : ppcss_pipelines_.BindingOrderIterator()) {
-
-        // DELETE_WVkPipelineBindingInfo ppcess_binding =
-        //     ppcss_pipelines_.Binding(pbindingid);
-
-        auto ppcess_binding = ppcss_pipelines_.GetBinding(pbindingid);
-
-        WVkRenderPipeline ppcess_pipeline =
-            ppcss_pipelines_.Pipeline(ppcess_binding.pipeline_id);
-        WVkDescriptorSetLayoutInfo ppcess_dsetlay =
-            ppcss_pipelines_.DescriptorSetLayout(ppcess_binding.pipeline_id);
-        VkDescriptorPool ppcess_dpool =
-            ppcss_pipelines_.DescriptorPool(ppcess_binding.pipeline_id, in_frame_index);
-
-        // render into layout
-        wvk::render::RndCmd_TransitionRenderImageLayout(
-            in_command_buffer,
-            dst_img,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            {},
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-            );
-
-        wvk::render::RndCmd_BeginPostprocessRendering(
-            in_command_buffer,
-            dst_view,
-            postprocess_attachments_.Extent()
-            );
-
-        vkCmdBindPipeline(
-            in_command_buffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            ppcess_pipeline.pipeline
-            );
-
-        wvk::render::RndCmd_SetViewportAndScissor(
-            in_command_buffer,
-            postprocess_attachments_.Extent()
-            );
-
-        ppcess_global_descriptors_.UpdateDescriptorBinding(
-            ppcess_global_descriptors_.PREV_BINDING,
-            frame_index_,
-            {
-                .sampler=render_plane_.Sampler(),
-                .imageView=input_view,
-                .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-            }
-            );
-
-        // TODO is it required to be recreated each frame?
-        VkDescriptorSet pp_descriptor = wvk::render::CreateDescriptorSet(
-            device_.Device(),
-            ppcess_dpool,
-            ppcess_dsetlay.descset_layout,
-            frame_index_,
-            ppcess_binding.ubos,
-            ppcess_binding.textures
-            );
-
-        const WVkMesh & render_plane = render_plane_.RenderPlane();
-
-        wvk::render::RndCmd_PostprocessDrawCommands(
-            device_.Device(), in_command_buffer,
-            render_plane.vertex_buffer, render_plane.index_buffer,
-            render_plane.index_count,
-            ppcess_pipeline.pipeline_layout,
-            ppcess_pipeline.pipeline,
-            std::array<VkDescriptorSet,3>{
-                global_descriptors_.DescriptorSet(frame_index_),
-                pp_descriptor,
-                ppcess_global_descriptors_.DescriptorSet(frame_index_)
-            }
-            );
-
-        vkCmdEndRendering(in_command_buffer);
-
-        idx++;
-
-        input_view = pp_views[idx % 2];
-        input_img = pp_images[idx % 2];
-        dst_view = pp_views[(idx + 1) % 2];
-        dst_img = pp_images[(idx + 1) % 2];
-
-        // render from layout
-        wvk::render::RndCmd_TransitionRenderImageLayout(
-            in_command_buffer,
-            input_img,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_ACCESS_SHADER_READ_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
-            );
-    }
-
-    // Image view that will be used by the swap chain pipeline pass
-    swap_chain_input_imgview_ref = input_view;
-}
-
-void WVkRender::RecordTonemappingRenderCommandBuffer(
-    const VkCommandBuffer & in_command_buffer,
-    const std::uint32_t & in_frame_index,
-    const std::uint32_t & in_image_index
-    ) {
-    
-    wvk::render::RndCmd_TransitionTonemappingWriteLayout(
-        in_command_buffer,
-        tonemapping_attachments_.Color(in_frame_index).Image()
-        // tonemapping_rtargets_[in_frame_index].color.image
-        );
-
-    wvk::render::RndCmd_BeginTonemappingRendering(
-        in_command_buffer,
-        tonemapping_attachments_.Color(in_frame_index).View(),
-        tonemapping_attachments_.Extent()
-        );
-
-    tonemapping_pipeline_.ResetDescriptorPool(in_frame_index);
-
-    VkPipeline pipeline = tonemapping_pipeline_.Pipeline();
-
-    vkCmdBindPipeline(
-        in_command_buffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline
-        );
-
-    wvk::render::RndCmd_SetViewportAndScissor(
-        in_command_buffer,
-        tonemapping_attachments_.Extent()
-        );
-
-    VkDescriptorSet descriptorset =
-        wvk::render::CreateTonemappingDescriptor(
-            device_.Device(),
-            tonemapping_pipeline_.DescriptorPool(in_frame_index),
-            tonemapping_pipeline_.DescriptorSetLayout(),
-            render_plane_.Sampler(),
-            swap_chain_input_imgview_ref
-            );
-
-    const WVkMesh & rplane = render_plane_. RenderPlane();
-    VkDeviceSize offsets = 0;
-
-    wvk::render::TonemappingBindings(
-        in_command_buffer,
-        rplane.vertex_buffer,
-        rplane.index_buffer,
-        offsets,
-        descriptorset,
-        tonemapping_pipeline_.PipelineLayout()
-        );
-
-    vkCmdDrawIndexed(in_command_buffer,
-                     rplane.index_count,
-                     1,
-                     0,
-                     0,
-                     0);
-
-    vkCmdEndRendering(in_command_buffer);
-
-    wvk::render::RndCmd_TransitionTonemappingReadLayout(
-        in_command_buffer,
-        tonemapping_attachments_.Color(in_frame_index).Image()
-        );
-
-    swap_chain_input_imgview_ref =
-        tonemapping_attachments_.Color(in_frame_index).View();
-}
+//     swap_chain_input_imgview_ref =
+//         tonemapping_attachments_.Color(in_frame_index).View();
+// }
 
 void WVkRender::RecordSwapChainRenderCommandBuffer(
     const VkCommandBuffer & in_command_buffer,

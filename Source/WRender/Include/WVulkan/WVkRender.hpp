@@ -173,27 +173,11 @@ private:
 
     // TODO move Record commands to an inline library
 
-    void RecordGBuffersRenderCommandBuffer(
-        const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index
-        );
-
-    void RecordLightingRenderCommandBuffer(
-        const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index
-        );
-
-    void RecordPostprocessRenderCommandBuffer(
-        const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index,
-        const std::uint32_t & in_image_index
-        );
-
-    void RecordTonemappingRenderCommandBuffer(
-        const VkCommandBuffer & in_command_buffer,
-        const std::uint32_t & in_frame_index,
-        const std::uint32_t & in_image_index
-        );
+    // void RecordTonemappingRenderCommandBuffer(
+    //     const VkCommandBuffer & in_command_buffer,
+    //     const std::uint32_t & in_frame_index,
+    //     const std::uint32_t & in_image_index
+    //     );
 
     void RecordSwapChainRenderCommandBuffer(
         const VkCommandBuffer & in_command_buffer,
@@ -214,7 +198,7 @@ private:
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
-    WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> offscreen_attachments_{};
+    WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_attachments_{};
     WVkAttachmentsPostprocessRAII<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
     WVkAttachmentsTonemappingRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
@@ -228,8 +212,8 @@ private:
     WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
     WVkGBufferPipelinesRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
     WVkPostprocessPipelinesRAII ppcss_pipelines_{};
-    WVkLightingPipelineRAII<> offscreen_pipeline_{};
     WVkTonemappingPipelineRAII<> tonemapping_pipeline_{};
 
     WVkRenderSyncRAII<WVK_MAX_FRAMES_IN_FLIGHT> render_sync_{};
