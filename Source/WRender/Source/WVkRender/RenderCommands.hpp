@@ -6,7 +6,8 @@
 
 namespace wvk::render::rcmd {
     
-    inline void TransitionImageLayout(
+    inline
+    void TransitionImageLayout(
         const VkCommandBuffer & in_command_buffer,
         const VkImage & in_image,
         const VkImageLayout & in_old_layout,
@@ -49,6 +50,36 @@ namespace wvk::render::rcmd {
             &dependency_info
             );
     }
+
+    inline
+    void SetViewportAndScissor(
+        VkCommandBuffer command_buffer,
+        VkExtent2D extent2d
+        ) {
+        VkViewport viewport{};
+        viewport.x = 0.f;
+        viewport.y = 0.f;
+        viewport.width = static_cast<float>(extent2d.width);
+        viewport.height = static_cast<float>(extent2d.height);
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+        vkCmdSetViewport(
+            command_buffer,
+            0, 1,
+            &viewport
+            );
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = extent2d;
+        vkCmdSetScissor(
+            command_buffer,
+            0, 1,
+            &scissor
+            );
+
+    }
+
 }
 
 namespace wvk::render::rcmd::GBuffer {}
@@ -57,11 +88,11 @@ namespace wvk::render::rcmd::ShadowMap {
 
     inline
     void AttachmentTransitionWriteLayout(
-        VkCommandBuffer in_command_buffer,
+        VkCommandBuffer command_buffer,
         VkImage depth_image
         ) {
         wvk::render::rcmd::TransitionImageLayout(
-            in_command_buffer,
+            command_buffer,
             depth_image,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
@@ -74,7 +105,13 @@ namespace wvk::render::rcmd::ShadowMap {
     }
 
     inline
-    void AttachmentTransitionReadLayout(){}
+    void AttachmentTransitionReadLayout(
+        VkCommandBuffer command_buffer,
+        VkImage depth_image
+        )
+    {
+        // TODO
+    }
 
     inline
     void BeginRendering(

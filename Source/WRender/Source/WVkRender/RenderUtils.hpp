@@ -892,6 +892,7 @@ namespace wvk::render {
             );
     }
 
+    [[deprecated("Use wvk::render::rcmd::SetViewportAndScissor")]]
     inline void RndCmd_SetViewportAndScissor(
         const VkCommandBuffer & in_command_buffer,
         const VkExtent2D & in_extent

@@ -131,7 +131,8 @@ namespace wvk::render::rec_cmd_bffr {
                                  0);
             }
         }
-    
+
+        // TODO can Shadow map be in parallel?
         vkCmdEndRendering(command_buffer);
 
         wvk::render::RndCmd_TransitionGBufferReadLayout(
@@ -152,7 +153,9 @@ namespace wvk::render::rec_cmd_bffr {
         std::uint32_t frame_index,
         wvk::raii::ShadowMapAttachments<FramesInFlight> & attachments,
         wvk::raii::ShadowMapPipeline<FramesInFlight> & pipeline,
-        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
+        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors,
+        WVkGBufferPipelinesRAII<FramesInFlight> const & gbuffer_pipelines,
+        wvk::raii::AssetRenderData const & asset_render_data
         ) {
 
         wvk::render::rcmd::ShadowMap::AttachmentTransitionWriteLayout(
@@ -169,9 +172,94 @@ namespace wvk::render::rec_cmd_bffr {
 
         // Bind pipeline
         // Render if for each GBuffer opaque geometry.
+        // Bind Pipeline
+        vkCmdBindPipeline(
+            command_buffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipeline.Pipeline()
+            );
 
+        wvk::render::rcmd::SetViewportAndScissor(
+            command_buffer,
+            attachments.Extent()
+            );
+
+        for(auto pipeline_id : gbuffer_pipelines.IterPipelines()) {
         
-    
+            gbuffer_pipelines.ResetDescriptorPool(pipeline_id, frame_index);
+
+            const WVkRenderPipeline & render_pipeline =
+                gbuffer_pipelines.Pipeline(pipeline_id);
+
+            // TODO : can the shadow map be included inside GBuffers commands?
+            for (auto & bid : gbuffer_pipelines.IterBindings(pipeline_id)) {
+
+                auto& binding = gbuffer_pipelines.GetBinding(bid);
+
+                VkDescriptorSet descriptorset =
+                    wvk::render::CreateDescriptorSet(
+                        device,
+                        gbuffer_pipelines.DescriptorPool(pipeline_id, frame_index),
+                        gbuffer_pipelines.DescriptorSetLayout(pipeline_id).descset_layout,
+                        frame_index,
+                        binding.ubos,
+                        binding.textures
+                        );
+
+                auto& mesh_info = asset_render_data.StaticMeshInfo(
+                    binding.mesh_asset_id
+                    );
+
+                VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
+                VkDeviceSize offsets[] = {0};
+
+                vkCmdBindVertexBuffers(
+                    command_buffer,
+                    0,
+                    1,
+                    vertex_buffers,
+                    offsets
+                    );
+
+                vkCmdBindIndexBuffer(
+                    command_buffer,
+                    mesh_info.index_buffer,
+                    0,
+                    VK_INDEX_TYPE_UINT32
+                    );
+
+                std::array<VkDescriptorSet, 2> descsets =
+                    {
+                        global_descriptors.DescriptorSet(frame_index),
+                        descriptorset
+                    };
+
+                vkCmdBindDescriptorSets(command_buffer,
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        render_pipeline.pipeline_layout,
+                                        0,
+                                        static_cast<std::uint32_t>(descsets.size()),
+                                        descsets.data(),
+                                        0,
+                                        nullptr);
+
+                vkCmdDrawIndexed(command_buffer,
+                                 mesh_info.index_count,
+                                 1,
+                                 0,
+                                 0,
+                                 0);
+            }
+        }
+
+        // TODO can Shadow map be in parallel?
+        vkCmdEndRendering(command_buffer);
+
+        wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
+            command_buffer,
+            attachments.Depth(frame_index).Image()
+            );
+
     }
 
     template<std::uint8_t FramesInFlight>
