@@ -13,12 +13,12 @@ FetchContent_Declare(
 # Get KTX prebuild libraries
 # --------------------------
 
-FetchContent_Declare(
-    ktx
-    GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
-    GIT_TAG v5.0.0-rc1
-    GIT_SHALLOW TRUE
-)
+# FetchContent_Declare(
+#     ktx
+#     GIT_REPOSITORY https://github.com/KhronosGroup/KTX-Software.git
+#     GIT_TAG v5.0.0-rc1
+#     GIT_SHALLOW TRUE
+# )
 
 # Include fastgltf library
 # ------------------------
@@ -32,8 +32,9 @@ FetchContent_Declare(
 
 # FetchContent_Populate(fastgltf)
 FetchContent_Populate(tinyobjloader)
-
-FetchContent_MakeAvailable(fastgltf ktx)
+FetchContent_MakeAvailable(fastgltf)
+set_target_properties(fastgltf PROPERTIES
+    POSITION_INDEPENDENT_CODE ON)
 
 add_library(
     WImporter 
@@ -71,18 +72,18 @@ target_link_libraries(
         WObjects
         WInterfaces
         fastgltf
-        ktx
+        # ktx
 )
 
-include(ShaderUtils)
+# include(ShaderUtils)
 
-add_slang_shader_target(
-    WImporter_AllShaders
-    SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders
-)
+# add_slang_shader_target(
+#     WImporter_AllShaders
+#     SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Content/Shaders
+# )
 
 # compile shaders first
-add_dependencies(WImporter WImporter_AllShaders)
+# add_dependencies(WImporter WImporter_AllShaders)
 
 install(
     TARGETS WImporter
