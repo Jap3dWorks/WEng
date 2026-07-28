@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -141,7 +142,33 @@ namespace wvk::render::rcmd::ShadowMap {
             command_buffer,
             &rendering_info
             );
+    }
 
+    VkDescriptorSet CreateDescriptorSet(
+        VkDevice device,
+        std::uint32_t model_ubo_binding,
+        VkDescriptorBufferInfo model_ubo
+        ) {
+
+        VkDescriptorSet result;
+
+        VkWriteDescriptorSet write_ds = wvk::types::VkWriteDescriptorSet();
+        wvk::descriptor::UpdateWriteDescriptorSet_UBO(
+            write_ds,
+            model_ubo_binding,
+            &model_ubo,
+            result
+            );
+
+        vkUpdateDescriptorSets(
+            device,
+            1,
+            &write_ds,
+            0,
+            nullptr
+            );
+
+        return result;
     }
 }
     

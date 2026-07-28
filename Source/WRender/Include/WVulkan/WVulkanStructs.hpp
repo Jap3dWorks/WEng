@@ -119,6 +119,9 @@ struct [[deprecated]] DELETE_WVkDescriptorSetUBOBinding {
 
 
 struct WVkDescUBOInfo {
+    /**
+     * index in AssetRenderData.
+     */
     std::size_t index{0};
 
     VkDescriptorBufferInfo desc_buffer; // <- avoid search buffer during rendering

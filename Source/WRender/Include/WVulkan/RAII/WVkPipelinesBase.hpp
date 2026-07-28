@@ -134,9 +134,9 @@ public:
         return pipelines_db_.descriptor_pools.at(in_frameindex).Get(in_id);
     }
 
-    [[deprecated]] WNODISCARD
-    DELETE_WVkPipelineBindingInfo const & Binding(const WBindingIdType & in_id) const {
-        return pipelines_db_.bindings.Get(in_id);
+    WNODISCARD
+    std::size_t GetBindingsCount() const {
+        return pipelines_db_.pipe_bindings.Count();
     }
 
     WNODISCARD

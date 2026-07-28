@@ -23,6 +23,8 @@ class WVkGBufferPipelinesRAII : public WVkPipelinesBase<wcr::wid::WAssetId,
 
 public:
 
+    static inline constexpr const std::uint8_t MODEL_UBO_BINDING{0};
+
     using Super = WVkPipelinesBase<wcr::wid::WAssetId,
                                    wcr::wid::WEntityComponentId,
                                    FramesInFlight>;

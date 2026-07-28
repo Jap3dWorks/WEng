@@ -35,6 +35,6 @@ public struct FSGBUFferOutput {
     public float4 extra01     : SV_TARGET4;
 };
 
-[[vk::binding(0, 1)]] // binding, set
+[[vk::binding(0, 1)]] // binding 0, set 1
 public ConstantBuffer<ModelUBO> model_ubo;
 

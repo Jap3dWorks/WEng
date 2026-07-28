@@ -258,11 +258,7 @@ void WVkRender::Draw()
         render_command_buffers_[frame_index_]
         );
 
-    // RecordGBuffersRenderCommandBuffer(
-    //     render_command_buffers_[frame_index_],
-    //     frame_index_);
-
-    wvk::render::rec_cmd_bffr::GBuffers(
+    auto shadow_map_bindings = wvk::render::rec_cmd_bffr::GBuffers(
         device_.Device(),
         render_command_buffers_[frame_index_],
         frame_index_,

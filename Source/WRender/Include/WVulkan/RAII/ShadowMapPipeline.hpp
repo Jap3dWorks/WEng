@@ -22,6 +22,8 @@ namespace wvk::raii {
 
     public:
 
+        static inline constexpr std::uint8_t MODEL_UBO_BINDING{0};
+
         static inline constexpr std::string_view SHADER_PATH
             {"/Content/Shaders/WRender_shadowmap.shdw.spv"};
 
@@ -61,6 +63,23 @@ namespace wvk::raii {
             {
                 InitializePipeline(device);
             }
+
+
+        VkPipelineLayout GetPipelineLayout() const {
+            return pipeline_layout_.Value();
+        }
+
+        VkDescriptorPool GetDescriptorPool(std::uint8_t frame_index) const {
+            return descriptor_pool_.Value();
+        }
+
+        void ResetDescriptorPool(std::uint8_t frame_index) {
+            vkResetDescriptorPool(
+                descriptor_pool_[frame_index].Creator().device,
+                descriptor_pool_[frame_index].Value(),
+                {}
+                );
+        }
 
     private:
 
@@ -209,7 +228,11 @@ namespace wvk::raii {
 
     private:
 
-        wvk::raii::DescriptorPool<1 * FramesInFlight, 0, 1 * FramesInFlight> descriptor_pool_{};
+        std::array<
+            wvk::raii::DescriptorPool<150, 0, 150>,
+            FramesInFlight
+            > descriptor_pool_{};
+        
         wvk::raii::DescriptorSetLayout<1> descset_lay_{};
         wvk::raii::PipelineLayout<1>  pipeline_layout_{};
         wvk::raii::PipelineWrapper pipeline_{};

@@ -36,11 +36,6 @@ public:
 
     using PipeBindingsDb=TSparseSet<WVkPipelineBinding<FramesInFlight>>;
 
-    // using PipeBindingsDb =
-    //     TObjectDataBase<WVkPipelineBinding<FramesInFlight>,
-    //                     void,
-    //                     wcr::wid::WEntityComponentId::IdType>;
-
 public:
 
     WVkPipelinesDb() noexcept = default;
