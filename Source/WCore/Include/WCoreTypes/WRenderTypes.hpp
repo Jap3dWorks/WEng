@@ -319,7 +319,7 @@ namespace wct::render {
         // shadow projection matrix
         // shadow light (camera) matrix
         glm::mat4 shadow_map_projection{};
-        glm::mat4 shadow_map_matrix{};
+        glm::mat4 shadow_map_view_matrix{};
     };
 
     static_assert(sizeof(PointLight) * LightingUBO::MAX_POINT_LIGHTS +

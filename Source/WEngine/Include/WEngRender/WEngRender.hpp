@@ -78,8 +78,13 @@ namespace wng::render {
         std::array<wcr::wid::WEntityComponentId, directional_lights.size()> dl_ids;
         std::uint32_t dl_count=0;
 
+        struct ShadowMap {
+            glm::mat4 projection{};
+            glm::mat4 view{};
+        } shadow_map_dt{};
+
         in_level->ForEachComponent<wcm::light::Directional>(
-            [&in_level, &directional_lights, &dl_ids, &dl_count]
+            [&in_level, &directional_lights, &dl_ids, &dl_count, &shadow_map_dt]
             (wcm::light::Directional * cmp) {
                 if (cmp->Get_active()) {
 
@@ -102,7 +107,19 @@ namespace wng::render {
                         in_level->GetComponentTypeId<wcm::light::Directional>(),
                         wcr::wid::null_id
                     };
-                    
+
+                    // Collect shadow map UBO data
+                    if (cmp->Get_cast_shadows()) {
+                        shadow_map_dt.projection =
+                            wrd::light::ToShadowMapProjectionMatrix(*cmp, 1024);
+
+                        shadow_map_dt.view =
+                            wrd::light::ToShadowMapViewMatrix(
+                                *transform_cmp,
+                                *cmp
+                                );
+                    }
+
                     dl_count++;
                 }
             }
@@ -124,6 +141,8 @@ namespace wng::render {
             {directional_lights.begin(), directional_lights.begin() + dl_count},
             amb_light
             );
+
+        // TODO : in_render->InitializeShadowMap()
 
     }
 
