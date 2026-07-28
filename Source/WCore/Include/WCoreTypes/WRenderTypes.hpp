@@ -314,12 +314,20 @@ namespace wct::render {
         std::uint32_t point_lights_count{0};
         std::uint32_t directional_lights_count{0};
         float _padding[2];
+
+        // shadow map data
+        // shadow projection matrix
+        // shadow light (camera) matrix
+        glm::mat4 shadow_map_projection{};
+        glm::mat4 shadow_map_matrix{};
     };
 
     static_assert(sizeof(PointLight) * LightingUBO::MAX_POINT_LIGHTS +
                   sizeof(DirectionalLight) * LightingUBO::MAX_DIRECTIONAL_LIGHTS +
                   sizeof(AmbientLight) +
-                  16 == sizeof(LightingUBO), "Size must match a Vulkan layout");
+                  16  +
+                  sizeof(glm::mat4) +
+                  sizeof(glm::mat4) == sizeof(LightingUBO), "Size must match a Vulkan layout");
 
     
 

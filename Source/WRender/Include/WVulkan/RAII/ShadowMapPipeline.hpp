@@ -22,6 +22,8 @@ namespace wvk::raii {
 
     public:
 
+        // static inline constexpr std::
+
         static inline constexpr std::uint8_t MODEL_UBO_BINDING{0};
 
         static inline constexpr std::string_view SHADER_PATH
