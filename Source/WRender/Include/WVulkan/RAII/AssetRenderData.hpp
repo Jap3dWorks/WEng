@@ -26,7 +26,8 @@ namespace wvk::raii {
     using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
     using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
-// WARNING UBOs can be frame dependent
+    // TODO extract ubo management from AssetRenderData.
+    // WARNING UBOs can be frame dependent.
     using WVkUBODb = TObjectDataBase<WVkUBO, void, wcr::wid::WEngId::IdType>;
 
     public:
@@ -152,7 +153,7 @@ namespace wvk::raii {
     WVkTextureDb texture_collection_{};
     WVkMeshDb static_mesh_collection_{};
 
-    struct UboData {
+    struct [[deprecated]] UboData {
         WVkUBODb ubo_collection{};
 
         std::unordered_map<

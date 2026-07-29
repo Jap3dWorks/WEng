@@ -123,8 +123,6 @@ namespace wvk::render::pipe_bindings {
                     std::size_t minidx = std::min(i, indexes.size()-1);
                     WVkUBO const & ubo = asset_render_data.GetUBO(indexes[minidx]);
 
-                    
-
                     result.ubo_desc[i] = {
                         .index = indexes[minidx],
                         .desc_buffer = {
