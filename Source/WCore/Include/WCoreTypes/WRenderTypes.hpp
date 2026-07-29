@@ -316,8 +316,6 @@ namespace wct::render {
         float _padding[2];
 
         // shadow map data
-        // shadow projection matrix
-        // shadow light (camera) matrix
         glm::mat4 shadow_map_projection{};
         glm::mat4 shadow_map_view_matrix{};
     };

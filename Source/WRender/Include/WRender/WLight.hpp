@@ -1,5 +1,6 @@
+#pragma once
+
 #include <glm/ext/matrix_clip_space.hpp>
-#pragma
 
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WComponents/Transform.hpp"
@@ -45,22 +46,25 @@ namespace wrd::light {
 
     inline constexpr glm::mat4 ToShadowMapViewMatrix(
         wcm::Transform const & transform,
-        wcm::light::Directional const & directional
+        wcm::light::Directional const & directional,
+        glm::vec3 interest_point={0.f, 0.f, 0.f}
         )
     {
         glm::mat4 trns = transform.Get_transform_matrix();
 
-        // -pi/2 y rotate, so z is looking back
-        glm::mat4 mat {
-            trns[2], trns[1], -trns[0], trns[3]
-        };
+        glm::mat3 orient{trns[2], trns[1], -trns[0]};
 
-        glm::mat3 orient{mat};
+        // assert if it is and ortogonal matrix
+        assert(
+            std::abs(orient[0].length() - 1.f) < 0.00001 &&
+            std::abs(orient[1].length() - 1.f) < 0.00001 &&
+            std::abs(orient[2].length() - 1.f) < 0.00001
+            );
 
-        // ortogonal matrix traspose is equivalent to inverse
         glm::mat4 inv_orient=glm::transpose(orient);
 
-        glm::vec3 translation {mat[3]};
+        float radius = 2500.f;
+        glm::vec3 translation {interest_point - glm::vec3(trns[0]) * radius};
 
         glm::mat4 inv_translation = glm::translate(glm::mat4{1}, -translation);
 
@@ -71,9 +75,6 @@ namespace wrd::light {
         const wcm::light::Ambient & in_light
         )
     {
-
-        
-
         return {
             .color=in_light.Get_color() * in_light.Get_intensity()
         };

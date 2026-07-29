@@ -2,6 +2,7 @@
 
 #include "WComponents/Camera.hpp"
 #include "WComponents/Transform.hpp"
+#include "WCore/WDebug.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WUtils/WMath.hpp"
 #include <glm/ext/quaternion_transform.hpp>
@@ -9,6 +10,8 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/matrix.hpp>
+
+#include <cmath>
 
 namespace wrd::render {
 
@@ -27,6 +30,13 @@ namespace wrd::render {
             );
 
         glm::mat3 orient{transform_component.Get_transform_matrix()};
+
+        // orient needs to be an ortonormal base.
+        assert(
+            std::abs(orient[0].length() - 1.f) < 0.00001 &&
+            std::abs(orient[1].length() - 1.f) < 0.00001 &&
+            std::abs(orient[2].length() - 1.f) < 0.00001
+            );
         glm::mat4 o = glm::transpose(orient);
 
         glm::vec3 translation{transform_component.Get_transform_matrix()[3]};

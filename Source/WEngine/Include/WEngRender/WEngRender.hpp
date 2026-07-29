@@ -113,6 +113,8 @@ namespace wng::render {
                         shadow_map_dt.projection =
                             wrd::light::ToShadowMapProjectionMatrix(*cmp, 1024);
 
+                        // TODO update the interest point of the directional shadow map
+                        //  using a system.
                         shadow_map_dt.view =
                             wrd::light::ToShadowMapViewMatrix(
                                 *transform_cmp,

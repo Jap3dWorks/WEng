@@ -46,8 +46,9 @@ public struct LightingUBO {
     public AmbientLight ambient_light;
     public uint point_lights_count;
     public uint directional_lights_count;
-    public float4 shadow_map_projection;
-    public float4 shadow_map_matrix;
+
+    public float4x4 shadow_map_projection;
+    public float4x4 shadow_map_view;
 };
 
 // Global bindings
