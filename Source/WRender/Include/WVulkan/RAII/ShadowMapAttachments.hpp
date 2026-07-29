@@ -47,14 +47,15 @@ namespace wvk::raii {
             VkDevice device,
             VkPhysicalDevice physical_device,
             VkFormat format,
-            VkExtent2D extent_2d
+            std::uint32_t attachment_size
             ) {
             for(std::uint32_t i=0 ; i<attachments_.size(); i++) {
                 attachments_[i]= {
                     device,
                     physical_device,
                     format,
-                    extent_2d
+                    VkExtent2D{.width=attachment_size,
+                               .height=attachment_size}
                 };
             }
         }

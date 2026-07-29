@@ -1,4 +1,5 @@
 import GlobalUBO.GlobalUBO;
+import GBuffer.GBuffer;
 
 public struct VSSMInput {
     public float3 pos;
@@ -16,9 +17,10 @@ struct FSSMOutput {
 VSSMOutput vsMain(VSSMInput input) {
     VSSMOutput output;
 
-    output.pos = mul(lighting_ubo.shadow_map_projection,
-        mul(lighting_ubo.shadow_map_view,
-            mul(model_ubo.model, float4(input.pos))));
+    output.pos =
+        mul(lighting_ubo.shadow_map_projection,
+            mul(lighting_ubo.shadow_map_view,
+                mul(model_ubo.model, float4(input.pos, 0.f))));
 
     return output;
 }

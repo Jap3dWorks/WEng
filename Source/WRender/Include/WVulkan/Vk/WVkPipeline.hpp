@@ -11,7 +11,6 @@ namespace wvk::pipeline {
         WVkRenderPipeline &pipeline_info,
         const VkDevice & device);
 
-
     static inline constexpr std::array const GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
         VkVertexInputAttributeDescription{
             .location = 0,

@@ -8,7 +8,7 @@
 #include "WVulkan/RAII/PipelineLayout.hpp"
 #include "WRender/WShader.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
-#include "WVulkan/Vk/WVkPipeline.hpp"
+#include "WCoreTypes/WGeometry.hpp"
 
 #include <string_view>
 #include <vulkan/vulkan_core.h>
@@ -22,7 +22,30 @@ namespace wvk::raii {
 
     public:
 
-        // static inline constexpr std::
+        static inline constexpr std::array const VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
+            VkVertexInputAttributeDescription{
+                .location = 0,
+                .binding = 0,
+                .format = VK_FORMAT_R32G32B32_SFLOAT,
+                .offset = offsetof(wct::geometry::WVertex, position)
+            },
+                VkVertexInputAttributeDescription{
+                .location = 1,
+                    .binding = 0,
+                    .format = VK_FORMAT_R32G32_SFLOAT,
+                    .offset = offsetof(wct::geometry::WVertex, tex_coords),
+                    }
+        };
+
+        static inline constexpr std::array const VERTEX_INPUT_BINDING_DESCRIPTION {
+            VkVertexInputBindingDescription{
+                .binding=0,
+                .stride=sizeof(wct::geometry::WVertex),
+                .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
+            }  
+        };
+
+    public:
 
         static inline constexpr std::uint8_t MODEL_UBO_BINDING{0};
 
@@ -115,16 +138,16 @@ namespace wvk::raii {
 
             vertex_input_info.vertexBindingDescriptionCount =
                 static_cast<uint32_t>(
-                    wvk::pipeline::GEO_VERTEX_INPUT_BINDING_DESCRIPTION.size()
+                    VERTEX_INPUT_BINDING_DESCRIPTION.size()
                     );
             vertex_input_info.vertexAttributeDescriptionCount =
                 static_cast<uint32_t>(
-                    wvk::pipeline::GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
+                    VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.size()
                     );
             vertex_input_info.pVertexBindingDescriptions =
-                wvk::pipeline::GEO_VERTEX_INPUT_BINDING_DESCRIPTION.data();
+                VERTEX_INPUT_BINDING_DESCRIPTION.data();
             vertex_input_info.pVertexAttributeDescriptions =
-                wvk::pipeline::GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
+                VERTEX_INPUT_ATTRIBUTE_DESCRIPTION.data();
 
             VkPipelineInputAssemblyStateCreateInfo input_assembly = 
                 wvk::types::VkPipelineInputAssemblyStateCreateInfo();
@@ -231,13 +254,15 @@ namespace wvk::raii {
     private:
 
         std::array<
-            wvk::raii::DescriptorPool<150, 0, 150>,
+            wvk::raii::DescriptorPool<1, 0, 0, 1>,
             FramesInFlight
             > descriptor_pool_{};
         
         wvk::raii::DescriptorSetLayout<1> descset_lay_{};
+
         wvk::raii::PipelineLayout<1>  pipeline_layout_{};
         wvk::raii::PipelineWrapper pipeline_{};
+
 
     };
 }

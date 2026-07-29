@@ -9,10 +9,14 @@
 
 namespace wvk::raii {
 
-    template<std::uint8_t UniformBuffers, std::uint8_t Images, std::uint8_t MaxSets>
+    template<
+        std::uint32_t DynamicUniformCount,
+        std::uint32_t StaticUniformCount,
+        std::uint32_t ImageSamplerCount,
+        std::uint32_t MaxSets>
     struct DescriptorPoolCrtr {
 
-        static_assert(UniformBuffers + Images > 0);
+        static_assert(DynamicUniformCount + StaticUniformCount + ImageSamplerCount > 0);
 
     public:
 
@@ -21,35 +25,67 @@ namespace wvk::raii {
             VkDescriptorPoolCreateInfo pool_info =
                 wvk::types::VkDescriptorPoolCreateInfo();
 
-            if constexpr(UniformBuffers > 0 && Images > 0) {
+            auto update_pool_info = [&pool_info]
+                (auto & data ) {
+                pool_info.poolSizeCount = static_cast<std::uint32_t>(data.size());
+                pool_info.pPoolSizes = data.data();
+                pool_info.maxSets = MaxSets;
+            };
+
+            if constexpr(DynamicUniformCount > 0 && StaticUniformCount > 0 && ImageSamplerCount > 0) {
+                std::array<VkDescriptorPoolSize, 3> pool_sizes{};
+                pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                pool_sizes[0].descriptorCount=DynamicUniformCount;
+
+                pool_sizes[1].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                pool_sizes[1].descriptorCount=StaticUniformCount;
+
+                pool_sizes[2].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                pool_sizes[2].descriptorCount=ImageSamplerCount;
+
+                update_pool_info(pool_sizes);
+
+            }
+            else if constexpr (DynamicUniformCount>0 && StaticUniformCount > 0) {
                 std::array<VkDescriptorPoolSize, 2> pool_sizes{};
-                pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                pool_sizes[0].descriptorCount=UniformBuffers;
+                pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                pool_sizes[0].descriptorCount=DynamicUniformCount;
+
+                pool_sizes[1].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                pool_sizes[1].descriptorCount=StaticUniformCount;
+
+                update_pool_info(pool_sizes);
+            }
+            else if constexpr (DynamicUniformCount>0 && ImageSamplerCount > 0) {
+                std::array<VkDescriptorPoolSize, 2> pool_sizes{};
+                pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                pool_sizes[0].descriptorCount=DynamicUniformCount;
 
                 pool_sizes[1].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                pool_sizes[1].descriptorCount=Images;
+                pool_sizes[1].descriptorCount=ImageSamplerCount;
 
-                pool_info.poolSizeCount = static_cast<std::uint32_t>(pool_sizes.size());
-                pool_info.pPoolSizes = pool_sizes.data();
-                pool_info.maxSets = MaxSets;
+                update_pool_info(pool_sizes);
             }
-            else if constexpr (UniformBuffers > 0) {
+            else if constexpr (DynamicUniformCount>0) {
+                std::array<VkDescriptorPoolSize, 1> pool_sizes{};
+                pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                pool_sizes[0].descriptorCount=StaticUniformCount;
+
+                update_pool_info(pool_sizes);
+            }
+            else if constexpr (StaticUniformCount > 0) {
                 std::array<VkDescriptorPoolSize, 1> pool_sizes{};
                 pool_sizes[0].type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                pool_sizes[0].descriptorCount=UniformBuffers;
+                pool_sizes[0].descriptorCount=StaticUniformCount;
 
-                pool_info.poolSizeCount = static_cast<std::uint32_t>(pool_sizes.size());
-                pool_info.pPoolSizes = pool_sizes.data();
-                pool_info.maxSets = MaxSets;
+                update_pool_info(pool_sizes);
             }
-            else if constexpr (Images > 0) {
+            else if constexpr (ImageSamplerCount > 0) {
                 std::array<VkDescriptorPoolSize, 1> pool_sizes{};
                 pool_sizes[0].type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                pool_sizes[0].descriptorCount=Images;
+                pool_sizes[0].descriptorCount=ImageSamplerCount;
 
-                pool_info.poolSizeCount = static_cast<std::uint32_t>(pool_sizes.size());
-                pool_info.pPoolSizes = pool_sizes.data();
-                pool_info.maxSets = MaxSets;
+                update_pool_info(pool_sizes);
             }
             else {
                 return VK_NULL_HANDLE;
@@ -83,8 +119,12 @@ namespace wvk::raii {
 
     };
 
-    template<std::uint8_t UniformBuffers, std::uint8_t Images, std::uint8_t MaxSets>
+    template<
+        std::uint32_t DynamicUniformCount,
+        std::uint32_t StaticUniformCount,
+        std::uint32_t ImageSamplerCount,
+        std::uint32_t MaxSets>
     using DescriptorPool = wvk::raii::VkRAII<
         VkDescriptorPool,
-        DescriptorPoolCrtr<UniformBuffers, Images, MaxSets>>;
+        DescriptorPoolCrtr<DynamicUniformCount, StaticUniformCount, ImageSamplerCount, MaxSets>>;
 }
