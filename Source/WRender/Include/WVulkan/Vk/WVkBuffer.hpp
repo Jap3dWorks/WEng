@@ -83,8 +83,8 @@ namespace wvk::buffer {
         const std::size_t & in_offset=0
         ) {
 
-        char * mapped_mem = reinterpret_cast<char*>(ubo_memory);
-        memcpy((mapped_mem + in_offset),
+        std::uint8_t * mapped_mem = reinterpret_cast<std::uint8_t*>(ubo_memory);
+        std::memcpy((mapped_mem + in_offset),
                in_data,
                in_size               
             );

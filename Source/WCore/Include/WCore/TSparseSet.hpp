@@ -104,8 +104,18 @@ public:
         return value_dense_[index_pos_map_.at(in_index)];
     }
 
-    std::size_t DensePosition(std::size_t in_pos) const {
-        return index_dense_[in_pos];
+    /**
+     * Returns the index stored in the dense position
+     */
+    std::size_t IndexInDensePosition(std::size_t dense_position) const {
+        return index_dense_[dense_position];
+    }
+
+    /**
+     * @brief Returns the dense position of the index param.
+     */
+    std::size_t DensePosition(std::size_t index) const {
+        return index_pos_map_.at(index);
     }
 
     T * DenseData() noexcept {

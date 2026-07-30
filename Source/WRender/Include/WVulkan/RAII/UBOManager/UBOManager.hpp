@@ -26,8 +26,6 @@ namespace wvk::raii::ubo_manager {
                        std::size_t ubo_size,
                        wct::render::ERPipeParamType,
                        void const * initial_data);
-
-
         
         void Clear(VkDevice device);
 
@@ -40,7 +38,6 @@ namespace wvk::raii::ubo_manager {
                               void const * initial_data);
 
         void DestroyUBOs(wcr::wid::WEngId wid, VkDevice device);
-
 
     private:
 

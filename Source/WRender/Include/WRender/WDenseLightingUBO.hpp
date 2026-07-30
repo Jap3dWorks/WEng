@@ -121,7 +121,7 @@ namespace wrd::light {
         }
 
         WNODISCARD std::uint32_t DensePosition(std::size_t in_id) const {
-            return light_set_.DensePosition(in_id);
+            return light_set_.IndexInDensePosition(in_id);
         }
 
         WNODISCARD T const * DenseData() const {

@@ -215,22 +215,22 @@ public:
     }
 
     T & GetFirst(IdBase & out_id) {
-        out_id = storage_.DensePosition(0);
+        out_id = storage_.IndexInDensePosition(0);
         return storage_.Get(out_id);
     }
 
     T & GetFirst(IdBase & out_id) const {
-        out_id = storage_.DensePosition(0);
+        out_id = storage_.IndexInDensePosition(0);
         return storage_.Get(out_id);
     }
 
     void BGetFirst(B* & out_first, IdBase & out_id) override {
-        out_id = storage_.DensePosition(0);
+        out_id = storage_.IndexInDensePosition(0);
         out_first = &(storage_.Get(out_id));
     }
     
     void BGetFirst(const B*& out_first, IdBase & out_id) const override {
-        out_id = storage_.DensePosition(0);
+        out_id = storage_.IndexInDensePosition(0);
         out_first = &(storage_.Get(out_id));
     }
 
