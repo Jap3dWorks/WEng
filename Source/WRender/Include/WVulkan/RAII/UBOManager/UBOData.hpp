@@ -4,6 +4,7 @@
 #include "WCore/TSparseSet.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/WDebug.hpp"
+#include "WCore/Lists.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -12,11 +13,18 @@
 #include <variant>
 #include <cassert>
 #include <algorithm>
+#include <numeric>
 
+// TODO Reescale Buffer size.
+ 
 namespace wvk::raii::ubo_manager {
-    
+
     template<std::uint8_t FramesInFlight>
-    class UboData {
+    class UboDataBase {};
+
+    template<std::uint8_t FramesInFlight, std::size_t BlockSize> 
+    requires (sizeof(BlockSize) % 16 == 0)
+    class UboData : public UboDataBase<FramesInFlight> {
 
     public:
 
@@ -27,7 +35,7 @@ namespace wvk::raii::ubo_manager {
         UboData& operator=(const UboData&) = default;
         UboData& operator=(UboData&&) = default;
 
-        ~UboData() {
+        ~UboData() override {
             if(device_ != VK_NULL_HANDLE) {
                 for(auto & vk_buffer: vk_buffers) {
                     wvk::buffer::Destroy(
@@ -44,17 +52,12 @@ namespace wvk::raii::ubo_manager {
         UboData(
             VkDevice device,
             VkPhysicalDevice physical_device,
-            std::size_t block_size,
             std::size_t elements_max_count) :
             device_(device),
-            block_size_(block_size),
             elements_max_count_(elements_max_count) {
 
-            // Assert block size alignment as 4 floats
-            assert(block_size % (sizeof(float) * 4) == 0);
-
             VkDeviceSize device_size = 
-                block_size * elements_max_count;
+                BlockSize * elements_max_count;
 
             for(auto & vk_buffer : vk_buffers) {
                 vk_buffer = wvk::buffer::CreateUBO(
@@ -108,7 +111,7 @@ namespace wvk::raii::ubo_manager {
                    transactions.back().old_pos != old_pos + 1)
                 {
                     // empty or not consecutive
-                    transactions.emplace_back({old_pos, new_pos, 1});
+                    transactions.emplace_back(old_pos, new_pos, 1);
                 }
                 else {
                     // consecutive just update the last transaction
@@ -122,30 +125,32 @@ namespace wvk::raii::ubo_manager {
                 std::uint8_t * ptr = wvk::buffer::MapUBO(vk_buffers[f].buffer, device_);
 
                 for(auto & trn : transactions) {
-                    std::uint8_t * val_ptr = ptr + trn.old_pos * block_size_;
+                    std::uint8_t * val_ptr = ptr + trn.old_pos * BlockSize;
                     wvk::buffer::UpdateUBO(
-                        ptr, val_ptr, block_size_ * trn.size, trn.new_pos * block_size_
+                        ptr, val_ptr, GetSize(trn.size), trn.new_pos * BlockSize
                         );
                 }
                 wvk::buffer::UnmapUBO(vk_buffers[f].buffer, device_);
             }
         }
 
-        void Add(std::vector<wcr::wid::WEngId> ids, const void * data) {
+        template<typename T> requires (sizeof(T) == BlockSize)
+        void Add(std::vector<wcr::wid::WEngId> ids, std::span<T> & data) {
             for(auto id : ids) {
                 assert(!position_track.Contains(id.GetId()));
                 position_track.Insert(id.GetId(), 1);
             }
 
+            // Assuming that new elements are located at the end of the sparse set.
             std::size_t offset = GetOffset(ids[0]);
-            std::size_t size = BlocksSize(ids.size());
+            std::size_t size = GetSize(ids.size());
 
             for(std::uint8_t f=0; f<FramesInFlight; f++) {
                 void * ptr = wvk::buffer::MapUBO(vk_buffers[f].buffer, device_);
 
                 wvk::buffer::UpdateUBO(
                     ptr,
-                    data,
+                    data.data(),
                     size,
                     offset
                     );
@@ -158,13 +163,74 @@ namespace wvk::raii::ubo_manager {
             return position_track.Contains(id.GetId());
         }
 
-        void Update(std::uint8_t frame_index, wcr::wid::WEngId id, const void* data) {
+        template<typename T> requires (sizeof(T) == BlockSize)
+        void Update(std::uint8_t frame_index,
+                    std::vector<wcr::wid::WEngId> ids,
+                    std::span<T> & data) {
             assert(position_track.Contains(id.GetId()));
 
-            std::size_t dense_pos = position_track.IndexInDensePosition(id.GetId());
+            std::vector<std::uint32_t> permutation{};
+            permutation.resize(ids.size());
 
-            // TODO
+            std::iota(permutation.begin(), permutation.end(), 0);
             
+            std::sort(permutation.begin(), permutation.end(), 
+                      [&ids, this](auto a, auto b) {
+                          return position_track.DensePosition(ids[a].GetId()) <
+                              position_track.DensePosition(ids[b].GetId());
+                      });
+
+            auto last = std::unique(permutation.begin(), permutation.end(),
+                [&ids, this](auto a, auto b) {
+                    return position_track.DensePosition(ids[a].GetId()) ==
+                        position_track.DensePosition(ids[b].GetId());
+                });
+
+            permutation.erase(last, permutation.end());
+            wcr::lists::ApplyPermutation(
+                ids, permutation
+                );
+
+            ids.resize(permutation.size());
+
+            wcr::lists::ApplyPermutation(
+                data, permutation
+                );
+
+            struct Transaction {
+                std::size_t pos;
+                std::size_t size;
+                T * data;
+            };
+            
+            std::vector<Transaction> transactions;
+            transactions.reserve(ids.size());
+
+            for(std::uint32_t i=0; i<ids.size(); ++i) {
+                std::size_t pos = position_track.DensePosition(ids[i].GetId());
+
+                if (transactions.empty() || 
+                    transactions.back().pos + 1 != pos) {
+                    transactions.emplace_back(pos, 1, &data[i]);
+                }
+                else {
+                    transactions.back().size++;
+                }
+            }
+
+            if (transactions.empty()) return;
+
+            std::uint8_t * ptr = wvk::buffer::MapUBO(
+                vk_buffers[frame_index], device_
+                );
+
+            for(auto trn : transactions) {
+                wvk::buffer::UpdateUBO(
+                    ptr, trn.data, GetSize(trn.size), trn.pos * BlockSize
+                    );
+            }
+
+            wvk::buffer::UnmapUBO(vk_buffers[frame_index], device_);
         }
 
         std::size_t GetPosition(wcr::wid::WEngId id) const {
@@ -173,19 +239,29 @@ namespace wvk::raii::ubo_manager {
         }
 
         std::size_t GetOffset(wcr::wid::WEngId id) const {
-            return GetPosition() * block_size_;
+            return GetPosition(id) * BlockSize;
         }
 
-        std::size_t BlocksSize(std::size_t blocks_count) const {
-            return blocks_count * block_size_;
+        std::size_t Count() const {
+            return position_track.Count();
+        }
+
+        WVkUBO GetUBO(std::uint8_t frame_index) const {
+            return vk_buffers[frame_index];
         }
 
     private:
 
+        std::size_t GetSize(std::size_t blocks_count) const {
+            return blocks_count * BlockSize;
+        }
+
+    private:
+
+        // std::uint8_t could contain some useful flags for each UBO
         TSparseSet<std::uint8_t> position_track;
         std::array<WVkUBO, FramesInFlight> vk_buffers;
 
-        std::size_t block_size_;
         std::size_t elements_max_count_;
         VkDevice device_;
     };

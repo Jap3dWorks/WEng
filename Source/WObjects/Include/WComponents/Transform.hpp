@@ -4,7 +4,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WCoreTypes/WMathStructs.hpp"
-#include "WUtils/WMath.hpp"
+#include "WCore/WMath.hpp"
 
 #include "wcm::Transform.WEng.hpp"
 
@@ -26,7 +26,7 @@ namespace wcm {
 
         void SetTransformMatrix(glm::mat4 in_transform_matrix) {
 
-            auto [position, rotation, scale]  = WMath::ToPositionRotationScale(
+            auto [position, rotation, scale]  = wcr::math::ToPositionRotationScale(
                 in_transform_matrix, rotation_order);
 
             Set_position(std::move(position));

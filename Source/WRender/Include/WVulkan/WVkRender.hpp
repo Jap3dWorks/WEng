@@ -25,6 +25,7 @@
 #include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 #include "WInterfaces/IRender.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
+#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkRenderSyncRAII.hpp"
 
@@ -173,8 +174,6 @@ private:
 
     void RecreateSwapChain();
 
-    // TODO move Record commands to an inline library
-
     wrd::light::WDenseLightingUBO lighting_UBO_{};
 
     WVkInstanceRAII instance_{};
@@ -185,6 +184,8 @@ private:
     wdw::WWindow * window_{nullptr};
 
     wvk::raii::AssetRenderData asset_render_data_{};
+    wvk::raii::ubo_manager::DynamicUBOManager<WVK_MAX_FRAMES_IN_FLIGHT> dynamic_ubo_manager_{};
+    
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};

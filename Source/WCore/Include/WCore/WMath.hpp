@@ -15,7 +15,7 @@
 // #endif
 // #include <glm/gtx/vector_angle.hpp>
 
-namespace WMath {
+namespace wcr::math {
 
     inline constexpr glm::mat3 RotateZMatrix(float z_angle) {
         return {

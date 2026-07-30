@@ -4,7 +4,7 @@
 #include "WComponents/Transform.hpp"
 #include "WCore/WDebug.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WUtils/WMath.hpp"
+#include "WCore/WMath.hpp"
 #include <glm/ext/quaternion_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
