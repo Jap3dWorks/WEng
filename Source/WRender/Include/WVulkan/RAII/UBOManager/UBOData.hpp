@@ -1,10 +1,12 @@
 #pragma once
 
+#include "WCore/WId.hpp"
 #include "WVulkan/Vk/WVkBuffer.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WCore/WDebug.hpp"
 #include "WCore/Lists.hpp"
+#include "WCore/IdPool.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -73,7 +75,8 @@ namespace wvk::raii::ubo_manager {
             VkPhysicalDevice physical_device,
             std::size_t elements_max_count) :
             device_(device),
-            elements_max_count_(elements_max_count) {
+            elements_max_count_(elements_max_count),
+            id_pool({{0,elements_max_count}}){
 
             VkDeviceSize device_size = 
                 BlockSize * elements_max_count;
@@ -281,7 +284,13 @@ namespace wvk::raii::ubo_manager {
 
         // std::uint8_t could contain some useful flags for each UBO
         TSparseSet<std::uint8_t> position_track;
+
+        std::unordered_map<wcr::wid::WEngId, std::size_t> track;
+
+        // std::vector<
+        
         std::array<WVkUBO, FramesInFlight> vk_buffers;
+        wcr::IdPool<> id_pool{};
 
         std::size_t elements_max_count_;
         VkDevice device_;

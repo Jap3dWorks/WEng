@@ -47,7 +47,7 @@ namespace wcr {
         T Generate() {
             if (free_ranges_.empty()) {
                 throw std::runtime_error(
-                    "Ges Id Pool is empty, no more DTId's can be generated!"
+                    "Id Pool is empty, no more numbers can be generated!"
                     );
             }
         
