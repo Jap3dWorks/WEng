@@ -3,7 +3,10 @@
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/RAII/UBOManager/UBOData.hpp"
+#include "WCore/Execution.hpp"
 
+#include <limits>
+#include <type_traits>
 #include <utility>
 #include <vulkan/vulkan_core.h>
 #include <unordered_map>
@@ -39,44 +42,57 @@ namespace wvk::raii::ubo_manager {
             std::size_t in_ubo_elements
             ) : vkn_(device, physical_device),
                 ubo_elements(in_ubo_elements)
-            {}
+            {
+                TypeErasureInitReg();
+            }
 
     public:
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        void Add(std::vector<wcr::wid::WEngId> ids, std::span<BlockSizeType<BlockSize>> & data) {
-            GetUboData<FrameFlag, BlockSize>(*this)->Add(std::move(ids), data);
+        template<std::uint8_t FrameFlag, BlockSizeIntT BlockSize>
+        constexpr auto * GetUBOData() {
+            return TypeErasureFns<FrameFlag,BlockSize>::GetUboDataConst(*this);
         }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        void Update(std::uint8_t frame_index, 
-                    std::vector<wcr::wid::WEngId> ids, 
-                    std::span<BlockSizeType<BlockSize>> & data) {
-            GetUboData<FrameFlag, BlockSize>(*this)->Update(
-                std::min(static_cast<std::uint8_t>(FrameFlag - 1), frame_index),
-                std::move(ids), 
-                data
-                );
+        template<std::uint8_t FrameFlag>
+        void Add(BlockSizeIntT block_size,
+                 std::vector<wcr::wid::WEngId> ids,
+                 void * data) {
+            GetTEFnContainer<FrameFlag>[block_size]
+                .add(*this, std::move(ids), data);
         }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        void Remove(std::vector<wcr::wid::WEngId> ids) {
-            GetUboData<FrameFlag, BlockSize>(*this)->Remove(std::move(ids));
+        template<std::uint8_t FrameFlag>
+        void Update(BlockSizeIntT block_size,
+                    std::uint8_t frame_index,
+                    std::vector<wcr::wid::WEngId> ids,
+                    void * data) {
+            
+            GetTEFnContainer<FrameFlag>[block_size]
+                .update(*this,
+                        frame_index,
+                        std::move(ids),
+                        data);
         }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        bool Contains(wcr::wid::WEngId id) const {
-            return GetUboData<FrameFlag, BlockSize>(*this)->Contains(id);
+        template<std::uint8_t FrameFlag>
+        void Remove(BlockSizeIntT block_size, std::vector<wcr::wid::WEngId> ids) {
+            GetTEFnContainer<FrameFlag>[block_size].remove(*this, std::move(ids));
         }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        std::size_t GetOffset(wcr::wid::WEngId id) const {
-            return GetUboData<FrameFlag, BlockSize>(*this)->GetOffset();
+        template<std::uint8_t FrameFlag>
+        bool Contains(BlockSizeIntT block_size, wcr::wid::WEngId id) const {
+            return GetTEFnContainer<FrameFlag>()[block_size].contains(*this, id);
         }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        WVkUBO GetUBO(std::uint8_t frame_index) const {
-            return GetUboData<FrameFlag, BlockSize>(*this)->GetUBO(frame_index);
+        template<std::uint8_t FrameFlag>
+        std::size_t GetOffset(BlockSizeIntT block_size, wcr::wid::WEngId id) const {
+            return GetTEFnContainer<FrameFlag>()[block_size].get_offset(*this, id);
+        }
+
+        template<std::uint8_t FrameFlag>
+        WVkUBO GetUBO(BlockSizeIntT block_size,
+                      std::uint8_t frame_index) const {
+            return GetTEFnContainer<FrameFlag>()[block_size].get_UBO(*this, frame_index);
         }
 
     private:
@@ -87,54 +103,92 @@ namespace wvk::raii::ubo_manager {
         } vkn_;
 
         std::size_t ubo_elements;
+
+        struct UniqueVoidPtr {
+            static inline void NoDelete(void*) {}
+
+            std::unique_ptr<void, void(*)(void*)> ptr{nullptr, &NoDelete};
+
+            void * get() const {return ptr.get(); }
+        };
         
-        // Data block size . SpareSet
-        std::unordered_map<std::size_t,
-                           std::unique_ptr<UboDataBase>> static_frame_ubo{};
+        std::unordered_map<BlockSizeIntT,
+                           UniqueVoidPtr> static_frame_ubo_{};
 
-        // Reserves one block for each frame in flight continously.
-        std::unordered_map<std::size_t,
-                           std::unique_ptr<UboDataBase>> dynamic_frame_ubo{};
+        std::unordered_map<BlockSizeIntT,
+                           UniqueVoidPtr> dynamic_frame_ubo_{};
 
-        template<std::uint8_t FrameFlag>
-        requires (FrameFlag == STATIC_FRAME_FLAG || FrameFlag == DYNAMIC_FRAME_FLAG)
-        static inline constexpr auto & GetContainer(DynamicUBOManager & self) {
+        template<std::uint8_t FrameFlag, typename T>
+        requires requires{
+            {FrameFlag == STATIC_FRAME_FLAG || FrameFlag == DYNAMIC_FRAME_FLAG};
+            {std::is_same_v<std::decay_t<T>, DynamicUBOManager>};
+        }
+        static inline constexpr auto & GetContainer(T && self) {
             if constexpr(FrameFlag == STATIC_FRAME_FLAG) {
-                return self.static_frame_ubo;
+                return std::forward<T>(self).static_frame_ubo_;
             }
             else {
-                return self.dynamic_frame_ubo;
+                return std::forward<T>(self).dynamic_frame_ubo_;
             }
         }
-
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
+        
+        template<std::uint8_t FrameFlag, BlockSizeIntT BlockSize>
         requires (FrameFlag == STATIC_FRAME_FLAG || FrameFlag == DYNAMIC_FRAME_FLAG)
-        static inline UboData<FrameFlag, BlockSize> * GetUboData(DynamicUBOManager & self) {
+        struct TypeErasureFns {
 
-            if(!GetContainer<FrameFlag>(self).contains(BlockSize)) {
-                GetContainer<FrameFlag>(self)[BlockSize] = UboData<FrameFlag, BlockSize>{
-                    self.vkn_.device,
-                    self.vkn_.physical_device,
-                    self.ubo_elements
+            using UBODataT = UBOData<FrameFlag, BlockSize>;
+
+            static inline void Destructor(void * ptr) {
+                UBODataT* ubo_ptr = reinterpret_cast<UBODataT *>(ptr);
+                ubo_ptr->~UBOData();
+                delete ubo_ptr;
+            }
+
+            static inline UniqueVoidPtr CreateUBOData(
+                DynamicUBOManager const & self
+                ) {
+                return {
+                    std::unique_ptr<UBODataT, void(*)(void*)>(
+                        new UBODataT(self.vkn_.device,
+                                     self.vkn_.physical_device,
+                                     self.ubo_elements),
+                        Destructor
+                        )
                 };
+            }
 
-                return static_cast<UboData<FrameFlag, BlockSize>*>(
+            static inline void EnsureContainer(DynamicUBOManager & self) {
+                if(!GetContainer<FrameFlag>(self).contains(BlockSize)) {
+                    GetContainer<FrameFlag>(self).try_emplace(
+                        BlockSize,
+                        CreateUBOData(self)
+                        );
+                }
+            }
+
+            static inline UBODataT * GetUboData(DynamicUBOManager & self) {
+                EnsureContainer(self);
+
+                return reinterpret_cast<UBODataT*>(
                     GetContainer<FrameFlag>(self)[BlockSize].get()
                     );
             }
-        }
 
-        template<std::uint8_t FrameFlag, std::uint8_t BlockSize>
-        struct TypeErasure {
+            static inline UBODataT const * GetUboDataConst(DynamicUBOManager const & self) {
+                return reinterpret_cast<UBODataT const *>(
+                    GetContainer<FrameFlag>(self).at(BlockSize).get()
+                    );
+            }
 
             static inline void Add(
                 DynamicUBOManager & self,
                 std::vector<wcr::wid::WEngId> ids,
                 void * data) {
-                std::span<BlockSizeType<BlockSize>> blck_dt{
-                    reinterpret_cast<BlockSizeType<BlockSize>*>(data),
+                std::span<BlockSizeT<BlockSize>> blck_dt{
+                    reinterpret_cast<BlockSizeT<BlockSize>*>(data),
                     ids.size()};
-                GetUboData<FrameFlag, BlockSize>(self)->Add(std::move(ids), blck_dt);
+                
+                GetUboData(self)->Add(std::move(ids), blck_dt);
             }
 
             static inline void Update(
@@ -142,11 +196,11 @@ namespace wvk::raii::ubo_manager {
                 std::uint8_t frame_index, 
                 std::vector<wcr::wid::WEngId> ids,
                 void * data) {
-                std::span<BlockSizeType<BlockSize>> blck_dt {
-                    reinterpret_cast<BlockSizeType<BlockSize>*>(data),
+                std::span<BlockSizeT<BlockSize>> blck_dt {
+                    reinterpret_cast<BlockSizeT<BlockSize>*>(data),
                     ids.size()};
                 
-                GetUboData<FrameFlag, BlockSize>(self)->Update(
+                GetUboData(self)->Update(
                     std::min(static_cast<std::uint8_t>(FrameFlag - 1), frame_index),
                     std::move(ids), 
                     blck_dt
@@ -155,54 +209,50 @@ namespace wvk::raii::ubo_manager {
 
             static inline void Remove(
                 DynamicUBOManager & self,
-                std::vector<wcr::wid::WEngId> ids) {
-                GetUboData<FrameFlag, BlockSize>(self)->Remove(std::move(ids));
+                std::vector<wcr::wid::WEngId> ids
+                ) {
+                GetUboData(self)->Remove(std::move(ids));
             }
 
             static inline bool Contains(
-                DynamicUBOManager & self,
-                wcr::wid::WEngId id) {
-                return GetUboData<FrameFlag, BlockSize>(self)->Contains(id);
+                DynamicUBOManager const & self,
+                wcr::wid::WEngId id
+                ) {
+                return GetUboDataConst(self)->Contains(id);
             }
 
             static inline std::size_t GetOffset(
-                DynamicUBOManager & self,
+                DynamicUBOManager const & self,
                 wcr::wid::WEngId id) {
-                return GetUboData<FrameFlag, BlockSize>(self)->GetOffset();
+                return GetUboDataConst(self)->GetOffset(id);
             }
 
             static inline WVkUBO GetUBO(
-                DynamicUBOManager & self,
+                DynamicUBOManager const & self,
                 std::uint8_t frame_index) {
-                return GetUboData<FrameFlag, BlockSize>(self)->GetUBO(frame_index);
+                return GetUboDataConst(self)->GetUBO(frame_index);
             }
             
         };
 
-        using TEAddFnT = decltype(TypeErasure<1,16>::Add)*;
-        using TEUpdateFnT = decltype(TypeErasure<1,16>::Update)*;
-        using TERemoveFnT = decltype(TypeErasure<1,16>::Remove)*;
-        using TEContainsFnT = decltype(TypeErasure<1,16>::Contains)*;
-        using TEGetOffsetFnT = decltype(TypeErasure<1,16>::GetOffset)*;
-        using TEGetUBOFbT = decltype(TypeErasure<1,16>::GetUBO)*;
+        using AddFnT = decltype(TypeErasureFns<1,16>::Add)*;
+        using UpdateFnT = decltype(TypeErasureFns<1,16>::Update)*;
+        using RemoveFnT = decltype(TypeErasureFns<1,16>::Remove)*;
+        using ContainsFnT = decltype(TypeErasureFns<1,16>::Contains)*;
+        using GetOffsetFnT = decltype(TypeErasureFns<1,16>::GetOffset)*;
+        using GetUBOFnT = decltype(TypeErasureFns<1,16>::GetUBO)*;
 
         struct TERegister {
-            TEAddFnT add;
-            TEUpdateFnT update;
-            TERemoveFnT remove;
-            TEContainsFnT contains;
-            TEGetOffsetFnT offset;
-            TEGetUBOFbT get_ubo;
+            AddFnT add;
+            UpdateFnT update;
+            RemoveFnT remove;
+            ContainsFnT contains;
+            GetOffsetFnT get_offset;
+            GetUBOFnT get_UBO;
         };
 
-        static inline std::unordered_map<std::uint8_t, TERegister>
-        te_static_reg_fn{};
-
-        static inline std::unordered_map<std::uint8_t, TERegister>
-        te_dynamic_reg_fn{};
-
         template<std::uint8_t FramesFlag>
-        constexpr static auto & GetRegFnContainer() {
+        constexpr static auto & GetTEFnContainer() {
             if constexpr(FramesFlag == STATIC_FRAME_FLAG) {
                 return te_static_reg_fn;
             }
@@ -211,53 +261,59 @@ namespace wvk::raii::ubo_manager {
             }
         }
 
+        static inline std::unordered_map<BlockSizeIntT, TERegister>
+        te_static_reg_fn{};
 
-        template<std::size_t... Is>
-        static constexpr auto make_sequence(std::index_sequence<Is...>)
-            {
-                return std::integer_sequence<std::uint8_t,
-                                             static_cast<std::uint8_t>((Is + 1) * 16)...>{};
-            }
+        static inline std::unordered_map<BlockSizeIntT, TERegister>
+        te_dynamic_reg_fn{};
 
+        static constexpr auto BlockSizesSequence() {
 
-        using Seq = decltype(make_sequence(std::make_index_sequence<15>{}));
+            auto index_seq =
+                std::make_integer_sequence<
+                    BlockSizeIntT,
+                    (std::numeric_limits<BlockSizeIntT>::max()/16) + 1>();
 
-
-        static std::unordered_map<std::uint8_t, TEAddFnT> TEInitReg() {
-
-            static bool called=false;
-
-            if (called) return;
-
-            auto reg_erasure_fn = [] <std::uint8_t FramesFlag, std::uint8_t ... Ints>
-                (std::integer_sequence<std::uint8_t, Ints...>) {
-                ((GetRegFnContainer<FramesFlag>()[Ints].add=
-                  TypeErasure<FramesFlag, Ints>::Add), ...);
-                ((GetRegFncontainer<FramesFlag>()[Ints].update=
-                  TypeErasure<FramesFlag, Ints>::Update), ...);
-                ((GetRegFncontainer<FramesFlag>()[Ints].remove=
-                  TypeErasure<FramesFlag, Ints>::Remove), ...);
-                ((GetRegFncontainer<FramesFlag>()[Ints].contains=
-                  TypeErasure<FramesFlag, Ints>::Contains), ...);
-                ((GetRegFncontainer<FramesFlag>()[Ints].offset=
-                  TypeErasure<FramesFlag, Ints>::Offset), ...);
-                ((GetRegFncontainer<FramesFlag>()[Ints].get_ubo=
-                  TypeErasure<FramesFlag, Ints>::GetUBO), ...);
-                
+            auto make_seq = []
+                <BlockSizeIntT... Ints>
+                (std::integer_sequence<BlockSizeIntT, Ints...> idxseq) constexpr -> auto {
+                return std::integer_sequence<BlockSizeIntT, (Ints * 16)...>{};
             };
 
-            reg_erasure_fn. template operator()<STATIC_FRAME_FLAG>
-                (make_sequence(std::make_index_sequence<15>()));
-
-
-            reg_erasure_fn. template operator()<DYNAMIC_FRAME_FLAG>
-                (make_sequence(std::make_index_sequence<15>()));
-
-
-            called = true;
-
+            return make_seq(index_seq);
         }
 
+        static void TypeErasureInitReg() {
+
+            auto reg_erasure_fn = [] <std::uint8_t FramesFlag, BlockSizeIntT ... Ints>
+                (std::integer_sequence<std::uint8_t, Ints...>) {
+                ((GetTEFnContainer<FramesFlag>()[Ints].add=
+                  TypeErasureFns<FramesFlag, Ints>::Add), ...);
+                
+                ((GetTEFnContainer<FramesFlag>()[Ints].update=
+                  TypeErasureFns<FramesFlag, Ints>::Update), ...);
+                
+                ((GetTEFnContainer<FramesFlag>()[Ints].remove=
+                  TypeErasureFns<FramesFlag, Ints>::Remove), ...);
+
+                ((GetTEFnContainer<FramesFlag>()[Ints].contains=
+                  TypeErasureFns<FramesFlag, Ints>::Contains), ...);
+
+                ((GetTEFnContainer<FramesFlag>()[Ints].get_offset=
+                  TypeErasureFns<FramesFlag, Ints>::GetOffset), ...);
+
+                ((GetTEFnContainer<FramesFlag>()[Ints].get_UBO=
+                  TypeErasureFns<FramesFlag, Ints>::GetUBO), ...);
+            };
+
+            WCORE_EXECUTE_ONCE(
+
+                reg_erasure_fn.template operator()<STATIC_FRAME_FLAG> (BlockSizesSequence());
+
+                reg_erasure_fn.template operator()<DYNAMIC_FRAME_FLAG> (BlockSizesSequence());
+                
+                );
+        }
     };
     
 }
