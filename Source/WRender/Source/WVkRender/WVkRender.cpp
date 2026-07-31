@@ -1,6 +1,7 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
 #include "WCore/WId.hpp"
+#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #endif
 
 #include "WVulkan/WVkRender.hpp"
@@ -207,6 +208,12 @@ void WVkRender::Initialize()
         device_.PhysicalDevice(),
         device_.GraphicsQueue(),
         command_pool_.Value()
+    };
+
+    dynamic_ubo_manager_ = {
+        device_.Device(),
+        device_.PhysicalDevice(),
+        wvk::raii::ubo_manager::INITIAL_BUFFER_SIZE
     };
 
     wvk::render::UpdatePPcessGlobalDescriptorSet(

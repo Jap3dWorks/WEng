@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <type_traits>
 #include <vulkan/vulkan_core.h>
 #include <variant>
 #include <cassert>
@@ -19,20 +20,42 @@
  
 namespace wvk::raii::ubo_manager {
 
-    template<std::uint8_t FramesInFlight>
-    class UboDataBase {};
+    template<std::uint8_t N>
+    struct BlockSizeType : std::false_type {};
+
+    template<std::uint8_t N>
+    requires (N % 16 == 0)
+    struct BlockSizeType<N> : std::true_type {
+        static constexpr std::uint8_t Size{N};
+        std::uint8_t block_size[N];
+    };
+
+    static_assert(sizeof(BlockSizeType<16>)== 16);
+    static_assert(sizeof(BlockSizeType<32>)== 32);
+    static_assert(sizeof(BlockSizeType<64>)== 64);
+    static_assert(sizeof(BlockSizeType<128>)== 128);
+    static_assert(sizeof(BlockSizeType<240>) == 240);
+
+    class UboDataBase {
+        UboDataBase() = default;
+        UboDataBase(const UboDataBase&) = delete;
+        UboDataBase(UboDataBase&&) = default;
+        UboDataBase& operator=(const UboDataBase&) = delete;
+        UboDataBase& operator=(UboDataBase&&) = default;
+        virtual ~UboDataBase() = default;
+    };
 
     template<std::uint8_t FramesInFlight, std::size_t BlockSize> 
-    requires (sizeof(BlockSize) % 16 == 0)
-    class UboData : public UboDataBase<FramesInFlight> {
+    requires (BlockSizeType<BlockSize>::value)
+    class UboData : public UboDataBase {
 
     public:
 
         UboData() = delete;
         
-        UboData(const UboData&) = default;
+        UboData(const UboData&) = delete;
         UboData(UboData&&) = default;
-        UboData& operator=(const UboData&) = default;
+        UboData& operator=(const UboData&) = delete;
         UboData& operator=(UboData&&) = default;
 
         ~UboData() override {
@@ -134,8 +157,9 @@ namespace wvk::raii::ubo_manager {
             }
         }
 
-        template<typename T> requires (sizeof(T) == BlockSize)
-        void Add(std::vector<wcr::wid::WEngId> ids, std::span<T> & data) {
+        void Add(std::vector<wcr::wid::WEngId> ids,
+                 std::span<BlockSizeType<BlockSize>> & data) {
+
             for(auto id : ids) {
                 assert(!position_track.Contains(id.GetId()));
                 position_track.Insert(id.GetId(), 1);
@@ -163,10 +187,9 @@ namespace wvk::raii::ubo_manager {
             return position_track.Contains(id.GetId());
         }
 
-        template<typename T> requires (sizeof(T) == BlockSize)
         void Update(std::uint8_t frame_index,
                     std::vector<wcr::wid::WEngId> ids,
-                    std::span<T> & data) {
+                    std::span<BlockSizeType<BlockSize>> & data) {
             assert(position_track.Contains(id.GetId()));
 
             std::vector<std::uint32_t> permutation{};
@@ -200,7 +223,7 @@ namespace wvk::raii::ubo_manager {
             struct Transaction {
                 std::size_t pos;
                 std::size_t size;
-                T * data;
+                BlockSizeType<BlockSize> * data;
             };
             
             std::vector<Transaction> transactions;

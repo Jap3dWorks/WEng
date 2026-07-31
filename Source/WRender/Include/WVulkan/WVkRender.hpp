@@ -93,7 +93,8 @@ public:
         asset_render_data_.UnloadTexture(in_id);
     }
 
-    void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id, const wct::geometry::WMesh & in_mesh) override {
+    void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
+                        const wct::geometry::WMesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WId.hpp"
+#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -52,7 +53,6 @@ namespace wvk::render::pipe_bindings {
         was::RenderPipelineParams const & parameters,
         wvk::raii::AssetRenderData & asset_render_data        
         ) {
-
         auto & ubo_params = parameters.Get_ubo_list();
 
         std::unordered_map<
@@ -236,6 +236,31 @@ namespace wvk::render::pipe_bindings {
 
         return result;
     }
+
+    // template<std::uint8_t FramesInFlight>
+    // WNODISCARD std::vector<WVkDescSetUBOBinding<FramesInFlight>>
+    // _CollectUBOBindings_(
+    //     wcr::wid::WEntityComponentId const & id,
+    //     was::RenderPipeline const & pipeline,
+    //     was::RenderPipelineParams const & parameters,
+    //     wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
+    //     wvk::raii::AssetRenderData & asset_render_data
+    //     ) {
+    //     auto & ubo_params = parameters.Get_ubo_list();
+
+    //     std::unordered_map<
+    //         std::uint8_t,
+    //         wct::render::RPipeParamUbo const *> binding_param{};
+
+    //     for (auto & ubo : ubo_params) {
+    //         binding_param.insert(
+    //             {ubo.binding, &ubo}
+    //             );
+    //     }
+
+    //     // ubo_params[0].data
+        
+    // }
 
     template<std::uint8_t FramesInFlight>
     inline void CreateBindingSet(
