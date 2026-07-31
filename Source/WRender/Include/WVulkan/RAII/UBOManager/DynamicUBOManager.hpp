@@ -306,7 +306,7 @@ namespace wvk::raii::ubo_manager {
                   TypeErasureFns<FramesFlag, Ints>::GetUBO), ...);
             };
 
-            WCORE_EXECUTE_ONCE(
+            WCORE_STATIC_EXECUTE_ONCE(
 
                 reg_erasure_fn.template operator()<STATIC_FRAME_FLAG> (BlockSizesSequence());
 
