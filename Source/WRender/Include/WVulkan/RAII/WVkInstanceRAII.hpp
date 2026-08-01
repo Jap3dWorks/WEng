@@ -40,15 +40,18 @@ struct WVkInstanceCreator {
         VkDebugUtilsMessengerCreateInfoEXT debug_create_info =
             wvk::types::VkDebugUtilsMessengerCreateInfoEXT();
 
-        std::vector<const char*> enabled_layers_names{};
+        std::vector<std::string> enabled_layers_names{};
+        std::vector<char const *> enabled_layers_ptrs{};
+        
         if (in_enable_validation_layers)
         {
             create_info.enabledLayerCount =
                 static_cast<std::uint32_t>(in_validation_layers.size());
-        
-            wstr::ToConstCharPtrs(in_validation_layers, enabled_layers_names);
 
-            create_info.ppEnabledLayerNames = enabled_layers_names.data();
+            enabled_layers_names = wstr::ToStrings(in_validation_layers);
+            enabled_layers_ptrs = wstr::ToConstCharPtrs(enabled_layers_names);
+
+            create_info.ppEnabledLayerNames = enabled_layers_ptrs.data();
 
             debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |

@@ -100,20 +100,23 @@ public:
         create_info.pEnabledFeatures = nullptr;
 
         create_info.enabledExtensionCount = static_cast<uint32_t>(in_device_extensions.size());
+
+        auto enable_extension_names = wstr::ToStrings(in_device_extensions);
+        auto extension_names_ptrs = wstr::ToConstCharPtrs(enable_extension_names);
     
-        std::vector<const char *> enable_extension_names{};
-        wstr::ToConstCharPtrs(in_device_extensions, enable_extension_names);
-    
-        create_info.ppEnabledExtensionNames = enable_extension_names.data();
+        create_info.ppEnabledExtensionNames = extension_names_ptrs.data();
     
         create_info.pNext = &vk2_features;
 
-        std::vector<const char *> enabled_layer_names{};
+        std::vector<std::string> enabled_layer_names{};
+        std::vector<const char *> enabled_layer_ptrs{};
         if (in_enable_validation_layers)
         {
             create_info.enabledLayerCount = static_cast<uint32_t>(in_validation_layers.size());
-            wstr::ToConstCharPtrs(in_validation_layers, enabled_layer_names);
-            create_info.ppEnabledLayerNames = enabled_layer_names.data();
+            enabled_layer_names = wstr::ToStrings(in_validation_layers);
+            enabled_layer_ptrs = wstr::ToConstCharPtrs(enabled_layer_names);
+
+            create_info.ppEnabledLayerNames = enabled_layer_ptrs.data();
         }
         else
         {

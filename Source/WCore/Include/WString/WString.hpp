@@ -133,22 +133,28 @@ namespace wstr {
         return std::filesystem::absolute(in_path).string();
     }
     
-
-    /**
-     * @brief converts a vector of std::string_view into a vector of const char *.
-     * @DEPRECATED this is not reliable.
-     */
-    [[deprecated("Not a secure function.")]] inline void ToConstCharPtrs(
-        const std::vector<std::string_view>& in_vw,
-        std::vector<const char *> & out_char_ptr
+    WNODISCARD inline std::vector<std::string> ToStrings(
+        std::vector<std::string_view> const & in_vw
         ) {
-        out_char_ptr.clear();
-        out_char_ptr.reserve(in_vw.size());
 
-        for (const std::string_view & v : in_vw) {
-            out_char_ptr.push_back(v.data());  // CAUTION not null character!
+        std::vector<std::string> result;
+        result.reserve(in_vw.size());
+        for (auto sv : in_vw) {
+            result.push_back(std::string(sv));
         }
+        return result;
+    }
 
+    WNODISCARD inline std::vector<char const *>  ToConstCharPtrs(
+        std::vector<std::string> & strings
+        ) {
+        std::vector<char const *> result;
+        result.reserve(strings.size());
+        
+        for (auto & v : strings) {
+            result.push_back(v.data());
+        }
+        return result;
     }
 
     /**

@@ -100,6 +100,10 @@ public:
         std::vector<WVkDescSetUBOBinding<FramesInFlight>> in_ubos,
         std::vector<WVkDescSetTextureBinding> in_textures
         ){
+
+        // TODO 1 local descriptor by pipeline_id x param_asset_id x ubo buffers (binding order)
+        // store in a tree structure
+
         WVkRenderPipeline pipeline_info = Super::Pipeline(in_pipeline_id);
 
         WCORE_DEBUG_ONLY(

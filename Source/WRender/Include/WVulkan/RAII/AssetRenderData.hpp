@@ -26,10 +26,6 @@ namespace wvk::raii {
     using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
     using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
-    // TODO extract ubo management from AssetRenderData.
-    // WARNING UBOs can be frame dependent.
-    using WVkUBODb = TObjectDataBase<WVkUBO, void, wcr::wid::WEngId::IdType>;
-
     public:
 
     AssetRenderData()=default;
@@ -112,33 +108,6 @@ namespace wvk::raii {
 
     void Clear();
 
-    // UBOs
-
-    /**
-     * Create an UBO buffer associated to input ubo_set_id
-     */
-    WNODISCARD
-    std::size_t CreateUBO(wcr::wid::WEngId ubo_set_id,
-                          std::size_t ubo_size,
-                          void const * initial_data_ptr) {
-        return ubo_data_.CreateUBO(vkn_.device, vkn_.physical_device,
-                                   ubo_set_id, ubo_size, initial_data_ptr);
-    }
-
-    void DestroyUBOs(wcr::wid::WEngId wid) {
-        ubo_data_.DestroyUBOs(wid, vkn_.device);
-    }
-
-    bool ContainsUBOs(wcr::wid::WEngId wid) const {
-        return ubo_data_.ubo_sets.contains(wid);
-    }
-
-    WVkUBO const & GetUBO(std::size_t id) const {
-        return ubo_data_.ubo_collection.Get(id);
-    }
-
-    std::vector<std::size_t> GetUBOs(wcr::wid::WEngId wid) const;
-
     private:
 
     void Destroy();
@@ -152,26 +121,6 @@ namespace wvk::raii {
 
     WVkTextureDb texture_collection_{};
     WVkMeshDb static_mesh_collection_{};
-
-    struct [[deprecated]] UboData {
-        WVkUBODb ubo_collection{};
-
-        std::unordered_map<
-            wcr::wid::WEngId,
-            std::variant<std::size_t, std::vector<std::size_t>>
-            > ubo_sets{};
-
-        void Clear(VkDevice device);
-
-        void Reg(wcr::wid::WEngId set_id, std::size_t ubo_id);
-
-        std::size_t CreateUBO(VkDevice device, VkPhysicalDevice pdevice,
-                              wcr::wid::WEngId id,
-                              std::size_t ubo_size, void const * initial_data);
-
-        void DestroyUBOs(wcr::wid::WEngId wid, VkDevice device);
-        
-    } ubo_data_{};
 
     };
 
