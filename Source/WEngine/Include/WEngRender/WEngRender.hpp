@@ -260,9 +260,19 @@ namespace wng::render {
              &in_level]
             (wcm::StaticMesh* in_component) {
 
+                wcr::wid::WAssetId sm_id = in_component->Get_static_mesh_asset();
+
+                if(!sm_id.IsValid()) {
+                    return;
+                }
+
                 was::StaticMesh & sm_asset = in_asset_db.Get<was::StaticMesh>(
                     in_component->Get_static_mesh_asset()
                     );
+
+                if (sm_asset.MeshCount() == 0) {
+                    return;
+                }
 
                 sm_asset.ForEachMesh(
                     [&in_asset_db,
@@ -319,9 +329,8 @@ namespace wng::render {
                     wct::render::RPipeParamUbo ubodt{
                         .binding=wct::render::CommonBindings::MODEL_UBO,
                         .data=std::span<std::uint8_t>(
-                            ptr,
-                            ptr + sizeof(grpubo)) // ,
-                        // .offset=0
+                            ptr, sizeof(grpubo)
+                            )
                     };
 
                     // Update only the first static mesh model binding

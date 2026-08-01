@@ -33,9 +33,9 @@ namespace wrd::render {
 
         // orient needs to be an ortonormal base.
         assert(
-            std::abs(orient[0].length() - 1.f) < 0.00001 &&
-            std::abs(orient[1].length() - 1.f) < 0.00001 &&
-            std::abs(orient[2].length() - 1.f) < 0.00001
+            std::abs(glm::length(orient[0]) - 1.f) < 0.0001 &&
+            std::abs(glm::length(orient[1]) - 1.f) < 0.0001 &&
+            std::abs(glm::length(orient[2]) - 1.f) < 0.0001
             );
         glm::mat4 o = glm::transpose(orient);
 

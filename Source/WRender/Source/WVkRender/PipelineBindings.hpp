@@ -302,20 +302,19 @@ namespace wvk::render::pipe_bindings {
             [&]
             <std::uint8_t UBOFrames>
             (wct::render::RPipeParamDescLayInfo const & desc, wcr::wid::WEngId wid)
-            -> std::optional<WVkDescSetUBOBinding<FramesInFlight>>
+            -> WVkDescSetUBOBinding<FramesInFlight>
             {
                 constexpr auto frame_flag=ubo_frame_flag_v<FramesInFlight, UBOFrames>;
 
-                if (ubo_man.template Contains<frame_flag>(
-                        desc.size, wid) )
-                    return std::nullopt;
+                if (!ubo_man.template Contains<frame_flag>(
+                        desc.size, wid) ) {
+                    void const * ptr = binding_param.contains(desc.binding)
+                        ? get_ubo_data_ptr(binding_param[desc.binding])
+                        : nullptr;
 
-                void const * ptr = binding_param.contains(desc.binding)
-                ? get_ubo_data_ptr(binding_param[desc.binding])
-                : nullptr;
-
-                ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
-
+                    ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
+                }
+                
                 WVkDescSetUBOBinding<FramesInFlight> result{};
                 result.binding = desc.binding;
 
@@ -348,8 +347,7 @@ namespace wvk::render::pipe_bindings {
             switch(descriptor.type) {
 
             case wct::render::ERPipeParamType::UBO_Static:
-                // result.push_back(
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<1> (
                         descriptor,
@@ -359,13 +357,11 @@ namespace wvk::render::pipe_bindings {
                                 parameters.Get_asset_id(),
                                 descriptor.binding
                                 ))
-                        ))
-                    result.push_back(std::move(item.value()));
-                
+                        ));
                 break;
 
             case wct::render::ERPipeParamType::UBO_Dynamic:
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<FramesInFlight> (
                         descriptor,
@@ -376,13 +372,12 @@ namespace wvk::render::pipe_bindings {
                                 descriptor.binding
                                 ))
                         )
-                    )
-                    result.push_back(std::move(item.value()));
+                    );
 
                 break;
 
             case wct::render::ERPipeParamType::UBO_Entity_Static: 
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<1> (
                         descriptor,
@@ -390,13 +385,12 @@ namespace wvk::render::pipe_bindings {
                             get_entity_id(entity_component_id)
                             )
                         )
-                    )
-                    result.push_back(std::move(item.value()));
+                    );
 
                 break;
 
             case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<FramesInFlight> (
                         descriptor,
@@ -404,13 +398,12 @@ namespace wvk::render::pipe_bindings {
                             get_entity_id(entity_component_id)
                             )
                         )
-                    )
-                    result.push_back(std::move(item.value()));
+                    );
 
                 break;
                 
             case wct::render::ERPipeParamType::UBO_Component_Static:
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<1> (
                         descriptor,
@@ -418,13 +411,12 @@ namespace wvk::render::pipe_bindings {
                             entity_component_id
                             )
                         )
-                    )
-                    result.push_back(std::move(item.value()));
+                    );
 
                 break;
 
             case wct::render::ERPipeParamType::UBO_Component_Dynamic:
-                if (auto item =
+                result.push_back(
                     CreateUBOBinding
                     .template operator()<FramesInFlight> (
                         descriptor,
@@ -432,8 +424,7 @@ namespace wvk::render::pipe_bindings {
                             entity_component_id
                             )
                         )
-                    )
-                    result.push_back(std::move(item.value()));
+                    );
 
                 break;
 

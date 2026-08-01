@@ -219,7 +219,7 @@ private:
                 buffer_infos[j].range = itm->range;
                 buffer_infos[j].offset=0;
 
-                wvk::descriptor::UpdateWriteDescriptorSet_UBO(
+                UpdateWriteDescriptorSet_UBO(
                     write_descriptors[j],
                     j, // binding 0 and 1
                     &buffer_infos[j],
@@ -312,6 +312,26 @@ private:
             lighting_ubo_ = {};
         }
     }
+
+    constexpr void UpdateWriteDescriptorSet_UBO(
+        VkWriteDescriptorSet & out_write_descriptor_set,
+        uint32_t binding,
+        VkDescriptorBufferInfo const * buffer_info,
+        VkDescriptorSet dst_set
+        )
+        {
+            out_write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            out_write_descriptor_set.dstBinding = binding;
+            out_write_descriptor_set.dstSet = dst_set;
+            out_write_descriptor_set.dstArrayElement = 0;
+            // descriptorType as param
+            out_write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            out_write_descriptor_set.descriptorCount = 1;
+            out_write_descriptor_set.pBufferInfo = buffer_info;
+            out_write_descriptor_set.pImageInfo = VK_NULL_HANDLE;
+            out_write_descriptor_set.pNext = VK_NULL_HANDLE;
+        }
+    
 
     VkDevice device_{VK_NULL_HANDLE};
 

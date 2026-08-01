@@ -33,7 +33,7 @@ public:
 
     constexpr TSparseSet() noexcept = default;
 
-    virtual ~TSparseSet() = default;
+    ~TSparseSet() = default;
 
     constexpr TSparseSet(const ValueAllocator & in_value_allocator) :
         index_pos_map_(),

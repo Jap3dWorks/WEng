@@ -149,14 +149,20 @@ namespace wvk::render::rec_cmd_bffr {
                         descriptorset
                     };
 
+                std::vector<std::uint32_t> dynamic_offsets;
+                dynamic_offsets.resize(
+                    // 2,
+                    binding.ubos.size(),
+                    0);
+
                 vkCmdBindDescriptorSets(command_buffer,
                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         render_pipeline.pipeline_layout,
                                         0,
                                         static_cast<std::uint32_t>(descsets.size()),
                                         descsets.data(),
-                                        0,
-                                        nullptr);
+                                        dynamic_offsets.size(),
+                                        dynamic_offsets.data());
 
                 vkCmdDrawIndexed(command_buffer,
                                  mesh_info.index_count,
@@ -476,6 +482,8 @@ namespace wvk::render::rec_cmd_bffr {
                 );
 
             // const WVkMesh & render_plane = render_plane_.RenderPlane();
+            std::vector<std::uint32_t> dynamic_offsets{};
+            dynamic_offsets.resize(ppcess_binding.ubos.size(), 0);
 
             wvk::render::RndCmd_PostprocessDrawCommands(
                 device, command_buffer,
@@ -483,6 +491,7 @@ namespace wvk::render::rec_cmd_bffr {
                 render_plane.index_count,
                 ppcess_pipeline.pipeline_layout,
                 ppcess_pipeline.pipeline,
+                dynamic_offsets,
                 std::array<VkDescriptorSet,3>{
                     global_descriptors.DescriptorSet(frame_index),
                     pp_descriptor,

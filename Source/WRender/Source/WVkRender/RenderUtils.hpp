@@ -4,6 +4,7 @@
 #include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
 #include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
 #include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
@@ -86,14 +87,15 @@ namespace wvk::render {
         write_ds.reserve(ubo_binding.size() + in_textures_binding.size());
 
         for(auto & ubo_desc : ubo_binding) {
-            write_ds.push_back({});
-
-            wvk::descriptor::UpdateWriteDescriptorSet_UBO(
-                write_ds.back(),
-                ubo_desc.binding,
-                &(ubo_desc.ubo_desc[in_frame_index].desc_buffer),
-                descriptor_set
-                );
+            VkWriteDescriptorSet ubo_write = wvk::types::VkWriteDescriptorSet();
+            ubo_write.dstBinding = ubo_desc.binding;
+            ubo_write.dstSet = descriptor_set;
+            ubo_write.dstArrayElement = 0;
+            ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            ubo_write.descriptorCount = 1;
+            ubo_write.pBufferInfo = &(ubo_desc.ubo_desc[in_frame_index].desc_buffer);
+            
+            write_ds.push_back(std::move(ubo_write));
         }
 
         for (auto & texbnd : in_textures_binding) {
@@ -920,7 +922,7 @@ namespace wvk::render {
             );
     }
 
-    template<typename TDcrpLst>
+    template<typename TDcrpLst, typename TDynOffsetsList>
     inline void RndCmd_PostprocessDrawCommands(
         const VkDevice & in_device,
         const VkCommandBuffer & in_command_buffer,
@@ -929,6 +931,7 @@ namespace wvk::render {
         const std::uint32_t & in_index_count,
         const VkPipelineLayout & in_pipeline_layout,
         const VkPipeline & in_pipeline,
+        TDynOffsetsList && dynamic_offsets,
         TDcrpLst && in_descriptors
         ) {
         VkDeviceSize offsets[] = {0};
@@ -950,8 +953,8 @@ namespace wvk::render {
                                 0,
                                 static_cast<std::uint32_t>(std::forward<TDcrpLst>(in_descriptors).size()),
                                 std::forward<TDcrpLst>(in_descriptors).data(),
-                                0,
-                                nullptr);
+                                dynamic_offsets.size(),
+                                dynamic_offsets.data());
 
         vkCmdDrawIndexed(in_command_buffer,
                          in_index_count,

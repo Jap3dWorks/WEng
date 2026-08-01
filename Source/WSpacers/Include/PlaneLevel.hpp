@@ -95,7 +95,8 @@ namespace spacers::plane {
 
         was::RenderPipelineParams param{};
 
-        wct::render::UBOData ubo_data{};
+        wct::render::PBRScalarUBO ubo_data{};
+        
         param.Set_ubo_list(
             {
                 {

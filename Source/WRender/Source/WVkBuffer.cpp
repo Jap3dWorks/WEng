@@ -1,6 +1,7 @@
 #include "WVulkan/Vk/WVkBuffer.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 
 void wvk::buffer::CreateVkBuffer(
     VkBuffer &out_buffer,

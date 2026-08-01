@@ -136,7 +136,6 @@ namespace wvk::raii::ubo_manager {
 
             static inline void Deleter(void * ptr) {
                 BlockSizeUBOsT* ubo_ptr = reinterpret_cast<BlockSizeUBOsT *>(ptr);
-                ubo_ptr->~BlockSizeUBOsT();
                 delete ubo_ptr;
             }
 

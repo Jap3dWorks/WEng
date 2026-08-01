@@ -58,16 +58,17 @@ namespace wvk::raii::ubo_manager {
 
         ~BlockSizeUBOs() {
             if(device_ != VK_NULL_HANDLE) {
-                for(auto & vk_buffer: vk_buffers) {
+                for(auto & buffer: vk_buffers) {
                     wvk::buffer::Destroy(
-                        vk_buffer,
+                        buffer,
                         device_
                         );
-                    vk_buffer = {};
+                    buffer = {};
                 }
                     
                 device_ = VK_NULL_HANDLE;
             }
+            // position_track = {};
         }
 
         BlockSizeUBOs(
@@ -250,7 +251,6 @@ namespace wvk::raii::ubo_manager {
 
         VkDevice device_;
 
-        // std::uint8_t could contain some useful flags for each UBO
         TSparseSet<std::uint8_t> position_track;
 
         std::array<WVkUBO, FramesInFlight> vk_buffers;

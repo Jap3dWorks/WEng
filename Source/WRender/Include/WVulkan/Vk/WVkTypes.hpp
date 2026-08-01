@@ -94,9 +94,12 @@ namespace wvk::types {
     }
 
     inline constexpr VkWriteDescriptorSet VkWriteDescriptorSet() noexcept {
-        ::VkWriteDescriptorSet result{};
-        result.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        return result;
+        return {
+            .sType=VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pBufferInfo=VK_NULL_HANDLE,
+            .pImageInfo=VK_NULL_HANDLE,
+            .pNext=VK_NULL_HANDLE
+        };
     }
 
     inline constexpr VkDescriptorImageInfo VkDescriptorImageInfo() noexcept {

@@ -144,7 +144,7 @@ namespace wvk::render::rcmd::ShadowMap {
             );
     }
 
-    VkDescriptorSet CreateDescriptorSet(
+    inline VkDescriptorSet CreateDescriptorSet(
         VkDevice device,
         std::uint32_t model_ubo_binding,
         VkDescriptorBufferInfo model_ubo
@@ -153,12 +153,16 @@ namespace wvk::render::rcmd::ShadowMap {
         VkDescriptorSet result;
 
         VkWriteDescriptorSet write_ds = wvk::types::VkWriteDescriptorSet();
-        wvk::descriptor::UpdateWriteDescriptorSet_UBO(
-            write_ds,
-            model_ubo_binding,
-            &model_ubo,
-            result
-            );
+
+        write_ds.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write_ds.dstBinding = model_ubo_binding;
+        write_ds.dstSet = result;
+        write_ds.dstArrayElement = 0;
+        write_ds.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        write_ds.descriptorCount = 1;
+        write_ds.pBufferInfo = &model_ubo;
+        write_ds.pImageInfo = VK_NULL_HANDLE;
+        write_ds.pNext = VK_NULL_HANDLE;
 
         vkUpdateDescriptorSets(
             device,
