@@ -75,7 +75,7 @@ struct WVkUBO
 {
     VkBuffer buffer{VK_NULL_HANDLE};
     VkDeviceMemory device_memory{VK_NULL_HANDLE};
-    VkDeviceSize range{1};
+    VkDeviceSize range{16};
 };
 
 struct WVkRenderPipeline

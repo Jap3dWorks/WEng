@@ -213,7 +213,7 @@ void WVkRender::Initialize()
     dynamic_ubo_manager_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        wvk::raii::ubo_manager::INITIAL_BUFFER_SIZE
+        wvk::raii::ubo_manager::INITIAL_UBO_COUNT
     };
 
     wvk::render::UpdatePPcessGlobalDescriptorSet(
@@ -478,11 +478,11 @@ void WVkRender::CreatePipelineBinding(
         asset_render_data_
         );
 
-    auto ubo_bindings = wvk::render::pipe_bindings::CollectUBOBindings<FramesInFlight()>(
+    auto ubo_bindings = wvk::render::pipe_bindings::_new_CollectUBOBindings_<FramesInFlight()>(
         component_id,
         pipeline,
         parameters,
-        asset_render_data_
+        dynamic_ubo_manager_
         );
 
     wvk::render::pipe_bindings::CreateBindingSet(
@@ -535,6 +535,7 @@ void WVkRender::ClearPipelines() {
 
 void WVkRender::UnloadAllResources() {
     asset_render_data_.Clear();
+    // UBOS?
 }
 
 void WVkRender::UpdateUboCamera(
@@ -550,9 +551,6 @@ void WVkRender::UpdateParameterDynamic(
     const wcr::wid::WEntityComponentId & component_id,
     const wct::render::RPipeParamUbo & ubo_pipe_param
     ) {
-
-    WVkDescSetUBOWrite ubowrt = wvk::render::pipe_bindings::GetUboWrite(ubo_pipe_param);
-
     WVkDescSetUBOBinding<FramesInFlight()> ubo_binding =
         wvk::render::pipe_bindings::GetUboBinding(
             component_id,
@@ -562,12 +560,11 @@ void WVkRender::UpdateParameterDynamic(
             ppcss_pipelines_
             );
 
-    wvk::render::pipe_bindings::UpdateParamDynamic(
+    wvk::render::pipe_bindings::_new_UpdateParamDynamic_(
         ubo_binding,
-        ubowrt,
-        asset_render_data_,
-        device_.Device(),
-        frame_index_
+        dynamic_ubo_manager_,
+        frame_index_,
+        wvk::render::pipe_bindings::GetUboPtrData(ubo_pipe_param)
         );
 }
 
@@ -575,9 +572,7 @@ void WVkRender::UpdateParameterStatic(
     const wcr::wid::WEntityComponentId & component_id,
     const wct::render::RPipeParamUbo & ubo_pipe_param
     ) {
-
-    WVkDescSetUBOWrite ubowrt = wvk::render::pipe_bindings::GetUboWrite(ubo_pipe_param);
-
+    // TODO pipeline descriptor could be useful to know if it is a static or dynamic param
     WVkDescSetUBOBinding<FramesInFlight()> ubo_binding =
         wvk::render::pipe_bindings::GetUboBinding(
             component_id,
@@ -587,11 +582,10 @@ void WVkRender::UpdateParameterStatic(
             ppcss_pipelines_
             );
     
-    wvk::render::pipe_bindings::UpdateParamStatic(
+    wvk::render::pipe_bindings::_new_UpdateParamStatic_(
         ubo_binding,
-        ubowrt,
-        asset_render_data_,
-        device_.Device()
+        dynamic_ubo_manager_,
+        wvk::render::pipe_bindings::GetUboPtrData(ubo_pipe_param)
         );
 }
 

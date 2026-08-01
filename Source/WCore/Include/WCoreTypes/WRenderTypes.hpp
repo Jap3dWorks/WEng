@@ -225,7 +225,7 @@ namespace wct::render {
          * Offset is applied to locate the memory address on VkBuffer when mapped.
          * It allows to update a segment of the entire buffer.   
          */
-        std::size_t offset{0};
+        // std::size_t offset{0};
     };
 
     template<typename T>

@@ -320,8 +320,8 @@ namespace wng::render {
                         .binding=wct::render::CommonBindings::MODEL_UBO,
                         .data=std::span<std::uint8_t>(
                             ptr,
-                            ptr + sizeof(grpubo)),
-                        .offset=0
+                            ptr + sizeof(grpubo)) // ,
+                        // .offset=0
                     };
 
                     // Update only the first static mesh model binding
