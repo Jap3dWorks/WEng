@@ -74,9 +74,6 @@ public:
             );
 
         pipelines.InsertAt(in_pipeline_id, render_pipeline_info);
-
-        // render_pipeline_info.wid = in_pipeline_id;
-        // render_pipeline_info.descriptor_set_layout_id = in_pipeline_id;
     }
 
     template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::RPipeParamDescLayList &> ConfigInfoFn>
@@ -210,5 +207,9 @@ public:
     WVkDescSetLayoutDb descriptor_set_layouts{};
     WVkDescriptorPoolDb descriptor_pools{};
     PipeBindingsDb pipe_bindings{};
+
+    // TODO 1 local descriptor by pipeline_id x param_asset_id x ubo buffers (in binding order)
+    // store in a tree structure
+    // Use the dynamics offsets when drawing and avoid recreating descriptors each frame.
 
 };

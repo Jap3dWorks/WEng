@@ -236,7 +236,7 @@ protected:
 
     WVkPipelinesDb<WPipelineIdType, WBindingIdType, FramesInFlight> pipelines_db_{};
 
-    // pipline_id binding_id tracks
+    // track pipline_id binding_id
     std::unordered_map<WPipelineIdType, TSparseSet<WBindingIdType>> pipeline_bindings_{};
 
   
