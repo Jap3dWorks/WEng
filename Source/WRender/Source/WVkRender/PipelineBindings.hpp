@@ -2,8 +2,8 @@
 
 #include "WCore/WId.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
-#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
-#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
+#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WCore/TVisitor.hpp"
@@ -251,8 +251,8 @@ namespace wvk::render::pipe_bindings {
         wcr::wid::WEntityComponentId binding_set_id,
         wcr::wid::WTypeAssetIndexId renderable_asset_id,
         wcr::wid::WAssetId pipeline_id,
-        WVkGBufferPipelinesRAII<FramesInFlight> & gbuffers_pipelines,
-        WVkPostprocessPipelinesRAII & postprocess_pipelines,
+        wvk::raii::pipelines::GBuffer<FramesInFlight> & gbuffers_pipelines,
+        wvk::raii::pipelines::Postprocess & postprocess_pipelines,
         std::vector<WVkDescSetUBOBinding<FramesInFlight>> ubo_bindings,
         std::vector<WVkDescSetTextureBinding> texture_bindings
         ) {
@@ -282,8 +282,8 @@ namespace wvk::render::pipe_bindings {
         wcr::wid::WEntityComponentId binding_set_id,
         std::uint8_t binding,
         wct::render::ERPipeType pipe_type,
-        WVkGBufferPipelinesRAII<FramesInFlight> const & gbuffers_pipelines,
-        WVkPostprocessPipelinesRAII const & postprocess_pipelines
+        wvk::raii::pipelines::GBuffer<FramesInFlight> const & gbuffers_pipelines,
+        wvk::raii::pipelines::Postprocess const & postprocess_pipelines
         ) {
         switch(pipe_type) {
         case wct::render::ERPipeType::Postprocess:

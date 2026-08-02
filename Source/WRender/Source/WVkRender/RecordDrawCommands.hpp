@@ -7,9 +7,9 @@
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
-#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
-#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
 #include "WVulkan/RAII/ShadowMapAttachments.hpp"
@@ -36,7 +36,7 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsGBuffersRAII<FramesInFlight> & attachments,
-        WVkGBufferPipelinesRAII<FramesInFlight> & pipelines,
+        wvk::raii::pipelines::GBuffer<FramesInFlight> & pipelines,
         wvk::raii::AssetRenderData const & asset_render_data,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {
@@ -398,7 +398,7 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsPostprocessRAII<FramesInFlight> & attachments,
-        WVkPostprocessPipelinesRAII & pipelines,
+        wvk::raii::pipelines::Postprocess & pipelines,
         WVkAttachmentsLightingRAII<FramesInFlight> const & lighting_attachments,
         WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcss_global_descriptors,

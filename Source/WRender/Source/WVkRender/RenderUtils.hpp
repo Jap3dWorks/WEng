@@ -2,7 +2,7 @@
 
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
-#include "WVulkan/RAII/WVkGBufferPipelinesRAII.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 #include "WVulkan/WVkConfig.hpp"

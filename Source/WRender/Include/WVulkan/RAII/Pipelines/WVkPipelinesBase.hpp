@@ -3,7 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/WVkConfig.hpp"
-#include "WVkPipelinesDb.hpp"
+#include "WVulkan/RAII/Pipelines/WVkPipelinesDb.hpp"
 #include "WVulkan/Vk/WVkBuffer.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
 #include "WVulkan/WVulkanStructs.hpp"

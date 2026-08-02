@@ -1,4 +1,4 @@
-#include "WVulkan/RAII/WVkPostprocessPipelinesRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVkPostprocessPipeUtils.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
@@ -10,20 +10,20 @@
 #include <vulkan/vulkan_core.h>
 
 
-WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
+wvk::raii::pipelines::Postprocess::Postprocess(
     const VkDevice & in_device,
     const VkPhysicalDevice & in_physical_device
     ) : Super(in_device, in_physical_device) {}
 
-WVkPostprocessPipelinesRAII::WVkPostprocessPipelinesRAII(
-    WVkPostprocessPipelinesRAII && other
+wvk::raii::pipelines::Postprocess::Postprocess(
+    Postprocess && other
     ) noexcept  :
     Super(std::move(other)),
     binding_order_(std::move(other.binding_order_))
 {}
 
-WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
-    WVkPostprocessPipelinesRAII && other
+wvk::raii::pipelines::Postprocess & wvk::raii::pipelines::Postprocess::operator=(
+    Postprocess && other
     ) noexcept {
     if (this != &other) {
         Super::operator=(std::move(other));
@@ -35,7 +35,7 @@ WVkPostprocessPipelinesRAII & WVkPostprocessPipelinesRAII::operator=(
 }
 
 
-void WVkPostprocessPipelinesRAII::CreatePipeline(
+void wvk::raii::pipelines::Postprocess::CreatePipeline(
     wcr::wid::WAssetId in_id,
     const was::RenderPipeline & in_pipeline_asset,
     VkDescriptorSetLayout in_global_descriptor,
@@ -84,7 +84,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
     pipeline_bindings_[in_id] = {};
 }
 
-// wcr::wid::WEntityComponentId WVkPostprocessPipelinesRAII::CreateBinding(
+// wcr::wid::WEntityComponentId wvk::raii::pipelines::Postprocess::CreateBinding(
 //     const wcr::wid::WEntityComponentId & in_binding_id,
 //     const wcr::wid::WAssetId & in_pipeline_id,
 //     const std::vector<WVkDescSetUBOWrite> & in_ubos,
@@ -109,7 +109,7 @@ void WVkPostprocessPipelinesRAII::CreatePipeline(
 //     return in_binding_id;
 // }
 
-void WVkPostprocessPipelinesRAII::ComputeBindingOrder() {
+void wvk::raii::pipelines::Postprocess::ComputeBindingOrder() {
     binding_order_.clear();
     binding_order_.resize(pipelines_db_.pipe_bindings.Count());
 
