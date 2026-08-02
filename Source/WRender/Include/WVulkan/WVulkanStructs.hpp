@@ -125,6 +125,19 @@ struct WVkDescSetUBOBinding {
     std::array<WVkDescUBOInfo, FramesInFlight> ubo_desc{};
 };
 
+template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
+struct _new_WVkDescSetUBOBinding {
+    std::uint8_t binding{0};
+    std::uint32_t dynamic_offset{0};
+    std::uint32_t range{0};
+
+    std::array<VkBuffer, FramesInFlight> buffers;
+    // struct ubodt {
+    //     std::uint32_t dynamic_offset;
+    //     VkDescriptor descriptor{};
+    // };
+};
+
 template<std::uint8_t Frames>
 struct WVkPipelineBinding {
     wcr::wid::WAssetId pipeline_id{0};

@@ -142,10 +142,13 @@ namespace wcr::wid {
 
     };
 
+    class WEngId;
+
     template<typename T>
     concept CIsWId =
         std::is_same_v<T, WId<typename T::IdType, typename T::FlagType, T::NULL_VALUE >> ||
-        std::is_base_of_v<WId<typename T::IdType, typename T::FlagType, T::NULL_VALUE >, T>;
+        std::is_base_of_v<WId<typename T::IdType, typename T::FlagType, T::NULL_VALUE >, T> ||
+        std::is_same_v<T, WEngId>;
 
 // ---------------
 // Specialized IDs

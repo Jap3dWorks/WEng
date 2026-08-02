@@ -6,6 +6,7 @@
 #include "WVulkan/RAII/DescriptorPool.hpp"
 
 #include <vulkan/vulkan_core.h>
+#include <unordered_set>
 
 namespace wvk::raii::pipelines::gbuffer_lib {
 
@@ -16,14 +17,27 @@ namespace wvk::raii::pipelines::gbuffer_lib {
         std::uint32_t model_ubo_offset;
         std::array<VkDescriptorSet, FramesInFlight> model_ubo_descriptor_set;
 
-        std::uint32_t param_ubo_offset;
+        std::vector<std::uint32_t> param_ubo_offsets;
+        
         std::array<VkDescriptorSet, FramesInFlight> param_descripor_set;
     };
 
     template<std::uint8_t FramesInFlight>
     struct Collection {
-        wvk::raii::DescriptorPool<10,10,70,90> descriptor_pool{};
+        
+        wvk::raii::DescriptorPool<
+            8 * FramesInFlight,
+            0,
+            30 * FramesInFlight,
+            38> descriptor_pool{};
+
+        std::array<VkDescriptorSet, FramesInFlight> model_ubo_desc_set{VK_NULL_HANDLE};
+
         wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> ubo_manager{};
+
+        std::unordered_map<wcr::wid::WAssetId,
+                           std::array<VkDescriptorSet, FramesInFlight>> param_descriptors;
+
     };
 
     inline auto CreatePipeline(
@@ -202,6 +216,78 @@ namespace wvk::raii::pipelines::gbuffer_lib {
         }
 
         return std::tuple{render_pipeline, pipeline_layout};
+    }
+
+    template<std::uint8_t FramesInFlight>
+    inline auto CreateModelUboDescriptorSet(
+        VkDevice device,
+        wcr::wid::WEngId model_ubo_id,
+        std::uint32_t model_ubo_binding,
+        Collection<FramesInFlight> & collection,
+        VkDescriptorSetLayout model_ubo_layout
+        ) {
+
+        collection.ubo_manager.Add<FramesInFlight>(
+            sizeof(wct::render::ModelUBO),
+            model_ubo_id
+            );
+
+        std::array<VkDescriptorSet, FramesInFlight> result;
+
+        for(std::uint32_t f=0; f<FramesInFlight; ++f) {
+                    
+            WVkUBO ubo = collection.ubo_manager
+                .GetUBO<FramesInFlight>(
+                    sizeof(wct::render::ModelUBO),
+                    f
+                    );
+
+            VkDescriptorSet descriptor_set;
+            VkDescriptorSetAllocateInfo alloc_info =
+                wvk::types::VkDescriptorSetAllocateInfo();
+
+            alloc_info.descriptorPool = collection.descriptor_pool;
+            alloc_info.descriptorSetCount = 1;
+            alloc_info.pSetLayouts = &model_ubo_layout;
+
+            wvk::vulkan::ExecVkProcChecked(
+                vkAllocateDescriptorSets,
+                "Failed to allocate descriptor sets!",
+                device,
+                &alloc_info,
+                &descriptor_set
+                );
+
+            VkWriteDescriptorSet write_ds;
+
+            VkDescriptorBufferInfo buffer_info = {
+                .buffer=ubo.buffer,
+                .offset=0,
+                .range=sizeof(wct::render::ModelUBO)
+            };
+
+            VkWriteDescriptorSet ubo_write = wvk::types::VkWriteDescriptorSet();
+            ubo_write.dstBinding = model_ubo_binding;
+            ubo_write.dstSet = descriptor_set;
+            ubo_write.dstArrayElement = 0;
+            ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            ubo_write.descriptorCount = 1;
+            ubo_write.pBufferInfo = &buffer_info;
+            
+            vkUpdateDescriptorSets(
+                device,
+                1,
+                &ubo_write,
+                0,
+                nullptr
+                );
+
+            result[f]=descriptor_set;
+        }
+
+        return result;
+
+
     }
 
     

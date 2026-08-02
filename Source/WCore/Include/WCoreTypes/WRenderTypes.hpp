@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCore/WCoreMacros.hpp"
 #include "WCore/WConcepts.hpp"
+#include "WCore/WId.hpp"
 
 #include <cstdint>
 #include <array>
@@ -183,6 +184,39 @@ namespace wct::render {
             param_type == ERPipeParamType::UBO_Component_Static ||
             param_type == ERPipeParamType::UBO_Component_Dynamic;
     }
+
+    constexpr inline wcr::wid::WEngId ApplyPipeParamType(
+        wcr::wid::WEngId id,
+        ERPipeParamType pipe_param_type) noexcept {
+
+        auto get_entity_id = [](wcr::wid::WEntityComponentId _id) constexpr {
+
+            wcr::wid::WAssetId level;
+            wcr::wid::WEntityId entity;
+            wcr::wid::WComponentTypeId component;
+            wcr::wid::WSubIdxId indx;
+
+            _id.ExtractWIds(level, entity, component, indx);
+            
+            return wcr::wid::WEngId::FromEntityComponent(
+                wcr::wid::WEntityComponentId{
+                    level,
+                    entity,
+                    wcr::wid::null_id,
+                    wcr::wid::null_id}
+                );
+        };
+
+        switch (pipe_param_type){
+        case wct::render::ERPipeParamType::UBO_Entity_Static:
+            return get_entity_id(id.AsEntityComponentId());
+        case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
+            return get_entity_id(id.AsEntityComponentId());
+        default:
+            return id;
+        }
+    };
+
 
     struct RPipeParamDescLayInfo {
         std::uint8_t binding{0};

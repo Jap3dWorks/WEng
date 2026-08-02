@@ -93,6 +93,13 @@ namespace wvk::types {
         return result;
     }
 
+    inline constexpr VkDescriptorSetAllocateInfo VkDescriptorSetAllocateInfo() noexcept {
+        return {
+            .sType=VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+            .pNext=VK_NULL_HANDLE
+        };
+    }
+
     inline constexpr VkWriteDescriptorSet VkWriteDescriptorSet() noexcept {
         return {
             .sType=VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
