@@ -8,36 +8,28 @@
 
 namespace wvk::descriptor {
 
-    /**
-     * @DEPRECATED
-     */
-    void Create(
+    [[deprecated]] void Create(
         WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
         const VkDevice & device
         );
 
-    WNODISCARD VkDescriptorSetLayout Create(
-        VkDescriptorSetLayoutBinding * in_bindings_ptr,
-        std::uint32_t in_binding_count,
-        VkDevice & in_device
-        );
-
-    /**
-     * @DEPRECATED
-     */
-    void Create(
+    [[deprecated]] void Create(
         VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & device
         );
 
-    /**
-     * @DEPRECATED
-     */
-    void Create(
+    [[deprecated]] void Create(
         VkDescriptorSet& out_descriptor_set_info,
         const VkDevice & device,
         const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
         const VkDescriptorPool & descriptor_pool_info
+        );
+
+    WNODISCARD VkDescriptorSetLayout CreateDescriptorSetLayout(
+        std::span<VkDescriptorSetLayoutBinding> layout_bindings,
+        // VkDescriptorSetLayoutBinding * in_bindings_ptr,
+        // std::uint32_t in_binding_count,
+        VkDevice & in_device
         );
 
     template<std::uint8_t N>
@@ -76,10 +68,7 @@ namespace wvk::descriptor {
         VkDescriptorPool descriptor_pool_info
         );
 
-    /**
-     * @DEPRECATED
-     */
-    void Destroy(
+    [[deprecated]] void Destroy(
         WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
         const VkDevice & device
         );

@@ -128,6 +128,13 @@ namespace wvk::types {
         return {};
     }
 
+    inline constexpr VkDescriptorSetLayoutCreateInfo VkDescriptorSetLayoutCreateInfo() noexcept {
+        return {
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+            .pNext = nullptr
+        };
+    }
+
     inline constexpr VkPipelineColorBlendAttachmentState VkPipelineColorBlendAttachmentState() noexcept {
         return {};
     }
@@ -216,10 +223,10 @@ namespace wvk::types {
     }
 
     inline constexpr VkPipelineShaderStageCreateInfo VkPipelineShaderStageCreateInfo() noexcept {
-        ::VkPipelineShaderStageCreateInfo result{};
-        result.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        result.pNext = VK_NULL_HANDLE;
-        return result;
+        return {
+            .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .pNext=VK_NULL_HANDLE
+        };
     }
 
     inline constexpr VkSubmitInfo VkSubmitInfo() noexcept {

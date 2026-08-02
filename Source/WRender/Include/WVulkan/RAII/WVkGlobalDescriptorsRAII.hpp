@@ -274,9 +274,8 @@ private:
         bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT |
                                  VK_SHADER_STAGE_FRAGMENT_BIT; 
 
-        return wvk::descriptor::Create(
-            bindings.data(),
-            bindings.size(),
+        return wvk::descriptor::CreateDescriptorSetLayout(
+            bindings,
             in_device
             );
     }

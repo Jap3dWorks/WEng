@@ -1,4 +1,5 @@
 #include "WVulkan/Vk/WVkDescriptor.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
 
 void wvk::descriptor::Create(
     WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
@@ -26,19 +27,17 @@ void wvk::descriptor::Create(
     }
 }
 
-VkDescriptorSetLayout wvk::descriptor::Create(
-    VkDescriptorSetLayoutBinding * in_bindings_ptr,
-    std::uint32_t in_binding_count,
+VkDescriptorSetLayout wvk::descriptor::CreateDescriptorSetLayout(
+    std::span<VkDescriptorSetLayoutBinding> layout_bindings,
     VkDevice & in_device
     ) {
     VkDescriptorSetLayout result;
-    VkDescriptorSetLayoutCreateInfo create_info{};
+    
+    VkDescriptorSetLayoutCreateInfo create_info =
+        wvk::types::VkDescriptorSetLayoutCreateInfo();
 
-    create_info.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-
-    create_info.bindingCount = in_binding_count;
-    create_info.pBindings = in_bindings_ptr;
+    create_info.bindingCount = layout_bindings.size();
+    create_info.pBindings = layout_bindings.data();
 
     if (vkCreateDescriptorSetLayout(
             in_device,

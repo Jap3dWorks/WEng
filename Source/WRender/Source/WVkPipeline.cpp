@@ -28,3 +28,27 @@ void wvk::pipeline::Destroy(
 	pipeline_info.pipeline = VK_NULL_HANDLE;
     }
 }
+
+void wvk::pipeline::Destroy(
+    VkPipeline pipeline,
+    VkDevice device
+    ) {
+    vkDestroyPipeline(
+        device,
+        pipeline,
+        nullptr
+	    );
+    
+}
+
+void Destroy(
+    VkPipelineLayout pipeline_layout,
+    VkDevice device
+    ) {
+    // destroy pipeline layout
+    vkDestroyPipelineLayout(
+        device,
+        pipeline_layout,
+        nullptr);
+    
+}

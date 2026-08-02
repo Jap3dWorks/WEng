@@ -7,9 +7,19 @@
 
 namespace wvk::pipeline {
     
-    void Destroy(
+    [[deprecated]] void Destroy(
         WVkRenderPipeline &pipeline_info,
         const VkDevice & device);
+
+    void Destroy(
+        VkPipeline pipeline,
+        VkDevice device
+        );
+
+    void Destroy(
+        VkPipelineLayout pipeline_layout,
+        VkDevice device
+        );
 
     static inline constexpr std::array const GEO_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION {
         VkVertexInputAttributeDescription{

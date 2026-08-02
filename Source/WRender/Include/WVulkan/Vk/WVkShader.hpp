@@ -3,6 +3,8 @@
 #include "WCore/TVisitor.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
+#include "WString/WString.hpp"
+#include "WRender/WShader.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
@@ -20,7 +22,8 @@ namespace wvk::shader {
         VkShaderModuleCreateInfo shader_module_create_info =
             wvk::types::VkShaderModuleCreateInfo();
         shader_module_create_info.codeSize = in_code_size;
-        shader_module_create_info.pCode = reinterpret_cast<std::uint32_t const *>(in_code);
+        shader_module_create_info.pCode =
+            reinterpret_cast<std::uint32_t const *>(in_code);
 
         wvk::vulkan::ExecVkProcChecked(
             vkCreateShaderModule,
@@ -33,6 +36,32 @@ namespace wvk::shader {
 
         return result;
     }
+
+    inline VkShaderModule CreateShaderModule(
+        VkDevice in_device,
+        std::string_view shader_code
+        )
+    {
+        VkShaderModule result;
+
+        VkShaderModuleCreateInfo shader_module_create_info =
+            wvk::types::VkShaderModuleCreateInfo();
+        shader_module_create_info.codeSize = shader_code.size();
+        shader_module_create_info.pCode = 
+            reinterpret_cast<std::uint32_t const *>(shader_code.data());
+
+        wvk::vulkan::ExecVkProcChecked(
+            vkCreateShaderModule,
+            "Failed to create shader module!",
+            in_device, 
+            &shader_module_create_info, 
+            nullptr, 
+            &result
+            );
+
+        return result;
+    }
+    
 
     /**
      * Returns a tuple with shader stages and shader modules,
@@ -52,16 +81,15 @@ namespace wvk::shader {
 
         for (uint32_t i = 0; i < stage_infos.size(); i++)
         {
-            shader_stages[i] = {};
-            shader_stages[i].pNext = VK_NULL_HANDLE;
-            shader_stages[i].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            shader_stages[i] = wvk::types::VkPipelineShaderStageCreateInfo();
             shader_stages[i].stage = wvk::types::ToShaderStageFlagBits(
                 stage_infos[i].type
                 );
 
-            shader_modules[i] = CreateShaderModule(in_device,
-                                                   std::visit(code_data, stage_infos[i].code),
-                                                   std::visit(code_size, stage_infos[i].code));
+            shader_modules[i] = CreateShaderModule(
+                in_device,
+                std::visit(code_data, stage_infos[i].code),
+                std::visit(code_size, stage_infos[i].code));
 
             shader_stages[i].module = shader_modules[i];
             shader_stages[i].pName = stage_infos[i].entry_point.c_str();
@@ -101,5 +129,41 @@ namespace wvk::shader {
 
         return std::tuple{std::move(shader_stages), std::move(shader_modules)};
         
+    }
+
+    inline WVkShaderStageInfo ToShaderStageInfo(
+        std::string_view file_path,
+        std::string_view entry_point,
+        wct::render::EShaderStageFlag in_shader_type
+        ) {
+        WVkShaderStageInfo result;
+
+        result.code = wrd::shader::ReadShader(std::string{file_path});
+
+        result.entry_point = std::string{entry_point};
+        result.type = in_shader_type;
+
+        return result;
+    }
+
+    inline std::vector<WVkShaderStageInfo> ToShaderStageInfo(
+        wct::render::ShaderList const & shader_list
+        ) {
+        std::vector<WVkShaderStageInfo> result;
+
+        result.reserve(shader_list.size());
+
+        wct::render::ForEach(
+            shader_list,
+            [&result]
+            (const wct::render::ShaderInfo & shd) {
+                result.push_back(
+                    ToShaderStageInfo(wstr::SystemPath(shd.file.View()).c_str(),
+                          std::string(shd.entry.View()).c_str(),
+                          shd.type)
+                    );
+            });
+        
+        return result;
     }
 }

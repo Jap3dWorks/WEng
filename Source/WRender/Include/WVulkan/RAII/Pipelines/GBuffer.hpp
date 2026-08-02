@@ -7,7 +7,7 @@
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/RenderPipeline.hpp"
-#include "WVulkan/RAII/Pipelines/_WVkGBufferPipelinesRAII_.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer_lib.hpp"
 
 #include <vector>
 #include "WVulkan/RAII/Pipelines/WVkPipelinesBase.hpp"
@@ -128,6 +128,7 @@ namespace wvk::raii::pipelines {
             Super::pipeline_bindings_[in_pipeline_id]
                 .Insert(binding_set_id.GetId(), binding_set_id);
         }
+
 
     };
 

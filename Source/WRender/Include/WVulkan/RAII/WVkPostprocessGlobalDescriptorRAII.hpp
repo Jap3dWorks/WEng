@@ -194,9 +194,8 @@ private:
             buildbinding(EXTRA01_BINDING)
         };
 
-        return wvk::descriptor::Create(
-            bindings.data(),
-            bindings.size(),
+        return wvk::descriptor::CreateDescriptorSetLayout(
+            bindings,
             in_device);
     }
 
