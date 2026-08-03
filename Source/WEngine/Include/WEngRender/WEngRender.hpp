@@ -345,7 +345,7 @@ namespace wng::render {
                         WFLOG("ecid bitset: {}", std::bitset<64>(ecid.GetId()).to_string())
                         );
 
-                    in_render->UpdateParameterStatic(ecid, ubodt);
+                    in_render->UpdatePipelineBindingSetParameter_Static(ecid, ubodt);
             }
             );
 

@@ -66,10 +66,14 @@ namespace wct::render {
     };
 
     struct CommonBindings {
+        static constexpr std::uint8_t MODEL_UBO_SET{1};
+
         static constexpr std::uint8_t MODEL_UBO{0};
     };
 
     struct PBRBindings {
+        static constexpr std::uint8_t PBR_SET{2};
+
         static constexpr std::uint8_t PBR_SCALAR_UBO{1};
         static constexpr std::uint8_t ALBEDO_TEXTURE{2};
         static constexpr std::uint8_t EMISSION_TEXTURE{3};
@@ -251,6 +255,8 @@ namespace wct::render {
 
     /** Render Pipeline Param Ubo Struct */
     struct RPipeParamUbo {
+        // descriptor set?
+        std::uint8_t descriptor_set{1};
         std::uint8_t binding{0};
 
         std::variant<UBORef, UBOData> data{};

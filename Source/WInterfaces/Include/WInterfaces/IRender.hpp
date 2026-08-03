@@ -38,16 +38,17 @@ public:
      * than the was::RenderPipeline * parameter.
      */
     virtual void CreateRenderPipeline(
-        was::RenderPipeline * in_pipeline_asset
+        was::RenderPipeline const & pipeline_asset
         )=0;
 
     /**
      * @brief Create a pipeline binding to component.
      * Pipeline binding shares the same WId than the component.
      */
-    virtual void CreatePipelineBinding(
-        const wcr::wid::WEntityComponentId & component_id,
-        const wcr::wid::WTypeAssetIndexId & in_mesh_id,
+    virtual void CreatePipelineBindingSet(
+        std::size_t binding_set_collection,  // usually the level id
+        wcr::wid::WEngId binding_set_id,
+        wcr::wid::WTypeAssetIndexId renderable_asset_id,
         was::RenderPipeline const & pipeline_id,
         was::RenderPipelineParams const & in_parameters
         )=0;
@@ -55,12 +56,15 @@ public:
     /**
      * @brief Delete the created render pipeline and its binidngs with WId in_id.
      */
-    virtual void DeleteRenderPipeline(const wcr::wid::WAssetId & in_id)=0;
+    virtual void DeleteRenderPipeline(
+        was::RenderPipeline const & render_pipeline
+        )=0;
 
-    /**
-     * @brief Delete the create render pipeline binding.
-     */
-    virtual void DeletePipelineBinding(const wcr::wid::WEntityComponentId & in_id)=0;
+    virtual void DeletePipelineBindingSet(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        was::RenderPipeline const & pipeline
+        )=0;
 
     /** @brief Refresh things like postprocess order */
     virtual void RefreshPipelines()=0;
@@ -94,15 +98,22 @@ public:
      * @brief Updates only for current frame in flight.
      *        Storage inside ubo_write will be consumed in the current call.
      */
-    virtual void UpdateParameterDynamic(const wcr::wid::WEntityComponentId & in_id,
-                                        const wct::render::RPipeParamUbo & ubo_write)=0;
+    virtual void UpdatePipelineBindingSetParameter_Dynamic(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        was::RenderPipeline const & pipeline,
+        wct::render::RPipeParamUbo const & ubo_write)=0;
 
     /**
      * @brief Updates for all frames in flight.
      *        Storage inside ubo_write will be in the current call.
      */
-    virtual void UpdateParameterStatic(const wcr::wid::WEntityComponentId & in_id,
-                                       const wct::render::RPipeParamUbo & ubo_write)=0;
+    virtual void UpdatePipelineBindingSetParameter_Static(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId in_component_id,
+        was::RenderPipeline const & pipeline,
+        wct::render::RPipeParamUbo const & ubo_write
+        )=0;
 
     /**
      * @brief Unload all render resources.

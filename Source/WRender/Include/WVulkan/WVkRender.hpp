@@ -1,8 +1,10 @@
 #pragma once
 
+#include "WAssets/RenderPipeline.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
 
+#include "WVulkan/RAII/Pipelines/_new_GBuffer_.hpp"
 #include "WVulkan/WVkConfig.hpp"
 
 #include "WCore/WCoreMacros.hpp"
@@ -67,19 +69,26 @@ public:
     void WaitIdle() const override;
 
     void CreateRenderPipeline(
-        was::RenderPipeline * in_pipeline_asset
+        was::RenderPipeline const & pipeline_asset
         ) override;
 
-    void CreatePipelineBinding(
-        const wcr::wid::WEntityComponentId & component_id,
-        const wcr::wid::WTypeAssetIndexId & in_mesh_id,
-        const was::RenderPipeline & pipeline_id,
-        const was::RenderPipelineParams & in_param_asset
+    void DeleteRenderPipeline(
+        was::RenderPipeline const & render_pipeline
         ) override;
 
-    void DeleteRenderPipeline(const wcr::wid::WAssetId & in_id) override;
+    void CreatePipelineBindingSet(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        wcr::wid::WTypeAssetIndexId renderable_asset_id,
+        was::RenderPipeline const & pipeline_id,
+        was::RenderPipelineParams const & in_param_asset
+        ) override;
 
-    void DeletePipelineBinding(const wcr::wid::WEntityComponentId & in_id) override;
+    void DeletePipelineBindingSet(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        was::RenderPipeline const & pipeline
+        ) override;
 
     void RefreshPipelines() override;
 
@@ -105,17 +114,21 @@ public:
     /**
      * @brief Updates only for current frame in flight
      */
-    void UpdateParameterDynamic(
-        const wcr::wid::WEntityComponentId & in_component_id,
-        const wct::render::RPipeParamUbo & ubo_write
+    void UpdatePipelineBindingSetParameter_Dynamic(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        was::RenderPipeline const & pipeline,
+        wct::render::RPipeParamUbo const & ubo_write
         ) override;
 
     /**
      * @brief Updates for all frames in flight
      */
-    void UpdateParameterStatic(
-        const wcr::wid::WEntityComponentId & in_component_id,
-        const wct::render::RPipeParamUbo & ubo_write
+    void UpdatePipelineBindingSetParameter_Static(
+        std::size_t binding_set_collection,
+        wcr::wid::WEngId binding_set_id,
+        was::RenderPipeline const & pipeline,
+        wct::render::RPipeParamUbo const & ubo_write
         ) override;
 
     void UnloadAllResources() override;
@@ -204,7 +217,8 @@ private:
     WVkGlobalDescriptorsRAII<WVK_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
     WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
-    wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    // wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    wvk::raii::pipelines::_new_GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     wvk::raii::ShadowMapPipeline<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipelines_{};
     WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
     wvk::raii::pipelines::Postprocess ppcss_pipelines_{};
@@ -212,12 +226,6 @@ private:
 
     WVkRenderSyncRAII<WVK_MAX_FRAMES_IN_FLIGHT> render_sync_{};
     std::size_t semaphore_index_{0};
-
-    struct PipelinesTrack {
-        std::unordered_map<wcr::wid::WAssetId, wct::render::ERPipeType> pipeline_pipetype{};
-        std::unordered_map<wcr::wid::WEntityComponentId, wct::render::ERPipeType> binding_pipetype{};
-    } pipeline_track_{};
-
 
     uint32_t frame_index_{0};
     

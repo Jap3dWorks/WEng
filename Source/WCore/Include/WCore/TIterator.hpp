@@ -6,6 +6,8 @@
 #include <utility>
 #include <cstdint>
 
+// TODO namespace wcr::iterator
+
 template<typename _ValueType,
          typename _IterType,
          typename _RetValueType,
@@ -19,12 +21,7 @@ public:
 
     using ValueType = _ValueType;
     using IterType = _IterType;
-    
     using RetValueType = _RetValueType;
-    // using FnValue_IterParamType=_FnValue_IterParamType;
-
-    // using FnIncr_IterParamType=_FnIncr_IterParamType;
-    // using FnIncr_RetType=_FnIncr_RetType;
     
 public:
 

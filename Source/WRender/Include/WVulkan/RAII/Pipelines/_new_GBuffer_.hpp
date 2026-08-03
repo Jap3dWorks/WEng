@@ -6,6 +6,7 @@
 #include "WCore/WId.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WCore/TIterator.hpp"
 #include "WLog.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
@@ -36,6 +37,18 @@ namespace wvk::raii::pipelines {
     class _new_GBuffer
     {
 
+        using CollectionsMap = std::unordered_map<
+            std::size_t,
+            wvk::raii::pipelines::gbuffer_lib::DescriptorCollection<FramesInFlight>>;
+
+        template<typename ValueFn, typename IncrFn>
+        using CollectionsIterator = TIterator<
+            typename CollectionsMap::value_type const,
+            typename CollectionsMap::const_iterator,
+            std::size_t, ValueFn, IncrFn
+            >;
+
+
     public:
 
         static inline constexpr const std::uint8_t MODEL_UBO_BINDING{0};
@@ -63,29 +76,26 @@ namespace wvk::raii::pipelines {
 
         _new_GBuffer(VkDevice device, VkPhysicalDevice physical_device) :
             vkn_(device, physical_device),
-            model_ubo_layout({device},
-                             std::array{
-                                 VkDescriptorSetLayoutBinding{
-                                     MODEL_UBO_LAYOUT_BINDING
-                                 }
-                             }
+            model_ubo_layout_(
+                {device},
+                std::array{MODEL_UBO_LAYOUT_BINDING}
                 ),
-            param_layouts(
+            param_layouts_(
                 [](auto id) {return VK_NULL_HANDLE;},
                 [device](auto layout) { wvk::descriptor::Destroy(layout, device); }
                 ),
-            pipelines(
+            pipelines_(
                 [](auto id) {return VK_NULL_HANDLE;},
                 [device](auto pipeline) { wvk::descriptor::Destroy(pipeline,device); }
-                )
+                ),
+            collections_()
             {}
 
     public:
 
         void CreatePipeline(
             const was::RenderPipeline & pipeline_asset,
-            VkDescriptorSetLayout global_descset_layout,
-            std::size_t collection_id
+            VkDescriptorSetLayout global_descset_layout
             ) {
 
             assert(descriptor_set_layouts.Contains(pipeline_asset.Get_asset_id().GetId()));
@@ -98,7 +108,7 @@ namespace wvk::raii::pipelines {
                     pipeline_asset.Get_descriptor_list()
                     );
 
-            param_layouts.CreateAt(
+            param_layouts_.CreateAt(
                 pipeline_asset.Get_asset_id().GetId(),
                 [this, &layoyt_binding](auto id){
                     return wvk::descriptor::CreateDescriptorSetLayout(
@@ -108,7 +118,7 @@ namespace wvk::raii::pipelines {
                 }
                 );
 
-            pipelines.CreateAt(
+            pipelines_.CreateAt(
                 pipeline_asset.Get_asset_id().GetId(),
                 [this, &global_descset_layout, &shaders_info]
                 (auto id) {
@@ -116,8 +126,8 @@ namespace wvk::raii::pipelines {
                         vkn_.device,
                         {
                             global_descset_layout,
-                            *model_ubo_layout, // ubo model at desc set 1
-                            param_layouts.Get(id)
+                            *model_ubo_layout_, // ubo model at desc set 1
+                            param_layouts_.Get(id)
                         },
                         {
                             shaders_info
@@ -132,8 +142,8 @@ namespace wvk::raii::pipelines {
             wcr::wid::WEngId binding_set_id,
             was::RenderPipeline asset_pipeline,
             was::RenderPipelineParams asset_params,
-            wcr::wid::WTypeAssetIndexId in_mesh_asset_id,
-            wvk::raii::AssetRenderData & asset_data // ,
+            wvk::raii::AssetRenderData & asset_data,
+            wcr::wid::WTypeAssetIndexId in_mesh_asset_id
             ){
 
             EnsureCollection(collection_id);
@@ -143,43 +153,77 @@ namespace wvk::raii::pipelines {
                 wct::render::ERPipeParamType::UBO_Entity_Dynamic
                 ).GetId();
 
-            EnsureModelUboDescriptorSet(collection_id, model_ubo_id);
-
-            auto param_dynamic_offsets = EnsureParamDescriptorSet(
-                collection_id,
+            collections_[collection_id].CreateBindingSet(
                 binding_set_id,
+                model_ubo_id,
+                *model_ubo_layout_,
+                MODEL_UBO_BINDING,
                 asset_pipeline,
                 asset_params,
-                asset_data
+                param_layouts_.Get(asset_pipeline.Get_asset_id().GetId()),
+                asset_data,
+                in_mesh_asset_id
                 );
-
-            auto model_ubo_offset = collections[collection_id]
-                .ubo_manager
-                .GetOffset<FramesInFlight>(
-                    sizeof(wct::render::ModelUBO),
-                    binding_set_id);
-
-            auto param_descriptor_sets = collections[collection_id]
-                .param_descriptors[asset_params.Get_asset_id()];
-
-            wvk::raii::pipelines::gbuffer_lib::Binding binding{
-                .mesh_id=in_mesh_asset_id,
-                .model_ubo_offset = model_ubo_offset,
-                .model_ubo_descriptor_set = collections[collection_id].model_ubo_desc_set,
-                .param_ubo_offsets=std::move(param_dynamic_offsets),
-                .param_descriptor_set = param_descriptor_sets
-            };
-
-            collections[collection_id].pipeline_bindings_[
-                asset_pipeline.Get_asset_id().GetId()
-                ].Insert(binding_set_id.GetId(), std::move(binding));
         }
+
+        void DeleteBindingSet(
+            std::size_t collection_id,
+            wcr::wid::WEngId binding_set_id
+            ) {
+            // TODO
+        }
+
+        void DeleteBindingSetCollection(
+            std::size_t collection_id
+            ) {
+            // TODO
+        }
+
+        void UpdateBindingSetParameter(
+            std::size_t collection_id,
+            wcr::wid::WEngId binding_set_id,
+            was::RenderPipeline const & pipeline,
+            wct::render::RPipeParamUbo const & ubo_pipe_param,
+            std::uint8_t frame_index
+            ) {
+            // TODO
+            
+        }
+
+        auto IterPipelines() const {
+            return pipelines_.IterIndexes();
+        }
+
+        WNODISCARD std::tuple<VkPipeline, VkPipelineLayout> 
+        GetPipeline(wcr::wid::WAssetId pipeline_id) const {
+            return pipelines_.Get(pipeline_id.GetId());
+        }
+
+        auto IterCollections() const {
+            return CollectionsIterator {
+                collections_.cbegin(),
+                collections_.cend(),
+                [](auto it, std::size_t incr) { return (*it).first; },
+                [](auto it, std::size_t incr) { it++; return it; }
+            };
+        }
+
+        auto Bindings(wcr::wid::WAssetId pipeline_id, std::size_t collection_id) const {
+            return collections_.at(collection_id).pipeline_bindings.at(pipeline_id);
+        }
+
+        template<typename Fn>
+        auto ForEachBinding(wcr::wid::WAssetId pipeline_id, Fn && fn) {
+            
+        }
+
+        // TODO Destroy collection
 
     private:
 
         void EnsureCollection(std::size_t id) {
-            if(!collections.contains(id)) {
-                collections[id]={
+            if(!collections_.contains(id)) {
+                collections_[id]={
                     .descriptor_pool{{vkn_.device}},
                     .ubo_manager{
                         vkn_.device, 
@@ -190,100 +234,20 @@ namespace wvk::raii::pipelines {
             }
         }
 
-        void EnsureModelUboDescriptorSet(
-            std::size_t collection_id,
-            wcr::wid::WEngId model_ubo_id
-            ) {
-            
-            VkDescriptorSet model_ubo_descriptor;
-
-            if(collections[collection_id].model_ubo_desc_set[0] == VK_NULL_HANDLE) {
-
-                auto descriptors =
-                    wvk::raii::pipelines::gbuffer_lib::
-                    CreateModelUboDescriptorSet(
-                        vkn_.device,
-                        model_ubo_id,
-                        MODEL_UBO_BINDING,
-                        collections[collection_id].ubo_manager,
-                        collections[collection_id].descriptor_pool,
-                        *model_ubo_layout
-                        );
-
-                collections[collection_id].model_ubo_desc_set = descriptors;
-            }
-        }
-
-        std::vector<std::uint32_t> EnsureParamDescriptorSet(
-            std::size_t collection_id,
-            wcr::wid::WEngId binding_set_id,
-            was::RenderPipeline const & asset_pipeline,
-            was::RenderPipelineParams const & asset_params,
-            wvk::raii::AssetRenderData & asset_data
-            ) {
-
-            auto ubo_params = wvk::raii::pipelines::desc_bindings
-                ::CollectUBOBindings<FramesInFlight>(
-                    binding_set_id,
-                    asset_pipeline,
-                    asset_params,
-                    collections[collection_id].ubo_manager
-                    );
-
-            if (!collections[collection_id].param_descriptors.contains(
-                    asset_params.Get_asset_id())) {
-                
-                auto texture_params = wvk::raii::pipelines::desc_bindings
-                    ::CollectTextureBindings(
-                        asset_params,
-                        asset_data
-                        );
-
-                auto descriptors =wvk::raii::pipelines::desc_bindings
-                    ::CreateParamsDescriptorSet(
-                        vkn_.device,
-                        param_layouts.Get(asset_pipeline.Get_asset_id().GetId()),
-                        collections[collection_id].descriptor_pool,
-                        texture_params,
-                        ubo_params
-                        );
-
-                collections[collection_id].param_descriptors[asset_params.Get_asset_id()] =
-                    std::move(descriptors);
-            }
-
-            std::sort(ubo_params, [](auto a, auto b)
-                {
-                    return a.binding < b.binding;
-                }
-                );
-
-            std::vector<std::uint32_t> dynamic_offsets;
-
-            std::ranges::transform(ubo_params,
-                                   std::back_inserter(dynamic_offsets),
-                                   [](auto b) {return b.dynamic_offset; });
-
-            return dynamic_offsets;
-        }
-
         struct {
             VkDevice device{VK_NULL_HANDLE};
             VkPhysicalDevice physical_device{VK_NULL_HANDLE};
         } vkn_;
 
-        wvk::raii::DescriptorSetLayout<1> model_ubo_layout;
+        wvk::raii::DescriptorSetLayout<1> model_ubo_layout_;
 
         TObjectDataBase<VkDescriptorSetLayout, void, std::size_t>
-        param_layouts;
+        param_layouts_;
 
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
-        pipelines;
+        pipelines_;
 
-        std::unordered_map<
-            std::size_t,
-            wvk::raii::pipelines::gbuffer_lib::DescriptorCollection<FramesInFlight>>
-        collections{};
+        CollectionsMap collections_{};
 
     };
 

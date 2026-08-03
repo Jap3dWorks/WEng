@@ -2,6 +2,7 @@
 
 #include "WCoreTypes/WGeometry.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
+#include "WVulkan/RAII/Pipelines/_new_GBuffer_.hpp"
 #include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
@@ -36,32 +37,32 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsGBuffersRAII<FramesInFlight> & attachments,
-        wvk::raii::pipelines::GBuffer<FramesInFlight> & pipelines,
+        wvk::raii::pipelines::_new_GBuffer<FramesInFlight> & pipelines,
         wvk::raii::AssetRenderData const & asset_render_data,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {
 
         std::vector<std::optional<ShadowMapBindingInfo>> shadow_map_bindings{};
-        shadow_map_bindings.reserve(pipelines.GetBindingsCount());
+        // shadow_map_bindings.reserve(pipelines.GetBindingsCount());
 
-        auto collect_shadow_map_binding =
-            [frame_index, &pipelines]
-            (
-                WVkMesh const & mesh,
-                WVkPipelineBinding<FramesInFlight> const & binding
-                )
-            -> std::optional<ShadowMapBindingInfo> {
-            for(auto & ubo_dt : binding.ubos) {
-                if(ubo_dt.binding == pipelines.MODEL_UBO_BINDING) {
-                    return ShadowMapBindingInfo{
-                        .mesh_info=mesh,
-                        .model_ubo=ubo_dt.ubo_desc[frame_index]
-                    };
-                } 
-            }
+        // auto collect_shadow_map_binding =
+        //     [frame_index, &pipelines]
+        //     (
+        //         WVkMesh const & mesh,
+        //         WVkPipelineBinding<FramesInFlight> const & binding
+        //         )
+        //     -> std::optional<ShadowMapBindingInfo> {
+        //     for(auto & ubo_dt : binding.ubos) {
+        //         if(ubo_dt.binding == pipelines.MODEL_UBO_BINDING) {
+        //             return ShadowMapBindingInfo{
+        //                 .mesh_info=mesh,
+        //                 .model_ubo=ubo_dt.ubo_desc[frame_index]
+        //             };
+        //         } 
+        //     }
             
-            return std::nullopt;
-        };
+        //     return std::nullopt;
+        // };
 
         wvk::render::RndCmd_TransitionGBufferWriteLayout(
             command_buffer,
@@ -86,90 +87,81 @@ namespace wvk::render::rec_cmd_bffr {
 
         for(auto pipeline_id : pipelines.IterPipelines()) {
         
-            pipelines.ResetDescriptorPool(pipeline_id, frame_index);
-
-            const WVkRenderPipeline & render_pipeline =
-                pipelines.Pipeline(pipeline_id);
+            std::tuple<VkPipeline,VkPipelineLayout> render_pipeline =
+                pipelines.GetPipeline(pipeline_id);
 
             vkCmdBindPipeline(command_buffer,
                               VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              render_pipeline.pipeline);
+                              std::get<0>(render_pipeline));
+                              // render_pipeline.pipeline);
 
             wvk::render::RndCmd_SetViewportAndScissor(
                 command_buffer,
                 attachments.Extent()
                 );
 
-            for (auto & bid : pipelines.IterBindings(pipeline_id)) {
+            for (auto coll_id : pipelines.IterCollections()) {
+                
+                for (auto & binding : pipelines.Bindings(pipeline_id, coll_id)) {
 
-                auto& binding = pipelines.GetBinding(bid);
+                    auto& mesh_info =
+                        asset_render_data.StaticMeshInfo(
+                            binding.mesh_id
+                            );
 
-                auto& mesh_info =
-                    asset_render_data.StaticMeshInfo(
-                        binding.mesh_asset_id
+                    // shadow_map_bindings.push_back(
+                    //     collect_shadow_map_binding(
+                    //         mesh_info, binding
+                    //         ));
+
+                    VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
+                    VkDeviceSize offsets[] = {0};
+
+                    vkCmdBindVertexBuffers(
+                        command_buffer,
+                        0,
+                        1,
+                        vertex_buffers,
+                        offsets
                         );
 
-                shadow_map_bindings.push_back(
-                    collect_shadow_map_binding(
-                        mesh_info, binding
-                        ));
-
-                // Create descriptor
-                VkDescriptorSet descriptorset =
-                    wvk::render::CreateDescriptorSet(
-                        device,
-                        pipelines.DescriptorPool(pipeline_id, frame_index),
-                        pipelines.DescriptorSetLayout(pipeline_id).descset_layout,
-                        frame_index,
-                        binding.ubos,
-                        binding.textures
+                    vkCmdBindIndexBuffer(
+                        command_buffer,
+                        mesh_info.index_buffer,
+                        0,
+                        VK_INDEX_TYPE_UINT32
                         );
 
-                VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
-                VkDeviceSize offsets[] = {0};
+                    std::array descsets =
+                        {
+                            global_descriptors.DescriptorSet(frame_index),
+                            binding.model_ubo_descriptor_set.at(frame_index),
+                            binding.param_descripor_set.at(frame_index)
+                        };
 
-                vkCmdBindVertexBuffers(
-                    command_buffer,
-                    0,
-                    1,
-                    vertex_buffers,
-                    offsets
-                    );
+                    std::vector<std::uint32_t> dynamic_offsets =
+                        std::vector{ binding.model_ubo_offset };
 
-                vkCmdBindIndexBuffer(
-                    command_buffer,
-                    mesh_info.index_buffer,
-                    0,
-                    VK_INDEX_TYPE_UINT32
-                    );
+                    dynamic_offsets.append_range(
+                        binding.param_ubo_offsets
+                        );
 
-                std::array<VkDescriptorSet, 2> descsets =
-                    {
-                        global_descriptors.DescriptorSet(frame_index),
-                        descriptorset
-                    };
+                    vkCmdBindDescriptorSets(command_buffer,
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            std::get<1>(render_pipeline),
+                                            0,
+                                            static_cast<std::uint32_t>(descsets.size()),
+                                            descsets.data(),
+                                            dynamic_offsets.size(),
+                                            dynamic_offsets.data());
 
-                std::vector<std::uint32_t> dynamic_offsets;
-                dynamic_offsets.resize(
-                    // 2,
-                    binding.ubos.size(),
-                    0);
-
-                vkCmdBindDescriptorSets(command_buffer,
-                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        render_pipeline.pipeline_layout,
-                                        0,
-                                        static_cast<std::uint32_t>(descsets.size()),
-                                        descsets.data(),
-                                        dynamic_offsets.size(),
-                                        dynamic_offsets.data());
-
-                vkCmdDrawIndexed(command_buffer,
-                                 mesh_info.index_count,
-                                 1,
-                                 0,
-                                 0,
-                                 0);
+                    vkCmdDrawIndexed(command_buffer,
+                                     mesh_info.index_count,
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
             }
         }
 
