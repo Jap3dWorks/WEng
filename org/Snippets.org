@@ -470,6 +470,28 @@ int main() {
 : Value 5
 : HI
 
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <vector>
+#include <algorithm>
+
+int main() {
+
+    std::vector<std::uint32_t> v {1,2,4,5,6,7};
+    std::vector<std::uint32_t> d {};
+    // d.resize(v.size());
+
+    std::ranges::transform(v, std::back_inserter(d),
+                   [](auto b) {return b*2; });
+
+    std::print("new values: {}", d);
+
+}
+#+end_src
+
+#+RESULTS:
+: new values: [2, 4, 8, 10, 12, 14]
+
 * iota integer ranges
 
 #+HEADER: :flags --std=gnu++23
@@ -506,3 +528,4 @@ Value 7
 Value 8
 Value 9
 #+end_example
+

@@ -4,41 +4,13 @@
 #include "WVulkan/Vk/WVkPipeline.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
+#include "WAssets/RenderPipeline.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 
 #include <vulkan/vulkan_core.h>
 #include <unordered_set>
 
 namespace wvk::raii::pipelines::gbuffer_lib {
-
-    template<std::uint8_t FramesInFlight>
-    struct Binding {
-        wcr::wid::WTypeAssetIndexId mesh_id;
-
-        std::uint32_t model_ubo_offset;
-        std::array<VkDescriptorSet, FramesInFlight> model_ubo_descriptor_set;
-
-        std::vector<std::uint32_t> param_ubo_offsets;
-        
-        std::array<VkDescriptorSet, FramesInFlight> param_descripor_set;
-    };
-
-    template<std::uint8_t FramesInFlight>
-    struct Collection {
-        
-        wvk::raii::DescriptorPool<
-            8 * FramesInFlight,
-            0,
-            30 * FramesInFlight,
-            38> descriptor_pool{};
-
-        std::array<VkDescriptorSet, FramesInFlight> model_ubo_desc_set{VK_NULL_HANDLE};
-
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> ubo_manager{};
-
-        std::unordered_map<wcr::wid::WAssetId,
-                           std::array<VkDescriptorSet, FramesInFlight>> param_descriptors;
-
-    };
 
     inline auto CreatePipeline(
         const VkDevice & in_device,
@@ -223,11 +195,12 @@ namespace wvk::raii::pipelines::gbuffer_lib {
         VkDevice device,
         wcr::wid::WEngId model_ubo_id,
         std::uint32_t model_ubo_binding,
-        Collection<FramesInFlight> & collection,
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
+        VkDescriptorPool descriptor_pool,
         VkDescriptorSetLayout model_ubo_layout
         ) {
 
-        collection.ubo_manager.Add<FramesInFlight>(
+        ubo_man.Add<FramesInFlight>(
             sizeof(wct::render::ModelUBO),
             model_ubo_id
             );
@@ -236,7 +209,7 @@ namespace wvk::raii::pipelines::gbuffer_lib {
 
         for(std::uint32_t f=0; f<FramesInFlight; ++f) {
                     
-            WVkUBO ubo = collection.ubo_manager
+            WVkUBO ubo = ubo_man
                 .GetUBO<FramesInFlight>(
                     sizeof(wct::render::ModelUBO),
                     f
@@ -246,7 +219,7 @@ namespace wvk::raii::pipelines::gbuffer_lib {
             VkDescriptorSetAllocateInfo alloc_info =
                 wvk::types::VkDescriptorSetAllocateInfo();
 
-            alloc_info.descriptorPool = collection.descriptor_pool;
+            alloc_info.descriptorPool = descriptor_pool;
             alloc_info.descriptorSetCount = 1;
             alloc_info.pSetLayouts = &model_ubo_layout;
 
@@ -286,11 +259,46 @@ namespace wvk::raii::pipelines::gbuffer_lib {
         }
 
         return result;
-
-
     }
 
-    
+
+    template<std::uint8_t FramesInFlight>
+    struct Binding {
+        wcr::wid::WTypeAssetIndexId mesh_id;
+
+        std::uint32_t model_ubo_offset;
+        std::array<VkDescriptorSet, FramesInFlight> model_ubo_descriptor_set;
+
+        std::vector<std::uint32_t> param_ubo_offsets;
+        
+        std::array<VkDescriptorSet, FramesInFlight> param_descripor_set;
+    };
+
+    template<std::uint8_t FramesInFlight>
+    struct DescriptorCollection {
+        
+        wvk::raii::DescriptorPool<
+            8 * FramesInFlight,
+            0,
+            30 * FramesInFlight,
+            38> descriptor_pool{};
+
+        std::array<VkDescriptorSet, FramesInFlight> model_ubo_desc_set{VK_NULL_HANDLE};
+
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> ubo_manager{};
+
+        std::unordered_map<wcr::wid::WAssetId,
+                           std::array<VkDescriptorSet, FramesInFlight>> param_descriptors;
+
+        std::unordered_map<
+            wcr::wid::WAssetId::IdType,
+            TSparseSet<Binding<FramesInFlight>>> pipeline_bindings_{};
+
+        
+    };
+
+
+
 };
 
 
