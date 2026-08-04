@@ -15,7 +15,6 @@ namespace wvk::raii::pipelines {
 
     template<std::uint8_t FramesInFlight>
     struct Binding {
-        
 
         wcr::wid::WTypeAssetIndexId mesh_id;
 
@@ -23,9 +22,9 @@ namespace wvk::raii::pipelines {
 
         wcr::wid::WAssetId param_descriptor_set_id;
         
-        std::vector<std::uint32_t> dynamic_offsets;
-
         std::array<VkDescriptorSet, FramesInFlight> param_descripor_set;
+
+        std::vector<std::uint32_t> dynamic_offsets;
     };
 
     template<std::uint8_t FramesInFlight>
@@ -119,8 +118,9 @@ namespace wvk::raii::pipelines {
             assert(param_type != wct::render::ERPipeParamType::None);
 
             wvk::raii::pipelines::desc_bindings
-                ::template UpdateParameter
-                <wvk::raii::pipelines::desc_bindings::EUpdateType::DYNAMIC>
+                ::template UpdateParameter <
+                    wvk::raii::pipelines::desc_bindings::EUpdateType::DYNAMIC
+                    >
                 (frame_index,
                  param_layout,
                  pipeline_params_id,
@@ -142,8 +142,9 @@ namespace wvk::raii::pipelines {
             assert(param_type != wct::render::ERPipeParamType::None);
 
             wvk::raii::pipelines::desc_bindings
-                ::template UpdateParameter
-                <wvk::raii::pipelines::desc_bindings::EUpdateType::STATIC>
+                ::template UpdateParameter <
+                    wvk::raii::pipelines::desc_bindings::EUpdateType::STATIC
+                    >
                 (0,
                  param_layout,
                  pipeline_params_id,

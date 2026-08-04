@@ -251,6 +251,8 @@ namespace wvk::raii::pipelines {
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
         pipelines_;
 
+        DescriptorCollection<FramesInFlight> ubo_collection_{};
+
         CollectionsMap collections_{};
 
     };
