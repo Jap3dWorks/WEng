@@ -80,7 +80,7 @@ struct WVkUBO
 
 struct WVkRenderPipeline
 {
-    wct::render::ERPipeType type{wct::render::ERPipeType::Graphics};
+    wct::render::ERPipeType type{wct::render::ERPipeType::GBuffer};
 
     VkPipeline pipeline{VK_NULL_HANDLE};
     VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    

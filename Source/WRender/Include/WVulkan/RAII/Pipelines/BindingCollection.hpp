@@ -10,19 +10,18 @@
 #include "WVulkan/RAII/Pipelines/_new_GBuffer_lib.hpp"
 
 #include <cstdint>
+#include <algorithm>
 
 namespace wvk::raii::pipelines {
 
     template<std::uint8_t FramesInFlight>
     struct Binding {
 
-        wcr::wid::WTypeAssetIndexId mesh_id;
+        wcr::wid::WEngId renderable_asset_id;   // matching with the render asset
 
-        std::array<VkDescriptorSet, FramesInFlight> model_ubo_descriptor_set;
-
-        wcr::wid::WAssetId param_descriptor_set_id;
+        wcr::wid::WEngId descriptor_bindings_id;
         
-        std::array<VkDescriptorSet, FramesInFlight> param_descripor_set;
+        std::array<VkDescriptorSet, FramesInFlight> param_descriptor_set;
 
         std::vector<std::uint32_t> dynamic_offsets;
     };
@@ -36,84 +35,68 @@ namespace wvk::raii::pipelines {
             30 * FramesInFlight,
             38> descriptor_pool{};
 
-        std::array<VkDescriptorSet, FramesInFlight> model_ubo_desc_set{VK_NULL_HANDLE};
-
         wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> ubo_manager{};
 
         // Descriptor by each asset_params
-        std::unordered_map<wcr::wid::WAssetId,
-                           std::array<VkDescriptorSet, FramesInFlight>> param_descriptors;
+        std::unordered_map<
+            wcr::wid::WEngId,
+            std::array<VkDescriptorSet, FramesInFlight>
+            > identifier_descriptors;
 
         std::unordered_map<
-            wcr::wid::WAssetId::IdType,
+            wcr::wid::WEngId::IdType,
             TSparseSet<Binding<FramesInFlight>>> pipeline_bindings{};
 
         void CreateBindingSet(
-            wcr::wid::WEngId binding_set_id,
-            wcr::wid::WEngId model_ubo_id,
-            VkDescriptorSetLayout model_ubo_layout,
-            std::uint8_t model_ubo_binding,
-            was::RenderPipeline asset_pipeline,
-            was::RenderPipelineParams asset_params,
-            VkDescriptorSetLayout param_ds_layout,
-            wvk::raii::AssetRenderData & asset_data,
-            wcr::wid::WTypeAssetIndexId in_mesh_asset_id
+            wcr::wid::WEngId binding_set_id,               // from component id
+            wcr::wid::WEngId pipeline_id,                  // id for the pipeline
+            wcr::wid::WEngId descriptor_bindings_id,       // usually id from pipeline params
+            wcr::wid::WEngId renderable_asset_id,
+            wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
+            wct::render::RPipeParamList_Ubo const & ubo_params,
+            wct::render::RPipeParamList_WAssetId const & texture_params,
+            VkDescriptorSetLayout descriptor_set_layout,
+            wvk::raii::AssetRenderData & asset_data
             ) {
             
-            EnsureModelUboDescriptorSet(
-                model_ubo_id,
-                model_ubo_layout,
-                model_ubo_binding
-                );
-
             auto param_dynamic_offsets = EnsureParamDescriptorSet(
                 binding_set_id,
-                asset_pipeline,
-                asset_params,
+                descriptor_bindings_id,
+                param_descriptors,
                 asset_data,
-                param_ds_layout
+                descriptor_set_layout
                 );
 
-            std::vector<std::uint32_t> dyn_offsets = {
-                ubo_manager
-                .GetOffset<FramesInFlight>(
-                    sizeof(wct::render::ModelUBO),
-                    binding_set_id)
-            };
-            
-            dyn_offsets.append_range(std::move(param_dynamic_offsets));
-
-            auto param_descriptor_set = param_descriptors[asset_params.Get_asset_id()];
+            auto param_descriptor_set = identifier_descriptors[descriptor_bindings_id];
 
             wvk::raii::pipelines::Binding binding {
-                .mesh_id=in_mesh_asset_id,
-                .model_ubo_descriptor_set = model_ubo_desc_set,
-                .param_descriptor_set_id=asset_params.Get_asset_id(),
-                .dynamic_offsets=std::move(dyn_offsets),
+                .renderable_asset_id=renderable_asset_id,
+                .descriptor_bindings_id=descriptor_bindings_id,
+                .dynamic_offsets=std::move(param_dynamic_offsets),
                 .param_descriptor_set = param_descriptor_set
             };
 
             pipeline_bindings[
-                asset_pipeline.Get_asset_id().GetId()
+                pipeline_id
                 ].Insert(binding_set_id.GetId(), std::move(binding));            
         }
 
         void DeleteBindingSet(
-            was::RenderPipeline const & render_pipeline,
+            wcr::wid::WEngId pipeline_id,
             wcr::wid::WEngId binding_set_id) {
-            pipeline_bindings[render_pipeline.Get_asset_id().GetId()]
+            pipeline_bindings[pipeline_id.GetId()]
                 .Remove(binding_set_id.GetId());
         }
 
         void UpdateBindingSetParameter(
             std::uint8_t frame_index,
-            wct::render::RPipeParamDescriptor param_layout,
-            wcr::wid::WAssetId pipeline_params_id,
+            wcr::wid::WEngId render_pipeline_id,
             wcr::wid::WEngId binding_set_id,
-            wct::render::RPipeParamUbo const & ubo_pipe_param
+            wct::render::RPipeParamDescriptor param_descriptor,
+            wct::render::RPipeParamUbo const & ubo_data
             ) {
 
-            wct::render::ERPipeParamType param_type = param_layout.type;
+            wct::render::ERPipeParamType param_type = param_descriptor.type;
 
             assert(param_type != wct::render::ERPipeParamType::None);
 
@@ -122,19 +105,19 @@ namespace wvk::raii::pipelines {
                     wvk::raii::pipelines::desc_bindings::EUpdateType::DYNAMIC
                     >
                 (frame_index,
-                 param_layout,
-                 pipeline_params_id,
                  binding_set_id,
-                 ubo_manager,
-                 ubo_pipe_param
+                 pipeline_bindings[render_pipeline_id.GetId()].Get(binding_set_id.GetId()),
+                 param_descriptor,
+                 ubo_data,
+                 ubo_manager
                     );
         }
 
         void UpdateBindingSetParameter(
-            wct::render::RPipeParamDescriptor param_layout,
-            wcr::wid::WAssetId pipeline_params_id,
+            wcr::wid::WEngId render_pipeline_id,
             wcr::wid::WEngId binding_set_id,
-            wct::render::RPipeParamUbo const & ubo_pipe_param
+            wct::render::RPipeParamDescriptor param_layout,
+            wct::render::RPipeParamUbo const & ubo_data
             ) {
 
             wct::render::ERPipeParamType param_type = param_layout.type;
@@ -147,44 +130,21 @@ namespace wvk::raii::pipelines {
                     >
                 (0,
                  param_layout,
-                 pipeline_params_id,
+                 pipeline_bindings[render_pipeline_id.GetId()].Get(binding_set_id.GetId()),
                  binding_set_id,
                  ubo_manager,
-                 ubo_pipe_param
+                 ubo_data
                     );
         }
 
     private:
         
-        void EnsureModelUboDescriptorSet(
-            wcr::wid::WEngId model_ubo_id,
-            VkDescriptorSetLayout model_ubo_layout,
-            std::uint8_t model_ubo_binding
-            ) {
-            
-            VkDescriptorSet model_ubo_descriptor;
-
-            if(model_ubo_desc_set[0] == VK_NULL_HANDLE) {
-
-                auto descriptors =
-                    wvk::raii::pipelines::gbuffer_lib::
-                    CreateModelUboDescriptorSet(
-                        descriptor_pool.Creator().device,
-                        model_ubo_id,
-                        model_ubo_binding,
-                        ubo_manager,
-                        *descriptor_pool,
-                        model_ubo_layout
-                        );
-
-                model_ubo_desc_set = descriptors;
-            }
-        }
-
         std::vector<std::uint32_t> EnsureParamDescriptorSet(
             wcr::wid::WEngId binding_set_id,
-            was::RenderPipeline const & asset_pipeline,
-            was::RenderPipelineParams const & asset_params,
+            wcr::wid::WEngId descriptor_bindings_id,
+            wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
+            wct::render::RPipeParamList_Ubo const & ubo_param_list,
+            wct::render::RPipeParamList_WAssetId const & texture_param_list,
             wvk::raii::AssetRenderData & asset_data,
             VkDescriptorSetLayout param_layout
             ) {
@@ -192,17 +152,17 @@ namespace wvk::raii::pipelines {
             auto ubo_params = wvk::raii::pipelines::desc_bindings
                 ::CollectUBOBindings<FramesInFlight>(
                     binding_set_id,
-                    asset_pipeline,
-                    asset_params,
+                    descriptor_bindings_id,
+                    param_descriptors,
+                    ubo_param_list,
                     ubo_manager
                     );
 
-            if (!param_descriptors.contains(
-                    asset_params.Get_asset_id())) {
+            if (!identifier_descriptors.contains(descriptor_bindings_id)) {
                 
                 auto texture_params = wvk::raii::pipelines::desc_bindings
                     ::CollectTextureBindings(
-                        asset_params,
+                        texture_param_list,
                         asset_data
                         );
 
@@ -210,19 +170,20 @@ namespace wvk::raii::pipelines {
                     ::CreateParamsDescriptorSet(
                         descriptor_pool.Creator().device,
                         param_layout,
-                        descriptor_pool,
+                        descriptor_pool.Value(),
                         texture_params,
                         ubo_params
                         );
 
-                param_descriptors[asset_params.Get_asset_id()] =
+                identifier_descriptors[descriptor_bindings_id] =
                     std::move(descriptors);
             }
 
-            std::sort(ubo_params, [](auto a, auto b)
-                {
-                    return a.binding < b.binding;
-                }
+            std::sort(ubo_params,
+                      [](auto a, auto b)
+                          {
+                              return a.binding < b.binding;
+                          }
                 );
 
             std::vector<std::uint32_t> dynamic_offsets;
@@ -232,8 +193,7 @@ namespace wvk::raii::pipelines {
                                    [](auto b) {return b.dynamic_offset; });
 
             return dynamic_offsets;
-        }       
-
+        }
         
     };
 

@@ -76,10 +76,10 @@ public:
         pipelines.InsertAt(in_pipeline_id, render_pipeline_info);
     }
 
-    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::RPipeParamDescLayList &> ConfigInfoFn>
+    template<CCallable<void, WVkDescriptorSetLayoutInfo&, const wct::render::RPipeParamDescriptorsLayout &> ConfigInfoFn>
     void CreateDescSetLayout(const WPipelineIdType & in_id,
                              const VkDevice & in_device,
-                             const wct::render::RPipeParamDescLayList & params,
+                             const wct::render::RPipeParamDescriptorsLayout & params,
                              ConfigInfoFn && config_fn) {
         
         WVkDescriptorSetLayoutInfo descriptor_set_layout_info;

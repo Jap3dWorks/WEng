@@ -23,11 +23,9 @@
 namespace wvk::raii::pipelines::desc_bindings {
 
     WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectTextureBindings(
-        was::RenderPipelineParams const & parameters,
+        wct::render::RPipeParamList_WAssetId const & texture_params,
         wvk::raii::AssetRenderData & asset_render_data
         ) {
-        auto texture_params = parameters.Get_texture_list();
-
         std::vector<WVkDescSetTextureBinding> textures{};
         textures.resize(texture_params.size());
 
@@ -50,13 +48,20 @@ namespace wvk::raii::pipelines::desc_bindings {
     }
 
     inline constexpr wcr::wid::WEngId ToAssetParamBindingId(
-        wcr::wid::WAssetId asset_param_id,
+        wcr::wid::WEngId param_id,
         std::uint8_t binding)
     {
+        wcr::wid::WAssetTypeId assettype;
+        wcr::wid::WAssetId assetid;
+        wcr::wid::WSubIdxId idx;
+
+        // binding as index
+        param_id.AsAssetIndexId().ExtractWIds(assettype, assetid, idx);
+
         return wcr::wid::WEngId::FromAsset(
             wcr::wid::WTypeAssetIndexId(
-                wcr::wid::null_id,
-                asset_param_id,
+                assettype,
+                assetid,
                 binding
                 ));
     }
@@ -99,11 +104,11 @@ namespace wvk::raii::pipelines::desc_bindings {
     template<std::uint8_t FramesInFlight>
     WNODISCARD std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> CollectUBOBindings(
         wcr::wid::WEngId binding_set_id,
-        was::RenderPipeline const & pipeline,
-        was::RenderPipelineParams const & parameters,
+        wcr::wid::WEngId parameter_bindings_id,
+        wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
+        wct::render::RPipeParamList_Ubo const & ubo_params,
         wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man
         ) {
-        auto & ubo_params = parameters.Get_ubo_list();
 
         std::unordered_map<
             std::uint8_t,
@@ -163,11 +168,9 @@ namespace wvk::raii::pipelines::desc_bindings {
         std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> result{};
         result.reserve(ubo_params.size());
 
-        for (auto & descriptor : pipeline.Get_descriptor_list()) {
+        for (auto & descriptor : param_descriptors) {
 
             switch(descriptor.type) {
-
-            // TODO required binidng id
 
             case wct::render::ERPipeParamType::UBO_Static:
                 result.push_back(
@@ -175,7 +178,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                     .template operator()<1> (
                         descriptor,
                         ToAssetParamBindingId(
-                            parameters.Get_asset_id(), 
+                            parameter_bindings_id,
                             descriptor.binding
                             )
                         ));
@@ -187,7 +190,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                     .template operator()<FramesInFlight> (
                         descriptor,
                         ToAssetParamBindingId(
-                            parameters.Get_asset_id(), 
+                            parameter_bindings_id,
                             descriptor.binding
                             )
                         )
@@ -410,18 +413,18 @@ namespace wvk::raii::pipelines::desc_bindings {
     template<EUpdateType UpdateType, std::uint8_t FramesInFlight>
     inline void UpdateParameter(
         std::uint8_t frame_index,
-        wct::render::RPipeParamDescriptor param_descriptor,
-        wcr::wid::WAssetId params_id,
         wcr::wid::WEngId binding_set_id,
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
-        wct::render::RPipeParamUbo const & ubo_pipe_param
+        wcr::wid::WEngId descriptor_bindings_id,
+        wct::render::RPipeParamDescriptor param_descriptor,
+        wct::render::RPipeParamUbo const & ubo_data,
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man
         ) {
 
         wvk::raii::ubo_manager::BlockSizeIntT block_size =
             static_cast<wvk::raii::ubo_manager::BlockSizeIntT>(param_descriptor.size);
 
         auto update_dynamic_param =
-            [&ubo_man, &frame_index, &block_size, &ubo_pipe_param]
+            [&ubo_man, &frame_index, &block_size, &ubo_data]
             (wcr::wid::WEngId ubo_param_id ) {
                 if constexpr (UpdateType == EUpdateType::STATIC) {
                     for(std::uint8_t f=0; f<FramesInFlight; ++f) {
@@ -429,7 +432,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                             block_size ,
                             f ,
                             std::vector{ubo_param_id},
-                            GetUboPtrData(ubo_pipe_param)
+                            GetUboPtrData(ubo_data)
                             );
                     
                     } 
@@ -438,7 +441,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                         block_size ,
                         frame_index ,
                         std::vector{ubo_param_id},
-                        GetUboPtrData(ubo_pipe_param)
+                        GetUboPtrData(ubo_data)
                         );
                 }
             } ;
@@ -449,13 +452,13 @@ namespace wvk::raii::pipelines::desc_bindings {
             ubo_man.template Update<STATIC_FLAG<FramesInFlight>>(
                 block_size,
                 0,
-                std::vector{ToAssetParamBindingId(params_id, param_descriptor.binding)},
-                GetUboPtrData(ubo_pipe_param)
+                std::vector{ToAssetParamBindingId(descriptor_bindings_id, param_descriptor.binding)},
+                GetUboPtrData(ubo_data)
                 );
             break;
 
         case wct::render::ERPipeParamType::UBO_Dynamic:
-            update_dynamic_param(ToAssetParamBindingId(params_id, param_descriptor.binding));
+            update_dynamic_param(ToAssetParamBindingId(descriptor_bindings_id, param_descriptor.binding));
             break;
 
         case wct::render::ERPipeParamType::UBO_Entity_Static:
@@ -463,7 +466,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                 block_size ,
                 0,
                 std::vector{ToEntityParamId(binding_set_id)},
-                GetUboPtrData(ubo_pipe_param)
+                GetUboPtrData(ubo_data)
                 );
             break;
 
@@ -476,7 +479,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                 block_size ,
                 0,
                 binding_set_id,
-                GetUboPtrData(ubo_pipe_param)
+                GetUboPtrData(ubo_data)
                 );
             break;
         case wct::render::ERPipeParamType::UBO_Component_Dynamic:

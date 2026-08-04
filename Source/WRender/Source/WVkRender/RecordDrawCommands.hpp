@@ -87,12 +87,12 @@ namespace wvk::render::rec_cmd_bffr {
 
         for(auto pipeline_id : pipelines.IterPipelines()) {
         
-            std::tuple<VkPipeline,VkPipelineLayout> render_pipeline =
+            std::tuple<VkPipeline,VkPipelineLayout> pipeline__layout =
                 pipelines.GetPipeline(pipeline_id);
 
             vkCmdBindPipeline(command_buffer,
                               VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              std::get<0>(render_pipeline));
+                              std::get<0>(pipeline__layout));
                               // render_pipeline.pipeline);
 
             wvk::render::RndCmd_SetViewportAndScissor(
@@ -135,20 +135,18 @@ namespace wvk::render::rec_cmd_bffr {
                     std::array descsets =
                         {
                             global_descriptors.DescriptorSet(frame_index),
-                            binding.model_ubo_descriptor_set.at(frame_index),
-                            binding.param_descripor_set.at(frame_index)
+                            std::get<0>(binding).param_descriptor_set.at(frame_index),
+                            std::get<1>(binding).param_descriptor_set.at(frame_index)
                         };
 
                     std::vector<std::uint32_t> dynamic_offsets =
-                        std::vector{ binding.model_ubo_offset };
+                        std::get<0>(binding).param_ubo_offsets ;
 
-                    dynamic_offsets.append_range(
-                        binding.param_ubo_offsets
-                        );
+                    dynamic_offsets.push_back(std::get<1>(binding).param_ubo_offsets[0]);
 
                     vkCmdBindDescriptorSets(command_buffer,
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                            std::get<1>(render_pipeline),
+                                            std::get<1>(pipeline__layout),
                                             0,
                                             static_cast<std::uint32_t>(descsets.size()),
                                             descsets.data(),

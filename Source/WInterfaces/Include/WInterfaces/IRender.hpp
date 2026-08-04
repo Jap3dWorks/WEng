@@ -102,7 +102,9 @@ public:
         std::size_t binding_set_collection,
         wcr::wid::WEngId binding_set_id,
         was::RenderPipeline const & pipeline,
-        wct::render::RPipeParamUbo const & ubo_write)=0;
+        wcr::wid::WSubIdxId param_descriptor_id,
+        wct::render::RPipeParamUbo const & ubo_pipe_param
+        )=0;
 
     /**
      * @brief Updates for all frames in flight.
@@ -110,9 +112,10 @@ public:
      */
     virtual void UpdatePipelineBindingSetParameter_Static(
         std::size_t binding_set_collection,
-        wcr::wid::WEngId in_component_id,
+        wcr::wid::WEngId binding_set_id,
         was::RenderPipeline const & pipeline,
-        wct::render::RPipeParamUbo const & ubo_write
+        wcr::wid::WSubIdxId param_descriptor_id,
+        wct::render::RPipeParamUbo const & ubo_pipe_param
         )=0;
 
     /**

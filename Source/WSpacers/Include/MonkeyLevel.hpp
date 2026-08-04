@@ -125,7 +125,7 @@ namespace spacers::monkey {
 
         pipeline_asset.Set_shader_list(shader_list);
 
-        auto descriptors = pipeline_asset.Get_descriptor_list();
+        auto descriptors = pipeline_asset.Get_descriptors_layout_list();
 
         descriptors[0].binding = 0;
         descriptors[0].type = wct::render::ERPipeParamType::UBO_Entity_Dynamic;

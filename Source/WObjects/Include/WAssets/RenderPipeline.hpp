@@ -16,7 +16,7 @@ namespace was {
 
         WPROPERTY(wct::render::ERPipeType, pipeline_type, wct::render::ERPipeType::GBuffer);
         WPROPERTY(wct::render::ShaderList, shader_list,);
-        WPROPERTY(wct::render::RPipeParamDescLayList, descriptor_list,);
+        WPROPERTY(wct::render::RPipeParamDescriptorsLayout, descriptors_layout,);
 
     private:
 

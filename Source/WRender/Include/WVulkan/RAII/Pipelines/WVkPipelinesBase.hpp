@@ -188,7 +188,7 @@ protected:
     }
     
     inline bool ValidateBindingParams(
-        const wct::render::RPipeParamDescLayList & in_pipeline_params,
+        const wct::render::RPipeParamDescriptorsLayout & in_pipeline_params,
         const std::vector<WVkDescSetUBOWrite> & in_ubos,
         const std::vector<WVkDescSetTextureBinding> & in_textures) {
 

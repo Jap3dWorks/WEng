@@ -388,24 +388,20 @@ void WVkRender::CreateRenderPipeline(
     ) {
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::ERPipeType::Graphics,
         wct::render::ERPipeType::GBuffer,
         wct::render::ERPipeType::Postprocess>
         (
             render_pipeline.Get_pipeline_type(),
             [&,this](){
                 gbuffers_pipelines_.CreatePipeline(
-                    render_pipeline,
+                    wcr::wid::WEngId::FromAsset(render_pipeline.Get_asset_id()),
+                    render_pipeline.Get_shader_list(),
+                    render_pipeline.Get_descriptors_layout_list(),
                     global_descriptors_.DescriptorSetLayout()
                     );
             },
             [&,this](){
-                gbuffers_pipelines_.CreatePipeline(
-                    render_pipeline,
-                    global_descriptors_.DescriptorSetLayout()
-                    );
-            },
-            [&,this](){
+                // TODO
                 ppcss_pipelines_.CreatePipeline(
                     render_pipeline.Get_asset_id(),
                     render_pipeline,
@@ -419,22 +415,15 @@ void WVkRender::CreateRenderPipeline(
 void WVkRender::DeleteRenderPipeline(
     was::RenderPipeline const & render_pipeline
     ) {
-
     wct::render::pipeline_type_dispatcher<
-        wct::render::ERPipeType::Graphics,
         wct::render::ERPipeType::GBuffer,
         wct::render::ERPipeType::Postprocess
         >
         (render_pipeline.Get_pipeline_type(),
          [&,this]() {
-             // gbuffers_pipelines_.DeletePipeline(
-             //     in_id
-             //     );
-         },
-         [&,this]() {
-             // gbuffers_pipelines_.DeletePipeline(
-             //     in_id
-             //     );
+             gbuffers_pipelines_.DeletePipeline(
+                 wcr::wid::WEngId::FromAsset(render_pipeline.Get_asset_id())
+                 );
          },
          [&,this]() {
              // ppcss_pipelines_.DeletePipeline(
@@ -455,14 +444,22 @@ void WVkRender::CreatePipelineBindingSet(
 
     switch(pipeline.Get_pipeline_type()) {
     case wct::render::ERPipeType::GBuffer:
+    {
         gbuffers_pipelines_.CreateBindingSet(
             binding_set_collection,
             binding_set_id,
-            pipeline,
-            parameters,
-            asset_render_data_,
-            renderable_asset_id
+            wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id()),
+            wcr::wid::WEngId::FromAsset(parameters.Get_asset_id()),
+            wcr::wid::WEngId::FromAsset(renderable_asset_id),
+            gbuffers_pipelines_.GetModelDescriptor(pipeline.Get_descriptors_layout()),
+            gbuffers_pipelines_.GetDefaultModelParam(),
+            pipeline.Get_descriptors_layout(),
+            parameters.Get_ubo_list(),
+            parameters.Get_texture_list(),
+            asset_render_data_
             );
+    }
+    break;
     case wct::render::ERPipeType::Postprocess:
         // temp with No postprocess
         // ppcss_pipelines_.CreateBindingSet(
@@ -488,19 +485,15 @@ void WVkRender::DeletePipelineBindingSet(
     wcr::wid::WEntityComponentId cmpid = binding_set_id.AsEntityComponentId();
 
     wct::render::pipeline_type_dispatcher<
-        wct::render::ERPipeType::Graphics,
         wct::render::ERPipeType::GBuffer,
         wct::render::ERPipeType::Postprocess>
         (
             pipeline.Get_pipeline_type(),
             [&,this](){
                 gbuffers_pipelines_.DeleteBindingSet(
-                    binding_set_collection, binding_set_id
-                    );
-            },
-            [&,this](){
-                gbuffers_pipelines_.DeleteBindingSet(
-                    binding_set_collection, binding_set_id
+                    binding_set_collection,
+                    binding_set_id,
+                    wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id())
                     );
             },
             [&,this](){ ppcss_pipelines_.DeleteBinding(cmpid); }
@@ -545,6 +538,7 @@ void WVkRender::UpdatePipelineBindingSetParameter_Dynamic(
     std::size_t binding_set_collection,
     wcr::wid::WEngId binding_set_id,
     was::RenderPipeline const & pipeline,
+    wcr::wid::WSubIdxId param_descriptor_id,
     wct::render::RPipeParamUbo const & ubo_pipe_param
     ) {
 
@@ -566,15 +560,13 @@ void WVkRender::UpdatePipelineBindingSetParameter_Dynamic(
     default:
         
         gbuffers_pipelines_.UpdateBindingSetParameter(
+            frame_index_,
             binding_set_collection,
+            wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id()),
             binding_set_id,
-            pipeline,
-            ubo_pipe_param,
-            frame_index_
+            pipeline.Get_descriptors_layout()[param_descriptor_id.GetId()],
+            ubo_pipe_param
             );
-
-        // return gbuffers_pipelines
-        //     .GetUBOBinding(binding_set_id, binding);
     }
     
     // // WVkDescSetUBOBinding<FramesInFlight()> ubo_binding =
@@ -598,8 +590,35 @@ void WVkRender::UpdatePipelineBindingSetParameter_Static(
     std::size_t binding_set_collection,
     wcr::wid::WEngId binding_set_id,
     was::RenderPipeline const & pipeline,
-    wct::render::RPipeParamUbo const & ubo_write
+    wcr::wid::WSubIdxId param_descriptor_id,
+    wct::render::RPipeParamUbo const & ubo_pipe_param
     ) {
+
+
+    switch(pipeline.Get_pipeline_type()) {
+    case wct::render::ERPipeType::Postprocess:
+        // return postprocess_pipelines
+        // .GetUBOBinding(binding_set_id, binding);
+        // break;
+
+        // wvk::render::pipe_bindings::UpdateParamDynamic(
+        //     ppcss_pipelines_.GetUBOBinding(component_id, ubo_pipe_param.binding),
+        //     dynamic_ubo_manager_,
+        //     frame_index_,
+        //     wvk::render::pipe_bindings::GetUboPtrData(ubo_pipe_param)
+        //     );
+
+    default:
+        
+        gbuffers_pipelines_.UpdateBindingSetParameter(
+            binding_set_collection,
+            wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id()),
+            binding_set_id,
+            pipeline.Get_descriptors_layout()[param_descriptor_id.GetId()],
+            ubo_pipe_param
+            );
+    }
+
 
     // WVkDescSetUBOBinding<FramesInFlight()> ubo_binding =
     //     wvk::render::pipe_bindings::GetUboBinding(

@@ -100,7 +100,7 @@ namespace wvk::descriptor {
     }
 
     inline std::vector<VkDescriptorSetLayoutBinding> ToDescriptorSetLayoutBinding(
-        const wct::render::RPipeParamDescLayList & in_param_list
+        const wct::render::RPipeParamDescriptorsLayout & in_param_list
         ) {
         std::vector<VkDescriptorSetLayoutBinding> result;
 
@@ -140,7 +140,7 @@ namespace wvk::descriptor {
 
     inline void UpdateDescriptorSetLayout(
         WVkDescriptorSetLayoutInfo & out_dsl,
-        const wct::render::RPipeParamDescLayList & in_param_list
+        const wct::render::RPipeParamDescriptorsLayout & in_param_list
         ) {
 
         out_dsl.bindings = ToDescriptorSetLayoutBinding(in_param_list);

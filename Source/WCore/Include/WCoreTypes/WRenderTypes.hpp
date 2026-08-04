@@ -123,7 +123,6 @@ namespace wct::render {
 
     enum class ERPipeType : uint8_t
     {
-        Graphics,       // DEPRECATED use GBuffer for opaque pass
         GBuffer,        // GBuffer generation shader
         Lighting,      // Lighting render using GBuffers
         Transparency,   // Alpha Blending
@@ -160,7 +159,7 @@ namespace wct::render {
     }
     
     template<ERPipeType... PipelineTypes, typename... Handlers>
-    inline constexpr void pipeline_type_dispatcher(ERPipeType type, Handlers&&... handlers) {
+    inline constexpr void pipeline_type_dispatcher(ERPipeType type, Handlers && ... handlers) {
 
         static_assert(sizeof...(PipelineTypes) == sizeof...(Handlers));
     
@@ -200,7 +199,31 @@ namespace wct::render {
         std::uint8_t size{0};
     };
 
-    using RPipeParamDescLayList = std::array<RPipeParamDescriptor, 16>;
+    using RPipeParamDescriptorsLayout = std::array<RPipeParamDescriptor, 16>;
+
+    constexpr const std::uint8_t MODEL_UBO_BINDING{0};
+    constexpr const std::uint8_t MODEL_UBO_DESC_SET{2};
+    constexpr wct::render::RPipeParamDescriptor ModelParamDescriptor_Static() {
+        return wct::render::RPipeParamDescriptor {
+            .set=MODEL_UBO_DESC_SET,
+            .binding=MODEL_UBO_BINDING,
+            .type=wct::render::ERPipeParamType::UBO_Entity_Static,
+            .stage_flags=wct::render::EShaderStageFlag::Vertex,
+            .size=sizeof(wct::render::ModelUBO)
+        };
+    }
+
+    constexpr wct::render::RPipeParamDescriptor ModelParamDescriptor_Dynamic() {
+        return wct::render::RPipeParamDescriptor {
+            .set=MODEL_UBO_DESC_SET,
+            .binding=MODEL_UBO_BINDING,
+            .type=wct::render::ERPipeParamType::UBO_Entity_Dynamic,
+            .stage_flags=wct::render::EShaderStageFlag::Vertex,
+            .size=sizeof(wct::render::ModelUBO)
+        };
+    }
+
+
 
     struct ShaderInfo {
         EShaderStageFlag type{EShaderStageFlag::None};
@@ -250,7 +273,7 @@ namespace wct::render {
     using RPipeParamList_Ubo = std::vector<RPipeParamUbo>;
 
     template<CCallable<void, const RPipeParamDescriptor &> TFn>
-    inline void ForEach(const wct::render::RPipeParamDescLayList & in_lst, TFn && in_fn) {
+    inline void ForEach(const wct::render::RPipeParamDescriptorsLayout & in_lst, TFn && in_fn) {
         for(const auto& param: in_lst) {
             if (param.type==ERPipeParamType::None)
                 break;

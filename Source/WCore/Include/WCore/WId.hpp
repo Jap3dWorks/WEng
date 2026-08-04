@@ -669,6 +669,13 @@ namespace wcr::wid {
         return WEngId( GetKindBits(EObjectKind::Asset) | payload );
     }
 
+    static constexpr WEngId FromAsset(WAssetId in_asset_index) noexcept {
+        WTypeAssetIndexId id(null_id, in_asset_index, null_id);
+        IdType payload = id.GetId();
+        return WEngId( GetKindBits(EObjectKind::Asset) | payload );
+    }
+    
+
     static constexpr WEngId FromEntityComponent(WEntityComponentId in_entt_component_id) noexcept {
         std::uint64_t payload = in_entt_component_id.GetId();
         return WEngId(GetKindBits(EObjectKind::EntityComponent) | payload );

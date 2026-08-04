@@ -81,7 +81,7 @@ namespace {
 
         pipeline_asset.Set_shader_list(shader_stages);
 
-        auto descriptors = pipeline_asset.Get_descriptor_list();
+        auto descriptors = pipeline_asset.Get_descriptors_layout_list();
 
         // Model UBO (reserved)
         descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;

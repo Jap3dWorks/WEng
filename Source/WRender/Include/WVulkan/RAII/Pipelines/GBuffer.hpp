@@ -8,9 +8,9 @@
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer_lib.hpp"
+#include "WVulkan/RAII/Pipelines/WVkPipelinesBase.hpp"
 
 #include <vector>
-#include "WVulkan/RAII/Pipelines/WVkPipelinesBase.hpp"
 
 
 namespace wvk::raii::pipelines {
@@ -63,7 +63,7 @@ namespace wvk::raii::pipelines {
             Super::pipelines_db_.CreateDescSetLayout(
                 pipeline_id,
                 Super::Device(),
-                pipeline_asset.Get_descriptor_list(),
+                pipeline_asset.Get_descriptors_layout_list(),
                 wvk::descriptor::UpdateDescriptorSetLayout
                 );
 
