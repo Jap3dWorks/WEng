@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WCore/WId.hpp"
+#include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
@@ -48,7 +49,7 @@ namespace wvk::raii::pipelines::desc_bindings {
         return textures;
     }
 
-    inline constexpr wcr::wid::WEngId ToParamBindingId(
+    inline constexpr wcr::wid::WEngId ToAssetParamBindingId(
         wcr::wid::WAssetId asset_param_id,
         std::uint8_t binding)
     {
@@ -59,6 +60,26 @@ namespace wvk::raii::pipelines::desc_bindings {
                 binding
                 ));
     }
+
+    constexpr inline wcr::wid::WEngId ToEntityParamId(
+        wcr::wid::WEngId id) noexcept {
+
+        wcr::wid::WAssetId level;
+        wcr::wid::WEntityId entity;
+        wcr::wid::WComponentTypeId component;
+        wcr::wid::WSubIdxId indx;
+
+        id.AsEntityComponentId().ExtractWIds(level, entity, component, indx);
+            
+        return wcr::wid::WEngId::FromEntityComponent(
+            wcr::wid::WEntityComponentId{
+                level,
+                entity,
+                wcr::wid::null_id,
+                wcr::wid::null_id}
+            );
+    }
+    
 
     template<std::uint8_t FramesInFlight, std::uint8_t UBOFrames>
     constexpr auto UBOManFrameFlag() {
@@ -106,7 +127,7 @@ namespace wvk::raii::pipelines::desc_bindings {
         auto CreateUBOBinding =
             [&]
             <std::uint8_t UBOFrames>
-            (wct::render::RPipeParamDescLayInfo const & desc, wcr::wid::WEngId wid)
+            (wct::render::RPipeParamDescriptor const & desc, wcr::wid::WEngId wid)
             -> _new_WVkDescSetUBOBinding<FramesInFlight>
             {
                 constexpr auto frame_flag=ubo_frame_flag_v<FramesInFlight, UBOFrames>;
@@ -146,12 +167,14 @@ namespace wvk::raii::pipelines::desc_bindings {
 
             switch(descriptor.type) {
 
+            // TODO required binidng id
+
             case wct::render::ERPipeParamType::UBO_Static:
                 result.push_back(
                     CreateUBOBinding
                     .template operator()<1> (
                         descriptor,
-                        ToParamBindingId(
+                        ToAssetParamBindingId(
                             parameters.Get_asset_id(), 
                             descriptor.binding
                             )
@@ -163,7 +186,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                     CreateUBOBinding
                     .template operator()<FramesInFlight> (
                         descriptor,
-                        ToParamBindingId(
+                        ToAssetParamBindingId(
                             parameters.Get_asset_id(), 
                             descriptor.binding
                             )
@@ -177,9 +200,8 @@ namespace wvk::raii::pipelines::desc_bindings {
                     CreateUBOBinding
                     .template operator()<1> (
                         descriptor,
-                        wct::render::ApplyPipeParamType(
-                            binding_set_id,
-                            wct::render::ERPipeParamType::UBO_Entity_Static
+                        ToEntityParamId(
+                            binding_set_id
                             )
                         )
                     );
@@ -191,9 +213,8 @@ namespace wvk::raii::pipelines::desc_bindings {
                     CreateUBOBinding
                     .template operator()<FramesInFlight> (
                         descriptor,
-                        wct::render::ApplyPipeParamType(
-                            binding_set_id,
-                            wct::render::ERPipeParamType::UBO_Entity_Static
+                        ToEntityParamId(
+                            binding_set_id
                             )
                         )
                     );
@@ -239,65 +260,6 @@ namespace wvk::raii::pipelines::desc_bindings {
                 }
                 ),
             ubo_param.data
-            );
-    }
-
-    // inline WVkDescSetUBOWrite GetUboWrite(wct::render::RPipeParamUbo const & ubo_pipe_param) {
-    //     return std::visit(
-    //         wcr::TVisitor(
-    //             [&ubo_pipe_param](auto const & ubodata) -> WVkDescSetUBOWrite {
-    //                 return {
-    //                     .binding = ubo_pipe_param.binding,
-    //                     .data = ubodata.data(),
-    //                     .size = ubodata.size(),
-    //                     .offset = 0 //  ubo_pipe_param.offset
-    //                 };
-    //             }
-    //             ),
-    //         ubo_pipe_param.data
-    //         );
-    // }
-
-    template<std::uint8_t FramesInFlight>
-    inline void UpdateParamStatic(
-        WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
-        void const * data
-        ) {
-
-        if (ubo_binding.ubo_desc[0].desc_buffer.buffer ==
-            ubo_binding.ubo_desc[1].desc_buffer.buffer) {
-            ubo_man.template Update<ubo_man.STATIC_FRAME_FLAG>(
-                ubo_binding.ubo_desc[0].desc_buffer.range,
-                0,
-                {ubo_binding.ubo_desc[0].index},
-                data
-                );
-        }
-        else {
-            for(std::uint32_t f=0; f<FramesInFlight; f++) {
-                ubo_man.template Update<ubo_man.DYNAMIC_FRAME_FLAG>(
-                    ubo_binding.ubo_desc[f].desc_buffer.range,
-                    f,
-                    {ubo_binding.ubo_desc[f].index},
-                    data
-                    );
-            }
-        }
-    }
-
-    template<std::uint8_t FramesInFlight>
-    inline void UpdateParamDynamic(
-        WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
-        std::uint8_t frame_index,
-        void const * data
-        ) {
-        ubo_man.template Update<ubo_man.DYNAMIC_FRAME_FLAG>(
-            ubo_binding.ubo_desc[frame_index].desc_buffer.range,
-            frame_index,
-            {ubo_binding.ubo_desc[frame_index].index},
-            data
             );
     }
 
@@ -385,5 +347,147 @@ namespace wvk::raii::pipelines::desc_bindings {
         return descriptor_sets;
     }
 
+    // inline WVkDescSetUBOWrite GetUboWrite(wct::render::RPipeParamUbo const & ubo_pipe_param) {
+    //     return std::visit(
+    //         wcr::TVisitor(
+    //             [&ubo_pipe_param](auto const & ubodata) -> WVkDescSetUBOWrite {
+    //                 return {
+    //                     .binding = ubo_pipe_param.binding,
+    //                     .data = ubodata.data(),
+    //                     .size = ubodata.size(),
+    //                     .offset = 0 //  ubo_pipe_param.offset
+    //                 };
+    //             }
+    //             ),
+    //         ubo_pipe_param.data
+    //         );
+    // }
+
+    // template<std::uint8_t FramesInFlight>
+    // inline void UpdateParamStatic(
+    //     WVkDescSetUBOBinding<FramesInFlight> & ubo_binding,
+    //     wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
+    //     void const * data
+    //     ) {
+
+    //     if (ubo_binding.ubo_desc[0].desc_buffer.buffer ==
+    //         ubo_binding.ubo_desc[1].desc_buffer.buffer) {
+    //         ubo_man.template Update<ubo_man.STATIC_FRAME_FLAG>(
+    //             ubo_binding.ubo_desc[0].desc_buffer.range,
+    //             0,
+    //             {ubo_binding.ubo_desc[0].index},
+    //             data
+    //             );
+    //     }
+    //     else {
+    //         for(std::uint32_t f=0; f<FramesInFlight; f++) {
+    //             ubo_man.template Update<ubo_man.DYNAMIC_FRAME_FLAG>(
+    //                 ubo_binding.ubo_desc[f].desc_buffer.range,
+    //                 f,
+    //                 {ubo_binding.ubo_desc[f].index},
+    //                 data
+    //                 );
+    //         }
+    //     }
+    // }
+
+    namespace {
+    
+        template<std::uint8_t Frames>
+        constexpr auto STATIC_FLAG = wvk::raii::ubo_manager
+            ::DynamicUBOManager<Frames>::STATIC_FRAME_FLAG;
+
+        template<std::uint8_t Frames>
+        constexpr auto DYNAMIC_FLAG = wvk::raii::ubo_manager
+            ::DynamicUBOManager<Frames>::DYNAMIC_FRAME_FLAG;
+    }
+
+    enum class EUpdateType {
+        STATIC,
+        DYNAMIC
+    };
+
+    template<EUpdateType UpdateType, std::uint8_t FramesInFlight>
+    inline void UpdateParameter(
+        std::uint8_t frame_index,
+        wct::render::RPipeParamDescriptor param_descriptor,
+        wcr::wid::WAssetId params_id,
+        wcr::wid::WEngId binding_set_id,
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
+        wct::render::RPipeParamUbo const & ubo_pipe_param
+        ) {
+
+        wvk::raii::ubo_manager::BlockSizeIntT block_size =
+            static_cast<wvk::raii::ubo_manager::BlockSizeIntT>(param_descriptor.size);
+
+        auto update_dynamic_param =
+            [&ubo_man, &frame_index, &block_size, &ubo_pipe_param]
+            (wcr::wid::WEngId ubo_param_id ) {
+                if constexpr (UpdateType == EUpdateType::STATIC) {
+                    for(std::uint8_t f=0; f<FramesInFlight; ++f) {
+                        ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+                            block_size ,
+                            f ,
+                            std::vector{ubo_param_id},
+                            GetUboPtrData(ubo_pipe_param)
+                            );
+                    
+                    } 
+                } else {
+                    ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+                        block_size ,
+                        frame_index ,
+                        std::vector{ubo_param_id},
+                        GetUboPtrData(ubo_pipe_param)
+                        );
+                }
+            } ;
+                    
+
+        switch (param_descriptor.type) {
+        case wct::render::ERPipeParamType::UBO_Static:
+            ubo_man.template Update<STATIC_FLAG<FramesInFlight>>(
+                block_size,
+                0,
+                std::vector{ToAssetParamBindingId(params_id, param_descriptor.binding)},
+                GetUboPtrData(ubo_pipe_param)
+                );
+            break;
+
+        case wct::render::ERPipeParamType::UBO_Dynamic:
+            update_dynamic_param(ToAssetParamBindingId(params_id, param_descriptor.binding));
+            break;
+
+        case wct::render::ERPipeParamType::UBO_Entity_Static:
+            ubo_man.template Update<STATIC_FLAG<FramesInFlight>>(
+                block_size ,
+                0,
+                std::vector{ToEntityParamId(binding_set_id)},
+                GetUboPtrData(ubo_pipe_param)
+                );
+            break;
+
+        case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
+            update_dynamic_param(ToEntityParamId(binding_set_id));
+            break;
+
+        case wct::render::ERPipeParamType::UBO_Component_Static:
+            ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+                block_size ,
+                0,
+                binding_set_id,
+                GetUboPtrData(ubo_pipe_param)
+                );
+            break;
+        case wct::render::ERPipeParamType::UBO_Component_Dynamic:
+            update_dynamic_param(binding_set_id);
+
+            break;
+        default:
+            break;
+                    
+        }
+
+    }
 
 }

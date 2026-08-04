@@ -189,49 +189,18 @@ namespace wct::render {
             param_type == ERPipeParamType::UBO_Component_Dynamic;
     }
 
-    constexpr inline wcr::wid::WEngId ApplyPipeParamType(
-        wcr::wid::WEngId id,
-        ERPipeParamType pipe_param_type) noexcept {
-
-        auto get_entity_id = [](wcr::wid::WEntityComponentId _id) constexpr {
-
-            wcr::wid::WAssetId level;
-            wcr::wid::WEntityId entity;
-            wcr::wid::WComponentTypeId component;
-            wcr::wid::WSubIdxId indx;
-
-            _id.ExtractWIds(level, entity, component, indx);
-            
-            return wcr::wid::WEngId::FromEntityComponent(
-                wcr::wid::WEntityComponentId{
-                    level,
-                    entity,
-                    wcr::wid::null_id,
-                    wcr::wid::null_id}
-                );
-        };
-
-        switch (pipe_param_type){
-        case wct::render::ERPipeParamType::UBO_Entity_Static:
-            return get_entity_id(id.AsEntityComponentId());
-        case wct::render::ERPipeParamType::UBO_Entity_Dynamic:
-            return get_entity_id(id.AsEntityComponentId());
-        default:
-            return id;
-        }
-    };
-
-
-    struct RPipeParamDescLayInfo {
+    struct RPipeParamDescriptor {
+        std::uint8_t set{1};
         std::uint8_t binding{0};
+        
         ERPipeParamType type{ERPipeParamType::None};
         EShaderStageFlag stage_flags{EShaderStageFlag::None};
     
-        /** @brief total UBO size. */
-        std::size_t size{0};
+        /** @brief Only for UBOs, total UBO size. */
+        std::uint8_t size{0};
     };
 
-    using RPipeParamDescLayList = std::array<RPipeParamDescLayInfo, 16>;
+    using RPipeParamDescLayList = std::array<RPipeParamDescriptor, 16>;
 
     struct ShaderInfo {
         EShaderStageFlag type{EShaderStageFlag::None};
@@ -255,15 +224,16 @@ namespace wct::render {
 
     /** Render Pipeline Param Ubo Struct */
     struct RPipeParamUbo {
-        // descriptor set?
-        std::uint8_t descriptor_set{1};
+
+        std::uint8_t set{1};
         std::uint8_t binding{0};
 
         std::variant<UBORef, UBOData> data{};
 
         /**
          * Offset is applied to locate the memory address on VkBuffer when mapped.
-         * It allows to update a segment of the entire buffer.   
+         * It allows to update a segment of the entire buffer.
+         * // TODO activate offset
          */
         // std::size_t offset{0};
     };
@@ -279,7 +249,7 @@ namespace wct::render {
     using RPipeParamList_WAssetId = std::vector<RPipeParamAsset>;
     using RPipeParamList_Ubo = std::vector<RPipeParamUbo>;
 
-    template<CCallable<void, const RPipeParamDescLayInfo &> TFn>
+    template<CCallable<void, const RPipeParamDescriptor &> TFn>
     inline void ForEach(const wct::render::RPipeParamDescLayList & in_lst, TFn && in_fn) {
         for(const auto& param: in_lst) {
             if (param.type==ERPipeParamType::None)

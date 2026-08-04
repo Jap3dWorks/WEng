@@ -1,32 +1,31 @@
 #pragma once
 
-#include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
-#include "WCore/WDebug.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WId.hpp"
 #include "WCore/TObjectDataBase.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCore/TIterator.hpp"
 #include "WLog.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
-#include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
-#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
+#include "WVulkan/RAII/Pipelines/BindingCollection.hpp"
+// #include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
+// #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
-#include "WVulkan/Vk/WVkPipeline.hpp"
-#include "WVulkan/Vk/WVkTypes.hpp"
-#include "WVulkan/Vk/WVulkan.hpp"
+// #include "WVulkan/Vk/WVkPipeline.hpp"
+// #include "WVulkan/Vk/WVkTypes.hpp"
+// #include "WVulkan/Vk/WVulkan.hpp"
 #include "WVulkan/WVkConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
+// #include "WVulkan/WVulkanStructs.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WVulkan/RAII/Pipelines/_new_GBuffer_lib.hpp"
 #include "WVulkan/RAII/DescriptorSetLayout.hpp"
-#include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
-#include "WVulkan/RAII/Pipelines/WVkPipelinesBase.hpp"
+// #include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
+// #include "WVulkan/RAII/Pipelines/WVkPipelinesBase.hpp"
 
-#include <vector>
+// #include <vector>
 #include <vulkan/vulkan_core.h>
-
 
 namespace wvk::raii::pipelines {
 
@@ -39,7 +38,7 @@ namespace wvk::raii::pipelines {
 
         using CollectionsMap = std::unordered_map<
             std::size_t,
-            wvk::raii::pipelines::gbuffer_lib::DescriptorCollection<FramesInFlight>>;
+            wvk::raii::pipelines::DescriptorCollection<FramesInFlight>>;
 
         template<typename ValueFn, typename IncrFn>
         using CollectionsIterator = TIterator<
@@ -168,24 +167,29 @@ namespace wvk::raii::pipelines {
 
         void DeleteBindingSet(
             std::size_t collection_id,
+            was::RenderPipeline const & render_pipeline,
             wcr::wid::WEngId binding_set_id
             ) {
-            // TODO
+            collections_[collection_id].DeleteBindingSet(
+                render_pipeline,
+                binding_set_id);
         }
 
         void DeleteBindingSetCollection(
             std::size_t collection_id
             ) {
-            // TODO
+            collections_.erase(collection_id);
         }
 
         void UpdateBindingSetParameter(
             std::size_t collection_id,
-            wcr::wid::WEngId binding_set_id,
             was::RenderPipeline const & pipeline,
-            wct::render::RPipeParamUbo const & ubo_pipe_param,
-            std::uint8_t frame_index
+            was::RenderPipelineParams const & pipeline_params,
+            // wcr::wid::WEngId binding_set_id,
+            std::uint8_t frame_index,
+            wct::render::RPipeParamUbo const & ubo_pipe_param
             ) {
+            
             // TODO
             
         }
