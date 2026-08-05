@@ -132,10 +132,6 @@ struct _new_WVkDescSetUBOBinding {
     std::uint32_t range{0};
 
     std::array<VkBuffer, FramesInFlight> buffers;
-    // struct ubodt {
-    //     std::uint32_t dynamic_offset;
-    //     VkDescriptor descriptor{};
-    // };
 };
 
 template<std::uint8_t Frames>

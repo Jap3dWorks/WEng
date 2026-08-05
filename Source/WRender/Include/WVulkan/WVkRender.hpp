@@ -4,7 +4,7 @@
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
 
-#include "WVulkan/RAII/Pipelines/_new_GBuffer_.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/WVkConfig.hpp"
 
 #include "WCore/WCoreMacros.hpp"
@@ -219,7 +219,7 @@ private:
     WVkGlobalDescriptorsRAII<WVK_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
     WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
-    wvk::raii::pipelines::_new_GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
+    wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     wvk::raii::ShadowMapPipeline<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipelines_{};
     WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
     wvk::raii::pipelines::Postprocess ppcss_pipelines_{};

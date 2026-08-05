@@ -9,6 +9,7 @@
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WInterfaces/IRender.hpp"
+#include "WLog.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WComponents/StaticMesh.hpp"
 #include "WComponents/Light/Point.hpp"
@@ -444,7 +445,7 @@ namespace wng::render {
         texture_assets.Reserve(64);
 
         struct PipelineBinding {
-            wcr::wid::WEntityComponentId binidng;
+            wcr::wid::WEntityComponentId binding;
             was::RenderPipeline * pipeline;
         };
         TSparseSet<PipelineBinding> pipeline_bindings;
@@ -476,8 +477,8 @@ namespace wng::render {
                      &pipeline_bindings]
                     (
                         was::StaticMesh * _sm,
-                        const wcr::wid::WSubIdxId & _id,
-                        wct::geometry::WMesh& _m
+                        wcr::wid::WSubIdxId _id,
+                        wct::geometry::WMesh & _m
                         ) {
 
                         auto & pipeline_parameters =
@@ -503,10 +504,15 @@ namespace wng::render {
                             _id
                         };
 
+                        wcr::wid::WAssetId pipeline_id =
+                            _component->GetPipelineAssignment(_id).pipeline;
+
+                        assert(pipeline_id);
+
                         auto pipebinding = PipelineBinding{
-                            .binidng=ecid,
+                            .binding=ecid,
                             .pipeline=&in_asset_db.Get<was::RenderPipeline>(
-                                _component->GetPipelineAssignment(_id).pipeline
+                                pipeline_id
                                 )
                         };
 
@@ -538,7 +544,7 @@ namespace wng::render {
         for(auto & pipebind : pipeline_bindings) {
             in_render->DeletePipelineBindingSet(
                 in_level->Get_asset_id().GetId(),
-                wcr::wid::WEngId::FromEntityComponent(pipebind.binidng),
+                wcr::wid::WEngId::FromEntityComponent(pipebind.binding),
                 *pipebind.pipeline
                 );
 

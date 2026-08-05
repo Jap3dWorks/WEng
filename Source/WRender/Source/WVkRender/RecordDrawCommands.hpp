@@ -2,7 +2,7 @@
 
 #include "WCoreTypes/WGeometry.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
-#include "WVulkan/RAII/Pipelines/_new_GBuffer_.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
@@ -37,7 +37,7 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsGBuffersRAII<FramesInFlight> & attachments,
-        wvk::raii::pipelines::_new_GBuffer<FramesInFlight> & pipelines,
+        wvk::raii::pipelines::GBuffer<FramesInFlight> & pipelines,
         wvk::raii::AssetRenderData const & asset_render_data,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {

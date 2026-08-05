@@ -2,12 +2,14 @@
 
 #include "WAssets/RenderPipeline.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
+#include "WCore/WDebug.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WLog.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
-#include "WVulkan/RAII/Pipelines/_new_GBuffer_lib.hpp"
+#include "WVulkan/RAII/Pipelines/GBuffer_lib.hpp"
 
 #include <cstdint>
 #include <algorithm>
@@ -86,12 +88,16 @@ namespace wvk::raii::pipelines {
 
             pipeline_bindings[
                 pipeline_id.GetId()
-                ].Insert(binding_set_id.GetId(), std::move(binding));            
+                ].Insert(binding_set_id.GetId(), std::move(binding));
+
         }
 
         void DeleteBindingSet(
             wcr::wid::WEngId pipeline_id,
-            wcr::wid::WEngId binding_set_id) {
+            wcr::wid::WEngId binding_set_id
+            ) {
+            assert(pipeline_bindings.contains(pipeline_id.GetId()));
+            
             pipeline_bindings[pipeline_id.GetId()]
                 .Remove(binding_set_id.GetId());
         }

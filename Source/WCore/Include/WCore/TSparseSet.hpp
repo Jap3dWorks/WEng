@@ -135,11 +135,11 @@ public:
         size_t last_index = index_dense_.back();
         
         value_dense_[pos] = std::move(value_dense_.back());
+        index_dense_[pos] = last_index;
 
         index_pos_map_[last_index] = pos;
 
         index_pos_map_.erase(in_index);
-
         value_dense_.pop_back();
         index_dense_.pop_back();
     }

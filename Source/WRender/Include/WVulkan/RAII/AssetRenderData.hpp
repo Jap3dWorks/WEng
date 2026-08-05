@@ -17,110 +17,111 @@
 
 namespace wvk::raii {
 
-/**
- * @brief Manage the lifetime of asset render data like geometries and textures.
- */
+    /**
+     * @brief Manage the lifetime of asset render data like geometries and textures.
+     */
     class WRENDER_API AssetRenderData {
     private:
 
-    using WVkTextureDb = TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
-    using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
+        using WVkTextureDb =
+            TObjectDataBase<WVkTextureInfo, void, wcr::wid::WTypeAssetIndexId::IdType>;
+        using WVkMeshDb = TObjectDataBase<WVkMesh, void, wcr::wid::WTypeAssetIndexId::IdType>;
 
     public:
 
-    AssetRenderData()=default;
+        AssetRenderData()=default;
 
-    AssetRenderData(
-        const VkDevice & in_device_info,
-        const VkPhysicalDevice & in_physical_device,
-        const VkQueue & in_graphics_queue,
-        const VkCommandPool & in_command_pool_info
-        );
-
-    ~AssetRenderData();
-
-    AssetRenderData(const AssetRenderData & other) = delete;
-
-    AssetRenderData(AssetRenderData && other);
-
-    AssetRenderData & operator=(const AssetRenderData & other) = delete;
-
-    AssetRenderData & operator=(AssetRenderData && other);
-
-    // Texture TODO wcr::wid::WTypeAssetIndex
-    
-    void LoadTexture(const wcr::wid::WAssetId & in_id, const was::Texture & in_texture) {
-        
-        texture_collection_.CreateAt(
-            in_id.GetId(),
-            [this, &in_texture](const wcr::wid::WAssetId & _id) -> WVkTextureInfo {
-                WVkTextureInfo result;
-                wvk::texture::CreateTexture(
-                    result,
-                    in_texture,
-                    vkn_.device,
-                    vkn_.physical_device,
-                    vkn_.graphics_queue,
-                    vkn_.command_pool
-                    );
-                return result;
-            });
-    }
-
-    void UnloadTexture(const wcr::wid::WAssetId & in_id);
-
-    WNODISCARD WVkTextureInfo const & TextureInfo(const wcr::wid::WAssetId & id) const {
-        return texture_collection_.Get(id.GetId());
-    }
-
-    // Static Mesh
-
-    void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
-                        const wct::geometry::WMesh & in_mesh) {
-
-        static_mesh_collection_.CreateAt(
-            in_id,
-            [this, &in_mesh] (const wcr::wid::WTypeAssetIndexId & in_id) -> WVkMesh {
-                WVkMesh result;
-                wvk::mesh::CreateMeshBuffers(
-                    result,
-                    in_mesh.vertices.data(),
-                    sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),
-                    in_mesh.indices.data(),
-                    sizeof(decltype(in_mesh.indices)::value_type) * in_mesh.indices.size(),
-                    in_mesh.indices.size(),
-                    vkn_.device,
-                    vkn_.physical_device,
-                    vkn_.graphics_queue,
-                    vkn_.command_pool
-                    );
-                
-                return result;
-            }
+        AssetRenderData(
+            const VkDevice & in_device_info,
+            const VkPhysicalDevice & in_physical_device,
+            const VkQueue & in_graphics_queue,
+            const VkCommandPool & in_command_pool_info
             );
-    }
 
-    void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id);
+        ~AssetRenderData();
 
-    const WVkMesh & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
+        AssetRenderData(const AssetRenderData & other) = delete;
 
-    // --
+        AssetRenderData(AssetRenderData && other);
 
-    void Clear();
+        AssetRenderData & operator=(const AssetRenderData & other) = delete;
+
+        AssetRenderData & operator=(AssetRenderData && other);
+
+        // Texture TODO wcr::wid::WTypeAssetIndex
+
+        void LoadTexture(const wcr::wid::WAssetId & in_id, const was::Texture & in_texture) {
+
+            texture_collection_.CreateAt(
+                in_id.GetId(),
+                [this, &in_texture](const wcr::wid::WAssetId & _id) -> WVkTextureInfo {
+                    WVkTextureInfo result;
+                    wvk::texture::CreateTexture(
+                        result,
+                        in_texture,
+                        vkn_.device,
+                        vkn_.physical_device,
+                        vkn_.graphics_queue,
+                        vkn_.command_pool
+                        );
+                    return result;
+                });
+        }
+
+        void UnloadTexture(const wcr::wid::WAssetId & in_id);
+
+        WNODISCARD WVkTextureInfo const & TextureInfo(const wcr::wid::WAssetId & id) const {
+            return texture_collection_.Get(id.GetId());
+        }
+
+        // Static Mesh
+
+        void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
+                            const wct::geometry::WMesh & in_mesh) {
+
+            static_mesh_collection_.CreateAt(
+                in_id,
+                [this, &in_mesh] (const wcr::wid::WTypeAssetIndexId & in_id) -> WVkMesh {
+                    WVkMesh result;
+                    wvk::mesh::CreateMeshBuffers(
+                        result,
+                        in_mesh.vertices.data(),
+                        sizeof(decltype(in_mesh.vertices)::value_type) * in_mesh.vertices.size(),
+                        in_mesh.indices.data(),
+                        sizeof(decltype(in_mesh.indices)::value_type) * in_mesh.indices.size(),
+                        in_mesh.indices.size(),
+                        vkn_.device,
+                        vkn_.physical_device,
+                        vkn_.graphics_queue,
+                        vkn_.command_pool
+                        );
+
+                    return result;
+                }
+                );
+        }
+
+        void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id);
+
+        const WVkMesh & StaticMeshInfo(const wcr::wid::WTypeAssetIndexId & in_id) const;
+
+        // --
+
+        void Clear();
 
     private:
 
-    void Destroy();
+        void Destroy();
 
-    struct Vkn {
-        VkDevice device{VK_NULL_HANDLE};
-        VkPhysicalDevice physical_device{VK_NULL_HANDLE};
-        VkQueue graphics_queue{VK_NULL_HANDLE};
-        VkCommandPool command_pool{VK_NULL_HANDLE};
-    } vkn_{} ;
+        struct Vkn {
+            VkDevice device{VK_NULL_HANDLE};
+            VkPhysicalDevice physical_device{VK_NULL_HANDLE};
+            VkQueue graphics_queue{VK_NULL_HANDLE};
+            VkCommandPool command_pool{VK_NULL_HANDLE};
+        } vkn_{} ;
 
-    WVkTextureDb texture_collection_{};
-    WVkMeshDb static_mesh_collection_{};
+        WVkTextureDb texture_collection_{};
+        WVkMeshDb static_mesh_collection_{};
 
     };
 

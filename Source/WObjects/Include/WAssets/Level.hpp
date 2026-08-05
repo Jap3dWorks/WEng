@@ -105,18 +105,6 @@ namespace was {
             return entity_component_db.GetComponentTypeId<T>();
         }
 
-        // wcr::wid::WEntityComponentId GetEntityComponentId(const WClass * in_component_class,
-        //                                                   const wcr::wid::WEntityId & in_entity_id,
-        //                                                   const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
-
-        //     assert(WComponent::StaticClass()->IsBaseOf(in_component_class));
-
-        //     wcr::wid::WComponentTypeId cid =
-        //         entity_component_db.GetComponentTypeId(in_component_class);
-            
-        //     return {Get_asset_id(), in_entity_id, cid, in_index_id};
-        // }
-
     private:
 
         template<std::derived_from<WComponent> T>

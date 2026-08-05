@@ -451,8 +451,6 @@ void WVkRender::CreatePipelineBindingSet(
             wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id()),
             wcr::wid::WEngId::FromAsset(parameters.Get_asset_id()),
             wcr::wid::WEngId::FromAsset(renderable_asset_id),
-            gbuffers_pipelines_.GetModelDescriptor(pipeline.Get_descriptors_layout()),
-            gbuffers_pipelines_.GetDefaultModelParam(),
             pipeline.Get_descriptors_layout(),
             parameters.Get_ubo_list(),
             parameters.Get_texture_list(),
@@ -480,9 +478,10 @@ void WVkRender::DeletePipelineBindingSet(
     const was::RenderPipeline & pipeline
     ) {
 
-    // TODO : Also delete by entire collections 
+    // TODO : Also a method to delete the entire collection
 
-    wcr::wid::WEntityComponentId cmpid = binding_set_id.AsEntityComponentId();
+    wcr::wid::WEntityComponentId cmpid =
+        binding_set_id.AsEntityComponentId();
 
     wct::render::pipeline_type_dispatcher<
         wct::render::ERPipeType::GBuffer,
@@ -492,8 +491,8 @@ void WVkRender::DeletePipelineBindingSet(
             [&,this](){
                 gbuffers_pipelines_.DeleteBindingSet(
                     binding_set_collection,
-                    binding_set_id,
-                    wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id())
+                    wcr::wid::WEngId::FromAsset(pipeline.Get_asset_id()),
+                    binding_set_id
                     );
             },
             [&,this](){ ppcss_pipelines_.DeleteBinding(cmpid); }

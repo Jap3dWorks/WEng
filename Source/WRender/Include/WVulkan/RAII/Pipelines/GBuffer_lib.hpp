@@ -1,71 +1,27 @@
 #pragma once
 
-#include "WCore/WCore.hpp"
-#include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/WVkConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
-#include "WVulkan/Vk/WVulkan.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
-#include "WVulkan/Vk/WVkTypes.hpp"
 #include "WVulkan/Vk/WVkPipeline.hpp"
-#include "WCoreTypes/WGeometry.hpp"
-#include "WRender/WShader.hpp"
-#include <array>
+#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
+#include "WVulkan/RAII/DescriptorPool.hpp"
+#include "WVulkan/RAII/AssetRenderData.hpp"
+#include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
+#include "WAssets/RenderPipeline.hpp"
+#include "WAssets/RenderPipelineParams.hpp"
+
 #include <vulkan/vulkan_core.h>
+#include <unordered_set>
 
-namespace wvr::gbuffer_pipelines {
-    
-    inline void CreateDescSetPool(
-        VkDescriptorPool & out_descriptor_pool,
-        const VkDevice & in_device
-        ) {
-        
-        std::array<VkDescriptorPoolSize, 2> pool_sizes;
+namespace wvk::raii::pipelines::gbuffer_lib {
 
-        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        pool_sizes[0].descriptorCount = 20;
-
-        pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        pool_sizes[1].descriptorCount = 40;
-
-        VkDescriptorPoolCreateInfo pool_info{};
-        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
-        pool_info.pPoolSizes = pool_sizes.data();
-        
-        pool_info.maxSets = 60;
-
-        wvk::vulkan::ExecVkProcChecked(
-            vkCreateDescriptorPool,
-            "Failed to create descriptor pool!",
-            in_device,
-            &pool_info,
-            nullptr,
-            &out_descriptor_pool
-            );
-    }
-
-    inline WVkShaderStageInfo BuildShaderStageInfo(
-        const char * in_shader_file_path,
-        const char * in_entry_point,
-        wct::render::EShaderStageFlag in_shader_type
-        ) {
-        WVkShaderStageInfo result;
-
-        result.code = wrd::shader::ReadShader(in_shader_file_path);
-
-        result.entry_point = in_entry_point;
-        result.type = in_shader_type;
-
-        return result;
-    }
-
-    inline void CreatePipeline(
-        WVkRenderPipeline & out_render_pipeline,
+    inline auto CreatePipeline(
         const VkDevice & in_device,
         const std::vector<VkDescriptorSetLayout> & in_desc_layouts,
         const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
         ) {
+
+        VkPipeline render_pipeline;
+        VkPipelineLayout pipeline_layout;
 
         auto [shader_stages, shader_modules] = wvk::shader::CreateShaderModules(
             in_device,
@@ -208,10 +164,10 @@ namespace wvr::gbuffer_pipelines {
             in_device,
             &pipeline_layout_info,
             nullptr,
-            &out_render_pipeline.pipeline_layout
+            &pipeline_layout
             );
 
-        pipeline_create_info.layout = out_render_pipeline.pipeline_layout;
+        pipeline_create_info.layout = pipeline_layout;
         
         wvk::vulkan::ExecVkProcChecked(
             vkCreateGraphicsPipelines,
@@ -221,7 +177,7 @@ namespace wvr::gbuffer_pipelines {
             1,
             &pipeline_create_info,
             nullptr,
-            &out_render_pipeline.pipeline
+            &render_pipeline
             );
 
         for (auto& shader_module : shader_modules)
@@ -232,8 +188,81 @@ namespace wvr::gbuffer_pipelines {
                 nullptr
                 );
         }
-        
+
+        return std::tuple{render_pipeline, pipeline_layout};
     }
 
-}
+    template<std::uint8_t FramesInFlight>
+    inline auto CreateModelUboDescriptorSet(
+        VkDevice device,
+        wcr::wid::WEngId model_ubo_id,
+        std::uint32_t model_ubo_binding,
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man,
+        VkDescriptorPool descriptor_pool,
+        VkDescriptorSetLayout model_ubo_layout
+        ) {
+
+        ubo_man.Add<FramesInFlight>(
+            sizeof(wct::render::ModelUBO),
+            model_ubo_id
+            );
+
+        std::array<VkDescriptorSet, FramesInFlight> result;
+
+        for(std::uint32_t f=0; f<FramesInFlight; ++f) {
+                    
+            WVkUBO ubo = ubo_man
+                .GetUBO<FramesInFlight>(
+                    sizeof(wct::render::ModelUBO),
+                    f
+                    );
+
+            VkDescriptorSet descriptor_set;
+            VkDescriptorSetAllocateInfo alloc_info =
+                wvk::types::VkDescriptorSetAllocateInfo();
+
+            alloc_info.descriptorPool = descriptor_pool;
+            alloc_info.descriptorSetCount = 1;
+            alloc_info.pSetLayouts = &model_ubo_layout;
+
+            wvk::vulkan::ExecVkProcChecked(
+                vkAllocateDescriptorSets,
+                "Failed to allocate descriptor sets!",
+                device,
+                &alloc_info,
+                &descriptor_set
+                );
+
+            VkWriteDescriptorSet write_ds;
+
+            VkDescriptorBufferInfo buffer_info = {
+                .buffer=ubo.buffer,
+                .offset=0,
+                .range=sizeof(wct::render::ModelUBO)
+            };
+
+            VkWriteDescriptorSet ubo_write = wvk::types::VkWriteDescriptorSet();
+            ubo_write.dstBinding = model_ubo_binding;
+            ubo_write.dstSet = descriptor_set;
+            ubo_write.dstArrayElement = 0;
+            ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            ubo_write.descriptorCount = 1;
+            ubo_write.pBufferInfo = &buffer_info;
+            
+            vkUpdateDescriptorSets(
+                device,
+                1,
+                &ubo_write,
+                0,
+                nullptr
+                );
+
+            result[f]=descriptor_set;
+        }
+
+        return result;
+    }
+
+};
+
 
