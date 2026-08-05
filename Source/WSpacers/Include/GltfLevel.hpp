@@ -95,7 +95,7 @@ namespace spacers::gltflevel {
                 "/Content/Assets/BeautifulGame/"
                 );
 
-        wcr::wid::WAssetId level_id{wcr::wid::null_id};
+        wcr::wid::WAssetId level_id{wcr::wid::nullid};
         was::Level * level_asset{nullptr};
 
         for (auto & item : imported_assets) {

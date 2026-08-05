@@ -121,7 +121,7 @@ namespace was {
 
         template<std::derived_from<WComponent> T>
         wcr::wid::WEntityComponentId EntityComponentId(const wcr::wid::WEntityId & in_entity_id,
-                                                       const wcr::wid::WSubIdxId & in_index_id=wcr::wid::null_id) const noexcept {
+                                                       const wcr::wid::WSubIdxId & in_index_id=wcr::wid::nullid) const noexcept {
             return {
                 Get_asset_id(), in_entity_id, GetComponentTypeId<T>(), in_index_id
             };

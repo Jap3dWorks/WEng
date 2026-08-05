@@ -80,8 +80,8 @@ namespace wvk::raii::pipelines::desc_bindings {
             wcr::wid::WEntityComponentId{
                 level,
                 entity,
-                wcr::wid::null_id,
-                wcr::wid::null_id}
+                wcr::wid::nullid,
+                wcr::wid::nullid}
             );
     }
     
@@ -478,7 +478,7 @@ namespace wvk::raii::pipelines::desc_bindings {
             ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
                 block_size ,
                 0,
-                binding_set_id,
+                std::vector{binding_set_id},
                 GetUboPtrData(ubo_data)
                 );
             break;

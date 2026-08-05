@@ -101,12 +101,12 @@ namespace wvk::render::rec_cmd_bffr {
                 );
 
             for (auto coll_id : pipelines.IterCollections()) {
-                
-                for (auto & binding : pipelines.Bindings(pipeline_id, coll_id)) {
+
+                for (auto & binding : pipelines.Bindings(coll_id, pipeline_id)) {
 
                     auto& mesh_info =
                         asset_render_data.StaticMeshInfo(
-                            binding.mesh_id
+                            binding.renderable_asset_id.AsAssetIndexId()
                             );
 
                     // shadow_map_bindings.push_back(
@@ -132,17 +132,21 @@ namespace wvk::render::rec_cmd_bffr {
                         VK_INDEX_TYPE_UINT32
                         );
 
+                    auto ubo_binding = pipelines.GetUboBinding(
+                        coll_id, pipeline_id, binding.binding_set_id
+                        );
+
                     std::array descsets =
                         {
                             global_descriptors.DescriptorSet(frame_index),
-                            std::get<0>(binding).param_descriptor_set.at(frame_index),
-                            std::get<1>(binding).param_descriptor_set.at(frame_index)
+                            binding.param_descriptor_set.at(frame_index),
+                            ubo_binding.param_descriptor_set.at(frame_index)
                         };
 
                     std::vector<std::uint32_t> dynamic_offsets =
-                        std::get<0>(binding).param_ubo_offsets ;
+                        binding.dynamic_offsets;
 
-                    dynamic_offsets.push_back(std::get<1>(binding).param_ubo_offsets[0]);
+                    dynamic_offsets.push_back(ubo_binding.dynamic_offsets[0]);
 
                     vkCmdBindDescriptorSets(command_buffer,
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,

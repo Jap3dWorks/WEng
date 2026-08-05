@@ -63,7 +63,7 @@ namespace wvk::raii::pipelines {
             Super::pipelines_db_.CreateDescSetLayout(
                 pipeline_id,
                 Super::Device(),
-                pipeline_asset.Get_descriptors_layout_list(),
+                pipeline_asset.Get_descriptors_layout(),
                 wvk::descriptor::UpdateDescriptorSetLayout
                 );
 

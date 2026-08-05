@@ -125,14 +125,14 @@ namespace spacers::monkey {
 
         pipeline_asset.Set_shader_list(shader_list);
 
-        auto descriptors = pipeline_asset.Get_descriptors_layout_list();
+        auto descriptors = pipeline_asset.Get_descriptors_layout();
 
         descriptors[0].binding = 0;
         descriptors[0].type = wct::render::ERPipeParamType::UBO_Entity_Dynamic;
         descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
         descriptors[0].size = sizeof(wct::render::PostprocessUBO);
 
-        pipeline_asset.Set_descriptor_list(descriptors);
+        pipeline_asset.Set_descriptors_layout(descriptors);
 
         wcr::wid::WAssetId paramid =
             engine.AssetManager().Create<was::RenderPipelineParams>(

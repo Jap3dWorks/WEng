@@ -41,7 +41,7 @@ void wvk::pipeline::Destroy(
     
 }
 
-void Destroy(
+void wvk::pipeline::Destroy(
     VkPipelineLayout pipeline_layout,
     VkDevice device
     ) {

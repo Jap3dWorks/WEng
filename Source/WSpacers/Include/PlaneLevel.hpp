@@ -100,7 +100,8 @@ namespace spacers::plane {
         param.Set_ubo_list(
             {
                 {
-                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::PBRBindings::SET,
+                    wct::render::PBRBindings::PARAM_UBO,
                     wct::render::ToUBOData(&ubo_data)
                 }  
             }
@@ -109,18 +110,22 @@ namespace spacers::plane {
         param.Set_texture_list(
             {
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ALBEDO_TEXTURE,
                     level_data.texture_id
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::EMISSION_TEXTURE,
                     engine.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::NORMAL_TEXTURE,
                     engine.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ORM_TEXTURE,
                     engine.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
                 }

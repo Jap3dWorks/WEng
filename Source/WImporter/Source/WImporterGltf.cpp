@@ -193,9 +193,9 @@ namespace {
         std::vector<NullableIndex<>> const & textures_map,
         std::vector<wcr::wid::WAssetId> const & textures,
         fastgltf::Material const & in_material,
-        wcr::wid::WAssetId null_texture=wcr::wid::null_id,
-        wcr::wid::WAssetId null_rgba=wcr::wid::null_id,
-        wcr::wid::WAssetId null_normal=wcr::wid::null_id
+        wcr::wid::WAssetId null_texture=wcr::wid::nullid,
+        wcr::wid::WAssetId null_rgba=wcr::wid::nullid,
+        wcr::wid::WAssetId null_normal=wcr::wid::nullid
         ) {
         was::RenderPipelineParams result{};
 
@@ -270,7 +270,9 @@ namespace {
                                 );
                         
                         out_tex_params.emplace_back(
-                            tex_binding, text_id
+                            wct::render::PBRBindings::SET,
+                            tex_binding,
+                            text_id
                             );
 
                         if constexpr(std::is_same_v<TextType, fastgltf::NormalTextureInfo>) {
@@ -284,6 +286,7 @@ namespace {
                         
                     } else {
                         out_tex_params.emplace_back(
+                            wct::render::PBRBindings::SET,
                             tex_binding,
                             fallback
                             );
@@ -371,6 +374,7 @@ namespace {
             pbr_scalars.orm_nscale[2] = in_material.pbrData.metallicFactor;
 
             texture_params.emplace_back(
+                wct::render::PBRBindings::SET,
                 wct::render::PBRBindings::ORM_TEXTURE,
                 null_texture
                 );
@@ -383,7 +387,8 @@ namespace {
         result.Set_ubo_list(
             {
                 {
-                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::PBRBindings::SET,
+                    wct::render::PBRBindings::PARAM_UBO,
                     wct::render::ToUBOData(pbr_scalars)
                 }
             }
@@ -399,9 +404,9 @@ namespace {
         fastgltf::Asset const & in_asset,
         std::vector<NullableIndex<>> const & textures_map,
         std::vector<wcr::wid::WAssetId> const & texture_wids,
-        wcr::wid::WAssetId null_texture=wcr::wid::null_id,
-        wcr::wid::WAssetId null_rgba=wcr::wid::null_id,
-        wcr::wid::WAssetId null_normal=wcr::wid::null_id
+        wcr::wid::WAssetId null_texture=wcr::wid::nullid,
+        wcr::wid::WAssetId null_rgba=wcr::wid::nullid,
+        wcr::wid::WAssetId null_normal=wcr::wid::nullid
         ){
         
         std::vector<was::RenderPipelineParams> assets;
@@ -626,7 +631,7 @@ namespace {
                 sm_names.push_back(mesh.name);
             }
             else {
-                index_sm_map.push_back(wcr::wid::null_id);
+                index_sm_map.push_back(wcr::wid::nullid);
             }
         }
 
@@ -732,7 +737,7 @@ namespace {
             tx.samplerIndex
                 .and_then([](auto& v) ->std::optional<NullableIndex<IndexType>>
                           {return v;})
-                .value_or(wcr::wid::null_id);
+                .value_or(wcr::wid::nullid);
 
         }
         return texture_samplers;
@@ -743,7 +748,7 @@ namespace {
         fastgltf::Asset const & in_asset
         ) {
         std::vector<NullableIndex<>> text_assets_map{};
-        text_assets_map.resize(in_asset.textures.size(), wcr::wid::null_id);
+        text_assets_map.resize(in_asset.textures.size(), wcr::wid::nullid);
 
         std::vector<was::Texture> text_assets{};
         text_assets.reserve(in_asset.textures.size());

@@ -17,7 +17,7 @@ namespace wcm {
 
     public:
 
-        WPROPERTY(wcr::wid::WAssetId, static_mesh_asset, wcr::wid::null_id);
+        WPROPERTY(wcr::wid::WAssetId, static_mesh_asset, wcr::wid::nullid);
         WPROPERTY(was::StaticMesh::PipelineAssignments, pipeline_assignments,);
 
     public:

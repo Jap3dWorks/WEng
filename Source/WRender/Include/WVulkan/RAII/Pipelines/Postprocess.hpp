@@ -58,7 +58,7 @@ namespace wvk::raii::pipelines {
                 binding_set_id,
                 WVkPipelineBinding{
                     .pipeline_id = in_pipeline_id,
-                    .mesh_asset_id = wcr::wid::null_id,
+                    .mesh_asset_id = wcr::wid::nullid,
                     .ubos = std::move(in_ubos),
                     .textures = std::move(in_textures)
                 }

@@ -66,19 +66,18 @@ namespace wct::render {
     };
 
     struct CommonBindings {
-        static constexpr std::uint8_t MODEL_UBO_SET{1};
-
+        static constexpr std::uint8_t MODEL_SET{2};
         static constexpr std::uint8_t MODEL_UBO{0};
     };
 
     struct PBRBindings {
-        static constexpr std::uint8_t PBR_SET{2};
+        static constexpr std::uint8_t SET{1};
 
-        static constexpr std::uint8_t PBR_SCALAR_UBO{1};
-        static constexpr std::uint8_t ALBEDO_TEXTURE{2};
-        static constexpr std::uint8_t EMISSION_TEXTURE{3};
-        static constexpr std::uint8_t NORMAL_TEXTURE{4};
-        static constexpr std::uint8_t ORM_TEXTURE{5};
+        static constexpr std::uint8_t PARAM_UBO{0};
+        static constexpr std::uint8_t ALBEDO_TEXTURE{1};
+        static constexpr std::uint8_t EMISSION_TEXTURE{2};
+        static constexpr std::uint8_t NORMAL_TEXTURE{3};
+        static constexpr std::uint8_t ORM_TEXTURE{4};
     };
 
     inline constexpr std::uint8_t MAX_PIPELINE_SHADERS=8;
@@ -263,6 +262,7 @@ namespace wct::render {
 
     template<typename T>
     struct TRPipeParam {
+        std::uint8_t set{1};
         std::uint8_t binding{0};
         T value{};
     };

@@ -64,7 +64,7 @@ namespace wng::render {
                         in_level->Get_asset_id(),
                         cmp->Get_entity_id(),
                         in_level->GetComponentTypeId<wcm::light::Point>(),
-                        wcr::wid::null_id
+                        wcr::wid::nullid
                     };
 
                     pl_count++;
@@ -105,7 +105,7 @@ namespace wng::render {
                         in_level->Get_asset_id(),
                         cmp->Get_entity_id(),
                         in_level->GetComponentTypeId<wcm::light::Directional>(),
-                        wcr::wid::null_id
+                        wcr::wid::nullid
                     };
 
                     // Collect shadow map UBO data
@@ -232,7 +232,7 @@ namespace wng::render {
                  wct::geometry::WMesh & _m) {
                     
                     wcr::wid::WTypeAssetIndexId asset_index {
-                        wcr::wid::null_id,
+                        wcr::wid::nullid,
                         _sma->Get_asset_id(),
                         _id};
 
@@ -250,7 +250,7 @@ namespace wng::render {
         // Initialize Render Pipelines
         for (const wcr::wid::WAssetId & id : render_pipelines) {
             auto & render_pipeline = in_asset_db.Get<was::RenderPipeline>(id);
-            in_render->CreateRenderPipeline(&render_pipeline);
+            in_render->CreateRenderPipeline(render_pipeline);
         }
 
         // Pipeline Bindings
@@ -303,13 +303,14 @@ namespace wng::render {
                             );
                         
                         wcr::wid::WTypeAssetIndexId assid {
-                            wcr::wid::null_id,
+                            wcr::wid::nullid,
                             _sma->Get_asset_id(),
                             _id
                         };
 
-                        in_render->CreatePipelineBinding(
-                            ecid,
+                        in_render->CreatePipelineBindingSet(
+                            in_level->Get_asset_id().GetId(),
+                            wcr::wid::WEngId::FromEntityComponent(ecid),
                             assid,
                             pipeline,
                             param
@@ -334,18 +335,35 @@ namespace wng::render {
                     };
 
                     // Update only the first static mesh model binding
-                    wcr::wid::WEntityComponentId ecid {
-                        in_level->Get_asset_id(),
-                        in_component->Get_entity_id(),
-                        in_level->GetComponentTypeId<wcm::StaticMesh>(),
-                        {0}
-                    };
+                    // All meshes shares the same model ubo
 
-                    WCORE_DEBUG_ONLY(
-                        WFLOG("ecid bitset: {}", std::bitset<64>(ecid.GetId()).to_string())
+                    wcr::wid::WEngId binding_set_id =
+                        wcr::wid::WEngId::FromEntityComponent(
+                            wcr::wid::WEntityComponentId {
+                                in_level->Get_asset_id(),
+                                in_component->Get_entity_id(),
+                                in_level->GetComponentTypeId<wcm::StaticMesh>(),
+                                {0}
+                            }
+                            );
+
+                    auto assignment = in_component->GetPipelineAssignment(0);
+                    auto pipeline_asset = in_asset_db
+                        .Get<was::RenderPipeline>(assignment.pipeline);
+
+                    wcr::wid::WSubIdxId desc_id = pipeline_asset
+                        .DescriptorIndexAt(
+                            wct::render::MODEL_UBO_DESC_SET,
+                            wct::render::MODEL_UBO_BINDING
+                            );
+
+                    in_render->UpdatePipelineBindingSetParameter_Static(
+                        in_level->Get_asset_id().GetId(),
+                        binding_set_id.GetId(),
+                        pipeline_asset,
+                        desc_id,
+                        ubodt
                         );
-
-                    in_render->UpdatePipelineBindingSetParameter_Static(ecid, ubodt);
             }
             );
 
@@ -375,7 +393,7 @@ namespace wng::render {
 
             for (const wcr::wid::WAssetId & id : cam_render_pipelines) {
                 auto & render_pipeline = in_asset_db.Get<was::RenderPipeline>(id);
-                in_render->CreateRenderPipeline(&render_pipeline); // TODO Use the data struct
+                in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
             }
 
             wcm::Camera & comp = in_level
@@ -398,9 +416,10 @@ namespace wng::render {
                         _idx
                     };
 
-                    in_render->CreatePipelineBinding(
-                        ecid,
-                        wcr::wid::null_id,
+                    in_render->CreatePipelineBindingSet(
+                        in_level->Get_asset_id().GetId(),
+                        wcr::wid::WEngId::FromEntityComponent(ecid),
+                        wcr::wid::nullid,
                         in_asset_db.Get<was::RenderPipeline>(_assgn.pipeline),
                         in_asset_db.Get<was::RenderPipelineParams>(_assgn.params)
                         );
@@ -423,7 +442,12 @@ namespace wng::render {
         static_meshes.Reserve(64);
         TSparseSet<wcr::wid::WAssetId> texture_assets;
         texture_assets.Reserve(64);
-        TSparseSet<wcr::wid::WEntityComponentId> pipeline_bindings;
+
+        struct PipelineBinding {
+            wcr::wid::WEntityComponentId binidng;
+            was::RenderPipeline * pipeline;
+        };
+        TSparseSet<PipelineBinding> pipeline_bindings;
         pipeline_bindings.Reserve(64);
         
         in_level->ForEachComponent<wcm::StaticMesh>(
@@ -450,15 +474,16 @@ namespace wng::render {
                      &texture_assets,
                      &in_level,
                      &pipeline_bindings]
-                    (was::StaticMesh * _sm, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh& _m) {
+                    (
+                        was::StaticMesh * _sm,
+                        const wcr::wid::WSubIdxId & _id,
+                        wct::geometry::WMesh& _m
+                        ) {
 
                         auto & pipeline_parameters =
                             in_asset_db.Get<was::RenderPipelineParams>(
                                 _component->GetPipelineAssignment(_id).params
                                 );
-
-                        // auto & parameters_struct = pipeline_parameters
-                        //     ->RenderPipelineParameters();
 
                         auto texture_list = pipeline_parameters.Get_texture_list();
 
@@ -478,7 +503,17 @@ namespace wng::render {
                             _id
                         };
 
-                        pipeline_bindings.Insert(ecid.GetId(), ecid);
+                        auto pipebinding = PipelineBinding{
+                            .binidng=ecid,
+                            .pipeline=&in_asset_db.Get<was::RenderPipeline>(
+                                _component->GetPipelineAssignment(_id).pipeline
+                                )
+                        };
+
+                        pipeline_bindings.Insert(
+                            ecid.GetId(),
+                            std::move(pipebinding)
+                            );
                     }
                     );
             }
@@ -486,9 +521,11 @@ namespace wng::render {
         
         for(auto & id : static_meshes) {
             in_asset_db.Get<was::StaticMesh>(id).ForEachMesh(
-                [&in_render](was::StaticMesh * _sm, const wcr::wid::WSubIdxId & _id, wct::geometry::WMesh & _m) {
+                [&in_render](was::StaticMesh * _sm,
+                             const wcr::wid::WSubIdxId & _id,
+                             wct::geometry::WMesh & _m) {
                     in_render->UnloadStaticMesh(
-                        {wcr::wid::null_id, _sm->Get_asset_id(), _id}
+                        {wcr::wid::nullid, _sm->Get_asset_id(), _id}
                         );
                 }
                 );            
@@ -498,10 +535,15 @@ namespace wng::render {
             in_render->UnloadTexture(id);
         }
 
-        for(auto & id : pipeline_bindings) {
-            in_render->DeletePipelineBinding(id);
-            
+        for(auto & pipebind : pipeline_bindings) {
+            in_render->DeletePipelineBindingSet(
+                in_level->Get_asset_id().GetId(),
+                wcr::wid::WEngId::FromEntityComponent(pipebind.binidng),
+                *pipebind.pipeline
+                );
+
             // TODO: if a render pipeline has no bindings can be marked to unload.
+            
         }
     }
 }

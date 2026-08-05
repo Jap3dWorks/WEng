@@ -17,9 +17,11 @@ namespace wvk::raii::pipelines {
     template<std::uint8_t FramesInFlight>
     struct Binding {
 
-        wcr::wid::WEngId renderable_asset_id;   // matching with the render asset
+        wcr::wid::WEngId binding_set_id;
 
-        wcr::wid::WEngId descriptor_bindings_id;
+        wcr::wid::WEngId renderable_asset_id;     // matching with the render asset
+
+        wcr::wid::WEngId descriptor_bindings_id;  // usually matches with the render param asset id
         
         std::array<VkDescriptorSet, FramesInFlight> param_descriptor_set;
 
@@ -35,7 +37,8 @@ namespace wvk::raii::pipelines {
             30 * FramesInFlight,
             38> descriptor_pool{};
 
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> ubo_manager{};
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight>
+        ubo_manager{};
 
         // Descriptor by each asset_params
         std::unordered_map<
@@ -44,8 +47,10 @@ namespace wvk::raii::pipelines {
             > identifier_descriptors;
 
         std::unordered_map<
-            wcr::wid::WEngId::IdType,
-            TSparseSet<Binding<FramesInFlight>>> pipeline_bindings{};
+            wcr::wid::WEngId::IdType,         // Pipeline id
+            TSparseSet<Binding<FramesInFlight>>
+            > pipeline_bindings{};
+        // TODO : could pipeline_bindings be a simpler container? like a DenseVector.
 
         void CreateBindingSet(
             wcr::wid::WEngId binding_set_id,               // from component id
@@ -59,25 +64,28 @@ namespace wvk::raii::pipelines {
             wvk::raii::AssetRenderData & asset_data
             ) {
             
-            auto param_dynamic_offsets = EnsureParamDescriptorSet(
+            auto dynamic_offsets = EnsureParamDescriptorSet(
                 binding_set_id,
                 descriptor_bindings_id,
                 param_descriptors,
-                asset_data,
-                descriptor_set_layout
+                ubo_params,
+                texture_params,
+                descriptor_set_layout,
+                asset_data
                 );
 
             auto param_descriptor_set = identifier_descriptors[descriptor_bindings_id];
 
-            wvk::raii::pipelines::Binding binding {
+            wvk::raii::pipelines::Binding<FramesInFlight> binding {
+                .binding_set_id=binding_set_id,
                 .renderable_asset_id=renderable_asset_id,
                 .descriptor_bindings_id=descriptor_bindings_id,
-                .dynamic_offsets=std::move(param_dynamic_offsets),
-                .param_descriptor_set = param_descriptor_set
+                .param_descriptor_set = param_descriptor_set,
+                .dynamic_offsets=std::move(dynamic_offsets)
             };
 
             pipeline_bindings[
-                pipeline_id
+                pipeline_id.GetId()
                 ].Insert(binding_set_id.GetId(), std::move(binding));            
         }
 
@@ -106,7 +114,8 @@ namespace wvk::raii::pipelines {
                     >
                 (frame_index,
                  binding_set_id,
-                 pipeline_bindings[render_pipeline_id.GetId()].Get(binding_set_id.GetId()),
+                 pipeline_bindings[render_pipeline_id.GetId()]
+                     .Get(binding_set_id.GetId()).descriptor_bindings_id,
                  param_descriptor,
                  ubo_data,
                  ubo_manager
@@ -129,11 +138,13 @@ namespace wvk::raii::pipelines {
                     wvk::raii::pipelines::desc_bindings::EUpdateType::STATIC
                     >
                 (0,
-                 param_layout,
-                 pipeline_bindings[render_pipeline_id.GetId()].Get(binding_set_id.GetId()),
+                 // param_layout,
                  binding_set_id,
-                 ubo_manager,
-                 ubo_data
+                 pipeline_bindings[render_pipeline_id.GetId()]
+                     .Get(binding_set_id.GetId()).renderable_asset_id,
+                 param_layout,
+                 ubo_data,
+                 ubo_manager
                     );
         }
 
@@ -145,8 +156,8 @@ namespace wvk::raii::pipelines {
             wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
             wct::render::RPipeParamList_Ubo const & ubo_param_list,
             wct::render::RPipeParamList_WAssetId const & texture_param_list,
-            wvk::raii::AssetRenderData & asset_data,
-            VkDescriptorSetLayout param_layout
+            VkDescriptorSetLayout param_layout,
+            wvk::raii::AssetRenderData & asset_data
             ) {
 
             auto ubo_params = wvk::raii::pipelines::desc_bindings
@@ -179,8 +190,8 @@ namespace wvk::raii::pipelines {
                     std::move(descriptors);
             }
 
-            std::sort(ubo_params,
-                      [](auto a, auto b)
+            std::sort(ubo_params.begin(), ubo_params.end(),
+                      [](auto const & a, auto const & b)
                           {
                               return a.binding < b.binding;
                           }

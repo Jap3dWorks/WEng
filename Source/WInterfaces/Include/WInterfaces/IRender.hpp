@@ -113,7 +113,7 @@ public:
     virtual void UpdatePipelineBindingSetParameter_Static(
         std::size_t binding_set_collection,
         wcr::wid::WEngId binding_set_id,
-        was::RenderPipeline const & pipeline,
+        was::RenderPipeline const & pipeline,     // TODO : Use param descriptor?
         wcr::wid::WSubIdxId param_descriptor_id,
         wct::render::RPipeParamUbo const & ubo_pipe_param
         )=0;

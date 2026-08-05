@@ -81,7 +81,7 @@ namespace {
 
         pipeline_asset.Set_shader_list(shader_stages);
 
-        auto descriptors = pipeline_asset.Get_descriptors_layout_list();
+        auto descriptors = pipeline_asset.Get_descriptors_layout();
 
         // Model UBO (reserved)
         descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;
@@ -90,7 +90,7 @@ namespace {
         descriptors[0].size=sizeof(wct::render::ModelUBO);
 
         // PBR scalar params UBO
-        descriptors[1].binding=wct::render::PBRBindings::PBR_SCALAR_UBO;
+        descriptors[1].binding=wct::render::PBRBindings::PARAM_UBO;
         descriptors[1].type=wct::render::ERPipeParamType::UBO_Static;
         descriptors[1].stage_flags=
             wct::render::EShaderStageFlag::Vertex |
@@ -117,7 +117,7 @@ namespace {
         descriptors[5].type=wct::render::ERPipeParamType::Texture;
         descriptors[5].stage_flags=wct::render::EShaderStageFlag::Fragment;
 
-        pipeline_asset.Set_descriptor_list(descriptors);
+        pipeline_asset.Set_descriptors_layout(descriptors);
         
         out_db.CreateFrom<was::RenderPipeline>(
             weng::defaults::PBR_PIPELINE_ASSET_PATH,
@@ -131,25 +131,30 @@ namespace {
         params.Set_ubo_list(
             {
                 {
-                    wct::render::PBRBindings::PBR_SCALAR_UBO,
+                    wct::render::PBRBindings::SET,
+                    wct::render::PBRBindings::PARAM_UBO,
                     wct::render::ToUBOData(wct::render::PBRScalarUBO{})
                 }
             }
             );
         params.Set_texture_list({
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ALBEDO_TEXTURE,
                     out_db.GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::EMISSION_TEXTURE,
                     out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::NORMAL_TEXTURE,
                     out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
+                    wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ORM_TEXTURE,
                     out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
                 },
@@ -239,7 +244,7 @@ WEngine weng::defaults::DefaultEngine() {
         .Register<wim::importer::WImporterGltf>(
             result.AssetManager().GetId(weng::defaults::PBR_PIPELINE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH),
-            wcr::wid::null_id,
+            wcr::wid::nullid,
             result.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH),
             result.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)

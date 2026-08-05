@@ -396,7 +396,7 @@ void WVkRender::CreateRenderPipeline(
                 gbuffers_pipelines_.CreatePipeline(
                     wcr::wid::WEngId::FromAsset(render_pipeline.Get_asset_id()),
                     render_pipeline.Get_shader_list(),
-                    render_pipeline.Get_descriptors_layout_list(),
+                    render_pipeline.Get_descriptors_layout(),
                     global_descriptors_.DescriptorSetLayout()
                     );
             },

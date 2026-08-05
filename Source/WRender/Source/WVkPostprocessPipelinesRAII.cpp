@@ -50,7 +50,7 @@ void wvk::raii::pipelines::Postprocess::CreatePipeline(
     pipelines_db_.CreateDescSetLayout(
         in_id,
         device_,
-        in_pipeline_asset.Get_descriptors_layout_list(),
+        in_pipeline_asset.Get_descriptors_layout(),
         wvk::descriptor::UpdateDescriptorSetLayout
         );
 
