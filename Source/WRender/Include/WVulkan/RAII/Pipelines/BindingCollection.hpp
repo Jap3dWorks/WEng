@@ -31,7 +31,7 @@ namespace wvk::raii::pipelines {
     };
 
     template<std::uint8_t FramesInFlight>
-    struct DescriptorCollection {
+    struct BindingCollection {
         
         wvk::raii::DescriptorPool<
             8 * FramesInFlight,
@@ -211,8 +211,41 @@ namespace wvk::raii::pipelines {
 
             return dynamic_offsets;
         }
-        
     };
 
+    template<std::uint8_t FramesInFlight>
+    using BindingCollectionsMap = std::unordered_map<
+        std::size_t,
+        wvk::raii::pipelines::BindingCollection<FramesInFlight>>;
+
+    template<std::uint8_t FramesInFlight, typename ValueFn, typename IncrFn>
+    using BindingCollectionsIterator = TIterator<
+        typename BindingCollectionsMap<FramesInFlight>::value_type const,
+        typename BindingCollectionsMap<FramesInFlight>::const_iterator,
+        std::size_t, ValueFn, IncrFn
+        >;
+
+
+    template<std::uint8_t FramesInFlight>
+    inline constexpr auto IterCollectionsIds(
+        BindingCollectionsMap<FramesInFlight> const & collections_map
+        ) {
+        auto valueFn = [](auto it, std::size_t incr) { return (*it).first; };
+        auto incrFn  = [](auto it, std::size_t incr) { it++; return it; };
+
+        using ValueFn_t = decltype(valueFn);
+        using IncrFn_t  = decltype(incrFn);
+
+        return wvk::raii::pipelines::BindingCollectionsIterator<
+            FramesInFlight, ValueFn_t, IncrFn_t
+            >
+            {
+                collections_map.cbegin(),
+                collections_map.cend(),
+                std::move(valueFn),
+                std::move(incrFn)
+            };
+
+    }
 
 }

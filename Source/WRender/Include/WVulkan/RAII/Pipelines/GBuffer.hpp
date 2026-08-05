@@ -27,16 +27,7 @@ namespace wvk::raii::pipelines {
     class GBuffer
     {
 
-        using CollectionsMap = std::unordered_map<
-            std::size_t,
-            wvk::raii::pipelines::DescriptorCollection<FramesInFlight>>;
-
-        template<typename ValueFn, typename IncrFn>
-        using CollectionsIterator = TIterator<
-            typename CollectionsMap::value_type const,
-            typename CollectionsMap::const_iterator,
-            std::size_t, ValueFn, IncrFn
-            >;
+    private:
 
     public:
 
@@ -52,19 +43,6 @@ namespace wvk::raii::pipelines {
             .stageFlags=VK_SHADER_STAGE_VERTEX_BIT,
             .pImmutableSamplers=nullptr,
         };
-
-        // static inline wct::render::RPipeParamDescriptor GetModelDescriptor(
-        //     wct::render::RPipeParamDescriptorsLayout const & descriptors
-        //     ) {
-        //     for(auto & desc : descriptors ) {
-        //         if (desc.set == wct::render::CommonBindings::MODEL_SET &&
-        //             desc.binding == wct::render::CommonBindings::MODEL_UBO) {
-        //             return desc;
-        //         }
-        //     }
-
-        //     return wct::render::ModelParamDescriptor_Dynamic();
-        // }
 
         static inline constexpr wct::render::RPipeParamUbo GetDefaultModelParam() {
             return {
@@ -343,12 +321,8 @@ namespace wvk::raii::pipelines {
         }
 
         auto IterCollections() const {
-            return CollectionsIterator {
-                collections_.cbegin(),
-                collections_.cend(),
-                [](auto it, std::size_t incr) { return (*it).first; },
-                [](auto it, std::size_t incr) { it++; return it; }
-            };
+            return wvk::raii::pipelines
+                ::IterCollectionsIds(collections_);
         }
 
         auto Bindings(
@@ -406,11 +380,11 @@ namespace wvk::raii::pipelines {
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
         pipelines_;
 
-        CollectionsMap collections_{};
+        wvk::raii::pipelines::BindingCollectionsMap<FramesInFlight> collections_{};
 
         // TODO simpler class for model ubos.
         // with faster associative access.
-        CollectionsMap model_collections_{};
+        wvk::raii::pipelines::BindingCollectionsMap<FramesInFlight> model_collections_{};
 
     };
 
