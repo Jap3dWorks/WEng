@@ -84,18 +84,22 @@ namespace spacers::monkey {
         param_asset.Set_texture_list(
             {
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::ALBEDO_TEXTURE,
                     .value=tex_ids[0]
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::EMISSION_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::NORMAL_TEXTURE,
                     .value=null_normal->Get_asset_id()
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::ORM_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 }
@@ -127,10 +131,13 @@ namespace spacers::monkey {
 
         auto descriptors = pipeline_asset.Get_descriptors_layout();
 
-        descriptors[0].binding = 0;
-        descriptors[0].type = wct::render::ERPipeParamType::UBO_Entity_Dynamic;
-        descriptors[0].stage_flags = wct::render::EShaderStageFlag::Vertex;
-        descriptors[0].size = sizeof(wct::render::PostprocessUBO);
+        descriptors[0] = {
+            .set=1,
+            .binding=0,
+            .type=wct::render::ERPipeParamType::UBO_Entity_Dynamic,
+            .stage_flags=wct::render::EShaderStageFlag::Fragment,
+            .size=sizeof(wct::render::PostprocessUBO)
+        };
 
         pipeline_asset.Set_descriptors_layout(descriptors);
 
@@ -183,18 +190,22 @@ namespace spacers::monkey {
         param_asset.Set_texture_list(
             {
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::ALBEDO_TEXTURE,
                     .value=tex_ids[0]
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::EMISSION_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::NORMAL_TEXTURE,
                     .value=null_normal->Get_asset_id()
                 },
                 {
+                    .set=wct::render::PBRBindings::SET,
                     .binding=wct::render::PBRBindings::ORM_TEXTURE,
                     .value=null_texture->Get_asset_id()
                 }
@@ -205,8 +216,8 @@ namespace spacers::monkey {
     }
 
     inline wcr::wid::WAssetId ConfigLevel(WEngine & in_engine,
-                         const ModelAssets & in_viking_room,
-                         const ModelAssets & in_monkey_dt
+                                          const ModelAssets & in_viking_room,
+                                          const ModelAssets & in_monkey_dt
         ) {
 
         wcr::wid::WAssetId levelid = in_engine.AssetManager().Create<was::Level>(

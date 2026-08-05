@@ -35,7 +35,7 @@ namespace wvk::raii::pipelines {
             8 * FramesInFlight,
             0,
             30 * FramesInFlight,
-            38> descriptor_pool{};
+            112> descriptor_pool{};
 
         wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight>
         ubo_manager{};
@@ -44,7 +44,7 @@ namespace wvk::raii::pipelines {
         std::unordered_map<
             wcr::wid::WEngId,
             std::array<VkDescriptorSet, FramesInFlight>
-            > identifier_descriptors;
+            > identifier_descriptors{};
 
         std::unordered_map<
             wcr::wid::WEngId::IdType,         // Pipeline id

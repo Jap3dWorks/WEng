@@ -200,12 +200,12 @@ namespace wct::render {
 
     using RPipeParamDescriptorsLayout = std::array<RPipeParamDescriptor, 16>;
 
-    constexpr const std::uint8_t MODEL_UBO_BINDING{0};
-    constexpr const std::uint8_t MODEL_UBO_DESC_SET{2};
+    // constexpr const std::uint8_t MODEL_UBO_BINDING{0};
+    // constexpr const std::uint8_t MODEL_UBO_DESC_SET{2};
     constexpr wct::render::RPipeParamDescriptor ModelParamDescriptor_Static() {
         return wct::render::RPipeParamDescriptor {
-            .set=MODEL_UBO_DESC_SET,
-            .binding=MODEL_UBO_BINDING,
+            .set=CommonBindings::MODEL_SET,
+            .binding=CommonBindings::MODEL_UBO,
             .type=wct::render::ERPipeParamType::UBO_Entity_Static,
             .stage_flags=wct::render::EShaderStageFlag::Vertex,
             .size=sizeof(wct::render::ModelUBO)
@@ -214,8 +214,8 @@ namespace wct::render {
 
     constexpr wct::render::RPipeParamDescriptor ModelParamDescriptor_Dynamic() {
         return wct::render::RPipeParamDescriptor {
-            .set=MODEL_UBO_DESC_SET,
-            .binding=MODEL_UBO_BINDING,
+            .set=CommonBindings::MODEL_SET,
+            .binding=CommonBindings::MODEL_UBO,
             .type=wct::render::ERPipeParamType::UBO_Entity_Dynamic,
             .stage_flags=wct::render::EShaderStageFlag::Vertex,
             .size=sizeof(wct::render::ModelUBO)

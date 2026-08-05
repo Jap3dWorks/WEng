@@ -46,7 +46,7 @@ namespace wvk::raii::pipelines {
           {wcr::wid::nullid};
         
         static inline constexpr const VkDescriptorSetLayoutBinding MODEL_UBO_LAYOUT_BINDING{
-            .binding=wct::render::MODEL_UBO_BINDING,
+            .binding=wct::render::CommonBindings::MODEL_UBO,
             .descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
             .descriptorCount=1,
             .stageFlags=VK_SHADER_STAGE_VERTEX_BIT,
@@ -57,8 +57,8 @@ namespace wvk::raii::pipelines {
             wct::render::RPipeParamDescriptorsLayout const & descriptors
             ) {
             for(auto & desc : descriptors ) {
-                if (desc.set == wct::render::MODEL_UBO_DESC_SET &&
-                    desc.binding == wct::render::MODEL_UBO_BINDING) {
+                if (desc.set == wct::render::CommonBindings::MODEL_SET &&
+                    desc.binding == wct::render::CommonBindings::MODEL_UBO) {
                     return desc;
                 }
             }
@@ -68,10 +68,39 @@ namespace wvk::raii::pipelines {
 
         static inline constexpr wct::render::RPipeParamUbo GetDefaultModelParam() {
             return {
-                .set=wct::render::MODEL_UBO_DESC_SET,
-                .binding=wct::render::MODEL_UBO_BINDING,
+                .set=wct::render::CommonBindings::MODEL_SET,
+                .binding=wct::render::CommonBindings::MODEL_UBO,
                 .data=wct::render::ToUBOData(wct::render::ModelUBO())
             };
+        }
+
+        WNODISCARD static inline constexpr
+        auto SplitDescriptors(wct::render::RPipeParamDescriptorsLayout param_descriptors) {
+            std::int32_t index=-1;
+            std::int32_t last=param_descriptors.size()-1;
+
+            wct::render::RPipeParamDescriptor model_descriptor =
+                wct::render::ModelParamDescriptor_Dynamic();
+
+            for(std::int32_t i=0; i < param_descriptors.size(); ++i ) {
+                if (param_descriptors[i].type == wct::render::ERPipeParamType::None) {
+                    last = i-1;
+                    break;
+                }
+                if (param_descriptors[i].set == wct::render::CommonBindings::MODEL_SET &&
+                    param_descriptors[i].binding == wct::render::CommonBindings::MODEL_UBO
+                    ) {
+                    index=i;
+                }
+            }
+
+            if (index > -1) {
+                model_descriptor = param_descriptors[index];
+                param_descriptors[index] = param_descriptors[last];
+                param_descriptors[last] = { .type=wct::render::ERPipeParamType::None };
+            }
+
+            return std::tuple{std::move(param_descriptors), std::move(model_descriptor)};
         }
 
         _new_GBuffer() noexcept=default;
@@ -106,25 +135,28 @@ namespace wvk::raii::pipelines {
         void CreatePipeline(
             wcr::wid::WEngId pipeline_id,
             wct::render::ShaderList const & shader_list, 
-            wct::render::RPipeParamDescriptorsLayout const & descriptor_layout_list,
+            wct::render::RPipeParamDescriptorsLayout all_param_descriptors,
             VkDescriptorSetLayout global_descset_layout
             ) {
 
-            assert(descriptor_set_layouts.Contains(pipeline_asset.Get_asset_id().GetId()));
+            assert(!param_layouts_.Contains(pipeline_id.GetId()));
 
             auto shaders_info =
                 wvk::shader::ToShaderStageInfo(shader_list);
 
-            auto layoyt_binding =
+            auto [param_descriptors, model_descriptor] =
+                SplitDescriptors(std::move(all_param_descriptors));
+
+            auto layout_binding =
                 wvk::descriptor::ToDescriptorSetLayoutBinding(
-                    descriptor_layout_list
+                    param_descriptors
                     );
 
             param_layouts_.CreateAt(
                 pipeline_id.GetId(),
-                [this, &layoyt_binding](auto id){
+                [this, &layout_binding](auto id){
                     return wvk::descriptor::CreateDescriptorSetLayout(
-                        layoyt_binding,
+                        layout_binding,
                         vkn_.device
                         );
                 }
@@ -225,7 +257,7 @@ namespace wvk::raii::pipelines {
             wct::render::RPipeParamDescriptor const & param_descriptor,
             wct::render::RPipeParamUbo const & ubo_data
             ) {
-            if (param_descriptor.set == wct::render::MODEL_UBO_DESC_SET) {
+            if (param_descriptor.set == wct::render::CommonBindings::MODEL_SET) {
                 model_collections_[collection_id]
                     .UpdateBindingSetParameter(
                         render_pipeline_id,
@@ -252,7 +284,7 @@ namespace wvk::raii::pipelines {
             wct::render::RPipeParamDescriptor const & param_descriptor,
             wct::render::RPipeParamUbo const & ubo_data
             ) {
-            if (param_descriptor.set == wct::render::MODEL_UBO_DESC_SET) {
+            if (param_descriptor.set == wct::render::CommonBindings::MODEL_SET) {
                 model_collections_[collection_id]
                     .UpdateBindingSetParameter(
                         frame_index,
@@ -311,19 +343,20 @@ namespace wvk::raii::pipelines {
 
     private:
 
+
         void EnsureCollection(std::size_t id) {
             if(!collections_.contains(id)) {
                 collections_[id]={
-                    .descriptor_pool{{vkn_.device}},
-                    .ubo_manager{
+                    .descriptor_pool={{vkn_.device}},
+                    .ubo_manager = {
                         vkn_.device, 
                         vkn_.physical_device, 
                         wvk::raii::ubo_manager::INITIAL_UBO_COUNT
                     }
                 };
                 model_collections_[id] = {
-                    .descriptor_pool{{vkn_.device}},
-                    .ubo_manager{
+                    .descriptor_pool={{vkn_.device}},
+                    .ubo_manager={
                         vkn_.device, 
                         vkn_.physical_device, 
                         wvk::raii::ubo_manager::INITIAL_UBO_COUNT

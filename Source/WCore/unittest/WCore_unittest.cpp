@@ -106,7 +106,7 @@ bool SplitAssetPath_Test() {
 }
 
 bool WIDCompoundNullValue_Test() {
-    wcr::wid::WTypeAssetIndexId wid{wcr::wid::null_id};
+    wcr::wid::WTypeAssetIndexId wid{wcr::wid:: nullid};
 
     auto idvalue = wid.GetId();
 

@@ -353,8 +353,8 @@ namespace wng::render {
 
                     wcr::wid::WSubIdxId desc_id = pipeline_asset
                         .DescriptorIndexAt(
-                            wct::render::MODEL_UBO_DESC_SET,
-                            wct::render::MODEL_UBO_BINDING
+                            wct::render::CommonBindings::MODEL_SET,
+                            wct::render::CommonBindings::MODEL_UBO
                             );
 
                     in_render->UpdatePipelineBindingSetParameter_Static(

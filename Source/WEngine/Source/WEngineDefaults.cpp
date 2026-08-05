@@ -84,38 +84,58 @@ namespace {
         auto descriptors = pipeline_asset.Get_descriptors_layout();
 
         // Model UBO (reserved)
-        descriptors[0].binding=wct::render::CommonBindings::MODEL_UBO;
-        descriptors[0].type=wct::render::ERPipeParamType::UBO_Entity_Dynamic;
-        descriptors[0].stage_flags=wct::render::EShaderStageFlag::Vertex;
-        descriptors[0].size=sizeof(wct::render::ModelUBO);
+        descriptors[0] = {
+            .set=wct::render::CommonBindings::MODEL_SET,
+            .binding=wct::render::CommonBindings::MODEL_UBO,
+            .type=wct::render::ERPipeParamType::UBO_Entity_Dynamic,
+            .stage_flags=wct::render::EShaderStageFlag::Vertex,
+            .size=sizeof(wct::render::ModelUBO)
+        };
 
         // PBR scalar params UBO
-        descriptors[1].binding=wct::render::PBRBindings::PARAM_UBO;
-        descriptors[1].type=wct::render::ERPipeParamType::UBO_Static;
-        descriptors[1].stage_flags=
-            wct::render::EShaderStageFlag::Vertex |
-            wct::render::EShaderStageFlag::Fragment ;
-        descriptors[1].size=sizeof(wct::render::PBRScalarUBO);
+
+        descriptors[1] = {
+            .set = wct::render::PBRBindings::SET,
+            .binding=wct::render::PBRBindings::PARAM_UBO,
+            .type=wct::render::ERPipeParamType::UBO_Static,
+            .stage_flags=
+                wct::render::EShaderStageFlag::Vertex |
+                wct::render::EShaderStageFlag::Fragment,
+            .size=sizeof(wct::render::PBRScalarUBO)
+        };
+        
 
         // albedo
-        descriptors[2].binding=wct::render::PBRBindings::ALBEDO_TEXTURE;
-        descriptors[2].type=wct::render::ERPipeParamType::Texture;
-        descriptors[2].stage_flags=wct::render::EShaderStageFlag::Fragment;
+        descriptors[2] = {
+            .set=wct::render::PBRBindings::SET,
+            .binding=wct::render::PBRBindings::ALBEDO_TEXTURE,
+            .type=wct::render::ERPipeParamType::Texture,
+            .stage_flags=wct::render::EShaderStageFlag::Fragment
+        };
 
         // emission
-        descriptors[3].binding=wct::render::PBRBindings::EMISSION_TEXTURE;
-        descriptors[3].type=wct::render::ERPipeParamType::Texture;
-        descriptors[3].stage_flags=wct::render::EShaderStageFlag::Fragment;
+        descriptors[3] = {
+            .set=wct::render::PBRBindings::SET,
+            .binding=wct::render::PBRBindings::EMISSION_TEXTURE,
+            .type=wct::render::ERPipeParamType::Texture,
+            .stage_flags=wct::render::EShaderStageFlag::Fragment
+        };
 
         // normal map
-        descriptors[4].binding=wct::render::PBRBindings::NORMAL_TEXTURE;
-        descriptors[4].type=wct::render::ERPipeParamType::Texture;
-        descriptors[4].stage_flags=wct::render::EShaderStageFlag::Fragment;
+        descriptors[4] = {
+            .set=wct::render::PBRBindings::SET,
+            .binding=wct::render::PBRBindings::NORMAL_TEXTURE,
+            .type=wct::render::ERPipeParamType::Texture,
+            .stage_flags=wct::render::EShaderStageFlag::Fragment
+        };
 
         // normal map
-        descriptors[5].binding=wct::render::PBRBindings::ORM_TEXTURE;
-        descriptors[5].type=wct::render::ERPipeParamType::Texture;
-        descriptors[5].stage_flags=wct::render::EShaderStageFlag::Fragment;
+        descriptors[5] = {
+            .set=wct::render::PBRBindings::SET,
+            .binding=wct::render::PBRBindings::ORM_TEXTURE,
+            .type=wct::render::ERPipeParamType::Texture,
+            .stage_flags=wct::render::EShaderStageFlag::Fragment
+        };
 
         pipeline_asset.Set_descriptors_layout(descriptors);
         

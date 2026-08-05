@@ -6,21 +6,20 @@ import GBuffer.GBuffer;
 // Set 0 binding 1 contiains lighting_ubo.
 
 // Set 1 is reserved for local UBOs.
-// Set 1 binding 0 contains model_ubo.
 
-[[vk::binding(1,1)]]
+[[vk::binding(0,1)]]
 ConstantBuffer<PBRScalar> pbr_scalars;
 
-[[vk::binding(2, 1)]]  // binding, set
+[[vk::binding(1, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> albedo;
 
-[[vk::binding(3, 1)]]  // binding, set
+[[vk::binding(2, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> emission;
 
-[[vk::binding(4, 1)]]  // binding, set
+[[vk::binding(3, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> normal;
 
-[[vk::binding(5, 1)]]  // binding, set
+[[vk::binding(4, 1)]]  // binding, set
 ConstantBuffer<Sampler2D> orm;
 
 // main functions
