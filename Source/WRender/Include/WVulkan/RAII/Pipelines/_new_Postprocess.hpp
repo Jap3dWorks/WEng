@@ -2,9 +2,13 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TObjectDataBase.hpp"
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/RAII/Pipelines/_new_Postprocess_lib.hpp"
-// #include "BindingCollection.hpp"
+#include "WVulkan/RAII/DescriptorPool.hpp"
+#include "WVulkan/Vk/WVkPipeline.hpp"
+#include "WVulkan/RAII/AssetRenderData.hpp"
+// #include "GBufferBindings.hpp"
 
 #include <cstdint>
 #include <vulkan/vulkan_core.h>
@@ -19,9 +23,22 @@ namespace wck::raii::pipelines {
         _new_Postprocess() = default;
 
         _new_Postprocess(
-            VkDevice in_device,
-            VkPhysicalDevice in_physical_device
-            ) : vkn_(in_device, in_physical_device)
+            VkDevice device,
+            VkPhysicalDevice physical_device
+            ) :
+            vkn_(device, physical_device),
+            descriptor_pool_({device}),
+            param_layouts_(
+                [] (auto id) { return VK_NULL_HANDLE; },
+                [device] (auto layout) { wvk::descriptor::Destroy(layout, device); }
+                ),
+            pipelines_(
+                [] (auto id) -> std::tuple<VkPipeline, VkPipelineLayout> { return {}; },
+                [device] (auto & pipeline__layout) {
+                    wvk::pipeline::Destroy(std::get<0>(pipeline__layout, device));
+                    wvk::pipeline::Destroy(std::get<1>(pipeline__layout, device));
+                }
+                )
             {}
 
         _new_Postprocess(const _new_Postprocess&) = delete;
@@ -38,6 +55,8 @@ namespace wck::raii::pipelines {
             wct::render::RPipeParamDescriptorsLayout all_param_descriptors,
             VkDescriptorSetLayout global_descset_layout
             ) {
+
+            assert(!pipelines_.Contains(pipeline_id.GetId()));
 
             auto shaders_info =
                 wvk::shader::ToShaderStageInfo(shader_list);
@@ -76,7 +95,26 @@ namespace wck::raii::pipelines {
                 );
         }
 
-        void CreateBindingSet();
+        void DeletePipeline(
+            wcr::wid::WEngId pipeline_id
+            ) {
+            // TODO
+        }
+
+        void CreateBindingSet(
+            wcr::wid::WEngId binding_set_id,
+            wcr::wid::WEngId pipeline_id,
+            wcr::wid::WEngId descriptor_bindings_id,
+            wct::render::RPipeParamDescriptorsLayout param_descriptors,
+            wct::render::RPipeParamList_Ubo pipe_ubo_params,
+            wct::render::RPipeParamList_WAssetId const & texture_params,
+            wvk::raii::AssetRenderData & asset_data
+            ) {
+            assert(pipelines_.Contains(pipeline_id.GetId()));
+
+            
+
+        }
 
         void UpdateBindingSet();
 
@@ -87,16 +125,22 @@ namespace wck::raii::pipelines {
             VkPhysicalDevice physical_device{VK_NULL_HANDLE};
         } vkn_;
 
+        wvk::raii::DescriptorPool<
+            0,
+            2 * wct::render::MAX_PIPELINE_ASSINGMENTS,
+            16 * wct::render::MAX_PIPELINE_ASSINGMENTS,
+            (2 + 16) * wct::render::MAX_PIPELINE_ASSINGMENTS
+            > descriptor_pool_{};
+
         TObjectDataBase<VkDescriptorSetLayout, void, std::size_t>
         param_layouts_;
 
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
         pipelines_;
 
-        // wvk::raii::pipelines::BindingCollection<FramesInFlight>
+        // wvk::raii::pipelines::gbuffer::BindingCollection<FramesInFlight>
         // collection_{};
 
-        
         
 
     };

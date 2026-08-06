@@ -8,8 +8,9 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <array>
 
-namespace wvk::raii::pipelines {
+namespace wvk::raii::pipelines::gbuffer {
 
     template<std::uint8_t FramesInFlight>
     struct Binding {
@@ -20,7 +21,7 @@ namespace wvk::raii::pipelines {
 
         wcr::wid::WEngId descriptor_bindings_id;  // usually matches with the render param asset id
         
-        std::array<VkDescriptorSet, FramesInFlight> param_descriptor_set;
+        std::array<VkDescriptorSet, FramesInFlight> descriptor_set;
 
         std::vector<std::uint32_t> dynamic_offsets;
     };
@@ -73,7 +74,7 @@ namespace wvk::raii::pipelines {
 
             auto param_descriptor_set = identifier_descriptors[descriptor_bindings_id];
 
-            wvk::raii::pipelines::Binding<FramesInFlight> binding {
+            wvk::raii::pipelines::gbuffer::Binding<FramesInFlight> binding {
                 .binding_set_id=binding_set_id,
                 .renderable_asset_id=renderable_asset_id,
                 .descriptor_bindings_id=descriptor_bindings_id,
@@ -211,7 +212,7 @@ namespace wvk::raii::pipelines {
     template<std::uint8_t FramesInFlight>
     using BindingCollectionsMap = std::unordered_map<
         std::size_t,
-        wvk::raii::pipelines::BindingCollection<FramesInFlight>>;
+        BindingCollection<FramesInFlight>>;
 
     template<std::uint8_t FramesInFlight, typename ValueFn, typename IncrFn>
     using BindingCollectionsIterator = ::TIterator<
@@ -231,7 +232,7 @@ namespace wvk::raii::pipelines {
         using ValueFn_t = decltype(valueFn);
         using IncrFn_t  = decltype(incrFn);
 
-        return wvk::raii::pipelines::BindingCollectionsIterator<
+        return BindingCollectionsIterator<
             FramesInFlight, ValueFn_t, IncrFn_t
             >
             {

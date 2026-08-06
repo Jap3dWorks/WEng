@@ -299,7 +299,9 @@ namespace wct::render {
         wcr::wid::WAssetId params{};
     };
 
-    template<std::uint8_t Max=WENG_MAX_ASSET_IDS>
+    inline constexpr std::uint8_t MAX_PIPELINE_ASSINGMENTS{16};
+
+    template<std::uint8_t Max=MAX_PIPELINE_ASSINGMENTS>
     using RPipeAssignments = std::array<RPipeAssignment, Max>;
 
    // Lighting

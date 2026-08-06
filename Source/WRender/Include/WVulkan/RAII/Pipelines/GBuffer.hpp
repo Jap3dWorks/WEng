@@ -8,7 +8,7 @@
 #include "WCore/TIterator.hpp"
 #include "WLog.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
-#include "WVulkan/RAII/Pipelines/BindingCollection.hpp"
+#include "WVulkan/RAII/Pipelines/GBufferBindings.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
 #include "WVulkan/WVkConfig.hpp"
@@ -140,7 +140,7 @@ namespace wvk::raii::pipelines {
             VkDescriptorSetLayout global_descset_layout
             ) {
 
-            assert(!param_layouts_.Contains(pipeline_id.GetId()));
+            assert(!pipelines_.Contains(pipeline_id.GetId()));
 
             auto shaders_info =
                 wvk::shader::ToShaderStageInfo(shader_list);
@@ -197,6 +197,8 @@ namespace wvk::raii::pipelines {
             wct::render::RPipeParamList_WAssetId const & texture_params,
             wvk::raii::AssetRenderData & asset_data
             ){
+
+            assert(pipelines_.Contains(pipeline_id.GetId()));
 
             EnsureCollection(collection_id);
 
@@ -319,7 +321,7 @@ namespace wvk::raii::pipelines {
         }
 
         auto IterCollections() const {
-            return wvk::raii::pipelines
+            return wvk::raii::pipelines::gbuffer
                 ::IterCollectionsIds(collections_);
         }
 
@@ -348,7 +350,7 @@ namespace wvk::raii::pipelines {
             if(!collections_.contains(id)) {
                 collections_[id]={
                     .descriptor_pool={{vkn_.device}},
-                    .ubo_manager = {
+                    .dynamic_ubo_manager = {
                         vkn_.device, 
                         vkn_.physical_device, 
                         wvk::raii::ubo_manager::INITIAL_UBO_COUNT
@@ -356,7 +358,7 @@ namespace wvk::raii::pipelines {
                 };
                 model_collections_[id] = {
                     .descriptor_pool={{vkn_.device}},
-                    .ubo_manager={
+                    .dynamic_ubo_manager={
                         vkn_.device, 
                         vkn_.physical_device, 
                         wvk::raii::ubo_manager::INITIAL_UBO_COUNT
@@ -378,11 +380,11 @@ namespace wvk::raii::pipelines {
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
         pipelines_;
 
-        wvk::raii::pipelines::BindingCollectionsMap<FramesInFlight> collections_{};
+        wvk::raii::pipelines::gbuffer::BindingCollectionsMap<FramesInFlight> collections_{};
 
         // TODO simpler class for model ubos.
         // with faster associative access.
-        wvk::raii::pipelines::BindingCollectionsMap<FramesInFlight> model_collections_{};
+        wvk::raii::pipelines::gbuffer::BindingCollectionsMap<FramesInFlight> model_collections_{};
 
     };
 
