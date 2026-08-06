@@ -1,15 +1,10 @@
 #pragma once
 
-#include "WAssets/RenderPipeline.hpp"
-#include "WAssets/RenderPipelineParams.hpp"
-#include "WCore/WDebug.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WLog.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
-#include "WVulkan/RAII/Pipelines/GBuffer_lib.hpp"
 
 #include <cstdint>
 #include <algorithm>
@@ -40,7 +35,7 @@ namespace wvk::raii::pipelines {
             112> descriptor_pool{};
 
         wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight>
-        ubo_manager{};
+        dynamic_ubo_manager{};
 
         // Descriptor by each asset_params
         std::unordered_map<
@@ -124,7 +119,7 @@ namespace wvk::raii::pipelines {
                      .Get(binding_set_id.GetId()).descriptor_bindings_id,
                  param_descriptor,
                  ubo_data,
-                 ubo_manager
+                 dynamic_ubo_manager
                     );
         }
 
@@ -150,7 +145,7 @@ namespace wvk::raii::pipelines {
                      .Get(binding_set_id.GetId()).renderable_asset_id,
                  param_layout,
                  ubo_data,
-                 ubo_manager
+                 dynamic_ubo_manager
                     );
         }
 
@@ -172,7 +167,7 @@ namespace wvk::raii::pipelines {
                     descriptor_bindings_id,
                     param_descriptors,
                     ubo_param_list,
-                    ubo_manager
+                    dynamic_ubo_manager
                     );
 
             if (!identifier_descriptors.contains(descriptor_bindings_id)) {
@@ -219,7 +214,7 @@ namespace wvk::raii::pipelines {
         wvk::raii::pipelines::BindingCollection<FramesInFlight>>;
 
     template<std::uint8_t FramesInFlight, typename ValueFn, typename IncrFn>
-    using BindingCollectionsIterator = TIterator<
+    using BindingCollectionsIterator = ::TIterator<
         typename BindingCollectionsMap<FramesInFlight>::value_type const,
         typename BindingCollectionsMap<FramesInFlight>::const_iterator,
         std::size_t, ValueFn, IncrFn

@@ -174,9 +174,7 @@ namespace wvk::raii::pipelines {
                             param_layouts_.Get(id),
                             *model_ubo_layout_,
                         },
-                        {
-                            shaders_info
-                        }
+                        shaders_info
                         );
                 }
                 );

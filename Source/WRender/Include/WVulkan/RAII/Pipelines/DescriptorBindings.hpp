@@ -3,21 +3,14 @@
 #include "WCore/WId.hpp"
 #include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
-#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
-#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WCore/TVisitor.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
+#include "WVulkan/Vk/WVkTypes.hpp"
 
-#include "WAssets/RenderPipelineParams.hpp"
-#include "WAssets/RenderPipeline.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/Vk/WVkBuffer.hpp"
 
-#include <optional>
-#include <ranges>
-#include <iterator>
 #include <algorithm>
 
 namespace wvk::raii::pipelines::desc_bindings {

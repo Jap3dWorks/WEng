@@ -15,9 +15,9 @@
 namespace wvk::raii::pipelines::gbuffer_lib {
 
     inline auto CreatePipeline(
-        const VkDevice & in_device,
-        const std::vector<VkDescriptorSetLayout> & in_desc_layouts,
-        const std::vector<WVkShaderStageInfo> & in_shader_stage_infos
+        VkDevice in_device,
+        std::vector<VkDescriptorSetLayout> const & in_desc_layouts,
+        std::vector<WVkShaderStageInfo> const & in_shader_stage_infos
         ) {
 
         VkPipeline render_pipeline;

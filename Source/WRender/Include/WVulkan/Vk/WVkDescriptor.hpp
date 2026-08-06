@@ -99,33 +99,52 @@ namespace wvk::descriptor {
         }
     }
 
+    inline constexpr
+    std::optional<VkDescriptorType> ToDescriptorType(
+        wct::render::ERPipeParamType param_type,
+        VkDescriptorType vk_texture_type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VkDescriptorType vk_ubo_type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+        ) noexcept {
+        switch(param_type) {
+
+        case wct::render::ERPipeParamType::None:
+            return std::nullopt;
+
+        case wct::render::ERPipeParamType::Texture:
+            return vk_texture_type;
+
+        default:
+            return vk_ubo_type;
+        }
+    }
+
     inline std::vector<VkDescriptorSetLayoutBinding> ToDescriptorSetLayoutBinding(
-        const wct::render::RPipeParamDescriptorsLayout & in_param_list
+        const wct::render::RPipeParamDescriptorsLayout & in_param_list,
+        VkDescriptorType vk_texture_type=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        VkDescriptorType vk_ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
         ) {
         std::vector<VkDescriptorSetLayoutBinding> result;
 
         result.reserve(in_param_list.size());
 
+        auto to_descriptor_type =
+            [vk_ubo_type, vk_texture_type](wct::render::ERPipeParamType param_type)
+                {
+                    return ToDescriptorType(param_type,
+                                            vk_texture_type,
+                                            vk_ubo_type);
+                };
+
         wct::render::ForEach(
             in_param_list,
-            [&result]
+            [&result, &to_descriptor_type]
             (const auto& _prm) {
                 VkDescriptorSetLayoutBinding bndng{};
 
-                switch(_prm.type) {
+                auto descriptor_type = to_descriptor_type(_prm.type);
+                if (!descriptor_type) return;
 
-                case wct::render::ERPipeParamType::None:
-                    return;
-
-                case wct::render::ERPipeParamType::Texture:
-                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    break;
-                
-                default:
-                    bndng.descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-                    break;
-                }
-
+                bndng.descriptorType=*descriptor_type;
                 bndng.binding = _prm.binding;
                 bndng.descriptorCount = 1;
                 bndng.pImmutableSamplers = nullptr;
