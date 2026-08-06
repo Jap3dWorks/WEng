@@ -1,8 +1,10 @@
 #pragma once
 
+#include "WCore/WConcepts.hpp"
 #include "WCore/WId.hpp"
 #include "WVulkan/RAII/UBOManager/BlockSizeUBOs.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
+#include "WVulkan/Vk/WVkBuffer.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WCore/TVisitor.hpp"
@@ -12,8 +14,20 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 
 #include <algorithm>
+#include <vulkan/vulkan_core.h>
 
 namespace wvk::raii::pipelines::desc_bindings {
+
+    inline void const * GetUboPtrData(wct::render::RPipeParamUbo const & ubo_param) {
+        return std::visit(
+            wcr::TVisitor(
+                [&ubo_param](auto const & ubodata) -> void const * {
+                    return ubodata.data();
+                }
+                ),
+            ubo_param.data
+            );
+    }
 
     WNODISCARD inline std::vector<WVkDescSetTextureBinding> CollectTextureBindings(
         wct::render::RPipeParamList_WAssetId const & texture_params,
@@ -80,7 +94,7 @@ namespace wvk::raii::pipelines::desc_bindings {
     
 
     template<std::uint8_t FramesInFlight, std::uint8_t UBOFrames>
-    constexpr auto UBOManFrameFlag() {
+    inline constexpr auto UBOManFrameFlag() {
         if constexpr (UBOFrames == 1) {
             return wvk::raii::ubo_manager
                 ::DynamicUBOManager<FramesInFlight>::STATIC_FRAME_FLAG;
@@ -91,36 +105,39 @@ namespace wvk::raii::pipelines::desc_bindings {
         }
     };
 
+
+    template<typename Params, CIterable<Params> ParamsCollection>
+    inline auto GetBindingParamsMap(ParamsCollection const & params) {
+        std::unordered_map<
+            std::uint8_t,
+            Params const *> binding_params{};
+
+        for (auto & param : params) {
+            binding_params.insert(
+                {param.binding, &param}
+                );
+        }
+
+        return binding_params;
+    }
+
+
     template<std::uint8_t FramesInFlight, std::uint8_t UBOFrames>
     constexpr auto ubo_frame_flag_v=UBOManFrameFlag<FramesInFlight, UBOFrames>();
 
     template<std::uint8_t FramesInFlight>
-    WNODISCARD std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> CollectUBOBindings(
+    WNODISCARD inline std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>>
+    CollectUBOBindings_Dynamic(
         wcr::wid::WEngId binding_set_id,
         wcr::wid::WEngId parameter_bindings_id,
         wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
         wct::render::RPipeParamList_Ubo const & ubo_params,
-        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & ubo_man
+        wvk::raii::ubo_manager::DynamicUBOManager<FramesInFlight> & dynamic_ubo_man
         ) {
 
-        std::unordered_map<
-            std::uint8_t,
-            wct::render::RPipeParamUbo const *> binding_param{};
-
-        for (auto & ubo : ubo_params) {
-            binding_param.insert(
-                {ubo.binding, &ubo}
-                );
-        }
-
-        auto get_ubo_data_ptr = [](wct::render::RPipeParamUbo const * ubo_param) -> void const * {
-            return std::visit<void const *> (
-                wcr::TVisitor([](auto const& data) -> void const * {
-                    return static_cast<void const *>(data.data());
-                }),
-                ubo_param->data
-                );
-        };        
+        auto binding_param =  GetBindingParamsMap<wct::render::RPipeParamUbo>(
+            ubo_params
+            );
 
         auto CreateUBOBinding =
             [&]
@@ -130,26 +147,28 @@ namespace wvk::raii::pipelines::desc_bindings {
             {
                 constexpr auto frame_flag=ubo_frame_flag_v<FramesInFlight, UBOFrames>;
 
-                if (!ubo_man.template Contains<frame_flag>(
+                if (!dynamic_ubo_man.template Contains<frame_flag>(
                         desc.size, wid) ) {
                     void const * ptr = binding_param.contains(desc.binding)
-                        ? get_ubo_data_ptr(binding_param[desc.binding])
+                        ? GetUboPtrData(*binding_param[desc.binding])
                         : nullptr;
 
-                    ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
+                    dynamic_ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
                 }
                 
-                _new_WVkDescSetUBOBinding<FramesInFlight> result{};
-                result.binding = desc.binding;
-                result.dynamic_offset = ubo_man.template GetOffset<frame_flag>(
-                    desc.size, wid
-                    );
+                _new_WVkDescSetUBOBinding<FramesInFlight> result {
+                    .binding=desc.binding,
+                    .offset=dynamic_ubo_man.template GetOffset<frame_flag>(
+                        desc.size, wid
+                        ),
+                    .ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
+                };
 
                 for(std::uint8_t f=0; f<FramesInFlight; ++f) {
                     std::uint8_t ubo_f_index =
                         std::min(static_cast<std::uint8_t>(UBOFrames-1),f);
 
-                    result.buffers[f]=ubo_man.template GetUBO<frame_flag>(
+                    result.buffers[f]=dynamic_ubo_man.template GetUBO<frame_flag>(
                                 desc.size, ubo_f_index
                         ).buffer;
                     result.range=desc.size;
@@ -248,15 +267,76 @@ namespace wvk::raii::pipelines::desc_bindings {
         return result;
     }
 
-    inline void const * GetUboPtrData(wct::render::RPipeParamUbo const & ubo_param) {
-        return std::visit(
-            wcr::TVisitor(
-                [&ubo_param](auto const & ubodata) -> void const * {
-                    return ubodata.data();
-                }
-                ),
-            ubo_param.data
+
+    template<std::uint8_t FramesInFlight>
+    WNODISCARD std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>>
+    CollectUBOBindings (
+        VkDevice device,
+        VkPhysicalDevice physical_device,
+        // wcr::wid::WEngId binding_set_id,
+        // wcr::wid::WEngId parameter_bindings_id,  // pipeline params
+        wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
+        wct::render::RPipeParamList_Ubo const & ubo_params
+        ){
+
+        auto binding_param =
+            GetBindingParamsMap<wct::render::RPipeParamUbo>(
+                ubo_params
+                );
+
+        std::uint32_t buffer_size = std::accumulate(
+            param_descriptors.begin(),
+            param_descriptors.end(),
+            0,
+            [](auto & desc) ->std::uint32_t {
+                return desc.type != wct::render::ERPipeParamType::None
+                    ? desc.size
+                    : 0; });
+
+        std::array<WVkBuffer, FramesInFlight> ubo_buffers;
+        for(std::uint32_t i=0; i<FramesInFlight; ++i) {
+            ubo_buffers = wvk::buffer::CreateUBOBuffer(
+            buffer_size,
+            device,
+            physical_device
             );
+        }
+
+        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> result;
+        result.reserve(param_descriptors.size());
+
+        std::uint32_t offset=0;
+        for(auto & param_desc : param_descriptors) {
+            result.push_back(
+                {
+                    .binding=param_desc.binding,
+                    .buffers=ubo_buffers,
+                    .offset=offset,
+                    .range=param_desc.size,
+                    .ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+                }
+                );
+
+            offset += param_desc.size;
+
+            if (binding_param.contains(param_desc.binding)) {
+                for(std::uint32_t f=0; f<FramesInFlight; ++f) {
+                    wvk::buffer::UpdateBuffer(
+                        wvk::buffer::MapBuffer(
+                            ubo_buffers[f],
+                            device
+                            ),
+                        GetUboPtrData(*binding_param[param_desc.binding]),
+                        param_desc.size,
+                        offset
+                        );
+
+                    wvk::buffer::UnmapBuffer(ubo_buffers[f]);
+                }
+            }
+
+        }
+        return result;
     }
 
     template<std::uint8_t FramesInFlight>
@@ -264,8 +344,8 @@ namespace wvk::raii::pipelines::desc_bindings {
         VkDevice device,
         VkDescriptorSetLayout desc_layout,
         VkDescriptorPool desc_pool,
-        std::vector<WVkDescSetTextureBinding> const & texture_params,
-        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> const & ubo_params
+        std::vector<WVkDescSetTextureBinding> const & texture_bindings,
+        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> const & ubo_bindings
         ) {
             
         std::array<VkDescriptorSet, FramesInFlight> descriptor_sets;
@@ -290,14 +370,17 @@ namespace wvk::raii::pipelines::desc_bindings {
                 );
 
             std::vector<VkWriteDescriptorSet> write_sets;
-            write_sets.reserve(texture_params.size() + ubo_params.size());
+            write_sets.reserve(texture_bindings.size() + ubo_bindings.size());
             std::vector<VkDescriptorBufferInfo> buffer_infos;
-            buffer_infos.reserve(ubo_params.size());
+            buffer_infos.reserve(ubo_bindings.size());
 
-            for(auto & p : ubo_params) {
+            for(auto & p : ubo_bindings) {
+                
                 VkDescriptorBufferInfo buffer_info {
                     .buffer=p.buffers[f],
-                    .offset=0,
+                    .offset = (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == p.ubo_type)
+                        ? 0
+                        : p.offset,
                     .range=p.range
                 };
 
@@ -307,14 +390,14 @@ namespace wvk::raii::pipelines::desc_bindings {
                 ubo_write.dstBinding = p.binding;
                 ubo_write.dstSet = descriptor_set;
                 ubo_write.dstArrayElement = 0;
-                ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                ubo_write.descriptorType = p.ubo_type;
                 ubo_write.descriptorCount = 1;
                 ubo_write.pBufferInfo = &buffer_infos.back();
             
                 write_sets.push_back(std::move(ubo_write));
             }
 
-            for (auto & t : texture_params) {
+            for (auto & t : texture_bindings) {
 
                 VkWriteDescriptorSet tex_write = wvk::types::VkWriteDescriptorSet();
 

@@ -200,6 +200,16 @@ namespace wct::render {
 
     using RPipeParamDescriptorsLayout = std::array<RPipeParamDescriptor, 16>;
 
+    template<CCallable<void, const RPipeParamDescriptor &> TFn>
+    inline void ForEach(const wct::render::RPipeParamDescriptorsLayout & in_lst, TFn && in_fn) {
+        for(const auto& param: in_lst) {
+            if (param.type==ERPipeParamType::None)
+                break;
+
+            std::forward<TFn>(in_fn)(param);
+        }
+    }
+
     // constexpr const std::uint8_t MODEL_UBO_BINDING{0};
     // constexpr const std::uint8_t MODEL_UBO_DESC_SET{2};
     constexpr wct::render::RPipeParamDescriptor ModelParamDescriptor_Static() {
@@ -271,16 +281,6 @@ namespace wct::render {
 
     using RPipeParamList_WAssetId = std::vector<RPipeParamAsset>;
     using RPipeParamList_Ubo = std::vector<RPipeParamUbo>;
-
-    template<CCallable<void, const RPipeParamDescriptor &> TFn>
-    inline void ForEach(const wct::render::RPipeParamDescriptorsLayout & in_lst, TFn && in_fn) {
-        for(const auto& param: in_lst) {
-            if (param.type==ERPipeParamType::None)
-                break;
-
-            std::forward<TFn>(in_fn)(param);
-        }
-    }
 
     template<CCallable<void, const ShaderInfo &> TFn>
     inline void ForEach(const ShaderList & in_lst, TFn && in_fn) {
@@ -365,3 +365,4 @@ namespace wct::render {
     
 
 }
+

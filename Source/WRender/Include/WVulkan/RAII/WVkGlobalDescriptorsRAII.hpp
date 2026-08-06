@@ -73,7 +73,7 @@ public:
         std::uint8_t in_frame_index,
         const wct::render::CameraUBO & in_camera_ubo
         ) {
-        void * ptr = wvk::buffer::MapUBO(
+        void * ptr = wvk::buffer::MapBuffer(
             camera_ubo_[in_frame_index],
             device_
             );
@@ -84,7 +84,7 @@ public:
             sizeof(wct::render::CameraUBO)
             );
     
-        wvk::buffer::UnmapUBO(
+        wvk::buffer::UnmapBuffer(
             camera_ubo_[in_frame_index],
             device_
             );
@@ -96,7 +96,7 @@ public:
         std::size_t in_size
         ) {
         memcpy(
-            wvk::buffer::MapUBO(
+            wvk::buffer::MapBuffer(
                 camera_ubo_[in_frame_index],
                 device_
                 ),
@@ -104,7 +104,7 @@ public:
             in_size
             );
     
-        wvk::buffer::UnmapUBO(
+        wvk::buffer::UnmapBuffer(
             camera_ubo_[in_frame_index],
             device_
             );
@@ -115,7 +115,7 @@ public:
         const wct::render::LightingUBO & in_lighting_ubo
         ) {
         memcpy(
-            wvk::buffer::MapUBO(
+            wvk::buffer::MapBuffer(
                 lighting_ubo_[in_frame_index],
                 device_
                 ),
@@ -123,7 +123,7 @@ public:
             sizeof(wct::render::LightingUBO)
             );
 
-        wvk::buffer::UnmapUBO(
+        wvk::buffer::UnmapBuffer(
             lighting_ubo_[in_frame_index],
             device_
             );
@@ -136,7 +136,7 @@ public:
         )
         {
         memcpy(
-            wvk::buffer::MapUBO(
+            wvk::buffer::MapBuffer(
                 lighting_ubo_[in_frame_index],
                 device_
                 ),
@@ -144,7 +144,7 @@ public:
             size
             );
 
-        wvk::buffer::UnmapUBO(
+        wvk::buffer::UnmapBuffer(
             lighting_ubo_[in_frame_index],
             device_
             );
@@ -198,13 +198,13 @@ private:
                 descriptor_pool_
                 );
 
-            camera_ubo_[i] = wvk::buffer::CreateUBO(
+            camera_ubo_[i] = wvk::buffer::CreateUBOBuffer(
                 sizeof(wct::render::CameraUBO),
                 device_,
                 in_physical_device
                 );
 
-            lighting_ubo_[i] = wvk::buffer::CreateUBO(
+            lighting_ubo_[i] = wvk::buffer::CreateUBOBuffer(
                 sizeof(wct::render::LightingUBO),
                 device_,
                 in_physical_device
@@ -336,8 +336,8 @@ private:
 
     VkDescriptorPool descriptor_pool_{VK_NULL_HANDLE};
     VkDescriptorSetLayout descset_layout_info_{VK_NULL_HANDLE};
-    std::array<WVkUBO, FramesInFlight> camera_ubo_{};
-    std::array<WVkUBO, FramesInFlight> lighting_ubo_{};
+    std::array<WVkBuffer, FramesInFlight> camera_ubo_{};
+    std::array<WVkBuffer, FramesInFlight> lighting_ubo_{};
 
     std::array<VkDescriptorSet, FramesInFlight> descriptors_{};
 };

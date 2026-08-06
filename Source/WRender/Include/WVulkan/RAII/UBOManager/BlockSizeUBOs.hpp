@@ -83,7 +83,7 @@ namespace wvk::raii::ubo_manager {
                 BlockSize * elements_max_count;
 
             for(auto & vk_buffer : vk_buffers) {
-                vk_buffer = wvk::buffer::CreateUBO(
+                vk_buffer = wvk::buffer::CreateUBOBuffer(
                     device_size,
                     device,
                     physical_device
@@ -106,16 +106,16 @@ namespace wvk::raii::ubo_manager {
             if (!data.data()) return;
 
             for(std::uint8_t f=0; f<FramesInFlight; f++) {
-                void * ptr = wvk::buffer::MapUBO(vk_buffers[f], device_);
+                void * ptr = wvk::buffer::MapBuffer(vk_buffers[f], device_);
 
-                wvk::buffer::UpdateUBO(
+                wvk::buffer::UpdateBuffer(
                     ptr,
                     data.data(),
                     size,
                     offset
                     );
 
-                wvk::buffer::UnmapUBO(vk_buffers[f], device_);
+                wvk::buffer::UnmapBuffer(vk_buffers[f], device_);
             }
         }
 
@@ -125,20 +125,20 @@ namespace wvk::raii::ubo_manager {
 
             assert(frame_index < FramesInFlight);
 
-            void * ptr = wvk::buffer::MapUBO(
+            void * ptr = wvk::buffer::MapBuffer(
                 vk_buffers[frame_index], device_
                 );
 
             std::uint32_t i=0;
             for(auto id : ids) {
-                wvk::buffer::UpdateUBO(
+                wvk::buffer::UpdateBuffer(
                     ptr, &data[i], BlockSize, GetOffset(id)
                     );
 
                 i++;
             }
             
-            wvk::buffer::UnmapUBO(vk_buffers[frame_index], device_);
+            wvk::buffer::UnmapBuffer(vk_buffers[frame_index], device_);
         }
 
         /**
@@ -203,17 +203,17 @@ namespace wvk::raii::ubo_manager {
             }
 
             for(std::uint8_t f=0; f < FramesInFlight ; f++) {
-                void * ptr = wvk::buffer::MapUBO(vk_buffers[f], device_);
+                void * ptr = wvk::buffer::MapBuffer(vk_buffers[f], device_);
 
                 for(auto & trn : transactions) {
                     std::byte * val_ptr =
                         reinterpret_cast<std::byte*>(ptr) + trn.old_pos * BlockSize;
                     
-                    wvk::buffer::UpdateUBO(
+                    wvk::buffer::UpdateBuffer(
                         ptr, val_ptr, GetSize(trn.size), trn.new_pos * BlockSize
                         );
                 }
-                wvk::buffer::UnmapUBO(vk_buffers[f], device_);
+                wvk::buffer::UnmapBuffer(vk_buffers[f], device_);
             }
 
             return relocated_ids;
@@ -236,7 +236,7 @@ namespace wvk::raii::ubo_manager {
             return position_track.Count();
         }
 
-        WVkUBO GetUBO(std::uint8_t frame_index) const  {
+        WVkBuffer GetUBO(std::uint8_t frame_index) const  {
             assert(frame_index < FramesInFlight);
             return vk_buffers[frame_index];
         }
@@ -253,7 +253,7 @@ namespace wvk::raii::ubo_manager {
 
         TSparseSet<std::uint8_t> position_track;
 
-        std::array<WVkUBO, FramesInFlight> vk_buffers;
+        std::array<WVkBuffer, FramesInFlight> vk_buffers;
 
         std::size_t buffer_base_count_size_;
         

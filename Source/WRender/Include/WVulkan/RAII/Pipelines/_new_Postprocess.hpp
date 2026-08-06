@@ -5,7 +5,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/RAII/Pipelines/_new_Postprocess_lib.hpp"
-#include "WVulkan/RAII/DescriptorPool.hpp"
+#include "WVulkan/RAII/Pipelines/_new_PostprocessBindings.hpp"
 #include "WVulkan/Vk/WVkPipeline.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 // #include "GBufferBindings.hpp"
@@ -27,7 +27,11 @@ namespace wck::raii::pipelines {
             VkPhysicalDevice physical_device
             ) :
             vkn_(device, physical_device),
-            descriptor_pool_({device}),
+            binding_collection_{
+                .device=device,
+                .physical_device={physical_device},
+                .descriptor_pool={{device}}
+            },
             param_layouts_(
                 [] (auto id) { return VK_NULL_HANDLE; },
                 [device] (auto layout) { wvk::descriptor::Destroy(layout, device); }
@@ -120,23 +124,21 @@ namespace wck::raii::pipelines {
 
     private:
 
+        
+
         struct {
             VkDevice device{VK_NULL_HANDLE};
             VkPhysicalDevice physical_device{VK_NULL_HANDLE};
         } vkn_;
-
-        wvk::raii::DescriptorPool<
-            0,
-            2 * wct::render::MAX_PIPELINE_ASSINGMENTS,
-            16 * wct::render::MAX_PIPELINE_ASSINGMENTS,
-            (2 + 16) * wct::render::MAX_PIPELINE_ASSINGMENTS
-            > descriptor_pool_{};
 
         TObjectDataBase<VkDescriptorSetLayout, void, std::size_t>
         param_layouts_;
 
         TObjectDataBase<std::tuple<VkPipeline, VkPipelineLayout>, void, std::size_t>
         pipelines_;
+
+        wvk::raii::pipelines::postprocess::BindingCollection<FramesInFlight>
+        binding_collection_;
 
         // wvk::raii::pipelines::gbuffer::BindingCollection<FramesInFlight>
         // collection_{};

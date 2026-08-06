@@ -139,8 +139,8 @@ namespace wvk::render::rec_cmd_bffr {
                     std::array descsets =
                         {
                             global_descriptors.DescriptorSet(frame_index),
-                            binding.param_descriptor_set.at(frame_index),
-                            ubo_binding.param_descriptor_set.at(frame_index)
+                            binding.descriptor_set.at(frame_index),
+                            ubo_binding.descriptor_set.at(frame_index)
                         };
 
                     std::vector<std::uint32_t> dynamic_offsets =

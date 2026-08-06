@@ -211,7 +211,7 @@ namespace wvk::raii::pipelines::gbuffer_lib {
 
         for(std::uint32_t f=0; f<FramesInFlight; ++f) {
                     
-            WVkUBO ubo = ubo_man
+            WVkBuffer ubo = ubo_man
                 .GetUBO<FramesInFlight>(
                     sizeof(wct::render::ModelUBO),
                     f

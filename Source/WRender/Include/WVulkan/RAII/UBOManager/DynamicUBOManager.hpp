@@ -94,7 +94,7 @@ namespace wvk::raii::ubo_manager {
         }
 
         template<std::uint8_t FrameFlag>
-        WVkUBO GetUBO(BlockSizeIntT block_size,
+        WVkBuffer GetUBO(BlockSizeIntT block_size,
                       std::uint8_t frame_index) const {
             return GetTEFnContainer<FrameFlag>().at(block_size).get_UBO(*this, frame_index);
         }
@@ -224,7 +224,7 @@ namespace wvk::raii::ubo_manager {
                 return GetBlockSizeUBOsConst(self)->GetOffset(id);
             }
 
-            static inline WVkUBO GetUBO(
+            static inline WVkBuffer GetUBO(
                 DynamicUBOManager const & self,
                 std::uint8_t frame_index) {
                 return GetBlockSizeUBOsConst(self)->GetUBO(frame_index);

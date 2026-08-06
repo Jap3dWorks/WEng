@@ -78,7 +78,7 @@ namespace wvk::raii::pipelines::gbuffer {
                 .binding_set_id=binding_set_id,
                 .renderable_asset_id=renderable_asset_id,
                 .descriptor_bindings_id=descriptor_bindings_id,
-                .param_descriptor_set = param_descriptor_set,
+                .descriptor_set = param_descriptor_set,
                 .dynamic_offsets=std::move(dynamic_offsets)
             };
 
@@ -163,7 +163,7 @@ namespace wvk::raii::pipelines::gbuffer {
             ) {
 
             auto ubo_params = wvk::raii::pipelines::desc_bindings
-                ::CollectUBOBindings<FramesInFlight>(
+                ::CollectUBOBindings_Dynamic<FramesInFlight>(
                     binding_set_id,
                     descriptor_bindings_id,
                     param_descriptors,
@@ -203,7 +203,7 @@ namespace wvk::raii::pipelines::gbuffer {
 
             std::ranges::transform(ubo_params,
                                    std::back_inserter(dynamic_offsets),
-                                   [](auto b) {return b.dynamic_offset; });
+                                   [](auto b) {return b.offset; });
 
             return dynamic_offsets;
         }

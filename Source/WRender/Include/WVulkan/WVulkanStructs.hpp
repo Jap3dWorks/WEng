@@ -71,7 +71,7 @@ struct WVkMesh
     uint32_t index_count {0};
 };
 
-struct WVkUBO
+struct WVkBuffer
 {
     VkBuffer buffer{VK_NULL_HANDLE};
     VkDeviceMemory device_memory{VK_NULL_HANDLE};
@@ -128,10 +128,11 @@ struct WVkDescSetUBOBinding {
 template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
 struct _new_WVkDescSetUBOBinding {
     std::uint8_t binding{0};
-    std::uint32_t dynamic_offset{0};
-    std::uint32_t range{0};
 
+    std::uint32_t offset{0};
+    std::uint32_t range{0};
     std::array<VkBuffer, FramesInFlight> buffers;
+    VkDescriptorType ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 };
 
 template<std::uint8_t Frames>

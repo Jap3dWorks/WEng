@@ -14,24 +14,24 @@ namespace wvk::buffer {
         VkMemoryPropertyFlags properties
         );
 
-    WVkUBO CreateUBO(
+    WVkBuffer CreateUBOBuffer(
         VkDeviceSize in_size,
         VkDevice in_device,
         VkPhysicalDevice in_physical_device
         );
 
-    void * MapUBO(
-        const WVkUBO & in_ubo,
+    void * MapBuffer(
+        const WVkBuffer & in_ubo,
         VkDevice in_device
         );
 
-    void UnmapUBO(
-        const WVkUBO & in_ubo,
+    void UnmapBuffer(
+        const WVkBuffer & in_ubo,
         VkDevice in_device
         );
 
     void Destroy(
-        WVkUBO & out_ubo_info,
+        WVkBuffer & out_buffer,
         VkDevice device
         );
 
@@ -76,14 +76,14 @@ namespace wvk::buffer {
         vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
     }
 
-    inline bool UpdateUBO(
-        void * ubo_memory,
+    inline bool UpdateBuffer(
+        void * buffer_memory,
         const void * in_data,
         const std::size_t & in_size,
         const std::size_t & in_offset=0
         ) {
 
-        std::uint8_t * mapped_mem = reinterpret_cast<std::uint8_t*>(ubo_memory);
+        std::uint8_t * mapped_mem = reinterpret_cast<std::uint8_t*>(buffer_memory);
         std::memcpy((mapped_mem + in_offset),
                in_data,
                in_size               
