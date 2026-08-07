@@ -6,7 +6,9 @@
 #include <vulkan/vulkan_core.h>
 
 namespace wvk::render::rcmd {
-    
+
+    // TODO bring back render command functions from ./RenderUtils.hpp 
+
     inline
     void TransitionImageLayout(
         const VkCommandBuffer & in_command_buffer,
@@ -176,5 +178,7 @@ namespace wvk::render::rcmd::ShadowMap {
     }
 }
     
-namespace wvk::render::rcmd::Lighting {}
+namespace wvk::render::rcmd::Lighting {
+    
+}
 
