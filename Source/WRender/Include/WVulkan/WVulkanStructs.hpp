@@ -131,7 +131,7 @@ struct _new_WVkDescSetUBOBinding {
 
     std::uint32_t offset{0};
     std::uint32_t range{0};
-    std::array<VkBuffer, FramesInFlight> buffers;
+    std::array<WVkBuffer, FramesInFlight> buffers;
     VkDescriptorType ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 };
 

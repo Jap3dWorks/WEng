@@ -223,16 +223,16 @@ namespace wvk::raii::ubo_manager {
             return position_track.Contains(id.GetId());
         }
 
-        std::size_t GetPosition(wcr::wid::WEngId id) const  {
+        std::uint32_t GetPosition(wcr::wid::WEngId id) const  {
             assert(position_track.Contains(id.GetId()));
             return position_track.DensePosition(id.GetId());
         }
 
-        std::size_t GetOffset(wcr::wid::WEngId id) const  {
+        std::uint32_t GetOffset(wcr::wid::WEngId id) const  {
             return GetPosition(id) * BlockSize;
         }
 
-        std::size_t Count() const  {
+        std::uint32_t Count() const  {
             return position_track.Count();
         }
 
@@ -243,7 +243,7 @@ namespace wvk::raii::ubo_manager {
 
     private:
 
-        std::size_t GetSize(std::size_t blocks_count) const {
+        std::uint32_t GetSize(std::uint32_t blocks_count) const {
             return blocks_count * BlockSize;
         }
 

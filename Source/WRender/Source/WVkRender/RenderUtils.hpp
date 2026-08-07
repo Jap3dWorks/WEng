@@ -922,16 +922,15 @@ namespace wvk::render {
             );
     }
 
-    template<typename TDcrpLst, typename TDynOffsetsList>
+    template<typename TDcrpLst>
     inline void RndCmd_PostprocessDrawCommands(
-        const VkDevice & in_device,
-        const VkCommandBuffer & in_command_buffer,
-        const VkBuffer & in_vertex_buffer,
-        const VkBuffer & in_index_buffer,
-        const std::uint32_t & in_index_count,
-        const VkPipelineLayout & in_pipeline_layout,
-        const VkPipeline & in_pipeline,
-        TDynOffsetsList && dynamic_offsets,
+        VkDevice in_device,
+        VkCommandBuffer in_command_buffer,
+        VkBuffer in_vertex_buffer,
+        VkBuffer in_index_buffer,
+        std::uint32_t in_index_count,
+        VkPipelineLayout in_pipeline_layout,
+        VkPipeline in_pipeline,
         TDcrpLst && in_descriptors
         ) {
         VkDeviceSize offsets[] = {0};
@@ -953,8 +952,7 @@ namespace wvk::render {
                                 0,
                                 static_cast<std::uint32_t>(std::forward<TDcrpLst>(in_descriptors).size()),
                                 std::forward<TDcrpLst>(in_descriptors).data(),
-                                dynamic_offsets.size(),
-                                dynamic_offsets.data());
+                                0, nullptr);
 
         vkCmdDrawIndexed(in_command_buffer,
                          in_index_count,

@@ -8,7 +8,8 @@
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
-#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
+// #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
+#include "WVulkan/RAII/Pipelines/_new_Postprocess.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
@@ -392,7 +393,7 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsPostprocessRAII<FramesInFlight> & attachments,
-        wvk::raii::pipelines::Postprocess & pipelines,
+        wvk::raii::pipelines::_new_Postprocess<FramesInFlight> & pipelines,
         WVkAttachmentsLightingRAII<FramesInFlight> const & lighting_attachments,
         WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcss_global_descriptors,
@@ -409,22 +410,14 @@ namespace wvk::render::rec_cmd_bffr {
         std::array<VkImageView, 2> pp_views = {input_view, dst_view};
         std::array<VkImage, 2> pp_images = {input_img, dst_img};
 
-        // TODO Descriptors are being recreated each frame.
-        //  is it required? can I preserve the descriptors between frames?
-        pipelines.ResetDescriptorPools(frame_index);
-
         // Render each postprocess shader
         std::uint32_t idx=0;
-        for(auto pbindingid : pipelines.BindingOrderIterator()) {
+        for(auto pbindingid : pipelines.BindingsOrder()) {
 
             auto ppcess_binding = pipelines.GetBinding(pbindingid);
 
-            WVkRenderPipeline ppcess_pipeline =
-                pipelines.Pipeline(ppcess_binding.pipeline_id);
-            WVkDescriptorSetLayoutInfo ppcess_dsetlay =
-                pipelines.DescriptorSetLayout(ppcess_binding.pipeline_id);
-            VkDescriptorPool ppcess_dpool =
-                pipelines.DescriptorPool(ppcess_binding.pipeline_id, frame_index);
+            std::tuple<VkPipeline, VkPipelineLayout> pipeline__layout =
+                pipelines.GetPipeline(ppcess_binding.pipeline_id);
 
             // render into layout
             wvk::render::RndCmd_TransitionRenderImageLayout(
@@ -447,7 +440,7 @@ namespace wvk::render::rec_cmd_bffr {
             vkCmdBindPipeline(
                 command_buffer,
                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                ppcess_pipeline.pipeline
+                std::get<0>(pipeline__layout)
                 );
 
             wvk::render::RndCmd_SetViewportAndScissor(
@@ -465,30 +458,17 @@ namespace wvk::render::rec_cmd_bffr {
                 }
                 );
 
-            // TODO is it required to be recreated each frame?
-            VkDescriptorSet pp_descriptor = wvk::render::CreateDescriptorSet(
-                device,
-                ppcess_dpool,
-                ppcess_dsetlay.descset_layout,
-                frame_index,
-                ppcess_binding.ubos,
-                ppcess_binding.textures
-                );
-
-            // const WVkMesh & render_plane = render_plane_.RenderPlane();
-            std::vector<std::uint32_t> dynamic_offsets{};
-            dynamic_offsets.resize(ppcess_binding.ubos.size(), 0);
-
             wvk::render::RndCmd_PostprocessDrawCommands(
-                device, command_buffer,
-                render_plane.vertex_buffer, render_plane.index_buffer,
+                device,
+                command_buffer,
+                render_plane.vertex_buffer,
+                render_plane.index_buffer,
                 render_plane.index_count,
-                ppcess_pipeline.pipeline_layout,
-                ppcess_pipeline.pipeline,
-                dynamic_offsets,
-                std::array<VkDescriptorSet,3>{
+                std::get<1>(pipeline__layout),
+                std::get<0>(pipeline__layout),
+                std::array<VkDescriptorSet,3> {
                     global_descriptors.DescriptorSet(frame_index),
-                    pp_descriptor,
+                    ppcess_binding.descriptor_set[frame_index],
                     ppcss_global_descriptors.DescriptorSet(frame_index)
                 }
                 );

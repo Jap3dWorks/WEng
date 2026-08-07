@@ -80,6 +80,10 @@ namespace wct::render {
         static constexpr std::uint8_t ORM_TEXTURE{4};
     };
 
+    struct PostprocessBindings {
+        static constexpr std::uint8_t SET{1};  // ppcess param set
+    };
+
     inline constexpr std::uint8_t MAX_PIPELINE_SHADERS=8;
 
     struct RenderSize {
@@ -185,6 +189,12 @@ namespace wct::render {
             param_type == ERPipeParamType::UBO_Entity_Static    ||
             param_type == ERPipeParamType::UBO_Component_Static ||
             param_type == ERPipeParamType::UBO_Component_Dynamic;
+    }
+
+    inline constexpr bool IsUBOParamStaticType(ERPipeParamType param_type) {
+        return param_type == ERPipeParamType::UBO_Static ||
+            param_type == ERPipeParamType::UBO_Entity_Static ||
+            param_type == ERPipeParamType::UBO_Component_Static;
     }
 
     struct RPipeParamDescriptor {

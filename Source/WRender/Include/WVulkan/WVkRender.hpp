@@ -4,7 +4,6 @@
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WCore/WCore.hpp"
 
-#include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/WVkConfig.hpp"
 
 #include "WCore/WCoreMacros.hpp"
@@ -22,6 +21,9 @@
 #include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
+
+#include "WVulkan/RAII/Pipelines/_new_Postprocess.hpp"
+
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
@@ -222,7 +224,10 @@ private:
     wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     wvk::raii::ShadowMapPipeline<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipelines_{};
     WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
-    wvk::raii::pipelines::Postprocess ppcss_pipelines_{};
+
+    wvk::raii::pipelines::_new_Postprocess<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_pipelines_{};
+    // wvk::raii::pipelines::Postprocess ppcess_pipelines_{};
+
     WVkTonemappingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_pipeline_{};
 
     WVkRenderSyncRAII<WVK_MAX_FRAMES_IN_FLIGHT> render_sync_{};

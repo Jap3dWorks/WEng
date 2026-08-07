@@ -3,7 +3,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
-#include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
+#include "WVulkan/RAII/Pipelines/ParamBindings.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 
 #include <cstdint>
@@ -110,9 +110,9 @@ namespace wvk::raii::pipelines::gbuffer {
 
             assert(param_type != wct::render::ERPipeParamType::None);
 
-            wvk::raii::pipelines::desc_bindings
-                ::template UpdateParameter <
-                    wvk::raii::pipelines::desc_bindings::EUpdateType::DYNAMIC
+            wvk::raii::pipelines::param_bindings
+                ::template UpdateParameter_DynamicUbo <
+                    wvk::raii::pipelines::param_bindings::EUpdateType::DYNAMIC
                     >
                 (frame_index,
                  binding_set_id,
@@ -135,9 +135,9 @@ namespace wvk::raii::pipelines::gbuffer {
 
             assert(param_type != wct::render::ERPipeParamType::None);
 
-            wvk::raii::pipelines::desc_bindings
-                ::template UpdateParameter <
-                    wvk::raii::pipelines::desc_bindings::EUpdateType::STATIC
+            wvk::raii::pipelines::param_bindings
+                ::template UpdateParameter_DynamicUbo <
+                    wvk::raii::pipelines::param_bindings::EUpdateType::STATIC
                     >
                 (0,
                  // param_layout,
@@ -162,7 +162,7 @@ namespace wvk::raii::pipelines::gbuffer {
             wvk::raii::AssetRenderData & asset_data
             ) {
 
-            auto ubo_params = wvk::raii::pipelines::desc_bindings
+            auto ubo_params = wvk::raii::pipelines::param_bindings
                 ::CollectUBOBindings_Dynamic<FramesInFlight>(
                     binding_set_id,
                     descriptor_bindings_id,
@@ -173,13 +173,13 @@ namespace wvk::raii::pipelines::gbuffer {
 
             if (!identifier_descriptors.contains(descriptor_bindings_id)) {
                 
-                auto texture_params = wvk::raii::pipelines::desc_bindings
+                auto texture_params = wvk::raii::pipelines::param_bindings
                     ::CollectTextureBindings(
                         texture_param_list,
                         asset_data
                         );
 
-                auto descriptors =wvk::raii::pipelines::desc_bindings
+                auto descriptors =wvk::raii::pipelines::param_bindings
                     ::CreateParamsDescriptorSet(
                         descriptor_pool.Creator().device,
                         param_layout,

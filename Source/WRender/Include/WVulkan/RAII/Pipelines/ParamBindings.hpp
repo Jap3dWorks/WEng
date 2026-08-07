@@ -16,13 +16,24 @@
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
 
-namespace wvk::raii::pipelines::desc_bindings {
+namespace wvk::raii::pipelines::param_bindings {
 
-    inline void const * GetUboPtrData(wct::render::RPipeParamUbo const & ubo_param) {
+    inline void const * GetUboParamPtr(wct::render::RPipeParamUbo const & ubo_param) {
         return std::visit(
             wcr::TVisitor(
                 [&ubo_param](auto const & ubodata) -> void const * {
                     return ubodata.data();
+                }
+                ),
+            ubo_param.data
+            );
+    }
+
+    inline std::size_t GetUboParamSize(wct::render::RPipeParamUbo const & ubo_param) {
+        return std::visit(
+            wcr::TVisitor(
+                [&ubo_param](auto const & ubodata) -> std::size_t {
+                    return ubodata.size();
                 }
                 ),
             ubo_param.data
@@ -150,7 +161,7 @@ namespace wvk::raii::pipelines::desc_bindings {
                 if (!dynamic_ubo_man.template Contains<frame_flag>(
                         desc.size, wid) ) {
                     void const * ptr = binding_param.contains(desc.binding)
-                        ? GetUboPtrData(*binding_param[desc.binding])
+                        ? GetUboParamPtr(*binding_param[desc.binding])
                         : nullptr;
 
                     dynamic_ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
@@ -170,7 +181,7 @@ namespace wvk::raii::pipelines::desc_bindings {
 
                     result.buffers[f]=dynamic_ubo_man.template GetUBO<frame_flag>(
                                 desc.size, ubo_f_index
-                        ).buffer;
+                        );
                     result.range=desc.size;
                 }
                 return result;
@@ -273,11 +284,22 @@ namespace wvk::raii::pipelines::desc_bindings {
     CollectUBOBindings (
         VkDevice device,
         VkPhysicalDevice physical_device,
-        // wcr::wid::WEngId binding_set_id,
-        // wcr::wid::WEngId parameter_bindings_id,  // pipeline params
         wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
         wct::render::RPipeParamList_Ubo const & ubo_params
         ){
+
+        std::vector<wct::render::RPipeParamDescriptor> ubo_descriptors{};
+        ubo_descriptors.reserve(param_descriptors.size());
+
+        for (auto& desc : param_descriptors) {
+            if(wct::render::IsUBOParamType(desc.type)) {
+                ubo_descriptors.push_back(desc);
+            }
+        }
+        
+        if (ubo_descriptors.empty()) {
+            return {};
+        }
 
         auto binding_param =
             GetBindingParamsMap<wct::render::RPipeParamUbo>(
@@ -285,17 +307,18 @@ namespace wvk::raii::pipelines::desc_bindings {
                 );
 
         std::uint32_t buffer_size = std::accumulate(
-            param_descriptors.begin(),
-            param_descriptors.end(),
+            ubo_descriptors.begin(),
+            ubo_descriptors.end(),
             0,
-            [](auto & desc) ->std::uint32_t {
-                return desc.type != wct::render::ERPipeParamType::None
-                    ? desc.size
-                    : 0; });
+            [](std::uint32_t a, auto & desc) ->std::uint32_t {
+                if (wct::render::ERPipeParamType::None == desc.type) { return a; }
+                return a + desc.size;
+            }
+            );
 
         std::array<WVkBuffer, FramesInFlight> ubo_buffers;
-        for(std::uint32_t i=0; i<FramesInFlight; ++i) {
-            ubo_buffers = wvk::buffer::CreateUBOBuffer(
+        for(std::uint32_t f=0; f<FramesInFlight; ++f) {
+            ubo_buffers[f] = wvk::buffer::CreateUBOBuffer(
             buffer_size,
             device,
             physical_device
@@ -303,39 +326,41 @@ namespace wvk::raii::pipelines::desc_bindings {
         }
 
         std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> result;
-        result.reserve(param_descriptors.size());
+        result.reserve(ubo_descriptors.size());
 
         std::uint32_t offset=0;
-        for(auto & param_desc : param_descriptors) {
+        for(auto & ubo_param_desc : ubo_descriptors) {
+            
             result.push_back(
                 {
-                    .binding=param_desc.binding,
+                    .binding=ubo_param_desc.binding,
                     .buffers=ubo_buffers,
                     .offset=offset,
-                    .range=param_desc.size,
+                    .range=ubo_param_desc.size,
                     .ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
                 }
                 );
 
-            offset += param_desc.size;
-
-            if (binding_param.contains(param_desc.binding)) {
+            if (binding_param.contains(ubo_param_desc.binding)) {
                 for(std::uint32_t f=0; f<FramesInFlight; ++f) {
                     wvk::buffer::UpdateBuffer(
                         wvk::buffer::MapBuffer(
                             ubo_buffers[f],
                             device
                             ),
-                        GetUboPtrData(*binding_param[param_desc.binding]),
-                        param_desc.size,
+                        GetUboParamPtr(*binding_param[ubo_param_desc.binding]),
+                        ubo_param_desc.size,
                         offset
                         );
 
-                    wvk::buffer::UnmapBuffer(ubo_buffers[f]);
+                    wvk::buffer::UnmapBuffer(ubo_buffers[f], device);
                 }
             }
+            
+            offset += ubo_param_desc.size;
 
         }
+        
         return result;
     }
 
@@ -377,7 +402,7 @@ namespace wvk::raii::pipelines::desc_bindings {
             for(auto & p : ubo_bindings) {
                 
                 VkDescriptorBufferInfo buffer_info {
-                    .buffer=p.buffers[f],
+                    .buffer=p.buffers[f].buffer,
                     .offset = (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == p.ubo_type)
                         ? 0
                         : p.offset,
@@ -473,11 +498,11 @@ namespace wvk::raii::pipelines::desc_bindings {
     namespace {
     
         template<std::uint8_t Frames>
-        constexpr auto STATIC_FLAG = wvk::raii::ubo_manager
+        constexpr auto DYN_UBO_MAN_STATIC_FLAG = wvk::raii::ubo_manager
             ::DynamicUBOManager<Frames>::STATIC_FRAME_FLAG;
 
         template<std::uint8_t Frames>
-        constexpr auto DYNAMIC_FLAG = wvk::raii::ubo_manager
+        constexpr auto DYN_UBO_MAN_DYNAMIC_FLAG = wvk::raii::ubo_manager
             ::DynamicUBOManager<Frames>::DYNAMIC_FRAME_FLAG;
     }
 
@@ -487,7 +512,7 @@ namespace wvk::raii::pipelines::desc_bindings {
     };
 
     template<EUpdateType UpdateType, std::uint8_t FramesInFlight>
-    inline void UpdateParameter(
+    inline void UpdateParameter_DynamicUbo(
         std::uint8_t frame_index,
         wcr::wid::WEngId binding_set_id,
         wcr::wid::WEngId descriptor_bindings_id,
@@ -504,20 +529,20 @@ namespace wvk::raii::pipelines::desc_bindings {
             (wcr::wid::WEngId ubo_param_id ) {
                 if constexpr (UpdateType == EUpdateType::STATIC) {
                     for(std::uint8_t f=0; f<FramesInFlight; ++f) {
-                        ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+                        ubo_man.template Update<DYN_UBO_MAN_DYNAMIC_FLAG<FramesInFlight>>(
                             block_size ,
                             f ,
                             std::vector{ubo_param_id},
-                            GetUboPtrData(ubo_data)
+                            GetUboParamPtr(ubo_data)
                             );
                     
                     } 
                 } else {
-                    ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+                    ubo_man.template Update<DYN_UBO_MAN_DYNAMIC_FLAG<FramesInFlight>>(
                         block_size ,
                         frame_index ,
                         std::vector{ubo_param_id},
-                        GetUboPtrData(ubo_data)
+                        GetUboParamPtr(ubo_data)
                         );
                 }
             } ;
@@ -525,11 +550,11 @@ namespace wvk::raii::pipelines::desc_bindings {
 
         switch (param_descriptor.type) {
         case wct::render::ERPipeParamType::UBO_Static:
-            ubo_man.template Update<STATIC_FLAG<FramesInFlight>>(
+            ubo_man.template Update<DYN_UBO_MAN_STATIC_FLAG<FramesInFlight>>(
                 block_size,
                 0,
                 std::vector{ToAssetParamBindingId(descriptor_bindings_id, param_descriptor.binding)},
-                GetUboPtrData(ubo_data)
+                GetUboParamPtr(ubo_data)
                 );
             break;
 
@@ -538,11 +563,11 @@ namespace wvk::raii::pipelines::desc_bindings {
             break;
 
         case wct::render::ERPipeParamType::UBO_Entity_Static:
-            ubo_man.template Update<STATIC_FLAG<FramesInFlight>>(
+            ubo_man.template Update<DYN_UBO_MAN_STATIC_FLAG<FramesInFlight>>(
                 block_size ,
                 0,
                 std::vector{ToEntityParamId(binding_set_id)},
-                GetUboPtrData(ubo_data)
+                GetUboParamPtr(ubo_data)
                 );
             break;
 
@@ -551,11 +576,11 @@ namespace wvk::raii::pipelines::desc_bindings {
             break;
 
         case wct::render::ERPipeParamType::UBO_Component_Static:
-            ubo_man.template Update<DYNAMIC_FLAG<FramesInFlight>>(
+            ubo_man.template Update<DYN_UBO_MAN_DYNAMIC_FLAG<FramesInFlight>>(
                 block_size ,
                 0,
                 std::vector{binding_set_id},
-                GetUboPtrData(ubo_data)
+                GetUboParamPtr(ubo_data)
                 );
             break;
         case wct::render::ERPipeParamType::UBO_Component_Dynamic:
@@ -566,7 +591,53 @@ namespace wvk::raii::pipelines::desc_bindings {
             break;
                     
         }
-
     }
+
+    template<EUpdateType UpdateType, std::uint8_t FramesInFlight>
+    inline void UpdateParameter_Postprocess(
+        VkDevice device,
+        std::uint8_t frame_index,
+        wct::render::RPipeParamUbo const & ubo_param_data,
+        std::array<WVkBuffer, FramesInFlight> const & ubo_buffer,
+        std::uint32_t param_offset
+        ) {
+
+        auto update_buffer =
+            [device]
+            (WVkBuffer buffer,
+             wct::render::RPipeParamUbo const & ubo_data,
+             std::uint32_t offset
+                ) {
+                wvk::buffer::UpdateBuffer(
+                    wvk::buffer::MapBuffer(
+                        buffer, device
+                        ),
+                    GetUboParamPtr(ubo_data),
+                    GetUboParamSize(ubo_data),
+                    offset
+                    );
+
+                wvk::buffer::UnmapBuffer(buffer, device);
+            };
+
+        if constexpr(EUpdateType::STATIC == UpdateType) {
+            // update all frames
+            for (std::uint8_t f=0; f<FramesInFlight; ++f) {
+                update_buffer(
+                    ubo_buffer[f],
+                    ubo_param_data,
+                    param_offset
+                    );
+            }
+        }
+        else {
+            update_buffer(
+                ubo_buffer[frame_index],
+                ubo_param_data,
+                param_offset
+                );
+        }
+    }
+    
 
 }

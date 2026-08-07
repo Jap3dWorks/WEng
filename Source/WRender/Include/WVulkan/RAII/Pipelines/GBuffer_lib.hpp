@@ -5,7 +5,7 @@
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
-#include "WVulkan/RAII/Pipelines/DescriptorBindings.hpp"
+#include "WVulkan/RAII/Pipelines/ParamBindings.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
 

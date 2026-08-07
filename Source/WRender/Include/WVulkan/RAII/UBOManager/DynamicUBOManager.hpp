@@ -89,7 +89,7 @@ namespace wvk::raii::ubo_manager {
         }
 
         template<std::uint8_t FrameFlag>
-        std::size_t GetOffset(BlockSizeIntT block_size, wcr::wid::WEngId id) const {
+        std::uint32_t GetOffset(BlockSizeIntT block_size, wcr::wid::WEngId id) const {
             return GetTEFnContainer<FrameFlag>().at(block_size).get_offset(*this, id);
         }
 
@@ -218,7 +218,7 @@ namespace wvk::raii::ubo_manager {
                 return GetBlockSizeUBOsConst(self) && GetBlockSizeUBOsConst(self)->Contains(id);
             }
 
-            static inline std::size_t GetOffset(
+            static inline std::uint32_t GetOffset(
                 DynamicUBOManager const & self,
                 wcr::wid::WEngId id) {
                 return GetBlockSizeUBOsConst(self)->GetOffset(id);
