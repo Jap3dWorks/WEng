@@ -9,7 +9,7 @@
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
 // #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
-#include "WVulkan/RAII/Pipelines/_new_Postprocess.hpp"
+#include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
@@ -29,7 +29,7 @@ namespace wvk::render::rec_cmd_bffr {
 
     struct ShadowMapBindingInfo {
         WVkMesh mesh_info;
-        WVkDescUBOInfo model_ubo;
+        // WVkDescUBOInfo model_ubo;
     };
 
     template<std::uint8_t FramesInFlight>
@@ -226,12 +226,13 @@ namespace wvk::render::rec_cmd_bffr {
         for(auto binding  : pipeline_bindings) {
             if (!binding) continue;
 
-            VkDescriptorSet descriptorset =
-                wvk::render::rcmd::ShadowMap::CreateDescriptorSet(
-                    device,
-                    pipeline.MODEL_UBO_BINDING,
-                    binding->model_ubo.desc_buffer
-                    );
+            VkDescriptorSet descriptorset;
+            //     =
+            //     wvk::render::rcmd::ShadowMap::CreateDescriptorSet(
+            //         device,
+            //         pipeline.MODEL_UBO_BINDING,
+            //         binding->model_ubo.desc_buffer
+            //         );
 
             VkBuffer vertex_buffers[] = {binding->mesh_info.vertex_buffer};
             VkDeviceSize offsets[] = {0};
@@ -393,7 +394,7 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
         WVkAttachmentsPostprocessRAII<FramesInFlight> & attachments,
-        wvk::raii::pipelines::_new_Postprocess<FramesInFlight> & pipelines,
+        wvk::raii::pipelines::Postprocess<FramesInFlight> & pipelines,
         WVkAttachmentsLightingRAII<FramesInFlight> const & lighting_attachments,
         WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcss_global_descriptors,

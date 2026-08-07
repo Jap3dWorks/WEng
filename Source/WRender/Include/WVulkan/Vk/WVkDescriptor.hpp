@@ -8,22 +8,22 @@
 
 namespace wvk::descriptor {
 
-    [[deprecated]] void Create(
-        WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-        const VkDevice & device
-        );
+    // [[deprecated]] void Create(
+    //     WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
+    //     const VkDevice & device
+    //     );
 
     [[deprecated]] void Create(
         VkDescriptorPool & out_descriptor_pool_info,
         const VkDevice & device
         );
 
-    [[deprecated]] void Create(
-        VkDescriptorSet& out_descriptor_set_info,
-        const VkDevice & device,
-        const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
-        const VkDescriptorPool & descriptor_pool_info
-        );
+    // [[deprecated]] void Create(
+    //     VkDescriptorSet& out_descriptor_set_info,
+    //     const VkDevice & device,
+    //     const WVkDescriptorSetLayoutInfo& descriptor_set_layout_info,
+    //     const VkDescriptorPool & descriptor_pool_info
+    //     );
 
     WNODISCARD VkDescriptorSetLayout CreateDescriptorSetLayout(
         std::span<VkDescriptorSetLayoutBinding> layout_bindings,
@@ -68,10 +68,10 @@ namespace wvk::descriptor {
         VkDescriptorPool descriptor_pool_info
         );
 
-    [[deprecated]] void Destroy(
-        WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-        const VkDevice & device
-        );
+    // [[deprecated]] void Destroy(
+    //     WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
+    //     const VkDevice & device
+    //     );
 
     void Destroy(
         VkDescriptorSetLayout in_descriptor_set_layout,
@@ -157,14 +157,14 @@ namespace wvk::descriptor {
         return result;
     }
 
-    inline void UpdateDescriptorSetLayout(
-        WVkDescriptorSetLayoutInfo & out_dsl,
-        const wct::render::RPipeParamDescriptorsLayout & in_param_list
-        ) {
+    // inline void UpdateDescriptorSetLayout(
+    //     WVkDescriptorSetLayoutInfo & out_dsl,
+    //     const wct::render::RPipeParamDescriptorsLayout & in_param_list
+    //     ) {
 
-        out_dsl.bindings = ToDescriptorSetLayoutBinding(in_param_list);
+    //     out_dsl.bindings = ToDescriptorSetLayoutBinding(in_param_list);
 
-    }
+    // }
 
     constexpr void UpdateWriteDescriptorSet_Texture(
         VkWriteDescriptorSet & out_write_descriptor_set,

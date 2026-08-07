@@ -58,68 +58,6 @@ namespace wvk::render {
 
     }
 
-    template<std::uint8_t FramesInFlight>
-    inline VkDescriptorSet CreateDescriptorSet(
-        const VkDevice & in_device,
-        const VkDescriptorPool & in_desc_pool,
-        const VkDescriptorSetLayout & in_desc_lay,
-        const std::uint32_t & in_frame_index,
-        std::vector<WVkDescSetUBOBinding<FramesInFlight>> const & ubo_binding,
-        std::vector<WVkDescSetTextureBinding> const & in_textures_binding
-        ) {
-        VkDescriptorSet descriptor_set;
-        VkDescriptorSetAllocateInfo alloc_info{};
-        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        alloc_info.descriptorPool = in_desc_pool;
-        alloc_info.descriptorSetCount = 1;
-        alloc_info.pSetLayouts = &in_desc_lay;
-
-        if (vkAllocateDescriptorSets(
-                in_device,
-                &alloc_info,
-                &descriptor_set
-                ) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to allocate descriptor sets!");
-        }    
-
-        std::vector<VkWriteDescriptorSet> write_ds{};
-        write_ds.reserve(ubo_binding.size() + in_textures_binding.size());
-
-        for(auto & ubo_desc : ubo_binding) {
-            VkWriteDescriptorSet ubo_write = wvk::types::VkWriteDescriptorSet();
-            ubo_write.dstBinding = ubo_desc.binding;
-            ubo_write.dstSet = descriptor_set;
-            ubo_write.dstArrayElement = 0;
-            ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-            ubo_write.descriptorCount = 1;
-            ubo_write.pBufferInfo = &(ubo_desc.ubo_desc[in_frame_index].desc_buffer);
-            
-            write_ds.push_back(std::move(ubo_write));
-        }
-
-        for (auto & texbnd : in_textures_binding) {
-            write_ds.push_back({});
-            
-            wvk::descriptor::UpdateWriteDescriptorSet_Texture(
-                write_ds.back(),
-                texbnd.binding,
-                texbnd.image_info,
-                descriptor_set
-                );
-        }
-
-        vkUpdateDescriptorSets(
-            in_device,
-            static_cast<std::uint32_t>(write_ds.size()),
-            write_ds.data(),
-            0,
-            nullptr
-            );
-
-        return descriptor_set;
-    }
-
     inline VkDescriptorSet CreateLightingRenderDescriptor(
         const VkDevice & vk_device,
         const VkDescriptorPool & in_desc_pool,

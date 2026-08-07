@@ -137,7 +137,7 @@ namespace wvk::raii::pipelines::param_bindings {
     constexpr auto ubo_frame_flag_v=UBOManFrameFlag<FramesInFlight, UBOFrames>();
 
     template<std::uint8_t FramesInFlight>
-    WNODISCARD inline std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>>
+    WNODISCARD inline std::vector<WVkDescSetUBOBinding<FramesInFlight>>
     CollectUBOBindings_Dynamic(
         wcr::wid::WEngId binding_set_id,
         wcr::wid::WEngId parameter_bindings_id,
@@ -154,7 +154,7 @@ namespace wvk::raii::pipelines::param_bindings {
             [&]
             <std::uint8_t UBOFrames>
             (wct::render::RPipeParamDescriptor const & desc, wcr::wid::WEngId wid)
-            -> _new_WVkDescSetUBOBinding<FramesInFlight>
+            -> WVkDescSetUBOBinding<FramesInFlight>
             {
                 constexpr auto frame_flag=ubo_frame_flag_v<FramesInFlight, UBOFrames>;
 
@@ -167,7 +167,7 @@ namespace wvk::raii::pipelines::param_bindings {
                     dynamic_ubo_man.template Add<frame_flag>(desc.size, {wid}, ptr);
                 }
                 
-                _new_WVkDescSetUBOBinding<FramesInFlight> result {
+                WVkDescSetUBOBinding<FramesInFlight> result {
                     .binding=desc.binding,
                     .offset=dynamic_ubo_man.template GetOffset<frame_flag>(
                         desc.size, wid
@@ -188,7 +188,7 @@ namespace wvk::raii::pipelines::param_bindings {
                         
             };
 
-        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> result{};
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> result{};
         result.reserve(ubo_params.size());
 
         for (auto & descriptor : param_descriptors) {
@@ -280,7 +280,7 @@ namespace wvk::raii::pipelines::param_bindings {
 
 
     template<std::uint8_t FramesInFlight>
-    WNODISCARD std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>>
+    WNODISCARD std::vector<WVkDescSetUBOBinding<FramesInFlight>>
     CollectUBOBindings (
         VkDevice device,
         VkPhysicalDevice physical_device,
@@ -325,7 +325,7 @@ namespace wvk::raii::pipelines::param_bindings {
             );
         }
 
-        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> result;
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> result;
         result.reserve(ubo_descriptors.size());
 
         std::uint32_t offset=0;
@@ -370,7 +370,7 @@ namespace wvk::raii::pipelines::param_bindings {
         VkDescriptorSetLayout desc_layout,
         VkDescriptorPool desc_pool,
         std::vector<WVkDescSetTextureBinding> const & texture_bindings,
-        std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> const & ubo_bindings
+        std::vector<WVkDescSetUBOBinding<FramesInFlight>> const & ubo_bindings
         ) {
             
         std::array<VkDescriptorSet, FramesInFlight> descriptor_sets;

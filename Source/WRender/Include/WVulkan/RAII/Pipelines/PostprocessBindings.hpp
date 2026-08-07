@@ -145,7 +145,7 @@ namespace wvk::raii::pipelines::postprocess {
 
         std::unordered_map<std::uint8_t, std::uint32_t>
         PipelineOffsets(
-            std::vector<_new_WVkDescSetUBOBinding<FramesInFlight>> & ubo_bindings
+            std::vector<WVkDescSetUBOBinding<FramesInFlight>> & ubo_bindings
             ) {
             std::unordered_map<std::uint8_t, std::uint32_t> offset_map;
             for(auto & bind : ubo_bindings) {

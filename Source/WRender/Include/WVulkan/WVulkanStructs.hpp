@@ -54,14 +54,6 @@ struct WVkShaderStageInfo
     std::string entry_point{"main"};
 };
 
-struct WVkDescriptorSetLayoutInfo
-{
-    // TODO it is not required to store the descriptor bindings.
-    //  Remove this struct.
-    std::vector<VkDescriptorSetLayoutBinding> bindings{};
-    VkDescriptorSetLayout descset_layout{VK_NULL_HANDLE};
-};
-
 struct WVkMesh
 {
     VkBuffer vertex_buffer {VK_NULL_HANDLE};
@@ -78,26 +70,8 @@ struct WVkBuffer
     VkDeviceSize range{16};
 };
 
-struct WVkRenderPipeline
-{
-    wct::render::ERPipeType type{wct::render::ERPipeType::GBuffer};
-
-    VkPipeline pipeline{VK_NULL_HANDLE};
-    VkPipelineLayout pipeline_layout{VK_NULL_HANDLE};    
-};
-
 // Pipeline Bindings
 // -----------------
-
-// TODO is this struct required?
-struct WVkDescSetUBOWrite {
-    std::uint8_t binding{0};
-    
-    const void * data{nullptr};
-    std::size_t size{0};
-    /** Offset applied to mapped pointer when a vulkan buffer is mapped. */
-    std::size_t offset{0};      
-};
 
 struct WVkDescSetTextureBinding {
     std::uint8_t binding{0};
@@ -109,38 +83,13 @@ struct WVkDescSetTextureBinding {
     };
 };
 
-struct WVkDescUBOInfo {
-    /**
-     * index in AssetRenderData.
-     */
-    std::size_t index{0};
-
-    VkDescriptorBufferInfo desc_buffer; // <- avoid search buffer during rendering
-};
-
 template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
 struct WVkDescSetUBOBinding {
-    std::uint8_t binding{0};
-
-    std::array<WVkDescUBOInfo, FramesInFlight> ubo_desc{};
-};
-
-template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
-struct _new_WVkDescSetUBOBinding {
     std::uint8_t binding{0};
 
     std::uint32_t offset{0};
     std::uint32_t range{0};
     std::array<WVkBuffer, FramesInFlight> buffers;
     VkDescriptorType ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-};
-
-template<std::uint8_t Frames>
-struct WVkPipelineBinding {
-    wcr::wid::WAssetId pipeline_id{0};
-    wcr::wid::WTypeAssetIndexId mesh_asset_id{0};
-
-    std::vector<WVkDescSetUBOBinding<Frames>> ubos{};
-    std::vector<WVkDescSetTextureBinding> textures{};
 };
 

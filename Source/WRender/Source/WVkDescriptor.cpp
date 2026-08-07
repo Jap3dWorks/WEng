@@ -1,32 +1,6 @@
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 
-void wvk::descriptor::Create(
-    WVkDescriptorSetLayoutInfo& out_descriptor_set_layout_info,
-    const VkDevice & in_device
-    ) {
-    VkDescriptorSetLayoutCreateInfo create_info{};
-
-    create_info.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-
-    create_info.bindingCount = static_cast<uint32_t>(
-        out_descriptor_set_layout_info.bindings.size()
-        );
-
-    create_info.pBindings =
-        out_descriptor_set_layout_info.bindings.data();
-
-    if (vkCreateDescriptorSetLayout(
-            in_device,
-            &create_info,
-            nullptr,
-            &out_descriptor_set_layout_info.descset_layout) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create descriptor set layout!");
-    }
-}
-
 VkDescriptorSetLayout wvk::descriptor::CreateDescriptorSetLayout(
     std::span<VkDescriptorSetLayoutBinding> layout_bindings,
     VkDevice & in_device
@@ -83,30 +57,6 @@ void wvk::descriptor::Create(
     }
 }
 
-// DEPRECATED
-void wvk::descriptor::Create(
-    VkDescriptorSet & out_descriptor_set,
-    const VkDevice & in_device,
-    const WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const VkDescriptorPool & descriptor_pool
-    )
-{
-    VkDescriptorSetAllocateInfo alloc_info{};
-    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    alloc_info.descriptorPool = descriptor_pool;
-    alloc_info.descriptorSetCount = 1;
-    alloc_info.pSetLayouts = &descriptor_set_layout_info.descset_layout;
-
-    if (vkAllocateDescriptorSets(
-            in_device,
-            &alloc_info,
-            &out_descriptor_set
-            ) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-}
-
 VkDescriptorSet wvk::descriptor::CreateDescriptor(
     VkDevice in_device,
     VkDescriptorSetLayout in_descriptor_set_layout,
@@ -130,20 +80,6 @@ VkDescriptorSet wvk::descriptor::CreateDescriptor(
     }
 
     return result;
-}
-
-
-void wvk::descriptor::Destroy(
-    WVkDescriptorSetLayoutInfo & descriptor_set_layout_info,
-    const VkDevice & in_device
-    )
-{
-    // destroy descriptor set layout
-    vkDestroyDescriptorSetLayout(
-        in_device,
-        descriptor_set_layout_info.descset_layout,
-        nullptr
-        );
 }
 
 void wvk::descriptor::Destroy(

@@ -7,10 +7,6 @@
 
 namespace wvk::pipeline {
     
-    [[deprecated]] void Destroy(
-        WVkRenderPipeline &pipeline_info,
-        const VkDevice & device);
-
     void Destroy(
         VkPipeline pipeline,
         VkDevice device
