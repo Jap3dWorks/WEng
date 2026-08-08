@@ -275,6 +275,16 @@ void WVkRender::Draw()
         global_descriptors_
         );
 
+    wvk::render::rec_cmd_bffr::ShadowMap(
+        device_.Device(),
+        render_command_buffers_[frame_index_],
+        frame_index_,
+        shadow_map_attachments_,
+        shadow_map_pipeline_,
+        shadow_map_bindings,
+        global_descriptors_
+        );
+
     wvk::render::rec_cmd_bffr::Lighting(
         device_.Device(),
         render_command_buffers_[frame_index_],

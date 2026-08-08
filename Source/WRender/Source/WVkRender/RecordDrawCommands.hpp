@@ -8,14 +8,13 @@
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
-// #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
-#include "WVulkan/RAII/ShadowMapAttachments.hpp"
-#include "WVulkan/RAII/ShadowMapPipeline.hpp"
+#include "WVulkan/RAII/Attachments/ShadowMap.hpp"
+#include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
 
 #include "WVkRender/RenderUtils.hpp"
 #include "WVkRender/RenderCommands.hpp"
@@ -27,10 +26,16 @@
 
 namespace wvk::render::rec_cmd_bffr {
 
-    struct ShadowMapBindingInfo {
-        WVkMesh mesh_info;
-        // WVkDescUBOInfo model_ubo;
-    };
+
+    using ShadowMapBindingInfo =
+        std::unordered_map<
+            wcr::wid::WEngId, // pipeline_id
+            std::unordered_map<
+                std::size_t,      // collection_id
+                std::tuple <
+                    VkDescriptorSet,                                  // descriporSet
+                    std::vector<std::tuple<WVkMesh, std::uint32_t>>   // mesh offset
+                    >>>;
 
     template<std::uint8_t FramesInFlight>
     inline auto GBuffers(
@@ -43,27 +48,39 @@ namespace wvk::render::rec_cmd_bffr {
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {
 
-        std::vector<std::optional<ShadowMapBindingInfo>> shadow_map_bindings{};
-        // shadow_map_bindings.reserve(pipelines.GetBindingsCount());
+        ShadowMapBindingInfo shadow_map_binding_info{};
 
-        // auto collect_shadow_map_binding =
-        //     [frame_index, &pipelines]
-        //     (
-        //         WVkMesh const & mesh,
-        //         WVkPipelineBinding<FramesInFlight> const & binding
-        //         )
-        //     -> std::optional<ShadowMapBindingInfo> {
-        //     for(auto & ubo_dt : binding.ubos) {
-        //         if(ubo_dt.binding == pipelines.MODEL_UBO_BINDING) {
-        //             return ShadowMapBindingInfo{
-        //                 .mesh_info=mesh,
-        //                 .model_ubo=ubo_dt.ubo_desc[frame_index]
-        //             };
-        //         } 
-        //     }
-            
-        //     return std::nullopt;
-        // };
+        auto collect_shadow_map_descriptor =
+            [&shadow_map_binding_info] (
+                wcr::wid::WEngId pipeline_id,
+                std::size_t collection_id,
+                VkDescriptorSet descriptor
+                ) {
+                if (!shadow_map_binding_info.contains(pipeline_id)) {
+                    shadow_map_binding_info[pipeline_id]= {};
+                    if (!shadow_map_binding_info[pipeline_id].contains(collection_id)) {
+                        shadow_map_binding_info[pipeline_id] [collection_id]={};
+                    }
+                }
+                shadow_map_binding_info[pipeline_id]
+                    [collection_id] = std::tuple{
+                    descriptor,
+                    std::vector<std::tuple<WVkMesh, std::uint32_t>>{}};
+            };
+
+        auto collect_shadow_map_binding =
+            [&shadow_map_binding_info] (
+                wcr::wid::WEngId pipeline_id,
+                std::size_t collection_id,
+                WVkMesh const & mesh,
+                std::uint32_t offset
+                ) {
+                std::get<1>(shadow_map_binding_info[pipeline_id][collection_id]).push_back(
+                    std::tuple{mesh, offset}
+                    );
+
+                return std::nullopt;
+            };
 
         wvk::render::RndCmd_TransitionGBufferWriteLayout(
             command_buffer,
@@ -94,7 +111,6 @@ namespace wvk::render::rec_cmd_bffr {
             vkCmdBindPipeline(command_buffer,
                               VK_PIPELINE_BIND_POINT_GRAPHICS,
                               std::get<0>(pipeline__layout));
-                              // render_pipeline.pipeline);
 
             wvk::render::RndCmd_SetViewportAndScissor(
                 command_buffer,
@@ -103,17 +119,18 @@ namespace wvk::render::rec_cmd_bffr {
 
             for (auto coll_id : pipelines.IterCollections()) {
 
+                collect_shadow_map_descriptor(
+                    pipeline_id,
+                    coll_id,
+                    pipelines.GetModelUboDescriptors(coll_id)[frame_index]
+                    );
+
                 for (auto & binding : pipelines.Bindings(coll_id, pipeline_id)) {
 
                     auto& mesh_info =
                         asset_render_data.StaticMeshInfo(
                             binding.renderable_asset_id.AsAssetIndexId()
                             );
-
-                    // shadow_map_bindings.push_back(
-                    //     collect_shadow_map_binding(
-                    //         mesh_info, binding
-                    //         ));
 
                     VkBuffer vertex_buffers[] = {mesh_info.vertex_buffer};
                     VkDeviceSize offsets[] = {0};
@@ -133,21 +150,28 @@ namespace wvk::render::rec_cmd_bffr {
                         VK_INDEX_TYPE_UINT32
                         );
 
-                    auto ubo_binding = pipelines.GetUboBinding(
+                    auto model_ubo_binding = pipelines.GetModelUboBinding(
                         coll_id, pipeline_id, binding.binding_set_id
+                        );
+
+                    collect_shadow_map_binding(
+                        pipeline_id,
+                        coll_id,
+                        mesh_info,
+                        model_ubo_binding.dynamic_offsets[0]
                         );
 
                     std::array descsets =
                         {
                             global_descriptors.DescriptorSet(frame_index),
                             binding.descriptor_set.at(frame_index),
-                            ubo_binding.descriptor_set.at(frame_index)
+                            model_ubo_binding.descriptor_set.at(frame_index)
                         };
 
                     std::vector<std::uint32_t> dynamic_offsets =
                         binding.dynamic_offsets;
 
-                    dynamic_offsets.push_back(ubo_binding.dynamic_offsets[0]);
+                    dynamic_offsets.push_back(model_ubo_binding.dynamic_offsets[0]);
 
                     vkCmdBindDescriptorSets(command_buffer,
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -181,7 +205,7 @@ namespace wvk::render::rec_cmd_bffr {
             attachments.Extra01(frame_index).Image()
             );
 
-        return shadow_map_bindings;
+        return shadow_map_binding_info;
     }
 
     template<std::uint8_t FramesInFlight>
@@ -189,22 +213,22 @@ namespace wvk::render::rec_cmd_bffr {
         VkDevice device,
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
-        wvk::raii::ShadowMapAttachments<FramesInFlight> & attachments,
-        wvk::raii::ShadowMapPipeline<FramesInFlight> & pipeline,
-        std::vector<std::optional<ShadowMapBindingInfo>> const & pipeline_bindings,
+        wvk::raii::attachments::ShadowMap<FramesInFlight> & shadowmap_attachments,
+        wvk::raii::pipelines::ShadowMap<FramesInFlight> & shadowmap_pipeline,
+        ShadowMapBindingInfo const & pipeline_bindings,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {
 
         wvk::render::rcmd::ShadowMap::AttachmentTransitionWriteLayout(
             command_buffer,
-            attachments.ShadowMap(frame_index)
+            shadowmap_attachments.GetAttachment(frame_index).Image()
             );
 
         // beginRendering
         wvk::render::rcmd::ShadowMap::BeginRendering(
             command_buffer,
-            attachments.ShadowMap(frame_index),
-            attachments.Extent()
+            shadowmap_attachments.GetAttachment(frame_index).View(),
+            shadowmap_attachments.GetExtent()
             );
 
         // Bind pipeline
@@ -213,74 +237,73 @@ namespace wvk::render::rec_cmd_bffr {
         vkCmdBindPipeline(
             command_buffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipeline.Pipeline()
+            shadowmap_pipeline.GetPipeline()
             );
 
         wvk::render::rcmd::SetViewportAndScissor(
             command_buffer,
-            attachments.Extent()
+            shadowmap_attachments.GetExtent()
             );
 
-        pipeline.ResetDescriptorPool(frame_index);
+        // shadowmap_pipeline.ResetDescriptorPool(frame_index);
 
-        for(auto binding  : pipeline_bindings) {
-            if (!binding) continue;
+        for(auto & pipeline__collection  : pipeline_bindings) {
+            for (auto & coll__data : pipeline__collection.second) {
 
-            VkDescriptorSet descriptorset;
-            //     =
-            //     wvk::render::rcmd::ShadowMap::CreateDescriptorSet(
-            //         device,
-            //         pipeline.MODEL_UBO_BINDING,
-            //         binding->model_ubo.desc_buffer
-            //         );
+                VkDescriptorSet descriptorset = std::get<0>(coll__data.second);
 
-            VkBuffer vertex_buffers[] = {binding->mesh_info.vertex_buffer};
-            VkDeviceSize offsets[] = {0};
+                for (auto & bind : std::get<1>(coll__data.second)) {
+                
+                    VkBuffer vertex_buffers[] = {std::get<0>(bind).vertex_buffer};
+                    VkDeviceSize offsets[] = {0};
 
-            vkCmdBindVertexBuffers(
-                command_buffer,
-                0,
-                1,
-                vertex_buffers,
-                offsets
-                );
+                    vkCmdBindVertexBuffers(
+                        command_buffer,
+                        0,
+                        1,
+                        vertex_buffers,
+                        offsets
+                        );
 
-            vkCmdBindIndexBuffer(
-                command_buffer,
-                binding->mesh_info.index_buffer,
-                0,
-                VK_INDEX_TYPE_UINT32
-                );
+                    vkCmdBindIndexBuffer(
+                        command_buffer,
+                        std::get<0>(bind).index_buffer,
+                        0,
+                        VK_INDEX_TYPE_UINT32
+                        );
 
-            std::array<VkDescriptorSet, 2> descsets =
-                {
-                    global_descriptors.DescriptorSet(frame_index),  // key light info
-                    descriptorset
-                };
+                    std::array<VkDescriptorSet, 2> descsets =
+                        {
+                            global_descriptors.DescriptorSet(frame_index),  // key light info
+                            descriptorset
+                        };
 
-            vkCmdBindDescriptorSets(command_buffer,
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    pipeline.GetPipelineLayout(),
-                                    0,
-                                    static_cast<std::uint32_t>(descsets.size()),
-                                    descsets.data(),
-                                    0,
-                                    nullptr);
+                    vkCmdBindDescriptorSets(command_buffer,
+                                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                            shadowmap_pipeline.GetPipelineLayout(),
+                                            0,
+                                            static_cast<std::uint32_t>(descsets.size()),
+                                            descsets.data(),
+                                            1,
+                                            &std::get<1>(bind));
 
-            vkCmdDrawIndexed(command_buffer,
-                             binding->mesh_info.index_count,
-                             1,
-                             0,
-                             0,
-                             0);
+                    vkCmdDrawIndexed(command_buffer,
+                                     std::get<0>(bind).index_count,
+                                     1,
+                                     0,
+                                     0,
+                                     0);
+                }
+            }
         }
 
         vkCmdEndRendering(command_buffer);
 
-        wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
-            command_buffer,
-            attachments.Depth(frame_index).Image()
-            );
+        // TODO Get Detpth method
+        // wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
+        //     command_buffer,
+        //     shadowmap_attachments.GetDepth(frame_index).Image()
+        //     );
 
     }
 

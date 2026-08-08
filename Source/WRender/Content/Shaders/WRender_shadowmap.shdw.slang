@@ -9,9 +9,7 @@ struct VSSMOutput {
     float4 pos : SV_Position;
 };
 
-struct FSSMOutput {
-    // float4 value;
-};
+struct FSSMOutput {};
 
 [shader("vertex")]
 VSSMOutput vsMain(VSSMInput input) {

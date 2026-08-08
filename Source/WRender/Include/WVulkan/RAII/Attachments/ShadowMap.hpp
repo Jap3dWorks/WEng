@@ -5,10 +5,10 @@
 
 #include <vulkan/vulkan_core.h>
 
-namespace wvk::raii {
+namespace wvk::raii::attachments {
 
     template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
-    class ShadowMapAttachments {
+    class ShadowMap {
 
     public:
 
@@ -19,26 +19,33 @@ namespace wvk::raii {
 
     public:
 
-        ShadowMapAttachments() = default;
-        ShadowMapAttachments(const ShadowMapAttachments&) = delete;
-        ShadowMapAttachments(ShadowMapAttachments&&) = default;
-        ShadowMapAttachments& operator=(const ShadowMapAttachments&) = delete;
-        ShadowMapAttachments& operator=(ShadowMapAttachments&&) = default;
-        ~ShadowMapAttachments() = default;
+        ShadowMap() = default;
+        ShadowMap(const ShadowMap&) = delete;
+        ShadowMap(ShadowMap&&) = default;
+        ShadowMap& operator=(const ShadowMap&) = delete;
+        ShadowMap& operator=(ShadowMap&&) = default;
+        ~ShadowMap() = default;
 
-        ShadowMapAttachments(
+        ShadowMap(
             VkDevice device,
             VkPhysicalDevice physical_device,
             VkExtent2D extent_2d
-            )  {
-            Initialize(device, physical_device, SHADOW_MAP_FORMAT);
+            )  :
+            extent_(extent_2d) {
+            Initialize(device, physical_device, SHADOW_MAP_FORMAT, extent_2d);
         }
 
     public:
 
         WNODISCARD
-        wvk::raii::Attachment const & ShadowMap(std::uint8_t frame_index) const noexcept {
+        wvk::raii::Attachment const &
+        GetAttachment(std::uint8_t frame_index) const noexcept {
             return attachments_[frame_index];
+        }
+
+        WNODISCARD
+        VkExtent2D GetExtent() const noexcept {
+            return extent_;
         }
 
     private:
@@ -47,15 +54,14 @@ namespace wvk::raii {
             VkDevice device,
             VkPhysicalDevice physical_device,
             VkFormat format,
-            std::uint32_t attachment_size
+            VkExtent2D attachment_size
             ) {
             for(std::uint32_t i=0 ; i<attachments_.size(); i++) {
                 attachments_[i]= {
                     device,
                     physical_device,
                     format,
-                    VkExtent2D{.width=attachment_size,
-                               .height=attachment_size}
+                    VkExtent2D{attachment_size}
                 };
             }
         }
@@ -63,6 +69,8 @@ namespace wvk::raii {
     private:
 
         std::array<wvk::raii::Attachment, FramesInFlight> attachments_{};
+
+        VkExtent2D extent_{};
 
     };
 

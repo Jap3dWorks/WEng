@@ -33,7 +33,7 @@ namespace wvk::raii::pipelines {
 
         static inline constexpr const std::uint8_t PARAM_DESC_SET{1};
         
-        static inline constexpr const wcr::wid::WEngId MODEL_UBO_DESCRIPTOR_BINDING_ID
+        static inline constexpr const wcr::wid::WEngId MODEL_UBO_BINDINGS_DESCRIPTOR_ID
           {wcr::wid::nullid};
         
         static inline constexpr const VkDescriptorSetLayoutBinding MODEL_UBO_LAYOUT_BINDING{
@@ -190,7 +190,7 @@ namespace wvk::raii::pipelines {
             std::size_t collection_id,               // usually the level id
             wcr::wid::WEngId binding_set_id,         // usually the subcomponent id
             wcr::wid::WEngId pipeline_id,            // the asset pipeline id
-            wcr::wid::WEngId descriptor_bindings_id, // usually the asset param id
+            wcr::wid::WEngId bindings_descriptor_id, // usually the asset param id
             wcr::wid::WEngId renderable_asset_id,
             wct::render::RPipeParamDescriptorsLayout param_descriptors,
             wct::render::RPipeParamList_Ubo pipe_ubo_params,
@@ -211,7 +211,7 @@ namespace wvk::raii::pipelines {
             model_collections_[collection_id].CreateBindingSet(
                 binding_set_id,
                 pipeline_id,
-                MODEL_UBO_DESCRIPTOR_BINDING_ID,   // <- all model ubos in the same descriptor
+                MODEL_UBO_BINDINGS_DESCRIPTOR_ID,   // <- all model ubos in the same descriptor
                 renderable_asset_id,
                 {model_desc},
                 {model_ubo},
@@ -220,11 +220,10 @@ namespace wvk::raii::pipelines {
                 asset_data
                 );
 
-
             collections_[collection_id].CreateBindingSet(
                 binding_set_id,
                 pipeline_id,
-                descriptor_bindings_id,
+                bindings_descriptor_id,
                 renderable_asset_id,
                 param_desc,
                 param_ubos,
@@ -333,7 +332,7 @@ namespace wvk::raii::pipelines {
                 return collections_.at(collection_id).pipeline_bindings.at(pipeline_id.GetId());
             }
 
-        auto GetUboBinding(
+        auto GetModelUboBinding(
             std::size_t collection_id,
             wcr::wid::WEngId pipeline_id,
             wcr::wid::WEngId binding_set_id
@@ -341,6 +340,15 @@ namespace wvk::raii::pipelines {
             return model_collections_.at(collection_id)
                 .pipeline_bindings.at(pipeline_id.GetId())
                 .Get(binding_set_id.GetId());
+        }
+
+        auto GetModelUboDescriptors(
+            std::size_t collection_id
+            ) const {
+            return model_collections_
+                .at(collection_id)
+                .identifier_descriptors
+                .at(MODEL_UBO_BINDINGS_DESCRIPTOR_ID);
         }
 
     private:

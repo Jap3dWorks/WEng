@@ -53,7 +53,7 @@ namespace wvk::raii::pipelines::gbuffer {
         void CreateBindingSet(
             wcr::wid::WEngId binding_set_id,               // from component id
             wcr::wid::WEngId pipeline_id,                  // id for the pipeline
-            wcr::wid::WEngId descriptor_bindings_id,       // usually id from pipeline params
+            wcr::wid::WEngId bindings_descriptor_id,       // usually id from pipeline params
             wcr::wid::WEngId renderable_asset_id,
             wct::render::RPipeParamDescriptorsLayout const & param_descriptors,
             wct::render::RPipeParamList_Ubo const & ubo_params,
@@ -64,7 +64,7 @@ namespace wvk::raii::pipelines::gbuffer {
             
             auto dynamic_offsets = EnsureParamDescriptorSet(
                 binding_set_id,
-                descriptor_bindings_id,
+                bindings_descriptor_id,
                 param_descriptors,
                 ubo_params,
                 texture_params,
@@ -72,12 +72,12 @@ namespace wvk::raii::pipelines::gbuffer {
                 asset_data
                 );
 
-            auto param_descriptor_set = identifier_descriptors[descriptor_bindings_id];
+            auto param_descriptor_set = identifier_descriptors[bindings_descriptor_id];
 
             wvk::raii::pipelines::gbuffer::Binding<FramesInFlight> binding {
                 .binding_set_id=binding_set_id,
                 .renderable_asset_id=renderable_asset_id,
-                .descriptor_bindings_id=descriptor_bindings_id,
+                .descriptor_bindings_id=bindings_descriptor_id,
                 .descriptor_set = param_descriptor_set,
                 .dynamic_offsets=std::move(dynamic_offsets)
             };

@@ -13,8 +13,8 @@
 #include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
-#include "WVulkan/RAII/ShadowMapAttachments.hpp"
-#include "WVulkan/RAII/ShadowMapPipeline.hpp"
+#include "WVulkan/RAII/Attachments/ShadowMap.hpp"
+#include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
 #include "WVulkan/RAII/WVkRenderPlaneRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
@@ -205,7 +205,7 @@ private:
     WVkRenderPlaneRAII render_plane_{};
 
     WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
-    wvk::raii::ShadowMapAttachments<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_attachments_{};
+    wvk::raii::attachments::ShadowMap<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_attachments_{};
     WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_attachments_{};
     WVkAttachmentsPostprocessRAII<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
     WVkAttachmentsTonemappingRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
@@ -220,7 +220,7 @@ private:
     WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
     wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
-    wvk::raii::ShadowMapPipeline<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipelines_{};
+    wvk::raii::pipelines::ShadowMap<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipeline_{};
     WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
 
     wvk::raii::pipelines::Postprocess<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_pipelines_{};

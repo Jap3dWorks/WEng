@@ -13,12 +13,11 @@
 #include <string_view>
 #include <vulkan/vulkan_core.h>
 #include <span>
-#include <variant>
 
-namespace wvk::raii {
+namespace wvk::raii::pipelines {
     
     template<std::uint8_t FramesInFlight=WVK_MAX_FRAMES_IN_FLIGHT>
-    class ShadowMapPipeline {
+    class ShadowMap {
 
     public:
 
@@ -54,19 +53,19 @@ namespace wvk::raii {
 
     public:
 
-        ShadowMapPipeline() = default;
-        ShadowMapPipeline(const ShadowMapPipeline&) = delete;
-        ShadowMapPipeline(ShadowMapPipeline&&) = default;
-        ShadowMapPipeline& operator=(const ShadowMapPipeline&) = delete;
-        ShadowMapPipeline& operator=(ShadowMapPipeline&&) = default;
-        ~ShadowMapPipeline() = default;
+        ShadowMap() = default;
+        ShadowMap(ShadowMap const &) = delete;
+        ShadowMap(ShadowMap&&) = default;
+        ShadowMap& operator=(ShadowMap const &) = delete;
+        ShadowMap& operator=(ShadowMap&&) = default;
+        ~ShadowMap() = default;
 
-        ShadowMapPipeline(
+        ShadowMap(
             VkDevice device,
             std::string_view shader_path,
             VkDescriptorSetLayout global_layout
             ) :
-            descriptor_pool_({device}),
+            // descriptor_pool_({device}),
             descset_lay_(
                 {device},
                 std::array{
@@ -90,20 +89,14 @@ namespace wvk::raii {
             }
 
 
+        WNODISCARD
         VkPipelineLayout GetPipelineLayout() const {
             return pipeline_layout_.Value();
         }
 
-        VkDescriptorPool GetDescriptorPool(std::uint8_t frame_index) const {
-            return descriptor_pool_.Value();
-        }
-
-        void ResetDescriptorPool(std::uint8_t frame_index) {
-            vkResetDescriptorPool(
-                descriptor_pool_[frame_index].Creator().device,
-                descriptor_pool_[frame_index].Value(),
-                {}
-                );
+        WNODISCARD
+        VkPipeline GetPipeline() const {
+            return *pipeline_;
         }
 
     private:
@@ -253,11 +246,6 @@ namespace wvk::raii {
 
     private:
 
-        std::array<
-            wvk::raii::DescriptorPool<1, 0, 0, 1>,
-            FramesInFlight
-            > descriptor_pool_{};
-        
         wvk::raii::DescriptorSetLayout<1> descset_lay_{};
 
         wvk::raii::PipelineLayout<1>  pipeline_layout_{};

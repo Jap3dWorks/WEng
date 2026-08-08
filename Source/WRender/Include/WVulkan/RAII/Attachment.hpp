@@ -159,5 +159,6 @@ namespace wvk::raii {
         VkImage image_{VK_NULL_HANDLE};
         VkDeviceMemory memory_{VK_NULL_HANDLE};
         VkImageView view_{VK_NULL_HANDLE};
+
     };
 }

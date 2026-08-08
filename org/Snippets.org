@@ -529,3 +529,25 @@ Value 8
 Value 9
 #+end_example
 
+
+* Vector in a tuple
+
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <cstdint> <print>
+#include <ranges>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+
+int main() {
+
+    auto tuple_vector = std::tuple{std::vector<std::uint32_t>{}};
+
+    std::get<0>(tuple_vector).push_back(10);
+
+    return 0;
+}
+#+end_src
+
+#+RESULTS:
+
