@@ -29,4 +29,6 @@ inline constexpr VkFormat WVK_POSTPROCESS_RENDER_COLOR_FORMAT{VK_FORMAT_R16G16B1
 // TODO check for a better solution.
 inline constexpr std::uint8_t WVK_GBUFFERS_COUNT{6};
 
+inline constexpr std::uint8_t WVK_SHADOWMAP_COUNT{1};
+
 

@@ -1,12 +1,13 @@
 #ifndef GLFW_INCLUDE_VULKAN
 #define GLFW_INCLUDE_VULKAN
-#include "WCore/WId.hpp"
-#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 #endif
+#include <GLFW/glfw3.h>
+
+#include "WCore/WId.hpp"
+#include "WVulkan/RAII/Attachments/ShadowMap.hpp"
+#include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
 
 #include "WVulkan/WVkRender.hpp"
-
-#include <GLFW/glfw3.h>
 
 #include "WAssets/RenderPipeline.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
@@ -15,8 +16,6 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "RenderUtils.hpp"
 #include "WWindow/WWindow.hpp"
-#include "WCore/TVisitor.hpp"
-#include "PipelineBindings.hpp"
 #include "RecordDrawCommands.hpp"
 
 #include "WLog.hpp"
@@ -48,6 +47,7 @@ void WVkRender::SetWindow(wdw::WWindow * in_window) {
 
 void WVkRender::Initialize()
 {
+
     WVkRenderDebugInfo render_debug_info =
         // wvk::render::CreateWVkRenderDebugInfo(WENG_VK_ENABLE_VALIDATION_LAYERS);
         wvk::render::CreateWVkRenderDebugInfo(true);
@@ -68,11 +68,12 @@ void WVkRender::Initialize()
 
     // Create Vulkan Window Surface
     surface_ = WVkSurfaceRAII(
-        {*instance_},
+        { *instance_ },
         window_
         );
 
     // Create Vulkan Device
+    
     device_ = WVkDeviceRAII(
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -97,13 +98,24 @@ void WVkRender::Initialize()
     gbuffers_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         WVK_GBUFFER_RENDER_COLOR_FORMAT,
         WVK_GBUFFER_RENDER_EMISSION_FORMAT,
         WVK_GBUFFER_RENDER_NORMAL_FORMAT,
         WVK_GBUFFER_RENDER_ORM_FORMAT,
         WVK_GBUFFER_RENDER_DEPTH_FORMAT,
         WVK_GBUFFER_RENDER_EXTRA01_FORMAT,
+    };
+
+    // Shadow map Attachments
+
+    shadow_map_attachments_ = {
+        device_.Device(),
+        device_.PhysicalDevice(),
+        {
+            wvk::raii::attachments::ShadowMap<FramesInFlight()>::DEFAULT_SHADOW_MAP_SIZE,
+            wvk::raii::attachments::ShadowMap<FramesInFlight()>::DEFAULT_SHADOW_MAP_SIZE
+        }
     };
 
     // Lighting Attachments
@@ -166,6 +178,14 @@ void WVkRender::Initialize()
     gbuffers_pipelines_ = {
         device_.Device(),
         device_.PhysicalDevice()
+    };
+
+    WFLOG("[DEBUG] Initialize Software Pipelines.");
+
+    shadow_map_pipeline_ = {
+        device_.Device(),
+        wvk::raii::pipelines::ShadowMap<FramesInFlight()>::SHADER_PATH,
+        global_descriptors_.DescriptorSetLayout()
     };
 
     WFLOG("[DEBUG] Initialize Lighting Pipeline.");
@@ -292,6 +312,7 @@ void WVkRender::Draw()
         lighting_attachments_,
         lighting_pipeline_,
         gbuffers_attachments_,
+        shadow_map_attachments_,
         global_descriptors_,
         render_plane_.RenderPlane(),
         render_plane_.Sampler()
@@ -655,7 +676,7 @@ void WVkRender::RecreateSwapChain() {
     gbuffers_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         WVK_GBUFFER_RENDER_COLOR_FORMAT,
         WVK_GBUFFER_RENDER_EMISSION_FORMAT,
         WVK_GBUFFER_RENDER_NORMAL_FORMAT,
@@ -667,21 +688,21 @@ void WVkRender::RecreateSwapChain() {
     lighting_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     postprocess_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         WVK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
 
     tonemapping_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         swap_chain_.Format()
     };
 

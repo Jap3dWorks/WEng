@@ -18,6 +18,9 @@ public uniform Sampler2D depth;  // future depth + stencil
 [[vk::binding(5,1)]]
 public uniform Sampler2D extra01;
 
+[[vk::binding(6,1)]]
+public uniform Sampler2D shadow_map;
+
 public struct VSLightingInput {
     public float2 position;
     public float2 tex_coord;

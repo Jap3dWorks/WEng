@@ -12,8 +12,9 @@ namespace wvk::raii::attachments {
 
     public:
 
-        static inline constexpr VkFormat SHADOW_MAP_FORMAT
-            { VkFormat::VK_FORMAT_D32_SFLOAT_S8_UINT };
+        static inline constexpr VkFormat SHADOW_MAP_FORMAT {
+            VK_FORMAT_D32_SFLOAT
+                };
 
         static inline constexpr std::uint32_t DEFAULT_SHADOW_MAP_SIZE {1024};
 
@@ -32,14 +33,19 @@ namespace wvk::raii::attachments {
             VkExtent2D extent_2d
             )  :
             extent_(extent_2d) {
-            Initialize(device, physical_device, SHADOW_MAP_FORMAT, extent_2d);
+            Initialize(
+                device,
+                physical_device,
+                SHADOW_MAP_FORMAT,
+                extent_2d
+                );
         }
 
     public:
 
         WNODISCARD
         wvk::raii::Attachment const &
-        GetAttachment(std::uint8_t frame_index) const noexcept {
+        GetDepth(std::uint8_t frame_index) const noexcept {
             return attachments_[frame_index];
         }
 
@@ -61,7 +67,9 @@ namespace wvk::raii::attachments {
                     device,
                     physical_device,
                     format,
-                    VkExtent2D{attachment_size}
+                    attachment_size,
+                    wvk::raii::Attachment::DEPTH_USAGE_FLAGS,
+                    wvk::raii::Attachment::DEPTH_ASPECT_FLAGS
                 };
             }
         }

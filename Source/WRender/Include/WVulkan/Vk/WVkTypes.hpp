@@ -120,15 +120,15 @@ namespace wvk::types {
     }
 
     inline constexpr VkRenderingInfo VkRenderingInfo()  noexcept {
-        ::VkRenderingInfo result{};
-        result.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-        return result;
+        return {
+            .sType = VK_STRUCTURE_TYPE_RENDERING_INFO
+        };
     }
 
     inline constexpr VkRenderingAttachmentInfo VkRenderingAttachmentInfo() noexcept {
-        ::VkRenderingAttachmentInfo result {};
-        result.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        return result;
+        return {
+            .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO
+        };
     }
 
     inline constexpr VkDescriptorSetLayoutBinding VkDescriptorSetLayoutBinding() noexcept {

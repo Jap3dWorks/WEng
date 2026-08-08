@@ -22,7 +22,7 @@
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 
-#include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Lighting.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 #include "WInterfaces/IRender.hpp"
@@ -221,7 +221,7 @@ private:
 
     wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     wvk::raii::pipelines::ShadowMap<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipeline_{};
-    WVkLightingPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
+    wvk::raii::pipelines::Lighting<WVK_MAX_FRAMES_IN_FLIGHT> lighting_pipeline_{};
 
     wvk::raii::pipelines::Postprocess<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_pipelines_{};
 

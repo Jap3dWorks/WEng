@@ -120,11 +120,11 @@ namespace spacers::monkey {
 
         auto shader_list = pipeline_asset.Get_shader_list();
         shader_list[0].type=wct::render::EShaderStageFlag::Vertex;
-        shader_list[0].file = "/Content/Shaders/WRender_rpassdebug.pprcess.spv";
+        shader_list[0].file = "/Content/Shaders/WRender_rpassdebug.ppcess.spv";
         shader_list[0].entry = "vsMain";
 
         shader_list[1].type=wct::render::EShaderStageFlag::Fragment;
-        shader_list[1].file = "/Content/Shaders/WRender_rpassdebug.pprcess.spv";
+        shader_list[1].file = "/Content/Shaders/WRender_rpassdebug.ppcess.spv";
         shader_list[1].entry = "fsMain";
 
         pipeline_asset.Set_shader_list(shader_list);

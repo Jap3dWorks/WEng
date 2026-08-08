@@ -58,75 +58,75 @@ namespace wvk::render {
 
     }
 
-    inline VkDescriptorSet CreateLightingRenderDescriptor(
-        const VkDevice & vk_device,
-        const VkDescriptorPool & in_desc_pool,
-        const VkDescriptorSetLayout & in_desc_lay,
-        const VkSampler & in_sampler,
-        const VkImageView & in_albedo_view,
-        const VkImageView & in_emission_view,
-        const VkImageView & in_normal_view,
-        const VkImageView & in_orm_view,
-        const VkImageView & in_depth_view,
-        const VkImageView & in_extra01_view
-        ) {
-        VkDescriptorSet descriptor_set{};
-        VkDescriptorSetAllocateInfo alloc_info{};
-        alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        alloc_info.descriptorPool = in_desc_pool;
-        alloc_info.descriptorSetCount = 1;
-        alloc_info.pSetLayouts = &in_desc_lay;
+    // inline VkDescriptorSet CreateLightingRenderDescriptor(
+    //     const VkDevice & vk_device,
+    //     const VkDescriptorPool & in_desc_pool,
+    //     const VkDescriptorSetLayout & in_desc_lay,
+    //     const VkSampler & in_sampler,
+    //     const VkImageView & in_albedo_view,
+    //     const VkImageView & in_emission_view,
+    //     const VkImageView & in_normal_view,
+    //     const VkImageView & in_orm_view,
+    //     const VkImageView & in_depth_view,
+    //     const VkImageView & in_extra01_view
+    //     ) {
+    //     VkDescriptorSet descriptor_set{};
+    //     VkDescriptorSetAllocateInfo alloc_info{};
+    //     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    //     alloc_info.descriptorPool = in_desc_pool;
+    //     alloc_info.descriptorSetCount = 1;
+    //     alloc_info.pSetLayouts = &in_desc_lay;
 
-        if (vkAllocateDescriptorSets(
-                vk_device,
-                &alloc_info,
-                &descriptor_set
-                ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to allocate descriptor sets!");
-        }
+    //     if (vkAllocateDescriptorSets(
+    //             vk_device,
+    //             &alloc_info,
+    //             &descriptor_set
+    //             ) != VK_SUCCESS) {
+    //         throw std::runtime_error("Failed to allocate descriptor sets!");
+    //     }
 
-        std::array<VkWriteDescriptorSet, WVK_GBUFFERS_COUNT> write_ds;
-        std::array<VkDescriptorImageInfo, WVK_GBUFFERS_COUNT> image_infos;
+    //     std::array<VkWriteDescriptorSet, WVK_GBUFFERS_COUNT> write_ds;
+    //     std::array<VkDescriptorImageInfo, WVK_GBUFFERS_COUNT> image_infos;
 
-        std::uint32_t idx=0;
-        for (const VkImageView & vw : {in_albedo_view,
-                                       in_emission_view,
-                                       in_normal_view,
-                                       in_orm_view,
-                                       in_depth_view,
-                                       in_extra01_view
-                                       }) {
+    //     std::uint32_t idx=0;
+    //     for (const VkImageView & vw : {in_albedo_view,
+    //                                    in_emission_view,
+    //                                    in_normal_view,
+    //                                    in_orm_view,
+    //                                    in_depth_view,
+    //                                    in_extra01_view
+    //                                    }) {
 
-            image_infos[idx] = wvk::types::VkDescriptorImageInfo();
-            image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_infos[idx].imageView = vw;
-            image_infos[idx].sampler = in_sampler;
+    //         image_infos[idx] = wvk::types::VkDescriptorImageInfo();
+    //         image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    //         image_infos[idx].imageView = vw;
+    //         image_infos[idx].sampler = in_sampler;
 
-            write_ds[idx] = wvk::types::VkWriteDescriptorSet();
-            write_ds[idx].dstBinding = idx;
-            write_ds[idx].dstSet = descriptor_set;
-            write_ds[idx].dstArrayElement=0;
-            write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            write_ds[idx].descriptorCount=1;
-            write_ds[idx].pImageInfo = &image_infos[idx];
-            write_ds[idx].pNext = VK_NULL_HANDLE;
+    //         write_ds[idx] = wvk::types::VkWriteDescriptorSet();
+    //         write_ds[idx].dstBinding = idx;
+    //         write_ds[idx].dstSet = descriptor_set;
+    //         write_ds[idx].dstArrayElement=0;
+    //         write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    //         write_ds[idx].descriptorCount=1;
+    //         write_ds[idx].pImageInfo = &image_infos[idx];
+    //         write_ds[idx].pNext = VK_NULL_HANDLE;
 
-            idx++;
-        }
+    //         idx++;
+    //     }
 
-        // The depth image layout
-        image_infos[4].imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+    //     // The depth image layout
+    //     image_infos[4].imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 
-        vkUpdateDescriptorSets(
-            vk_device,
-            static_cast<std::uint32_t>(write_ds.size()),
-            write_ds.data(),
-            0,
-            nullptr
-            );
+    //     vkUpdateDescriptorSets(
+    //         vk_device,
+    //         static_cast<std::uint32_t>(write_ds.size()),
+    //         write_ds.data(),
+    //         0,
+    //         nullptr
+    //         );
 
-        return descriptor_set;
-    }
+    //     return descriptor_set;
+    // }
 
     /**
      * @DEPRECATED

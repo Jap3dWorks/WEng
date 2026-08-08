@@ -5,6 +5,9 @@ import GBuffer.GBuffer;
 // Set 0 binding 0 contains camera_ubo.
 // Set 0 binding 1 contiains lighting_ubo.
 
+[[vk::binding(0, 2)]] // binding 0, set 2
+public ConstantBuffer<ModelUBO> model_ubo;
+
 // Set 1 is reserved for local UBOs.
 
 [[vk::binding(0,1)]]

@@ -1,5 +1,6 @@
 module GBuffer;
 
+// TODO Move ModelUBO to another slang file
 public struct ModelUBO {
     public float4x4 model;
     public float4x4 normal_matrix;
@@ -35,6 +36,6 @@ public struct FSGBUFferOutput {
     public float4 extra01     : SV_TARGET4;
 };
 
-[[vk::binding(0, 2)]] // binding 0, set 2
-public ConstantBuffer<ModelUBO> model_ubo;
+// [[vk::binding(0, 2)]] // binding 0, set 2
+// public ConstantBuffer<ModelUBO> model_ubo;
 

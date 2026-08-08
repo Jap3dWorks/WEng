@@ -7,7 +7,7 @@
 #include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
 #include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
-#include "WVulkan/RAII/WVkLightingPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Lighting.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
@@ -26,19 +26,18 @@
 
 namespace wvk::render::rec_cmd_bffr {
 
-
     using ShadowMapBindingInfo =
         std::unordered_map<
-            wcr::wid::WEngId, // pipeline_id
+            wcr::wid::WEngId,                                        // pipeline_id
             std::unordered_map<
-                std::size_t,      // collection_id
+                std::size_t,                                         // collection_id
                 std::tuple <
-                    VkDescriptorSet,                                  // descriporSet
-                    std::vector<std::tuple<WVkMesh, std::uint32_t>>   // mesh offset
+                    VkDescriptorSet,                                 // descriporSet
+                    std::vector<std::tuple<WVkMesh, std::uint32_t>>  // mesh offset
                     >>>;
 
     template<std::uint8_t FramesInFlight>
-    inline auto GBuffers(
+    inline auto GBuffers (
         VkDevice device,
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
@@ -209,7 +208,7 @@ namespace wvk::render::rec_cmd_bffr {
     }
 
     template<std::uint8_t FramesInFlight>
-    inline void ShadowMap(
+    inline void ShadowMap (
         VkDevice device,
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
@@ -221,13 +220,13 @@ namespace wvk::render::rec_cmd_bffr {
 
         wvk::render::rcmd::ShadowMap::AttachmentTransitionWriteLayout(
             command_buffer,
-            shadowmap_attachments.GetAttachment(frame_index).Image()
+            shadowmap_attachments.GetDepth(frame_index).Image()
             );
 
         // beginRendering
         wvk::render::rcmd::ShadowMap::BeginRendering(
             command_buffer,
-            shadowmap_attachments.GetAttachment(frame_index).View(),
+            shadowmap_attachments.GetDepth(frame_index).View(),
             shadowmap_attachments.GetExtent()
             );
 
@@ -245,12 +244,12 @@ namespace wvk::render::rec_cmd_bffr {
             shadowmap_attachments.GetExtent()
             );
 
-        // shadowmap_pipeline.ResetDescriptorPool(frame_index);
-
         for(auto & pipeline__collection  : pipeline_bindings) {
+            
             for (auto & coll__data : pipeline__collection.second) {
 
-                VkDescriptorSet descriptorset = std::get<0>(coll__data.second);
+                VkDescriptorSet geometry_descriptorset =
+                    std::get<0>(coll__data.second);
 
                 for (auto & bind : std::get<1>(coll__data.second)) {
                 
@@ -274,8 +273,10 @@ namespace wvk::render::rec_cmd_bffr {
 
                     std::array<VkDescriptorSet, 2> descsets =
                         {
-                            global_descriptors.DescriptorSet(frame_index),  // key light info
-                            descriptorset
+                            // key light info
+                            global_descriptors.DescriptorSet(frame_index),
+                            // camera light ubo,
+                            geometry_descriptorset
                         };
 
                     vkCmdBindDescriptorSets(command_buffer,
@@ -299,11 +300,10 @@ namespace wvk::render::rec_cmd_bffr {
 
         vkCmdEndRendering(command_buffer);
 
-        // TODO Get Detpth method
-        // wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
-        //     command_buffer,
-        //     shadowmap_attachments.GetDepth(frame_index).Image()
-        //     );
+        wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
+            command_buffer,
+            shadowmap_attachments.GetDepth(frame_index).Image()
+            );
 
     }
 
@@ -313,12 +313,14 @@ namespace wvk::render::rec_cmd_bffr {
         VkCommandBuffer in_command_buffer,
         std::uint32_t in_frame_index,
         WVkAttachmentsLightingRAII<FramesInFlight> & attachments,
-        WVkLightingPipelineRAII<FramesInFlight> & pipelines,
+        wvk::raii::pipelines::Lighting<FramesInFlight> & pipelines,
         WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
+        wvk::raii::attachments::ShadowMap<FramesInFlight> const & shadow_attachments,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors,
         WVkMesh const & render_plane,
         VkSampler plane_sampler
         ) {
+
         wvk::render::RndCmd_TransitionLightingWriteLayout(
             in_command_buffer,
             attachments.Color(in_frame_index).Image()
@@ -346,25 +348,25 @@ namespace wvk::render::rec_cmd_bffr {
 
         // DescriptorSet
         // TODO do not recreate each frame, create descriptorsSets only once.
-        VkDescriptorSet descriptorset = wvk::render::CreateLightingRenderDescriptor(
+        VkDescriptorSet descriptorset = wvk::render::rcmd::Lighting::CreateDescriptor(
             device,
             pipelines.DescriptorPool(in_frame_index),
             pipelines.DescriptorSetLayout(),
             plane_sampler,
-            // render_plane_.Sampler(),
             gbuffer_attachments.Albedo(in_frame_index).View(),
             gbuffer_attachments.Emission(in_frame_index).View(),
             gbuffer_attachments.Normal(in_frame_index).View(),
             gbuffer_attachments.ORM(in_frame_index).View(),
             gbuffer_attachments.Depth(in_frame_index).View(),
-            gbuffer_attachments.Extra01(in_frame_index).View()
+            gbuffer_attachments.Extra01(in_frame_index).View(),
+            shadow_attachments.GetDepth(in_frame_index).View()
             );
 
         // Draw Commands
-        // const WVkMesh & rplane = render_plane_.RenderPlane();
-    
-        VkBuffer vertex_buffers[] = {render_plane.vertex_buffer};
-        VkDeviceSize offsets[] = {0};
+        VkBuffer vertex_buffers[] = {
+            render_plane.vertex_buffer
+        };
+        VkDeviceSize offsets[] = { 0 };
 
         vkCmdBindVertexBuffers(
             in_command_buffer,
@@ -381,7 +383,7 @@ namespace wvk::render::rec_cmd_bffr {
             VK_INDEX_TYPE_UINT32
             );
 
-        std::array<VkDescriptorSet,2> descsets = {
+        std::array descsets = {
             global_descriptors.DescriptorSet(in_frame_index),
             descriptorset
         };

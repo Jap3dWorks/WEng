@@ -1,6 +1,10 @@
 import GlobalUBO.GlobalUBO;
 import GBuffer.GBuffer;
 
+[[vk::binding(0, 1)]] // binding 0, set 1
+public ConstantBuffer<ModelUBO> model_ubo;
+
+
 public struct VSSMInput {
     public float3 pos;
 };

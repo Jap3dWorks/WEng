@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 #include "WVulkan/WVkConfig.hpp"
 #include "WVulkan/RAII/DescriptorPool.hpp"
@@ -28,28 +29,31 @@ namespace wvk::raii::pipelines {
                 .format = VK_FORMAT_R32G32B32_SFLOAT,
                 .offset = offsetof(wct::geometry::WVertex, position)
             },
-                VkVertexInputAttributeDescription{
+            VkVertexInputAttributeDescription{
                 .location = 1,
-                    .binding = 0,
-                    .format = VK_FORMAT_R32G32_SFLOAT,
-                    .offset = offsetof(wct::geometry::WVertex, tex_coords),
-                    }
+                .binding = 0,
+                .format = VK_FORMAT_R32G32_SFLOAT,
+                .offset = offsetof(wct::geometry::WVertex, tex_coords)
+            }
         };
 
         static inline constexpr std::array const VERTEX_INPUT_BINDING_DESCRIPTION {
-            VkVertexInputBindingDescription{
+            VkVertexInputBindingDescription {
                 .binding=0,
                 .stride=sizeof(wct::geometry::WVertex),
                 .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
             }  
         };
 
+        static inline constexpr VkFormat DEPTH_FORMAT {
+            VK_FORMAT_D32_SFLOAT
+        };
+
     public:
 
-        static inline constexpr std::uint8_t MODEL_UBO_BINDING{0};
-
-        static inline constexpr std::string_view SHADER_PATH
-            {"/Content/Shaders/WRender_shadowmap.shdw.spv"};
+        static inline constexpr std::string_view SHADER_PATH {
+            "/Content/Shaders/WRender_shadowmap.shdw.spv"
+        };
 
     public:
 
@@ -65,29 +69,27 @@ namespace wvk::raii::pipelines {
             std::string_view shader_path,
             VkDescriptorSetLayout global_layout
             ) :
-            // descriptor_pool_({device}),
-            descset_lay_(
+            model_descset_lay_(
                 {device},
                 std::array{
-                    VkDescriptorSetLayoutBinding{
-                        .binding=0,
-                        .descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    VkDescriptorSetLayoutBinding {
+                        .binding=wct::render::CommonBindings::MODEL_UBO,
+                        .descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
                         .descriptorCount=1,
-                        .stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT,
+                        .stageFlags=VK_SHADER_STAGE_VERTEX_BIT,
                         .pImmutableSamplers=VK_NULL_HANDLE
                     }
                 }),
             pipeline_layout_(
-                {device},
-                std::array{
+                { device },
+                std::array {
                     global_layout,
-                    *descset_lay_
+                    *model_descset_lay_
                 }
                 )
             {
                 InitializePipeline(device);
             }
-
 
         WNODISCARD
         VkPipelineLayout GetPipelineLayout() const {
@@ -209,9 +211,10 @@ namespace wvk::raii::pipelines {
 
             VkPipelineRenderingCreateInfo rendering_info =
                 wvk::types::VkPipelineRenderingCreateInfo();
+            
             rendering_info.colorAttachmentCount = 0;
-            rendering_info.pColorAttachmentFormats = VK_NULL_HANDLE; 
-            rendering_info.depthAttachmentFormat = WVK_GBUFFER_RENDER_DEPTH_FORMAT;
+            rendering_info.pColorAttachmentFormats = VK_NULL_HANDLE;
+            rendering_info.depthAttachmentFormat = DEPTH_FORMAT;
             rendering_info.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
             pipeline_create_info.layout = *pipeline_layout_;
 
@@ -246,9 +249,9 @@ namespace wvk::raii::pipelines {
 
     private:
 
-        wvk::raii::DescriptorSetLayout<1> descset_lay_{};
+        wvk::raii::DescriptorSetLayout<1> model_descset_lay_{};
 
-        wvk::raii::PipelineLayout<1>  pipeline_layout_{};
+        wvk::raii::PipelineLayout<2>  pipeline_layout_{};
         wvk::raii::PipelineWrapper pipeline_{};
 
 
