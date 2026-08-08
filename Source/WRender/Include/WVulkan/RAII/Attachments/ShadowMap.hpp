@@ -21,10 +21,10 @@ namespace wvk::raii::attachments {
     public:
 
         ShadowMap() = default;
-        ShadowMap(const ShadowMap&) = delete;
+        ShadowMap(ShadowMap const &) = delete;
         ShadowMap(ShadowMap&&) = default;
-        ShadowMap& operator=(const ShadowMap&) = delete;
-        ShadowMap& operator=(ShadowMap&&) = default;
+        ShadowMap & operator=(ShadowMap const &) = delete;
+        ShadowMap & operator=(ShadowMap&&) = default;
         ~ShadowMap() = default;
 
         ShadowMap(
@@ -61,18 +61,19 @@ namespace wvk::raii::attachments {
             VkPhysicalDevice physical_device,
             VkFormat format,
             VkExtent2D attachment_size
-            ) {
-            for(std::uint32_t i=0 ; i<attachments_.size(); i++) {
-                attachments_[i]= {
-                    device,
-                    physical_device,
-                    format,
-                    attachment_size,
-                    wvk::raii::Attachment::DEPTH_USAGE_FLAGS,
-                    wvk::raii::Attachment::DEPTH_ASPECT_FLAGS
-                };
+            )
+            {
+                for(std::uint32_t i=0 ; i<attachments_.size(); i++) {
+                    attachments_[i]= {
+                        device,
+                        physical_device,
+                        format,
+                        attachment_size,
+                        wvk::raii::Attachment::DEPTH_USAGE_FLAGS,
+                        wvk::raii::Attachment::DEPTH_ASPECT_FLAGS
+                    };
+                }
             }
-        }
 
     private:
 
@@ -83,3 +84,4 @@ namespace wvk::raii::attachments {
     };
 
 }
+

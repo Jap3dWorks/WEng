@@ -70,6 +70,8 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 {
     float2 uv = vertexOutput.tex_coord;
 
+    return shadow_map.Sample(uv);
+
     // Read G-Buffers
     float dpt = depth.Sample(uv).r;
     float3 wpos = WPos(dpt, uv, camera_ubo.view, camera_ubo.inv_view, camera_ubo.inv_proj);

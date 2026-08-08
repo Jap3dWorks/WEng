@@ -4,9 +4,6 @@
 #include "WVulkan/Vk/WVkImage.hpp"
 
 #include <vulkan/vulkan_core.h>
-#include <cstdint>
-#include <vector>
-#include <cstring>
 
 namespace wvk::raii {
 
@@ -34,9 +31,8 @@ namespace wvk::raii {
         };
 
         Attachment() = default;
-
-        Attachment(const Attachment&) = delete;
-        Attachment& operator=(const Attachment&) = delete;
+        Attachment(Attachment const &) = delete;
+        Attachment & operator=(Attachment const &) = delete;
 
         Attachment(VkDevice in_device,
                    VkPhysicalDevice in_physical_device,
@@ -89,7 +85,6 @@ namespace wvk::raii {
             return *this;
         }
 
-
         WNODISCARD VkImage Image() const { return image_; }
 
         WNODISCARD VkDeviceMemory Memory() const { return memory_; }
@@ -105,7 +100,6 @@ namespace wvk::raii {
             VkImageUsageFlags in_usage_flags,
             VkImageAspectFlags in_aspect_flags
             ){
-
             wvk::image::CreateImage(
                 image_,
                 memory_,
@@ -119,7 +113,6 @@ namespace wvk::raii {
                 in_usage_flags,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                 );
-            
             view_ = wvk::image::CreateImageView(
                 image_,
                 in_format,
@@ -162,3 +155,4 @@ namespace wvk::raii {
 
     };
 }
+
