@@ -3,6 +3,7 @@
 #include "WVulkan/Vk/WVkDescriptor.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 
+#include <utility>
 #include <vulkan/vulkan_core.h>
 
 namespace wvk::render::rcmd {
@@ -214,8 +215,8 @@ namespace wvk::render::rcmd::Lighting {
 
         VkDescriptorSet descriptor_set{};
 
-        VkDescriptorSetAllocateInfo alloc_info =
-            wvk::types::VkDescriptorSetAllocateInfo();
+        VkDescriptorSetAllocateInfo alloc_info = wvk::types::VkDescriptorSetAllocateInfo();
+        
         alloc_info.descriptorPool = desc_pool;
         alloc_info.descriptorSetCount = 1;
         alloc_info.pSetLayouts = &desc_lay;
@@ -228,54 +229,55 @@ namespace wvk::render::rcmd::Lighting {
             throw std::runtime_error("Failed to allocate descriptor sets!");
         }
 
-        auto create_image_info = []
-            (auto view, auto sampler) -> VkDescriptorImageInfo
+        auto create_image_info =
+            [sampler]
+            (auto view, bool is_depth=false) constexpr -> VkDescriptorImageInfo
             {
                 auto result = wvk::types::VkDescriptorImageInfo();
-                result.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                result.imageLayout = (is_depth)
+                    ? VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL
+                    : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 result.imageView = view;
                 result.sampler = sampler;
 
                 return result;
             };
         
-        auto create_write_ds = []
-            (auto )
-            {};
+        auto create_write_ds =
+            [descriptor_set]
+            (std::uint32_t binding, VkDescriptorImageInfo & image_info) constexpr -> VkWriteDescriptorSet
+            {
+                auto write_ds = wvk::types::VkWriteDescriptorSet();
+                write_ds.dstBinding = binding;
+                write_ds.dstSet = descriptor_set;
+                write_ds.dstArrayElement=0;
+                write_ds.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                write_ds.descriptorCount=1;
+                write_ds.pImageInfo = &image_info;
+                write_ds.pNext = VK_NULL_HANDLE;
+
+                return write_ds;
+            };
             
+        std::array image_infos {
+            create_image_info(albedo_view),
+            create_image_info(emission_view),
+            create_image_info(normal_view),
+            create_image_info(orm_view),
+            create_image_info(depth_view, true),
+            create_image_info(extra01_view),
+            create_image_info(shadow_view, true)
+        };
 
-        std::array<VkWriteDescriptorSet, WVK_GBUFFERS_COUNT> write_ds;
-        std::array<VkDescriptorImageInfo, WVK_GBUFFERS_COUNT> image_infos;
+        std::array<VkWriteDescriptorSet, image_infos.size()> write_ds;
 
-        std::uint32_t idx=0;
-        for (const VkImageView & vw : {albedo_view,
-                                       emission_view,
-                                       normal_view,
-                                       orm_view,
-                                       depth_view,
-                                       extra01_view,
-                                       shadow_view
-            }) {
+        auto add_write_element = [&write_ds, &create_write_ds, &image_infos]
+            <std::size_t ... Idx>
+            (std::index_sequence<Idx...> seq) constexpr {
+            ((write_ds[Idx]=create_write_ds(Idx, image_infos[Idx])), ...);
+        };
 
-            image_infos[idx] = wvk::types::VkDescriptorImageInfo();
-            image_infos[idx].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_infos[idx].imageView = vw;
-            image_infos[idx].sampler = sampler;
-
-            write_ds[idx] = wvk::types::VkWriteDescriptorSet();
-            write_ds[idx].dstBinding = idx;
-            write_ds[idx].dstSet = descriptor_set;
-            write_ds[idx].dstArrayElement=0;
-            write_ds[idx].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            write_ds[idx].descriptorCount=1;
-            write_ds[idx].pImageInfo = &image_infos[idx];
-            write_ds[idx].pNext = VK_NULL_HANDLE;
-
-            idx++;
-        }
-
-        // The depth image layout
-        image_infos[4].imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+        add_write_element(std::make_index_sequence<image_infos.size()>{});
 
         vkUpdateDescriptorSets(
             vk_device,
