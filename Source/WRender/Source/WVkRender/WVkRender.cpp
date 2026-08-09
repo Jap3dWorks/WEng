@@ -741,6 +741,21 @@ void WVkRender::InitializeLights(
         );
 }
 
+void WVkRender::InitializeShadowMap(
+    glm::mat4 project_matrix,
+    glm::mat4 view_matrix
+    )  {
+    lighting_UBO_.UpdateShadowMap(
+        project_matrix,
+        view_matrix
+        );
+
+    global_descriptors_.StaticUpdateLightingUBO(
+        lighting_UBO_.LightingUbo()
+        );
+}
+
+
 void WVkRender::ClearLights() {
     lighting_UBO_.Clear();
 

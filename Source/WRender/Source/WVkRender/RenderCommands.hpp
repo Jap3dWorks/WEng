@@ -81,7 +81,6 @@ namespace wvk::render::rcmd {
             0, 1,
             &scissor
             );
-
     }
 
     inline
@@ -156,7 +155,7 @@ namespace wvk::render::rcmd::ShadowMap {
         rendering_info.renderArea = {{0,0}, in_extent};
         rendering_info.layerCount = 1;
         rendering_info.colorAttachmentCount = 0;
-        rendering_info.pColorAttachments = nullptr;
+        rendering_info.pColorAttachments = VK_NULL_HANDLE;
         rendering_info.pDepthAttachment = &depth_attachment;
 
         vkCmdBeginRendering(
@@ -231,7 +230,8 @@ namespace wvk::render::rcmd::Lighting {
 
         auto create_image_info =
             [sampler]
-            (auto view, bool is_depth=false) constexpr -> VkDescriptorImageInfo
+            (auto view, bool is_depth=false) constexpr
+            -> VkDescriptorImageInfo
             {
                 auto result = wvk::types::VkDescriptorImageInfo();
                 result.imageLayout = (is_depth)
@@ -245,7 +245,8 @@ namespace wvk::render::rcmd::Lighting {
         
         auto create_write_ds =
             [descriptor_set]
-            (std::uint32_t binding, VkDescriptorImageInfo & image_info) constexpr -> VkWriteDescriptorSet
+            (std::uint32_t binding, VkDescriptorImageInfo & image_info) constexpr
+            -> VkWriteDescriptorSet
             {
                 auto write_ds = wvk::types::VkWriteDescriptorSet();
                 write_ds.dstBinding = binding;
@@ -271,7 +272,8 @@ namespace wvk::render::rcmd::Lighting {
 
         std::array<VkWriteDescriptorSet, image_infos.size()> write_ds;
 
-        auto add_write_element = [&write_ds, &create_write_ds, &image_infos]
+        auto add_write_element =
+            [&write_ds, &create_write_ds, &image_infos]
             <std::size_t ... Idx>
             (std::index_sequence<Idx...> seq) constexpr {
             ((write_ds[Idx]=create_write_ds(Idx, image_infos[Idx])), ...);

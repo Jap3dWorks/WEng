@@ -28,13 +28,13 @@ namespace wvk::raii::pipelines {
                 .binding = 0,
                 .format = VK_FORMAT_R32G32B32_SFLOAT,
                 .offset = offsetof(wct::geometry::WVertex, position)
-            },
-            VkVertexInputAttributeDescription{
-                .location = 1,
-                .binding = 0,
-                .format = VK_FORMAT_R32G32_SFLOAT,
-                .offset = offsetof(wct::geometry::WVertex, tex_coords)
-            }
+            } // ,
+            // VkVertexInputAttributeDescription{
+            //     .location = 1,
+            //     .binding = 0,
+            //     .format = VK_FORMAT_R32G32_SFLOAT,
+            //     .offset = offsetof(wct::geometry::WVertex, tex_coords)
+            // }
         };
 
         static inline constexpr std::array const VERTEX_INPUT_BINDING_DESCRIPTION {
@@ -63,6 +63,8 @@ namespace wvk::raii::pipelines {
         ShadowMap& operator=(ShadowMap const &) = delete;
         ShadowMap& operator=(ShadowMap&&) = default;
         ~ShadowMap() = default;
+
+        // TODO Depth format as parameter
 
         ShadowMap(
             VkDevice device,

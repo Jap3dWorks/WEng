@@ -162,6 +162,11 @@ public:
         const wct::render::AmbientLight & in_ambient_light
         )=0;
 
+    virtual void InitializeShadowMap(
+        glm::mat4 project_matrix,
+        glm::mat4 view_matrix
+        )=0;
+
     /**
      * @brief Removes all render lighting data.
      */

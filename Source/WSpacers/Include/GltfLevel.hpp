@@ -78,11 +78,14 @@ namespace spacers::gltflevel {
         
         dir_ptr->Set_intensity(5.f);
 
+        dir_ptr->Set_cast_shadows(true);
+
         auto* trns_ptr = &level
             ->GetComponent<wcm::Transform>
             (dir_light);
 
         trns_ptr->Set_rotation({0.0, 0.75, -0.75});
+        
     }
 
     inline wcr::wid::WAssetId CreateLevel(WEngine & in_engine) {

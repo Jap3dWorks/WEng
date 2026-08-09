@@ -70,7 +70,7 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 {
     float2 uv = vertexOutput.tex_coord;
 
-    return shadow_map.Sample(uv);
+    return pow(shadow_map.Sample(uv).r, 4);
 
     // Read G-Buffers
     float dpt = depth.Sample(uv).r;

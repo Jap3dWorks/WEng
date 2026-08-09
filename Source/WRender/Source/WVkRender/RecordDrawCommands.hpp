@@ -33,7 +33,7 @@ namespace wvk::render::rec_cmd_bffr {
                 std::size_t,                                         // collection_id
                 std::tuple <
                     VkDescriptorSet,                                 // descriporSet
-                    std::vector<std::tuple<WVkMesh, std::uint32_t>>  // mesh offset
+                    std::vector<std::tuple<WVkMesh, std::uint32_t>>  // mesh model-offset
                     >>>;
 
     template<std::uint8_t FramesInFlight>
@@ -72,10 +72,10 @@ namespace wvk::render::rec_cmd_bffr {
                 wcr::wid::WEngId pipeline_id,
                 std::size_t collection_id,
                 WVkMesh const & mesh,
-                std::uint32_t offset
+                std::uint32_t model_offset
                 ) {
                 std::get<1>(shadow_map_binding_info[pipeline_id][collection_id]).push_back(
-                    std::tuple{mesh, offset}
+                    std::tuple{mesh, model_offset}
                     );
 
                 return std::nullopt;
@@ -248,12 +248,12 @@ namespace wvk::render::rec_cmd_bffr {
             
             for (auto & coll__data : pipeline__collection.second) {
 
-                VkDescriptorSet geometry_descriptorset =
+                VkDescriptorSet model_descriptorset =
                     std::get<0>(coll__data.second);
 
-                for (auto & bind : std::get<1>(coll__data.second)) {
+                for (auto & mesh__offset : std::get<1>(coll__data.second)) {
                 
-                    VkBuffer vertex_buffers[] = {std::get<0>(bind).vertex_buffer};
+                    VkBuffer vertex_buffers[] = {std::get<0>(mesh__offset).vertex_buffer};
                     VkDeviceSize offsets[] = {0};
 
                     vkCmdBindVertexBuffers(
@@ -266,7 +266,7 @@ namespace wvk::render::rec_cmd_bffr {
 
                     vkCmdBindIndexBuffer(
                         command_buffer,
-                        std::get<0>(bind).index_buffer,
+                        std::get<0>(mesh__offset).index_buffer,
                         0,
                         VK_INDEX_TYPE_UINT32
                         );
@@ -276,8 +276,10 @@ namespace wvk::render::rec_cmd_bffr {
                             // key light info
                             global_descriptors.DescriptorSet(frame_index),
                             // camera light ubo,
-                            geometry_descriptorset
+                            model_descriptorset
                         };
+
+                    std::uint32_t model_offset = std::get<1>(mesh__offset);
 
                     vkCmdBindDescriptorSets(command_buffer,
                                             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -286,10 +288,10 @@ namespace wvk::render::rec_cmd_bffr {
                                             static_cast<std::uint32_t>(descsets.size()),
                                             descsets.data(),
                                             1,
-                                            &std::get<1>(bind));
+                                            &model_offset);
 
                     vkCmdDrawIndexed(command_buffer,
-                                     std::get<0>(bind).index_count,
+                                     std::get<0>(mesh__offset).index_count,
                                      1,
                                      0,
                                      0,

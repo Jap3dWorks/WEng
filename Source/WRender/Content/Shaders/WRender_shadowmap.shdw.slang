@@ -10,25 +10,25 @@ public struct VSSMInput {
 };
 
 struct VSSMOutput {
-    float4 pos : SV_Position;
+    float4 pos : SV_POSITION;
 };
 
 struct FSSMOutput {};
 
 [shader("vertex")]
-VSSMOutput vsMain(VSSMInput input) {
+VSSMOutput vsMain(VSGBufferInput input) {
     VSSMOutput output;
 
     output.pos =
         mul(lighting_ubo.shadow_map_projection,
             mul(lighting_ubo.shadow_map_view,
-                mul(model_ubo.model, float4(input.pos, 0.f))));
+                mul(model_ubo.model, float4(input.position, 1.f))));
 
     return output;
 }
 
 [shader("fragment")]
-FSSMOutput fsMain(VSSMOutput vert_in) : SV_TARGET {
-    FSSMOutput output;
-    return output;
+void fsMain(VSSMOutput vert_in) : SV_TARGET {
+    // FSSMOutput output;
+    // return output;
 }

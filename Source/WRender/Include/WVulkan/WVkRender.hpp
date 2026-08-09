@@ -168,6 +168,11 @@ public:
         const wct::render::AmbientLight & in_ambient_light
         ) override;
 
+    void InitializeShadowMap(
+        glm::mat4 project_matrix,
+        glm::mat4 view_matrix
+        ) override;
+
     void ClearLights() override;
 
     void UpdatePointLights(

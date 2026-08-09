@@ -334,9 +334,9 @@ namespace wvk::raii::pipelines::param_bindings {
             result.push_back(
                 {
                     .binding=ubo_param_desc.binding,
-                    .buffers=ubo_buffers,
                     .offset=offset,
                     .range=ubo_param_desc.size,
+                    .buffers=ubo_buffers,
                     .ubo_type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
                 }
                 );

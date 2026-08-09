@@ -3,6 +3,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WLog.hpp"
+#include "WRender/WLight.hpp"
 
 #include <cstdint>
 #include <limits>
@@ -295,6 +296,14 @@ namespace wrd::light {
 
         const wct::render::LightingUBO & LightingUbo() const {
             return lighting_ubo_;
+        }
+
+        void UpdateShadowMap(
+            glm::mat4 projection_matrix,
+            glm::mat4 view_matrix
+            ) {
+            lighting_ubo_.shadow_map_projection = projection_matrix;
+            lighting_ubo_.shadow_map_view_matrix = view_matrix;
         }
 
     private:

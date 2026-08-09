@@ -31,7 +31,7 @@ namespace wrd::render {
 
         glm::mat3 orient{transform_component.Get_transform_matrix()};
 
-        // orient needs to be an ortonormal base.
+        // Orient needs to be an ortonormal base.
         assert(
             std::abs(glm::length(orient[0]) - 1.f) < 0.0001 &&
             std::abs(glm::length(orient[1]) - 1.f) < 0.0001 &&
@@ -58,7 +58,6 @@ namespace wrd::render {
 
     inline wct::render::ModelUBO ToUBOGraphicsStruct(
         wcm::Transform const & in_transform
-        // const WTransformStruct & in_transform
         ) {
 
         glm::mat3 tmp = glm::transpose(

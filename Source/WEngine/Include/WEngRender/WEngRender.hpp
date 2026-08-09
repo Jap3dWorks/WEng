@@ -55,8 +55,10 @@ namespace wng::render {
                         (cmp->Get_entity_id());
 
                     auto plight = wrd::light::ToPointLight(
-                        *transform_component,
-                        *cmp
+                        transform_component->Get_position(),
+                        cmp->Get_radius(),
+                        cmp->Get_color(),
+                        cmp->Get_intensity()
                         );
                     
                     point_lights[pl_count] = plight;
@@ -94,8 +96,9 @@ namespace wng::render {
                         (cmp->Get_entity_id());
 
                     auto dlight = wrd::light::ToDirectionalLight(
-                        *transform_cmp,
-                        *cmp
+                        transform_cmp->Get_transform_matrix()[0],  // x direction
+                        cmp->Get_color(),
+                        cmp->Get_intensity()
                         );
 
                     dlight.direction = transform_cmp->Get_transform_matrix()[0];
@@ -112,14 +115,19 @@ namespace wng::render {
                     // Collect shadow map UBO data
                     if (cmp->Get_cast_shadows()) {
                         shadow_map_dt.projection =
-                            wrd::light::ToShadowMapProjectionMatrix(*cmp, 1024);
+                            // TODO shadow map size constant
+                            wrd::light::ToShadowMapProjectionMatrix(
+                                5.f, 5.f, -5.f, 13.f
+                                );
 
                         // TODO update the interest point of the directional shadow map
                         //  using a system.
                         shadow_map_dt.view =
+                            // glm::translate(glm::mat4(1), -glm::vec3{0.0, 0.0, 2.f});
+                        
                             wrd::light::ToShadowMapViewMatrix(
-                                *transform_cmp,
-                                *cmp
+                                transform_cmp->Get_transform_matrix(),
+                                {0.f, 0.f, 0.f}  // TODO parametrizable
                                 );
                     }
 
@@ -145,7 +153,10 @@ namespace wng::render {
             amb_light
             );
 
-        // TODO : in_render->InitializeShadowMap()
+        in_render->InitializeShadowMap(
+            shadow_map_dt.projection,
+            shadow_map_dt.view
+            );
 
     }
 
