@@ -1,6 +1,8 @@
 module GlobalUBO;
 
 // Camera stuffs
+// -------------
+
 public struct CameraUBO {
     public float4x4 proj;
     public float4x4 view;
@@ -49,6 +51,7 @@ public struct LightingUBO {
 
     public float4x4 shadow_map_projection;
     public float4x4 shadow_map_view;
+    public uint directional_shadow_cast;
 };
 
 // Global bindings

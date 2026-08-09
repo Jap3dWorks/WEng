@@ -127,7 +127,7 @@ namespace wct::render {
     enum class ERPipeType : uint8_t
     {
         GBuffer,        // GBuffer generation shader
-        Lighting,      // Lighting render using GBuffers
+        Lighting,       // Lighting render using GBuffers
         Transparency,   // Alpha Blending
         Postprocess,    // Camera shader pipelines
         Compute,        // GPU
@@ -363,6 +363,9 @@ namespace wct::render {
         // shadow map data
         glm::mat4 shadow_map_projection{};
         glm::mat4 shadow_map_view_matrix{};
+
+        std::uint32_t directional_shadow_cast{};
+        float _padding_1[3];
     };
 
     static_assert(sizeof(PointLight) * LightingUBO::MAX_POINT_LIGHTS +
@@ -370,9 +373,9 @@ namespace wct::render {
                   sizeof(AmbientLight) +
                   16  +
                   sizeof(glm::mat4) +
-                  sizeof(glm::mat4) == sizeof(LightingUBO), "Size must match a Vulkan layout");
-
-    
+                  sizeof(glm::mat4)  +
+                  sizeof(std::uint32_t) * 4 == sizeof(LightingUBO),
+                  "Size must match a Vulkan layout");
 
 }
 

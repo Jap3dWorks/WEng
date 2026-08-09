@@ -117,7 +117,7 @@ namespace wng::render {
                         shadow_map_dt.projection =
                             // TODO shadow map size constant
                             wrd::light::ToShadowMapProjectionMatrix(
-                                5.f, 5.f, -5.f, 13.f
+                                3.f, 3.f, -8.f, 15.f
                                 );
 
                         // TODO update the interest point of the directional shadow map

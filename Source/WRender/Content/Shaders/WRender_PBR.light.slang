@@ -5,8 +5,7 @@ import Lighting.Lighting;
 // Set 0 binding 0 contains camera_ubo.
 // Set 0 binding 1 contiains lighting_ubo.
 
-// Set 1 is reserved for local Shader descriptors.
-// 
+// Set 1 contains render pases
 
 // main functions
 // --------------
@@ -21,7 +20,6 @@ VSLightingOutput vsMain(VSLightingInput input)
 
     return output;
 }
-
 
 // PBR functions
 float DistributionGGX(float NdotH, float roughness) {
@@ -50,7 +48,7 @@ float3 FresnelSchlick(float cosTheta, float3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float3 WPos(float depth, float2 uv, float4x4 view, float4x4 inv_view, float4x4 inv_proj) {
+float3 WPos(float depth, float2 uv, /* float4x4 view, */ float4x4 inv_view, float4x4 inv_proj) {
 
     // Convert UV to clip-space coordinates [-1, +1]
     float4 clip_pos = float4(uv * 2.0 - 1.0, depth, 1.0);
@@ -63,6 +61,19 @@ float3 WPos(float depth, float2 uv, float4x4 view, float4x4 inv_view, float4x4 i
     return mul(inv_view, float4(view_pos.xyz, 1.0)).xyz;
 }
 
+float Shadow(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj) {
+
+    float4 shadow = mul(shadow_proj, mul(shadow_view, float4(wpos,1.f)));
+
+    float3 ndc = shadow.xyz / shadow.w;
+
+    float2 uv = saturate(ndc.xy * 0.5 + 0.5);
+
+    float sm_val = shadow_map.Sample(uv).r;
+
+    return (ndc.z - 0.002 > sm_val) ? 0.f : 1.f;
+}
+
 static const float PI = 3.14159265359;
 
 [shader("fragment")]
@@ -70,11 +81,9 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 {
     float2 uv = vertexOutput.tex_coord;
 
-    return pow(shadow_map.Sample(uv).r, 4);
-
     // Read G-Buffers
     float dpt = depth.Sample(uv).r;
-    float3 wpos = WPos(dpt, uv, camera_ubo.view, camera_ubo.inv_view, camera_ubo.inv_proj);
+    float3 wpos = WPos(dpt, uv, /* , camera_ubo.view, */ camera_ubo.inv_view, camera_ubo.inv_proj);
 
     float3 nrm = normal.Sample(uv).rgb;
     float3 alb = albedo.Sample(uv).rgb;
@@ -95,9 +104,9 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         float3 Lvec = lighting_ubo.point_lights[i].position.xyz - wpos;
         float dist = length(Lvec);
 
-        // float radius = lighting_ubo.point_lights[i].color_radius.w;
+        float radius = lighting_ubo.point_lights[i].color_radius.w;
         // Skip if fragment is outside light’s radius
-        // if(dist > radius) continue;
+        if(dist > radius) continue;
 
         float3 L = Lvec / dist;  // normalized
         float attenuation = 1.0 / (dist * dist + 1e-4);
@@ -122,6 +131,9 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 
     float3 color = lighting_ubo.ambient_light.color.rgb * alb * ao + Lo + ems;
 
+    // TODO : apply shadow only on the first directional light
+    float shdw = Shadow(wpos, lighting_ubo.shadow_map_view, lighting_ubo.shadow_map_projection);
+
     // PBR directional
     for (uint i=0; i < lighting_ubo.directional_lights_count; i++) {
         float3 L = normalize(-lighting_ubo.directional_lights[i].direction.rgb);
@@ -138,7 +150,7 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
         float3 kD = (1.0 - F) * (1.0 - rm.y);
         float3 radiance = lighting_ubo.directional_lights[i].color.rgb;
 
-        color += (kD * alb / PI + specular) * radiance * NdotL;
+        color += (kD * alb / PI + specular) * radiance * NdotL * shdw;
     }
 
     return float4(color, 1.0);
