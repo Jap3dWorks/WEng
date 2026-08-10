@@ -9,6 +9,8 @@
 #include <vulkan/vulkan_core.h>
 #include <stdexcept>
 
+namespace wvk::raii {}
+
 class WVkDeviceRAII {
 
 public:
@@ -19,30 +21,21 @@ public:
                   const VkInstance & in_instance,
                   const VkSurfaceKHR & in_surface,
                   bool in_enable_validation_layers,
-                  const std::vector<std::string_view>& in_validation_layers) {
+                  const std::vector<std::string_view>& in_validation_layers,
+                  std::optional<std::string> physical_device_name=std::nullopt
+        ) {
 
         // Pick Physical Device
-    
-        uint32_t device_count = 0;
-        vkEnumeratePhysicalDevices(in_instance, &device_count, nullptr);
-        if (device_count == 0)
-        {
-            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
-        }
-    
-        std::vector<VkPhysicalDevice> devices(device_count);
-        vkEnumeratePhysicalDevices(in_instance, &device_count, devices.data());
 
-        for (const auto &device : devices)
-        {
-            if (wvk::vulkan::IsDeviceSuitable(device, in_surface, in_device_extensions))
-            {
-                // TODO device checks
-                vk_physical_device = device;
-                msaa_samples = wvk::vulkan::GetMaxUsableSampleCount(device);
-                break;
-            }
-        }
+        vk_physical_device =
+            CollectPhysicalDevice(
+                in_instance,
+                in_surface,
+                in_device_extensions,
+                physical_device_name
+                );
+
+        msaa_samples = wvk::vulkan::GetMaxUsableSampleCount(vk_physical_device);
 
         if (vk_physical_device == VK_NULL_HANDLE)
         {
@@ -207,6 +200,60 @@ public:
 
 private:
 
+    VkPhysicalDevice CollectPhysicalDevice(
+        VkInstance instance,
+        VkSurfaceKHR surface,
+        const std::vector<std::string_view> & device_extensions,
+        std::optional<std::string> physical_device_name
+        ) const {
+
+        uint32_t device_count = 0;
+        vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
+        if (device_count == 0)
+        {
+            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+        }
+    
+        std::vector<VkPhysicalDevice> devices(device_count);
+        vkEnumeratePhysicalDevices(instance, &device_count, devices.data());
+
+        std::vector<VkPhysicalDevice> valid_devices{};
+
+        for (const auto &device : devices)
+        {
+            if (wvk::vulkan::IsDeviceSuitable(device, surface, device_extensions))
+            {
+                valid_devices.push_back(device);
+            }
+        }
+
+        std::vector<VkPhysicalDeviceProperties> properties;
+        properties.resize(valid_devices.size());
+
+        for (std::uint32_t i=0; i < properties.size(); ++i) {
+            vkGetPhysicalDeviceProperties(
+                valid_devices[i],
+                &properties[i]
+                );
+        }
+
+        if (physical_device_name) {
+            for (std::uint32_t i=0; i<properties.size(); ++i) {
+                if ((*physical_device_name) == properties[i].deviceName) {
+                    return valid_devices[i];
+                }
+            }
+            
+        }
+        for (std::uint32_t i=0; i<properties.size(); ++i) {
+            if (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU == properties[i].deviceType) {
+                return valid_devices[i];
+            }
+        }
+
+        return valid_devices[0];
+    }
+    
     void Destroy() {
         if (vk_device != VK_NULL_HANDLE) {
             
