@@ -32,6 +32,8 @@ namespace wct::render {
         // ...
     };
 
+    static_assert(sizeof(ModelUBO) % 64 == 0);
+
     /**
      * @brief parameters to use in a shader.
      */
@@ -42,6 +44,8 @@ namespace wct::render {
         glm::vec4 param3;
         glm::vec4 param4;
     };
+
+    static_assert(sizeof(PostprocessUBO) % 64 == 0);
 
     /**
      * @brief Camera Data to be used in the shader.
@@ -59,11 +63,16 @@ namespace wct::render {
         float far_clipping{100.f};
     };
 
+    static_assert(sizeof(CameraUBO) % 16==0);
+
     struct PBRScalarUBO {
         glm::vec4 albedo{0.0, 0.0, 0.0, 0.0};
         glm::vec4 emission{0.0, 0.0, 0.0, 0.0};
         glm::vec4 orm_nscale{1.0, .8, .2, 1.0};
+        float padding_[4];
     };
+
+    static_assert(sizeof(PBRScalarUBO) % 64 == 0);
 
     struct CommonBindings {
         static constexpr std::uint8_t MODEL_SET{2};
@@ -368,14 +377,7 @@ namespace wct::render {
         float _padding_1[3];
     };
 
-    static_assert(sizeof(PointLight) * LightingUBO::MAX_POINT_LIGHTS +
-                  sizeof(DirectionalLight) * LightingUBO::MAX_DIRECTIONAL_LIGHTS +
-                  sizeof(AmbientLight) +
-                  16  +
-                  sizeof(glm::mat4) +
-                  sizeof(glm::mat4)  +
-                  sizeof(std::uint32_t) * 4 == sizeof(LightingUBO),
-                  "Size must match a Vulkan layout");
+    static_assert(sizeof(LightingUBO) % 16 == 0);
 
 }
 

@@ -3,6 +3,8 @@ FROM quay.io/fedora/fedora-toolbox:44
 # Copy package list
 COPY packages.txt /tmp/packages.txt
 
+ENV VK_ICD_FILENAMES=/run/host/usr/share/vulkan/icd.d
+
 # Install development tools
 RUN dnf -y upgrade --refresh
 RUN dnf -y install $(cat /tmp/packages.txt)
