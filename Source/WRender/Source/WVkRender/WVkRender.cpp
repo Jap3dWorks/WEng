@@ -73,6 +73,8 @@ void WVkRender::Initialize()
         );
 
     // Create Vulkan Device
+
+    WFLOG("[DEBUG] Initialize Device.");
     
     device_ = WVkDeviceRAII(
         {

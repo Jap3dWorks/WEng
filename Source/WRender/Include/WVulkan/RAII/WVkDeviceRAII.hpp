@@ -240,6 +240,10 @@ private:
         if (physical_device_name) {
             for (std::uint32_t i=0; i<properties.size(); ++i) {
                 if ((*physical_device_name) == properties[i].deviceName) {
+                    WFLOG("Selected device : {}", properties[i].deviceName);
+                    // TODO : use the alignment limit to when creating dynamic uniform buffers
+                    WFLOG("Device uniform buffer offset alignment limit : {}",
+                          properties[i].limits.minUniformBufferOffsetAlignment);
                     return valid_devices[i];
                 }
             }
@@ -247,10 +251,12 @@ private:
         }
         for (std::uint32_t i=0; i<properties.size(); ++i) {
             if (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU == properties[i].deviceType) {
+                WFLOG("Selected device : {}", properties[i].deviceName);
                 return valid_devices[i];
             }
         }
 
+        WFLOG("Selected device : {}", properties[0].deviceName);
         return valid_devices[0];
     }
     
