@@ -74,6 +74,26 @@ float Shadow(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj) {
     return (ndc.z - 0.002 > sm_val) ? 0.f : 1.f;
 }
 
+float3 DirectionalLight(float3 direction, float3 light_color, float3 V, float3 F0, float3 alb, float3 nrm, float2 rm) {
+    float3 L = normalize(-direction);
+    float NdotL = max(dot(nrm, L), 0.0);
+    float3 H = normalize(V + L);
+    float NdotH = max(dot(nrm, H), 0.0);
+    float HdotV = max(dot(H, V), 0.0);
+
+    float D = DistributionGGX(NdotH, rm.x);
+    float G = GeometrySmith(max(dot(nrm, V), 0.0), NdotL, rm.x);
+    float3 F = FresnelSchlick(HdotV, F0);
+
+    float3 specular = (D * G * F) / (4.0 * max(dot(nrm, V), 0.0) * NdotL + 1e-4);
+    float3 kD = (1.0 - F) * (1.0 - rm.y);
+    float3 radiance = light_color;
+
+    return (kD * alb / PI + specular) * radiance * NdotL; // * shdw;
+    // color += (kD * alb / PI + specular) * radiance * NdotL * shdw;
+
+}
+
 static const float PI = 3.14159265359;
 
 [shader("fragment")]
@@ -131,26 +151,31 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 
     float3 color = lighting_ubo.ambient_light.color.rgb * alb * ao + Lo + ems;
 
-    // TODO : apply shadow only on the first directional light
-    float shdw = Shadow(wpos, lighting_ubo.shadow_map_view, lighting_ubo.shadow_map_projection);
+
+    float lght_sdhw_factor =
+        Shadow(wpos, lighting_ubo.shadow_map_view, lighting_ubo.shadow_map_projection);
+
+    uint dl_shadow_casters = lighting_ubo.directional_shadow_casters;
 
     // PBR directional
-    for (uint i=0; i < lighting_ubo.directional_lights_count; i++) {
-        float3 L = normalize(-lighting_ubo.directional_lights[i].direction.rgb);
-        float NdotL = max(dot(nrm, L), 0.0);
-        float3 H = normalize(V + L);
-        float NdotH = max(dot(nrm, H), 0.0);
-        float HdotV = max(dot(H, V), 0.0);
-
-        float D = DistributionGGX(NdotH, rm.x);
-        float G = GeometrySmith(max(dot(nrm, V), 0.0), NdotL, rm.x);
-        float3 F = FresnelSchlick(HdotV, F0);
-
-        float3 specular = (D * G * F) / (4.0 * max(dot(nrm, V), 0.0) * NdotL + 1e-4);
-        float3 kD = (1.0 - F) * (1.0 - rm.y);
-        float3 radiance = lighting_ubo.directional_lights[i].color.rgb;
-
-        color += (kD * alb / PI + specular) * radiance * NdotL * shdw;
+    for (uint i=0; i < dl_shadow_casters; i++) {
+        if (lght_sdhw_factor) {
+            color += DirectionalLight(
+                lighting_ubo.directional_lights[i].direction.rgb,
+                lighting_ubo.directional_lights[i].color.rgb,
+                V, F0,
+                alb, nrm, rm
+                );            
+        }
+    }
+    
+    for (uint i=dl_shadow_casters; i < lighting_ubo.directional_lights_count; i++) {
+        color += DirectionalLight(
+            lighting_ubo.directional_lights[i].direction.rgb,
+            lighting_ubo.directional_lights[i].color.rgb,
+            V, F0,
+            alb, nrm, rm
+            );
     }
 
     return float4(color, 1.0);

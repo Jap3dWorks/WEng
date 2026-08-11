@@ -16,7 +16,7 @@ namespace wvk::raii::attachments {
             VK_FORMAT_D32_SFLOAT
                 };
 
-        static inline constexpr std::uint32_t DEFAULT_SHADOW_MAP_SIZE {1024};
+        static inline constexpr std::uint32_t DEFAULT_SHADOW_MAP_SIZE {2048};
 
     public:
 

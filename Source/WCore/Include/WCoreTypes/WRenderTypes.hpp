@@ -373,7 +373,7 @@ namespace wct::render {
         glm::mat4 shadow_map_projection{};
         glm::mat4 shadow_map_view_matrix{};
 
-        std::uint32_t directional_shadow_cast{};
+        std::uint32_t directional_shadow_casters{};
         float _padding_1[3];
     };
 

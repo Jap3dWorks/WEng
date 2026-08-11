@@ -159,7 +159,8 @@ public:
         std::span<wct::render::PointLight> in_point_lights,
         std::span<wcr::wid::WEntityComponentId> in_dl_ids,
         std::span<wct::render::DirectionalLight> in_directional_lights,
-        const wct::render::AmbientLight & in_ambient_light
+        const wct::render::AmbientLight & in_ambient_light,
+        std::uint32_t directional_shadow_casters=0
         )=0;
 
     virtual void InitializeShadowMap(

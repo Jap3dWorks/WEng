@@ -118,6 +118,17 @@ public:
         return index_pos_map_.at(index);
     }
 
+    void SwapDensePositions(std::size_t index_a, std::size_t index_b) {
+        std::size_t pos_a = index_pos_map_.at(index_a);
+        std::size_t pos_b = index_pos_map_.at(index_b);
+
+        std::swap(value_dense_[pos_a], value_dense_[pos_b]);
+        std::swap(index_dense_[pos_a], index_dense_[pos_b]);
+
+        index_pos_map_[index_a]=pos_b;
+        index_pos_map_[index_b]=pos_a;
+    }
+
     T * DenseData() noexcept {
         return value_dense_.data();
     }

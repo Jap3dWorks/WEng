@@ -724,9 +724,17 @@ void WVkRender::InitializeLights(
     std::span<wct::render::PointLight> in_point_lights,
     std::span<wcr::wid::WEntityComponentId> in_dl_ids,
     std::span<wct::render::DirectionalLight> in_directional_lights,
-    const wct::render::AmbientLight & in_ambient_light
+    const wct::render::AmbientLight & in_ambient_light,
+    std::uint32_t directional_shadow_casters
     ) {
     lighting_UBO_.Clear();
+
+    // Current state allows only 1 shadow caster light
+    assert(directional_shadow_casters <= 1);
+
+    lighting_UBO_.SetDirectionalLightShadowCasters(
+        directional_shadow_casters
+        );
 
     lighting_UBO_.PointLightDenseController()
         .Update(in_pl_ids, in_point_lights);

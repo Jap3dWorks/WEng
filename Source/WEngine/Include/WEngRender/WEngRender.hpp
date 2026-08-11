@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WCore/TypeTraits.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WComponents/Camera.hpp"
@@ -27,6 +28,62 @@
 #include <span>
 
 namespace wng::render {
+
+    template<typename LightsArray>
+    struct LightsRenderData {
+        
+        using ElementType = wcr::type_traits::ElementType_t<LightsArray>;
+
+        LightsArray lights;
+        std::array<
+            wcr::wid::WEntityComponentId,
+            wcr::type_traits::MaxSize_v<LightsArray>> ids;
+
+        std::size_t count{0};
+
+        void AddLight(ElementType light,
+                      wcr::wid::WEntityComponentId id) {
+            lights[count]=std::move(light);
+            ids[count]=id;
+            count++;
+        }
+
+        auto lights_begin() {
+            return lights.begin();
+        }
+
+        auto lights_end() {
+            return lights.begin() + count;
+        }
+
+        auto ids_begin() {
+            return ids.begin();
+        }
+
+        auto ids_end() {
+            return ids.begin() + count;
+        }
+
+        static constexpr auto Merge(LightsRenderData a, LightsRenderData b) {
+            std::vector<wcr::wid::WEntityComponentId> merged_ids{
+                a.ids_begin(), a.ids_end()};
+            
+            merged_ids.insert(
+                merged_ids.end(),
+                b.ids_begin(), b.ids_end()
+                );
+
+            std::vector<wct::render::DirectionalLight> merged_lights{
+                a.lights_begin(), a.lights_end()
+            };
+            merged_lights.insert(
+                merged_lights.end(),
+                b.lights_begin(), b.lights_end()
+                );
+
+            return std::tuple{std::move(merged_ids), std::move(merged_lights)};
+        }
+    };
 
     inline void InitializeLights(
         IRender * in_render,
@@ -77,9 +134,11 @@ namespace wng::render {
 
         // Directional Lights
 
-        decltype(wct::render::LightingUBO::directional_lights) directional_lights;
-        std::array<wcr::wid::WEntityComponentId, directional_lights.size()> dl_ids;
-        std::uint32_t dl_count=0;
+        using DirectionalLightsArray = decltype(wct::render::LightingUBO::directional_lights);
+
+        LightsRenderData<DirectionalLightsArray> directional_lights;
+        // Current state only 1 shadow caster / shadow map
+        LightsRenderData<DirectionalLightsArray> directional_shadow_caster;  
 
         struct ShadowMap {
             glm::mat4 projection{};
@@ -87,7 +146,14 @@ namespace wng::render {
         } shadow_map_dt{};
 
         in_level->ForEachComponent<wcm::light::Directional>(
-            [&in_level, &directional_lights, &dl_ids, &dl_count, &shadow_map_dt]
+            [&in_level,
+             &directional_lights,
+             &directional_shadow_caster,
+             // &directional_lights,
+             // &dl_ids,
+             // &dl_count,
+             &shadow_map_dt
+                ]
             (wcm::light::Directional * cmp) {
                 if (cmp->Get_active()) {
 
@@ -103,35 +169,41 @@ namespace wng::render {
 
                     dlight.direction = transform_cmp->Get_transform_matrix()[0];
 
-                    directional_lights[dl_count] = dlight;
-
-                    dl_ids[dl_count] = {
-                        in_level->Get_asset_id(),
-                        cmp->Get_entity_id(),
-                        in_level->GetComponentTypeId<wcm::light::Directional>(),
-                        wcr::wid::nullid
-                    };
-
-                    // Collect shadow map UBO data
                     if (cmp->Get_cast_shadows()) {
                         shadow_map_dt.projection =
                             // TODO shadow map size constant
                             wrd::light::ToShadowMapProjectionMatrix(
-                                3.f, 3.f, -8.f, 15.f
+                                2.f, 2.f, -8.f, 15.f
                                 );
 
                         // TODO update the interest point of the directional shadow map
                         //  using a system.
-                        shadow_map_dt.view =
-                            // glm::translate(glm::mat4(1), -glm::vec3{0.0, 0.0, 2.f});
-                        
-                            wrd::light::ToShadowMapViewMatrix(
-                                transform_cmp->Get_transform_matrix(),
-                                {0.f, 0.f, 0.f}  // TODO parametrizable
-                                );
-                    }
+                        shadow_map_dt.view = wrd::light::ToShadowMapViewMatrix(
+                            transform_cmp->Get_transform_matrix(),
+                            {0.f, 0.f, 0.f}  // TODO parametrizable
+                            );
 
-                    dl_count++;
+                        directional_shadow_caster.AddLight(
+                            dlight,
+                            {
+                                in_level->Get_asset_id(),
+                                cmp->Get_entity_id(),
+                                in_level->GetComponentTypeId<wcm::light::Directional>(),
+                                wcr::wid::nullid
+                            }   
+                            );
+                    }
+                    else {
+                        directional_lights.AddLight(
+                            dlight,
+                            {
+                                in_level->Get_asset_id(),
+                                cmp->Get_entity_id(),
+                                in_level->GetComponentTypeId<wcm::light::Directional>(),
+                                wcr::wid::nullid
+                            }
+                            );
+                    }
                 }
             }
             );
@@ -144,13 +216,21 @@ namespace wng::render {
                 amb_light = wrd::light::ToAmbientLight(*cmp);
             }
             );
-        
+
+        std::uint32_t dl_shdw = directional_shadow_caster.count;
+
+        auto[dl_ids, dl_lights] = LightsRenderData<DirectionalLightsArray>::Merge(
+            std::move(directional_shadow_caster),
+            std::move(directional_lights)
+            );
+
         in_render->InitializeLights(
             {pl_ids.begin(), pl_ids.begin() + pl_count},
             {point_lights.begin(), point_lights.begin() + pl_count},
-            {dl_ids.begin(), dl_ids.begin() + dl_count},
-            {directional_lights.begin(), directional_lights.begin() + dl_count},
-            amb_light
+            dl_ids,
+            dl_lights,
+            amb_light,
+            dl_shdw
             );
 
         in_render->InitializeShadowMap(

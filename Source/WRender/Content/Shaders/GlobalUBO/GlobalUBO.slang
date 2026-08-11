@@ -51,7 +51,7 @@ public struct LightingUBO {
 
     public float4x4 shadow_map_projection;
     public float4x4 shadow_map_view;
-    public uint directional_shadow_cast;
+    public uint directional_shadow_casters;
 };
 
 // Global bindings

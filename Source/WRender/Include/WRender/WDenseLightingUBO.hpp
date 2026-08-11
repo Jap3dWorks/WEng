@@ -89,24 +89,30 @@ namespace wrd::light {
         DenseStaticMemController& operator=(DenseStaticMemController&&) = default;
         virtual ~DenseStaticMemController() = default;
 
-        DenseStaticMemController(std::array<T,MAX> & light_mem) :
+        DenseStaticMemController(std::array<T,MAX> & light_mem, std::size_t shadow_casters) :
             _index_mem_(),
             light_set_(
                 Alloc<T>(light_mem),
                 Alloc<std::size_t>(_index_mem_)
-                ) {}
+                ),
+            shadow_casters_(shadow_casters) {}
 
+        // TODO is shadow caster?
         void Insert(std::size_t in_id, const T & in_value) {
             light_set_.Insert(in_id, in_value);
         }
 
         void Remove(std::size_t in_id) {
-            light_set_.Remove(in_id);
-        }
 
-        void Update(std::size_t in_id,
-                    wct::render::PointLight point_light) {
-            light_set_.Insert(in_id, point_light);
+            auto pos = light_set_.DensePosition(in_id);
+
+            if (shadow_casters_ > 0 && pos < shadow_casters_-1) {
+                auto last_caster_id = light_set_.IndexInDensePosition(shadow_casters_-1);
+                light_set_.SwapDensePositions(in_id, last_caster_id);
+                --shadow_casters_;
+            }
+
+            light_set_.Remove(in_id);
         }
 
         bool Contains(std::size_t in_id) const {
@@ -117,8 +123,13 @@ namespace wrd::light {
             return light_set_.Count();
         }
 
+        std::uint32_t ShadowCasters() const {
+            return shadow_casters_;
+        }
+
         void Clear() {
             light_set_.Clear();
+            shadow_casters_=0;
         }
 
         WNODISCARD std::uint32_t DensePosition(std::size_t in_id) const {
@@ -133,7 +144,9 @@ namespace wrd::light {
 
         LightSet light_set_{};
 
-        IndexArray _index_mem_{};
+        IndexArray _index_mem_{};  // real memory to allocate the index array
+
+        std::uint32_t shadow_casters_{0};
 
     };
 
@@ -141,8 +154,8 @@ namespace wrd::light {
     struct WLightDenseController {
 
         WLightDenseController() = default;
-        WLightDenseController(const WLightDenseController&) = delete;
-        WLightDenseController& operator=(const WLightDenseController&) = delete;
+        WLightDenseController(WLightDenseController const &) = delete;
+        WLightDenseController& operator=(WLightDenseController const &) = delete;
 
         WLightDenseController(WLightDenseController&&) = default;
         WLightDenseController& operator=(WLightDenseController&&) = default;
@@ -150,10 +163,12 @@ namespace wrd::light {
 
         WLightDenseController(
             std::array<T, MaxLights> & in_lights_data_ref,
-            CountType & in_count_ref
+            CountType & count_ref,
+            std::uint32_t & shadow_casters_ref
             ) :
-            count_ref_(&in_count_ref),
-            controller_(in_lights_data_ref)
+            count_ref_(&count_ref),
+            shadow_casters_(&shadow_casters_ref),
+            controller_(in_lights_data_ref, shadow_casters_ref) // TODO: pass index array too
             {}
 
         void Update(wcr::wid::WEntityComponentId in_component_id,
@@ -184,11 +199,13 @@ namespace wrd::light {
         void RemoveLight(wcr::wid::WEntityComponentId in_component_id) {
             controller_.Remove(in_component_id);
             *count_ref_ = controller_.Count();
+            *shadow_casters_ = controller_.ShadowCasters();
         }
 
         void Clear() {
             controller_.Clear();
             *count_ref_ = controller_.Count();
+            *shadow_casters_=controller_.ShadowCasters();
         }
 
 
@@ -237,12 +254,12 @@ namespace wrd::light {
     private:
 
         CountType * count_ref_{nullptr};
+        std::uint32_t * shadow_casters_{nullptr};
 
         DenseStaticMemController<
             T,
             MaxLights,
             StaticSpanAllocator> controller_;
-        
     };
 
     /**
@@ -283,15 +300,23 @@ namespace wrd::light {
         }
 
         WNODISCARD PointLightDC PointLightDenseController() {
-            return {lighting_ubo_.point_lights, lighting_ubo_.point_lights_count};
+            return {lighting_ubo_.point_lights,
+                    lighting_ubo_.point_lights_count,
+                    tmp_pl_shadow_cast_};
         }
 
         WNODISCARD DirectionalLightDC DirectionalLightDenseController() {
-            return {lighting_ubo_.directional_lights, lighting_ubo_.directional_lights_count};
+            return {lighting_ubo_.directional_lights,
+                    lighting_ubo_.directional_lights_count,
+                    lighting_ubo_.directional_shadow_casters};
         }
 
         void UpdateAmbientLight(const wct::render::AmbientLight & in_light) {
             lighting_ubo_.ambient_light = in_light;
+        }
+
+        void SetDirectionalLightShadowCasters(std::uint32_t shadow_casters) {
+            lighting_ubo_.directional_shadow_casters=shadow_casters;
         }
 
         const wct::render::LightingUBO & LightingUbo() const {
@@ -309,6 +334,9 @@ namespace wrd::light {
     private:
 
         wct::render::LightingUBO lighting_ubo_{};
-        
+
+        // TODO light index arrays
+
+        std::uint32_t tmp_pl_shadow_cast_;
     };
 }
