@@ -14,12 +14,14 @@ struct GLFWwindow;
 namespace wdw {
 
     struct WWindowSize {
-        std::uint32_t width{1280};
-        std::uint32_t height{720};
+        std::uint32_t width{1600};
+        std::uint32_t height{900};
     };
 
     class WWINDOW_API WWindow {
     public:
+
+        static inline constexpr WWindowSize INITIAL_WINDOW_SIZE {};
 
         using FramebufferSizeFun = void(*)(WWindow*, int width, int height);
 

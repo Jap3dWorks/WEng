@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <vulkan/vulkan_core.h>
+#include <numeric>
 
 namespace wvk::raii::pipelines::param_bindings {
 
@@ -179,7 +180,7 @@ namespace wvk::raii::pipelines::param_bindings {
                     std::uint8_t ubo_f_index =
                         std::min(static_cast<std::uint8_t>(UBOFrames-1),f);
 
-                    result.buffers[f]=dynamic_ubo_man.template GetUBO<frame_flag>(
+                    result.buffers[f]=dynamic_ubo_man.template GetBuffer<frame_flag>(
                                 desc.size, ubo_f_index
                         );
                     result.range=desc.size;

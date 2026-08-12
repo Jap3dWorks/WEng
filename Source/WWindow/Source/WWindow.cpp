@@ -104,9 +104,6 @@ void wdw::WWindow::Initialize() {
                 WLOG("GLFW Error {} : {}.", code, desc);
             });    
 
-    // Force wayland session
-    // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);    
-
     if(!glfwInit()) {
         WFLOG("glfwInit failed.");
         return;
@@ -115,8 +112,8 @@ void wdw::WWindow::Initialize() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     window_ = glfwCreateWindow(
-        800,
-        600,
+        INITIAL_WINDOW_SIZE.width,
+        INITIAL_WINDOW_SIZE.height,
         title_.c_str(),
         nullptr,
         nullptr
@@ -126,8 +123,6 @@ void wdw::WWindow::Initialize() {
         WFLOG("glfwCreateWindow failed.");
         return;
     }
-
-    // glfwSetWindowUserPointer(window_, this);
 
     static_windows_[window_] = this;
     static_callbacks_[this]={};

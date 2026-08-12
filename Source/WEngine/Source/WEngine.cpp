@@ -3,49 +3,11 @@
 #include "WCore/WCore.hpp"
 #include "WInterfaces/IRender.hpp"
 
-// #include "WImporter/WImporterTexture.hpp"
-// #include "WImporter/WImporterObj.hpp"
-// #include "WImporterRegister/WImporterRegister.hpp"
-
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
-// #include "WObjects/WEntity.hpp"
-// #include "WObjects/WComponent.hpp"
-// #include "WComponents/Transform.hpp"
-// #include "WComponents/Camera.hpp"
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
-
-#include "WEngRender/WEngRender.hpp"
-
-// WEngine WEngine::DefaultCreate()
-// {
-//     WEngine result(std::make_unique<WVkRender>());
-
-//     result.ImportersRegister().Register<wim::importer::WImporterObj>();
-//     result.ImportersRegister().Register<wim::importer::WImportTexture>();
-
-//     // Register Wengine systems
-    
-//     WSystems::WENGINE_WSYSTEMS_REG(result.state_.systems_reg);
-
-//     // This must be the first included system
-//     result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
-
-//     result.AddInitSystem(0, "SystemInit_RenderLevelResources");
-
-//     result.AddPostSystem(0, "SystemPost_UpdateRenderCamera");
-
-//     result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
-
-//     // Default Assets
-    
-
-//     // TODO Plugins Modules Loading
-
-//     return result;
-// }
 
 WEngine::WEngine(std::unique_ptr<IRender> && in_render)
 {

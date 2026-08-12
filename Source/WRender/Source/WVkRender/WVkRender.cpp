@@ -125,7 +125,7 @@ void WVkRender::Initialize()
     lighting_attachments_ = {
         device_.Device(),
         device_.PhysicalDevice(),
-        {dimensions[0], dimensions[1]},
+        { dimensions[0], dimensions[1] },
         WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
@@ -162,27 +162,27 @@ void WVkRender::Initialize()
         command_pool_.Value()
         );
 
-    WFLOG("[DEBUG] Initialize Global Descriptor Set.");
+    WFLOG("Initialize Global Descriptor Set.");
 
     global_descriptors_ = {
         device_.Device(),
         device_.PhysicalDevice()
     };
 
-    WFLOG("[DEBUG] Initialize Postprocess Global Descriptor Set.");
+    WFLOG("Initialize Postprocess Global Descriptor Set.");
 
     ppcess_global_descriptors_ = {
         device_.Device()
     };
 
-    WFLOG("[DEBUG] Initialize GBuffer Pipelines.");
+    WFLOG("Initialize GBuffer Pipelines.");
 
     gbuffers_pipelines_ = {
         device_.Device(),
         device_.PhysicalDevice()
     };
 
-    WFLOG("[DEBUG] Initialize Software Pipelines.");
+    WFLOG("Initialize Software Pipelines.");
 
     shadow_map_pipeline_ = {
         device_.Device(),
@@ -190,28 +190,28 @@ void WVkRender::Initialize()
         global_descriptors_.DescriptorSetLayout()
     };
 
-    WFLOG("[DEBUG] Initialize Lighting Pipeline.");
+    WFLOG("Initialize Lighting Pipeline.");
 
     lighting_pipeline_ = {
         device_.Device(),
         global_descriptors_.DescriptorSetLayout()
     };
 
-    WFLOG("[DEBUG] Initialize Postprocess Pipelines.");
+    WFLOG("Initialize Postprocess Pipelines.");
 
     ppcess_pipelines_ = {
         device_.Device(),
         device_.PhysicalDevice()
     };
 
-    WFLOG("[DEBUG] Initialize tonemapping pipeline");
+    WFLOG("Initialize tonemapping pipeline");
 
     tonemapping_pipeline_ = {
         device_.Device(),
         swap_chain_.Format()
     };
     
-    WFLOG("[DEBUG] Initialize swap chain pipeline");
+    WFLOG("Initialize swap chain pipeline");
 
     swap_chain_pipeline_ = {
         device_.Device(),

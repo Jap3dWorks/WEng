@@ -13,6 +13,73 @@ namespace wvk::raii {}
 
 class WVkDeviceRAII {
 
+private:
+    
+    static VkPhysicalDevice CollectPhysicalDevice(
+        VkInstance instance,
+        VkSurfaceKHR surface,
+        const std::vector<std::string_view> & device_extensions,
+        std::optional<std::string> physical_device_name
+        ) {
+
+        uint32_t device_count = 0;
+        vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
+        if (device_count == 0)
+        {
+            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+        }
+    
+        std::vector<VkPhysicalDevice> devices(device_count);
+        vkEnumeratePhysicalDevices(instance, &device_count, devices.data());
+
+        std::vector<VkPhysicalDevice> valid_devices{};
+
+        for (const auto &device : devices)
+        {
+            if (wvk::vulkan::IsDeviceSuitable(device, surface, device_extensions))
+            {
+                valid_devices.push_back(device);
+            }
+        }
+
+        std::vector<VkPhysicalDeviceProperties> properties;
+        properties.resize(valid_devices.size());
+
+        for (std::uint32_t i=0; i < properties.size(); ++i) {
+            vkGetPhysicalDeviceProperties(
+                valid_devices[i],
+                &properties[i]
+                );
+        }
+
+        auto get_result = [&]
+            (VkPhysicalDevice physical_device, VkPhysicalDeviceProperties prop) {
+            WLOG("Selected device : {}", prop.deviceName);
+            WLOG("Device uniform buffer offset alignment limit : {}",
+                 prop.limits.minUniformBufferOffsetAlignment);
+
+            return physical_device;
+        };
+
+        if (physical_device_name) {
+            for (std::uint32_t i=0; i<properties.size(); ++i) {
+                if ((*physical_device_name) == properties[i].deviceName) {
+                    return get_result(valid_devices[i], properties[i]);
+                }
+            }
+            
+        }
+        for (std::uint32_t i=0; i<properties.size(); ++i) {
+            if (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU == properties[i].deviceType) {
+                return get_result(valid_devices[i], properties[i]);
+            }
+        }
+
+        return get_result(valid_devices[0], properties[0]);
+    }
+    
+
+
 public:
     
     WVkDeviceRAII()=default;
@@ -25,9 +92,7 @@ public:
                   std::optional<std::string> physical_device_name=std::nullopt
         ) {
 
-        // Pick Physical Device
-
-        vk_physical_device =
+        vk_physical_device_ =
             CollectPhysicalDevice(
                 in_instance,
                 in_surface,
@@ -35,9 +100,9 @@ public:
                 physical_device_name
                 );
 
-        msaa_samples = wvk::vulkan::GetMaxUsableSampleCount(vk_physical_device);
+        msaa_samples_ = wvk::vulkan::GetMaxUsableSampleCount(vk_physical_device_);
 
-        if (vk_physical_device == VK_NULL_HANDLE)
+        if (vk_physical_device_ == VK_NULL_HANDLE)
         {
             throw std::runtime_error("Failed to find a suitable GPU!");
         }
@@ -45,7 +110,7 @@ public:
         // Create Logical Device
 
         wvk::vulkan::QueueFamilyIndices indices =
-            wvk::vulkan::FindQueueFamilies(vk_physical_device, in_surface);
+            wvk::vulkan::FindQueueFamilies(vk_physical_device_, in_surface);
         std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
         std::set<uint32_t> unique_queue_families = {
             indices.graphics_family.value(),
@@ -118,20 +183,20 @@ public:
 
         wvk::vulkan::ExecVkProcChecked(vkCreateDevice,
                                    "Failed to create logical device!",
-                                   vk_physical_device,
+                                   vk_physical_device_,
                                    &create_info,
                                    nullptr,
-                                   &vk_device);
+                                   &vk_device_);
     
-        vkGetDeviceQueue(vk_device,
+        vkGetDeviceQueue(vk_device_,
                          indices.graphics_family.value(),
                          0,
-                         &vk_graphics_queue);
+                         &vk_graphics_queue_);
     
-        vkGetDeviceQueue(vk_device,
+        vkGetDeviceQueue(vk_device_,
                          indices.present_family.value(),
                          0,
-                         &vk_present_queue);
+                         &vk_present_queue_);
     }
 
     ~WVkDeviceRAII() {
@@ -142,17 +207,17 @@ public:
     WVkDeviceRAII & operator=(const WVkDeviceRAII & other) = delete;
     
     WVkDeviceRAII(WVkDeviceRAII && other) noexcept :
-        vk_physical_device(std::move(other.vk_physical_device)),
-        vk_device(std::move(other.vk_device)),
-        msaa_samples(std::move(other.msaa_samples)),
-        vk_graphics_queue(std::move(other.vk_graphics_queue)),
-        vk_present_queue(std::move(other.vk_present_queue))
+        vk_physical_device_(std::move(other.vk_physical_device_)),
+        vk_device_(std::move(other.vk_device_)),
+        msaa_samples_(std::move(other.msaa_samples_)),
+        vk_graphics_queue_(std::move(other.vk_graphics_queue_)),
+        vk_present_queue_(std::move(other.vk_present_queue_))
         {
-            other.vk_physical_device = VK_NULL_HANDLE;
-            other.vk_device = VK_NULL_HANDLE;
-            other.msaa_samples = VK_SAMPLE_COUNT_1_BIT;
-            other.vk_graphics_queue = VK_NULL_HANDLE;
-            other.vk_present_queue = VK_NULL_HANDLE;
+            other.vk_physical_device_ = VK_NULL_HANDLE;
+            other.vk_device_ = VK_NULL_HANDLE;
+            other.msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
+            other.vk_graphics_queue_ = VK_NULL_HANDLE;
+            other.vk_present_queue_ = VK_NULL_HANDLE;
         }
 
     WVkDeviceRAII & operator=(WVkDeviceRAII && other) {
@@ -160,17 +225,17 @@ public:
 
             Destroy();
 
-            vk_physical_device = std::move(other.vk_physical_device);
-            vk_device = std::move(other.vk_device);
-            msaa_samples = std::move(other.msaa_samples);
-            vk_graphics_queue = std::move(other.vk_graphics_queue);
-            vk_present_queue = std::move(other.vk_present_queue);
+            vk_physical_device_ = std::move(other.vk_physical_device_);
+            vk_device_ = std::move(other.vk_device_);
+            msaa_samples_ = std::move(other.msaa_samples_);
+            vk_graphics_queue_ = std::move(other.vk_graphics_queue_);
+            vk_present_queue_ = std::move(other.vk_present_queue_);
 
-            other.vk_physical_device = VK_NULL_HANDLE;
-            other.vk_device = VK_NULL_HANDLE;
-            other.msaa_samples = VK_SAMPLE_COUNT_1_BIT;
-            other.vk_graphics_queue = VK_NULL_HANDLE;
-            other.vk_present_queue = VK_NULL_HANDLE;
+            other.vk_physical_device_ = VK_NULL_HANDLE;
+            other.vk_device_ = VK_NULL_HANDLE;
+            other.msaa_samples_ = VK_SAMPLE_COUNT_1_BIT;
+            other.vk_graphics_queue_ = VK_NULL_HANDLE;
+            other.vk_present_queue_ = VK_NULL_HANDLE;
         }
 
         return *this;
@@ -179,103 +244,44 @@ public:
 public:
 
     VkPhysicalDevice PhysicalDevice() const noexcept {
-        return vk_physical_device;
+        return vk_physical_device_;
     }
 
     VkDevice Device() const noexcept {
-        return vk_device;
+        return vk_device_;
     }
 
     VkSampleCountFlagBits MSAASamples() const noexcept {
-        return msaa_samples;
+        return msaa_samples_;
     }
 
     VkQueue GraphicsQueue() const noexcept {
-        return vk_graphics_queue;
+        return vk_graphics_queue_;
     }
 
     VkQueue PresentQueue() const noexcept {
-        return vk_present_queue;
+        return vk_present_queue_;
     }
 
 private:
 
-    VkPhysicalDevice CollectPhysicalDevice(
-        VkInstance instance,
-        VkSurfaceKHR surface,
-        const std::vector<std::string_view> & device_extensions,
-        std::optional<std::string> physical_device_name
-        ) const {
-
-        uint32_t device_count = 0;
-        vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
-        if (device_count == 0)
-        {
-            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
-        }
-    
-        std::vector<VkPhysicalDevice> devices(device_count);
-        vkEnumeratePhysicalDevices(instance, &device_count, devices.data());
-
-        std::vector<VkPhysicalDevice> valid_devices{};
-
-        for (const auto &device : devices)
-        {
-            if (wvk::vulkan::IsDeviceSuitable(device, surface, device_extensions))
-            {
-                valid_devices.push_back(device);
-            }
-        }
-
-        std::vector<VkPhysicalDeviceProperties> properties;
-        properties.resize(valid_devices.size());
-
-        for (std::uint32_t i=0; i < properties.size(); ++i) {
-            vkGetPhysicalDeviceProperties(
-                valid_devices[i],
-                &properties[i]
-                );
-        }
-
-        if (physical_device_name) {
-            for (std::uint32_t i=0; i<properties.size(); ++i) {
-                if ((*physical_device_name) == properties[i].deviceName) {
-                    WFLOG("Selected device : {}", properties[i].deviceName);
-                    // TODO : use the alignment limit to when creating dynamic uniform buffers
-                    WFLOG("Device uniform buffer offset alignment limit : {}",
-                          properties[i].limits.minUniformBufferOffsetAlignment);
-                    return valid_devices[i];
-                }
-            }
-            
-        }
-        for (std::uint32_t i=0; i<properties.size(); ++i) {
-            if (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU == properties[i].deviceType) {
-                WFLOG("Selected device : {}", properties[i].deviceName);
-                return valid_devices[i];
-            }
-        }
-
-        WFLOG("Selected device : {}", properties[0].deviceName);
-        return valid_devices[0];
-    }
-    
     void Destroy() {
-        if (vk_device != VK_NULL_HANDLE) {
+        if (vk_device_ != VK_NULL_HANDLE) {
             
-            vkDeviceWaitIdle(vk_device);
-            vkDestroyDevice(vk_device, nullptr);
+            vkDeviceWaitIdle(vk_device_);
+            vkDestroyDevice(vk_device_, nullptr);
             
-            vk_device = VK_NULL_HANDLE;            
+            vk_device_ = VK_NULL_HANDLE;            
         }
     }
 
-    VkPhysicalDevice vk_physical_device{VK_NULL_HANDLE};
-    VkDevice vk_device {VK_NULL_HANDLE};
+    VkPhysicalDevice vk_physical_device_{VK_NULL_HANDLE};
+    
+    VkDevice vk_device_ {VK_NULL_HANDLE};
 
-    VkSampleCountFlagBits msaa_samples { VK_SAMPLE_COUNT_1_BIT };
+    VkSampleCountFlagBits msaa_samples_ { VK_SAMPLE_COUNT_1_BIT };
 
-    VkQueue vk_graphics_queue {VK_NULL_HANDLE};
-    VkQueue vk_present_queue {VK_NULL_HANDLE};
+    VkQueue vk_graphics_queue_ {VK_NULL_HANDLE};
+    VkQueue vk_present_queue_ {VK_NULL_HANDLE};
 
 };

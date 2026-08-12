@@ -4,25 +4,35 @@
 #include "WVulkan/Vk/WVkBuffer.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
-#include "WCore/WDebug.hpp"
-#include "WCore/Lists.hpp"
-#include "WCore/IdPool.hpp"
 
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
 #include <vulkan/vulkan_core.h>
-#include <variant>
 #include <cassert>
 #include <algorithm>
-#include <numeric>
 
-// TODO Reescale Buffer size.
+// TODO Reescale Buffer size when limits are reached.
  
 namespace wvk::raii::ubo_manager {
 
-    using BlockSizeIntT = std::uint8_t;
+    using BlockSizeIntT = std::uint16_t;  // increase to 16 bit
+
+    constexpr std::uint16_t BASE_BLOCK_ALIGNMENT=64;
+
+    static constexpr auto BlockSizesSequence() {
+
+        auto index_seq = std::make_integer_sequence<std::uint32_t, 12>();
+
+        auto make_seq = []
+            <std::uint32_t... Ints>
+            (std::integer_sequence<std::uint32_t, Ints...> idxseq) constexpr -> auto {
+            return std::integer_sequence<BlockSizeIntT, ((Ints + 1) * BASE_BLOCK_ALIGNMENT)...>{};
+        };
+
+        return make_seq(index_seq);
+    }
 
     template<BlockSizeIntT N>
     struct BlockSizeT : std::false_type {};
@@ -31,17 +41,13 @@ namespace wvk::raii::ubo_manager {
     requires (N % 16 == 0)
     struct BlockSizeT<N> : std::true_type {
         static constexpr BlockSizeIntT Size{N};
-        std::uint8_t block_size[N];
+        std::byte block_size[N];
     };
 
-    static_assert(sizeof(BlockSizeT<16>)== 16);
-    static_assert(sizeof(BlockSizeT<32>)== 32);
-    static_assert(sizeof(BlockSizeT<64>)== 64);
-    static_assert(sizeof(BlockSizeT<128>)== 128);
+    static_assert(sizeof(BlockSizeT<64>) == 64);
+    static_assert(sizeof(BlockSizeT<128>) == 128);
     static_assert(sizeof(BlockSizeT<240>) == 240);
-
-    template<typename T, T N>
-    concept _CBlockSizeIntT = requires {(N % 16 == 0);};
+    static_assert(sizeof(BlockSizeT<256>) == 256);
 
     template<std::uint8_t FramesInFlight, BlockSizeIntT BlockSize> 
     requires (BlockSizeT<BlockSize>::value)
@@ -68,7 +74,6 @@ namespace wvk::raii::ubo_manager {
                     
                 device_ = VK_NULL_HANDLE;
             }
-            // position_track = {};
         }
 
         BlockSizeUBOs(
@@ -236,7 +241,7 @@ namespace wvk::raii::ubo_manager {
             return position_track.Count();
         }
 
-        WVkBuffer GetUBO(std::uint8_t frame_index) const  {
+        WVkBuffer GetBuffer(std::uint8_t frame_index) const  {
             assert(frame_index < FramesInFlight);
             return vk_buffers[frame_index];
         }
