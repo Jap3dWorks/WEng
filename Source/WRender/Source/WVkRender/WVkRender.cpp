@@ -31,7 +31,7 @@
 
 void WVkRender::WaitIdle() const
 {
-    vkDeviceWaitIdle(device_.Device());
+    vkDeviceWaitIdle(device_.GetDevice());
 }
 
 void WVkRender::SetWindow(wdw::WWindow * in_window) {
@@ -76,7 +76,7 @@ void WVkRender::Initialize()
 
     WFLOG("[DEBUG] Initialize Device.");
     
-    device_ = WVkDeviceRAII(
+    device_ = wvk::raii::Device(
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
             VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME
@@ -88,8 +88,8 @@ void WVkRender::Initialize()
         );
 
     swap_chain_ = WVkSwapchainRAII(
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         surface_.Value(),
         dimensions[0],
         dimensions[1]
@@ -98,8 +98,8 @@ void WVkRender::Initialize()
     // GBuffers Attachments
 
     gbuffers_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         WVK_GBUFFER_RENDER_COLOR_FORMAT,
         WVK_GBUFFER_RENDER_EMISSION_FORMAT,
@@ -112,8 +112,8 @@ void WVkRender::Initialize()
     // Shadow map Attachments
 
     shadow_map_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         {
             wvk::raii::attachments::ShadowMap<FramesInFlight()>::DEFAULT_SHADOW_MAP_SIZE,
             wvk::raii::attachments::ShadowMap<FramesInFlight()>::DEFAULT_SHADOW_MAP_SIZE
@@ -123,8 +123,8 @@ void WVkRender::Initialize()
     // Lighting Attachments
 
     lighting_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
@@ -132,8 +132,8 @@ void WVkRender::Initialize()
     // Postprocess Attachments
 
     postprocess_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         {dimensions[0], dimensions[1]},
         WVK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
@@ -141,8 +141,8 @@ void WVkRender::Initialize()
     // tonemapping Attachments
 
     tonemapping_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         {dimensions[0], dimensions[1]},
         swap_chain_.Format()
     };
@@ -150,42 +150,42 @@ void WVkRender::Initialize()
     // Create Render Command Pool
 
     command_pool_ = WVkCommandPoolRAII( 
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         surface_.Value()
         );
 
     render_plane_ = WVkRenderPlaneRAII(
-        device_.Device(),
-        device_.PhysicalDevice(),
-        device_.GraphicsQueue(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
+        device_.GetGraphicsQueue(),
         command_pool_.Value()
         );
 
     WFLOG("Initialize Global Descriptor Set.");
 
     global_descriptors_ = {
-        device_.Device(),
-        device_.PhysicalDevice()
+        device_.GetDevice(),
+        device_.GetPhysicalDevice()
     };
 
     WFLOG("Initialize Postprocess Global Descriptor Set.");
 
     ppcess_global_descriptors_ = {
-        device_.Device()
+        device_.GetDevice()
     };
 
     WFLOG("Initialize GBuffer Pipelines.");
 
     gbuffers_pipelines_ = {
-        device_.Device(),
-        device_.PhysicalDevice()
+        device_.GetDevice(),
+        device_.GetPhysicalDevice()
     };
 
     WFLOG("Initialize Software Pipelines.");
 
     shadow_map_pipeline_ = {
-        device_.Device(),
+        device_.GetDevice(),
         wvk::raii::pipelines::ShadowMap<FramesInFlight()>::SHADER_PATH,
         global_descriptors_.DescriptorSetLayout()
     };
@@ -193,28 +193,28 @@ void WVkRender::Initialize()
     WFLOG("Initialize Lighting Pipeline.");
 
     lighting_pipeline_ = {
-        device_.Device(),
+        device_.GetDevice(),
         global_descriptors_.DescriptorSetLayout()
     };
 
     WFLOG("Initialize Postprocess Pipelines.");
 
     ppcess_pipelines_ = {
-        device_.Device(),
-        device_.PhysicalDevice()
+        device_.GetDevice(),
+        device_.GetPhysicalDevice()
     };
 
     WFLOG("Initialize tonemapping pipeline");
 
     tonemapping_pipeline_ = {
-        device_.Device(),
+        device_.GetDevice(),
         swap_chain_.Format()
     };
     
     WFLOG("Initialize swap chain pipeline");
 
     swap_chain_pipeline_ = {
-        device_.Device(),
+        device_.GetDevice(),
         swap_chain_.Format()
     };
 
@@ -222,19 +222,19 @@ void WVkRender::Initialize()
         command_pool_.
         CreateCommandBuffers();
 
-    render_sync_ = {device_.Device(),
+    render_sync_ = {device_.GetDevice(),
                    swap_chain_.Images().size()};
     
     asset_render_data_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
-        device_.GraphicsQueue(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
+        device_.GetGraphicsQueue(),
         command_pool_.Value()
     };
 
     dynamic_ubo_manager_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         wvk::raii::ubo_manager::INITIAL_UBO_COUNT
     };
 
@@ -249,7 +249,7 @@ void WVkRender::Initialize()
 void WVkRender::Draw()
 {
     vkWaitForFences(
-        device_.Device(),
+        device_.GetDevice(),
         1,
         &render_sync_.Fence(frame_index_),
         VK_TRUE,
@@ -259,7 +259,7 @@ void WVkRender::Draw()
     uint32_t image_index;
 
     VkResult result = vkAcquireNextImageKHR(
-        device_.Device(),
+        device_.GetDevice(),
         swap_chain_.Swapchain(),
         UINT64_MAX,
         render_sync_.ImageAvailableSemaphore(semaphore_index_),
@@ -276,7 +276,7 @@ void WVkRender::Draw()
     }
 
     vkResetFences(
-        device_.Device(),
+        device_.GetDevice(),
         1,
         &render_sync_.Fence(frame_index_)
         );
@@ -288,7 +288,7 @@ void WVkRender::Draw()
         );
 
     auto shadow_map_bindings = wvk::render::rec_cmd_bffr::GBuffers(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         gbuffers_attachments_,
@@ -298,7 +298,7 @@ void WVkRender::Draw()
         );
 
     wvk::render::rec_cmd_bffr::ShadowMap(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         shadow_map_attachments_,
@@ -308,7 +308,7 @@ void WVkRender::Draw()
         );
 
     wvk::render::rec_cmd_bffr::Lighting(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         lighting_attachments_,
@@ -321,7 +321,7 @@ void WVkRender::Draw()
         );
 
     swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Postprocess(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         postprocess_attachments_,
@@ -335,7 +335,7 @@ void WVkRender::Draw()
         );
 
     swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Tonemapping(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         tonemapping_attachments_,
@@ -346,7 +346,7 @@ void WVkRender::Draw()
         );
 
     wvk::render::rec_cmd_bffr::SwapChain(
-        device_.Device(),
+        device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
         image_index,
@@ -384,7 +384,7 @@ void WVkRender::Draw()
     wvk::vulkan::ExecVkProcChecked(
         vkQueueSubmit,
         "Failed to submit draw command buffer",
-        device_.GraphicsQueue(),
+        device_.GetGraphicsQueue(),
         1,
         &submit_info,
         render_sync_.Fence(frame_index_)
@@ -400,7 +400,7 @@ void WVkRender::Draw()
     present_info.pResults = VK_NULL_HANDLE;
 
     result = vkQueuePresentKHR(
-        device_.PresentQueue(),
+        device_.GetPresentQueue(),
         &present_info);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
@@ -553,13 +553,13 @@ void WVkRender::RefreshPipelines() {}
 
 void WVkRender::ClearPipelines() {
     gbuffers_pipelines_ = {
-        device_.Device(),
-        device_.PhysicalDevice()
+        device_.GetDevice(),
+        device_.GetPhysicalDevice()
     };
 
     ppcess_pipelines_ = {
-        device_.Device(),
-        device_.PhysicalDevice()
+        device_.GetDevice(),
+        device_.GetPhysicalDevice()
     };
 }
 
@@ -666,8 +666,8 @@ void WVkRender::RecreateSwapChain() {
     swap_chain_ = {};
 
     swap_chain_ = WVkSwapchainRAII(
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         surface_.Value(),
         dimensions[0],
         dimensions[1]
@@ -676,8 +676,8 @@ void WVkRender::RecreateSwapChain() {
     // Recreate Attachments
 
     gbuffers_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         WVK_GBUFFER_RENDER_COLOR_FORMAT,
         WVK_GBUFFER_RENDER_EMISSION_FORMAT,
@@ -688,22 +688,22 @@ void WVkRender::RecreateSwapChain() {
     };
 
     lighting_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         WVK_LIGHTING_RENDER_COLOR_FORMAT        
     };
 
     postprocess_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         WVK_POSTPROCESS_RENDER_COLOR_FORMAT        
     };
 
     tonemapping_attachments_ = {
-        device_.Device(),
-        device_.PhysicalDevice(),
+        device_.GetDevice(),
+        device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
         swap_chain_.Format()
     };

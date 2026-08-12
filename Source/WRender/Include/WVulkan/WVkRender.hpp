@@ -33,7 +33,7 @@
 
 #include "WRender/WDenseLightingUBO.hpp"
 
-#include "WVulkan/RAII/WVkDeviceRAII.hpp"
+#include "WVulkan/RAII/Device.hpp"
 #include "WVulkan/RAII/WVkInstanceRAII.hpp"
 #include "WVulkan/RAII/WVkSurfaceRAII.hpp"
 
@@ -143,7 +143,7 @@ public:
     wct::render::RenderSize RenderSize() const override { return render_size_; }
 
     WNODISCARD VkDevice Device() const noexcept
-    { return device_.Device(); }
+    { return device_.GetDevice(); }
 
     WNODISCARD const WVkCommandPoolRAII & RenderCommandPool() const noexcept
     { return command_pool_; }
@@ -200,7 +200,7 @@ private:
 
     WVkInstanceRAII instance_{};
     WVkSurfaceRAII surface_{};
-    WVkDeviceRAII device_{};
+    wvk::raii::Device device_{};
     WVkSwapchainRAII swap_chain_{};
 
     wdw::WWindow * window_{nullptr};
