@@ -29,10 +29,11 @@ namespace wcm {
         WPROPERTY(float, field_of_view, glm::pi<float>() * 0.25);
         WPROPERTY(float, near_clipping, 0.01f);
         WPROPERTY(float, far_clipping, 100.f);
-        // Focus Distance
-        WPROPERTY(float, focus_distance, 0)
 
-            WPROPERTY(wcr::wid::WRenderId, render_id, 0);
+        // Focus Distance
+        WPROPERTY(float, focus_distance, 1.5f);
+
+        WPROPERTY(wcr::wid::WRenderId, render_id, 0);
 
         WPROPERTY(PostprocessAssignments, postprocess_pipelines, );
 
@@ -63,6 +64,16 @@ namespace wcm {
             }
         }
 
+        WNODISCARD
+        glm::vec3 GetPointOfInterest(glm::vec3 point, glm::vec3 direction) const {
+            return point + glm::normalize(direction) * focus_distance;
+        }
+
+        WNODISCARD static inline constexpr
+        glm::vec3 GetCameraFrontVector(glm::mat4 transform_matrix) {
+            // camera fron vector is -z.
+            return -transform_matrix[2];
+        }
 
     };
 

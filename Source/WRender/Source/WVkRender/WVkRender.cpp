@@ -751,7 +751,7 @@ void WVkRender::InitializeLights(
         );
 }
 
-void WVkRender::InitializeShadowMap(
+void WVkRender::UpdateShadowMap(
     glm::mat4 project_matrix,
     glm::mat4 view_matrix
     )  {
@@ -760,6 +760,8 @@ void WVkRender::InitializeShadowMap(
         view_matrix
         );
 
+    // TODO Refresh lights can be a separated method.
+    // And an engine System can call it each frame.
     global_descriptors_.StaticUpdateLightingUBO(
         lighting_UBO_.LightingUbo()
         );

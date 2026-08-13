@@ -242,14 +242,18 @@ WEngine weng::defaults::DefaultEngine() {
     result.RegSystems(WSystems::WENGINE_WSYSTEMS_REG);
 
     // This must be the first included system
-    
-    result.AddInitSystem(0, "SystemInit_InitializeTransformsMatrix");
 
-    result.AddInitSystem(0, "SystemInit_RenderLevelResources");
+    // nullid level is used for global levels systems.
 
-    result.AddPostSystem(0, "SystemPost_UpdateRenderCamera");
+    result.AddInitSystem(wcr::wid::nullid, "SystemInit_InitializeTransformsMatrix");
 
-    result.AddEndSystem(0, "SystemEnd_RenderLevelResources");
+    result.AddInitSystem(wcr::wid::nullid, "SystemInit_RenderLevelResources");
+
+    result.AddPostSystem(wcr::wid::nullid, "SystemPost_UpdateRenderCamera");
+
+    result.AddPostSystem(wcr::wid::nullid, "SystemPost_UpdateShadowMap");
+
+    result.AddEndSystem(wcr::wid::nullid, "SystemEnd_RenderLevelResources");
 
     // Default Assets
 

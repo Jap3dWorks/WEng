@@ -34,11 +34,12 @@ namespace spacers::gltflevel {
         level->CreateComponent<wcm::CameraInput>(cid);  // User input
 
         wcm::Camera & cameracomp = level->GetComponent<wcm::Camera>(cid);
+        // TODO render id as a constant
         cameracomp.Set_render_id(1); // The renderable camera
         wcm::Transform * tcmp = &level->GetComponent<wcm::Transform>(cid);
 
         tcmp->Set_rotation({0.0f, 0.0f, 0.0f});
-        tcmp->Set_position({0.0, 0.0f, .5f});
+        tcmp->Set_position({0.0, 0.2f, 1.f});
 
         // postprocess
 

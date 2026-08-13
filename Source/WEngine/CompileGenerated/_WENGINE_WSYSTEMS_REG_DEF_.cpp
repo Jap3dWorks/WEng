@@ -21,6 +21,8 @@ START_DEFINE_WSYSTEMS_REG(WENGINE, WSYSTEMS)
 
     CALL_WSYSTEM_REGISTER(SystemPost_UpdateRenderCamera)
 
+    CALL_WSYSTEM_REGISTER(SystemPost_UpdateShadowMap)
+
     CALL_WSYSTEM_REGISTER(SystemEnd_RenderLevelResources)
 
 END_DEFINE_WSYSTEMS_REG()

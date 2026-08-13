@@ -61,7 +61,15 @@ float3 WPos(float depth, float2 uv, /* float4x4 view, */ float4x4 inv_view, floa
     return mul(inv_view, float4(view_pos.xyz, 1.0)).xyz;
 }
 
-float Shadow(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj) {
+float ShadowLightFactor(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj) {
+
+    float sm_p_step=1.f / 2048.f;
+    
+    float weights[] = {0.0759493670886 , 0.126582278481 , 0.0759493670886,
+                       0.126582278481, 0.189873417722 , 0.126582278481,
+                       0.0759493670886, 0.126582278481, 0.0759493670886};
+
+    float samples[9]={0.f};
 
     float4 shadow = mul(shadow_proj, mul(shadow_view, float4(wpos,1.f)));
 
@@ -69,9 +77,28 @@ float Shadow(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj) {
 
     float2 uv = saturate(ndc.xy * 0.5 + 0.5);
 
-    float sm_val = shadow_map.Sample(uv).r;
+    float sm_val=0;
+    for(int i=-1; i<2; ++i) {
+        for(int j=-1; j<2; ++j) {
+            float dist = shadow_map
+                .Sample(uv + float2(sm_p_step * i, sm_p_step * j)).r;
+            
+            samples[((j+1) * 3) + i+1] = (float)(ndc.z - 0.002 < dist);
+        }
+    }
 
-    return (ndc.z - 0.002 > sm_val) ? 0.f : 1.f;
+    for(int i=-1; i<2; ++i) {
+        for(int j=-1; j<2; ++j) {
+            sm_val += samples[((j+1)*3) + i+1] * weights[((j+1)*3) + i+1];
+        }
+    }
+
+    float xborder = saturate(abs((uv.x * 2  - 1) * 5.f) - 4.f);
+    float yborder = saturate(abs((uv.y * 2  - 1) * 5.f) - 4.f);
+
+    float border = max(smoothstep(0.f,1.f, xborder), smoothstep(0.f, 1.f, yborder));
+
+    return saturate(sm_val + border);
 }
 
 float3 DirectionalLight(float3 direction, float3 light_color, float3 V, float3 F0, float3 alb, float3 nrm, float2 rm) {
@@ -151,22 +178,20 @@ float4 fsMain(VSLightingOutput vertexOutput) : SV_TARGET
 
     float3 color = lighting_ubo.ambient_light.color.rgb * alb * ao + Lo + ems;
 
-
-    float lght_sdhw_factor =
-        Shadow(wpos, lighting_ubo.shadow_map_view, lighting_ubo.shadow_map_projection);
+    float dl_shadowlight_factor =
+        ShadowLightFactor(wpos, lighting_ubo.shadow_map_view, lighting_ubo.shadow_map_projection);
 
     uint dl_shadow_casters = lighting_ubo.directional_shadow_casters;
 
     // PBR directional
     for (uint i=0; i < dl_shadow_casters; i++) {
-        if (lght_sdhw_factor) {
-            color += DirectionalLight(
-                lighting_ubo.directional_lights[i].direction.rgb,
-                lighting_ubo.directional_lights[i].color.rgb,
-                V, F0,
-                alb, nrm, rm
-                );            
-        }
+        color += DirectionalLight(
+            lighting_ubo.directional_lights[i].direction.rgb,
+            lighting_ubo.directional_lights[i].color.rgb,
+            V, F0,
+            alb, nrm, rm
+            ) * dl_shadowlight_factor;
+
     }
     
     for (uint i=dl_shadow_casters; i < lighting_ubo.directional_lights_count; i++) {

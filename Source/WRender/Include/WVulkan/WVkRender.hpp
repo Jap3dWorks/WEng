@@ -169,7 +169,7 @@ public:
         std::uint32_t directional_shadow_casters=0
         ) override;
 
-    void InitializeShadowMap(
+    void UpdateShadowMap(
         glm::mat4 project_matrix,
         glm::mat4 view_matrix
         ) override;

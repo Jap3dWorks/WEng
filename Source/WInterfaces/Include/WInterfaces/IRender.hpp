@@ -163,7 +163,7 @@ public:
         std::uint32_t directional_shadow_casters=0
         )=0;
 
-    virtual void InitializeShadowMap(
+    virtual void UpdateShadowMap(
         glm::mat4 project_matrix,
         glm::mat4 view_matrix
         )=0;

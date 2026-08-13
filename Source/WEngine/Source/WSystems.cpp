@@ -7,7 +7,9 @@
 #include "WComponents/Transform.hpp"
 #include "WComponents/Movement.hpp"
 #include "WComponents/CameraInput.hpp"
-#include "WEngRender/WEngRender.hpp"
+#include "WEngRender/Assets.hpp"
+#include "WEngRender/Camera.hpp"
+#include "WEngRender/Lights.hpp"
 #include "WCore/WMath.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
@@ -16,35 +18,46 @@
 
 
 START_DEFINE_WSYSTEM(SystemInit_InitializeTransformsMatrix)
-    parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
-        [&parameters](wcm::Transform * _transform) {
-            // WTransformStruct & ts = _transform->TransformStruct();
+parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
+    [&parameters](wcm::Transform * _transform) {
+        // WTransformStruct & ts = _transform->TransformStruct();
             
-            _transform
-                ->Set_transform_matrix(
-                    wcr::math::ToMat4(
-                        _transform->Get_position(),
-                        _transform->Get_rotation(),
-                        _transform->Get_rotation_order(),
-                        _transform->Get_scale()
-                        ));
+        _transform
+            ->Set_transform_matrix(
+                wcr::math::ToMat4(
+                    _transform->Get_position(),
+                    _transform->Get_rotation(),
+                    _transform->Get_rotation_order(),
+                    _transform->Get_scale()
+                    ));
             
-        }
-        );
+    }
+    );
 END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_RenderLevelResources)
-    wng::render::InitializeResources(
-        parameters.engine->Render().Ptr(),
-        parameters.level,
-        parameters.engine->AssetManager()
-        );
+wng::render::assets::InitializeRenderAssets(
+    parameters.engine->Render().Ptr(),
+    parameters.level,
+    parameters.engine->AssetManager()
+    );
+
+wng::render::camera::InitializePostprocess(
+    parameters.engine->Render().Ptr(),
+    parameters.level,
+    parameters.engine->AssetManager()
+    );
+
+wng::render::lights::InitializeLights(
+    parameters.engine->Render().Ptr(),
+    parameters.level,
+    parameters.engine->AssetManager()
+    );
 END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
-
     wcr::wid::WEntityId camid;
     parameters.level->GetFirstComponent<wcm::Camera>(camid);
 
@@ -246,59 +259,54 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPre_CameraInputMovement)
-    wcr::wid::WEntityId id;
-    auto & ic = parameters.level->GetFirstComponent<wcm::CameraInput>(id);
-    auto & tc = parameters.level->GetComponent<wcm::Transform>(id);
-    auto & mc = parameters.level->GetComponent<wcm::Movement>(id);
+wcr::wid::WEntityId id;
+auto & ic = parameters.level->GetFirstComponent<wcm::CameraInput>(id);
+auto & tc = parameters.level->GetComponent<wcm::Transform>(id);
+auto & mc = parameters.level->GetComponent<wcm::Movement>(id);
 
-    glm::vec3 acc{0};
+glm::vec3 acc{0};
 
-    auto matrx = tc.Get_transform_matrix();
+auto matrx = tc.Get_transform_matrix();
 
-    if(ic.Get_front()) {
-        acc -= glm::vec3(matrx[2]);
-    }
-    if(ic.Get_back()) {
-        acc += glm::vec3(matrx[2]);
-    }
-    if(ic.Get_left()) {
-        acc -= glm::vec3(matrx[0]);
-    }
-    if(ic.Get_right()) {
-        acc += glm::vec3(matrx[0]);
-    }
+if(ic.Get_front()) {
+    acc -= glm::vec3(matrx[2]);
+}
+if(ic.Get_back()) {
+    acc += glm::vec3(matrx[2]);
+}
+if(ic.Get_left()) {
+    acc -= glm::vec3(matrx[0]);
+}
+if(ic.Get_right()) {
+    acc += glm::vec3(matrx[0]);
+}
 
-    mc.Set_acceleration(acc * 3.f);
+mc.Set_acceleration(acc * 3.f);
 END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPost_UpdateRenderCamera)
-    parameters.level->ForEachComponent<wcm::Camera> (
-        [&parameters] (wcm::Camera * cam) {
-
-            wcm::Transform & ts =
-                parameters.level->GetComponent<wcm::Transform>(
-                    cam->Get_entity_id()
-                    );
-
-            wct::render::RenderSize rsize = parameters.engine->Render()->RenderSize();
-
-            parameters.engine->Render()->UpdateUboCamera(
-                wrd::render::ToUBOCameraStruct(
-                    *cam,
-                    ts,
-                    (float) rsize.width / (float) rsize.height
-                    )
-                );
-        });
+wng::render::camera::UpdateRenderCamera(
+    &parameters.engine->Render().Get(),
+    parameters.level
+    );
 END_DEFINE_WSYSTEM()
 
 
+START_DEFINE_WSYSTEM(SystemPost_UpdateShadowMap)
+wng::render::lights::UpdateShadowMap(
+    &parameters.engine->Render().Get(),
+    parameters.level
+    );
+END_DEFINE_WSYSTEM()
+
+
+
 START_DEFINE_WSYSTEM(SystemEnd_RenderLevelResources)
-    wng::render::ReleaseRenderResources(
-        parameters.engine->Render().Ptr(),
-        parameters.level,
-        parameters.engine->AssetManager()
-        );
+wng::render::assets::ReleaseRenderResources(
+    parameters.engine->Render().Ptr(),
+    parameters.level,
+    parameters.engine->AssetManager()
+    );
 END_DEFINE_WSYSTEM()
 

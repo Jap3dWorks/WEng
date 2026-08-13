@@ -1,246 +1,28 @@
 #pragma once
 
-#include "WCore/TypeTraits.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WAssets/RenderPipeline.hpp"
-#include "WComponents/Camera.hpp"
 #include "WComponents/Transform.hpp"
 #include "WCore/TSparseSet.hpp"
-#include "WCore/WCoreMacros.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WInterfaces/IRender.hpp"
 #include "WLog.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WComponents/StaticMesh.hpp"
-#include "WComponents/Light/Point.hpp"
-#include "WComponents/Light/Directional.hpp"
-#include "WComponents/Light/Ambient.hpp"
 #include "WAssets/StaticMesh.hpp"
 #include "WAssets/Texture.hpp"
 #include "WAssets/Level.hpp"
 #include "WRender/WRender.hpp"
-#include "WRender/WLight.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCore/WDebug.hpp"
 
 #include <cstdint>
 #include <span>
 
-namespace wng::render {
+namespace wng::render::assets {
 
-    template<typename LightsArray>
-    struct LightsRenderData {
-        
-        using ElementType = wcr::type_traits::ElementType_t<LightsArray>;
-
-        LightsArray lights;
-        std::array<
-            wcr::wid::WEntityComponentId,
-            wcr::type_traits::MaxSize_v<LightsArray>> ids;
-
-        std::size_t count{0};
-
-        void AddLight(ElementType light,
-                      wcr::wid::WEntityComponentId id) {
-            lights[count]=std::move(light);
-            ids[count]=id;
-            count++;
-        }
-
-        auto lights_begin() {
-            return lights.begin();
-        }
-
-        auto lights_end() {
-            return lights.begin() + count;
-        }
-
-        auto ids_begin() {
-            return ids.begin();
-        }
-
-        auto ids_end() {
-            return ids.begin() + count;
-        }
-
-        static constexpr auto Merge(LightsRenderData a, LightsRenderData b) {
-            std::vector<wcr::wid::WEntityComponentId> merged_ids{
-                a.ids_begin(), a.ids_end()};
-            
-            merged_ids.insert(
-                merged_ids.end(),
-                b.ids_begin(), b.ids_end()
-                );
-
-            std::vector<wct::render::DirectionalLight> merged_lights{
-                a.lights_begin(), a.lights_end()
-            };
-            merged_lights.insert(
-                merged_lights.end(),
-                b.lights_begin(), b.lights_end()
-                );
-
-            return std::tuple{std::move(merged_ids), std::move(merged_lights)};
-        }
-    };
-
-    inline void InitializeLights(
-        IRender * in_render,
-        was::Level * in_level,
-        const WAssetDb & in_asset_db
-        ) {
-
-        // TODO It is required that Static Lights goes first than Dynamic lights.
-        // id arrays like :
-        // [SLight 1 , ..., SLight n, Dlight 1,...,Dlight m]
-        // More info at [[org/WEng.org::#StaticDynamicLightsUBOUpdates]]
-
-        // Point Lights
-
-        decltype(wct::render::LightingUBO::point_lights) point_lights;
-        std::array<wcr::wid::WEntityComponentId, point_lights.size()> pl_ids;
-        std::uint32_t pl_count=0;
-
-        in_level->ForEachComponent<wcm::light::Point>(
-            [&in_level, &point_lights, &pl_ids, &pl_count]
-            (wcm::light::Point * cmp) {
-                if (cmp->Get_active()) {
-
-                    auto * transform_component =
-                        &in_level->GetComponent<wcm::Transform>
-                        (cmp->Get_entity_id());
-
-                    auto plight = wrd::light::ToPointLight(
-                        transform_component->Get_position(),
-                        cmp->Get_radius(),
-                        cmp->Get_color(),
-                        cmp->Get_intensity()
-                        );
-                    
-                    point_lights[pl_count] = plight;
-
-                    pl_ids[pl_count] = {
-                        in_level->Get_asset_id(),
-                        cmp->Get_entity_id(),
-                        in_level->GetComponentTypeId<wcm::light::Point>(),
-                        wcr::wid::nullid
-                    };
-
-                    pl_count++;
-                }
-            }
-            );
-
-        // Directional Lights
-
-        using DirectionalLightsArray = decltype(wct::render::LightingUBO::directional_lights);
-
-        LightsRenderData<DirectionalLightsArray> directional_lights;
-        // Current state only 1 shadow caster / shadow map
-        LightsRenderData<DirectionalLightsArray> directional_shadow_caster;  
-
-        struct ShadowMap {
-            glm::mat4 projection{};
-            glm::mat4 view{};
-        } shadow_map_dt{};
-
-        in_level->ForEachComponent<wcm::light::Directional>(
-            [&in_level,
-             &directional_lights,
-             &directional_shadow_caster,
-             // &directional_lights,
-             // &dl_ids,
-             // &dl_count,
-             &shadow_map_dt
-                ]
-            (wcm::light::Directional * cmp) {
-                if (cmp->Get_active()) {
-
-                    auto * transform_cmp = &in_level
-                        ->GetComponent<wcm::Transform>
-                        (cmp->Get_entity_id());
-
-                    auto dlight = wrd::light::ToDirectionalLight(
-                        transform_cmp->Get_transform_matrix()[0],  // x direction
-                        cmp->Get_color(),
-                        cmp->Get_intensity()
-                        );
-
-                    dlight.direction = transform_cmp->Get_transform_matrix()[0];
-
-                    if (cmp->Get_cast_shadows()) {
-                        shadow_map_dt.projection =
-                            // TODO shadow map size constant
-                            wrd::light::ToShadowMapProjectionMatrix(
-                                2.f, 2.f, -8.f, 15.f
-                                );
-
-                        // TODO update the interest point of the directional shadow map
-                        //  using a system.
-                        shadow_map_dt.view = wrd::light::ToShadowMapViewMatrix(
-                            transform_cmp->Get_transform_matrix(),
-                            {0.f, 0.f, 0.f}  // TODO parametrizable
-                            );
-
-                        directional_shadow_caster.AddLight(
-                            dlight,
-                            {
-                                in_level->Get_asset_id(),
-                                cmp->Get_entity_id(),
-                                in_level->GetComponentTypeId<wcm::light::Directional>(),
-                                wcr::wid::nullid
-                            }   
-                            );
-                    }
-                    else {
-                        directional_lights.AddLight(
-                            dlight,
-                            {
-                                in_level->Get_asset_id(),
-                                cmp->Get_entity_id(),
-                                in_level->GetComponentTypeId<wcm::light::Directional>(),
-                                wcr::wid::nullid
-                            }
-                            );
-                    }
-                }
-            }
-            );
-
-        // Ambient Light
-
-        wct::render::AmbientLight amb_light;
-        in_level->ForEachComponent<wcm::light::Ambient>(
-            [&amb_light](auto * cmp) {
-                amb_light = wrd::light::ToAmbientLight(*cmp);
-            }
-            );
-
-        std::uint32_t dl_shdw = directional_shadow_caster.count;
-
-        auto[dl_ids, dl_lights] = LightsRenderData<DirectionalLightsArray>::Merge(
-            std::move(directional_shadow_caster),
-            std::move(directional_lights)
-            );
-
-        in_render->InitializeLights(
-            {pl_ids.begin(), pl_ids.begin() + pl_count},
-            {point_lights.begin(), point_lights.begin() + pl_count},
-            dl_ids,
-            dl_lights,
-            amb_light,
-            dl_shdw
-            );
-
-        in_render->InitializeShadowMap(
-            shadow_map_dt.projection,
-            shadow_map_dt.view
-            );
-
-    }
-
-    inline void InitializeResources(
+    inline void InitializeRenderAssets(
         IRender * in_render,
         was::Level * in_level,
         const WAssetDb & in_asset_db
@@ -459,69 +241,67 @@ namespace wng::render {
             }
             );
 
-        // Temporal solution, only one camera.
-        // other cameras with RenderId() > 1 could render into textures.
-        wcr::wid::WEntityId camera_entt{};
-        in_level->ForEachComponent<wcm::Camera>(
-            [&camera_entt](wcm::Camera * _cam){
-                if (!camera_entt && _cam->Get_render_id().IsValid()) {
-                    camera_entt = _cam->Get_entity_id();
-                }
-            }
-            );
+        // // Temporal solution, only one camera.
+        // // other cameras with RenderId() > 1 could render into textures.
+        // wcr::wid::WEntityId camera_entt{};
+        // in_level->ForEachComponent<wcm::Camera>(
+        //     [&camera_entt](wcm::Camera * _cam){
+        //         if (!camera_entt && _cam->Get_render_id().IsValid()) {
+        //             camera_entt = _cam->Get_entity_id();
+        //         }
+        //     }
+        //     );
 
-        if(camera_entt.IsValid()) {
-            TSparseSet<wcr::wid::WAssetId> cam_render_pipelines;
-            cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
+        // if(camera_entt.IsValid()) {
+        //     TSparseSet<wcr::wid::WAssetId> cam_render_pipelines;
+        //     cam_render_pipelines.Reserve(WENG_MAX_ASSET_IDS);
 
-            in_level->GetComponent<wcm::Camera>(camera_entt).ForEachPostprocessAssignment(
-                [&cam_render_pipelines](
-                     const wcm::Camera * _cmp,
-                     const wcr::wid::WSubIdxId & _idx,
-                     const auto & _assgn) {
-                    cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
-                }
-                );
+        //     in_level->GetComponent<wcm::Camera>(camera_entt).ForEachPostprocessAssignment(
+        //         [&cam_render_pipelines](
+        //              const wcm::Camera * _cmp,
+        //              const wcr::wid::WSubIdxId & _idx,
+        //              const auto & _assgn) {
+        //             cam_render_pipelines.Insert(_assgn.pipeline.GetId(), _assgn.pipeline);
+        //         }
+        //         );
 
-            for (const wcr::wid::WAssetId & id : cam_render_pipelines) {
-                auto & render_pipeline = in_asset_db.Get<was::RenderPipeline>(id);
-                in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
-            }
+        //     for (const wcr::wid::WAssetId & id : cam_render_pipelines) {
+        //         auto & render_pipeline = in_asset_db.Get<was::RenderPipeline>(id);
+        //         in_render->CreateRenderPipeline(render_pipeline); // TODO Use the data struct
+        //     }
 
-            wcm::Camera & comp = in_level
-                ->GetComponent<wcm::Camera>(camera_entt);
+        //     wcm::Camera & comp = in_level
+        //         ->GetComponent<wcm::Camera>(camera_entt);
             
-            comp.ForEachPostprocessAssignment(
-                [&in_level,
-                 &in_render,
-                 &in_asset_db](
-                    const wcm::Camera * _cmp,
-                    const wcr::wid::WSubIdxId & _idx,
-                    const auto & _assgn
-                    ) {
+        //     comp.ForEachPostprocessAssignment(
+        //         [&in_level,
+        //          &in_render,
+        //          &in_asset_db](
+        //             const wcm::Camera * _cmp,
+        //             const wcr::wid::WSubIdxId & _idx,
+        //             const auto & _assgn
+        //             ) {
 
-                    wcr::wid::WEntityComponentId ecid = {
-                        in_level->Get_asset_id(),
-                        _cmp->Get_entity_id(),
-                        // TODO MeshComponent? should be camera component?
-                        in_level->GetComponentTypeId<wcm::StaticMesh>(),
-                        _idx
-                    };
+        //             wcr::wid::WEntityComponentId ecid = {
+        //                 in_level->Get_asset_id(),
+        //                 _cmp->Get_entity_id(),
+        //                 // TODO MeshComponent? should be camera component?
+        //                 in_level->GetComponentTypeId<wcm::StaticMesh>(),
+        //                 _idx
+        //             };
 
-                    in_render->CreatePipelineBindingSet(
-                        in_level->Get_asset_id().GetId(),
-                        wcr::wid::WEngId::FromEntityComponent(ecid),
-                        wcr::wid::nullid,
-                        in_asset_db.Get<was::RenderPipeline>(_assgn.pipeline),
-                        in_asset_db.Get<was::RenderPipelineParams>(_assgn.params)
-                        );
-                }
-                );
-        }
+        //             in_render->CreatePipelineBindingSet(
+        //                 in_level->Get_asset_id().GetId(),
+        //                 wcr::wid::WEngId::FromEntityComponent(ecid),
+        //                 wcr::wid::nullid,
+        //                 in_asset_db.Get<was::RenderPipeline>(_assgn.pipeline),
+        //                 in_asset_db.Get<was::RenderPipelineParams>(_assgn.params)
+        //                 );
+        //         }
+        //         );
+        // }
 
-        InitializeLights(in_render, in_level, in_asset_db);
-
-        in_render->RefreshPipelines();
+        // in_render->RefreshPipelines();
     }
 
     inline void ReleaseRenderResources(
