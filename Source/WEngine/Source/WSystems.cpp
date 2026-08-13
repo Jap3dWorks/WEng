@@ -20,8 +20,6 @@
 START_DEFINE_WSYSTEM(SystemInit_InitializeTransformsMatrix)
 parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
     [&parameters](wcm::Transform * _transform) {
-        // WTransformStruct & ts = _transform->TransformStruct();
-            
         _transform
             ->Set_transform_matrix(
                 wcr::math::ToMat4(
@@ -58,203 +56,204 @@ END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemInit_CameraInput)
-    wcr::wid::WEntityId camid;
-    parameters.level->GetFirstComponent<wcm::Camera>(camid);
+wcr::wid::WEntityId camid;
+parameters.level->GetFirstComponent<wcm::Camera>(camid);
 
-    auto & asset_manager = parameters.engine->AssetManager();
+auto & asset_manager = parameters.engine->AssetManager();
 
-    wcr::wid::WAssetId mapping = asset_manager
-        .Get(weng::defaults::CAMERA_MAPPING_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId mapping = asset_manager
+    .Get(weng::defaults::CAMERA_MAPPING_ASSET_PATH)
+    ->Get_asset_id();
 
-    wcr::wid::WAssetId frontaction = asset_manager
-        .Get(weng::defaults::FRONT_ACTION_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId frontaction = asset_manager
+    .Get(weng::defaults::FRONT_ACTION_ASSET_PATH)
+    ->Get_asset_id();
 
-    wcr::wid::WAssetId backaction = asset_manager
-        .Get(weng::defaults::BACK_ACTION_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId backaction = asset_manager
+    .Get(weng::defaults::BACK_ACTION_ASSET_PATH)
+    ->Get_asset_id();
 
-    wcr::wid::WAssetId leftaction = asset_manager
-        .Get(weng::defaults::LEFT_ACTION_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId leftaction = asset_manager
+    .Get(weng::defaults::LEFT_ACTION_ASSET_PATH)
+    ->Get_asset_id();
 
-    wcr::wid::WAssetId rightaction = asset_manager
-        .Get(weng::defaults::RIGHT_ACTION_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId rightaction = asset_manager
+    .Get(weng::defaults::RIGHT_ACTION_ASSET_PATH)
+    ->Get_asset_id();
 
-    wcr::wid::WAssetId mousemovement = asset_manager
-        .Get(weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH)
-        ->Get_asset_id();
+wcr::wid::WAssetId mousemovement = asset_manager
+    .Get(weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH)
+    ->Get_asset_id();
 
-    parameters.engine->InputMappingRegister().PutInputMapping(mapping);
+parameters.engine->InputMappingRegister().PutInputMapping(mapping);
 
-    parameters.engine->InputMappingRegister().BindAction(
-        frontaction,
-        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
+parameters.engine->InputMappingRegister().BindAction(
+    frontaction,
+    [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
+        auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
-            switch(_v.input.mode) {
-            case EInputMode::Press:
-                ic.Set_front(true);
-                break;
-            case EInputMode::Release:
-                ic.Set_front(false);
-                break;
-            default:
+        switch(_v.input.mode) {
+        case EInputMode::Press:
+            ic.Set_front(true);
+            break;
+        case EInputMode::Release:
+            ic.Set_front(false);
+            break;
+        default:
                 
-            }
         }
-        );
+    }
+    );
 
-    parameters.engine->InputMappingRegister().BindAction(
-        backaction,
-        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
+parameters.engine->InputMappingRegister().BindAction(
+    backaction,
+    [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
+        auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
-            switch(_v.input.mode) {
-            case EInputMode::Press:
-                ic.Set_back(true);
-                break;
-            case EInputMode::Release:
-                ic.Set_back(false);
-                break;
-            default:
+        switch(_v.input.mode) {
+        case EInputMode::Press:
+            ic.Set_back(true);
+            break;
+        case EInputMode::Release:
+            ic.Set_back(false);
+            break;
+        default:
                 
-            }
         }
-        );
+    }
+    );
 
-    parameters.engine->InputMappingRegister().BindAction(
-        leftaction,
-        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
+parameters.engine->InputMappingRegister().BindAction(
+    leftaction,
+    [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
+        auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
-            switch(_v.input.mode) {
-            case EInputMode::Press:
-                ic.Set_left(true);
-                break;
-            case EInputMode::Release:
-                ic.Set_left(false);
-                break;
-            default:
+        switch(_v.input.mode) {
+        case EInputMode::Press:
+            ic.Set_left(true);
+            break;
+        case EInputMode::Release:
+            ic.Set_left(false);
+            break;
+        default:
                 
-            }
         }
-        );
+    }
+    );
 
-    parameters.engine->InputMappingRegister().BindAction(
-        rightaction,
-        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
+parameters.engine->InputMappingRegister().BindAction(
+    rightaction,
+    [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
+        auto & ic = _e->LevelInfo().level.GetComponent<wcm::CameraInput>(camid);
 
-            switch(_v.input.mode) {
-            case EInputMode::Press:
-                ic.Set_right(true);
-                break;
-            case EInputMode::Release:
-                ic.Set_right(false);
-                break;
-            default:
+        switch(_v.input.mode) {
+        case EInputMode::Press:
+            ic.Set_right(true);
+            break;
+        case EInputMode::Release:
+            ic.Set_right(false);
+            break;
+        default:
                 
-            }
         }
-        );
+    }
+    );
 
-    parameters.engine->InputMappingRegister().BindAction(
-        mousemovement,
-        [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
+parameters.engine->InputMappingRegister().BindAction(
+    mousemovement,
+    [camid](const WInputValuesStruct & _v, was::Action const * _a, WEngine * _e) {
 
-            auto * transform_component = &_e->LevelInfo()
-                .level.GetComponent<wcm::Transform>(camid);
+        auto * transform_component = &_e->LevelInfo()
+            .level.GetComponent<wcm::Transform>(camid);
             
-            // WTransformStruct & t = _e->LevelInfo()
-            //     .level.GetComponent<wcm::Transform>(camid)
-            //     .TransformStruct();
+        // WTransformStruct & t = _e->LevelInfo()
+        //     .level.GetComponent<wcm::Transform>(camid)
+        //     .TransformStruct();
 
-            auto rot = transform_component->Get_rotation();
-            rot.x = _v.direction.y * -0.001;
-            rot.y = _v.direction.x * -0.001;
+        auto rot = transform_component->Get_rotation();
+        rot.x = _v.direction.y * -0.001;
+        rot.y = _v.direction.x * -0.001;
 
-            transform_component->Set_rotation(rot);
+        transform_component->Set_rotation(rot);
 
-            transform_component->Set_transform_matrix(
-                wcr::math::ToMat4(
-                    transform_component->Get_position(),
-                    transform_component->Get_rotation(),
-                    transform_component->Get_rotation_order(),
-                    transform_component->Get_scale()
-                    )
-                );
+        transform_component->Set_transform_matrix(
+            wcr::math::ToMat4(
+                transform_component->Get_position(),
+                transform_component->Get_rotation(),
+                transform_component->Get_rotation_order(),
+                transform_component->Get_scale()
+                )
+            );
 
-            // t.transform_matrix = wcr::math::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
-        }
-        );
+        // t.transform_matrix = wcr::math::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
+    }
+    );
 END_DEFINE_WSYSTEM()
 
 
 START_DEFINE_WSYSTEM(SystemPre_UpdateMovement)
-    parameters.level->ForEachComponent<wcm::Movement>(
-        [&parameters](wcm::Movement * mc){
-            wcm::Transform & tc = parameters.level->
-                GetComponent<wcm::Transform>(mc->Get_entity_id());
+parameters.level->ForEachComponent<wcm::Movement>(
+    [&parameters](wcm::Movement * mc){
+        wcm::Transform & tc = parameters.level->
+            GetComponent<wcm::Transform>(mc->Get_entity_id());
 
-            float amag = std::min(glm::length(mc->Get_acceleration()), mc->Get_max_acceleration());
+        float amag = std::min(glm::length(mc->Get_acceleration()), mc->Get_max_acceleration());
 
-            if (amag > 0.0000001) {
-                mc->Set_acceleration(glm::normalize(mc->Get_acceleration()) * amag);
-            }
-            else {
-                mc->Set_acceleration(glm::vec3{0});
-            }
-
-            mc->Set_velocity(
-                mc->Get_velocity() + mc->Get_acceleration() * (float)parameters.engine->EngineCycle().DeltaTime
-                );
-
-            float vlength = glm::length(mc->Get_velocity());
-            float vmag = std::min(vlength, mc->Get_max_velocity());
-
-            glm::vec3 current_direction{0.00001, 0.00001, 0.00001};
-            if(vlength > 0.0000001) {
-                current_direction = glm::normalize(mc->Get_velocity());
-            }
-
-            float drag = mc->Get_drag() * (float)parameters.engine->EngineCycle().DeltaTime;
-
-            mc->Set_velocity(
-                (current_direction * vmag) - (current_direction * vmag * drag)
-                );
-
-            // WTransformStruct & ts = tc.TransformStruct();
-
-            tc.Set_position(
-                tc.Get_position() +
-                mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime
-                );
-
-            // ts.position +=
-            //     mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
-
-            tc.Set_transform_matrix(
-                wcr::math::ToMat4(
-                    tc.Get_position(),
-                    tc.Get_rotation(),
-                    tc.Get_rotation_order(),
-                    tc.Get_scale())
-                );
-
-            // ts.transform_matrix = wcr::math::ToMat4(
-            //     ts.position,
-            //     ts.rotation,
-            //     ts.rotation_order,
-            //     ts.scale);
+        if (amag > 0.0000001) {
+            mc->Set_acceleration(glm::normalize(mc->Get_acceleration()) * amag);
         }
-        );
+        else {
+            mc->Set_acceleration(glm::vec3{0});
+        }
+
+        mc->Set_velocity(
+            mc->Get_velocity() + mc->Get_acceleration() *
+            (float)parameters.engine->EngineCycle().DeltaTime
+            );
+
+        float vlength = glm::length(mc->Get_velocity());
+        float vmag = std::min(vlength, mc->Get_max_velocity());
+
+        glm::vec3 current_direction{0.00001, 0.00001, 0.00001};
+        if(vlength > 0.0000001) {
+            current_direction = glm::normalize(mc->Get_velocity());
+        }
+
+        float drag = mc->Get_drag() * (float)parameters.engine->EngineCycle().DeltaTime;
+
+        mc->Set_velocity(
+            (current_direction * vmag) - (current_direction * vmag * drag)
+            );
+
+        // WTransformStruct & ts = tc.TransformStruct();
+
+        tc.Set_position(
+            tc.Get_position() +
+            mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime
+            );
+
+        // ts.position +=
+        //     mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
+
+        tc.Set_transform_matrix(
+            wcr::math::ToMat4(
+                tc.Get_position(),
+                tc.Get_rotation(),
+                tc.Get_rotation_order(),
+                tc.Get_scale())
+            );
+
+        // ts.transform_matrix = wcr::math::ToMat4(
+        //     ts.position,
+        //     ts.rotation,
+        //     ts.rotation_order,
+        //     ts.scale);
+    }
+    );
 END_DEFINE_WSYSTEM()
 
 
@@ -299,7 +298,6 @@ wng::render::lights::UpdateShadowMap(
     parameters.level
     );
 END_DEFINE_WSYSTEM()
-
 
 
 START_DEFINE_WSYSTEM(SystemEnd_RenderLevelResources)

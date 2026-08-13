@@ -96,9 +96,10 @@ float ShadowLightFactor(float3 wpos, float4x4 shadow_view, float4x4 shadow_proj)
     float xborder = saturate(abs((uv.x * 2  - 1) * 5.f) - 4.f);
     float yborder = saturate(abs((uv.y * 2  - 1) * 5.f) - 4.f);
 
-    float border = max(smoothstep(0.f,1.f, xborder), smoothstep(0.f, 1.f, yborder));
+    // float border = smoothstep(0.f, 1.f, max(xborder, yborder));
+    float border = pow(max(xborder,yborder), 2);
 
-    return saturate(sm_val + border);
+    return saturate(pow(sm_val,2) + border);
 }
 
 float3 DirectionalLight(float3 direction, float3 light_color, float3 V, float3 F0, float3 alb, float3 nrm, float2 rm) {

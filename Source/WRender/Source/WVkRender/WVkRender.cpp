@@ -287,7 +287,7 @@ void WVkRender::Draw()
         render_command_buffers_[frame_index_]
         );
 
-    auto shadow_map_bindings = wvk::render::rec_cmd_bffr::GBuffers(
+    auto shadow_map_bindings = wvk::render::rec_draw_cmd::GBuffers(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -297,7 +297,7 @@ void WVkRender::Draw()
         global_descriptors_
         );
 
-    wvk::render::rec_cmd_bffr::ShadowMap(
+    wvk::render::rec_draw_cmd::ShadowMap(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -307,7 +307,7 @@ void WVkRender::Draw()
         global_descriptors_
         );
 
-    wvk::render::rec_cmd_bffr::Lighting(
+    wvk::render::rec_draw_cmd::Lighting(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -320,7 +320,7 @@ void WVkRender::Draw()
         render_plane_.Sampler()
         );
 
-    swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Postprocess(
+    swap_chain_input_imgview_ = wvk::render::rec_draw_cmd::Postprocess(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -334,7 +334,7 @@ void WVkRender::Draw()
         render_plane_.Sampler()
         );
 
-    swap_chain_input_imgview_ = wvk::render::rec_cmd_bffr::Tonemapping(
+    swap_chain_input_imgview_ = wvk::render::rec_draw_cmd::Tonemapping(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,
@@ -345,7 +345,7 @@ void WVkRender::Draw()
         render_plane_.Sampler()
         );
 
-    wvk::render::rec_cmd_bffr::SwapChain(
+    wvk::render::rec_draw_cmd::SwapChain(
         device_.GetDevice(),
         render_command_buffers_[frame_index_],
         frame_index_,

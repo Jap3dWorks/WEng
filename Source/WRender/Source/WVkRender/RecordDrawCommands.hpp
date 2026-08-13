@@ -24,7 +24,7 @@
 #include <vulkan/vulkan_core.h>
 #include <cstdint>
 
-namespace wvk::render::rec_cmd_bffr {
+namespace wvk::render::rec_draw_cmd {
 
     using ShadowMapBindingInfo =
         std::unordered_map<
@@ -81,7 +81,7 @@ namespace wvk::render::rec_cmd_bffr {
                 return std::nullopt;
             };
 
-        wvk::render::RndCmd_TransitionGBufferWriteLayout(
+        wvk::render::rcmd::GBuffer::AttachmentTransitionWriteLayout(
             command_buffer,
             attachments.Albedo(frame_index).Image(),
             attachments.Emission(frame_index).Image(),
@@ -91,7 +91,7 @@ namespace wvk::render::rec_cmd_bffr {
             attachments.Extra01(frame_index).Image()
             );
 
-        wvk::render::RndCmd_BeginGBuffersRendering(
+        wvk::render::rcmd::GBuffer::BeginRendering(
             command_buffer,
             attachments.Albedo(frame_index).View(),
             attachments.Emission(frame_index).View(),
@@ -111,7 +111,7 @@ namespace wvk::render::rec_cmd_bffr {
                               VK_PIPELINE_BIND_POINT_GRAPHICS,
                               std::get<0>(pipeline__layout));
 
-            wvk::render::RndCmd_SetViewportAndScissor(
+            wvk::render::rcmd::SetViewportAndScissor(
                 command_buffer,
                 attachments.Extent()
                 );
@@ -194,7 +194,7 @@ namespace wvk::render::rec_cmd_bffr {
         // TODO can Shadow map be in parallel?
         vkCmdEndRendering(command_buffer);
 
-        wvk::render::RndCmd_TransitionGBufferReadLayout(
+        wvk::render::rcmd::GBuffer::AttachmentTransitionReadLayout(
             command_buffer,
             attachments.Albedo(frame_index).Image(),
             attachments.Emission(frame_index).Image(),
@@ -218,13 +218,13 @@ namespace wvk::render::rec_cmd_bffr {
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
         ) {
 
-        wvk::render::rcmd::ShadowMap::AttachmentTransitionWriteLayout(
+        wvk::render::rcmd::shadowmap::AttachmentTransitionWriteLayout(
             command_buffer,
             shadowmap_attachments.GetDepth(frame_index).Image()
             );
 
         // beginRendering
-        wvk::render::rcmd::ShadowMap::BeginRendering(
+        wvk::render::rcmd::shadowmap::BeginRendering(
             command_buffer,
             shadowmap_attachments.GetDepth(frame_index).View(),
             shadowmap_attachments.GetExtent()
@@ -302,7 +302,7 @@ namespace wvk::render::rec_cmd_bffr {
 
         vkCmdEndRendering(command_buffer);
 
-        wvk::render::rcmd::ShadowMap::AttachmentTransitionReadLayout(
+        wvk::render::rcmd::shadowmap::AttachmentTransitionReadLayout(
             command_buffer,
             shadowmap_attachments.GetDepth(frame_index).Image()
             );
@@ -323,12 +323,12 @@ namespace wvk::render::rec_cmd_bffr {
         VkSampler plane_sampler
         ) {
 
-        wvk::render::RndCmd_TransitionLightingWriteLayout(
+        wvk::render::rcmd::lighting::AttachmentTransitionWriteLayout(
             in_command_buffer,
             attachments.Color(in_frame_index).Image()
             );
 
-        wvk::render::RndCmd_BeginLightingRendering(
+        wvk::render::rcmd::lighting::BeginRendering(
             in_command_buffer,
             attachments.Color(in_frame_index).View(),
             attachments.Extent()
@@ -343,14 +343,14 @@ namespace wvk::render::rec_cmd_bffr {
             pipelines.Pipeline()
             );
 
-        wvk::render::RndCmd_SetViewportAndScissor(
+        wvk::render::rcmd::SetViewportAndScissor(
             in_command_buffer,
             attachments.Extent()
             );
 
         // DescriptorSet
         // TODO do not recreate each frame, create descriptorsSets only once.
-        VkDescriptorSet descriptorset = wvk::render::rcmd::Lighting::CreateDescriptor(
+        VkDescriptorSet descriptorset = wvk::render::rcmd::lighting::CreateDescriptor(
             device,
             pipelines.DescriptorPool(in_frame_index),
             pipelines.DescriptorSetLayout(),
@@ -408,7 +408,7 @@ namespace wvk::render::rec_cmd_bffr {
 
         vkCmdEndRendering(in_command_buffer);
     
-        wvk::render::RndCmd_TransitionLightingReadLayout(
+        wvk::render::rcmd::lighting::AttachmentTransitionReadLayout(
             in_command_buffer,
             attachments.Color(in_frame_index).Image()
             );
@@ -447,19 +447,13 @@ namespace wvk::render::rec_cmd_bffr {
             std::tuple<VkPipeline, VkPipelineLayout> pipeline__layout =
                 pipelines.GetPipeline(ppcess_binding.pipeline_id);
 
-            // render into layout
-            wvk::render::RndCmd_TransitionRenderImageLayout(
+            
+            wvk::render::rcmd::postprocess::AttachmentTransitionWriteLayout(
                 command_buffer,
-                dst_img,
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                {},
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+                dst_img
                 );
 
-            wvk::render::RndCmd_BeginPostprocessRendering(
+            wvk::render::rcmd::postprocess::BeginRendering(
                 command_buffer,
                 dst_view,
                 attachments.Extent()
@@ -471,7 +465,7 @@ namespace wvk::render::rec_cmd_bffr {
                 std::get<0>(pipeline__layout)
                 );
 
-            wvk::render::RndCmd_SetViewportAndScissor(
+            wvk::render::rcmd::SetViewportAndScissor(
                 command_buffer,
                 attachments.Extent()
                 );
@@ -486,7 +480,7 @@ namespace wvk::render::rec_cmd_bffr {
                 }
                 );
 
-            wvk::render::RndCmd_PostprocessDrawCommands(
+            wvk::render::rcmd::postprocess::DrawCommands(
                 device,
                 command_buffer,
                 render_plane.vertex_buffer,
@@ -510,16 +504,9 @@ namespace wvk::render::rec_cmd_bffr {
             dst_view = pp_views[(idx + 1) % 2];
             dst_img = pp_images[(idx + 1) % 2];
 
-            // render from layout
-            wvk::render::RndCmd_TransitionRenderImageLayout(
+            wvk::render::rcmd::postprocess::AttachmentTransitionReadLayout(
                 command_buffer,
-                input_img,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_ACCESS_SHADER_READ_BIT,
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+                input_img
                 );
         }
 
@@ -537,12 +524,12 @@ namespace wvk::render::rec_cmd_bffr {
         WVkMesh const & render_plane,
         VkSampler plane_sampler
         ) {
-        wvk::render::RndCmd_TransitionTonemappingWriteLayout(
+        wvk::render::rcmd::tonemapping::AttachmentTransitionWriteLayout(
             in_command_buffer,
             attachments.Color(in_frame_index).Image()
             );
 
-        wvk::render::RndCmd_BeginTonemappingRendering(
+        wvk::render::rcmd::tonemapping::BeginRendering(
             in_command_buffer,
             attachments.Color(in_frame_index).View(),
             attachments.Extent()
@@ -558,7 +545,7 @@ namespace wvk::render::rec_cmd_bffr {
             pipeline
             );
 
-        wvk::render::RndCmd_SetViewportAndScissor(
+        wvk::render::rcmd::SetViewportAndScissor(
             in_command_buffer,
             attachments.Extent()
             );
@@ -592,7 +579,7 @@ namespace wvk::render::rec_cmd_bffr {
 
         vkCmdEndRendering(in_command_buffer);
 
-        wvk::render::RndCmd_TransitionTonemappingReadLayout(
+        wvk::render::rcmd::tonemapping::AttachmentTransitionReadLayout(
             in_command_buffer,
             attachments.Color(in_frame_index).Image()
             );
@@ -617,18 +604,12 @@ namespace wvk::render::rec_cmd_bffr {
         VkImageView swapchain_imageview = swap_chain.Views()[in_image_index];
 
         // swap chain image layout to render into it
-        wvk::render::RndCmd_TransitionRenderImageLayout(
+        wvk::render::rcmd::swapchain::AttachmentTransitionWriteLayout(
             in_command_buffer,
-            swapchain_image,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            {},
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            swapchain_image
             );
 
-        wvk::render::RndCmd_BeginSwapchainRendering(
+        wvk::render::rcmd::swapchain::BeginRendering(
             in_command_buffer,
             swapchain_imageview,
             swapchain_imageview,
@@ -645,7 +626,7 @@ namespace wvk::render::rec_cmd_bffr {
             pipeline.Pipeline()
             );
 
-        wvk::render::RndCmd_SetViewportAndScissor(
+        wvk::render::rcmd::SetViewportAndScissor(
             in_command_buffer,
             swap_chain.Extent()
             );
@@ -687,16 +668,9 @@ namespace wvk::render::rec_cmd_bffr {
 
         vkCmdEndRendering(in_command_buffer);
 
-        // Prepare swapchain images for present
-        wvk::render::RndCmd_TransitionRenderImageLayout(
+        wvk::render::rcmd::swapchain::AttachmentTransitionReadLayout(
             in_command_buffer,
-            swapchain_image,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-            {},
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+            swapchain_image
             );
     }
 }
