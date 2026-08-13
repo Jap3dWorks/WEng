@@ -54,7 +54,7 @@ namespace wvk::render {
     /**
      * @DEPRECATED
      */
-    inline VkDescriptorSet CreateInputRenderDescriptor(
+    [[deprecated]] inline VkDescriptorSet CreateInputRenderDescriptor(
         const VkDevice & in_device,
         const VkDescriptorPool & in_desc_pool,
         const VkDescriptorSetLayout & in_desc_lay,
@@ -109,7 +109,7 @@ namespace wvk::render {
      * @DEPRECATED
      */
     template<typename T>
-    inline std::vector<T> CreateSyncSemaphore(const std::size_t & in_images,
+    [[deprecated]] inline std::vector<T> CreateSyncSemaphore(const std::size_t & in_images,
                                               const VkDevice & in_device) {
         std::vector<T> result(in_images);
 
