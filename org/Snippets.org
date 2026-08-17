@@ -288,6 +288,60 @@ int main() {
 : a ptr value: 140728961716088
 : a name value: 
 
+#+HEADER: :flags --std=gnu++23
+#+begin_src C++ :main no :results output :includes <iostream> <print> <cstdint> <string>
+#include <vector>
+
+struct A {
+    std::vector<std::uint32_t> val{};
+    std::string name="default";
+
+    A()=default;
+    A(A && other) = default;
+
+    A& operator=(A && other) = default;
+
+    ~A() {
+        if (!val.empty()) {
+            std::println("Destroy {} val.", name);
+            val={};
+        } else {
+            std::println("{} val already destroyed.", name);
+        }
+        
+    }
+};
+
+struct B {
+    std::uint32_t val{1};
+};
+
+int main() {
+    A a1;
+    a1.val={1};
+    a1.name="a1";
+    A a2=std::move(a1);
+    std::println("a1 moved into a2");
+    a2.name="b";
+
+
+    B b1;
+    b1.val=2;
+    B b2 = std::move(b1);
+
+    std::println("b1 val: {}", b1.val);
+
+    return 0;
+}
+    
+#+end_src
+
+#+RESULTS:
+: a1 moved into a2
+: b1 val: 2
+: Destroy b val.
+:  val already destroyed.
+
 * Reference wrapper
 
 #+HEADER: :flags --std=gnu++23

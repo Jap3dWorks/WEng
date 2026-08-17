@@ -27,12 +27,10 @@ namespace wvk::raii::pipelines {
             VkDevice device,
             VkPhysicalDevice physical_device
             ) :
-            vkn_(device, physical_device),
-            binding_collection_{
-                .device=device,
-                .physical_device={physical_device},
-                .descriptor_pool={{device}}
-            },
+            vkn_(device /*, physical_device */ ),
+            binding_collection_(
+                device, physical_device
+                ),
             param_layouts_(
                 [] (auto id) { return VK_NULL_HANDLE; },
                 [device] (auto layout) { wvk::descriptor::Destroy(layout, device); }
@@ -182,7 +180,7 @@ namespace wvk::raii::pipelines {
         GetBinding(
             wcr::wid::WEngId binding_set_id
             ) const {
-            return binding_collection_.bindings.at(binding_set_id.GetId());
+            return binding_collection_.binding_data.bindings.at(binding_set_id.GetId());
         }
 
         void ClearBindingsOrder() {
@@ -197,7 +195,7 @@ namespace wvk::raii::pipelines {
 
         struct {
             VkDevice device{VK_NULL_HANDLE};
-            VkPhysicalDevice physical_device{VK_NULL_HANDLE};
+            // VkPhysicalDevice physical_device{VK_NULL_HANDLE};
         } vkn_;
 
         TObjectDataBase<VkDescriptorSetLayout, void, std::size_t>

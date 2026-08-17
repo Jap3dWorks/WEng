@@ -94,25 +94,21 @@ void wvk::buffer::UnmapBuffer(
 }
 
 void wvk::buffer::Destroy(
-    WVkBuffer & out_ubo_info,
-    VkDevice in_device
+    WVkBuffer ubo_info,
+    VkDevice device
     ) {
 
     vkDestroyBuffer(
-        in_device,
-        out_ubo_info.buffer,
+        device,
+        ubo_info.buffer,
         nullptr
         );
 
     vkFreeMemory(
-        in_device,
-        out_ubo_info.device_memory,
+        device,
+        ubo_info.device_memory,
         nullptr
         );
-
-    out_ubo_info.buffer = VK_NULL_HANDLE;
-    out_ubo_info.device_memory = VK_NULL_HANDLE;
-    out_ubo_info.range = 0;
 }
 
 

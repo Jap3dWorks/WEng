@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WCore/WId.hpp"
-#include "WCore/TSparseSet.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/RAII/Pipelines/ParamBindings.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
@@ -23,10 +22,13 @@ namespace wvk::raii::pipelines::postprocess {
     };
 
     template<std::uint8_t FramesInFlight>
-    struct BindingCollection {
-
-        VkDevice device{VK_NULL_HANDLE};
-        VkPhysicalDevice physical_device{VK_NULL_HANDLE};
+    class BindingCollection {
+    public:
+        
+        struct Vkn {
+            VkDevice device{VK_NULL_HANDLE};
+            VkPhysicalDevice physical_device{VK_NULL_HANDLE};
+        } vkn;
 
         wvk::raii::DescriptorPool<
             0,
@@ -35,32 +37,51 @@ namespace wvk::raii::pipelines::postprocess {
             (2 + 16) * wct::render::MAX_PIPELINE_ASSINGMENTS
             > descriptor_pool{};
 
-        struct BuffersContainer {
-
-            ~BuffersContainer() {
-
-                if (VK_NULL_HANDLE == out_self->device) return;
-
-                for(auto & p: buffers) {
-                    for(auto b : p.second) {
-                        wvk::buffer::Destroy(b, out_self->device);
-                    }
-                }
-            }
-            
-            BindingCollection * out_self{nullptr};
+        struct BindingData {
             std::unordered_map<std::size_t, std::array<WVkBuffer, FramesInFlight>> buffers{};
-            
-        } ubo_buffers{this, {}};
+    
+            // Binding_set_id : Binding data
+            std::unordered_map<std::size_t, Binding<FramesInFlight>> bindings{};
 
-        // Binding_set_id : Binding data
-        std::unordered_map<std::size_t, Binding<FramesInFlight>> bindings{};
-
-        std::unordered_map<
-            std::size_t,
             std::unordered_map<
-                std::uint8_t,
-                std::uint32_t>> pipeline_binding_offset{};
+                std::size_t,
+                std::unordered_map<
+                    std::uint8_t,
+                    std::uint32_t>> pipeline_binding_offset{};
+            
+        } binding_data{};
+
+        BindingCollection(VkDevice device, VkPhysicalDevice physical_device) :
+            vkn{device, physical_device},
+            descriptor_pool({device}) {}
+            
+        BindingCollection() = default;
+        BindingCollection(const BindingCollection&) = delete;
+        BindingCollection& operator=(const BindingCollection&) = delete;
+        BindingCollection(BindingCollection&& other) noexcept :
+            vkn(std::move(other.vkn)),
+            descriptor_pool(std::move(other.descriptor_pool)),
+            binding_data(std::move(other.binding_data))
+            {
+                other.vkn={};
+            }
+
+        BindingCollection& operator=(BindingCollection&& other) noexcept {
+            if (this != &other) {
+                Destroy();
+
+                vkn=std::move(other.vkn);
+                descriptor_pool = std::move(other.descriptor_pool);
+                binding_data = std::move(other.binding_data);
+
+                other.vkn={};
+            }
+            return *this;
+        }
+
+        ~BindingCollection() {
+            Destroy();
+        }
 
         void CreateBindingSet(
             wcr::wid::WEngId binding_set_id,  // camera component id
@@ -80,14 +101,14 @@ namespace wvk::raii::pipelines::postprocess {
 
             auto ubo_bindings = wvk::raii::pipelines::param_bindings
                 ::CollectUBOBindings<FramesInFlight>(
-                    descriptor_pool.Creator().device,
-                    physical_device,
+                    vkn.device,
+                    vkn.physical_device,
                     param_descriptors,
                     ubo_params                    
                     );
 
             if (!ubo_bindings.empty()) {
-                ubo_buffers.buffers.insert(
+                binding_data.buffers.insert(
                     {
                         binding_set_id.GetId(),
                         ubo_bindings[0].buffers
@@ -103,7 +124,7 @@ namespace wvk::raii::pipelines::postprocess {
                 ubo_bindings
                 );
 
-            bindings.insert(
+            binding_data.bindings.insert(
                 {
                     binding_set_id.GetId(),
                     Binding<FramesInFlight>{
@@ -113,8 +134,8 @@ namespace wvk::raii::pipelines::postprocess {
                 }
                 );
 
-            if (!pipeline_binding_offset.contains(pipeline_id.GetId())) {
-                pipeline_binding_offset[pipeline_id.GetId()] =
+            if (!binding_data.pipeline_binding_offset.contains(pipeline_id.GetId())) {
+                binding_data.pipeline_binding_offset[pipeline_id.GetId()] =
                     PipelineOffsets(ubo_bindings);
             }
         }
@@ -126,25 +147,38 @@ namespace wvk::raii::pipelines::postprocess {
             wcr::wid::WEngId binding_set_id,
             wct::render::RPipeParamUbo const & ubo_param_data
             ) {
-            std::uint32_t offset = pipeline_binding_offset
+            std::uint32_t offset = binding_data.pipeline_binding_offset
                 [render_pipeline_id.GetId()]
                 [ubo_param_data.binding];
 
             wvk::raii::pipelines::param_bindings
                 ::template UpdateParameter_Postprocess<UpdateType, FramesInFlight>
                 (
-                    device,
+                    vkn.device,
                     frame_index,
                     ubo_param_data,
-                    ubo_buffers.buffers[binding_set_id.GetId()],
+                    binding_data.buffers[binding_set_id.GetId()],
                     offset
                     );
         }
 
     private:
 
+        void Destroy() {
+            if (VK_NULL_HANDLE != vkn.device) {
+                for (auto & p : binding_data.buffers) {
+                    for(auto & b : p.second) {
+                        wvk::buffer::Destroy(b, vkn.device);
+                    }
+                }
+
+                binding_data = {};
+                vkn={};
+            }
+        }
+
         std::unordered_map<std::uint8_t, std::uint32_t>
-        PipelineOffsets(
+        static inline PipelineOffsets(
             std::vector<WVkDescSetUBOBinding<FramesInFlight>> & ubo_bindings
             ) {
             std::unordered_map<std::uint8_t, std::uint32_t> offset_map;

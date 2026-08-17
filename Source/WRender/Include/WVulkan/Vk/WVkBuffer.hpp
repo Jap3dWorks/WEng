@@ -31,7 +31,7 @@ namespace wvk::buffer {
         );
 
     void Destroy(
-        WVkBuffer & out_buffer,
+        WVkBuffer out_buffer,
         VkDevice device
         );
 
