@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
+#include "WVulkan/RAII/Attachments/GBuffers.hpp"
+#include "WVulkan/RAII/Attachments/Lighting.hpp"
 #include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
@@ -287,8 +287,8 @@ namespace wvk::render {
     template<std::uint8_t FramesInFlight>
     inline void UpdatePPcessGlobalDescriptorSet(
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcess_global_descriptor,
-        WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbffr_attach,
-        WVkAttachmentsLightingRAII<FramesInFlight> const & offscrn_attach,
+        wvk::raii::attachments::GBuffers<FramesInFlight> const & gbffr_attach,
+        wvk::raii::attachments::Lighting<FramesInFlight> const & offscrn_attach,
         VkSampler in_sampler,
         std::uint8_t in_frm_indx
         ) {
@@ -336,8 +336,8 @@ namespace wvk::render {
     template<std::uint8_t FramesInFlight>
     inline void UpdatePPcessGlobalDescriptorSet(
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
-        const WVkAttachmentsGBuffersRAII<FramesInFlight> & gbffr_attach,
-        const WVkAttachmentsLightingRAII<FramesInFlight> & offscrn_attach,
+        const wvk::raii::attachments::GBuffers<FramesInFlight> & gbffr_attach,
+        const wvk::raii::attachments::Lighting<FramesInFlight> & offscrn_attach,
         VkSampler in_sampler
         ) {
 

@@ -9,10 +9,10 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WCoreTypes/WGeometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
-#include "WVulkan/RAII/WVkAttachmentsLightingRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/RAII/Attachments/Lighting.hpp"
+#include "WVulkan/RAII/Attachments/Postprocess.hpp"
+#include "WVulkan/RAII/Attachments/Tonemapping.hpp"
+#include "WVulkan/RAII/Attachments/GBuffers.hpp"
 #include "WVulkan/RAII/Attachments/ShadowMap.hpp"
 #include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
@@ -23,12 +23,12 @@
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 
 #include "WVulkan/RAII/Pipelines/Lighting.hpp"
-#include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Tonemapping.hpp"
 #include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
 #include "WInterfaces/IRender.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"
-#include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Swapchain.hpp"
 #include "WVulkan/RAII/WVkRenderSyncRAII.hpp"
 
 #include "WRender/WDenseLightingUBO.hpp"
@@ -210,13 +210,13 @@ private:
     
     WVkRenderPlaneRAII render_plane_{};
 
-    WVkAttachmentsGBuffersRAII<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
+    wvk::raii::attachments::GBuffers<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_attachments_{};
     wvk::raii::attachments::ShadowMap<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_attachments_{};
-    WVkAttachmentsLightingRAII<WVK_MAX_FRAMES_IN_FLIGHT> lighting_attachments_{};
-    WVkAttachmentsPostprocessRAII<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
-    WVkAttachmentsTonemappingRAII<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
+    wvk::raii::attachments::Lighting<WVK_MAX_FRAMES_IN_FLIGHT> lighting_attachments_{};
+    wvk::raii::attachments::Postprocess<WVK_MAX_FRAMES_IN_FLIGHT> postprocess_attachments_{};
+    wvk::raii::attachments::Tonemapping<WVK_MAX_FRAMES_IN_FLIGHT> tonemapping_attachments_{};
 
-    WVkSwapchainPipelineRAII<WVK_MAX_FRAMES_IN_FLIGHT> swap_chain_pipeline_{};
+    wvk::raii::pipelines::Swapchain<WVK_MAX_FRAMES_IN_FLIGHT> swap_chain_pipeline_{};
     VkImageView swap_chain_input_imgview_{VK_NULL_HANDLE};
 
     WVkCommandPoolRAII command_pool_{};

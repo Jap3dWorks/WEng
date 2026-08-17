@@ -3,16 +3,16 @@
 #include "WCoreTypes/WGeometry.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
-#include "WVulkan/RAII/WVkAttachmentsPostprocessRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsTonemappingRAII.hpp"
-#include "WVulkan/RAII/WVkAttachmentsGBuffersRAII.hpp"
+#include "WVulkan/RAII/Attachments/Postprocess.hpp"
+#include "WVulkan/RAII/Attachments/Tonemapping.hpp"
+#include "WVulkan/RAII/Attachments/GBuffers.hpp"
 #include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
 #include "WVulkan/RAII/Pipelines/Lighting.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
-#include "WVulkan/RAII/WVkTonemappingPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Tonemapping.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/WVkSwapchainRAII.hpp"
-#include "WVulkan/RAII/WVkSwapchainPipelineRAII.hpp"
+#include "WVulkan/RAII/Pipelines/Swapchain.hpp"
 #include "WVulkan/RAII/Attachments/ShadowMap.hpp"
 #include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
 
@@ -41,7 +41,7 @@ namespace wvk::render::rec_draw_cmd {
         VkDevice device,
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
-        WVkAttachmentsGBuffersRAII<FramesInFlight> & attachments,
+        wvk::raii::attachments::GBuffers<FramesInFlight> & attachments,
         wvk::raii::pipelines::GBuffer<FramesInFlight> & pipelines,
         wvk::raii::AssetRenderData const & asset_render_data,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
@@ -314,9 +314,9 @@ namespace wvk::render::rec_draw_cmd {
         VkDevice device,
         VkCommandBuffer in_command_buffer,
         std::uint32_t in_frame_index,
-        WVkAttachmentsLightingRAII<FramesInFlight> & attachments,
+        wvk::raii::attachments::Lighting<FramesInFlight> & attachments,
         wvk::raii::pipelines::Lighting<FramesInFlight> & pipelines,
-        WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
+        wvk::raii::attachments::GBuffers<FramesInFlight> const & gbuffer_attachments,
         wvk::raii::attachments::ShadowMap<FramesInFlight> const & shadow_attachments,
         WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors,
         WVkMesh const & render_plane,
@@ -420,10 +420,10 @@ namespace wvk::render::rec_draw_cmd {
         VkDevice device,
         VkCommandBuffer command_buffer,
         std::uint32_t frame_index,
-        WVkAttachmentsPostprocessRAII<FramesInFlight> & attachments,
+        wvk::raii::attachments::Postprocess<FramesInFlight> & attachments,
         wvk::raii::pipelines::Postprocess<FramesInFlight> & pipelines,
-        WVkAttachmentsLightingRAII<FramesInFlight> const & lighting_attachments,
-        WVkAttachmentsGBuffersRAII<FramesInFlight> const & gbuffer_attachments,
+        wvk::raii::attachments::Lighting<FramesInFlight> const & lighting_attachments,
+        wvk::raii::attachments::GBuffers<FramesInFlight> const & gbuffer_attachments,
         WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcss_global_descriptors,
         WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptors,
         WVkMesh const & render_plane,
@@ -518,7 +518,7 @@ namespace wvk::render::rec_draw_cmd {
         VkDevice device,
         VkCommandBuffer in_command_buffer,
         std::uint32_t in_frame_index,
-        WVkAttachmentsTonemappingRAII<FramesInFlight> & attachments,
+        wvk::raii::attachments::Tonemapping<FramesInFlight> & attachments,
         WVkTonemappingPipelineRAII<FramesInFlight> & pipelines,
         VkImageView input_image_view,
         WVkMesh const & render_plane,
@@ -594,7 +594,7 @@ namespace wvk::render::rec_draw_cmd {
         std::uint32_t in_frame_index,
         std::uint32_t in_image_index,
         WVkSwapchainRAII const & swap_chain,
-        WVkSwapchainPipelineRAII<FramesInFlight> & pipeline,
+        wvk::raii::pipelines::Swapchain<FramesInFlight> & pipeline,
         VkImageView input_img_view,
         WVkMesh const & render_plane,
         VkSampler plane_sampler
