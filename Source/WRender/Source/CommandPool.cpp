@@ -1,19 +1,19 @@
-#include "WVulkan/RAII/WVkCommandPoolRAII.hpp"
-// #include "WVulkan/WVulkanStructs.hpp"
+#include "WVulkan/RAII/CommandPool.hpp"
 #include "WVulkan/Vk/WVkTypes.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
+
 #include <vulkan/vulkan_core.h>
 
 
-WVkCommandPoolRAII::WVkCommandPoolRAII(
-    const VkDevice & in_device,
-    const VkPhysicalDevice & in_physical_device,
-    const VkSurfaceKHR & in_surface
+wvk::raii::CommandPool::CommandPool(
+    VkDevice in_device,
+    VkPhysicalDevice in_physical_device,
+    VkSurfaceKHR in_surface
     ) :
     command_pool_({in_device}, in_physical_device, in_surface)
 {}
 
-VkCommandPool WVkCommandPoolRAII::WVkCommandPoolCreator::Create(
+VkCommandPool wvk::raii::CommandPool::WVkCommandPoolCreator::Create(
     VkPhysicalDevice in_physical_device,
     VkSurfaceKHR in_surface) {
         wvk::vulkan::QueueFamilyIndices queue_family_indices =
@@ -37,7 +37,7 @@ VkCommandPool WVkCommandPoolRAII::WVkCommandPoolCreator::Create(
     return result;
 }
 
-void WVkCommandPoolRAII::WVkCommandPoolCreator::Destroy(VkCommandPool command_pool) {
+void wvk::raii::CommandPool::WVkCommandPoolCreator::Destroy(VkCommandPool command_pool) {
     vkDestroyCommandPool(
         device,
         command_pool,

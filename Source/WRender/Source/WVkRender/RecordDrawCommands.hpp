@@ -11,7 +11,7 @@
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/Pipelines/Tonemapping.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
-#include "WVulkan/RAII/WVkSwapchainRAII.hpp"
+#include "WVulkan/RAII/Swapchain.hpp"
 #include "WVulkan/RAII/Pipelines/Swapchain.hpp"
 #include "WVulkan/RAII/Attachments/ShadowMap.hpp"
 #include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
@@ -593,15 +593,15 @@ namespace wvk::render::rec_draw_cmd {
         VkCommandBuffer in_command_buffer,
         std::uint32_t in_frame_index,
         std::uint32_t in_image_index,
-        WVkSwapchainRAII const & swap_chain,
+        wvk::raii::Swapchain const & swap_chain,
         wvk::raii::pipelines::Swapchain<FramesInFlight> & pipeline,
         VkImageView input_img_view,
         WVkMesh const & render_plane,
         VkSampler plane_sampler
         ) {
         
-        VkImage swapchain_image = swap_chain.Images()[in_image_index];
-        VkImageView swapchain_imageview = swap_chain.Views()[in_image_index];
+        VkImage swapchain_image = swap_chain.GetImages()[in_image_index];
+        VkImageView swapchain_imageview = swap_chain.GetViews()[in_image_index];
 
         // swap chain image layout to render into it
         wvk::render::rcmd::swapchain::AttachmentTransitionWriteLayout(
@@ -613,7 +613,7 @@ namespace wvk::render::rec_draw_cmd {
             in_command_buffer,
             swapchain_imageview,
             swapchain_imageview,
-            swap_chain.Extent()
+            swap_chain.GetExtent()
             );
 
         pipeline.ResetDescriptorPool(in_frame_index);
@@ -628,7 +628,7 @@ namespace wvk::render::rec_draw_cmd {
 
         wvk::render::rcmd::SetViewportAndScissor(
             in_command_buffer,
-            swap_chain.Extent()
+            swap_chain.GetExtent()
             );
 
         VkDescriptorSet descriptor = wvk::render::CreateInputRenderDescriptor(

@@ -58,7 +58,7 @@ void WVkRender::Initialize()
     };
 
     // Create Vulkan Instance
-    instance_ = WVkInstanceRAII(
+    instance_ = wvk::raii::Instance(
         {},
         render_debug_info.enable_validation_layers,
         render_debug_info.validation_layers,
@@ -67,7 +67,7 @@ void WVkRender::Initialize()
         );
 
     // Create Vulkan Window Surface
-    surface_ = WVkSurfaceRAII(
+    surface_ = wvk::raii::Surface(
         { *instance_ },
         window_
         );
@@ -87,7 +87,7 @@ void WVkRender::Initialize()
         render_debug_info.validation_layers
         );
 
-    swap_chain_ = WVkSwapchainRAII(
+    swap_chain_ = wvk::raii::Swapchain(
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         surface_.Value(),
@@ -144,18 +144,18 @@ void WVkRender::Initialize()
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         {dimensions[0], dimensions[1]},
-        swap_chain_.Format()
+        swap_chain_.GetFormat()
     };
     
     // Create Render Command Pool
 
-    command_pool_ = WVkCommandPoolRAII( 
+    command_pool_ = wvk::raii::CommandPool( 
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         surface_.Value()
         );
 
-    render_plane_ = WVkRenderPlaneRAII(
+    render_plane_ = wvk::raii::RenderPlane(
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         device_.GetGraphicsQueue(),
@@ -208,14 +208,14 @@ void WVkRender::Initialize()
 
     tonemapping_pipeline_ = {
         device_.GetDevice(),
-        swap_chain_.Format()
+        swap_chain_.GetFormat()
     };
     
     WFLOG("Initialize swap chain pipeline");
 
     swap_chain_pipeline_ = {
         device_.GetDevice(),
-        swap_chain_.Format()
+        swap_chain_.GetFormat()
     };
 
     render_command_buffers_ =
@@ -223,7 +223,7 @@ void WVkRender::Initialize()
         CreateCommandBuffers();
 
     render_sync_ = {device_.GetDevice(),
-                   swap_chain_.Images().size()};
+                   swap_chain_.GetImages().size()};
     
     asset_render_data_ = {
         device_.GetDevice(),
@@ -242,7 +242,7 @@ void WVkRender::Initialize()
         ppcess_global_descriptors_,
         gbuffers_attachments_,
         lighting_attachments_,
-        render_plane_.Sampler()
+        render_plane_.GetSampler()
         );
 }
 
@@ -251,7 +251,7 @@ void WVkRender::Draw()
     vkWaitForFences(
         device_.GetDevice(),
         1,
-        &render_sync_.Fence(frame_index_),
+        &render_sync_.GetFence(frame_index_),
         VK_TRUE,
         UINT64_MAX
         );
@@ -260,9 +260,9 @@ void WVkRender::Draw()
 
     VkResult result = vkAcquireNextImageKHR(
         device_.GetDevice(),
-        swap_chain_.Swapchain(),
+        swap_chain_.GetSwapchain(),
         UINT64_MAX,
-        render_sync_.ImageAvailableSemaphore(semaphore_index_),
+        render_sync_.GetImageAvailableSemaphore(semaphore_index_),
         VK_NULL_HANDLE,
         &image_index
         );
@@ -278,7 +278,7 @@ void WVkRender::Draw()
     vkResetFences(
         device_.GetDevice(),
         1,
-        &render_sync_.Fence(frame_index_)
+        &render_sync_.GetFence(frame_index_)
         );
 
     // Begin command buffer
@@ -316,8 +316,8 @@ void WVkRender::Draw()
         gbuffers_attachments_,
         shadow_map_attachments_,
         global_descriptors_,
-        render_plane_.RenderPlane(),
-        render_plane_.Sampler()
+        render_plane_.GetRenderPlane(),
+        render_plane_.GetSampler()
         );
 
     swap_chain_input_imgview_ = wvk::render::rec_draw_cmd::Postprocess(
@@ -330,8 +330,8 @@ void WVkRender::Draw()
         gbuffers_attachments_,
         ppcess_global_descriptors_,
         global_descriptors_,
-        render_plane_.RenderPlane(),
-        render_plane_.Sampler()
+        render_plane_.GetRenderPlane(),
+        render_plane_.GetSampler()
         );
 
     swap_chain_input_imgview_ = wvk::render::rec_draw_cmd::Tonemapping(
@@ -341,8 +341,8 @@ void WVkRender::Draw()
         tonemapping_attachments_,
         tonemapping_pipeline_,
         swap_chain_input_imgview_,
-        render_plane_.RenderPlane(),
-        render_plane_.Sampler()
+        render_plane_.GetRenderPlane(),
+        render_plane_.GetSampler()
         );
 
     wvk::render::rec_draw_cmd::SwapChain(
@@ -353,8 +353,8 @@ void WVkRender::Draw()
         swap_chain_,
         swap_chain_pipeline_,
         swap_chain_input_imgview_,
-        render_plane_.RenderPlane(),
-        render_plane_.Sampler()
+        render_plane_.GetRenderPlane(),
+        render_plane_.GetSampler()
         );
 
     // End Command buffer
@@ -370,7 +370,7 @@ void WVkRender::Draw()
 
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores =
-        &render_sync_.ImageAvailableSemaphore(semaphore_index_);
+        &render_sync_.GetImageAvailableSemaphore(semaphore_index_);
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
@@ -379,7 +379,7 @@ void WVkRender::Draw()
 
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores =
-        &render_sync_.RenderFinishedSempahore(image_index);
+        &render_sync_.GetRenderFinishedSempahore(image_index);
 
     wvk::vulkan::ExecVkProcChecked(
         vkQueueSubmit,
@@ -387,15 +387,15 @@ void WVkRender::Draw()
         device_.GetGraphicsQueue(),
         1,
         &submit_info,
-        render_sync_.Fence(frame_index_)
+        render_sync_.GetFence(frame_index_)
         );
 
     VkPresentInfoKHR present_info = wvk::types::VkPresentInfoKHR();
     present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = &render_sync_.RenderFinishedSempahore(image_index);
+    present_info.pWaitSemaphores = &render_sync_.GetRenderFinishedSempahore(image_index);
 
     present_info.swapchainCount = 1;
-    present_info.pSwapchains = &swap_chain_.Swapchain();
+    present_info.pSwapchains = &swap_chain_.GetSwapchain();
     present_info.pImageIndices = &image_index;
     present_info.pResults = VK_NULL_HANDLE;
 
@@ -409,7 +409,7 @@ void WVkRender::Draw()
         throw std::runtime_error("Failed to present swap chain image!");
     }
 
-    semaphore_index_ = (semaphore_index_ + 1) % swap_chain_.Images().size();
+    semaphore_index_ = (semaphore_index_ + 1) % swap_chain_.GetImages().size();
     frame_index_ = (frame_index_ + 1) % WVK_MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -665,7 +665,7 @@ void WVkRender::RecreateSwapChain() {
 
     swap_chain_ = {};
 
-    swap_chain_ = WVkSwapchainRAII(
+    swap_chain_ = wvk::raii::Swapchain(
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         surface_.Value(),
@@ -705,7 +705,7 @@ void WVkRender::RecreateSwapChain() {
         device_.GetDevice(),
         device_.GetPhysicalDevice(),
         { dimensions[0], dimensions[1] },
-        swap_chain_.Format()
+        swap_chain_.GetFormat()
     };
 
     // update postprocess global descriptors
@@ -714,7 +714,7 @@ void WVkRender::RecreateSwapChain() {
         ppcess_global_descriptors_,
         gbuffers_attachments_,
         lighting_attachments_,
-        render_plane_.Sampler()
+        render_plane_.GetSampler()
         );
 }
 

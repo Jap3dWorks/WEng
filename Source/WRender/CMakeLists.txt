@@ -5,9 +5,9 @@ add_library(
         CompileGenerated/CompileGenerated.cpp
         Source/WVkRender/WVkRender.cpp
         Source/WVulkan.cpp
-	    Source/WVkCommandPoolRAII.cpp
+	    Source/CommandPool.cpp
         Source/AssetRenderData.cpp
-        Source/WVkSurfaceRAII.cpp
+        Source/Surface.cpp
         Source/WVkTexture.cpp
         Source/WVkDescriptor.cpp
         Source/WVkBuffer.cpp
@@ -23,7 +23,6 @@ set_target_properties(
         CXX_STANDARD 23
 )
     
-
 find_package(glm REQUIRED)
 find_package(STB REQUIRED)
 find_package(glfw3 REQUIRED)

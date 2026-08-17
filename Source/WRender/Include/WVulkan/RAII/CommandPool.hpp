@@ -3,32 +3,33 @@
 #include "WCore/WCoreMacros.hpp"
 #include "WCore/WCore.hpp"
 #include "WVulkan/WVkConfig.hpp"
-#include "WVulkan/WVulkanStructs.hpp"
 #include "WVulkan/RAII/VkRAII.hpp"
 #include "WVulkan/Vk/WVulkan.hpp"
 
 #include <vulkan/vulkan_core.h>
 
-class WRENDER_API WVkCommandPoolRAII
-{
+namespace wvk::raii {
+    
+    class WRENDER_API CommandPool
+    {
 
-public:
+    public:
 
     template<std::uint8_t Count=WVK_MAX_FRAMES_IN_FLIGHT>
     using CommandBuffers = std::array<VkCommandBuffer, Count>;
 
-    WVkCommandPoolRAII(
-        const VkDevice & in_device,
-        const VkPhysicalDevice & in_physical_device,
-        const VkSurfaceKHR & in_surface
+    CommandPool(
+        VkDevice in_device,
+        VkPhysicalDevice in_physical_device,
+        VkSurfaceKHR in_surface
         );
 
-    WVkCommandPoolRAII()=default;
-    ~WVkCommandPoolRAII()=default;
-    WVkCommandPoolRAII(WVkCommandPoolRAII&&) noexcept=default;
-    WVkCommandPoolRAII & operator=(WVkCommandPoolRAII&&) noexcept=default;
-    WVkCommandPoolRAII(const WVkCommandPoolRAII &) = delete;
-    WVkCommandPoolRAII & operator=(const WVkCommandPoolRAII &) = delete;
+    CommandPool()=default;
+    ~CommandPool()=default;
+    CommandPool(CommandPool&&) noexcept=default;
+    CommandPool & operator=(CommandPool&&) noexcept=default;
+    CommandPool(const CommandPool &) = delete;
+    CommandPool & operator=(const CommandPool &) = delete;
 
 
     template<std::uint8_t Count=WVK_MAX_FRAMES_IN_FLIGHT>
@@ -57,7 +58,7 @@ public:
     WNODISCARD const VkCommandPool & Value() const noexcept
     { return *command_pool_; }
 
-private:
+    private:
 
     struct WVkCommandPoolCreator {
         VkDevice device{VK_NULL_HANDLE};
@@ -68,9 +69,10 @@ private:
         void Destroy(VkCommandPool command_pool);
     };
 
-    using WVkCommandPool = wvk::raii::VkRAII<VkCommandPool, WVkCommandPoolCreator>;
+    using WVkCommandPool = VkRAII<VkCommandPool, WVkCommandPoolCreator>;
 
     WVkCommandPool command_pool_{};
     
-};
+    };
 
+}
