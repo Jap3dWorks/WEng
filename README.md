@@ -25,12 +25,7 @@ Current development focuses on building a clean and extensible foundation using 
 * Physically Based Rendering (PBR)
 * Camera system
 * Entity Component System (ECS)
-
-### Work in Progress
-
 * Shadow Mapping
-* Screen Space Ambient Occlusion (SSAO)
-* Collider system
 
 ### Asset Pipeline
 
@@ -40,6 +35,12 @@ Current development focuses on building a clean and extensible foundation using 
 * Internal asset representation
 
 Currently, imported assets are converted into the engine's internal asset system. Asset serialization and packaging are planned for future development.
+
+### Work in Progress
+
+* Screen Space Ambient Occlusion (SSAO)
+* Collider system
+
 
 ---
 
@@ -69,7 +70,6 @@ Source/
 ├── WObjects
 ├── WImporter
 ├── WRender
-├── WSandBox
 └── WWindow
 ```
 
@@ -160,11 +160,6 @@ Planned work includes:
 * Continued engine architecture improvements
 * Ongoing performance optimizations
 
----
-
-## Screenshots
-
-Screenshots will be added as the rendering pipeline reaches a more complete state.
 
 ---
 
