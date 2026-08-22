@@ -23,9 +23,6 @@ set_target_properties(
         CXX_STANDARD 23
 )
     
-find_package(glm REQUIRED)
-find_package(STB REQUIRED)
-find_package(glfw3 REQUIRED)
 find_package(Vulkan REQUIRED)
 
 target_include_directories(
@@ -45,7 +42,6 @@ target_link_libraries(
         WCore
         WInterfaces
         glm::glm
-        glfw
         WWindow
         Vulkan::Vulkan
         dl

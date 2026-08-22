@@ -10,6 +10,12 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_SHALLOW TRUE
+)
+
 # Get KTX prebuild libraries
 # --------------------------
 
@@ -30,8 +36,8 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# FetchContent_Populate(fastgltf)
 FetchContent_Populate(tinyobjloader)
+FetchContent_Populate(stb)
 FetchContent_MakeAvailable(fastgltf)
 set_target_properties(fastgltf PROPERTIES
     POSITION_INDEPENDENT_CODE ON)
@@ -65,6 +71,7 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${tinyobjloader_SOURCE_DIR}
+        ${stb_SOURCE_DIR}
 )
 
 target_link_libraries(

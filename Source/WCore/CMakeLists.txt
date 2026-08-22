@@ -12,8 +12,6 @@ set_target_properties(
 
 add_dependencies(WCore ${GENERATE_CODE_TARGET})
 
-find_package(glm REQUIRED)
-
 target_include_directories(
     WCore 
     PUBLIC 

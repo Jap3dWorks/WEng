@@ -16,8 +16,6 @@ vulkan-validation-layers
 libwayland-cursor
 libwayland-egl
 libxkbcommon
-glm-devel
 catch2-devel
-glfw-devel
-stb_image-devel
 simdjson-devel
+glfw-devel

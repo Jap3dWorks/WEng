@@ -1,3 +1,12 @@
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.5.1
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(glfw)
+
 add_library(
     WWindow 
     SHARED
@@ -11,8 +20,6 @@ set_target_properties(
 )
 
 add_dependencies(WWindow ${GENERATE_CODE_TARGET})
-
-find_package(glfw3 REQUIRED)
 
 target_include_directories(
     WWindow 

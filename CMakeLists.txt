@@ -12,15 +12,6 @@ if (DEFINED WENG_WLOG_ENABLE)
     add_compile_definitions(WENG_WLOG_ENABLE=1)
 endif()
 
-if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-  message(STATUS "Platform is Windows.")
-  add_compile_options(-fdeclspec)
-endif ()
-
-if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-else()
-endif()
-
 # Get slang prebuild tools
 # ------------------------
 include(SlangSetup)
@@ -30,6 +21,20 @@ download_slang(v2026.12)
 # -------------
 
 include(EmacsGenerateCode)
+
+# Make glm available
+# ------------------
+
+include(FetchContent)
+
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+    GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(glm)
 
 # Collect submodules
 # ------------------
