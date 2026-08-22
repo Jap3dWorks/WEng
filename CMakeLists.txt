@@ -26,6 +26,11 @@ endif()
 include(SlangSetup)
 download_slang(v2026.12)
 
+# Generate Code
+# -------------
+
+include(EmacsGenerateCode)
+
 # Collect submodules
 # ------------------
 

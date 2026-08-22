@@ -10,7 +10,6 @@ f.ignore
 .lvenv
 compile_commands.json
 [wW]eb/
-project_structure.txt
 emcc.lua
 ThirdParty/
 *.bak
@@ -38,6 +37,6 @@ CMakeFiles/
 /org/**/*.el
 /org/images/
 /External
-PublicGenerated/
-CompileGenerated/
+# PublicGenerated/
+# CompileGenerated/
 *.glb
