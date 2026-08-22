@@ -17,6 +17,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WObjects ${GENERATE_CODE_TARGET})
+
 target_include_directories(
     WObjects 
     PUBLIC 

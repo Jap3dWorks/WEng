@@ -10,6 +10,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WWindow ${GENERATE_CODE_TARGET})
+
 find_package(glfw3 REQUIRED)
 
 target_include_directories(

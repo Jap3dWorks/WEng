@@ -10,13 +10,13 @@ generate-source-files:
 	--eval "(org-babel-load-file \"$(realpath org/InitSession.org)\")"	\
 	--eval "(wng/evaluate-module-org-files (wng/find-module-org-files \"$(realpath Source)\"))"
 
-generate-release: generate-source-files
+generate-release:
 	@cmake --preset Release					    	\
 		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	    \
 		-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}  \
 		-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 
-generate-debug: generate-source-files
+generate-debug:
 	@cmake --preset Debug					    	\
 		-DWUNITTEST=1							    \
 		-DWENG_WLOG_ENABLE=${WENG_WLOG_ENABLE}	    \

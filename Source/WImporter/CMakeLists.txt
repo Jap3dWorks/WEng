@@ -53,6 +53,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WImporter ${GENERATE_CODE_TARGET})
+
 target_include_directories(
     WImporter 
     PUBLIC 

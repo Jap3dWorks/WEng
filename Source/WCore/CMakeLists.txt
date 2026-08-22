@@ -10,6 +10,7 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WCore ${GENERATE_CODE_TARGET})
 
 find_package(glm REQUIRED)
 

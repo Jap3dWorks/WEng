@@ -16,6 +16,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WEngine ${GENERATE_CODE_TARGET})
+
 target_include_directories(
     WEngine 
     PUBLIC 

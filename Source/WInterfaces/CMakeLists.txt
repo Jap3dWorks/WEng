@@ -8,6 +8,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WInterfaces ${GENERATE_CODE_TARGET})
+
 target_include_directories(
     WInterfaces INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Include>

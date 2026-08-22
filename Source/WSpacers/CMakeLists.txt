@@ -10,6 +10,8 @@ set_target_properties(
         CXX_STANDARD 23
 )
 
+add_dependencies(WSpacers ${GENERATE_CODE_TARGET})
+
 target_include_directories(
     WSpacers 
     PRIVATE 

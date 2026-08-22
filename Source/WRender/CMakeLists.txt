@@ -64,7 +64,7 @@ add_slang_shader_target(
 )
 
 # compile shaders first
-add_dependencies(WRender WRender_AllShaders)
+add_dependencies(WRender WRender_AllShaders ${GENERATE_CODE_TARGET})
 
 install(
     TARGETS WRender
