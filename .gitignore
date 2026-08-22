@@ -1,4 +1,4 @@
-f.ignore
+.ignore
 .ssh
 .helix
 .venv
