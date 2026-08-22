@@ -3,8 +3,8 @@ add_library(
     SHARED
         CompileGenerated/CompileGenerated.cpp
         Source/WEngine.cpp
-        Source/WInputMappingRegister.cpp
         Source/WSystems.cpp
+        Source/WInputMappingRegister.cpp
         Source/WSystemsRunner.cpp
         Source/WSystemsRegister.cpp
         Source/WEngineDefaults.cpp
@@ -41,21 +41,21 @@ target_link_libraries(
         WInterfaces
 )
 
-install(
-    TARGETS WEngine
-    EXPORT WEngineTargets
-        LIBRARY DESTINATION lib64
-        ARCHIVE DESTINATION lib64
-        RUNTIME DESTINATION bin
-        INCLUDES DESTINATIoN include
-)
+# install(
+#     TARGETS WEngine
+#     EXPORT WEngineTargets
+#         LIBRARY DESTINATION lib64
+#         ARCHIVE DESTINATION lib64
+#         RUNTIME DESTINATION bin
+#         INCLUDES DESTINATIoN include
+# )
 
-install(
-    EXPORT WEngineTargets
-    FILE WEngineConfig.cmake
-    NAMESPACE WEngine::
-    DESTINATION lib/cmake/WEngine
-)
+# install(
+#     EXPORT WEngineTargets
+#     FILE WEngineConfig.cmake
+#     NAMESPACE WEngine::
+#     DESTINATION lib/cmake/WEngine
+# )
 
 install(
     DIRECTORY Include/

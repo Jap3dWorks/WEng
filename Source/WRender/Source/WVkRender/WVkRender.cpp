@@ -1,7 +1,3 @@
-#ifndef GLFW_INCLUDE_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif
-
 #include "WCore/WId.hpp"
 #include "WVulkan/RAII/Attachments/ShadowMap.hpp"
 #include "WVulkan/RAII/UBOManager/DynamicUBOManager.hpp"

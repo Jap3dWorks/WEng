@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <memory>
 
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 namespace wim::WLib_wtbi {
 

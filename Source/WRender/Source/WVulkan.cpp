@@ -8,7 +8,8 @@
 
 // #include <algorithm>
 #include <iostream>
-#include <GLFW/glfw3.h>
+#include "WWindow/Vulkan.hpp"
+// #include <GLFW/glfw3.h>
 // #include <array>
 // #include <cstddef>
 #include <cstdint>
@@ -58,7 +59,8 @@ std::vector<const char *> wvk::vulkan::GetRequiredExtensions(bool enable_validat
 {
     uint32_t glfw_extension_count = 0;
     const char ** glfw_extensions;
-    glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+    
+    glfw_extensions = wdw::vulkan::GetRequiredInstanceExtensions(glfw_extension_count);
 
     // iterator first last vector initialization
     std::vector<const char *> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);

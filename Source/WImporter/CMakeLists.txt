@@ -10,11 +10,15 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
+FetchContent_Populate(tinyobjloader)
+
 FetchContent_Declare(
     stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
     GIT_SHALLOW TRUE
 )
+
+FetchContent_Populate(stb)
 
 # Get KTX prebuild libraries
 # --------------------------
@@ -36,8 +40,6 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-FetchContent_Populate(tinyobjloader)
-FetchContent_Populate(stb)
 FetchContent_MakeAvailable(fastgltf)
 set_target_properties(fastgltf PROPERTIES
     POSITION_INDEPENDENT_CODE ON)
@@ -81,7 +83,6 @@ target_link_libraries(
         WObjects
         WInterfaces
         fastgltf
-        # ktx
 )
 
 # include(ShaderUtils)
@@ -94,21 +95,21 @@ target_link_libraries(
 # compile shaders first
 # add_dependencies(WImporter WImporter_AllShaders)
 
-install(
-    TARGETS WImporter
-    EXPORT WImporterTargets
-    LIBRARY DESTINATION lib64
-    ARCHIVE DESTINATION lib64
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-    )
+# install(
+#     TARGETS WImporter
+#     EXPORT WImporterTargets
+#     LIBRARY DESTINATION lib64
+#     ARCHIVE DESTINATION lib64
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+#     )
 
-install(
-    EXPORT WImporterTargets
-    FILE WImporterConfig.cmake
-    NAMESPACE WImporter::
-    DESTINATION lib/cmake/WImporter
-)
+# install(
+#     EXPORT WImporterTargets
+#     FILE WImporterConfig.cmake
+#     NAMESPACE WImporter::
+#     DESTINATION lib/cmake/WImporter
+# )
 
 install(
     DIRECTORY Include/

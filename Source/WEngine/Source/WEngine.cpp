@@ -204,7 +204,7 @@ WAssetDb & WEngine::AssetManager() noexcept {
 }
 
 void WEngine::UpdateEngineCycleStruct() {
-    double seconds = glfwGetTime();
+    double seconds = wdw::GetTime();
 
     state_.engine_cycle.DeltaTime = seconds - state_.engine_cycle.TotalTime;
     state_.engine_cycle.TotalTime = seconds;

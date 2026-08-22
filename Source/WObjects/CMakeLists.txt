@@ -36,22 +36,22 @@ target_link_libraries(
         WCore
 )    
 
-install(
-    TARGETS WObjects
-    EXPORT WObjectsTargets
-    LIBRARY DESTINATION lib64
-    ARCHIVE DESTINATION lib64
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
+# install(
+#     TARGETS WObjects
+#     EXPORT WObjectsTargets
+#     LIBRARY DESTINATION lib64
+#     ARCHIVE DESTINATION lib64
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
 
-# Generate and install config files
-install(
-    EXPORT WObjectsTargets
-    FILE WObjectsConfig.cmake
-    NAMESPACE WObjects::
-    DESTINATION lib/cmake/WObjects
-)
+# # Generate and install config files
+# install(
+#     EXPORT WObjectsTargets
+#     FILE WObjectsConfig.cmake
+#     NAMESPACE WObjects::
+#     DESTINATION lib/cmake/WObjects
+# )
 
 # Install public headers
 install(
@@ -89,7 +89,8 @@ if (DEFINED WUNITTEST)
 
     message("BUILD WObjects unittests.")
 
-    find_package(Catch2 2 REQUIRED)
+    include(UnitTestUtils)
+    download_catch2()
 
     add_executable(
         WObjects_unittest
@@ -110,13 +111,12 @@ if (DEFINED WUNITTEST)
         PRIVATE
             Source
             PrivateGenerated
-            Catch2::Catch2
         )
 
     target_link_libraries(
         WObjects_unittest
         PRIVATE
-            Catch2::Catch2
+            Catch2::Catch2WithMain
             WCore
             WObjects
     )

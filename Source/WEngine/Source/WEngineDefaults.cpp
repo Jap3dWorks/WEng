@@ -1,6 +1,7 @@
 #include "WEngine/WEngineDefaults.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WAssets/RenderPipelineParams.hpp"
+#include "WAssets/InputMapping.hpp"
 #include "WCore/WId.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"

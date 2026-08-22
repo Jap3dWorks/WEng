@@ -2,9 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TEvent.hpp"
-#include "WObjectDb/WAssetDb.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WAssets/InputMapping.hpp"
 #include "WAssets/Action.hpp"
 #include "WCore/TStack.hpp"
 

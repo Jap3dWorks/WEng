@@ -2,12 +2,9 @@
 #include "WCore/TObjectDataBase.hpp"
 #include "WCore/WCore.hpp"
 
-#define CATCH_CONFIG_MAIN
-
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "WCore/TRef.hpp"
-// #include "WCore/TFunction.hpp"
 #include "WCore/TWAllocator.hpp"
 #include "WObjectDb/WObjectDb.hpp"
 #include "WObjects/WAsset.hpp"

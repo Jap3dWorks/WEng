@@ -1,4 +1,7 @@
+#include "WInput/WInputMappingRegister.hpp"
 #include "WEngine/WEngine.hpp"
+
+#include "WAssets/InputMapping.hpp"
 
 void WInputMappingRegister::Emit(const WInputValuesStruct & in_input, WEngine * in_engine) 
 {

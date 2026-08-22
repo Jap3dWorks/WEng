@@ -8,6 +8,10 @@
 
 #include "WWindow/WWindow.hpp"
 
+double wdw::GetTime() {
+    return glfwGetTime();
+}
+
 std::unordered_map<GLFWwindow*, wdw::WWindow*> wdw::WWindow::static_windows_{};
 std::unordered_map<wdw::WWindow*, wdw::WWindow::Callbacks> wdw::WWindow::static_callbacks_{};
 

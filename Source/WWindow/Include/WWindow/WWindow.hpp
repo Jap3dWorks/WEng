@@ -13,6 +13,8 @@ struct GLFWwindow;
 
 namespace wdw {
 
+    double GetTime();
+
     struct WWindowSize {
         std::uint32_t width{1600};
         std::uint32_t height{900};

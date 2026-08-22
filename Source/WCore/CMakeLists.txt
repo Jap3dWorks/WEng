@@ -25,26 +25,26 @@ target_include_directories(
 
 target_link_libraries(
     WCore
-    PRIVATE
+    PUBLIC
         glm::glm
 )
 
-install(
-    TARGETS WCore
-    EXPORT WCoreTargets
-    LIBRARY DESTINATION lib64
-    ARCHIVE DESTINATION lib64
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
+# install(
+#     TARGETS WCore
+#     EXPORT WCoreTargets
+#     LIBRARY DESTINATION lib64
+#     ARCHIVE DESTINATION lib64
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
 
-# Generate and install config files
-install(
-    EXPORT WCoreTargets
-    FILE WCoreConfig.cmake
-    NAMESPACE WCore::
-    DESTINATION lib/cmake/WCore
-)
+# # Generate and install config files
+# install(
+#     EXPORT WCoreTargets
+#     FILE WCoreConfig.cmake
+#     NAMESPACE WCore::
+#     DESTINATION lib/cmake/WCore
+# )
 
 
 # Install public headers
@@ -85,7 +85,8 @@ if (DEFINED WUNITTEST)
 
     message("BUILD WCore unittests.")
 
-    find_package(Catch2 2 REQUIRED)
+    include(UnitTestUtils)
+    download_catch2()
 
     add_executable(
         WCore_unittest
@@ -106,13 +107,12 @@ if (DEFINED WUNITTEST)
         PRIVATE
             Source
             PrivateGenerated
-            Catch2:Catch2
         )
 
     target_link_libraries(
         WCore_unittest
         PRIVATE
-            Catch2::Catch2
+            Catch2::Catch2WithMain
             WCore
         )
 

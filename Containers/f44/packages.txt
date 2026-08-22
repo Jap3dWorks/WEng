@@ -15,7 +15,10 @@ vulkan-tools
 vulkan-validation-layers
 libwayland-cursor
 libwayland-egl
-libxkbcommon
-catch2-devel
-simdjson-devel
-glfw-devel
+wayland-devel
+libxkbcommon-devel
+libXcursor-devel
+libXrandr-devel
+libglvnd-devel
+libXi-devel
+libXinerama-devel

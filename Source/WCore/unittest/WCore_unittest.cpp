@@ -5,14 +5,14 @@
 #include <functional>
 #include <string_view>
 
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "WCore/TRef.hpp"
 #include "WString/WString.hpp"
 
 #include "WLog.hpp"
 
+#include <iostream>
 #include <vector>
 #include <cstdio>
 #include <cstdint>

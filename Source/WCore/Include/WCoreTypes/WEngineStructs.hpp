@@ -9,8 +9,6 @@
 #define GLFW_INCLUDE_NONE
 #endif
 
-#include <GLFW/glfw3.h>
-
 class WLevel;
 class WEngine;
 
@@ -30,7 +28,7 @@ struct WWindowStruct
     // GLFWframebuffersizefun framebuffer_size_callback {nullptr};
     void * user_pointer {nullptr};
 
-    GLFWwindow * window {nullptr};
+    struct GLFWwindow * window {nullptr};
 };
 
 enum class EInputKey : std::uint8_t{

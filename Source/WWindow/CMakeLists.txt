@@ -1,3 +1,6 @@
+set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW with Wayland support")
+set(GLFW_BUILD_X11 OFF CACHE BOOL "")
+
 FetchContent_Declare(
     glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -11,6 +14,8 @@ add_library(
     WWindow 
     SHARED
         Source/WWindow.cpp
+        Source/WInput.cpp
+        Source/Vulkan.cpp
     )
 
 set_target_properties(
@@ -40,22 +45,22 @@ target_link_libraries(
         glfw
 )
 
-install(
-    TARGETS WWindow
-    EXPORT WWindowTargets
-    LIBRARY DESTINATION lib64
-    ARCHIVE DESTINATION lib64
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-)
+# install(
+#     TARGETS WWindow
+#     EXPORT WWindowTargets
+#     LIBRARY DESTINATION lib64
+#     ARCHIVE DESTINATION lib64
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
 
-# Generate and install config files
-install(
-    EXPORT WWindowTargets
-    FILE WWindowConfig.cmake
-    NAMESPACE WWindow::
-    DESTINATION lib/cmake/WWindow
-)
+# # Generate and install config files
+# install(
+#     EXPORT WWindowTargets
+#     FILE WWindowConfig.cmake
+#     NAMESPACE WWindow::
+#     DESTINATION lib/cmake/WWindow
+# )
 
 # Install public headers
 install(
