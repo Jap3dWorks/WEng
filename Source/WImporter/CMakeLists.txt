@@ -95,14 +95,14 @@ target_link_libraries(
 # compile shaders first
 # add_dependencies(WImporter WImporter_AllShaders)
 
-# install(
-#     TARGETS WImporter
-#     EXPORT WImporterTargets
-#     LIBRARY DESTINATION lib64
-#     ARCHIVE DESTINATION lib64
-#     RUNTIME DESTINATION bin
-#     INCLUDES DESTINATION include
-#     )
+install(
+    TARGETS WImporter
+    # EXPORT WImporterTargets
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+    )
 
 # install(
 #     EXPORT WImporterTargets

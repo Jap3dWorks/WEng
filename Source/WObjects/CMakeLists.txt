@@ -36,14 +36,14 @@ target_link_libraries(
         WCore
 )    
 
-# install(
-#     TARGETS WObjects
-#     EXPORT WObjectsTargets
-#     LIBRARY DESTINATION lib64
-#     ARCHIVE DESTINATION lib64
-#     RUNTIME DESTINATION bin
-#     INCLUDES DESTINATION include
-# )
+install(
+    TARGETS WObjects
+    # EXPORT WObjectsTargets
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
 
 # # Generate and install config files
 # install(

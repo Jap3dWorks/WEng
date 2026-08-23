@@ -57,14 +57,14 @@ add_slang_shader_target(
 # compile shaders first
 add_dependencies(WRender WRender_AllShaders ${GENERATE_CODE_TARGET})
 
-# install(
-#     TARGETS WRender
-#     EXPORT WRenderTargets
-#     LIBRARY DESTINATION lib64
-#     ARCHIVE DESTINATION lib64
-#     RUNTIME DESTINATION bin
-#     INCLUDES DESTINATION include
-# )
+install(
+    TARGETS WRender
+    # EXPORT WRenderTargets
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
 
 # # Generate and install config files
 # install(

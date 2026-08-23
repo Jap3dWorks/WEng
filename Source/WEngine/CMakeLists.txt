@@ -41,14 +41,14 @@ target_link_libraries(
         WInterfaces
 )
 
-# install(
-#     TARGETS WEngine
-#     EXPORT WEngineTargets
-#         LIBRARY DESTINATION lib64
-#         ARCHIVE DESTINATION lib64
-#         RUNTIME DESTINATION bin
-#         INCLUDES DESTINATIoN include
-# )
+install(
+    TARGETS WEngine
+    # EXPORT WEngineTargets
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATIoN include
+)
 
 # install(
 #     EXPORT WEngineTargets

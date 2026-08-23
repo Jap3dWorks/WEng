@@ -29,14 +29,14 @@ target_link_libraries(
         glm::glm
 )
 
-# install(
-#     TARGETS WCore
-#     EXPORT WCoreTargets
-#     LIBRARY DESTINATION lib64
-#     ARCHIVE DESTINATION lib64
-#     RUNTIME DESTINATION bin
-#     INCLUDES DESTINATION include
-# )
+install(
+    TARGETS WCore
+    # EXPORT WCoreTargets
+    LIBRARY DESTINATION lib64
+    ARCHIVE DESTINATION lib64
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
 
 # # Generate and install config files
 # install(

@@ -19,17 +19,17 @@ target_include_directories(
 
 install(
     TARGETS WInterfaces
-    EXPORT WInterfacesTargets
+    # EXPORT WInterfacesTargets
     INCLUDES DESTINATION include
 )
 
 # Install config files
-install(
-    EXPORT WInterfacesTargets
-    FILE WInterfacesConfig.cmake
-    NAMESPACE WInterfaces::
-    DESTINATION lib/cmake/WInterfaces
-)
+# install(
+#     EXPORT WInterfacesTargets
+#     FILE WInterfacesConfig.cmake
+#     NAMESPACE WInterfaces::
+#     DESTINATION lib/cmake/WInterfaces
+# )
 
 install(
     DIRECTORY Include/
