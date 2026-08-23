@@ -117,14 +117,31 @@ The repository aims to provide a reproducible development environment.
 - Clang, CMake, and Ninja based build workflow
 - Minimal manual setup required for supported platforms
 
+A proposal to test a demo scene is:
+
+- Build a development environment using the provided image. This will create a toolbox container with system dependencies installed.
+
+``` bash
+weng> ./Containers/f44/rebuild.sh
+```
+
+- Use the container to compile and test the engine.
+
+```bash
+weng> toolbox run -c weng-dev-f44 make compile-release  # or compile-debug
+weng> toolbox run -c weng-dev-f44 bash -c "cd Install/Release && LD_LIBRARY_PATH=lib:lib64 bin/WSpacers"
+```
+
+make targets are build around cmake commands, so project can be compiled using exclusively cmake.
+
 ### Requirements
 
-* Clang
-* CMake
-* Emacs
-* Make
-* Ninja
-* Vulkan SDK
+- **Make**: as the build orchestation layer, it is optional.
+* **Clang**: as the primary compiler.
+* **CMake**: for project configuration and dependency resolution.
+* **Emacs**: templating autogeneration system.
+* **Ninja**: as the build generator.
+* **Vulkan SDK**.
 
 #### Why is Emacs required?
 
@@ -133,16 +150,6 @@ WEng uses **Emacs Org Mode** as part of its build pipeline.
 Each engine module contains an accompanying Org Mode document with the same name. These documents act as the source of truth for the module, combining documentation, templates, scripts and metadata in a single place.
 
 During the build process, Emacs processes these Org files to generate portions of the C++ source code automatically. This approach keeps documentation and implementation synchronized while reducing boilerplate and repetitive code.
-
-### Build System
-
-The project uses:
-
-* **Make** as the build orchestration layer
-* **Emacs Org mode** as the templating autogeneration system
-* **CMake** for project configuration
-* **Ninja** as the build generator
-* **Clang** as the primary compiler
 
 ---
 
@@ -153,13 +160,12 @@ The project is under continuous development.
 Planned work includes:
 
 * Collider system
+* Asset serialization
 * Physics system
 * Skeletal animation
-* Asset serialization
 * Additional rendering techniques
 * Continued engine architecture improvements
 * Ongoing performance optimizations
-
 
 ---
 
