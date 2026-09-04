@@ -5,25 +5,29 @@
                                (lambda ()
                                  (interactive)
                                  (compile
-                                  (concat "make -k -C "
-                                          (project-root (project-current))
-                                          " compile-release" ))))
+                                  (concat
+                                   "toolbox -c weng-dev-f44 run "
+                                   "make -k -C "
+                                   (project-root (project-current))
+                                   " compile-release" ))))
 
 
                    (define-key global-map (kbd "C-c = d")
                                (lambda ()
                                  (interactive)
                                  (compile
-                                  (concat "make -k -C "
-                                          (project-root (project-current))
-                                          " compile-debug" ))))
+                                  (concat
+                                   "toolbox -c weng-dev-f44 run "
+                                   "make -k -C "
+                                   (project-root (project-current))
+                                   " compile-debug" ))))
 
                    (define-key global-map (kbd "C-c = r")
                                (lambda ()
                                  (interactive)
                                  (async-shell-command
                                   (concat
-                                   "_run_toolbox_cmd_.sh "
+                                   "toolbox -c weng-dev-f44 run "
                                    "bash -c 'cd "
                                    (project-root (project-current))
                                    "/Install/Release ; "

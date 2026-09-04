@@ -17,8 +17,8 @@
 #include "WVulkan/RAII/Pipelines/ShadowMap.hpp"
 #include "WVulkan/RAII/Swapchain.hpp"
 #include "WVulkan/RAII/RenderPlane.hpp"
-#include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
-#include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
+#include "WVulkan/RAII/Descriptors/GlobalDesc.hpp"
+#include "WVulkan/RAII/Descriptors/PostprocessGlobalDesc.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 
@@ -222,8 +222,8 @@ private:
     wvk::raii::CommandPool command_pool_{};
     wvk::raii::CommandPool::CommandBuffers<WVK_MAX_FRAMES_IN_FLIGHT> render_command_buffers_{};
 
-    WVkGlobalDescriptorsRAII<WVK_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
-    WVkPostprocessGlobalDescriptorRAII<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
+    wvk::raii::descriptors::GlobalDesc<WVK_MAX_FRAMES_IN_FLIGHT> global_descriptors_{};
+    wvk::raii::descriptors::PostprocessGlobalDesc<WVK_MAX_FRAMES_IN_FLIGHT> ppcess_global_descriptors_{};
 
     wvk::raii::pipelines::GBuffer<WVK_MAX_FRAMES_IN_FLIGHT> gbuffers_pipelines_{};
     wvk::raii::pipelines::ShadowMap<WVK_MAX_FRAMES_IN_FLIGHT> shadow_map_pipeline_{};

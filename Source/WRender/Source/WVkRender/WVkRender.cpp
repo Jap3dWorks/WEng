@@ -781,7 +781,7 @@ namespace {
              std::uint8_t FramesInFlight,
              typename DenseController>
     inline void UpdateLightUBO(
-        WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptor,
+        wvk::raii::descriptors::GlobalDesc<FramesInFlight> & global_descriptor,
         std::uint8_t frame_index,
         DenseController & dense_controller,
         std::span<wcr::wid::WEntityComponentId> in_ids,

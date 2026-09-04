@@ -8,7 +8,6 @@
 - Data structure design paradigm (memory addresess sorted by component class).
 
 ** Module Structure
-
 *** Modules objective
 
 Modules should be linkable between them and dinamically linkable with the core application.
@@ -44,6 +43,7 @@ WRender -[dashed]-> WCore
 #+END_SRC
 
 *** Directory Tree
+
 - Source/ModuleName _(PascalCase)_
       - ModuleName.org
       - CMakeLists.txt (each mmodule will be managed by its own CMakeLists)
@@ -51,6 +51,7 @@ WRender -[dashed]-> WCore
             - ModuleFile.cpp _(PascalCase)_
       - Include
             - ModuleHeader.h _(PascalCase)_
+            - Subdirectories
       - PublicGenerated
       - PrivateGenerated
             - DllDef.hpp
@@ -59,8 +60,7 @@ WRender -[dashed]-> WCore
 
 *** Namespaces
 
-- All code elements (classes, structs, free operations, etc) should be placed in a namespace.
-- Namespaces as module abstractions.
+- All code elements (classes, structs, free operations, etc) should be placed inside a namespace.
 - w<name>::<subname>
       - w<name> : <name> is a two letter abbreviation of the external module.
       - <subname> : abstraction name that groups the elements.
@@ -94,62 +94,6 @@ Se declaran en WCore para evitar las dependencias cruzadas entre módulos.
 - wcr::debug
       - debug utilities.
 
-** WImporter
-*** Objective
-
-Módulo con las implementaciones necesarias para traducir assets externos en objetos nativos del engine.
-
-**** Files
-
-- WImporter/WImporterRegister.hpp
-- WImporter/WImporter.hpp
-
-**** Namespaces
-
-- wim::imp_register
-      - Abstracciones para registrar importadores al engine.
-      - Un importador registrado puede ser invocado usando tan solo la ruta al archivo.
-
-- wim::importer
-      - Objetos Importadores para cada tipo de asset, textura, geometríam etc.
-
-** WCommand
-
-/Command Module/
-
-This module will contain the system for command registation, base classes and command queues. 
-each module will be responsible of its commands creation and registation in the system.
-
-** WRender
-*** WRender
-**** Objective
-
-General Rendering related code.
-
-**** Files
-
-- WRender/*
-
-**** Namespaces
-
-- wrd::render
-- wrd::shader
-
-*** WVulkan
-**** Objective
-
-**** Files
-
-**** Namespaces
-
-- wvk::<label>
-- wvk::raii
-      - directory : WVulkan/WVkRAII
-
-**** WVkRender
-***** Objective
-IRender implementation using Vulkan.
-
 ** WEngine
 *** Objective
 
@@ -173,6 +117,26 @@ The engine class will reference to other modules in the aplication.
 **** Namespaces
 - wng::render
 
+** WImporter
+*** Objective
+
+Módulo con las implementaciones necesarias para traducir assets externos en objetos nativos del engine.
+
+**** Files
+
+- WImporter/WImporterRegister.hpp
+- WImporter/WImporter.hpp
+
+**** Namespaces
+
+- wim::imp_register
+      - Abstracciones para registrar importadores al engine.
+      - Un importador registrado puede ser invocado usando tan solo la ruta al archivo.
+
+- wim::importer
+      - Objetos Importadores para cada tipo de asset, textura, geometríam etc.
+
+** WInterfaces
 ** WObjects
 Rename to WEngObjects
 
@@ -219,8 +183,65 @@ Los componentes están asociados a actores. formando así entidades compuestas d
 - was : assets namespace
 - was::geometry
   
+** WRender
+*** WRender
+**** Objective
 
-** WObject and WClass Template/Reflection
+General Rendering related code.
+
+**** Files
+
+- WRender/*
+
+**** Namespaces
+
+- wrd::render
+- wrd::shader
+
+*** WVulkan
+**** Objective
+
+**** Files
+
+**** Namespaces
+
+- wvk::<label>
+- wvk::raii
+      - directory : WVulkan/WVkRAII
+
+**** WVkRender
+***** Objective
+IRender implementation using Vulkan.
+
+** WCollission
+
+/Collision detection and collision primitives/
+
+*** WColliders
+**** Objective
+/Collission shapes/
+
+**** Namespaces
+- *wcl::collider*
+      - Collission shapes
+
+*** WDetection
+**** Objective
+/Collission detection algorithms/
+
+****  Namespaces
+- *wcl::detection*
+
+** WPhysics
+** WCommand
+
+/Command Module/
+
+This module will contain the system for command registation, base classes and command queues. 
+each module will be responsible of its commands creation and registation in the system.
+
+** WWindow
+* Template/Reflection
 *** WPROPERTY macro
 :PROPERTIES:
 :CUSTOM_ID: WPROPERTY
@@ -267,7 +288,6 @@ All dynamic updates can be done in memory ranges, avoiding that any update range
       - Static lights requires only one UBO (no frames in flight).
       - Dynamic lights could be updated each frame.
 
-
 * Coding Style
 
 ** Classes Initial letter
@@ -276,4 +296,5 @@ All dynamic updates can be done in memory ranges, avoiding that any update range
 - I -> Interfaces
 - W -> WEng Object | Engine modules | Engine classes
 - E -> Enums
+
 

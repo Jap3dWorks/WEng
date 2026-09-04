@@ -2,7 +2,7 @@
 
 #include "WVulkan/RAII/Attachments/GBuffers.hpp"
 #include "WVulkan/RAII/Attachments/Lighting.hpp"
-#include "WVulkan/RAII/WVkPostprocessGlobalDescriptorRAII.hpp"
+#include "WVulkan/RAII/Descriptors/PostprocessGlobalDesc.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -286,7 +286,7 @@ namespace wvk::render {
 
     template<std::uint8_t FramesInFlight>
     inline void UpdatePPcessGlobalDescriptorSet(
-        WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcess_global_descriptor,
+        wvk::raii::descriptors::PostprocessGlobalDesc<FramesInFlight> & ppcess_global_descriptor,
         wvk::raii::attachments::GBuffers<FramesInFlight> const & gbffr_attach,
         wvk::raii::attachments::Lighting<FramesInFlight> const & offscrn_attach,
         VkSampler in_sampler,
@@ -335,7 +335,7 @@ namespace wvk::render {
 
     template<std::uint8_t FramesInFlight>
     inline void UpdatePPcessGlobalDescriptorSet(
-        WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & out_ppcss,
+        wvk::raii::descriptors::PostprocessGlobalDesc<FramesInFlight> & out_ppcss,
         const wvk::raii::attachments::GBuffers<FramesInFlight> & gbffr_attach,
         const wvk::raii::attachments::Lighting<FramesInFlight> & offscrn_attach,
         VkSampler in_sampler

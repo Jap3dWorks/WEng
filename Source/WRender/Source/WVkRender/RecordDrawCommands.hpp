@@ -6,7 +6,7 @@
 #include "WVulkan/RAII/Attachments/Postprocess.hpp"
 #include "WVulkan/RAII/Attachments/Tonemapping.hpp"
 #include "WVulkan/RAII/Attachments/GBuffers.hpp"
-#include "WVulkan/RAII/WVkGlobalDescriptorsRAII.hpp"
+#include "WVulkan/RAII/Descriptors/GlobalDesc.hpp"
 #include "WVulkan/RAII/Pipelines/Lighting.hpp"
 #include "WVulkan/RAII/Pipelines/Postprocess.hpp"
 #include "WVulkan/RAII/Pipelines/Tonemapping.hpp"
@@ -44,7 +44,7 @@ namespace wvk::render::rec_draw_cmd {
         wvk::raii::attachments::GBuffers<FramesInFlight> & attachments,
         wvk::raii::pipelines::GBuffer<FramesInFlight> & pipelines,
         wvk::raii::AssetRenderData const & asset_render_data,
-        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
+        wvk::raii::descriptors::GlobalDesc<FramesInFlight> const & global_descriptors
         ) {
 
         ShadowMapBindingInfo shadow_map_binding_info{};
@@ -215,7 +215,7 @@ namespace wvk::render::rec_draw_cmd {
         wvk::raii::attachments::ShadowMap<FramesInFlight> & shadowmap_attachments,
         wvk::raii::pipelines::ShadowMap<FramesInFlight> & shadowmap_pipeline,
         ShadowMapBindingInfo const & pipeline_bindings,
-        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors
+        wvk::raii::descriptors::GlobalDesc<FramesInFlight> const & global_descriptors
         ) {
 
         wvk::render::rcmd::shadowmap::AttachmentTransitionWriteLayout(
@@ -318,7 +318,7 @@ namespace wvk::render::rec_draw_cmd {
         wvk::raii::pipelines::Lighting<FramesInFlight> & pipelines,
         wvk::raii::attachments::GBuffers<FramesInFlight> const & gbuffer_attachments,
         wvk::raii::attachments::ShadowMap<FramesInFlight> const & shadow_attachments,
-        WVkGlobalDescriptorsRAII<FramesInFlight> const & global_descriptors,
+        wvk::raii::descriptors::GlobalDesc<FramesInFlight> const & global_descriptors,
         WVkMesh const & render_plane,
         VkSampler plane_sampler
         ) {
@@ -424,8 +424,8 @@ namespace wvk::render::rec_draw_cmd {
         wvk::raii::pipelines::Postprocess<FramesInFlight> & pipelines,
         wvk::raii::attachments::Lighting<FramesInFlight> const & lighting_attachments,
         wvk::raii::attachments::GBuffers<FramesInFlight> const & gbuffer_attachments,
-        WVkPostprocessGlobalDescriptorRAII<FramesInFlight> & ppcss_global_descriptors,
-        WVkGlobalDescriptorsRAII<FramesInFlight> & global_descriptors,
+        wvk::raii::descriptors::PostprocessGlobalDesc<FramesInFlight> & ppcss_global_descriptors,
+        wvk::raii::descriptors::GlobalDesc<FramesInFlight> & global_descriptors,
         WVkMesh const & render_plane,
         VkSampler plane_sampler
         ){
