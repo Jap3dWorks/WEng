@@ -80,7 +80,7 @@ install(
 
 # Unittest
 # --------
-# TODO remove the ENV option
+
 if (DEFINED WUNITTEST)
 
     message("BUILD WCore unittests.")

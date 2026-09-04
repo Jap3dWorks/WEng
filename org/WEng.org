@@ -213,21 +213,21 @@ General Rendering related code.
 ***** Objective
 IRender implementation using Vulkan.
 
-** WCollission
+** WCollision
 
 /Collision detection and collision primitives/
 
 *** WColliders
 **** Objective
-/Collission shapes/
+/Collision shapes/
 
 **** Namespaces
 - *wcl::collider*
-      - Collission shapes
+      - Collision shapes
 
-*** WDetection
+*** WCollision
 **** Objective
-/Collission detection algorithms/
+/Collision detection algorithms/
 
 ****  Namespaces
 - *wcl::detection*

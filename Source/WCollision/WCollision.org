@@ -1,0 +1,15 @@
+:PROPERTIES:
+:MODULE_TYPE: library
+:CPP_STANDARD: 23
+:END:
+#+title: WCollision
+
+* Module
+
+Module build data is included here.
+
+#+NAME: dependencies
+- WCore
+
+
+  

@@ -135,4 +135,21 @@
 #else
     #define WCORE_API
 #endif
+
+
+#if defined(_WIN32)
+    #ifdef WCOLLISION_EXPORTS
+        #define WCOLLISION_API __declspec(dllexport)
+    #else
+        #define WCOLLISION_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WCOLLISION_EXPORTS
+        #define WCOLLISION_API __attribute__((visibility("default")))
+    #else
+        #define WCOLLISION_API
+    #endif
+#else
+    #define WCOLLISION_API
+#endif
 // LinkDef ends here
