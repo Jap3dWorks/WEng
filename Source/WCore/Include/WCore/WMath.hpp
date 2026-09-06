@@ -181,7 +181,7 @@ namespace wcr::math {
         ) {
         
         glm::vec3 position = in_matrix[3];
-        glm::vec3 scale = {in_matrix[0].length(), in_matrix[1].length(), in_matrix[2].length()};
+        glm::vec3 scale = {glm::length(in_matrix[0]), glm::length(in_matrix[1]), glm::length(in_matrix[2])};
         glm::vec3 rotation = ToEulerRotation(in_matrix, in_order);
 
         return std::tuple{position, rotation, scale};
@@ -190,11 +190,23 @@ namespace wcr::math {
     inline constexpr glm::mat3 InvertOrthogonalBase(
         glm::mat3 orthonormal_base, float x_len, float y_len, float z_len
         ) {
-        glm::mat3 z_inv(1.f); z_inv[2][2] = 1/z_len;
-        glm::mat3 y_inv(1.f); y_inv[1][1] = 1/y_len;
-        glm::mat3 x_inv(1.f); x_inv[0][0] = 1/x_len;
 
-        return z_inv * y_inv * z_inv * glm::transpose(orthonormal_base);
+        glm::mat3 transposed = glm::transpose(orthonormal_base);
+
+        transposed[0][0] /= x_len;
+        transposed[1][0] /= x_len;
+        transposed[2][0] /= x_len;
+
+        transposed[0][1] /= y_len;
+        transposed[1][1] /= y_len;
+        transposed[2][1] /= y_len;
+        
+        transposed[0][2] /= z_len;
+        transposed[1][2] /= z_len;
+        transposed[2][2] /= z_len;
+
+        return transposed;
+
     }
 
     inline constexpr glm::mat3 InvertOrthogonalBase(glm::mat3 orthogonal_base) {
