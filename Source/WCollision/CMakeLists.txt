@@ -23,6 +23,14 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
 )
 
+target_link_libraries(
+    WCollision
+    PUBLIC
+        glm
+        WCore
+    PRIVATE
+)
+
 install(
     TARGETS WCollision
     LIBRARY DESTINATION lib64

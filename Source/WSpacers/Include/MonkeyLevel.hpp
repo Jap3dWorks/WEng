@@ -25,7 +25,7 @@
 #include "WComponents/StaticMesh.hpp"
 #include "WComponents/Camera.hpp"
 #include "WComponents/Light/Ambient.hpp"
-#include "WCoreTypes/WMathStructs.hpp"
+#include "WCoreTypes/Math.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
 
@@ -253,7 +253,7 @@ namespace spacers::monkey {
         wcr::wid::WEntityId eid = level.CreateEntity<WEntity>();
         level.CreateComponent<wcm::Transform>(eid);
         wcm::Transform & ctcmp = level.GetComponent<wcm::Transform>(eid);
-        ctcmp.Set_rotation_order(ERotationOrder::zxy);
+        ctcmp.Set_rotation_order(wct::math::ERotationOrder::zxy);
         ctcmp.Set_position({0.0, 0.0, -2.f});
         ctcmp.Set_rotation({-3.1415 * 0.5, -3.1415 * 0.5, 0.f});
 
@@ -270,7 +270,7 @@ namespace spacers::monkey {
         wcr::wid::WEntityId monkey_id = level.CreateEntity<WEntity>();
         level.CreateComponent<wcm::Transform>(monkey_id);
         auto * monkey_tc = &level.GetComponent<wcm::Transform>(monkey_id);
-        monkey_tc->Set_rotation_order(ERotationOrder::zxy);
+        monkey_tc->Set_rotation_order(wct::math::ERotationOrder::zxy);
         monkey_tc->Set_position({0.0, 0.5, -2.0});
         monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.15f);
 
@@ -287,7 +287,7 @@ namespace spacers::monkey {
         wcr::wid::WEntityId monkey2_id = level.CreateEntity<WEntity>();
         level.CreateComponent<wcm::Transform>(monkey2_id);
         monkey_tc = &level.GetComponent<wcm::Transform>(monkey2_id);
-        monkey_tc->Set_rotation_order(ERotationOrder::zxy);
+        monkey_tc->Set_rotation_order(wct::math::ERotationOrder::zxy);
         monkey_tc->Set_position({0.2, 0.65, -2.0});
         monkey_tc->Set_scale(monkey_tc->Get_scale() * 0.25f);
 

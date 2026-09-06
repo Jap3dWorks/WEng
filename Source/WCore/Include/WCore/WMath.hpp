@@ -1,7 +1,8 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WCoreTypes/WMathStructs.hpp"
+#include "WCoreTypes/Math.hpp"
+#include "glm/matrix.hpp"
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
@@ -9,13 +10,12 @@
 
 #include <cmath>
 #include <array>
-
-// #ifndef GLM_ENABLE_EXPERIMENTAL
-// #define GLM_ENABLE_EXPERIMENTAL
-// #endif
-// #include <glm/gtx/vector_angle.hpp>
+#include <limits>
 
 namespace wcr::math {
+
+    template<typename T=float>
+    inline constexpr T PI = glm::pi<T>();
 
     inline constexpr glm::mat3 RotateZMatrix(float z_angle) {
         return {
@@ -44,31 +44,31 @@ namespace wcr::math {
 
     inline glm::mat3 RotateMatrix(glm::mat3 const & in_matrix,
                                   glm::vec3 in_rotation,
-                                  ERotationOrder in_rotation_order) {
+                                  wct::math::ERotationOrder in_rotation_order) {
         
         glm::mat3 rz = RotateZMatrix(in_rotation.z);
         glm::mat3 rx = RotateXMatrix(in_rotation.x);
         glm::mat3 ry = RotateYMatrix(in_rotation.y);
 
         switch(in_rotation_order) {
-        case ERotationOrder::xyz:
+        case wct::math::ERotationOrder::xyz:
             return rz * ry * rx * in_matrix;
-        case ERotationOrder::xzy:
+        case wct::math::ERotationOrder::xzy:
             return ry * rz * rx * in_matrix;
-        case ERotationOrder::yxz:
+        case wct::math::ERotationOrder::yxz:
             return rz * rx * ry * in_matrix;
-        case ERotationOrder::yzx:
+        case wct::math::ERotationOrder::yzx:
             return rx * rz * ry * in_matrix;
-        case ERotationOrder::zxy:
+        case wct::math::ERotationOrder::zxy:
             return ry * rx * rz * in_matrix;
-        case ERotationOrder::zyx:
+        case wct::math::ERotationOrder::zyx:
             return rx * ry * rz * in_matrix;
         }
     }
     
     inline glm::mat4 RotateMatrix(glm::mat4 in_matrix,
                                   glm::vec3 in_rotation,
-                                  ERotationOrder in_rotation_order) {
+                                  wct::math::ERotationOrder in_rotation_order) {
 
         glm::mat3 rotation{in_matrix};
 
@@ -83,7 +83,7 @@ namespace wcr::math {
 
     inline glm::mat4 ToMat4(glm::vec3 in_position,
                             glm::vec3 in_eurler_rotation,
-                            ERotationOrder in_rotation_order,
+                            wct::math::ERotationOrder in_rotation_order,
                             glm::vec3 in_scale) {
         
         glm::mat3 scale{1};
@@ -103,24 +103,24 @@ namespace wcr::math {
      * Returns an array of 3 elements with a numeric translation of each axis
      * following the rotation order, e.g zyx -> {2,1,0}
      */
-    inline constexpr std::array<std::uint8_t, 3> ToNumeric(ERotationOrder in_rotation_order) noexcept {
+    inline constexpr std::array<std::uint8_t, 3> ToNumeric(wct::math::ERotationOrder in_rotation_order) noexcept {
         switch(in_rotation_order) {
-        case ERotationOrder::xyz:
+        case wct::math::ERotationOrder::xyz:
             return {0,1,2};
-        case ERotationOrder::xzy:
+        case wct::math::ERotationOrder::xzy:
             return {0, 2, 1};
-        case ERotationOrder::yxz:
+        case wct::math::ERotationOrder::yxz:
             return {1,0,2};
-        case ERotationOrder::yzx:
+        case wct::math::ERotationOrder::yzx:
             return {1,2,0};
-        case ERotationOrder::zxy:
+        case wct::math::ERotationOrder::zxy:
             return {2,0,1};
-        case ERotationOrder::zyx:
+        case wct::math::ERotationOrder::zyx:
             return {2,1,0};
         }
     }
 
-    inline constexpr glm::vec3 ToEulerRotation(glm::mat3 in_matrix, ERotationOrder rot_order) {
+    inline constexpr glm::vec3 ToEulerRotation(glm::mat3 in_matrix, wct::math::ERotationOrder rot_order) {
 
         in_matrix[0] = glm::normalize(in_matrix[0]);
         in_matrix[1] = glm::normalize(in_matrix[1]);
@@ -129,7 +129,7 @@ namespace wcr::math {
         auto angle_to_axis_plane = []
             (glm::vec3 vector, glm::vec3 axis_plane) constexpr -> float {
             float angle_cos = glm::dot(vector, axis_plane);
-            return glm::pi<float>() * 0.5 - glm::acos(angle_cos);
+            return PI<float> * 0.5 - glm::acos(angle_cos);
         };
 
         auto angle_to_axis_in_plane = []
@@ -177,7 +177,7 @@ namespace wcr::math {
 
     inline constexpr auto ToPositionRotationScale(
         glm::mat4 const & in_matrix,
-        ERotationOrder in_order
+        wct::math::ERotationOrder in_order
         ) {
         
         glm::vec3 position = in_matrix[3];
@@ -185,6 +185,72 @@ namespace wcr::math {
         glm::vec3 rotation = ToEulerRotation(in_matrix, in_order);
 
         return std::tuple{position, rotation, scale};
+    }
+
+    inline constexpr glm::mat3 InvertOrthogonalBase(
+        glm::mat3 orthonormal_base, float x_len, float y_len, float z_len
+        ) {
+        glm::mat3 z_inv(1.f); z_inv[2][2] = 1/z_len;
+        glm::mat3 y_inv(1.f); y_inv[1][1] = 1/y_len;
+        glm::mat3 x_inv(1.f); x_inv[0][0] = 1/x_len;
+
+        return z_inv * y_inv * z_inv * glm::transpose(orthonormal_base);
+    }
+
+    inline constexpr glm::mat3 InvertOrthogonalBase(glm::mat3 orthogonal_base) {
+
+        float x_len = glm::length(orthogonal_base[0]);
+        float y_len = glm::length(orthogonal_base[1]);
+        float z_len = glm::length(orthogonal_base[2]);
+
+        orthogonal_base[0] /= x_len;
+        orthogonal_base[1] /= y_len;
+        orthogonal_base[2] /= z_len;
+
+        return InvertOrthogonalBase(orthogonal_base, x_len, y_len, z_len);
+
+    }
+
+    inline constexpr glm::mat4 InvertTransformMatrix(glm::mat4 transform_mat) {
+        
+        glm::mat3 rot = transform_mat;
+
+        glm::mat3 inv_rot = InvertOrthogonalBase(rot);
+
+        float inv_tw = 1/transform_mat[3][3];
+
+        glm::vec3 inv_t{0.f};
+        for (std::uint32_t i=0; i<3; i++) {
+            inv_t[i] = - (inv_rot[0][i] * transform_mat[3][0] +
+                          inv_rot[1][i] * transform_mat[3][1] +
+                          inv_rot[2][i] * transform_mat[3][2]) * inv_tw;
+        }
+
+        glm::mat4 inv_transform{1.f};
+
+        inv_transform = inv_rot;
+
+        inv_transform[3] = glm::vec4{inv_t, inv_tw};
+
+        return inv_transform;
+
+    }
+
+
+    template<typename T> requires requires {
+        std::is_same_v<T, glm::mat3> || std::is_same_v<T,glm::mat4>;
+    }
+    inline constexpr bool AreEqual(T a, T b, float epsilon=2.5E-06) {
+
+        for (std::uint32_t i=0; i<T::length(); i++) {
+            for(std::uint32_t j=0; j<T::length(); j++) {
+                if (std::abs(a[i][j] - b[i][j]) > epsilon) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
 }

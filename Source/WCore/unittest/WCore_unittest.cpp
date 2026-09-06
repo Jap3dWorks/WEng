@@ -2,16 +2,15 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TWAllocator.hpp"
 #include "WCore/WId.hpp"
-#include <functional>
-#include <string_view>
-
-#include <catch2/catch_test_macros.hpp>
-
-#include "WCore/TRef.hpp"
 #include "WString/WString.hpp"
+#include "WMath_tests.hpp"
 
 #include "WLog.hpp"
 
+
+#include <functional>
+#include <string_view>
+#include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <vector>
 #include <cstdio>
@@ -130,6 +129,13 @@ TEST_CASE("WCore") {
     }
     SECTION("WId") {
         CHECK(WIDCompoundNullValue_Test());
+    }
+    SECTION("WMath") {
+        CHECK(wcr::math::utests::InvertMatrix_test1());
+        CHECK(wcr::math::utests::InvertMatrix_test2());
+        CHECK(wcr::math::utests::InvertMatrix_test3());
+        CHECK(wcr::math::utests::InvertMatrix_test4());
+
     }
 
 }
