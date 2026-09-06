@@ -3,6 +3,7 @@
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/Math.hpp"
 #include "glm/matrix.hpp"
+#include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
@@ -191,36 +192,20 @@ namespace wcr::math {
         glm::mat3 orthonormal_base, float x_len, float y_len, float z_len
         ) {
 
-        glm::mat3 transposed = glm::transpose(orthonormal_base);
+        orthonormal_base[0] /= x_len;
+        orthonormal_base[1] /= y_len;
+        orthonormal_base[2] /= z_len;
 
-        transposed[0][0] /= x_len;
-        transposed[1][0] /= x_len;
-        transposed[2][0] /= x_len;
-
-        transposed[0][1] /= y_len;
-        transposed[1][1] /= y_len;
-        transposed[2][1] /= y_len;
-        
-        transposed[0][2] /= z_len;
-        transposed[1][2] /= z_len;
-        transposed[2][2] /= z_len;
-
-        return transposed;
-
+        return glm::transpose(orthonormal_base);
     }
 
     inline constexpr glm::mat3 InvertOrthogonalBase(glm::mat3 orthogonal_base) {
 
-        float x_len = glm::length(orthogonal_base[0]);
-        float y_len = glm::length(orthogonal_base[1]);
-        float z_len = glm::length(orthogonal_base[2]);
+        orthogonal_base[0] /= glm::dot(orthogonal_base[0], orthogonal_base[0]);
+        orthogonal_base[1] /= glm::dot(orthogonal_base[1], orthogonal_base[1]);
+        orthogonal_base[2] /= glm::dot(orthogonal_base[2], orthogonal_base[2]);
 
-        orthogonal_base[0] /= x_len;
-        orthogonal_base[1] /= y_len;
-        orthogonal_base[2] /= z_len;
-
-        return InvertOrthogonalBase(orthogonal_base, x_len, y_len, z_len);
-
+        return glm::transpose(orthogonal_base);
     }
 
     inline constexpr glm::mat4 InvertTransformMatrix(glm::mat4 transform_mat) {
