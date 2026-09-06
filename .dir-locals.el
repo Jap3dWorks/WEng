@@ -47,7 +47,7 @@
                               :program "bin/WSpacers" 
                               :name "[LLDB][WSpacers]"
                               :env '(
-                                     ("LD_LIBRARY_PATH" . "lib:lib64"))
+                                     ("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))
                                      ))
 
                        (dap-register-debug-template
@@ -65,8 +65,8 @@
                               :cwd "${workspaceFolder}/Install/Debug"
                               :request "launch"
                               :program "bin/WCore_unittest" 
-                              :name "[LLDB][WCore] unittests"
-                              :env '(("LD_LIBRARY_PATH" . "lib:lib64"))))
+                              :name "LLDB::WCore::unittests"
+                              :env '(("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))))
                        ))
 
 		           )))))
