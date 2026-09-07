@@ -9,6 +9,10 @@
 
 int main() {
     std::cout << "HI\n";
+
+    std::println("Literal Number: {:f}", 2.5E-5);
+    std::println("Literal Number: {:f}", 2.5E-05);
+
     return 0;
 }
 
@@ -16,6 +20,8 @@ int main() {
 
 #+RESULTS:
 : HI
+: Literal Number: 0.000024
+: Literal Number: 0.000024
 
 * Vector To Array
 
@@ -582,7 +588,6 @@ Value 7
 Value 8
 Value 9
 #+end_example
-
 
 * Vector in a tuple
 

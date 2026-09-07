@@ -15,7 +15,6 @@
 #include <vector>
 #include <cstdio>
 #include <cstdint>
-#include <print>
 #include <bitset> 
 
 struct B{};
@@ -135,7 +134,7 @@ TEST_CASE("WCore") {
         CHECK(wcr::math::utests::InvertMatrix_test2());
         CHECK(wcr::math::utests::InvertMatrix_test3());
         CHECK(wcr::math::utests::InvertMatrix_test4());
-
+        CHECK(wcr::math::utests::InvertMatrix_test5());
     }
 
 }

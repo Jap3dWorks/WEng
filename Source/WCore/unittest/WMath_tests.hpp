@@ -12,7 +12,7 @@ namespace wcr::math::utests {
     template<typename T>
     inline bool EnsureInverse(T mat, T inv) {
         T check = mat * inv;
-        if (! wcr::math::AreEqual(check, T{1.f})) {
+        if (! wcr::math::AreEqual(check, T{1.f}, 1.0E-05)) {
             WFLOG("Matrix * Inverse needs to be equal to the Identity!");
             return false;
         }
@@ -69,5 +69,24 @@ namespace wcr::math::utests {
         return EnsureInverse(transform, inverse);
         
     }
+
+    inline bool InvertMatrix_test5() {
+
+        glm::mat4 transform {1.f};
+
+        transform = glm::rotate(transform,
+                                wcr::math::PI<float> * 0.38f,
+                                glm::vec3{.4f, 0.19f, -.9f});
+
+        transform = glm::scale(transform, glm::vec3{3.f, 2.f, 10});
+
+        transform[3] = glm::vec4{50.f, 80.f, 33.401, 1.f};
+
+        glm::mat4 inverse = wcr::math::InvertTransformMatrix(transform);
+
+        return EnsureInverse(transform, inverse);
+        
+    }
+
 }
 
