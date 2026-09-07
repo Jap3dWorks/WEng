@@ -233,7 +233,6 @@ namespace wcr::math {
 
     }
 
-
     template<typename T> requires requires {
         std::is_same_v<T, glm::mat3> || std::is_same_v<T,glm::mat4>;
     }
@@ -251,3 +250,4 @@ namespace wcr::math {
     }
 
 }
+
