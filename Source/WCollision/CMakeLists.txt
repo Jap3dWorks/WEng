@@ -55,3 +55,52 @@ install(
         PATTERN "*.h"
 )
     
+# Unittest
+# --------
+
+if (DEFINED WUNITTEST)
+
+    message("BUILD WCollision unittests.")
+
+    include(UnitTestUtils)
+    download_catch2()
+
+    add_executable(
+        WCollision_unittest
+        unittest/WCollision_unittest.cpp
+    )
+
+    set_target_properties(
+        WCollision_unittest
+        PROPERTIES
+        CXX_STANDARD 23
+    )
+
+    target_include_directories(
+        WCollision_unittest
+        PUBLIC
+            Inlcude
+            PublicGenerated
+        PRIVATE
+            Source
+            PrivateGenerated
+        )
+
+    target_link_libraries(
+        WCollision_unittest
+        PRIVATE
+            Catch2::Catch2WithMain
+            WCollision
+        )
+
+    install(
+        TARGETS
+        WCollision_unittest
+        RUNTIME DESTINATION bin
+    )
+
+else()
+
+    message("Exclude WCollision unittests build.")
+
+endif()

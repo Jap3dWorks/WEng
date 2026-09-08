@@ -13,16 +13,11 @@
 
 namespace wcl::collision {
 
-    // struct CollisionData{
-    //     glm::vec3 hit_point{};
-        
-    // };
-
     /**
      * Returns true if shapes are Axis Aligned Bounding Box.
      * Computing cheaper for a initial tests.
      */
-    inline bool TestAABB(
+    inline bool CheckAABB(
         wcl::shapes::AABB a,
         wcl::shapes::AABB b
         ) {
@@ -36,11 +31,11 @@ namespace wcl::collision {
     /**
      * @param b_transform : expected relative transform to a.
      */
-    inline bool Intersects(
-        wcl::shapes::Cube a_shape, wcl::shapes::Cube b_shape, glm::mat4 b_transform
+    inline bool CheckIntersection(
+        wcl::shapes::Box a_shape, wcl::shapes::Box b_shape, glm::mat4 b_transform
         ) {
 
-        auto b_points = wcl::shapes::GetCubePoints(b_shape, b_transform);
+        auto b_points = wcl::shapes::GetBoxVertices(b_shape, b_transform);
         std::uint32_t p_index=9;
 
         auto get_nearest =
@@ -80,31 +75,31 @@ namespace wcl::collision {
     /**
      * @param position : expected relative position to a.
      */
-    inline bool Intersects(
-        wcl::shapes::Cube, wcl::shapes::Sphere, glm::vec3 position
+    inline bool CheckIntersection(
+        wcl::shapes::Box, wcl::shapes::Sphere, glm::vec3 position
         ) {
         return false;
     }
 
-    inline bool Intersects(
-        wcl::shapes::Cube, wcl::shapes::Capsule, glm::mat4
+    inline bool CheckIntersection(
+        wcl::shapes::Box, wcl::shapes::Capsule, glm::mat4
         ) {
         return false;
     }
 
-    inline bool Intersects(
+    inline bool CheckIntersection(
         wcl::shapes::Sphere, wcl::shapes::Sphere, glm::mat4
         ) {
         return false;
     }
     
-    inline bool Intersects(
+    inline bool CheckIntersection(
         wcl::shapes::Sphere, wcl::shapes::Capsule, glm::mat4
         ) {
         return false;
     }
 
-    inline bool Intersects(
+    inline bool CheckIntersection(
         wcl::shapes::Capsule, wcl::shapes::Capsule, glm::mat4
         ) {
         return false;

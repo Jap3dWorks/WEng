@@ -67,6 +67,17 @@
                               :program "bin/WCore_unittest" 
                               :name "LLDB::WCore::unittests"
                               :env '(("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))))
+
+                       
+                       (dap-register-debug-template
+                        "[LLDB][WCollision] unittests"
+                        (list :type "lldb-vscode"
+                              :cwd "${workspaceFolder}/Install/Debug"
+                              :request "launch"
+                              :program "bin/WCollision_unittest" 
+                              :name "LLDB::WCollision::unittests"
+                              :env '(("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))))
+
                        ))
 
 		           )))))

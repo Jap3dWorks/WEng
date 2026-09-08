@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCore/WMath.hpp"
+#include "WCore/Math.hpp"
 #include "WCoreTypes/Math.hpp"
 #include "WLog.hpp"
 #include "glm/ext/matrix_transform.hpp"

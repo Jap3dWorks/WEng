@@ -4,7 +4,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 
 #include "WCoreTypes/Math.hpp"
-#include "WCore/WMath.hpp"
+#include "WCore/Math.hpp"
 
 #include "wcm::Transform.WEng.hpp"
 

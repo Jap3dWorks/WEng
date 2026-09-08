@@ -10,7 +10,7 @@
 #include "WEngRender/Assets.hpp"
 #include "WEngRender/Camera.hpp"
 #include "WEngRender/Lights.hpp"
-#include "WCore/WMath.hpp"
+#include "WCore/Math.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 
