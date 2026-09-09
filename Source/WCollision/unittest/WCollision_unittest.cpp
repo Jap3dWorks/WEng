@@ -9,5 +9,7 @@ TEST_CASE("WCollision") {
         CHECK(wcl::utests::test2_CheckAABB_2());
         CHECK(wcl::utests::test3_OBB_1());
         CHECK(wcl::utests::test4_OBB_2());
+        CHECK(wcl::utests::test5_OBB_3());
+        CHECK(wcl::utests::test6_OBB_4());
     }
 }

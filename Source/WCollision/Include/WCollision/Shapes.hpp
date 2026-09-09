@@ -43,22 +43,22 @@ namespace wcl::shapes {
         return result;
     }
 
-    // inline constexpr std::array<glm::vec3,8> GetBoxRadii(Box cube, glm::mat4 cube_transform) {
+    inline constexpr std::array<glm::vec3,8> GetBoxRadii(Box box, glm::mat4 cube_transform) {
 
-    //     std::array<glm::vec3,8> result{};
+        std::array<glm::vec3,8> result{};
 
-    //     glm::mat3 rot = cube_transform;
+        glm::mat3 rot = cube_transform;
 
-    //     result[0] = rot * glm::vec3{cube.x, cube.y, cube.z};
-    //     result[1] = rot * glm::vec3{-cube.x, cube.y, cube.z};
-    //     result[2] = rot * glm::vec3{cube.x, -cube.y, cube.z};
-    //     result[3] = rot * glm::vec3{cube.x, cube.y, -cube.z};
-    //     result[4] = rot * glm::vec3{-cube.x, -cube.y, cube.z};
-    //     result[5] = rot * glm::vec3{-cube.x, cube.y, -cube.z};
-    //     result[6] = rot * glm::vec3{cube.x, -cube.y, -cube.z};
-    //     result[7] = rot * glm::vec3{-cube.x, -cube.y, -cube.z};
+        result[0] = rot * glm::vec3{box.x, box.y, box.z};
+        result[1] = rot * glm::vec3{-box.x, box.y, box.z};
+        result[2] = rot * glm::vec3{box.x, -box.y, box.z};
+        result[3] = rot * glm::vec3{box.x, box.y, -box.z};
+        result[4] = rot * glm::vec3{-box.x, -box.y, box.z};
+        result[5] = rot * glm::vec3{-box.x, box.y, -box.z};
+        result[6] = rot * glm::vec3{box.x, -box.y, -box.z};
+        result[7] = rot * glm::vec3{-box.x, -box.y, -box.z};
 
-    //     return result;
+        return result;
         
-    // }
+    }
 }

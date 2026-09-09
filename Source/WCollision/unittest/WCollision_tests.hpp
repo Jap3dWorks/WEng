@@ -82,7 +82,7 @@ namespace wcl::utests {
         b_box.transform[3] = glm::vec4{7.f, 7.f, 7.f, 1.f};
         b_box.Refresh();
 
-        bool check = wcl::collision::CheckIntersection(
+        bool check = wcl::collision::CheckOBBIntersection(
             a_box.box, b_box.box, a_box.inv_transform * b_box.transform
             );
 
@@ -101,18 +101,18 @@ namespace wcl::utests {
 
         BoxCollider b_box{};
         b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
-        b_box.SetTranslation(glm::vec3{a_box.transform[0]} * 11.f);
+        b_box.SetTranslation(glm::vec3{b_box.transform[0]} * 11.f);
         b_box.Refresh();
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::collision::CheckIntersection(
+        bool check = wcl::collision::CheckOBBIntersection(
             a_box.box, b_box.box, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check || wcl::collision::CheckIntersection(
+        check = check && wcl::collision::CheckOBBIntersection(
             b_box.box, a_box.box, relative_transform
             );
 
@@ -123,5 +123,71 @@ namespace wcl::utests {
 
         return true;
     }
-    
+
+    inline bool test5_OBB_3() {
+        BoxCollider a_box{};
+        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Refresh();
+
+        BoxCollider b_box{};
+        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.SetTranslation(glm::vec3{b_box.transform[0]} * -9.f);
+        b_box.Refresh();
+
+        glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
+
+        bool check = wcl::collision::CheckOBBIntersection(
+            a_box.box, b_box.box, relative_transform
+            );
+
+        relative_transform = b_box.inv_transform * a_box.transform;
+
+        check = check && wcl::collision::CheckOBBIntersection(
+            b_box.box, a_box.box, relative_transform
+            );
+
+        if (!check) {
+            WFLOG("Box a and box b should be detected as an intersection!");
+            return false;
+        }
+
+        return true;
+    }
+
+
+    inline bool test6_OBB_4() {
+        BoxCollider a_box{};
+        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Refresh();
+
+        BoxCollider b_box{};
+        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.SetTranslation(glm::vec3{0.f, 9.f, 0.f});
+        b_box.Refresh();
+
+        glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
+
+        bool check = wcl::collision::CheckOBBIntersection(
+            a_box.box, b_box.box, relative_transform
+            );
+
+        relative_transform = b_box.inv_transform * a_box.transform;
+
+        check = check && wcl::collision::CheckOBBIntersection(
+            b_box.box, a_box.box, relative_transform
+            );
+
+        if (!check) {
+            WFLOG("Box a and box b should be detected as an intersection!");
+            return false;
+        }
+
+        return true;
+    }
+
+    inline bool test7_OBB_5() {
+
+        return true;
+    }
+
 }

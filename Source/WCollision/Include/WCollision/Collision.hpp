@@ -29,61 +29,84 @@ namespace wcl::collision {
     }
 
     /**
-     * @param b_transform : expected relative transform to a.
+     * @brief : If "a" and "b" are two Box collider shapes,
+     * too ensure a valid inersection check with CheckOBBIntersection it is required to call
+     * CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)
      */
-    inline bool CheckIntersection(
-        wcl::shapes::Box a_shape, wcl::shapes::Box b_shape, glm::mat4 b_transform
+    inline bool CheckOBBIntersection(
+        wcl::shapes::Box center_box, wcl::shapes::Box other_box, glm::mat4 other_transform
         ) {
+        auto other_radii = wcl::shapes::GetBoxRadii(other_box, other_transform);
 
-        auto b_points = wcl::shapes::GetBoxVertices(b_shape, b_transform);
-        std::uint32_t p_index=9;
+        glm::vec3 axis_radii{0.f};
 
-        auto get_nearest =
-            [&b_points]
-            (std::uint32_t axis) constexpr -> std::uint32_t  {
-                std::uint32_t result=9;
-                float dist=std::numeric_limits<float>::max();
-
-                for(std::uint32_t i=0; i<b_points.size(); i++) {
-                    if (std::abs(b_points[i].y) < dist) {
-                        dist = std::abs(b_points[i].y);
-                        result=i;
-                    }
-                }
-                
-                return result;
+        for(std::uint32_t i=0; i<other_radii.size(); i++) {
+            glm::vec3 abs_values = {
+                std::abs(other_radii[i].x),
+                std::abs(other_radii[i].y),
+                std::abs(other_radii[i].z)
             };
+                    
+            if (abs_values.x > axis_radii.x) {
+                axis_radii.x = abs_values.x;
+            }
+            if (abs_values.y > axis_radii.y) {
+                axis_radii.y = abs_values.y;
+            }
+            if (abs_values.z > axis_radii.z) {
+                axis_radii.z = abs_values.z;
+            }
+        }
 
         // X projection
-        p_index = get_nearest(0);
-        if (b_transform[3][0] > a_shape.x + (b_transform[3].x - b_points[p_index][0]))
+        if (std::abs(other_transform[3].x) > center_box.x + axis_radii.x)
             return false;
 
         // Y projection
-        p_index = get_nearest(1);
-        if (b_transform[3][1] > a_shape.y + (b_transform[3].y - b_points[p_index][1]))
+        if (std::abs(other_transform[3].y) > center_box.y + axis_radii.y)
             return false;
 
         // Z projection
-        p_index = get_nearest(1);
-        if (b_transform[3][2] > a_shape.z + (b_transform[3].z - b_points[p_index][2]))
+        if (std::abs(other_transform[3].z) > center_box.z + axis_radii.z)
             return false;
 
         return true;
     }
 
     /**
-     * @param position : expected relative position to a.
+     * Returns true if center_box and sphere are intersecting.
+     * @param center_box : box collision shape, it is considered the center of the system.
+     * @param sphere : sphere collision shape.
+     * @param sphere_position : sphere position relative to center_box.
      */
     inline bool CheckIntersection(
-        wcl::shapes::Box, wcl::shapes::Sphere, glm::vec3 position
+        wcl::shapes::Box center_box,
+        wcl::shapes::Sphere sphere,
+        glm::vec3 sphere_position
         ) {
-        return false;
+        sphere_position = {
+            std::abs(sphere_position.x),
+            std::abs(sphere_position.y),
+            std::abs(sphere_position.z)
+        };
+
+        glm::vec3 nearest_box_point = glm::vec3{
+            std::min(center_box.x, sphere_position.x),
+            std::min(center_box.y, sphere_position.y),
+            std::min(center_box.z, sphere_position.z)
+        };
+
+        glm::vec3 check = nearest_box_point - sphere_position;
+
+        return glm::dot(check, check) <= sphere.radius * sphere.radius;
     }
 
     inline bool CheckIntersection(
         wcl::shapes::Box, wcl::shapes::Capsule, glm::mat4
         ) {
+
+        
+
         return false;
     }
 
