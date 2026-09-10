@@ -2,6 +2,9 @@
 
 #include "WCore/WCore.hpp"
 #include "WCoreTypes/Math.hpp"
+
+#include "WCore/FloatingPoint.hpp"
+
 #include "glm/matrix.hpp"
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -236,11 +239,11 @@ namespace wcr::math {
     template<typename T> requires requires {
         std::is_same_v<T, glm::mat3> || std::is_same_v<T,glm::mat4>;
     }
-    inline constexpr bool AreEqual(T a, T b, float epsilon=2.5E-06) {
+    inline constexpr bool AreEqual(T a, T b, T epsilon=2.5E-06) {
 
         for (std::uint32_t i=0; i<T::length(); i++) {
             for(std::uint32_t j=0; j<T::length(); j++) {
-                if (std::abs(a[i][j] - b[i][j]) > epsilon) {
+                if (!wcr::fpoint::AreEqual(a[i][j], b[i][j], epsilon)) {
                     return false;
                 }
             }
