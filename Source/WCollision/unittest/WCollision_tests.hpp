@@ -11,6 +11,34 @@
 
 namespace wcl::utests {
 
+    struct BaseCollider {
+        glm::mat4 transform{1.f};
+        void Rotate(float angle, glm::vec3 direction) {
+            transform = glm::rotate(
+                transform,
+                angle,
+                glm::normalize(direction)
+                );
+        }
+
+        void SetTranslation(glm::vec3 translation) {
+            transform[3] = glm::vec4{translation, 1.f};
+        }
+    };
+
+    struct BoxCollider : public BaseCollider {
+        wcl::shapes::Box box {5.f,5.f,5.f};
+        glm::mat4 inv_transform {1.f};
+
+        void Refresh() {
+            inv_transform = wcr::math::InvertTransformMatrix(transform);
+        }
+    };
+
+    struct CapsuleCollider : public BaseCollider {
+        wcl::shapes::Capsule capsule{};
+    };
+
     inline bool test1_CheckAABB_1() {
         wcl::shapes::AABB a {
             .min = glm::vec3{0},
@@ -49,28 +77,6 @@ namespace wcl::utests {
         return true;
     }    
 
-    struct BoxCollider {
-        wcl::shapes::Box box {5.f,5.f,5.f};
-        glm::mat4 transform {1.f};
-        glm::mat4 inv_transform {1.f};
-
-        void Rotate(float angle, glm::vec3 direction) {
-            transform = glm::rotate(
-                transform,
-                angle,
-                glm::normalize(direction)
-                );
-        }
-
-        void SetTranslation(glm::vec3 translation) {
-            transform[3] = glm::vec4{translation, 1.f};
-        }
-
-        void Refresh() {
-            inv_transform = wcr::math::InvertTransformMatrix(transform);
-        }
-    };
-
     inline bool test3_OBB_1() {
         BoxCollider a_box{};
         a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
@@ -82,7 +88,7 @@ namespace wcl::utests {
         b_box.transform[3] = glm::vec4{7.f, 7.f, 7.f, 1.f};
         b_box.Refresh();
 
-        bool check = wcl::collision::CheckOBBIntersection(
+        bool check = wcl::collision::CheckBoxIntersection(
             a_box.box, b_box.box, a_box.inv_transform * b_box.transform
             );
 
@@ -106,13 +112,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::collision::CheckOBBIntersection(
+        bool check = wcl::collision::CheckBoxIntersection(
             a_box.box, b_box.box, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::collision::CheckOBBIntersection(
+        check = check && wcl::collision::CheckBoxIntersection(
             b_box.box, a_box.box, relative_transform
             );
 
@@ -136,13 +142,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::collision::CheckOBBIntersection(
+        bool check = wcl::collision::CheckBoxIntersection(
             a_box.box, b_box.box, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::collision::CheckOBBIntersection(
+        check = check && wcl::collision::CheckBoxIntersection(
             b_box.box, a_box.box, relative_transform
             );
 
@@ -167,13 +173,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::collision::CheckOBBIntersection(
+        bool check = wcl::collision::CheckBoxIntersection(
             a_box.box, b_box.box, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::collision::CheckOBBIntersection(
+        check = check && wcl::collision::CheckBoxIntersection(
             b_box.box, a_box.box, relative_transform
             );
 
@@ -185,7 +191,22 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test7_OBB_5() {
+    inline bool test7_OBB_capsule_1() {
+
+        BoxCollider axis_box{};
+        CapsuleCollider capsule{};
+
+        capsule.capsule.half_length=8.f;
+        capsule.SetTranslation(glm::vec3{0.f, 0.f, 6.f});
+
+        bool check = wcl::collision::CheckIntersection(
+            axis_box.box, capsule.capsule, capsule.transform
+            );
+
+        if(!check) {
+            WFLOG("Box and capsule should be intersecting!");
+            return false;
+        }
 
         return true;
     }

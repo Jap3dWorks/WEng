@@ -21,7 +21,7 @@ namespace wcl::shapes {
     };
 
     struct Capsule{
-        float length{10.f};
+        float half_length{5.f};  // half segment length
         float radius{3.f};
     };
     
@@ -43,6 +43,13 @@ namespace wcl::shapes {
         return result;
     }
 
+    inline constexpr AABB ToAABB(Box box) {
+        return {
+            .min{-box.x, -box.y, -box.z},
+            .max{box.x, box.y, box.z}
+        };
+    }
+
     inline constexpr std::array<glm::vec3,8> GetBoxRadii(Box box, glm::mat4 cube_transform) {
 
         std::array<glm::vec3,8> result{};
@@ -60,5 +67,20 @@ namespace wcl::shapes {
 
         return result;
         
+    }
+
+    inline constexpr auto AsPoints(Capsule capsule) {
+        return std::array{
+            glm::vec3{-capsule.half_length, 0.f, 0.f},
+            glm::vec3{capsule.half_length, 0.f, 0.f}
+        };
+    }
+
+    inline constexpr auto AsPoints(Capsule capsule, glm::mat4 transform) {
+        auto [p_a, p_b] = wcl::shapes::AsPoints(capsule);
+        
+        return std::array {glm::vec3{transform * glm::vec4{p_a, 1.f}},
+                           glm::vec3{transform * glm::vec4{p_b, 1.f}}};
+
     }
 }

@@ -4,8 +4,9 @@
 #include "WCore/WId.hpp"
 #include "WCollision/Shapes.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
+#include "WCollision/BoxCapsule.hpp"
 
-#include <optional>
+// #include <optional>
 
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
@@ -33,10 +34,10 @@ namespace wcl::collision {
      * too ensure a valid inersection check with CheckOBBIntersection it is required to call
      * CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)
      */
-    inline bool CheckOBBIntersection(
-        wcl::shapes::Box center_box, wcl::shapes::Box other_box, glm::mat4 other_transform
+    inline bool CheckBoxIntersection(
+        wcl::shapes::Box axis_box, wcl::shapes::Box obb, glm::mat4 obb_transform
         ) {
-        auto other_radii = wcl::shapes::GetBoxRadii(other_box, other_transform);
+        auto other_radii = wcl::shapes::GetBoxRadii(obb, obb_transform);
 
         glm::vec3 axis_radii{0.f};
 
@@ -59,15 +60,15 @@ namespace wcl::collision {
         }
 
         // X projection
-        if (std::abs(other_transform[3].x) > center_box.x + axis_radii.x)
+        if (std::abs(obb_transform[3].x) > axis_box.x + axis_radii.x)
             return false;
 
         // Y projection
-        if (std::abs(other_transform[3].y) > center_box.y + axis_radii.y)
+        if (std::abs(obb_transform[3].y) > axis_box.y + axis_radii.y)
             return false;
 
         // Z projection
-        if (std::abs(other_transform[3].z) > center_box.z + axis_radii.z)
+        if (std::abs(obb_transform[3].z) > axis_box.z + axis_radii.z)
             return false;
 
         return true;
@@ -80,7 +81,7 @@ namespace wcl::collision {
      * @param sphere_position : sphere position relative to center_box.
      */
     inline bool CheckIntersection(
-        wcl::shapes::Box center_box,
+        wcl::shapes::Box axis_box,
         wcl::shapes::Sphere sphere,
         glm::vec3 sphere_position
         ) {
@@ -91,9 +92,9 @@ namespace wcl::collision {
         };
 
         glm::vec3 nearest_box_point = glm::vec3{
-            std::min(center_box.x, sphere_position.x),
-            std::min(center_box.y, sphere_position.y),
-            std::min(center_box.z, sphere_position.z)
+            std::min(axis_box.x, sphere_position.x),
+            std::min(axis_box.y, sphere_position.y),
+            std::min(axis_box.z, sphere_position.z)
         };
 
         glm::vec3 check = nearest_box_point - sphere_position;
@@ -102,24 +103,42 @@ namespace wcl::collision {
     }
 
     inline bool CheckIntersection(
-        wcl::shapes::Box, wcl::shapes::Capsule, glm::mat4
+        wcl::shapes::Box axis_box, wcl::shapes::Capsule capsule, glm::mat4 capsule_transform
         ) {
 
-        
+        auto [p_a, p_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
 
-        return false;
+        return wcl::box_capsule::MinSquareDistance(axis_box, p_a, p_b) <=
+            capsule.radius * capsule.radius;
     }
 
     inline bool CheckIntersection(
-        wcl::shapes::Sphere, wcl::shapes::Sphere, glm::mat4
+        wcl::shapes::Sphere a_sphere, wcl::shapes::Sphere b_sphere, glm::vec3 b_translation
         ) {
-        return false;
+
+        float sqr_dist = glm::dot(b_translation, b_translation);
+
+        return std::pow(a_sphere.radius + b_sphere.radius, 2) >= sqr_dist;
     }
-    
+
+    /**
+     * @param capsule_transform : capsule transform relative to axis_sphere.
+     */
     inline bool CheckIntersection(
-        wcl::shapes::Sphere, wcl::shapes::Capsule, glm::mat4
+        wcl::shapes::Sphere axis_sphere, wcl::shapes::Capsule capsule, glm::mat4 capsule_transform
         ) {
-        return false;
+
+        auto [p_a, p_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
+
+        glm::vec3 segment = p_b - p_a;
+
+        float t = (- glm::dot(p_a, segment))/(glm::dot(segment, segment));
+
+        float t_min = std::max(std::min(t,1.f), 0.f);
+
+        glm::vec3 spoint = p_a + (p_b - p_a) * t;
+
+        return glm::dot(spoint, spoint) <= std::pow(axis_sphere.radius + capsule.radius, 2);
     }
 
     inline bool CheckIntersection(
