@@ -35,7 +35,9 @@ namespace wcl::collision {
      * CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)
      */
     inline bool CheckBoxIntersection(
-        wcl::shapes::Box axis_box, wcl::shapes::Box obb, glm::mat4 obb_transform
+        wcl::shapes::Box axis_box,
+        wcl::shapes::Box obb,
+        glm::mat4 obb_transform
         ) {
         auto other_radii = wcl::shapes::GetBoxRadii(obb, obb_transform);
 
@@ -103,7 +105,9 @@ namespace wcl::collision {
     }
 
     inline bool CheckIntersection(
-        wcl::shapes::Box axis_box, wcl::shapes::Capsule capsule, glm::mat4 capsule_transform
+        wcl::shapes::Box axis_box,
+        wcl::shapes::Capsule capsule,
+        glm::mat4 capsule_transform
         ) {
 
         auto [p_a, p_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
@@ -113,7 +117,9 @@ namespace wcl::collision {
     }
 
     inline bool CheckIntersection(
-        wcl::shapes::Sphere a_sphere, wcl::shapes::Sphere b_sphere, glm::vec3 b_translation
+        wcl::shapes::Sphere a_sphere,
+        wcl::shapes::Sphere b_sphere,
+        glm::vec3 b_translation
         ) {
 
         float sqr_dist = glm::dot(b_translation, b_translation);
@@ -125,7 +131,9 @@ namespace wcl::collision {
      * @param capsule_transform : capsule transform relative to axis_sphere.
      */
     inline bool CheckIntersection(
-        wcl::shapes::Sphere axis_sphere, wcl::shapes::Capsule capsule, glm::mat4 capsule_transform
+        wcl::shapes::Sphere axis_sphere,
+        wcl::shapes::Capsule capsule,
+        glm::mat4 capsule_transform
         ) {
 
         auto [p_a, p_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
