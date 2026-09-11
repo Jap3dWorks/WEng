@@ -109,7 +109,7 @@ namespace wcl::collision {
         auto [p_a, p_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
 
         return wcl::box_capsule::MinSquareDistance(axis_box, p_a, p_b) <=
-            capsule.radius * capsule.radius;
+            (capsule.radius * capsule.radius);
     }
 
     inline bool CheckIntersection(
@@ -142,9 +142,41 @@ namespace wcl::collision {
     }
 
     inline bool CheckIntersection(
-        wcl::shapes::Capsule, wcl::shapes::Capsule, glm::mat4
+        wcl::shapes::Capsule axis_capsule,
+        wcl::shapes::Capsule capsule,
+        glm::mat4 capsule_transform
         ) {
-        return false;
+
+        auto[p1_a, p1_b] = wcl::shapes::AsPoints(axis_capsule);
+        auto[p2_a, p2_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
+
+        glm::vec3 d1 = p1_b - p1_a;
+        glm::vec3 d2 = p2_b = p2_a;
+
+        float d2_dt = glm::dot(d2,d2);
+        float d1_dt = glm::dot(d1,d1);
+
+        float p1d1_dt = glm::dot(p1_a, d1);
+        float p2d2_dt = glm::dot(p2_a, d2);
+        float p1d2_dt = glm::dot(p1_a, d2);
+        float p2d1_dt = glm::dot(p2_a,d1);
+
+        float d1d2_dt = glm::dot(d1,d2);
+
+        float t_nearest =
+            (d1_dt * (p1d2_dt - p2d2_dt) - p1d2_dt + p2d1_dt) /
+            ((d2_dt * d1_dt) - d1d2_dt);
+
+        float t_min = std::max(std::min(t_nearest, 1.f), 0.f);
+
+        float s_nearest =
+            (- p1d1_dt + p2d1_dt + t_min * d1d2_dt) / d1_dt;
+
+        float s_min = std::max(std::min(s_nearest, 1.f), 0.f);
+
+        return glm::dot(
+            p1_a + d1 * s_min, p2_a + d2 * t_min
+            ) <= std::pow(axis_capsule.radius + capsule.radius,2);
     }
 
 }
