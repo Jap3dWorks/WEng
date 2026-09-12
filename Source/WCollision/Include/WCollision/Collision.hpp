@@ -14,11 +14,7 @@
 
 namespace wcl::collision {
 
-    /**
-     * Returns true if shapes are Axis Aligned Bounding Box.
-     * Computing cheaper for a initial tests.
-     */
-    inline bool CheckAABB(
+    inline bool Intersects(
         wcl::shapes::AABB a,
         wcl::shapes::AABB b
         ) {
@@ -32,9 +28,9 @@ namespace wcl::collision {
     /**
      * @brief : If "a" and "b" are two Box collider shapes,
      * too ensure a valid inersection check with CheckOBBIntersection it is required to call
-     * CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)
+     * (CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)) == true
      */
-    inline bool CheckBoxIntersection(
+    inline bool Intersects(
         wcl::shapes::Box axis_box,
         wcl::shapes::Box obb,
         glm::mat4 obb_transform
@@ -77,12 +73,12 @@ namespace wcl::collision {
     }
 
     /**
-     * Returns true if center_box and sphere are intersecting.
+     * @brief Returns true if axis_box and sphere are intersecting.
      * @param center_box : box collision shape, it is considered the center of the system.
      * @param sphere : sphere collision shape.
      * @param sphere_position : sphere position relative to center_box.
      */
-    inline bool CheckIntersection(
+    inline bool Intersects(
         wcl::shapes::Box axis_box,
         wcl::shapes::Sphere sphere,
         glm::vec3 sphere_position
@@ -104,7 +100,7 @@ namespace wcl::collision {
         return glm::dot(check, check) <= sphere.radius * sphere.radius;
     }
 
-    inline bool CheckIntersection(
+    inline bool Intersects(
         wcl::shapes::Box axis_box,
         wcl::shapes::Capsule capsule,
         glm::mat4 capsule_transform
@@ -116,7 +112,7 @@ namespace wcl::collision {
             (capsule.radius * capsule.radius);
     }
 
-    inline bool CheckIntersection(
+    inline bool Intersects(
         wcl::shapes::Sphere a_sphere,
         wcl::shapes::Sphere b_sphere,
         glm::vec3 b_translation
@@ -128,9 +124,10 @@ namespace wcl::collision {
     }
 
     /**
+     * @brief Check if axis_sphere and capsule are intersecting.
      * @param capsule_transform : capsule transform relative to axis_sphere.
      */
-    inline bool CheckIntersection(
+    inline bool Intersects(
         wcl::shapes::Sphere axis_sphere,
         wcl::shapes::Capsule capsule,
         glm::mat4 capsule_transform
@@ -144,12 +141,15 @@ namespace wcl::collision {
 
         float t_min = std::max(std::min(t,1.f), 0.f);
 
-        glm::vec3 spoint = p_a + (p_b - p_a) * t;
+        glm::vec3 spoint = p_a + segment * t;
 
-        return glm::dot(spoint, spoint) <= std::pow(axis_sphere.radius + capsule.radius, 2);
+        float sqr_dist = glm::dot(spoint, spoint);
+        float tier = std::pow(axis_sphere.radius + capsule.radius, 2);
+
+        return sqr_dist <= tier;
     }
 
-    inline bool CheckIntersection(
+    inline bool Intersects(
         wcl::shapes::Capsule axis_capsule,
         wcl::shapes::Capsule capsule,
         glm::mat4 capsule_transform

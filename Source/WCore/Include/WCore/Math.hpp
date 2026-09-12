@@ -239,7 +239,7 @@ namespace wcr::math {
     template<typename T> requires requires {
         std::is_same_v<T, glm::mat3> || std::is_same_v<T,glm::mat4>;
     }
-    inline constexpr bool AreEqual(T a, T b, T epsilon=2.5E-06) {
+    inline constexpr bool AreEqual(T a, T b, float epsilon=2.5E-06) {
 
         for (std::uint32_t i=0; i<T::length(); i++) {
             for(std::uint32_t j=0; j<T::length(); j++) {
