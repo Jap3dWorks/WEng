@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WVulkan/RAII/AssetRenderData.hpp"
 #include "WVulkan/RAII/Pipelines/GBuffer.hpp"
 #include "WVulkan/RAII/Attachments/Postprocess.hpp"

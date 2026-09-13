@@ -7,7 +7,7 @@
 #include "WVulkan/WVkConfig.hpp"
 
 #include "WCore/WCoreMacros.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WVulkan/RAII/Attachments/Lighting.hpp"
 #include "WVulkan/RAII/Attachments/Postprocess.hpp"
@@ -103,7 +103,7 @@ public:
     }
 
     void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
-                        const wct::geometry::WMesh & in_mesh) override {
+                        const wct::geometry::Mesh & in_mesh) override {
         asset_render_data_.LoadStaticMesh(in_id, in_mesh);
     }
 

@@ -9,16 +9,16 @@
 
 namespace wct::geometry {
 
-    using WIndex = std::uint32_t;
+    using Index = std::uint32_t;
 
-    struct WVertex{
+    struct Vertex{
         glm::vec3 position{};
         glm::vec2 tex_coords{};
         glm::vec4 color{};
         glm::vec3 normal{};
         glm::vec4 tangent{};
 
-        bool operator==(const WVertex& other) const{
+        bool operator==(const Vertex& other) const{
             return position == other.position && 
                 tex_coords == other.tex_coords &&
                 color == other.color &&
@@ -26,21 +26,17 @@ namespace wct::geometry {
         }
     };
 
-    struct WMesh{
-        std::vector<WVertex> vertices{};
-        std::vector<WIndex> indices{};
+    struct Mesh{
+        std::vector<Vertex> vertices{};
+        std::vector<Index> indices{};
     };
 
-// Meshes by Id, max 16
-// struct WMeshsesStruct{
-//     std::array<WMeshStruct, WENG_MAX_ASSET_IDS> meshes;
-// };
 
 }
 
 template<>
-struct std::hash<wct::geometry::WVertex>{
-    size_t operator()(wct::geometry::WVertex const& vertex) const
+struct std::hash<wct::geometry::Vertex>{
+    size_t operator()(wct::geometry::Vertex const& vertex) const
         {
             return (
                 (hash<glm::vec3>()(vertex.position) ^

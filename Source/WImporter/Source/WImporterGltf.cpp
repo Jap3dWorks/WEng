@@ -8,7 +8,7 @@
 #include "WComponents/Light/Point.hpp"
 #include "WComponents/StaticMesh.hpp"
 #include "WCore/WId.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WInterfaces/IRender.hpp"
@@ -454,12 +454,12 @@ namespace {
     }
 
     WNODISCARD inline
-    wct::geometry::WMesh CollectMeshPrimitive(
+    wct::geometry::Mesh CollectMeshPrimitive(
         fastgltf::Asset const & in_asset,
         fastgltf::Primitive const  & in_primitive
         ) {
 
-        wct::geometry::WMesh result;
+        wct::geometry::Mesh result;
 
         WCORE_DEBUG_ONLY(
             std::string attributes = "";

@@ -4,7 +4,7 @@
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WImporter/WImporterTexture.hpp"
 
 #include "WAssets/Level.hpp"
@@ -23,8 +23,8 @@ namespace spacers::plane {
         wcr::wid::WAssetId texture_id;
     };
 
-    inline wct::geometry::WMesh Plane() {
-        wct::geometry::WMesh result;
+    inline wct::geometry::Mesh Plane() {
+        wct::geometry::Mesh result;
         result.vertices = {
             {
                 {5.f, 0.f, 5.f},

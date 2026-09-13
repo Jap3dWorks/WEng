@@ -9,7 +9,7 @@
 #include "WVulkan/RAII/PipelineLayout.hpp"
 #include "WRender/WShader.hpp"
 #include "WVulkan/Vk/WVkShader.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 
 #include <string_view>
 #include <vulkan/vulkan_core.h>
@@ -27,7 +27,7 @@ namespace wvk::raii::pipelines {
                 .location = 0,
                 .binding = 0,
                 .format = VK_FORMAT_R32G32B32_SFLOAT,
-                .offset = offsetof(wct::geometry::WVertex, position)
+                .offset = offsetof(wct::geometry::Vertex, position)
             } // ,
             // VkVertexInputAttributeDescription{
             //     .location = 1,
@@ -40,7 +40,7 @@ namespace wvk::raii::pipelines {
         static inline constexpr std::array const VERTEX_INPUT_BINDING_DESCRIPTION {
             VkVertexInputBindingDescription {
                 .binding=0,
-                .stride=sizeof(wct::geometry::WVertex),
+                .stride=sizeof(wct::geometry::Vertex),
                 .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
             }  
         };

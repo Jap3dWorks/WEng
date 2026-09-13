@@ -24,6 +24,12 @@ namespace wcl::shapes {
         float half_length{5.f};  // half segment length
         float radius{3.f};
     };
+
+    /** Collider Mesh */
+    struct Mesh{
+        std::vector<glm::vec3> vertices{};
+        std::vector<std::uint32_t> indices{};
+    };
     
     using ShapeVariant = std::variant<Box, Sphere, Capsule>;
 

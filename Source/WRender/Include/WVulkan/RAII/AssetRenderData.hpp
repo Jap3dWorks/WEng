@@ -4,7 +4,7 @@
 #include "WCore/WCore.hpp"
 
 #include "WCore/WId.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WCoreTypes/WTexture.hpp"
 #include "WVulkan/WVulkanStructs.hpp"
@@ -77,7 +77,7 @@ namespace wvk::raii {
         // Static Mesh
 
         void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
-                            const wct::geometry::WMesh & in_mesh) {
+                            const wct::geometry::Mesh & in_mesh) {
 
             static_mesh_collection_.CreateAt(
                 in_id,

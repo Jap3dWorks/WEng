@@ -61,7 +61,7 @@ namespace wng::render::assets {
                      &texture_assets,
                      &in_asset_db](was::StaticMesh * _sm,
                                    const wcr::wid::WSubIdxId & _id,
-                                   wct::geometry::WMesh& _m) {
+                                   wct::geometry::Mesh& _m) {
 
                         wct::render::RPipeAssignment pipassign =
                             in_component->GetPipelineAssignment(_id);
@@ -103,7 +103,7 @@ namespace wng::render::assets {
                 [&in_render, &in_asset_db]
                 (was::StaticMesh * _sma,
                  wcr::wid::WSubIdxId _id,
-                 wct::geometry::WMesh & _m) {
+                 wct::geometry::Mesh & _m) {
                     
                     wcr::wid::WTypeAssetIndexId asset_index {
                         wcr::wid::nullid,
@@ -154,7 +154,7 @@ namespace wng::render::assets {
                      &in_render,
                      &in_component](was::StaticMesh * _sma,
                                     wcr::wid::WSubIdxId _id,
-                                    wct::geometry::WMesh & _m) {
+                                    wct::geometry::Mesh & _m) {
                         
                         auto & param = in_asset_db.Get<was::RenderPipelineParams>(
                             in_component->GetPipelineAssignment(_id).params
@@ -349,7 +349,7 @@ namespace wng::render::assets {
                     (
                         was::StaticMesh * _sm,
                         wcr::wid::WSubIdxId _id,
-                        wct::geometry::WMesh & _m
+                        wct::geometry::Mesh & _m
                         ) {
 
                         auto & pipeline_parameters =
@@ -400,7 +400,7 @@ namespace wng::render::assets {
             in_asset_db.Get<was::StaticMesh>(id).ForEachMesh(
                 [&in_render](was::StaticMesh * _sm,
                              const wcr::wid::WSubIdxId & _id,
-                             wct::geometry::WMesh & _m) {
+                             wct::geometry::Mesh & _m) {
                     in_render->UnloadStaticMesh(
                         {wcr::wid::nullid, _sm->Get_asset_id(), _id}
                         );

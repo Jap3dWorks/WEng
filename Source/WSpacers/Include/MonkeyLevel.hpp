@@ -17,7 +17,7 @@
 #include "WAssets/RenderPipeline.hpp"
 #include "WAssets/Level.hpp"
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/RenderPipeline.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"

@@ -1,5 +1,5 @@
 #include "WImporter/WImporterObj.hpp"
-#include "WCoreTypes/WGeometry.hpp"
+#include "WCoreTypes/Geometry.hpp"
 #include "WAssets/StaticMesh.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 
@@ -40,21 +40,21 @@ std::vector<wcr::wid::WAssetId> wim::importer::WImporterObj::Import(
 
     uint32_t index_offset = 0;
     
-    std::vector<wct::geometry::WMesh> meshes(shapes.size());
+    std::vector<wct::geometry::Mesh> meshes(shapes.size());
     std::vector<std::string> names(shapes.size());
 
     for (const auto & shape : shapes)
     {
-        wct::geometry::WMesh & mesh = meshes[index_offset];
+        wct::geometry::Mesh & mesh = meshes[index_offset];
         names[index_offset] = shape.name;
 
         ++index_offset;
 
-        std::unordered_map<wct::geometry::WVertex, uint32_t> unique_vertices = {};
+        std::unordered_map<wct::geometry::Vertex, uint32_t> unique_vertices = {};
 
         for (const auto & index : shape.mesh.indices)
         {
-            wct::geometry::WVertex vertex = {};
+            wct::geometry::Vertex vertex = {};
 
             vertex.position = {
                 attrib.vertices[(3 * index.vertex_index) + 0],

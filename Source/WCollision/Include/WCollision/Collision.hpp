@@ -6,11 +6,8 @@
 #include "glm/ext/matrix_float4x4.hpp"
 #include "WCollision/BoxCapsule.hpp"
 
-// #include <optional>
-
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
-#include <limits>
 
 namespace wcl::collision {
 
@@ -72,6 +69,15 @@ namespace wcl::collision {
         return true;
     }
 
+    inline bool Intersects(
+        wcl::shapes::Box axis_box,
+        glm::vec3 point
+        ) {
+        return axis_box.x >= std::abs(point.x) &&
+            axis_box.y >= std::abs(point.y) &&
+            axis_box.z >= std::abs(point.z);
+    }
+
     /**
      * @brief Returns true if axis_box and sphere are intersecting.
      * @param center_box : box collision shape, it is considered the center of the system.
@@ -113,6 +119,23 @@ namespace wcl::collision {
     }
 
     inline bool Intersects(
+        wcl::shapes::Box axis_box,
+        wcl::shapes::Mesh const & mesh,
+        glm::mat4 mesh_transform
+        ) {
+        // TODO
+        return false;
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Sphere sphere,
+        glm::vec3 point
+        ) {
+        // TODO
+        return false;
+    }
+
+    inline bool Intersects(
         wcl::shapes::Sphere a_sphere,
         wcl::shapes::Sphere b_sphere,
         glm::vec3 b_translation
@@ -147,6 +170,21 @@ namespace wcl::collision {
         float tier = std::pow(axis_sphere.radius + capsule.radius, 2);
 
         return sqr_dist <= tier;
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Mesh const & axis_mesh,
+        wcl::shapes::Sphere sphere,
+        glm::vec3 sphere_translation
+        ) {
+        return false;
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Capsule axis_capsule,
+        glm::vec3 point
+        ) {
+        return false;
     }
 
     inline bool Intersects(
@@ -185,6 +223,14 @@ namespace wcl::collision {
         return glm::dot(
             p1_a + d1 * s_min, p2_a + d2 * t_min
             ) <= std::pow(axis_capsule.radius + capsule.radius,2);
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Capsule axis_capsule,
+        wcl::shapes::Mesh const & mesh,
+        glm::vec3 mesh_transform
+        ) {
+        return false;
     }
 
 }

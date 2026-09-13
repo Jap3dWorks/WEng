@@ -8,7 +8,7 @@
 
 namespace was { class RenderPipeline; }
 
-namespace wct::geometry {struct WMesh;}
+namespace wct::geometry {struct Mesh;}
 
 namespace wdw { class WWindow; }
 
@@ -86,7 +86,7 @@ public:
     virtual void UnloadTexture(const wcr::wid::WAssetId & in_id)=0;
 
     virtual void LoadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id,
-                                const wct::geometry::WMesh & in_mesh)=0;
+                                const wct::geometry::Mesh & in_mesh)=0;
 
     virtual void UnloadStaticMesh(const wcr::wid::WTypeAssetIndexId & in_id)=0;
 
