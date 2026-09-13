@@ -31,7 +31,7 @@ namespace wcl::shapes {
         std::vector<std::uint32_t> indices{};
     };
     
-    using ShapeVariant = std::variant<Box, Sphere, Capsule>;
+    using ShapeVariant = std::variant<Box, Sphere, Capsule, Mesh>;
 
     inline constexpr std::array<glm::vec3,8> GetBoxVertices(Box cube, glm::mat4 cube_transform) {
 

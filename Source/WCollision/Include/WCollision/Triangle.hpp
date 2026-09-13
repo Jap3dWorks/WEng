@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCollision/Shapes.hpp"
+#include <glm/glm.hpp>
 
 namespace wcl::triangle {
 
