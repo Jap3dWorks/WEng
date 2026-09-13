@@ -119,9 +119,9 @@ namespace wcl::collision {
     }
 
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Mesh const & mesh,
-        glm::mat4 mesh_transform
+        wcl::shapes::Mesh const & axis_mesh,
+        wcl::shapes::Box box,
+        glm::mat4 box_transform
         ) {
         // TODO
         return false;
@@ -131,8 +131,7 @@ namespace wcl::collision {
         wcl::shapes::Sphere sphere,
         glm::vec3 point
         ) {
-        // TODO
-        return false;
+        return glm::dot(point, point) <= std::pow(sphere.radius, 2);
     }
 
     inline bool Intersects(
@@ -181,9 +180,18 @@ namespace wcl::collision {
     }
 
     inline bool Intersects(
-        wcl::shapes::Capsule axis_capsule,
-        glm::vec3 point
+        wcl::shapes::Capsule capsule,
+        glm::mat4 capsule_transform
+        // glm::vec3 point
         ) {
+        //
+
+        auto[p1_a, p1_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
+
+        glm::vec3 d1 = p1_a - p1_b;
+
+
+
         return false;
     }
 
@@ -192,12 +200,11 @@ namespace wcl::collision {
         wcl::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
-
         auto[p1_a, p1_b] = wcl::shapes::AsPoints(axis_capsule);
         auto[p2_a, p2_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
 
         glm::vec3 d1 = p1_b - p1_a;
-        glm::vec3 d2 = p2_b = p2_a;
+        glm::vec3 d2 = p2_b - p2_a;
 
         float d2_dt = glm::dot(d2,d2);
         float d1_dt = glm::dot(d1,d1);
@@ -220,9 +227,9 @@ namespace wcl::collision {
 
         float s_min = std::max(std::min(s_nearest, 1.f), 0.f);
 
-        return glm::dot(
-            p1_a + d1 * s_min, p2_a + d2 * t_min
-            ) <= std::pow(axis_capsule.radius + capsule.radius,2);
+        glm::vec3 len_vec = (p1_a + d1 * s_min) - (p2_a + d2 * t_min);
+
+        return glm::dot(len_vec, len_vec) <= std::pow(axis_capsule.radius + capsule.radius, 2);
     }
 
     inline bool Intersects(

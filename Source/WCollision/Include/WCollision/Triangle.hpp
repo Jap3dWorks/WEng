@@ -54,6 +54,7 @@ namespace wcl::triangle {
         float denom = 1.f / (va + vb + vc);
         float v = vb * denom;
         float w = vc * denom;
+        
         return tri[0] + ab * v + ac * w;
 
     }

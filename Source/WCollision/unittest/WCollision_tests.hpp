@@ -13,12 +13,20 @@ namespace wcl::utests {
 
     struct BaseCollider {
         glm::mat4 transform{1.f};
+        
         void Rotate(float angle, glm::vec3 direction) {
-            transform = glm::rotate(
-                transform,
+            
+            glm::mat3 rot = glm::rotate(
+                glm::mat4{1.f},
                 angle,
                 glm::normalize(direction)
                 );
+
+            glm::vec4 pos = transform[3];
+            glm::mat4 mat = rot * glm::mat3(transform);
+            mat[3] = pos;
+
+            transform = mat;
         }
 
         void SetTranslation(glm::vec3 translation) {
@@ -330,10 +338,10 @@ namespace wcl::utests {
         CapsuleCollider c2;
 
         c2.shape.radius=5.1f;
-        c2.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
-            glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f
+            glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
         bool check = wcl::collision::Intersects(
@@ -353,10 +361,10 @@ namespace wcl::utests {
         CapsuleCollider c2;
 
         c2.shape.radius=4.9f;
-        c2.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
-            glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f
+            glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
         bool check = wcl::collision::Intersects(
@@ -374,14 +382,14 @@ namespace wcl::utests {
 
     inline bool test_capsule_1() {
         CapsuleCollider c1;
-        c1.Rotate(wcr::math::PI<float> * (-0.25), {0.f, 1.f, 0.f});
+        c1.shape.radius=5.1f;
 
         CapsuleCollider c2;
-        c2.shape.radius=5.1f;
-        c2.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        c2.shape.radius=5.f;
+        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
-            glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f
+            glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
         bool check = wcl::collision::Intersects(
@@ -396,17 +404,16 @@ namespace wcl::utests {
         return true;
     }
 
-    // TODO check this test
     inline bool test_capsule_2() {
         CapsuleCollider c1;
-        c1.Rotate(wcr::math::PI<float> * (-0.25), {0.f, 1.f, 0.f});
-
+        c1.shape.radius = 4.9f;
+        
         CapsuleCollider c2;
-        c2.shape.radius=4.9f;
-        c2.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        c2.shape.radius=5.f;
+        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
-            glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f
+            glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
         bool check = wcl::collision::Intersects(
@@ -419,6 +426,14 @@ namespace wcl::utests {
         }
 
         return true;
+    }
+
+    inline bool test_mesh_1() {
+        return false;
+    }
+
+    inline bool test_mesh_2() {
+        return false;
     }
 
 }
