@@ -19,6 +19,8 @@ TEST_CASE("WCollision") {
         CHECK(wcl::utests::test_sphere_2());
         CHECK(wcl::utests::test_sphere_capsule_1());
         CHECK(wcl::utests::test_sphere_capsule_2());
+        CHECK(wcl::utests::test_point_capsule_1());
+        CHECK(wcl::utests::test_point_capsule_2());
         CHECK(wcl::utests::test_capsule_1());
         CHECK(wcl::utests::test_capsule_2());
     }

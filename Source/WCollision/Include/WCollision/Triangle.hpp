@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WCollision/Shapes.hpp"
+
 #include <glm/glm.hpp>
 
 namespace wcl::triangle {
@@ -56,6 +58,12 @@ namespace wcl::triangle {
         float w = vc * denom;
         
         return tri[0] + ab * v + ac * w;
-
     }
+
+    // inline bool IntersectWithBox(
+    //     wcl::shapes::Box axis_box,
+    //     std::array<glm::vec3, 3> tri
+    //     ) {
+        
+    // }
 }

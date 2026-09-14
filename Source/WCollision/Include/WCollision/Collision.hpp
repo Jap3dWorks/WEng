@@ -119,11 +119,61 @@ namespace wcl::collision {
     }
 
     inline bool Intersects(
-        wcl::shapes::Mesh const & axis_mesh,
-        wcl::shapes::Box box,
-        glm::mat4 box_transform
+        wcl::shapes::Box axis_box,
+        std::array<glm::vec3, 3> tri
         ) {
+
+        float p0, p1, p2, r;
+
+        glm::vec3 f0 = tri[1] - tri[0];
+        glm::vec3 f1 = tri[2] - tri[1];
+        glm::vec3 f2 = tri[0] - tri[2];
+
+        // test axis a00
+        p0 = tri[0].z * tri[1].y - tri[0].y*tri[1].z;
+        p2 = tri[2].z*(tri[1].y - tri[0].y) - tri[2].y * (tri[1].z - tri[0].z);
+        r = axis_box.y * std::abs(f0.z) + axis_box.z * std::abs(f0.y);
+        if (std::max(-std::max(p0, p2), std::min(p0, p2)) > r) return false;
+
+        // test axis a01
+        p0 = tri[0].y * (-tri[2].z + tri[1].z) + tri[0].z * (tri[2].y - tri[1].y);
+        p1 = -tri[1].y * tri[2].z + tri[1].z * tri[2].y;
+        r = axis_box.y * std::abs(f1.z) + axis_box.z * (f1.y);
+        if (std::max(-std::max(p0,p1), std::min(p0,p1)) > r) return false;
+
+        // test axis a02
+        p0 = tri[0].y * tri[2].z - tri[0].z * tri[2].y;
+        p1 = tri[1].y * (-tri[0].z + tri[2].z) + tri[1].z * (tri[0].y - tri[2].y);
+        r = axis_box.y * std::abs(f2.z) + axis_box.z * (std::abs(f2.y));
+        if (std::max(-std::max(p0,p1), std::min(p0,p1)) > r) return false;
+
+        // test axis a10
+        p0 = tri[0].x * tri[1].z - tri[0].z * tri[1].x;
+        p2 = tri[2].x * (tri[1].z - tri[0].z) + tri[2].z * (-tri[1].x + tri[0].x);
+        r = axis_box.x*std::abs(f0.z) + axis_box.z * std::abs(f0.x);
+        if (std::max(-std::max(p0, p2), std::min(p0, p1)) > r) return false;
+
+        // test axis a11
+        
+
+        // test axis a12
+
+        // test axis a20
+        // test axis a21
+        // test axis a22
+
+        
+
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Box axis_box,
+        wcl::shapes::Mesh const & mesh,
+        glm::mat4 mesh_transform
+        ) {
+
         // TODO
+        
         return false;
     }
 
@@ -176,23 +226,31 @@ namespace wcl::collision {
         wcl::shapes::Sphere sphere,
         glm::vec3 sphere_translation
         ) {
+        // TODO
         return false;
     }
 
+    /**
+     * @brief Checks if a point is intersecting with a capsule.
+     * Capsule transform is expressed relative to the point.
+     * To compute the algorithm, point coords are (0, 0, 0).
+     */
     inline bool Intersects(
         wcl::shapes::Capsule capsule,
         glm::mat4 capsule_transform
-        // glm::vec3 point
         ) {
-        //
-
         auto[p1_a, p1_b] = wcl::shapes::AsPoints(capsule, capsule_transform);
 
-        glm::vec3 d1 = p1_a - p1_b;
+        glm::vec3 s1 = p1_b - p1_a;
+        glm::vec3 s2 = -p1_a;
 
+        float t = glm::dot(s1, s2) / glm::dot(s1, s1);
 
+        t = std::max(std::min(t,1.f), 0.f);
 
-        return false;
+        glm::vec3 p = p1_a + s1 * t;
+
+        return glm::dot(p,p) <= capsule.radius * capsule.radius;
     }
 
     inline bool Intersects(
@@ -237,6 +295,7 @@ namespace wcl::collision {
         wcl::shapes::Mesh const & mesh,
         glm::vec3 mesh_transform
         ) {
+        // TODO
         return false;
     }
 

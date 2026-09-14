@@ -380,6 +380,42 @@ namespace wcl::utests {
     }
     
 
+    inline bool test_point_capsule_1() {
+        CapsuleCollider c1;
+
+        c1.shape.radius = 5.1f;
+        c1.SetTranslation(glm::vec3(0.f, 5.f, 0.f));
+
+       bool check = wcl::collision::Intersects(
+            c1.shape, c1.transform
+            );
+
+        if (!check) {
+            WFLOG("Capsule and point should be intersecting!");
+            return false;
+        }
+
+        return true;
+    }
+
+    inline bool test_point_capsule_2() {
+        CapsuleCollider c1;
+
+        c1.shape.radius = 4.9f;
+        c1.SetTranslation(glm::vec3(0.f, 5.f, 0.f));
+
+        bool check = wcl::collision::Intersects(
+            c1.shape, c1.transform
+            );
+
+        if (check) {
+            WFLOG("Capsule and point should NOT be intersecting!");
+            return false;
+        }
+
+        return true;
+    }    
+
     inline bool test_capsule_1() {
         CapsuleCollider c1;
         c1.shape.radius=5.1f;
@@ -427,6 +463,8 @@ namespace wcl::utests {
 
         return true;
     }
+
+    
 
     inline bool test_mesh_1() {
         return false;
