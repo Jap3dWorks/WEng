@@ -120,6 +120,15 @@ namespace wcl::collision {
 
     inline bool Intersects(
         wcl::shapes::Box axis_box,
+        wcl::shapes::Plane plane
+        ) {
+        // TODO test AABB with plane
+
+        return false;
+    }
+
+    inline bool Intersects(
+        wcl::shapes::Box axis_box,
         std::array<glm::vec3, 3> tri
         ) {
 
@@ -154,16 +163,51 @@ namespace wcl::collision {
         if (std::max(-std::max(p0, p2), std::min(p0, p1)) > r) return false;
 
         // test axis a11
-        
+        p0 = tri[1].x * (tri[2].z - tri[1].z) + tri[1].z * (-tri[2].x + tri[1].x);
+        p1 = tri[1].x * tri[2].z - tri[1].z * tri[2].x;
+        r = axis_box.x * std::abs(f1.z) + axis_box.z * std::abs(f1.x);
+        if (std::max(-std::max(p0, p1), std::min(p0, p1)) > r) return false;
 
         // test axis a12
+        p0 = tri[0].z * tri[2].x - tri[0].x * tri[2].z;
+        p1 = tri[1].x * (tri[0].z - tri[2].z) + tri[1].z * (-tri[0].x + tri[2].x);
+        r = axis_box.x * std::abs(f2.z) + axis_box.z * std::abs(f2.x);
+        if (std::max(-std::max(p0, p1), std::min(p0, p1)) > r) return false;
 
         // test axis a20
+        p0 = tri[0].y * tri[1].x - tri[0].x * tri[1].y;
+        p1 = tri[2].x * (-tri[1].y + tri[0].y) + tri[2].y * (tri[1].x - tri[0].x);
+        r = axis_box.x * std::abs(f0.y) + axis_box.y * std::abs(f0.x);
+        if (std::max(-std::max(p0, p1), std::min(p0,p1)) > r) return false;
+
         // test axis a21
+        p0 = tri[0].x * (-tri[2].y + tri[1].y) + tri[0].y * (tri[2].x - tri[1].x);
+        p1 = tri[1].y * tri[2].x - tri[1].x * tri[2].y;
+        r = axis_box.x * std::abs(f1.y) + axis_box.y * std::abs(f1.x);
+        if (std::max(-std::max(p0, p1), std::min(p0, p1)) > r) return false;
+
         // test axis a22
+        p0 = tri[0].x * tri[2].y - tri[0].y * tri[2].x;
+        p1 = tri[1].x * (-tri[0].y + tri[2].y) + tri[1].y * (tri[0].x - tri[2].x);
+        r = axis_box.x * std::abs(f2.y) + axis_box.y * std::abs(f2.x);
+        if(std::max(-std::max(p0, p1), std::min(p0, p1)) > r) return false;
 
+        // test axis corresponding to face normals
+        if (std::max(tri[0].x, std::max(tri[1].x, tri[2].x)) < - axis_box.x ||
+            std::min(tri[0].x, std::min(tri[1].x, tri[2].x)) > axis_box.x) return false;
+
+        if (std::max(tri[0].y, std::max(tri[1].y, tri[2].y)) < - axis_box.y ||
+            std::min(tri[0].y, std::min(tri[1].y, tri[2].y)) > axis_box.y) return false;
+
+        if (std::max(tri[0].z, std::max(tri[1].z, tri[2].z)) < - axis_box.z ||
+            std::min(tri[0].z, std::min(tri[1].z, tri[2].z)) > axis_box.z) return false;
         
+        // axis triangle face normal
+        wcl::shapes::Plane plane;
+        plane.normal = glm::cross(f0, f1);
+        plane.distance = glm::dot(plane.normal, tri[0]);
 
+        return Intersects(axis_box, plane);
     }
 
     inline bool Intersects(

@@ -16,6 +16,11 @@ namespace wcl::shapes {
         float z{5.f};
     };
 
+    struct Plane{
+        glm::vec3 normal;
+        float distance;
+    };
+
     struct Sphere{
         float radius{5.f};
     };
