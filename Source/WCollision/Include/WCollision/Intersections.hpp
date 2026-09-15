@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 
-namespace wcl::collision {
+namespace wcl::intersections {
 
     inline bool Intersects(
         wcl::shapes::AABB a,
@@ -224,7 +224,17 @@ namespace wcl::collision {
         glm::mat4 mesh_transform
         ) {
 
-        // TODO
+        for(std::uint32_t i=0; i < mesh.indices.size(); i=i+3) {
+            std::array<glm::vec3, 3> tri {
+                mesh_transform * glm::vec4{mesh.vertices[mesh.indices[i]],1.f},
+                mesh_transform * glm::vec4{mesh.vertices[mesh.indices[i+1]], 1.f},
+                mesh_transform * glm::vec4{mesh.vertices[mesh.indices[i+2]], 1.f} 
+            };
+
+            if (Intersects(axis_box, tri)) {
+                return true;
+            }
+        }
         
         return false;
     }
