@@ -118,13 +118,21 @@ namespace wcl::collision {
             (capsule.radius * capsule.radius);
     }
 
+    /**
+     * @brief Returns true if plane is intersecting the axis_box.
+     * plane normal and distance should be relative to axis_box.
+     * plane normal is not required to be normalized.
+     */
     inline bool Intersects(
         wcl::shapes::Box axis_box,
         wcl::shapes::Plane plane
         ) {
-        // TODO test AABB with plane
+        float r =
+            axis_box.x * std::abs(plane.normal.x) +
+            axis_box.y * std::abs(plane.normal.y) +
+            axis_box.z * std::abs(plane.normal.z);
 
-        return false;
+        return std::abs(plane.distance) * glm::dot(plane.normal, plane.normal) <= r ;
     }
 
     inline bool Intersects(
@@ -205,7 +213,7 @@ namespace wcl::collision {
         // axis triangle face normal
         wcl::shapes::Plane plane;
         plane.normal = glm::cross(f0, f1);
-        plane.distance = glm::dot(plane.normal, tri[0]);
+        plane.distance = glm::dot(plane.normal, tri[0]) / glm::dot(plane.normal, plane.normal);
 
         return Intersects(axis_box, plane);
     }

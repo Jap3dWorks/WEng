@@ -94,7 +94,7 @@ namespace wcl::utests {
         return true;
     }    
 
-    inline bool test_BOX_1() {
+    inline bool test_box_1() {
         BoxCollider a_box{};
         a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.transform[3] = glm::vec4{0.f, 0.f, 0.f, 1.f};
@@ -117,7 +117,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_2() {
+    inline bool test_box_2() {
         BoxCollider a_box{};
         a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
@@ -147,7 +147,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_3() {
+    inline bool test_box_3() {
         BoxCollider a_box{};
         a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
@@ -177,8 +177,7 @@ namespace wcl::utests {
         return true;
     }
 
-
-    inline bool test_BOX_4() {
+    inline bool test_box_4() {
         BoxCollider a_box{};
         a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
@@ -208,7 +207,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_capsule_1() {
+    inline bool test_box_capsule_1() {
         BoxCollider axis_box{};
 
         CapsuleCollider capsule{};
@@ -227,7 +226,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_capsule_2() {
+    inline bool test_box_capsule_2() {
         BoxCollider axis_box{};
 
         CapsuleCollider capsule{};
@@ -245,7 +244,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_capsule_3() {
+    inline bool test_box_capsule_3() {
         BoxCollider axis_box{};
 
         CapsuleCollider capsule{};
@@ -269,7 +268,7 @@ namespace wcl::utests {
         return true;
     }
 
-    inline bool test_BOX_capsule_4() {
+    inline bool test_box_capsule_4() {
         BoxCollider axis_box{};
         axis_box.shape = {5.f, 5.f, 5.f};
 
@@ -292,6 +291,96 @@ namespace wcl::utests {
             return false;
         }
 
+        return true;
+    }
+
+    inline bool test_box_plane_1() {
+        BoxCollider b{};
+        b.shape = {.x=5.1, .y=5.1, .z=5.1};
+        
+        wcl::shapes::Plane p{
+            .normal=glm::vec3{-1.f, 1.f, -1.f},
+            .distance=5.f
+        };
+
+        bool check = wcl::collision::Intersects(
+            b.shape, p
+            );
+
+        if (!check) {
+            WFLOG("Box and plane should be intersecting!");
+            return false;
+        }
+
+        return true;
+    }
+
+    inline bool test_box_plane_2() {
+        BoxCollider b{};
+        b.shape = {.x=4.9, .y=4.9, .z=4.9};
+
+        wcl::shapes::Plane p {
+            .normal=glm::vec3{-1.f, 1.f, -1.f},
+            .distance=5.f
+        };
+
+        bool check = wcl::collision::Intersects(
+            b.shape, p
+            );
+
+        if (check) {
+            WFLOG("Box and plane should NOT be intersecting!");
+            return false;
+        }
+
+        return true;
+    }
+
+    inline bool test_box_triangle_1() {
+        BoxCollider b{};
+        b.shape = {.x=5.1f, .y=5.1f, .z=5.1f};
+
+        glm::vec3 point{5.f, 5.f, 5.f};
+
+        std::array<glm::vec3, 3> tri {
+            point + glm::vec3{2, -2, 0},
+            point + glm::vec3{-2, 0, 2},
+            point + glm::vec3{0, 2, -2}
+        };
+
+        bool check = wcl::collision::Intersects(
+            b.shape, tri
+            );
+
+        if (!check) {
+            WFLOG("Box and triangle should be intersecting!");
+            return false;
+        }
+        
+        return true;
+    }
+
+    inline bool test_box_triangle_2() {
+        BoxCollider b{};
+        b.shape = {.x=4.9, .y=4.9, .z=4.9};
+
+        glm::vec3 point{5.f, 5.f, 5.f};
+
+        std::array<glm::vec3, 3> tri {
+            point + glm::vec3{2, -2, 0},
+            point + glm::vec3{-2, 0, 2},
+            point + glm::vec3{0, 2, -2}
+        };
+
+        bool check = wcl::collision::Intersects(
+            b.shape, tri
+            );
+
+        if (check) {
+            WFLOG("Box and triangle should NOT be intersecting!");
+            return false;
+        }
+        
         return true;
     }
 
@@ -463,8 +552,6 @@ namespace wcl::utests {
 
         return true;
     }
-
-    
 
     inline bool test_mesh_1() {
         return false;
