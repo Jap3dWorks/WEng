@@ -8,8 +8,11 @@
 #include <limits>
 
 
-namespace wcl::box_capsule {
+namespace wcl::distance {
 
+    /**
+     * Min square distance between a box (axis aligned) and a segment.
+     */
     inline float MinSquareDistance(wcl::shapes::Box axis_box, glm::vec3 p_a, glm::vec3 p_b) {
         glm::vec3 segment = p_b - p_a;
 
@@ -162,7 +165,6 @@ namespace wcl::box_capsule {
         }
 
         return min_square_dist;
-
     }
     
 }

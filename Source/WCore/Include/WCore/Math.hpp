@@ -252,5 +252,12 @@ namespace wcr::math {
         return true;
     }
 
+    template<typename T> requires requires {
+        std::is_same_v<T, glm::vec3> || std::is_same_v<T, glm::vec4>;
+    }
+    inline constexpr auto SqrLength(T v) {
+        return glm::dot(v,v);
+    }
+
 }
 

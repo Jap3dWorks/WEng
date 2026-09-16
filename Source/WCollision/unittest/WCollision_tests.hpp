@@ -315,8 +315,8 @@ namespace wcl::utests {
         b.shape = {.x=5.1, .y=5.1, .z=5.1};
         
         wcl::shapes::Plane p{
-            .normal=glm::vec3{-1.f, 1.f, -1.f},
-            .distance=5.f
+            .n=glm::vec3{-1.f, 1.f, -1.f},
+            .dist=5.f
         };
 
         bool check = wcl::intersections::Intersects(
@@ -336,8 +336,8 @@ namespace wcl::utests {
         b.shape = {.x=4.9, .y=4.9, .z=4.9};
 
         wcl::shapes::Plane p {
-            .normal=glm::vec3{-1.f, 1.f, -1.f},
-            .distance=5.f
+            .n=glm::vec3{-1.f, 1.f, -1.f},
+            .dist=5.f
         };
 
         bool check = wcl::intersections::Intersects(

@@ -17,8 +17,8 @@ namespace wcl::shapes {
     };
 
     struct Plane{
-        glm::vec3 normal;
-        float distance;
+        glm::vec3 n;  // plane normal (normalization is not required)
+        float dist;   // distance, n * dist is a plane point.
     };
 
     struct Sphere{
@@ -30,15 +30,25 @@ namespace wcl::shapes {
         float radius{3.f};
     };
 
+    struct Segment{
+        glm::vec3 p0;
+        glm::vec3 p1;
+    };
+
     /** Collider Mesh */
     struct Mesh{
         std::vector<glm::vec3> vertices{};
         std::vector<std::uint32_t> indices{};
     };
-    
-    using ShapeVariant = std::variant<Box, Sphere, Capsule, Mesh>;
 
-    inline constexpr std::array<glm::vec3,8> GetBoxVertices(Box cube, glm::mat4 cube_transform) {
+    /**
+     * Triangle
+     */
+    using Tri = std::array<glm::vec3, 3>;
+    
+    // using ShapeVariant = std::variant<Box, Sphere, Capsule, Mesh>;
+
+    inline constexpr std::array<glm::vec3,8> BoxVertices(Box cube, glm::mat4 cube_transform) {
 
         std::array<glm::vec3, 8> result{};
 
@@ -61,7 +71,7 @@ namespace wcl::shapes {
         };
     }
 
-    inline constexpr std::array<glm::vec3,8> GetBoxRadii(Box box, glm::mat4 cube_transform) {
+    inline constexpr std::array<glm::vec3,8> BoxRadii(Box box, glm::mat4 cube_transform) {
 
         std::array<glm::vec3,8> result{};
 
@@ -80,18 +90,28 @@ namespace wcl::shapes {
         
     }
 
-    inline constexpr auto AsPoints(Capsule capsule) {
-        return std::array{
+    inline constexpr auto AsSegment(Capsule capsule) {
+        return Segment{
             glm::vec3{-capsule.half_length, 0.f, 0.f},
             glm::vec3{capsule.half_length, 0.f, 0.f}
         };
     }
 
-    inline constexpr auto AsPoints(Capsule capsule, glm::mat4 transform) {
-        auto [p_a, p_b] = wcl::shapes::AsPoints(capsule);
+    inline constexpr auto AsSegment(Capsule capsule, glm::mat4 transform) {
+        Segment s = wcl::shapes::AsSegment(capsule);
         
-        return std::array {glm::vec3{transform * glm::vec4{p_a, 1.f}},
-                           glm::vec3{transform * glm::vec4{p_b, 1.f}}};
+        return Segment {glm::vec3{transform * glm::vec4{s.p0, 1.f}},
+                        glm::vec3{transform * glm::vec4{s.p1, 1.f}}};
+    }
 
+    inline constexpr auto AsPlane(Tri triangle) {
+        glm::vec3 s1 = triangle[1] - triangle[0];
+        glm::vec3 s2 = triangle[2] - triangle[0];
+        
+        glm::vec3 N = glm::cross(s1, s2);
+
+        float d = glm::dot(N, triangle[0]) / glm::dot(N,N);
+
+        return Plane{.n=N, .dist=d};
     }
 }

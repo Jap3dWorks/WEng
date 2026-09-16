@@ -4,11 +4,12 @@
 
 #include <glm/glm.hpp>
 
-namespace wcl::triangle {
+namespace wcl::closest_point {
 
-    inline glm::vec3 ClosestPoint(
-        glm::vec3 point,
-        std::array<glm::vec3, 3> tri) {
+    inline constexpr glm::vec3 OnTriangle(
+        std::array<glm::vec3, 3> tri,
+        glm::vec3 point
+        ) {
 
         // Check if point is outside vertex 0
         glm::vec3 ab = tri[0] - tri[1];
@@ -60,10 +61,55 @@ namespace wcl::triangle {
         return tri[0] + ab * v + ac * w;
     }
 
-    // inline bool IntersectWithBox(
-    //     wcl::shapes::Box axis_box,
-    //     std::array<glm::vec3, 3> tri
-    //     ) {
-        
-    // }
+    inline constexpr glm::vec3 OnPlane(
+        wcl::shapes::Plane plane,
+        glm::vec3 point
+        ) {
+        float l = plane.dist -  (
+            glm::dot(point, plane.n) / glm::dot(plane.n, plane.n)
+            );
+
+        return point + plane.n * l;
+    }
+    
+
+    /**
+     * @brief Returns {s_min, t_min}
+     * so s0.p0 + (s0.p1 - s0.p0) * s_min is the nearest point to s1 on s0,
+     * and s1.p0 + (s1.p1 - s1.p0) * t_min is the nearest point to s0 on s1.
+     */
+    inline constexpr std::array<float,2> OnSegments(
+        wcl::shapes::Segment s0,
+        wcl::shapes::Segment s1
+        ) {
+
+        glm::vec3 d1 = s0.p1 - s0.p0;
+        glm::vec3 d2 = s1.p1 - s1.p0;
+
+        float d2_dt = glm::dot(d2,d2);
+        float d1_dt = glm::dot(d1,d1);
+
+        float p1d1_dt = glm::dot(s0.p0 /* p1_a */, d1);
+        float p2d2_dt = glm::dot(s1.p0 /* p2_a */, d2);
+        float p1d2_dt = glm::dot(s0.p0 /* p1_a */, d2);
+        float p2d1_dt = glm::dot(s1.p0 /* p2_a */,d1);
+
+        float d1d2_dt = glm::dot(d1,d2);
+
+        float t_nearest =
+            (d1_dt * (p1d2_dt - p2d2_dt) - p1d2_dt + p2d1_dt) /
+            ((d2_dt * d1_dt) - d1d2_dt);
+
+        float t_min = std::max(std::min(t_nearest, 1.f), 0.f);
+
+        float s_nearest =
+            (- p1d1_dt + p2d1_dt + t_min * d1d2_dt) / d1_dt;
+
+        float s_min = std::max(std::min(s_nearest, 1.f), 0.f);
+
+        return std::array{s_min, t_min};
+    }
+
+    
+
 }
