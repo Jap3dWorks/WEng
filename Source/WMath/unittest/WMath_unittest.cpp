@@ -1,10 +1,17 @@
-// #include "WCollision_tests.hpp"
+#include "WMath_tests.hpp"
+#include "Geometry_tests.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-
-TEST_CASE("WCollision") {
-    SECTION("WCollision") {
+TEST_CASE("WMath") {
+    SECTION("WMath") {
+        CHECK(wmath::lin_algbr::utests::InvertMatrix_test1());
+        CHECK(wmath::lin_algbr::utests::InvertMatrix_test2());
+        CHECK(wmath::lin_algbr::utests::InvertMatrix_test3());
+        CHECK(wmath::lin_algbr::utests::InvertMatrix_test4());
+        CHECK(wmath::lin_algbr::utests::InvertMatrix_test5());
+    }
+    SECTION("GEOMETRY") {
         // CHECK(wcl::utests::test_CheckAABB_1());
         // CHECK(wcl::utests::test_CheckAABB_2());
         // CHECK(wcl::utests::test_box_1());
@@ -29,5 +36,7 @@ TEST_CASE("WCollision") {
         // CHECK(wcl::utests::test_point_capsule_2());
         // CHECK(wcl::utests::test_capsule_1());
         // CHECK(wcl::utests::test_capsule_2());
+        
     }
 }
+

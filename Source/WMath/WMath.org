@@ -1,0 +1,20 @@
+:PROPERTIES:
+:MODULE_TYPE: library
+:CPP_STANDARD: 23
+:END:
+
+#+title: WMath
+
+* Module
+
+*  Build
+
+#+NAME: LinkDef
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link :mkdirp yes
+#+begin_src C++ :tangle PrivateGenerated/LinkDef.hpp
+#pragma once
+<<linkdef-module-macros()>>
+#+end_src
+
+  

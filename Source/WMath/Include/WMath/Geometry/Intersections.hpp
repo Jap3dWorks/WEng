@@ -1,13 +1,10 @@
 #pragma once
 
-#include "WCollision/Spaces.hpp"
-#include "WCore/WCore.hpp"
-#include "WCore/Math.hpp"
-#include "WCore/WId.hpp"
-#include "WCollision/Shapes.hpp"
-#include "WCollision/Distance.hpp"
-#include "WCollision/ClosestPoint.hpp"
-#include "WCollision/IntersectionPoint.hpp"
+#include "WMath/Geometry/Spaces.hpp"
+#include "WMath/LinAlgbr.hpp"
+#include "WMath/Geometry/Distance.hpp"
+#include "WMath/Geometry/ClosestPoint.hpp"
+#include "WMath/Geometry/IntersectionPoint.hpp"
 
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -420,7 +417,7 @@ namespace wcl::intersections {
             segment,
             wcl::shapes::Segment{tri[0], tri[1]}
             );
-        float ftmp = wcr::math::SqrLength(
+        float ftmp = wmath::lin_algbr::SqrLength(
             min_vector(s_min, tri[0], tri[1], t_min)
             );
         if (ftmp < sqrdist) sqrdist = ftmp;
@@ -431,7 +428,7 @@ namespace wcl::intersections {
             segment,
             {tri[1], tri[2]}
             );
-        ftmp = wcr::math::SqrLength(
+        ftmp = wmath::lin_algbr::SqrLength(
             min_vector(s_min, tri[1], tri[2], t_min)
             );
         if(ftmp < sqrdist) sqrdist = ftmp;
@@ -442,7 +439,7 @@ namespace wcl::intersections {
             segment,
             {tri[2], tri[0]}
             );
-        ftmp = wcr::math::SqrLength(
+        ftmp = wmath::lin_algbr::SqrLength(
             min_vector(s_min, tri[2], tri[0], t_min)
             );
         if(ftmp < sqrdist) sqrdist = ftmp;
@@ -451,13 +448,13 @@ namespace wcl::intersections {
         // p0
         glm::vec3 pnt = wcl::closest_point::OnPlane(plane, segment.p0);
         if (inside_tri(pnt)) {
-            ftmp = wcr::math::SqrLength(pnt - segment.p0);
+            ftmp = wmath::lin_algbr::SqrLength(pnt - segment.p0);
             if (ftmp < sqrdist) sqrdist = ftmp;
         }
         // p1
         pnt = wcl::closest_point::OnPlane(plane, segment.p1);
         if(inside_tri(pnt)) {
-            ftmp = wcr::math::SqrLength(pnt - segment.p1);
+            ftmp = wmath::lin_algbr::SqrLength(pnt - segment.p1);
             if(ftmp < sqrdist) sqrdist = ftmp;
         }
 

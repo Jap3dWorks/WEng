@@ -70,6 +70,23 @@
 
 
 #if defined(_WIN32)
+    #ifdef WMATH_EXPORTS
+        #define WMATH_API __declspec(dllexport)
+    #else
+        #define WMATH_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WMATH_EXPORTS
+        #define WMATH_API __attribute__((visibility("default")))
+    #else
+        #define WMATH_API
+    #endif
+#else
+    #define WMATH_API
+#endif
+
+
+#if defined(_WIN32)
     #ifdef WINTERFACES_EXPORTS
         #define WINTERFACES_API __declspec(dllexport)
     #else

@@ -30,9 +30,10 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/PrivateGenerated
     )
 
-target_link_libraries(
+target_link_libraries (
     WObjects
-    PRIVATE
+    PUBLIC
+        WMath
         WCore
 )    
 

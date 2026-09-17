@@ -3,7 +3,6 @@
 #include "WCore/TWAllocator.hpp"
 #include "WCore/WId.hpp"
 #include "WString/WString.hpp"
-#include "WMath_tests.hpp"
 
 #include "WLog.hpp"
 
@@ -129,13 +128,5 @@ TEST_CASE("WCore") {
     SECTION("WId") {
         CHECK(WIDCompoundNullValue_Test());
     }
-    SECTION("WMath") {
-        CHECK(wcr::math::utests::InvertMatrix_test1());
-        CHECK(wcr::math::utests::InvertMatrix_test2());
-        CHECK(wcr::math::utests::InvertMatrix_test3());
-        CHECK(wcr::math::utests::InvertMatrix_test4());
-        CHECK(wcr::math::utests::InvertMatrix_test5());
-    }
-
 }
 

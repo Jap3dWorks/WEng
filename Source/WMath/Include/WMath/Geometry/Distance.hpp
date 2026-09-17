@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WCore/FloatingPoint.hpp"
-#include "WCollision/Shapes.hpp"
+#include "WMath/Numerical.hpp"
+#include "WMath/Geometry/Shapes.hpp"
 
 #include <glm/glm.hpp>
 #include <algorithm>
@@ -71,7 +71,7 @@ namespace wcl::distance {
         std::array<float, 6> t_limits{-1.f};
         std::uint32_t t_limits_count=0;
         for (std::uint32_t i = 0; i<3; i++) {
-            if (wcr::fpoint::AreEqual(segment[i], 0.f)) {
+            if (wmath::numerical::AreEqual(segment[i], 0.f)) {
                 is_constant[i]=true;
                 if (p_a[i] < -abox_limits[i]) {
                     const_sqr_dist[i] = std::pow(p_a[i] + abox_limits[i], 2);
@@ -104,11 +104,11 @@ namespace wcl::distance {
         if(t_limits_count > 0) {
             std::uint32_t init=0;
             std::uint32_t stop=t_limits_count;
-            if( wcr::fpoint::AreEqual(t_limits[0], 0.f) ) {
+            if( wmath::numerical::AreEqual(t_limits[0], 0.f) ) {
                 init=1;
             }
 
-            if (wcr::fpoint::AreEqual(t_limits[t_limits_count-1], 1.f)) {
+            if (wmath::numerical::AreEqual(t_limits[t_limits_count-1], 1.f)) {
                 --stop;
             }
 

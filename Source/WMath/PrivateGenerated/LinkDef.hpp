@@ -1,4 +1,4 @@
-// [[file:../WCollision.org::LinkDef][LinkDef]]
+// [[file:../WMath.org::LinkDef][LinkDef]]
 #pragma once
 
 #if defined(_WIN32)

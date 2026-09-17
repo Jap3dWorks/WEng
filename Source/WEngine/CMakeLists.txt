@@ -32,9 +32,10 @@ target_include_directories(
 target_link_libraries(
     WEngine
     PUBLIC
+        WMath
+        WCore
         WWindow
     PRIVATE
-        WCore
         WObjects
         WImporter
         WRender

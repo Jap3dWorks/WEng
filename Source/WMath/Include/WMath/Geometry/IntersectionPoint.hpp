@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WCollision/Shapes.hpp"
-#include "WCore/FloatingPoint.hpp"
+#include "WMath/Geometry/Shapes.hpp"
+#include "WMath/Numerical.hpp"
 
 #include <glm/glm.hpp>
 #include <optional>
@@ -16,7 +16,7 @@ namespace wcl::intersection_point {
         glm::vec3 l = segment.p1 - segment.p0;
         float D = glm::dot(plane.n, l);
 
-        if (wcr::fpoint::AreEqual(D, 0.f)) {
+        if (wmath::numerical::AreEqual(D, 0.f)) {
             return std::nullopt;
         }
 

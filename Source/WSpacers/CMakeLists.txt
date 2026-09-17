@@ -26,6 +26,7 @@ target_link_libraries(
     WSpacers
     PUBLIC
     PRIVATE
+        WMath
         WCore
         WObjects
         WInterfaces

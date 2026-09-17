@@ -46,8 +46,6 @@ namespace wcl::shapes {
      */
     using Tri = std::array<glm::vec3, 3>;
     
-    // using ShapeVariant = std::variant<Box, Sphere, Capsule, Mesh>;
-
     inline constexpr std::array<glm::vec3,8> BoxVertices(Box cube, glm::mat4 cube_transform) {
 
         std::array<glm::vec3, 8> result{};

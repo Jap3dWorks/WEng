@@ -10,7 +10,7 @@
 #include "WEngRender/Assets.hpp"
 #include "WEngRender/Camera.hpp"
 #include "WEngRender/Lights.hpp"
-#include "WCore/Math.hpp"
+#include "WMath/LinAlgbr.hpp"
 #include "WEngine/WEngine.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 
@@ -22,7 +22,7 @@ parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
     [&parameters](wcm::Transform * _transform) {
         _transform
             ->Set_transform_matrix(
-                wcr::math::ToMat4(
+                wmath::lin_algbr::ToMat4(
                     _transform->Get_position(),
                     _transform->Get_rotation(),
                     _transform->Get_rotation_order(),
@@ -181,7 +181,7 @@ parameters.engine->InputMappingRegister().BindAction(
         transform_component->Set_rotation(rot);
 
         transform_component->Set_transform_matrix(
-            wcr::math::ToMat4(
+            wmath::lin_algbr::ToMat4(
                 transform_component->Get_position(),
                 transform_component->Get_rotation(),
                 transform_component->Get_rotation_order(),
@@ -189,7 +189,7 @@ parameters.engine->InputMappingRegister().BindAction(
                 )
             );
 
-        // t.transform_matrix = wcr::math::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
+        // t.transform_matrix = wmath::lin_algbr::ToMat4(t.position, t.rotation, t.rotation_order, t.scale);
     }
     );
 END_DEFINE_WSYSTEM()
@@ -240,14 +240,14 @@ parameters.level->ForEachComponent<wcm::Movement>(
         //     mc->Get_velocity() * (float)parameters.engine->EngineCycle().DeltaTime;
 
         tc.Set_transform_matrix(
-            wcr::math::ToMat4(
+            wmath::lin_algbr::ToMat4(
                 tc.Get_position(),
                 tc.Get_rotation(),
                 tc.Get_rotation_order(),
                 tc.Get_scale())
             );
 
-        // ts.transform_matrix = wcr::math::ToMat4(
+        // ts.transform_matrix = wmath::lin_algbr::ToMat4(
         //     ts.position,
         //     ts.rotation,
         //     ts.rotation_order,

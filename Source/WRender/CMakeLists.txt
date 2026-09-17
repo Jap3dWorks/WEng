@@ -37,8 +37,10 @@ target_include_directories(
 
 target_link_libraries(
     WRender
-    PRIVATE
+    PUBLIC
+        WMath
         WCore
+    PRIVATE
         WObjects
         WInterfaces
         WWindow

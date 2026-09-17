@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WCollision/Shapes.hpp"
+#include "WMath/Geometry/Shapes.hpp"
 
 #include <glm/glm.hpp>
 

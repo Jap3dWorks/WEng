@@ -1,10 +1,11 @@
 #pragma once
 
-#include "WCollision/Shapes.hpp"
-#include "WCollision/Intersections.hpp"
-#include "WCore/Math.hpp"
-
 #include "WLog.hpp"
+
+#include "WMath/Geometry/Shapes.hpp"
+#include "WMath/Geometry/Intersections.hpp"
+#include "WMath/LinAlgbr.hpp"
+
 #include "glm/ext/matrix_transform.hpp"
 
 #include <glm/glm.hpp>
@@ -39,7 +40,7 @@ namespace wcl::utests {
         glm::mat4 inv_transform {1.f};
 
         void Refresh() {
-            inv_transform = wcr::math::InvertTransformMatrix(transform);
+            inv_transform = wmath::lin_algbr::InvertTransformMatrix(transform);
         }
     };
 
@@ -84,7 +85,6 @@ namespace wcl::utests {
         };
 
         if(!wcl::intersections::Intersects(a, b)) {
-            WFLOG("AABBs should intersect!");
             return false;
         }
 
@@ -103,7 +103,7 @@ namespace wcl::utests {
         };
 
         if(wcl::intersections::Intersects(a, b)) {
-            WFLOG("AABBs should not intersect!");
+            // WFLOG("AABBs should not intersect!");
             return false;
         }
 
@@ -112,12 +112,12 @@ namespace wcl::utests {
 
     inline bool test_box_1() {
         BoxCollider a_box{};
-        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.transform[3] = glm::vec4{0.f, 0.f, 0.f, 1.f};
         a_box.Refresh();
 
         BoxCollider b_box{};
-        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         b_box.transform[3] = glm::vec4{7.f, 7.f, 7.f, 1.f};
         b_box.Refresh();
 
@@ -126,7 +126,7 @@ namespace wcl::utests {
             );
 
         if (!check) {
-            WFLOG("Box a and Box b should be detected as an intersection!");
+            // WFLOG("Box a and Box b should be detected as an intersection!");
             return false;
         }
 
@@ -135,11 +135,11 @@ namespace wcl::utests {
 
     inline bool test_box_2() {
         BoxCollider a_box{};
-        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
 
         BoxCollider b_box{};
-        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         b_box.SetTranslation(glm::vec3{b_box.transform[0]} * 11.f);
         b_box.Refresh();
 
@@ -165,11 +165,11 @@ namespace wcl::utests {
 
     inline bool test_box_3() {
         BoxCollider a_box{};
-        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
 
         BoxCollider b_box{};
-        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         b_box.SetTranslation(glm::vec3{b_box.transform[0]} * -9.f);
         b_box.Refresh();
 
@@ -195,11 +195,11 @@ namespace wcl::utests {
 
     inline bool test_box_4() {
         BoxCollider a_box{};
-        a_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        a_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         a_box.Refresh();
 
         BoxCollider b_box{};
-        b_box.Rotate(wcr::math::PI<float> * 0.5f, {1.f, 1.f, 1.f});
+        b_box.Rotate(wmath::numerical::PI<float> * 0.5f, {1.f, 1.f, 1.f});
         b_box.SetTranslation(glm::vec3{0.f, 9.f, 0.f});
         b_box.Refresh();
 
@@ -265,8 +265,8 @@ namespace wcl::utests {
 
         CapsuleCollider capsule{};
         capsule.shape.radius = 5.1f;
-        capsule.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        capsule.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        capsule.Rotate(wmath::numerical::PI<float> * (0.25), {0.f, 1.f, 0.f});
+        capsule.Rotate(wmath::numerical::PI<float> * (-0.5), {1.f, 0.f, -1.f});
         capsule.SetTranslation(
             glm::vec3{axis_box.shape.x, axis_box.shape.y, axis_box.shape.z} +
             glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 5.f
@@ -291,8 +291,8 @@ namespace wcl::utests {
         CapsuleCollider capsule{};
         capsule.shape.half_length=5.f;
         capsule.shape.radius = 4.9f;
-        capsule.Rotate(wcr::math::PI<float> * (0.25), {0.f, 1.f, 0.f});
-        capsule.Rotate(wcr::math::PI<float> * (-0.5), {1.f, 0.f, -1.f});
+        capsule.Rotate(wmath::numerical::PI<float> * (0.25), {0.f, 1.f, 0.f});
+        capsule.Rotate(wmath::numerical::PI<float> * (-0.5), {1.f, 0.f, -1.f});
         capsule.SetTranslation(
             glm::vec3{axis_box.shape.x, axis_box.shape.y, axis_box.shape.z} +
             glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 5.f
@@ -479,8 +479,8 @@ namespace wcl::utests {
         CapsuleCollider c2;
 
         c2.shape.radius=5.1f;
-        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
@@ -502,8 +502,8 @@ namespace wcl::utests {
         CapsuleCollider c2;
 
         c2.shape.radius=4.9f;
-        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
@@ -563,8 +563,8 @@ namespace wcl::utests {
 
         CapsuleCollider c2;
         c2.shape.radius=5.f;
-        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
@@ -587,8 +587,8 @@ namespace wcl::utests {
         
         CapsuleCollider c2;
         c2.shape.radius=5.f;
-        c2.Rotate(wcr::math::PI<float> * (0.5), {0.f, 1.f, 0.f});
-        c2.Rotate(wcr::math::PI<float> * (-0.25), {1.f, 0.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (0.5), {0.f, 1.f, 0.f});
+        c2.Rotate(wmath::numerical::PI<float> * (-0.25), {1.f, 0.f, 0.f});
         c2.SetTranslation(
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );

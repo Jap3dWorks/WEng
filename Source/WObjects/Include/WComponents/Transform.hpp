@@ -3,8 +3,8 @@
 #include "WObjects/WComponent.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
-#include "WCoreTypes/Math.hpp"
-#include "WCore/Math.hpp"
+#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgbr.hpp"
 
 #include "wcm::Transform.WEng.hpp"
 
@@ -19,14 +19,16 @@ namespace wcm {
         WPROPERTY(glm::vec3, position, 0.0);
         WPROPERTY(glm::vec3, rotation, 0.0);
         WPROPERTY(glm::vec3, scale, 1.0);
-        WPROPERTY(wct::math::ERotationOrder, rotation_order, wct::math::ERotationOrder::zxy);
+        WPROPERTY(wmath::lin_algbr::ERotationOrder,
+                  rotation_order,
+                  wmath::lin_algbr::ERotationOrder::zxy);
         WPROPERTY(glm::mat4, transform_matrix, 1.0);
     
     public:
 
         void SetTransformMatrix(glm::mat4 in_transform_matrix) {
 
-            auto [position, rotation, scale]  = wcr::math::ToPositionRotationScale(
+            auto [position, rotation, scale]  = wmath::lin_algbr::ToPositionRotationScale(
                 in_transform_matrix, rotation_order);
 
             Set_position(std::move(position));
