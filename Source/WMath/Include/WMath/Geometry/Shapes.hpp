@@ -3,7 +3,7 @@
 #include <variant>
 #include <glm/glm.hpp>
 
-namespace wcl::shapes {
+namespace wmath::geometry::shapes {
 
     struct AABB {
         glm::vec3 min{-5.f, -5.f, -5.f};
@@ -96,7 +96,7 @@ namespace wcl::shapes {
     }
 
     inline constexpr auto AsSegment(Capsule capsule, glm::mat4 transform) {
-        Segment s = wcl::shapes::AsSegment(capsule);
+        Segment s = wmath::geometry::shapes::AsSegment(capsule);
         
         return Segment {glm::vec3{transform * glm::vec4{s.p0, 1.f}},
                         glm::vec3{transform * glm::vec4{s.p1, 1.f}}};

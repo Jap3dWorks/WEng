@@ -3,8 +3,8 @@
 #include "WObjects/WComponent.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
-#include "WMath/LinAlgbr.hpp"
-#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgebra.hpp"
+#include "WMath/LinAlgebra.hpp"
 
 #include "wcm::Transform.WEng.hpp"
 

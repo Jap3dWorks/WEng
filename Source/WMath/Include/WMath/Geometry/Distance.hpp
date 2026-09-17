@@ -13,7 +13,7 @@ namespace wcl::distance {
     /**
      * Min square distance between a box (axis aligned) and a segment.
      */
-    inline float MinSquareDistance(wcl::shapes::Box axis_box, glm::vec3 p_a, glm::vec3 p_b) {
+    inline float MinSquareDistance(wmath::geometry::shapes::Box axis_box, glm::vec3 p_a, glm::vec3 p_b) {
         glm::vec3 segment = p_b - p_a;
 
         std::array abox_limits {

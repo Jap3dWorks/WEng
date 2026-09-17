@@ -9,8 +9,8 @@
 namespace wcl::intersection_point {
 
     inline constexpr std::optional<glm::vec3> PlaneSegment(
-        wcl::shapes::Plane plane,
-        wcl::shapes::Segment segment
+        wmath::geometry::shapes::Plane plane,
+        wmath::geometry::shapes::Segment segment
         ) {
 
         glm::vec3 l = segment.p1 - segment.p0;

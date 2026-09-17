@@ -70,12 +70,12 @@
 
                        
                        (dap-register-debug-template
-                        "[LLDB][WCollision] unittests"
+                        "[LLDB][WMath] unittests"
                         (list :type "lldb-vscode"
                               :cwd "${workspaceFolder}/Install/Debug"
                               :request "launch"
-                              :program "bin/WCollision_unittest" 
-                              :name "LLDB::WCollision::unittests"
+                              :program "bin/WMath_unittest" 
+                              :name "LLDB::WMath::unittests"
                               :env '(("LD_LIBRARY_PATH" . "lib:lib64:${workspaceFolder}/Build/Debug/Debug"))))
 
                        ))

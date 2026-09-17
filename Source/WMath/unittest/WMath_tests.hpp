@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgebra.hpp"
 #include "WLog.hpp"
 
 #include <glm/ext/matrix_transform.hpp>

@@ -25,7 +25,7 @@
 #include "WComponents/StaticMesh.hpp"
 #include "WComponents/Camera.hpp"
 #include "WComponents/Light/Ambient.hpp"
-#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgebra.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 
 

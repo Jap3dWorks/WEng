@@ -4,13 +4,14 @@
 
 #include "WMath/Geometry/Shapes.hpp"
 #include "WMath/Geometry/Intersections.hpp"
-#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgebra.hpp"
 
+#include "WMath/Numerical.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
 #include <glm/glm.hpp>
 
-namespace wcl::utests {
+namespace wmath::geometry::utests {
 
     struct BaseCollider {
         glm::mat4 transform{1.f};
@@ -36,7 +37,7 @@ namespace wcl::utests {
     };
 
     struct BoxCollider : public BaseCollider {
-        wcl::shapes::Box shape {5.f,5.f,5.f};
+        wmath::geometry::shapes::Box shape {5.f,5.f,5.f};
         glm::mat4 inv_transform {1.f};
 
         void Refresh() {
@@ -45,20 +46,20 @@ namespace wcl::utests {
     };
 
     struct SphereCollider : public BaseCollider {
-        wcl::shapes::Sphere shape{
+        wmath::geometry::shapes::Sphere shape{
             .radius=5.f
         };
     };
 
     struct CapsuleCollider : public BaseCollider {
-        wcl::shapes::Capsule shape{
+        wmath::geometry::shapes::Capsule shape{
             .half_length=5.f,
             .radius=5.f
         };
     };
 
     struct MeshCollider : public BaseCollider {
-        wcl::shapes::Mesh shape{
+        wmath::geometry::shapes::Mesh shape{
             .vertices = std::vector{
                 glm::vec3{2, -2, 0},
                 glm::vec3{-2, 0, 2},
@@ -74,17 +75,17 @@ namespace wcl::utests {
     };
 
     inline bool test_CheckAABB_1() {
-        wcl::shapes::AABB a {
+        wmath::geometry::shapes::AABB a {
             .min = glm::vec3{0},
             .max = glm::vec3{2.f, 3.f, 2.f}
         };
 
-        wcl::shapes::AABB b {
+        wmath::geometry::shapes::AABB b {
             .min = glm::vec3{1.5f, 2.5f, 1.5f},
             .max = glm::vec3{10.f, 8.f, 6.f}
         };
 
-        if(!wcl::intersections::Intersects(a, b)) {
+        if(!wmath::geometry::intersections::Intersects(a, b)) {
             return false;
         }
 
@@ -92,17 +93,17 @@ namespace wcl::utests {
     }
 
     inline bool test_CheckAABB_2() {
-        wcl::shapes::AABB a {
+        wmath::geometry::shapes::AABB a {
             .min = glm::vec3{0},
             .max = glm::vec3{2.f, 3.f, 2.f}
         };
 
-        wcl::shapes::AABB b {
+        wmath::geometry::shapes::AABB b {
             .min = glm::vec3{2.5f, 3.5f, 2.5f},
             .max = glm::vec3{10.f, 8.f, 6.f}
         };
 
-        if(wcl::intersections::Intersects(a, b)) {
+        if(wmath::geometry::intersections::Intersects(a, b)) {
             // WFLOG("AABBs should not intersect!");
             return false;
         }
@@ -121,7 +122,7 @@ namespace wcl::utests {
         b_box.transform[3] = glm::vec4{7.f, 7.f, 7.f, 1.f};
         b_box.Refresh();
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             a_box.shape, b_box.shape, a_box.inv_transform * b_box.transform
             );
 
@@ -145,13 +146,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             a_box.shape, b_box.shape, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::intersections::Intersects(
+        check = check && wmath::geometry::intersections::Intersects(
             b_box.shape, a_box.shape, relative_transform
             );
 
@@ -175,13 +176,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             a_box.shape, b_box.shape, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::intersections::Intersects(
+        check = check && wmath::geometry::intersections::Intersects(
             b_box.shape, a_box.shape, relative_transform
             );
 
@@ -205,13 +206,13 @@ namespace wcl::utests {
 
         glm::mat4 relative_transform = a_box.inv_transform * b_box.transform;
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             a_box.shape, b_box.shape, relative_transform
             );
 
         relative_transform = b_box.inv_transform * a_box.transform;
 
-        check = check && wcl::intersections::Intersects(
+        check = check && wmath::geometry::intersections::Intersects(
             b_box.shape, a_box.shape, relative_transform
             );
 
@@ -230,7 +231,7 @@ namespace wcl::utests {
         capsule.shape.radius = 5.1f;
         capsule.SetTranslation(glm::vec3{0.f, 0.f, 10.f});
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             axis_box.shape, capsule.shape, capsule.transform
             );
 
@@ -248,7 +249,7 @@ namespace wcl::utests {
         CapsuleCollider capsule{};
         capsule.SetTranslation(glm::vec3{0.f, 0.f, 9.9f});
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             axis_box.shape, capsule.shape, capsule.transform
             );
 
@@ -272,7 +273,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 5.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             axis_box.shape, capsule.shape, capsule.transform
             );
 
@@ -298,7 +299,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 5.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             axis_box.shape, capsule.shape, capsule.transform
             );
 
@@ -314,12 +315,12 @@ namespace wcl::utests {
         BoxCollider b{};
         b.shape = {.x=5.1, .y=5.1, .z=5.1};
         
-        wcl::shapes::Plane p{
+        wmath::geometry::shapes::Plane p{
             .n=glm::vec3{-1.f, 1.f, -1.f},
             .dist=5.f
         };
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, p
             );
 
@@ -335,12 +336,12 @@ namespace wcl::utests {
         BoxCollider b{};
         b.shape = {.x=4.9, .y=4.9, .z=4.9};
 
-        wcl::shapes::Plane p {
+        wmath::geometry::shapes::Plane p {
             .n=glm::vec3{-1.f, 1.f, -1.f},
             .dist=5.f
         };
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, p
             );
 
@@ -364,7 +365,7 @@ namespace wcl::utests {
             point + glm::vec3{0, 2, -2}
         };
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, tri
             );
 
@@ -388,7 +389,7 @@ namespace wcl::utests {
             point + glm::vec3{0, 2, -2}
         };
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, tri
             );
 
@@ -407,7 +408,7 @@ namespace wcl::utests {
         MeshCollider m{};
         m.SetTranslation({5.f, 5.f, 5.f});
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, m.shape, m.transform
             );
 
@@ -425,7 +426,7 @@ namespace wcl::utests {
         MeshCollider m{};
         m.SetTranslation({5.f, 5.f, 5.f});
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             b.shape, m.shape, m.transform
             );
 
@@ -443,7 +444,7 @@ namespace wcl::utests {
 
         s2.SetTranslation(glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f);
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             s1.shape, s2.shape, s2.transform[3]
             );
 
@@ -462,7 +463,7 @@ namespace wcl::utests {
 
         s2.SetTranslation(glm::normalize(glm::vec3{1.f, 1.f, 1.f}) * 10.f);
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             s1.shape, s2.shape, s2.transform[3]
             );
 
@@ -485,7 +486,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             s1.shape, c2.shape, c2.transform
             );
 
@@ -508,7 +509,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             s1.shape, c2.shape, c2.transform
             );
 
@@ -527,7 +528,7 @@ namespace wcl::utests {
         c1.shape.radius = 5.1f;
         c1.SetTranslation(glm::vec3(0.f, 5.f, 0.f));
 
-       bool check = wcl::intersections::Intersects(
+       bool check = wmath::geometry::intersections::Intersects(
             c1.shape, c1.transform
             );
 
@@ -545,7 +546,7 @@ namespace wcl::utests {
         c1.shape.radius = 4.9f;
         c1.SetTranslation(glm::vec3(0.f, 5.f, 0.f));
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             c1.shape, c1.transform
             );
 
@@ -569,7 +570,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             c1.shape, c2.shape, c2.transform
             );
 
@@ -593,7 +594,7 @@ namespace wcl::utests {
             glm::normalize(glm::vec3{0.f, 1.f, -1.f}) * 10.f
             );
 
-        bool check = wcl::intersections::Intersects(
+        bool check = wmath::geometry::intersections::Intersects(
             c1.shape, c2.shape, c2.transform
             );
 
@@ -602,6 +603,45 @@ namespace wcl::utests {
             return false;
         }
 
+        return true;
+    }
+
+    inline bool test_capsule_mesh_1() {
+        MeshCollider m1;
+        CapsuleCollider c1;
+        c1.shape.radius=5.1;
+        c1.Rotate(wmath::numerical::PI<float> * 0.5, glm::vec3{0,0,1});
+        c1.SetTranslation({8.f, 0.f, -2.f});
+
+        bool check = wmath::geometry::intersections::Intersects(
+            m1.shape, c1.shape, c1.transform
+            );
+
+        if (!check) {
+            WFLOG("Capsule and mesh should be intersecting!");
+            return false;
+        }
+        
+        return true;
+    }
+
+    inline bool test_capsule_mesh_2() {
+        MeshCollider m1;
+        CapsuleCollider c1;
+        
+        c1.shape.radius=4.9;
+        c1.Rotate(wmath::numerical::PI<float> * 0.5, glm::vec3{0,0,1});
+        c1.SetTranslation({8.f, 0.f, -2.f});
+
+        bool check = wmath::geometry::intersections::Intersects(
+            m1.shape, c1.shape, c1.transform
+            );
+
+        if (check) {
+            WFLOG("Capsule and mesh should NOT be intersecting!");
+            return false;
+        }
+        
         return true;
     }
 

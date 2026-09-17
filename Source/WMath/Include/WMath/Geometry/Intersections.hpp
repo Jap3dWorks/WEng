@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WMath/Geometry/Spaces.hpp"
-#include "WMath/LinAlgbr.hpp"
+#include "WMath/LinAlgebra.hpp"
 #include "WMath/Geometry/Distance.hpp"
 #include "WMath/Geometry/ClosestPoint.hpp"
 #include "WMath/Geometry/IntersectionPoint.hpp"
@@ -11,11 +11,11 @@
 #include <glm/matrix.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 
-namespace wcl::intersections {
+namespace wmath::geometry::intersections {
 
     inline bool Intersects(
-        wcl::shapes::AABB a,
-        wcl::shapes::AABB b
+        wmath::geometry::shapes::AABB a,
+        wmath::geometry::shapes::AABB b
         ) {
         if (a.max[0] < b.min[0] || a.min[0] > b.max[0]) return false;
         if (a.max[1] < b.min[1] || a.min[1] > b.max[1]) return false;
@@ -30,11 +30,11 @@ namespace wcl::intersections {
      * (CheckOBBIntersection(a,b,b_transform_relative_to_a) && CheckOBBIntersection(b,a,a_transform_relative_to_b)) == true
      */
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Box obb,
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Box obb,
         glm::mat4 obb_transform
         ) {
-        auto other_radii = wcl::shapes::BoxRadii(obb, obb_transform);
+        auto other_radii = wmath::geometry::shapes::BoxRadii(obb, obb_transform);
 
         glm::vec3 axis_radii{0.f};
 
@@ -72,7 +72,7 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
+        wmath::geometry::shapes::Box axis_box,
         glm::vec3 point
         ) {
         return axis_box.x >= std::abs(point.x) &&
@@ -87,8 +87,8 @@ namespace wcl::intersections {
      * @param sphere_position : sphere position relative to center_box.
      */
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Sphere sphere,
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Sphere sphere,
         glm::vec3 sphere_position
         ) {
         sphere_position = {
@@ -109,12 +109,12 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Capsule capsule,
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
 
-        auto [p_a, p_b] = wcl::shapes::AsSegment(capsule, capsule_transform);
+        auto [p_a, p_b] = wmath::geometry::shapes::AsSegment(capsule, capsule_transform);
 
         return wcl::distance::MinSquareDistance(axis_box, p_a, p_b) <=
             (capsule.radius * capsule.radius);
@@ -126,8 +126,8 @@ namespace wcl::intersections {
      * plane normal is not required to be normalized.
      */
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Plane plane
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Plane plane
         ) {
         float r =
             axis_box.x * std::abs(plane.n.x) +
@@ -138,8 +138,8 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Tri tri
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Tri tri
         ) {
 
         float p0, p1, p2, r;
@@ -213,7 +213,7 @@ namespace wcl::intersections {
             std::min(tri[0].z, std::min(tri[1].z, tri[2].z)) > axis_box.z) return false;
         
         // axis triangle face normal
-        wcl::shapes::Plane plane;
+        wmath::geometry::shapes::Plane plane;
         plane.n = glm::cross(f0, f1);
         plane.dist = glm::dot(plane.n, tri[0]) / glm::dot(plane.n, plane.n);
 
@@ -222,8 +222,8 @@ namespace wcl::intersections {
 
     // TODO make the mesh the axis shape
     inline bool Intersects(
-        wcl::shapes::Box axis_box,
-        wcl::shapes::Mesh const & mesh,
+        wmath::geometry::shapes::Box axis_box,
+        wmath::geometry::shapes::Mesh const & mesh,
         glm::mat4 mesh_transform
         ) {
 
@@ -238,7 +238,7 @@ namespace wcl::intersections {
         for(std::uint32_t i=0; i < mesh.indices.size(); i=i+3) {
             if (Intersects(
                     axis_box,
-                    wcl::shapes::Tri {
+                    wmath::geometry::shapes::Tri {
                         cpy[mesh.indices[i]],
                         cpy[mesh.indices[i+1]],
                         cpy[mesh.indices[i+2]]
@@ -252,15 +252,15 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Sphere sphere,
+        wmath::geometry::shapes::Sphere sphere,
         glm::vec3 point
         ) {
         return glm::dot(point, point) <= std::pow(sphere.radius, 2);
     }
 
     inline bool Intersects(
-        wcl::shapes::Sphere a_sphere,
-        wcl::shapes::Sphere b_sphere,
+        wmath::geometry::shapes::Sphere a_sphere,
+        wmath::geometry::shapes::Sphere b_sphere,
         glm::vec3 b_translation
         ) {
 
@@ -274,12 +274,12 @@ namespace wcl::intersections {
      * @param capsule_transform : capsule transform relative to axis_sphere.
      */
     inline bool Intersects(
-        wcl::shapes::Sphere axis_sphere,
-        wcl::shapes::Capsule capsule,
+        wmath::geometry::shapes::Sphere axis_sphere,
+        wmath::geometry::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
 
-        auto [p_a, p_b] = wcl::shapes::AsSegment(capsule, capsule_transform);
+        auto [p_a, p_b] = wmath::geometry::shapes::AsSegment(capsule, capsule_transform);
 
         glm::vec3 segment = p_b - p_a;
 
@@ -296,16 +296,16 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Sphere axis_sphere,
-        wcl::shapes::Plane plane
+        wmath::geometry::shapes::Sphere axis_sphere,
+        wmath::geometry::shapes::Plane plane
         ) {
         glm::vec3 p = plane.n * plane.dist;
         return glm::dot(p,p) <= (axis_sphere.radius * axis_sphere.radius);
     }
 
     inline bool Intersects(
-        wcl::shapes::Tri tri,
-        wcl::shapes::Sphere sphere,
+        wmath::geometry::shapes::Tri tri,
+        wmath::geometry::shapes::Sphere sphere,
         glm::vec3 sphere_pos
         ) {
         glm::vec3 closest = wcl::closest_point::OnTriangle(
@@ -319,8 +319,8 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Mesh const & axis_mesh,
-        wcl::shapes::Sphere sphere,
+        wmath::geometry::shapes::Mesh const & axis_mesh,
+        wmath::geometry::shapes::Sphere sphere,
         glm::vec3 sphere_pos
         ) {
         for(std::uint32_t i=0; i<axis_mesh.indices.size(); i=i+3) {
@@ -343,10 +343,10 @@ namespace wcl::intersections {
      * To compute the algorithm, point coords are (0, 0, 0).
      */
     inline bool Intersects(
-        wcl::shapes::Capsule capsule,
+        wmath::geometry::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
-        auto[p1_a, p1_b] = wcl::shapes::AsSegment(capsule, capsule_transform);
+        auto[p1_a, p1_b] = wmath::geometry::shapes::AsSegment(capsule, capsule_transform);
 
         glm::vec3 s1 = p1_b - p1_a;
         glm::vec3 s2 = -p1_a;
@@ -361,12 +361,12 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Capsule axis_capsule,
-        wcl::shapes::Capsule capsule,
+        wmath::geometry::shapes::Capsule axis_capsule,
+        wmath::geometry::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
-        auto s0 = wcl::shapes::AsSegment(axis_capsule);
-        auto s1 = wcl::shapes::AsSegment(capsule, capsule_transform);
+        auto s0 = wmath::geometry::shapes::AsSegment(axis_capsule);
+        auto s1 = wmath::geometry::shapes::AsSegment(capsule, capsule_transform);
 
         auto [s_min, t_min] = wcl::closest_point::OnSegments(
             s0, s1
@@ -379,12 +379,12 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Tri tri,
-        wcl::shapes::Segment segment,
+        wmath::geometry::shapes::Tri tri,
+        wmath::geometry::shapes::Segment segment,
         float radius
         ) {
 
-        wcl::shapes::Plane plane = wcl::shapes::AsPlane(tri);
+        wmath::geometry::shapes::Plane plane = wmath::geometry::shapes::AsPlane(tri);
         auto intrsct_pnt = wcl::intersection_point::PlaneSegment(plane, segment);
 
         auto inside_tri = [&tri](glm::vec3 point) {
@@ -415,7 +415,7 @@ namespace wcl::intersections {
 
         auto [s_min, t_min] = wcl::closest_point::OnSegments(
             segment,
-            wcl::shapes::Segment{tri[0], tri[1]}
+            wmath::geometry::shapes::Segment{tri[0], tri[1]}
             );
         float ftmp = wmath::lin_algbr::SqrLength(
             min_vector(s_min, tri[0], tri[1], t_min)
@@ -462,16 +462,16 @@ namespace wcl::intersections {
     }
 
     inline bool Intersects(
-        wcl::shapes::Mesh const & mesh,
-        wcl::shapes::Capsule capsule,
+        wmath::geometry::shapes::Mesh const & mesh,
+        wmath::geometry::shapes::Capsule capsule,
         glm::mat4 capsule_transform
         ) {
 
-        auto segment = wcl::shapes::AsSegment(capsule, capsule_transform);
+        auto segment = wmath::geometry::shapes::AsSegment(capsule, capsule_transform);
 
         for(std::uint32_t i=0; i<mesh.indices.size(); i=i+3) {
             if(Intersects(
-                   wcl::shapes::Tri{
+                   wmath::geometry::shapes::Tri{
                        mesh.vertices[mesh.indices[i]],
                        mesh.vertices[mesh.indices[i+1]],
                        mesh.vertices[mesh.indices[i+2]]
@@ -484,6 +484,14 @@ namespace wcl::intersections {
         }
 
         return false;
+    }
+
+    inline bool Intersects(
+        wmath::geometry::shapes::Mesh const & axis_mesh,
+        wmath::geometry::shapes::Mesh const & mesh,
+        glm::mat4 mesh_transform
+        ) {
+        
     }
 
 }
