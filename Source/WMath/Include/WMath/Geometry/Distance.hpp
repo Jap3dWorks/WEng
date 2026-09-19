@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WMath/Numerical.hpp"
-#include "WMath/Geometry/Shapes.hpp"
+#include "WMath/Geometry/Shape.hpp"
 
 #include <glm/glm.hpp>
 #include <algorithm>
@@ -13,7 +13,7 @@ namespace wcl::distance {
     /**
      * Min square distance between a box (axis aligned) and a segment.
      */
-    inline float MinSquareDistance(wmath::geometry::shapes::Box axis_box, glm::vec3 p_a, glm::vec3 p_b) {
+    inline float MinSquareDistance(wmath::geometry::shape::Box axis_box, glm::vec3 p_a, glm::vec3 p_b) {
         glm::vec3 segment = p_b - p_a;
 
         std::array abox_limits {

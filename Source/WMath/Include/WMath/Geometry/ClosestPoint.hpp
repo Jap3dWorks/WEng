@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WMath/Geometry/Shapes.hpp"
+#include "WMath/Geometry/Shape.hpp"
 
 #include <glm/glm.hpp>
 
@@ -62,7 +62,7 @@ namespace wcl::closest_point {
     }
 
     inline constexpr glm::vec3 OnPlane(
-        wmath::geometry::shapes::Plane plane,
+        wmath::geometry::shape::Plane plane,
         glm::vec3 point
         ) {
         float l = plane.dist -  (
@@ -79,8 +79,8 @@ namespace wcl::closest_point {
      * and s1.p0 + (s1.p1 - s1.p0) * t_min is the nearest point to s0 on s1.
      */
     inline constexpr std::array<float,2> OnSegments(
-        wmath::geometry::shapes::Segment s0,
-        wmath::geometry::shapes::Segment s1
+        wmath::geometry::shape::Segment s0,
+        wmath::geometry::shape::Segment s1
         ) {
 
         glm::vec3 d1 = s0.p1 - s0.p0;
