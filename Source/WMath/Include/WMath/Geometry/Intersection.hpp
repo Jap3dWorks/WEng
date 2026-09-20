@@ -489,6 +489,25 @@ namespace wmath::geometry {
         return false;
     }
 
+    namespace {
+        
+        std::uint8_t GetIsolatedVeretx(
+            wmath::geometry::shape::Tri tri,
+            wmath::geometry::shape::Line line
+            ) {
+            std::uint8_t m=0;
+            for(std::uint8_t i=0; i<tri.size(); i++) {
+                bool t = glm::dot(tri[i] - line.point, line.dir) > 0.f;
+                m |= static_cast<std::uint8_t>(t) << i;
+            }
+            switch(m) {
+            case 1:
+            case 2:
+                
+            }
+        }
+    }
+
     inline constexpr bool Intersects(
         wmath::geometry::shape::Tri t0,
         wmath::geometry::shape::Tri t1
@@ -496,8 +515,20 @@ namespace wmath::geometry {
         auto p0 = wmath::geometry::shape::AsPlane(t0);
         auto p1 = wmath::geometry::shape::AsPlane(t1);
 
-        auto intr_line = wmath::geometry::intersection_shape::PlanePlane(p0, p1);
+        auto l0 = wmath::geometry::intersection_shape::PlanePlane(
+            p0, p1
+            );
 
+        if (!l0.has_value()) {
+            // parallel vertex
+            return false;
+        }
+
+        std::uint8_t i0 = GetIsolatedVertex(
+            t0, l0.value()
+            );
+
+        auto intr_line = wmath::geometry::intersection_shape::PlanePlane(p0, p1);
     }
 
     inline constexpr bool Intersects(
