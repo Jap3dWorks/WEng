@@ -3,7 +3,7 @@
 #include "WLog.hpp"
 
 #include "WMath/Geometry/Shape.hpp"
-#include "WMath/Geometry/IntersectionCheck.hpp"
+#include "WMath/Geometry/Intersection.hpp"
 #include "WMath/LinAlgebra.hpp"
 
 #include "WMath/Numerical.hpp"
@@ -317,7 +317,7 @@ namespace wmath::geometry::utests {
         
         wmath::geometry::shape::Plane p{
             .n=glm::vec3{-1.f, 1.f, -1.f},
-            .dist=5.f
+            .offset=5.f
         };
 
         bool check = wmath::geometry::Intersects(
@@ -338,7 +338,7 @@ namespace wmath::geometry::utests {
 
         wmath::geometry::shape::Plane p {
             .n=glm::vec3{-1.f, 1.f, -1.f},
-            .dist=5.f
+            .offset=5.f
         };
 
         bool check = wmath::geometry::Intersects(

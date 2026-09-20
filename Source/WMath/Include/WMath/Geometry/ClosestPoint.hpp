@@ -65,7 +65,7 @@ namespace wcl::closest_point {
         wmath::geometry::shape::Plane plane,
         glm::vec3 point
         ) {
-        float l = plane.dist -  (
+        float l = plane.offset -  (
             glm::dot(point, plane.n) / glm::dot(plane.n, plane.n)
             );
 

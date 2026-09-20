@@ -6,11 +6,13 @@
 #include "WMath/Geometry/Distance.hpp"
 #include "WMath/Geometry/ClosestPoint.hpp"
 #include "WMath/Geometry/IntersectionShape.hpp"
+#include "WMath/Numerical.hpp"
 
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <optional>
 
 namespace wmath::geometry {
 
@@ -135,7 +137,7 @@ namespace wmath::geometry {
             axis_box.y * std::abs(plane.n.y) +
             axis_box.z * std::abs(plane.n.z);
 
-        return std::abs(plane.dist) * glm::dot(plane.n, plane.n) <= r ;
+        return std::abs(plane.offset) * glm::dot(plane.n, plane.n) <= r ;
     }
 
     inline bool Intersects(
@@ -216,7 +218,7 @@ namespace wmath::geometry {
         // axis triangle face normal
         wmath::geometry::shape::Plane plane;
         plane.n = glm::cross(f0, f1);
-        plane.dist = glm::dot(plane.n, tri[0]) / glm::dot(plane.n, plane.n);
+        plane.offset = glm::dot(plane.n, tri[0]) / glm::dot(plane.n, plane.n);
 
         return Intersects(axis_box, plane);
     }
@@ -300,7 +302,7 @@ namespace wmath::geometry {
         wmath::geometry::shape::Sphere axis_sphere,
         wmath::geometry::shape::Plane plane
         ) {
-        glm::vec3 p = plane.n * plane.dist;
+        glm::vec3 p = plane.n * plane.offset;
         return glm::dot(p,p) <= (axis_sphere.radius * axis_sphere.radius);
     }
 
@@ -494,7 +496,7 @@ namespace wmath::geometry {
         auto p0 = wmath::geometry::shape::AsPlane(t0);
         auto p1 = wmath::geometry::shape::AsPlane(t1);
 
-        
+        auto intr_line = wmath::geometry::intersection_shape::PlanePlane(p0, p1);
 
     }
 

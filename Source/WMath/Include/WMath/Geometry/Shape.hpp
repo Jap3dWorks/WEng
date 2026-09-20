@@ -18,7 +18,15 @@ namespace wmath::geometry::shape {
 
     struct Plane{
         glm::vec3 n;  // plane normal (normalization is not required)
-        float dist;   // distance, n * dist is a plane point.
+        float offset; // n * offset is a plane point.
+
+        /**
+         * aX + bY + cZ = u
+         * u = <n,n> * dist
+         */
+        constexpr float ConstantTerm() const {
+            return glm::dot(n,n) * offset;
+        }
     };
 
     struct Sphere{
@@ -115,6 +123,6 @@ namespace wmath::geometry::shape {
 
         float d = glm::dot(N, triangle[0]) / glm::dot(N,N);
 
-        return Plane{.n=N, .dist=d};
+        return Plane{.n=N, .offset=d};
     }
 }
