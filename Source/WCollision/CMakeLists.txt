@@ -28,6 +28,7 @@ target_link_libraries(
     PUBLIC
         WMath
         WCore
+        WObjects
     PRIVATE
 )
 
