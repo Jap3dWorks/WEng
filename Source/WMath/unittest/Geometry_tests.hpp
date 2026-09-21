@@ -60,7 +60,7 @@ namespace wmath::geometry::utests {
 
     struct MeshCollider : public BaseCollider {
         wmath::geometry::shape::Mesh shape{
-            .vertices = std::vector{
+            .points = std::vector{
                 glm::vec3{2, -2, 0},
                 glm::vec3{-2, 0, 2},
                 glm::vec3{0, 2, -2},
@@ -610,8 +610,7 @@ namespace wmath::geometry::utests {
         MeshCollider m1;
         CapsuleCollider c1;
         c1.shape.radius=5.1;
-        c1.Rotate(wmath::numerical::PI<float> * 0.5, glm::vec3{0,0,1});
-        c1.SetTranslation({8.f, 0.f, -2.f});
+        c1.SetTranslation({0.f, 1.f, 8.f});
 
         bool check = wmath::geometry::Intersects(
             m1.shape, c1.shape, c1.transform
@@ -630,8 +629,7 @@ namespace wmath::geometry::utests {
         CapsuleCollider c1;
         
         c1.shape.radius=4.9;
-        c1.Rotate(wmath::numerical::PI<float> * 0.5, glm::vec3{0,0,1});
-        c1.SetTranslation({8.f, 0.f, -2.f});
+        c1.SetTranslation({0.f, 1.f, 8.f});
 
         bool check = wmath::geometry::Intersects(
             m1.shape, c1.shape, c1.transform
@@ -646,10 +644,12 @@ namespace wmath::geometry::utests {
     }
 
     inline bool test_mesh_1() {
+        // TODO
         return false;
     }
 
     inline bool test_mesh_2() {
+        // TODO
         return false;
     }
 

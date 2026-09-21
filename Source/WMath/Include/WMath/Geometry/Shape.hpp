@@ -3,6 +3,9 @@
 #include <variant>
 #include <glm/glm.hpp>
 
+#include <stdexcept>
+#include <exception>
+
 namespace wmath::geometry::shape {
 
     struct AABB {
@@ -46,11 +49,15 @@ namespace wmath::geometry::shape {
     struct Line{
         glm::vec3 dir;
         glm::vec3 point;
+
+        constexpr glm::vec3 Point(float t) const noexcept {
+            return (dir * t) + point;
+        }
     };
 
     /** Collider Mesh */
     struct Mesh{
-        std::vector<glm::vec3> vertices{};
+        std::vector<glm::vec3> points{};
         std::vector<std::uint32_t> indices{};
     };
 
@@ -58,7 +65,7 @@ namespace wmath::geometry::shape {
      * Triangle
      */
     using Tri = std::array<glm::vec3, 3>;
-    
+
     inline constexpr std::array<glm::vec3,8> BoxVertices(Box cube, glm::mat4 cube_transform) {
 
         std::array<glm::vec3, 8> result{};

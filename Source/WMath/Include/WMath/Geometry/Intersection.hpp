@@ -6,6 +6,8 @@
 #include "WMath/Geometry/Distance.hpp"
 #include "WMath/Geometry/ClosestPoint.hpp"
 #include "WMath/Geometry/IntersectionShape.hpp"
+#include "WMath/Geometry/Lib/IntersectionTri.hpp"
+
 #include "WMath/Numerical.hpp"
 
 #include <algorithm>
@@ -223,6 +225,29 @@ namespace wmath::geometry {
         return Intersects(axis_box, plane);
     }
 
+    inline bool Intersects(
+        wmath::geometry::shape::AABB aabb,
+        wmath::geometry::shape::Tri tri
+        ) {
+        
+        glm::vec3 c = (aabb.min + aabb.max) * 0.5f;
+
+        wmath::geometry::shape::Box box {
+            .x = (aabb.max.x - aabb.min.x) * 0.5f,
+            .y = (aabb.max.y - aabb.min.y) * 0.5f,
+            .z = (aabb.max.z - aabb.min.z) * 0.5f
+        };
+
+        return Intersects(
+            box,
+            wmath::geometry::shape::Tri{
+                tri[0] - c,
+                tri[1] - c,
+                tri[2] - c
+            }
+            );
+    }
+
     // TODO make the mesh the axis shape
     inline bool Intersects(
         wmath::geometry::shape::Box axis_box,
@@ -230,7 +255,7 @@ namespace wmath::geometry {
         glm::mat4 mesh_transform
         ) {
 
-        std::vector cpy = mesh.vertices;
+        std::vector cpy = mesh.points;
         
         std::transform(
             cpy.begin(), cpy.end(), cpy.begin(),
@@ -328,9 +353,9 @@ namespace wmath::geometry {
         ) {
         for(std::uint32_t i=0; i<axis_mesh.indices.size(); i=i+3) {
             if (Intersects({
-                        axis_mesh.vertices[axis_mesh.indices[i]],
-                        axis_mesh.vertices[axis_mesh.indices[i+1]],
-                        axis_mesh.vertices[axis_mesh.indices[i+2]]
+                        axis_mesh.points[axis_mesh.indices[i]],
+                        axis_mesh.points[axis_mesh.indices[i+1]],
+                        axis_mesh.points[axis_mesh.indices[i+2]]
                     },
                     sphere,
                     sphere_pos)) {
@@ -475,9 +500,9 @@ namespace wmath::geometry {
         for(std::uint32_t i=0; i<mesh.indices.size(); i=i+3) {
             if(Intersects(
                    wmath::geometry::shape::Tri{
-                       mesh.vertices[mesh.indices[i]],
-                       mesh.vertices[mesh.indices[i+1]],
-                       mesh.vertices[mesh.indices[i+2]]
+                       mesh.points[mesh.indices[i]],
+                       mesh.points[mesh.indices[i+1]],
+                       mesh.points[mesh.indices[i+2]]
                    },
                    segment,
                    capsule.radius
@@ -489,24 +514,6 @@ namespace wmath::geometry {
         return false;
     }
 
-    namespace {
-        
-        std::uint8_t GetIsolatedVeretx(
-            wmath::geometry::shape::Tri tri,
-            wmath::geometry::shape::Line line
-            ) {
-            std::uint8_t m=0;
-            for(std::uint8_t i=0; i<tri.size(); i++) {
-                bool t = glm::dot(tri[i] - line.point, line.dir) > 0.f;
-                m |= static_cast<std::uint8_t>(t) << i;
-            }
-            switch(m) {
-            case 1:
-            case 2:
-                
-            }
-        }
-    }
 
     inline constexpr bool Intersects(
         wmath::geometry::shape::Tri t0,
@@ -515,28 +522,87 @@ namespace wmath::geometry {
         auto p0 = wmath::geometry::shape::AsPlane(t0);
         auto p1 = wmath::geometry::shape::AsPlane(t1);
 
-        auto l0 = wmath::geometry::intersection_shape::PlanePlane(
+        auto line = wmath::geometry::intersection_shape::PlanePlane(
             p0, p1
             );
 
-        if (!l0.has_value()) {
-            // parallel vertex
+        if (!line.has_value()) {
+            // parallel planes
             return false;
         }
 
-        std::uint8_t i0 = GetIsolatedVertex(
-            t0, l0.value()
+        std::uint8_t i0 = wmath::geometry::lib::intersection_tri::GetIsolatedVertex(
+            t0,
+            line.value(),
+            p0.n
+            );
+        std::uint8_t i1 = wmath::geometry::lib::intersection_tri::GetIsolatedVertex(
+            t1,
+            line.value(),
+            p1.n
             );
 
-        auto intr_line = wmath::geometry::intersection_shape::PlanePlane(p0, p1);
+        if (2 > i0 || 2 > i1) {
+            // tris does not intersect the intersection line.
+            return false;
+        }
+
+        auto s0 = wmath::geometry::lib::intersection_tri::TriLineSegment(
+            t0, line.value(), i0
+            );
+        auto s1 = wmath::geometry::lib::intersection_tri::TriLineSegment(
+            t1, line.value(), i1
+            );
+
+        if (!(s0.has_value() && s1.has_value())) { return false; }
+
+        return wmath::numerical::RangesOverlap(
+            s0.value(), s1.value()
+            );
     }
 
     inline constexpr bool Intersects(
         wmath::geometry::shape::Mesh const & axis_mesh,
+        wmath::geometry::shape::AABB axis_aabb,
         wmath::geometry::shape::Mesh const & mesh,
         glm::mat4 mesh_transform
         ) {
-        
+
+        std::vector<glm::vec3> trnsf_points;
+        trnsf_points.resize(mesh.points.size());
+
+        std::transform(
+            mesh.points.begin(),
+            mesh.points.end(),
+            trnsf_points.begin(),
+            [&mesh_transform](glm::vec3 const & itm) {
+                return glm::vec3{ mesh_transform * glm::vec4{itm, 1.f}};
+            }
+            );
+
+        // Temporal and low efficient solution
+        for(std::uint32_t i=0; i<mesh.indices.size(); i=1+3) {
+            wmath::geometry::shape::Tri tri {
+                trnsf_points[mesh.indices[i]],
+                trnsf_points[mesh.indices[i+1]],
+                trnsf_points[mesh.indices[i+2]]
+            };
+
+            if (Intersects(axis_aabb, tri)) {
+                for (std::uint32_t j=0; j<axis_mesh.indices.size(); j=j+3) {
+                    wmath::geometry::shape::Tri check_tri {
+                        axis_mesh.points[axis_mesh.indices[j]],
+                        axis_mesh.points[axis_mesh.indices[j+1]],
+                        axis_mesh.points[axis_mesh.indices[j+2]],
+                    };
+                    if (Intersects(tri, check_tri)) {
+                        return true;
+                        }
+                    }
+                }
+            }
+
+        return false;
     }
 
 }

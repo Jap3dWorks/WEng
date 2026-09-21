@@ -38,6 +38,7 @@ TEST_CASE("WMath") {
         CHECK(wmath::geometry::utests::test_capsule_2());
         CHECK(wmath::geometry::utests::test_capsule_mesh_1());
         CHECK(wmath::geometry::utests::test_capsule_mesh_2());
+        // CHECK(wmath::geometry::utests::)
     }
 }
 
