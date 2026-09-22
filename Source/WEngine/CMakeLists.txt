@@ -3,11 +3,11 @@ add_library(
     SHARED
         CompileGenerated/CompileGenerated.cpp
         Source/WEngine.cpp
-        Source/WSystems.cpp
         Source/WInputMappingRegister.cpp
-        Source/WSystemsRunner.cpp
-        Source/WSystemsRegister.cpp
         Source/WEngineDefaults.cpp
+        # Source/WSystems.cpp
+        # Source/WSystemsRunner.cpp
+        # Source/WSystemsRegister.cpp
 )
 
 set_target_properties(
@@ -35,6 +35,7 @@ target_link_libraries(
         WMath
         WCore
         WWindow
+        WSystem
     PRIVATE
         WObjects
         WImporter

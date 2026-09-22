@@ -19,6 +19,23 @@
 
 
 #if defined(_WIN32)
+    #ifdef WSYSTEM_EXPORTS
+        #define WSYSTEM_API __declspec(dllexport)
+    #else
+        #define WSYSTEM_API __declspec(dllimport)
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #ifdef WSYSTEM_EXPORTS
+        #define WSYSTEM_API __attribute__((visibility("default")))
+    #else
+        #define WSYSTEM_API
+    #endif
+#else
+    #define WSYSTEM_API
+#endif
+
+
+#if defined(_WIN32)
     #ifdef WSPACERS_EXPORTS
         #define WSPACERS_API __declspec(dllexport)
     #else

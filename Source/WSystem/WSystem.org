@@ -1,0 +1,21 @@
+:PROPERTIES:
+:MODULE_TYPE: library
+:CPP_STANDARD: 23
+:header-args: :mkdirp yes
+:END:
+
+#+title: WSystem
+
+
+* Build
+
+#+NAME: LinkDef
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PrivateGenerated/LinkDef.hpp
+#pragma once
+<<linkdef-module-macros()>>
+#+end_src
+
+
+* WSystems

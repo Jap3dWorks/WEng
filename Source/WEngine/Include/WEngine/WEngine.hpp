@@ -9,8 +9,8 @@
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
 
-#include "WSystems/WSystemsRegister.hpp"
-#include "WSystems/WSystemsRunner.hpp"
+#include "WSystem/WSystemsRegister.hpp"
+#include "WSystem/WSystemsRunner.hpp"
 
 #include "WWindow/WWindow.hpp"
 

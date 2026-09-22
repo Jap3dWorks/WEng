@@ -1,6 +1,12 @@
+:PROPERTIES:
+:MODULE_TYPE: library
+:CPP_STANDARD: 23
+:header-args: :mkdirp yes
+:END:
+
 #+title: WEngine
 
-* LinkDef
+* Build
 
 #+NAME: LinkDef
 #+HEADER: :main no :eval no

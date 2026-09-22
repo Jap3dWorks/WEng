@@ -1,4 +1,4 @@
-// [[file:../WSpacers.org::LinkDef][LinkDef]]
+// [[file:../WSystem.org::LinkDef][LinkDef]]
 #pragma once
 
 #if defined(_WIN32)

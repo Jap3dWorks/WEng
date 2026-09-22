@@ -1,4 +1,4 @@
-#include "WSystems/WSystemsRegister.hpp"
+#include "WSystem/WSystemsRegister.hpp"
 
 WSystemsRegister::WSystemsRegister() :
     system_set_(),

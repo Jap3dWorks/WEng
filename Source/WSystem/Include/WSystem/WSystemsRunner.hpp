@@ -2,7 +2,7 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TSparseSet.hpp"
-#include "WSystems/WSystems.hpp"
+#include "WSystem/WSystems.hpp"
 
 #include <unordered_map>
 #include <variant>

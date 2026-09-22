@@ -1,14 +1,12 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WSystems/WSystems.hpp"
+#include "WSystem/WSystems.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WCore/IdPool.hpp"
 
 #include <unordered_map>
 #include <string>
-
-// TODO All WSystems registry, active or not. this will be useful for Serialization.
 
 class WENGINE_API WSystemsRegister {
 public:
@@ -34,10 +32,10 @@ public:
 
 private:
 
-    TSparseSet<WSystemFn> system_set_;
+    TSparseSet<WSystemFn> system_set_{};
 
-    wcr::IdPool<wcr::wid::WSystemId::IdType> id_pool_;
-    std::unordered_map<std::string, wcr::wid::WSystemId> name_wid_;
+    wcr::IdPool<wcr::wid::WSystemId::IdType> id_pool_{};
+    std::unordered_map<std::string, wcr::wid::WSystemId> name_wid_{};
 
 };
 

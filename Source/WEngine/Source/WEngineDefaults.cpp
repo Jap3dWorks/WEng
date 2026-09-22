@@ -12,7 +12,7 @@
 #include "WImporter/WImporterObj.hpp"
 #include "WImporter/WImporterGltf.hpp"
 #include "WImporterRegister/WImporterRegister.hpp"
-#include "WSystems/WSystems.hpp"
+#include "WSystem/WSystems.hpp"
 
 #include <memory>
 

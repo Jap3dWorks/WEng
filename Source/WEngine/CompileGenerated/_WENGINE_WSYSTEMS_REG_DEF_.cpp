@@ -2,9 +2,9 @@
 #pragma once
 
 // include headers
-#include "WSystems/WSystemMacros.hpp"
-#include "WSystems/WSystems.hpp"
-#include "WSystems/WSystemsRegister.hpp"
+#include "WSystem/WSystemMacros.hpp"
+#include "WSystem/WSystems.hpp"
+#include "WSystem/WSystemsRegister.hpp"
 
 // Start WSystems Register Generation
 START_DEFINE_WSYSTEMS_REG(WENGINE, WSYSTEMS)
