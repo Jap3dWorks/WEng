@@ -25,7 +25,6 @@ Module build data is included here.
 <<linkdef-module-macros()>>
 #+end_src
 
-  
 * WComponents
 
 ** Collision
@@ -42,5 +41,5 @@ Module build data is included here.
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WComponents", "Collision")>>
+<<wclass-compile-generated-cpp("WCollision/Components", "Collision")>>
 #+end_src

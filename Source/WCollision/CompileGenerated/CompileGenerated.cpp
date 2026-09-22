@@ -1,5 +1,5 @@
 // [[file:../WCollision.org::wcl::component::Collision-compilegenerated-cpp][wcl::component::Collision-compilegenerated-cpp]]
-#include "WComponents/Collision.hpp" 
+#include "WCollision/Components/Collision.hpp" 
 #ifndef WCLASSNAME
 #define WCLASSNAME(_CLS) WJOIN(WClass__, _CLS)
 #endif
