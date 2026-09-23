@@ -13,7 +13,7 @@
 
 #include <glm/geometric.hpp>
 
-bool wng::system::common::Init_InitializeTransformsMatrix(WSystemParameters const & parameters) {
+bool weng::system::common::Init_InitializeTransformsMatrix(wsm::SystemParameters const & parameters) {
     
     parameters.engine->LevelInfo().level.ForEachComponent<wcm::Transform>(
         [&parameters](wcm::Transform * _transform) {
@@ -34,20 +34,20 @@ bool wng::system::common::Init_InitializeTransformsMatrix(WSystemParameters cons
 }
 
 
-bool wng::system::common::Init_RenderLevelResources(WSystemParameters const & parameters) {
-    wng::render::assets::InitializeRenderAssets(
+bool weng::system::common::Init_RenderLevelResources(wsm::SystemParameters const & parameters) {
+    weng::render::assets::InitializeRenderAssets(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()
         );
 
-    wng::render::camera::InitializePostprocess(
+    weng::render::camera::InitializePostprocess(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()
         );
 
-    wng::render::lights::InitializeLights(
+    weng::render::lights::InitializeLights(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()
@@ -57,7 +57,7 @@ bool wng::system::common::Init_RenderLevelResources(WSystemParameters const & pa
 }
 
 
-bool wng::system::common::Init_CameraInput(WSystemParameters const & parameters) {
+bool weng::system::common::Init_CameraInput(wsm::SystemParameters const & parameters) {
     wcr::wid::WEntityId camid;
     parameters.level->GetFirstComponent<wcm::Camera>(camid);
 
@@ -199,7 +199,7 @@ bool wng::system::common::Init_CameraInput(WSystemParameters const & parameters)
 }
 
 
-bool wng::system::common::Pre_UpdateMovement(WSystemParameters const & parameters) {
+bool weng::system::common::Pre_UpdateMovement(wsm::SystemParameters const & parameters) {
     parameters.level->ForEachComponent<wcm::Movement>(
         [&parameters](wcm::Movement * mc){
             wcm::Transform & tc = parameters.level->
@@ -263,7 +263,7 @@ bool wng::system::common::Pre_UpdateMovement(WSystemParameters const & parameter
 }
 
 
-bool wng::system::common::Pre_CameraInputMovement(WSystemParameters const & parameters) {
+bool weng::system::common::Pre_CameraInputMovement(wsm::SystemParameters const & parameters) {
     wcr::wid::WEntityId id;
     auto & ic = parameters.level->GetFirstComponent<wcm::CameraInput>(id);
     auto & tc = parameters.level->GetComponent<wcm::Transform>(id);
@@ -292,8 +292,8 @@ bool wng::system::common::Pre_CameraInputMovement(WSystemParameters const & para
 }
 
 
-bool wng::system::common::Post_UpdateRenderCamera(WSystemParameters const & parameters) {
-    wng::render::camera::UpdateRenderCamera(
+bool weng::system::common::Post_UpdateRenderCamera(wsm::SystemParameters const & parameters) {
+    weng::render::camera::UpdateRenderCamera(
         &parameters.engine->Render().Get(),
         parameters.level
         );
@@ -302,8 +302,8 @@ bool wng::system::common::Post_UpdateRenderCamera(WSystemParameters const & para
 }
 
 
-bool wng::system::common::Post_UpdateShadowMap(WSystemParameters const & parameters) {
-    wng::render::lights::UpdateShadowMap(
+bool weng::system::common::Post_UpdateShadowMap(wsm::SystemParameters const & parameters) {
+    weng::render::lights::UpdateShadowMap(
         &parameters.engine->Render().Get(),
         parameters.level
         );
@@ -312,9 +312,9 @@ bool wng::system::common::Post_UpdateShadowMap(WSystemParameters const & paramet
 }
 
 
-bool wng::system::common::End_RenderLevelResources(WSystemParameters const & parameters) {
+bool weng::system::common::End_RenderLevelResources(wsm::SystemParameters const & parameters) {
 
-    wng::render::assets::ReleaseRenderResources(
+    weng::render::assets::ReleaseRenderResources(
         parameters.engine->Render().Ptr(),
         parameters.level,
         parameters.engine->AssetManager()

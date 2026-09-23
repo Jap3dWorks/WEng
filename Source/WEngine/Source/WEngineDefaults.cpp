@@ -240,26 +240,26 @@ WEngine weng::defaults::DefaultEngine() {
     result.ImportersRegister().Register<wim::importer::WImporterObj>();
     result.ImportersRegister().Register<wim::importer::WImportTexture>();
 
-    result.RegSystems(wng::system::common::RegSystems);
+    result.RegSystems(weng::system::common::RegSystems);
 
     // This must be the first included system
 
     // nullid level is used for global levels systems.
 
     result.AddInitSystem(wcr::wid::nullid,
-                         wng::system::common::Init_InitializeTransformsMatrix_str);
+                         weng::system::common::Init_InitializeTransformsMatrix_str);
 
     result.AddInitSystem(wcr::wid::nullid,
-                         wng::system::common::Init_RenderLevelResources_str);
+                         weng::system::common::Init_RenderLevelResources_str);
 
     result.AddPostSystem(wcr::wid::nullid,
-                         wng::system::common::Post_UpdateRenderCamera_str);
+                         weng::system::common::Post_UpdateRenderCamera_str);
 
     result.AddPostSystem(wcr::wid::nullid,
-                         wng::system::common::Post_UpdateShadowMap_str);
+                         weng::system::common::Post_UpdateShadowMap_str);
 
     result.AddEndSystem(wcr::wid::nullid,
-                        wng::system::common::End_RenderLevelResources_str);
+                        weng::system::common::End_RenderLevelResources_str);
 
     // Default Assets
 

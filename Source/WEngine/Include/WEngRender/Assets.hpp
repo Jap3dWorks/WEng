@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <span>
 
-namespace wng::render::assets {
+namespace weng::render::assets {
 
     inline void InitializeRenderAssets(
         IRender * in_render,

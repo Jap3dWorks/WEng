@@ -2,6 +2,7 @@
 
 #include "WComponents/Light/Directional.hpp"
 #include "WCore/WDebug.hpp"
+#include "WEngine/System/Systems.hpp"
 #include "WEngine/WEngine.hpp"
 
 #include "WAssets/Level.hpp"
@@ -21,9 +22,20 @@ namespace spacers::gltflevel {
     inline void ConfigLevel(WEngine & engine, was::Level * level) {
         auto levelid = level->Get_asset_id();
         
-        engine.AddInitSystem(levelid, "SystemInit_CameraInput");
-        engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
-        engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
+        engine.AddInitSystem(
+            levelid,
+            weng::system::common::Init_CameraInput_str
+            );
+
+        engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_CameraInputMovement_str
+            );
+        
+        engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_UpdateMovement_str
+            );
 
         // Camera
 

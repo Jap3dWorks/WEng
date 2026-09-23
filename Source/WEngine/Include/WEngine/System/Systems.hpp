@@ -1,7 +1,7 @@
 #pragma once
 
 #define WSYSTEM_MODULE_NAME WENGINE
-#define WSYSTEM_MODULE_NAMESPACE wng
+#define WSYSTEM_MODULE_NAMESPACE weng
 #define WSYSTEM_COLLECTION common
 
 #define WSYSTEM_XITEMS                                \
@@ -14,5 +14,5 @@
     WSYSTEM_X(Post_UpdateShadowMap)                   \
     WSYSTEM_X(End_RenderLevelResources)
 
-#include "WSystem/Boilerplate/WSystem_register.inc"
+#include "WSystem/Boilerplate/WSYSTEM_DECLARE.inc"
 

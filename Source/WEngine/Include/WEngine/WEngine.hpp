@@ -9,8 +9,8 @@
 #include "WCoreTypes/WEngineStructs.hpp"
 #include "WInput/WInputMappingRegister.hpp"
 
-#include "WSystem/WSystemsRegister.hpp"
-#include "WSystem/WSystemsRunner.hpp"
+#include "WSystem/SystemRegister.hpp"
+#include "WSystem/SystemRunner.hpp"
 
 #include "WWindow/WWindow.hpp"
 
@@ -84,7 +84,7 @@ public:
     wcr::wid::WLevelSystemId AddPostSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name);
     wcr::wid::WLevelSystemId AddEndSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name);
 
-    template<CCallable<void, WSystemsRegister &> RFn>
+    template<CCallable<void, wsm::SystemsRegister &> RFn>
     constexpr void RegSystems(RFn && in_fn) {
         in_fn(state_.systems_reg);
     }
@@ -145,8 +145,8 @@ private:
 
         WAssetDb asset_db{};
 
-        WSystemsRegister systems_reg{};
-        WSystemsRunner systems_runner{};
+        wsm::SystemsRegister systems_reg{};
+        wsm::SystemRunner systems_runner{};
 
         WInputMappingRegister input_mapping_register{};
 

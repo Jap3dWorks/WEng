@@ -3,6 +3,7 @@
 #include "WAssets/RenderPipelineParams.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
 #include "WEngine/WEngine.hpp"
+#include "WEngine/System/Systems.hpp"
 #include "WEngine/WEngineDefaults.hpp"
 #include "WCoreTypes/Geometry.hpp"
 #include "WImporter/WImporterTexture.hpp"
@@ -59,7 +60,6 @@ namespace spacers::plane {
 
         return result;
     }
-
 
     inline std::vector<wcr::wid::WAssetId> ImportAssets(WEngine & engine) {
         
@@ -142,13 +142,21 @@ namespace spacers::plane {
             );
     }
 
-
     inline void ConfigLevel(WEngine & engine, was::Level * level) {
         auto levelid = level->Get_asset_id();
         
-        engine.AddInitSystem(levelid, "SystemInit_CameraInput");
-        engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
-        engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
+        engine.AddInitSystem(
+            levelid,
+            weng::system::common::Init_CameraInput_str
+            );
+        engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_CameraInputMovement_str
+            );
+        engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_UpdateMovement_str
+            );
 
         // Camera
 

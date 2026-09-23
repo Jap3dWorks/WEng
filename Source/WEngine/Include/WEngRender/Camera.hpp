@@ -12,7 +12,7 @@
 #include "WAssets/Level.hpp"
 #include "WRender/WRender.hpp"
 
-namespace wng::render::camera {
+namespace weng::render::camera {
 
     inline wcr::wid::WEntityId GetRenderCamera(was::Level * in_level) {
         // Temporal solution, only one camera.

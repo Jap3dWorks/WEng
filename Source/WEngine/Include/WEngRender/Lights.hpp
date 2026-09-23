@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <span>
 
-namespace wng::render::lights {
+namespace weng::render::lights {
 
     struct ShadowMap {
         glm::mat4 projection{};
@@ -233,7 +233,7 @@ namespace wng::render::lights {
         IRender * render,
         was::Level * level
         ) {
-        wcr::wid::WEntityId cam_id = wng::render::camera::GetRenderCamera(level);
+        wcr::wid::WEntityId cam_id = weng::render::camera::GetRenderCamera(level);
 
         wcm::Camera & cam_cmp = level->GetComponent<wcm::Camera>(cam_id);
         wcm::Transform & trn_cmp = level->GetComponent<wcm::Transform>(cam_id);

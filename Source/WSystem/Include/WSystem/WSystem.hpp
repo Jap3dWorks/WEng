@@ -2,17 +2,17 @@
 
 #include "WCore/WCore.hpp"
 #include "WCore/TFunction.hpp"
-#include "WSystem/WSystemMacros.hpp"
 
 class WEngine;
 namespace was { class Level; }
 
-// TODO namespace encapsulation
+namespace wsm {
 
-struct WSystemParameters {
-    WEngine * engine;
-    was::Level * level;
-};
+    struct SystemParameters {
+        WEngine * engine;
+        was::Level * level;
+    };
 
-using WSystemFn = TFnPtr<bool(const WSystemParameters &)>;
+    using SystemFn = TFnPtr<bool(wsm::SystemParameters const &)>;
 
+}

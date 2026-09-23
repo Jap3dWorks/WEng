@@ -1,9 +1,8 @@
 add_library(
     WSystem 
     SHARED
-        # Source/WSystem.cpp
-        Source/WSystemsRegister.cpp
-        Source/WSystemsRunner.cpp
+        Source/SystemRegister.cpp
+        Source/SystemRunner.cpp
 )
 
 set_target_properties(

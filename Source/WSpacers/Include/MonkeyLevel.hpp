@@ -11,6 +11,7 @@
 #include "WImporterRegister/WImporterRegister.hpp"
 #include "WImporter/WImporterTexture.hpp"
 #include "WImporter/WImporterObj.hpp"
+#include "WEngine/System/Systems.hpp"
 
 #include "WAssets/StaticMesh.hpp"
 #include "WAssets/Texture.hpp"
@@ -226,9 +227,18 @@ namespace spacers::monkey {
 
         was::Level & level = in_engine.AssetManager().Get<was::Level>(levelid);
 
-        in_engine.AddInitSystem(levelid, "SystemInit_CameraInput");
-        in_engine.AddPreSystem(levelid, "SystemPre_CameraInputMovement");
-        in_engine.AddPreSystem(levelid, "SystemPre_UpdateMovement");
+        in_engine.AddInitSystem(
+            levelid,
+            weng::system::common::Init_CameraInput_str
+            );
+        in_engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_CameraInputMovement_str
+            );
+        in_engine.AddPreSystem(
+            levelid,
+            weng::system::common::Pre_UpdateMovement_str
+            );
 
         // Camera
 

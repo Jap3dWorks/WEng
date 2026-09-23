@@ -1,7 +1,7 @@
 // -*- mode: C++ -*-
 
 #include "WSystem/WSystem.hpp"
-#include "WSystem/WSystemsRegister.hpp"
+#include "WSystem/SystemRegister.hpp"
 #include <array>
 
 #ifdef JOIN_1
@@ -22,7 +22,7 @@ namespace WSYSYEM_TOTAL_NAMESPACE {
 #define TEST WSYSTEM_MODULE_API
 
 #define WSYSTEM_X(Name) \
-    bool WSYSTEM_MODULE_API Name(WSystemParameters const &); \
+    bool WSYSTEM_MODULE_API Name(wsm::SystemParameters const &); \
 
     WSYSTEM_XITEMS
 
@@ -35,13 +35,13 @@ namespace WSYSYEM_TOTAL_NAMESPACE {
 
 #undef WSYSTEM_X
 
-#define WSYSTEM_X(Name) constexpr std::string_view Name ## _str {#Name}; \
+#define WSYSTEM_X(Name) constexpr std::string_view const Name ## _str {#Name}; \
 
 WSYSTEM_XITEMS    
 
 #define WSYSTEM_X(Name) reg.RegSystem(Name ## _str, Name); \
     
-    inline constexpr void RegSystems(WSystemsRegister & reg) {
+    inline constexpr void RegSystems(wsm::SystemsRegister & reg) {
         WSYSTEM_XITEMS ;
     }
 
