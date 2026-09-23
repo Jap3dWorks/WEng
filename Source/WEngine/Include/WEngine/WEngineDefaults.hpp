@@ -3,8 +3,10 @@
 #include "WEngine/WEngine.hpp"
 
 namespace weng::defaults {
-
     WEngine DefaultEngine();
+}
+
+namespace weng::defaults::asset {
 
     inline constexpr
     std::string_view const NULL_RGBA_TEXTURE_ASSET_PATH{
@@ -67,5 +69,5 @@ namespace weng::defaults {
     std::string_view const MOUSE_MOVEMENT_ACTION_ASSET_PATH{
         "/Content/Input/MouseMovement:MouseMovement"        
     };
-
 }
+

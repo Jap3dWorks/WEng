@@ -63,13 +63,13 @@ namespace spacers::monkey {
             );
 
         WAsset * null_texture = engine.AssetManager()
-            .Get(weng::defaults::NULL_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH);
 
         WAsset * null_normal = engine.AssetManager()
-            .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH);
 
         was::RenderPipeline * pipeline_asset = engine.AssetManager()
-            .Get<was::RenderPipeline>(weng::defaults::PBR_PIPELINE_ASSET_PATH);
+            .Get<was::RenderPipeline>(weng::defaults::asset::PBR_PIPELINE_ASSET_PATH);
 
         out_model.pipeline_asset = pipeline_asset->Get_asset_id();
 
@@ -180,10 +180,10 @@ namespace spacers::monkey {
         out_model.param_asset = paramid;
 
         WAsset * null_texture = engine.AssetManager()
-            .Get(weng::defaults::NULL_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH);
 
         WAsset * null_normal = engine.AssetManager()
-            .Get(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH);
+            .Get(weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH);
 
         auto & param_asset = engine.AssetManager().Get<was::RenderPipelineParams>(paramid);
 

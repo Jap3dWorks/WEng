@@ -1,12 +1,7 @@
 #include "WSystem/WSystemsRegister.hpp"
 
-WSystemsRegister::WSystemsRegister() :
-    system_set_(),
-    id_pool_()
-{
-}
-
-wcr::wid::WSystemId WSystemsRegister::RegSystem(const char * in_name, const WSystemFn & in_system) {
+wcr::wid::WSystemId WSystemsRegister::RegSystem(std::string_view in_name,
+                                                const WSystemFn & in_system) {
     wcr::wid::WSystemId id = id_pool_.Generate();
 
     system_set_.Insert(id.GetId(), in_system);

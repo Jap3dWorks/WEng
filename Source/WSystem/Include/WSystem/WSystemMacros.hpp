@@ -5,7 +5,7 @@ class WLevel;
 class WEngine;
 
 
-#define START_WSYSTEMS_REG(_MODULE, _NAME) namespace WSystems { \
+#define START_WSYSTEMS_REG(_MODULE, _NAME) namespace wsm { \
     void _MODULE ## _ ## _NAME ## _REG(WSystemsRegister&);
 
 #define END_WSYSTEMS_REG() }
@@ -17,19 +17,19 @@ class WEngine;
 
 
 #define START_DEFINE_WSYSTEM(_FN)                                   \
-    void WSystems:: _FN ## _REG(WSystemsRegister & in_register) {   \
+    void wsm:: _FN ## _REG(WSystemsRegister & in_register) {   \
         in_register.RegSystem(#_FN, _FN);                           \
             }                                                       \
-    bool WSystems:: _FN(const WSystemParameters & parameters) {
+    bool wsm:: _FN(const WSystemParameters & parameters) {
 
 #define END_DEFINE_WSYSTEM() return true; }
 
 
-#define START_DEFINE_WSYSTEMS_REG(_MODULE, _NAME) void WSystems:: _MODULE ## _ ## _NAME ## _REG (WSystemsRegister & in_register) {
+#define START_DEFINE_WSYSTEMS_REG(_MODULE, _NAME) void wsm:: _MODULE ## _ ## _NAME ## _REG (WSystemsRegister & in_register) {
 
 #define END_DEFINE_WSYSTEMS_REG() }
 
 
 #define CALL_WSYSTEM_REGISTER(_FN) _FN ## _REG(in_register);
 
-#define REG_WSYSTEMS(_MODULE, _NAME, in_register) WSystems:: _MODULE ## _ ## _NAME ## _REG(in_register);
+#define REG_WSYSTEMS(_MODULE, _NAME, in_register) wsm:: _MODULE ## _ ## _NAME ## _REG(in_register);

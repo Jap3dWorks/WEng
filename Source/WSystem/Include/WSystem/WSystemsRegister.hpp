@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WCore/WCore.hpp"
-#include "WSystem/WSystems.hpp"
+#include "WSystem/WSystem.hpp"
 #include "WCore/TSparseSet.hpp"
 #include "WCore/IdPool.hpp"
 
@@ -9,10 +9,10 @@
 #include <string>
 
 class WENGINE_API WSystemsRegister {
-public:
-    WSystemsRegister();
 
-    wcr::wid::WSystemId RegSystem(const char * in_name, const WSystemFn & in_system);
+public:
+
+    wcr::wid::WSystemId RegSystem(std::string_view in_name, const WSystemFn & in_system);
 
     WSystemFn Get(const wcr::wid::WSystemId & in_id) const {
         return system_set_.Get(in_id.GetId());
@@ -35,7 +35,7 @@ private:
     TSparseSet<WSystemFn> system_set_{};
 
     wcr::IdPool<wcr::wid::WSystemId::IdType> id_pool_{};
-    std::unordered_map<std::string, wcr::wid::WSystemId> name_wid_{};
+    std::unordered_map<std::string_view, wcr::wid::WSystemId> name_wid_{};
 
 };
 

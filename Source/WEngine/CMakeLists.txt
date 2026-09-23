@@ -5,9 +5,7 @@ add_library(
         Source/WEngine.cpp
         Source/WInputMappingRegister.cpp
         Source/WEngineDefaults.cpp
-        # Source/WSystems.cpp
-        # Source/WSystemsRunner.cpp
-        # Source/WSystemsRegister.cpp
+        Source/System/Systems.cpp
 )
 
 set_target_properties(

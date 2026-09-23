@@ -12,7 +12,7 @@
 #include "WImporter/WImporterObj.hpp"
 #include "WImporter/WImporterGltf.hpp"
 #include "WImporterRegister/WImporterRegister.hpp"
-#include "WSystem/WSystems.hpp"
+#include "WEngine/System/Systems.hpp"
 
 #include <memory>
 
@@ -29,7 +29,7 @@ namespace {
             );
 
         out_db.CreateFrom<was::Texture>(
-            weng::defaults::NULL_TEXTURE_ASSET_PATH,
+            weng::defaults::asset::NULL_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
 
@@ -44,7 +44,7 @@ namespace {
             );
 
         out_db.CreateFrom<was::Texture>(
-            weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH,
+            weng::defaults::asset::NULL_RGBA_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
         
@@ -60,7 +60,7 @@ namespace {
             );
 
         out_db.CreateFrom<was::Texture>(
-            weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH,
+            weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH,
             std::move(texture_asset)
             );
     }
@@ -73,11 +73,11 @@ namespace {
         auto shader_stages = pipeline_asset.Get_shader_list();
 
         shader_stages[0].type=wct::render::EShaderStageFlag::Vertex;
-        shader_stages[0].file = weng::defaults::PBR_PIPELINE_SHADER_PATH;
+        shader_stages[0].file = weng::defaults::asset::PBR_PIPELINE_SHADER_PATH;
         shader_stages[0].entry = "vsMain";
 
         shader_stages[1].type = wct::render::EShaderStageFlag::Fragment;
-        shader_stages[1].file = weng::defaults::PBR_PIPELINE_SHADER_PATH;
+        shader_stages[1].file = weng::defaults::asset::PBR_PIPELINE_SHADER_PATH;
         shader_stages[1].entry = "fsMain";
 
         pipeline_asset.Set_shader_list(shader_stages);
@@ -141,7 +141,7 @@ namespace {
         pipeline_asset.Set_descriptors_layout(descriptors);
         
         out_db.CreateFrom<was::RenderPipeline>(
-            weng::defaults::PBR_PIPELINE_ASSET_PATH,
+            weng::defaults::asset::PBR_PIPELINE_ASSET_PATH,
             std::move(pipeline_asset)
             );
 
@@ -162,54 +162,54 @@ namespace {
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ALBEDO_TEXTURE,
-                    out_db.GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
+                    out_db.GetId(weng::defaults::asset::NULL_RGBA_TEXTURE_ASSET_PATH)
                 },
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::EMISSION_TEXTURE,
-                    out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                    out_db.GetId(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH)
                 },
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::NORMAL_TEXTURE,
-                    out_db.GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+                    out_db.GetId(weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ORM_TEXTURE,
-                    out_db.GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                    out_db.GetId(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH)
                 },
             });
 
         out_db.CreateFrom<was::RenderPipelineParams>(
-            weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH,
+            weng::defaults::asset::PBR_PIPE_PARAMS_NULL_ASSET_PATH,
             params
             );
     }
 
     void DefaultInputAssets(WAssetDb & asset_db) {
         wcr::wid::WAssetId cameramapping = asset_db.Create<was::InputMapping>(
-            weng::defaults::CAMERA_MAPPING_ASSET_PATH
+            weng::defaults::asset::CAMERA_MAPPING_ASSET_PATH
             );
 
         wcr::wid::WAssetId frontaction = asset_db.Create<was::Action>(
-            weng::defaults::FRONT_ACTION_ASSET_PATH
+            weng::defaults::asset::FRONT_ACTION_ASSET_PATH
             );
 
         wcr::wid::WAssetId backaction = asset_db.Create<was::Action>(
-            weng::defaults::BACK_ACTION_ASSET_PATH
+            weng::defaults::asset::BACK_ACTION_ASSET_PATH
             );
 
         wcr::wid::WAssetId leftaction = asset_db.Create<was::Action>(
-            weng::defaults::LEFT_ACTION_ASSET_PATH
+            weng::defaults::asset::LEFT_ACTION_ASSET_PATH
             );
 
         wcr::wid::WAssetId rightaction = asset_db.Create<was::Action>(
-            weng::defaults::RIGHT_ACTION_ASSET_PATH
+            weng::defaults::asset::RIGHT_ACTION_ASSET_PATH
             );
 
         wcr::wid::WAssetId mousemovement = asset_db.Create<was::Action>(
-            weng::defaults::MOUSE_MOVEMENT_ACTION_ASSET_PATH
+            weng::defaults::asset::MOUSE_MOVEMENT_ACTION_ASSET_PATH
             );
 
         auto & mapping_asset = asset_db
@@ -239,22 +239,27 @@ WEngine weng::defaults::DefaultEngine() {
 
     result.ImportersRegister().Register<wim::importer::WImporterObj>();
     result.ImportersRegister().Register<wim::importer::WImportTexture>();
-    
-    result.RegSystems(WSystems::WENGINE_WSYSTEMS_REG);
+
+    result.RegSystems(wng::system::common::RegSystems);
 
     // This must be the first included system
 
     // nullid level is used for global levels systems.
 
-    result.AddInitSystem(wcr::wid::nullid, "SystemInit_InitializeTransformsMatrix");
+    result.AddInitSystem(wcr::wid::nullid,
+                         wng::system::common::Init_InitializeTransformsMatrix_str);
 
-    result.AddInitSystem(wcr::wid::nullid, "SystemInit_RenderLevelResources");
+    result.AddInitSystem(wcr::wid::nullid,
+                         wng::system::common::Init_RenderLevelResources_str);
 
-    result.AddPostSystem(wcr::wid::nullid, "SystemPost_UpdateRenderCamera");
+    result.AddPostSystem(wcr::wid::nullid,
+                         wng::system::common::Post_UpdateRenderCamera_str);
 
-    result.AddPostSystem(wcr::wid::nullid, "SystemPost_UpdateShadowMap");
+    result.AddPostSystem(wcr::wid::nullid,
+                         wng::system::common::Post_UpdateShadowMap_str);
 
-    result.AddEndSystem(wcr::wid::nullid, "SystemEnd_RenderLevelResources");
+    result.AddEndSystem(wcr::wid::nullid,
+                        wng::system::common::End_RenderLevelResources_str);
 
     // Default Assets
 
@@ -267,12 +272,12 @@ WEngine weng::defaults::DefaultEngine() {
     // Gltf importer
     result.ImportersRegister()
         .Register<wim::importer::WImporterGltf>(
-            result.AssetManager().GetId(weng::defaults::PBR_PIPELINE_ASSET_PATH),
-            result.AssetManager().GetId(weng::defaults::PBR_PIPE_PARAMS_NULL_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::asset::PBR_PIPELINE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::asset::PBR_PIPE_PARAMS_NULL_ASSET_PATH),
             wcr::wid::nullid,
-            result.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH),
-            result.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH),
-            result.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+            result.AssetManager().GetId(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::asset::NULL_RGBA_TEXTURE_ASSET_PATH),
+            result.AssetManager().GetId(weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH)
             );
 
     // TODO Plugins Modules Loading

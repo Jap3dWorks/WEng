@@ -117,24 +117,24 @@ namespace spacers::plane {
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::EMISSION_TEXTURE,
-                    engine.AssetManager().GetId(weng::defaults::NULL_RGBA_TEXTURE_ASSET_PATH)
+                    engine.AssetManager().GetId(weng::defaults::asset::NULL_RGBA_TEXTURE_ASSET_PATH)
                 },
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::NORMAL_TEXTURE,
-                    engine.AssetManager().GetId(weng::defaults::NULL_NORMAL_TEXTURE_ASSET_PATH)
+                    engine.AssetManager().GetId(weng::defaults::asset::NULL_NORMAL_TEXTURE_ASSET_PATH)
                 },
                 {
                     wct::render::PBRBindings::SET,
                     wct::render::PBRBindings::ORM_TEXTURE,
-                    engine.AssetManager().GetId(weng::defaults::NULL_TEXTURE_ASSET_PATH)
+                    engine.AssetManager().GetId(weng::defaults::asset::NULL_TEXTURE_ASSET_PATH)
                 }
             }
             );
 
         smcmp.SetPipelineAssignment(
             0,
-            engine.AssetManager().GetId(weng::defaults::PBR_PIPELINE_ASSET_PATH),
+            engine.AssetManager().GetId(weng::defaults::asset::PBR_PIPELINE_ASSET_PATH),
             engine.AssetManager().CreateFrom(
                 "/Content/planelevel/param00:param00",
                 param

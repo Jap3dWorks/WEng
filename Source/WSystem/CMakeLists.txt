@@ -1,7 +1,7 @@
 add_library(
     WSystem 
     SHARED
-        Source/WSystem.cpp
+        # Source/WSystem.cpp
         Source/WSystemsRegister.cpp
         Source/WSystemsRunner.cpp
 )
@@ -31,7 +31,6 @@ target_link_libraries(
         WCore
         WObjects
     PRIVATE
-        WRender
     )
 
 install(
