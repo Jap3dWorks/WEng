@@ -1,6 +1,20 @@
 #include "WSystem/SystemRunner.hpp"
 #include "WCore/WCore.hpp"
 
+
+wcr::wid::WLevelSystemId wsm::SystemRunner::AddLevelSystem(
+    ESystemLocation system_location,
+    wcr::wid::WAssetId level_id,
+    wcr::wid::WSystemId system_id,
+    wsm::SystemFn system
+    ) {
+    return AddSystem(GetSystemContainer(system_location),
+                     system_location,
+                     level_id,
+                     system_id,
+                     system);
+}
+
 wcr::wid::WLevelSystemId wsm::SystemRunner::AddInitSystem(const wcr::wid::WAssetId & in_level_id,
                                         const wcr::wid::WSystemId & in_system_id,
                                         const wsm::SystemFn & in_system) {
@@ -46,24 +60,10 @@ void wsm::SystemRunner::RemoveSystem(const wcr::wid::WLevelSystemId & in_id) {
     wcr::wid::WSystemId sysid;
 
     in_id.ExtractWIds(lvlid, sysid);
-    
-    switch(systemid_location_[in_id]) {
-    case ESystemLocation::INIT:
-        init_systems_[lvlid].Remove(in_id.GetId());
-        break;
-    case ESystemLocation::PRE:
-        pre_systems_[lvlid].Remove(in_id.GetId());
-        break;
-    case ESystemLocation::POST:
-        post_systems_[lvlid].Remove(in_id.GetId());
-        break;
-    case ESystemLocation::END:
-        end_systems_[lvlid].Remove(in_id.GetId());
-        break;
-    default:
-        // TODO
-        break;
-    }
+
+    auto & system_container = GetSystemContainer(systemid_location_[in_id]);
+
+    system_container[lvlid].Remove(in_id.GetId());
 
     systemid_location_.extract(in_id);
 }
@@ -82,6 +82,23 @@ void wsm::SystemRunner::Clear() {
     end_systems_.clear();
 
     systemid_location_.clear();
+}
+
+void wsm::SystemRunner::RunLevelSystems(
+    wsm::ESystemLocation location,
+    wcr::wid::WAssetId level_id,
+    SystemParameters const & parameters
+    ) {
+
+    auto & system_container = GetSystemContainer(location);
+
+    if(!system_container.contains(level_id)) {
+        return;
+    }
+
+    for(auto & fn : system_container.at(level_id)) {
+        fn(parameters);
+    }   
 }
 
 void wsm::SystemRunner::RunInitSystems(const wcr::wid::WAssetId & in_level_id,

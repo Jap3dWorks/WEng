@@ -1,9 +1,11 @@
 #include "WEngine/WEngine.hpp"
 
 #include "WCore/WCore.hpp"
+#include "WCore/WId.hpp"
 #include "WInterfaces/IRender.hpp"
 
 #include "WCoreTypes/WEngineStructs.hpp"
+#include "WSystem/SystemRunner.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WInput/WInputLib.hpp"
@@ -117,21 +119,44 @@ void WEngine::LoadLevel(was::Level & in_level) {
     // TODO register level systems
 
     WFLOG("[DEBUG] Run Engine Init Systems.");
-    state_.systems_runner.RunInitSystems(
-        0, {this, &state_.level_info.level}
+    state_.systems_runner.RunLevelSystems(
+        wsm::ESystemLocation::INIT,
+        wcr::wid::nullid,
+        {this, &state_.level_info.level}
         );
 
+    // state_.systems_runner.RunInitSystems(
+    //     0, {this, &state_.level_info.level}
+    //     );
+
     WFLOG("[DEBUG] Run Level Init Systems.")
-    state_.systems_runner.RunInitSystems(
+    state_.systems_runner.RunLevelSystems(
+        wsm::ESystemLocation::INIT,
         state_.level_info.level.Get_asset_id(),
         {this, &state_.level_info.level}
         );
+
+    // state_.systems_runner.RunInitSystems(
+    //     state_.level_info.level.Get_asset_id(),
+    //     {this, &state_.level_info.level}
+    //     );
+    
 }
 
 void WEngine::UnloadLevel(was::Level & in_level) {
 
-    state_.systems_runner.RunEndSystems(0, {this, &in_level});
-    state_.systems_runner.RunEndSystems(in_level.Get_asset_id(), {this, &in_level});
+    state_.systems_runner.RunLevelSystems(
+        wsm::ESystemLocation::END,
+        wcr::wid::nullid,
+        {this, &in_level});
+    
+    state_.systems_runner.RunLevelSystems(
+        wsm::ESystemLocation::END,
+        in_level.Get_asset_id(),
+        {this, &in_level});
+
+    // state_.systems_runner.RunEndSystems(0, {this, &in_level});
+    // state_.systems_runner.RunEndSystems(in_level.Get_asset_id(), {this, &in_level});
 
     // TODO deregister level systems
     
