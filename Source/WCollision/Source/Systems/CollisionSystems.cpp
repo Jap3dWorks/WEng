@@ -1,5 +1,6 @@
 #include "WCollision/Systems/CollisionSystems.hpp"
 #include "WSystem/WSystem.hpp"
+#include "WAssets/Level.hpp"
 
 
 bool wcl::system::collision::INIT_SetupLevelCollision(wsm::SystemParameters const & parameters) {
@@ -24,7 +25,7 @@ bool wcl::system::collision::MID_TriggerCollisionEvents(wsm::SystemParameters co
 }
 
 bool wcl::system::collision::END_CleanCollisionData(wsm::SystemParameters const & parameters) {
-    // 
+    // Clean or save collision data
 
     return false;
 }
