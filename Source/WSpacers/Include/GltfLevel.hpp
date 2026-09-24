@@ -14,6 +14,7 @@
 #include "WComponents/CameraInput.hpp"
 #include "WComponents/Movement.hpp"
 #include "WComponents/Light/Ambient.hpp"
+#include "WSystem/SystemExecuter.hpp"
 
 #include <filesystem>
 
@@ -21,18 +22,19 @@ namespace spacers::gltflevel {
 
     inline void ConfigLevel(WEngine & engine, was::Level * level) {
         auto levelid = level->Get_asset_id();
-        
-        engine.AddInitSystem(
+
+        engine.AddLevelSystem(
+            wsm::ESystemLocation::INIT,
             levelid,
             weng::system::common::Init_CameraInput_str
             );
-
-        engine.AddPreSystem(
+        engine.AddLevelSystem(
+            wsm::ESystemLocation::PRE,
             levelid,
             weng::system::common::Pre_CameraInputMovement_str
             );
-        
-        engine.AddPreSystem(
+        engine.AddLevelSystem(
+            wsm::ESystemLocation::PRE,
             levelid,
             weng::system::common::Pre_UpdateMovement_str
             );

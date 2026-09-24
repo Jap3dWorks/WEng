@@ -7,6 +7,7 @@
 #include "WCoreTypes/WTexture.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WAssets/Texture.hpp"
+#include "WSystem/SystemExecuter.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WImporter/WImporterTexture.hpp"
 #include "WImporter/WImporterObj.hpp"
@@ -246,20 +247,35 @@ WEngine weng::defaults::DefaultEngine() {
 
     // nullid level is used for global levels systems.
 
-    result.AddInitSystem(wcr::wid::nullid,
-                         weng::system::common::Init_InitializeTransformsMatrix_str);
+    result.AddLevelSystem(
+        wsm::ESystemLocation::INIT,
+        wcr::wid::nullid,
+        weng::system::common::Init_InitializeTransformsMatrix_str
+        );
 
-    result.AddInitSystem(wcr::wid::nullid,
-                         weng::system::common::Init_RenderLevelResources_str);
+    result.AddLevelSystem(
+        wsm::ESystemLocation::INIT,
+        wcr::wid::nullid,
+        weng::system::common::Init_RenderLevelResources_str
+        );
 
-    result.AddPostSystem(wcr::wid::nullid,
-                         weng::system::common::Post_UpdateRenderCamera_str);
+    result.AddLevelSystem(
+        wsm::ESystemLocation::POST,
+        wcr::wid::nullid,
+        weng::system::common::Post_UpdateRenderCamera_str
+        );
 
-    result.AddPostSystem(wcr::wid::nullid,
-                         weng::system::common::Post_UpdateShadowMap_str);
+    result.AddLevelSystem(
+        wsm::ESystemLocation::POST,
+        wcr::wid::nullid,
+        weng::system::common::Post_UpdateShadowMap_str
+        );
 
-    result.AddEndSystem(wcr::wid::nullid,
-                        weng::system::common::End_RenderLevelResources_str);
+    result.AddLevelSystem(
+        wsm::ESystemLocation::END,
+        wcr::wid::nullid,
+        weng::system::common::End_RenderLevelResources_str
+        );
 
     // Default Assets
 

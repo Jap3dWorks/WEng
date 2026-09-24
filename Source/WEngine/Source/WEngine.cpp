@@ -5,7 +5,7 @@
 #include "WInterfaces/IRender.hpp"
 
 #include "WCoreTypes/WEngineStructs.hpp"
-#include "WSystem/SystemRunner.hpp"
+#include "WSystem/SystemExecuter.hpp"
 #include "WVulkan/WVkRender.hpp"
 #include "WObjectDb/WAssetDb.hpp"
 #include "WInput/WInputLib.hpp"
@@ -84,21 +84,36 @@ void WEngine::Run()
         }
         else
         {
-            state_.systems_runner
-                .RunPreSystems(0, {this, &state_.level_info.level});
 
             state_.systems_runner
-                .RunPreSystems(state_.level_info.level.Get_asset_id(),
-                               {this, &state_.level_info.level});
+                .RunLevelSystems(
+                    wsm::ESystemLocation::PRE,
+                    wcr::wid::nullid,
+                    {this, &state_.level_info.level}
+                    );
+
+            state_.systems_runner
+                .RunLevelSystems(
+                    wsm::ESystemLocation::PRE,
+                    state_.level_info.level.Get_asset_id(),
+                    {this, &state_.level_info.level}
+                    );
 
             // TODO MID systems
 
             state_.systems_runner
-                .RunPostSystems(0, {this, &state_.level_info.level});
+                .RunLevelSystems(
+                    wsm::ESystemLocation::POST,
+                    wcr::wid::nullid,
+                    {this, &state_.level_info.level}
+                    );
 
             state_.systems_runner
-                .RunPostSystems(state_.level_info.level.Get_asset_id(),
-                                {this, &state_.level_info.level});
+                .RunLevelSystems(
+                    wsm::ESystemLocation::POST,
+                    state_.level_info.level.Get_asset_id(),
+                    {this, &state_.level_info.level}
+                    );
 
             Render()->Draw();
 
@@ -125,22 +140,12 @@ void WEngine::LoadLevel(was::Level & in_level) {
         {this, &state_.level_info.level}
         );
 
-    // state_.systems_runner.RunInitSystems(
-    //     0, {this, &state_.level_info.level}
-    //     );
-
     WFLOG("[DEBUG] Run Level Init Systems.")
     state_.systems_runner.RunLevelSystems(
         wsm::ESystemLocation::INIT,
         state_.level_info.level.Get_asset_id(),
         {this, &state_.level_info.level}
         );
-
-    // state_.systems_runner.RunInitSystems(
-    //     state_.level_info.level.Get_asset_id(),
-    //     {this, &state_.level_info.level}
-    //     );
-    
 }
 
 void WEngine::UnloadLevel(was::Level & in_level) {
@@ -155,9 +160,6 @@ void WEngine::UnloadLevel(was::Level & in_level) {
         in_level.Get_asset_id(),
         {this, &in_level});
 
-    // state_.systems_runner.RunEndSystems(0, {this, &in_level});
-    // state_.systems_runner.RunEndSystems(in_level.Get_asset_id(), {this, &in_level});
-
     // TODO deregister level systems
     
 }
@@ -166,37 +168,17 @@ void WEngine::StartupLevel(const wcr::wid::WAssetId& in_id) noexcept {
     state_.startup_info.startup_level = in_id;
 }
 
-wcr::wid::WLevelSystemId WEngine::AddInitSystem(
-    wcr::wid::WAssetId const & in_level_id,
-    std::string_view in_system_name
+wcr::wid::WLevelSystemId WEngine::AddLevelSystem(
+    wsm::ESystemLocation system_location,
+    wcr::wid::WAssetId level_id,
+    std::string_view system_name
     ) {
-    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
-    return state_.systems_runner.AddInitSystem(
-        in_level_id, wsid, state_.systems_reg.GetSystem(wsid)
-        );
-}
-
-wcr::wid::WLevelSystemId WEngine::AddPreSystem(
-    wcr::wid::WAssetId const & in_level_id,
-    std::string_view in_system_name
-    ) {
-    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
-    return state_.systems_runner.AddPreSystem(
-        in_level_id, wsid, state_.systems_reg.GetSystem(wsid)
-        );
-}
-
-wcr::wid::WLevelSystemId WEngine::AddPostSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
-    return state_.systems_runner.AddPostSystem(
-        in_level_id, wsid, state_.systems_reg.GetSystem(wsid)
-        );
-}
-
-wcr::wid::WLevelSystemId WEngine::AddEndSystem(const wcr::wid::WAssetId & in_level_id, std::string_view in_system_name) {
-    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(in_system_name);
-    return state_.systems_runner.AddEndSystem(
-        in_level_id, wsid, state_.systems_reg.GetSystem(wsid)
+    wcr::wid::WSystemId wsid = state_.systems_reg.GetId(system_name);
+    return state_.systems_runner.AddLevelSystem(
+        system_location,
+        level_id,
+        wsid,
+        state_.systems_reg.GetSystem(wsid)
         );
 }
 

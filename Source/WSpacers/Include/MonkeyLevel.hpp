@@ -28,6 +28,7 @@
 #include "WComponents/Light/Ambient.hpp"
 #include "WMath/LinAlgebra.hpp"
 #include "WCoreTypes/WRenderTypes.hpp"
+#include "WSystem/SystemExecuter.hpp"
 
 
 namespace spacers::monkey {
@@ -227,15 +228,18 @@ namespace spacers::monkey {
 
         was::Level & level = in_engine.AssetManager().Get<was::Level>(levelid);
 
-        in_engine.AddInitSystem(
+        in_engine.AddLevelSystem(
+            wsm::ESystemLocation::INIT,
             levelid,
             weng::system::common::Init_CameraInput_str
             );
-        in_engine.AddPreSystem(
+        in_engine.AddLevelSystem(
+            wsm::ESystemLocation::PRE,
             levelid,
             weng::system::common::Pre_CameraInputMovement_str
             );
-        in_engine.AddPreSystem(
+        in_engine.AddLevelSystem(
+            wsm::ESystemLocation::PRE,
             levelid,
             weng::system::common::Pre_UpdateMovement_str
             );
