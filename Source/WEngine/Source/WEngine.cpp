@@ -11,6 +11,8 @@
 #include "WInput/WInputLib.hpp"
 #include "WLog.hpp"
 
+#include "EngineLib/WEngine_systems_lib.hpp"
+
 WEngine::WEngine(std::unique_ptr<IRender> && in_render)
 {
     state_.render = std::move(in_render);
@@ -85,39 +87,28 @@ void WEngine::Run()
         else
         {
 
-            state_.systems_runner
-                .RunLevelSystems(
-                    wsm::ESystemLocation::PRE,
-                    wcr::wid::nullid,
-                    {this, &state_.level_info.level}
-                    );
+            weng::systems_lib::RunLevelSystems(
+                this,
+                state_.systems_runner,
+                wsm::ESystemLocation::PRE,
+                state_.level_info.level
+                );
 
-            state_.systems_runner
-                .RunLevelSystems(
-                    wsm::ESystemLocation::PRE,
-                    state_.level_info.level.Get_asset_id(),
-                    {this, &state_.level_info.level}
-                    );
-
-            // TODO MID systems
-
-            state_.systems_runner
-                .RunLevelSystems(
-                    wsm::ESystemLocation::POST,
-                    wcr::wid::nullid,
-                    {this, &state_.level_info.level}
-                    );
-
-            state_.systems_runner
-                .RunLevelSystems(
-                    wsm::ESystemLocation::POST,
-                    state_.level_info.level.Get_asset_id(),
-                    {this, &state_.level_info.level}
-                    );
+            weng::systems_lib::RunLevelSystems(
+                this,
+                state_.systems_runner,
+                wsm::ESystemLocation::MID,
+                state_.level_info.level
+                );
 
             Render()->Draw();
 
-            // TODO Post systems
+            weng::systems_lib::RunLevelSystems(
+                this,
+                state_.systems_runner,
+                wsm::ESystemLocation::POST,
+                state_.level_info.level
+                );
         }
     }
     
@@ -133,32 +124,21 @@ void WEngine::MarkLoadLevel(const wcr::wid::WAssetId & in_level) {
 void WEngine::LoadLevel(was::Level & in_level) {
     // TODO register level systems
 
-    WFLOG("[DEBUG] Run Engine Init Systems.");
-    state_.systems_runner.RunLevelSystems(
+    weng::systems_lib::RunLevelSystems(
+        this,
+        state_.systems_runner,
         wsm::ESystemLocation::INIT,
-        wcr::wid::nullid,
-        {this, &state_.level_info.level}
-        );
-
-    WFLOG("[DEBUG] Run Level Init Systems.")
-    state_.systems_runner.RunLevelSystems(
-        wsm::ESystemLocation::INIT,
-        state_.level_info.level.Get_asset_id(),
-        {this, &state_.level_info.level}
+        in_level
         );
 }
 
 void WEngine::UnloadLevel(was::Level & in_level) {
 
-    state_.systems_runner.RunLevelSystems(
+    weng::systems_lib::RunLevelSystems(
+        this,
+        state_.systems_runner,
         wsm::ESystemLocation::END,
-        wcr::wid::nullid,
-        {this, &in_level});
-    
-    state_.systems_runner.RunLevelSystems(
-        wsm::ESystemLocation::END,
-        in_level.Get_asset_id(),
-        {this, &in_level});
+        in_level);
 
     // TODO deregister level systems
     

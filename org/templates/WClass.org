@@ -96,8 +96,10 @@ Content of wclass-wengine-hpp should be tangled inside PublicGenerated/ director
 - Temporal WPROPERTY solution, more info check [[file:org/WEng.hpp::#WPROPERTY]]
 
 #+NAME: wclass-wengine-hpp
-#+HEADER: :var namespace=""   :var wclass-name="WObject"
-#+HEADER: :var parent-namespace="" :var parent-wclass-name="WObject"
+#+HEADER: :var namespace=""
+#+HEADER: :var wclass-name="WObject"
+#+HEADER: :var parent-namespace=""
+#+HEADER: :var parent-wclass-name="WObject"
 #+HEADER: :var wapi="WENGINEOBJECTS"
 #+HEADER: :noweb yes
 #+begin_src elisp
@@ -250,8 +252,9 @@ namespace wrf::wclass {
 Content of compile-generated-cpp should be tangled in CompileGenerated/ directory.
 
 #+NAME: wclass-compile-generated-cpp
-#+HEADER: :noweb yes
-#+begin_src elisp :var wobject-module="WObjects" :var wobject="WObject"
+#+HEADER: :var wobject-module="WObjects"
+#+HEADER: :var wobject="WObject"
+#+begin_src elisp :noweb yes
 (concat
 (format "#include \"%s/%s.hpp\"" wobject-module wobject)
 " 

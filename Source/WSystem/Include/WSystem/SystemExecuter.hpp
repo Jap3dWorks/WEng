@@ -11,8 +11,7 @@ namespace wsm {
         INIT,
         PRE,
         MID,
-        RENDER,
-        POST,
+        POST,  // after draw scene
         END
     };
 
@@ -64,8 +63,6 @@ namespace wsm {
             return pre_systems_;
         case wsm::ESystemLocation::MID:
             return mid_systems_;
-        case wsm::ESystemLocation::RENDER:
-            return render_systems_;
         case wsm::ESystemLocation::POST:
             return post_systems_;
         case wsm::ESystemLocation::END:
@@ -76,7 +73,6 @@ namespace wsm {
     SystemsContainer init_systems_;
     SystemsContainer pre_systems_;
     SystemsContainer mid_systems_;
-    SystemsContainer render_systems_;
     SystemsContainer post_systems_;
     SystemsContainer end_systems_;
 

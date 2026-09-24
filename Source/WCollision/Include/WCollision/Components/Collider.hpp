@@ -5,7 +5,7 @@
 
 #include <variant>
 
-#include "wcl::component::Collision.WEng.hpp"
+#include "wcl::component::Collider.WEng.hpp"
 
 namespace wcl::component {
 
@@ -17,7 +17,7 @@ namespace wcl::component {
         wmath::geometry::shape::Mesh
         >;
 
-    class WCOLLISION_API Collision : public WComponent {
+    class WCOLLISION_API Collider : public WComponent {
 
         WOBJECT_BODY;
 

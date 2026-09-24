@@ -27,19 +27,42 @@ Module build data is included here.
 
 * WComponents
 
-** Collision
+** Collider
 
-#+NAME: wcl::component::Collision
+#+NAME: wcl::component::Collider
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
-#+begin_src C++ :tangle PublicGenerated/wcl::component::Collision.WEng.hpp
-<<wclass-wengine-hpp("wcl::component", "Collision", "", "WComponent", "WCOLLISION")>>
-<<wobject-body-macro("Collision")>>
+#+begin_src C++ :tangle PublicGenerated/wcl::component::Collider.WEng.hpp
+<<wclass-wengine-hpp("wcl::component", "Collider", "", "WComponent", "WCOLLISION")>>
+<<wobject-body-macro("Collider")>>
+#+end_src
+
+#+NAME: wcl::component::Collider-compilegenerated-cpp
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
+<<wclass-compile-generated-cpp("WCollision/Components", "Collider")>>
+#+end_src
+
+** CollisionLevelData
+
+Stores shared data amount all colliders in a level.
+e.g Collider Tree should go here.
+
+#+NAME: wcl::component::CollisionLevelData
+#+HEADER: :main no :eval no
+#+HEADER: :noweb yes :comments link
+#+begin_src C++ :tangle PublicGenerated/wcl::component::CollisionLevelData.WEng.hpp
+<<wclass-wengine-hpp("wcl::component", "CollisionLevelData", "", "WComponent", "WCOLLISION")>>
+<<wobject-body-macro("CollisionLevelData")>>
 #+end_src
 
 #+NAME: wcl::component::Collision-compilegenerated-cpp
 #+HEADER: :main no :eval no
 #+HEADER: :noweb yes :comments link
 #+begin_src C++ :tangle CompileGenerated/CompileGenerated.cpp
-<<wclass-compile-generated-cpp("WCollision/Components", "Collision")>>
+<<wclass-compile-generated-cpp("WCollision/Components", "CollisionLevelData")>>
 #+end_src
+
+* WSystems
+

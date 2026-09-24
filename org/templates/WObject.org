@@ -28,7 +28,8 @@ class WClass;
 #+end_src
 
 #+NAME: wobject-body-macro
-#+begin_src elisp :var wobject-name="WObject"
+#+HEADER: :var wobject-name="WObject"
+#+begin_src elisp
 (format
 "#ifdef WOBJECT_BODY
 #undef WOBJECT_BODY

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WAssets/Level.hpp"
 #include "WCore/WConcepts.hpp"
 #include "WCore/WCore.hpp"
 #include "WCore/TRef.hpp"

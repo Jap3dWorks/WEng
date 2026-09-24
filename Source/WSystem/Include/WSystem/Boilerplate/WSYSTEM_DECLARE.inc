@@ -22,7 +22,7 @@ namespace WSYSYEM_TOTAL_NAMESPACE {
 #define TEST WSYSTEM_MODULE_API
 
 #define WSYSTEM_X(Name) \
-    bool WSYSTEM_MODULE_API Name(wsm::SystemParameters const &); \
+    bool WSYSTEM_MODULE_API Name(wsm::SystemParameters const & parameters); \
 
     WSYSTEM_XITEMS
 

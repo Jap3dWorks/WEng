@@ -260,13 +260,13 @@ WEngine weng::defaults::DefaultEngine() {
         );
 
     result.AddLevelSystem(
-        wsm::ESystemLocation::POST,
+        wsm::ESystemLocation::MID,
         wcr::wid::nullid,
         weng::system::common::Post_UpdateRenderCamera_str
         );
 
     result.AddLevelSystem(
-        wsm::ESystemLocation::POST,
+        wsm::ESystemLocation::MID,
         wcr::wid::nullid,
         weng::system::common::Post_UpdateShadowMap_str
         );

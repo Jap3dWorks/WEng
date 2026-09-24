@@ -2,6 +2,7 @@ add_library(
     WCollision
     SHARED
         CompileGenerated/CompileGenerated.cpp
+        Source/Systems/CollisionSystems.cpp
 )
 
 set_target_properties(
@@ -29,6 +30,7 @@ target_link_libraries(
         WMath
         WCore
         WObjects
+        WSystem
     PRIVATE
 )
 
