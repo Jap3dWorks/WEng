@@ -59,6 +59,11 @@ namespace wmath::geometry::shape {
     struct Mesh{
         std::vector<glm::vec3> points{};
         std::vector<std::uint32_t> indices{};
+        AABB aabb{};
+
+        void GenerateAABB(){}
+
+        void UpdateAABB(std::vector<std::uint32_t> point_index) {}
     };
 
     /**

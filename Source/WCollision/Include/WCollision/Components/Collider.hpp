@@ -11,8 +11,8 @@ namespace wcl::component {
 
     using CollisionShape = std::variant<
         wmath::geometry::shape::Box,
-        wmath::geometry::shape::Capsule,
         wmath::geometry::shape::Sphere,
+        wmath::geometry::shape::Capsule,
         wmath::geometry::shape::Plane,
         wmath::geometry::shape::Mesh
         >;

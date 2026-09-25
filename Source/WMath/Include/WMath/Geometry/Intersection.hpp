@@ -369,6 +369,7 @@ namespace wmath::geometry {
      * @brief Checks if a point is intersecting with a capsule.
      * Capsule transform is expressed relative to the point.
      * To compute the algorithm, point coords are (0, 0, 0).
+     * TODO : axis_capsule, point parameters.
      */
     inline bool Intersects(
         wmath::geometry::shape::Capsule capsule,
@@ -563,7 +564,6 @@ namespace wmath::geometry {
 
     inline constexpr bool Intersects(
         wmath::geometry::shape::Mesh const & axis_mesh,
-        wmath::geometry::shape::AABB axis_aabb,
         wmath::geometry::shape::Mesh const & mesh,
         glm::mat4 mesh_transform
         ) {
@@ -588,7 +588,7 @@ namespace wmath::geometry {
                 trnsf_points[mesh.indices[i+2]]
             };
 
-            if (Intersects(axis_aabb, tri)) {
+            if (Intersects(axis_mesh.aabb, tri)) {
                 for (std::uint32_t j=0; j<axis_mesh.indices.size(); j=j+3) {
                     wmath::geometry::shape::Tri check_tri {
                         axis_mesh.points[axis_mesh.indices[j]],
