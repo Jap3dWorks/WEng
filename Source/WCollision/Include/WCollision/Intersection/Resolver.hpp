@@ -3,11 +3,11 @@
 #include "WCore/WCore.hpp"
 #include "WCore/TVisitor.hpp"
 #include "WCollision/Components/Collider.hpp"
-#include "WCollision/IntersectionVisitor.hpp"
+#include "WCollision/Intersection/Visitor.hpp"
 
 #include <glm/glm.hpp>
 
-namespace wcl {
+namespace wcl::intersection {
 
     class WCOLLISION_API Resolver {
 
@@ -29,7 +29,7 @@ namespace wcl {
                     return std::visit<bool>(
                         [&]<typename Shp2>
                         (Shp2 && bshp) {
-                            return IntersectVisitor::Visit(
+                            return Visitor::Visit(
                                 std::forward<Shp1>(ashp),
                                 a_transform,
                                 a_inv_transform,

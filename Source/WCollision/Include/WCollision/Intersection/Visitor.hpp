@@ -5,8 +5,9 @@
 
 #include <glm/glm.hpp>
 
-namespace wcl {
-    struct IntersectVisitor {
+namespace wcl::intersection {
+    
+    struct Visitor {
         
         // -------
         // box - box
@@ -246,8 +247,6 @@ namespace wcl {
             ) {
             // TODO
             return false;
-                
-
         }
 
         // -----------
