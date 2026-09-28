@@ -137,4 +137,15 @@ namespace wmath::geometry::shape {
 
         return Plane{.n=N, .offset=d};
     }
+
+    inline constexpr Plane Transform(Plane plane, glm::mat4 transform) {
+        glm::vec3 n = glm::mat3(transform) * plane.n;
+        float offset = glm::dot(n, n * plane.offset + glm::vec3(transform[3]));
+
+        return Plane{
+            .n=n,
+            .offset=offset
+        };
+    }
+
 }

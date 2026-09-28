@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WMath/Geometry/Intersection.hpp"
+#include "WMath/Geometry/IntersectionShape.hpp"
 #include "WMath/Geometry/Shape.hpp"
 
 #include <glm/glm.hpp>
@@ -229,8 +230,19 @@ namespace wcl::intersection {
             glm::mat4 const & b_transform,
             glm::mat4 const & b_inv_transform
             ) {
-            // TODO plane intersection
-            return false;
+
+            wmath::geometry::shape::Plane a_tpln =
+                wmath::geometry::shape::Transform(a_pln,
+                                                  a_transform);
+
+            wmath::geometry::shape::Plane b_tpln =
+                wmath::geometry::shape::Transform(b_pln,
+                                                  b_transform);
+
+            // TODO optimize this function, get intersection line is not required.
+            return wmath::geometry::intersection_shape::PlanePlane(
+                a_tpln, b_tpln
+                ).has_value();
         }
 
         // ------------
