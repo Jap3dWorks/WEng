@@ -133,7 +133,6 @@ namespace wcl::intersection {
                 );
         }
 
-
         // --------------
         // sphere - plane
         // --------------
@@ -239,10 +238,9 @@ namespace wcl::intersection {
                 wmath::geometry::shape::Transform(b_pln,
                                                   b_transform);
 
-            // TODO optimize this function, get intersection line is not required.
-            return wmath::geometry::intersection_shape::PlanePlane(
+            return wmath::geometry::Intersects(
                 a_tpln, b_tpln
-                ).has_value();
+                );
         }
 
         // ------------

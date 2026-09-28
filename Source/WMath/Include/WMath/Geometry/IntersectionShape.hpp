@@ -7,7 +7,9 @@
 #include <optional>
 #include <cassert>
 
-namespace {
+namespace wmath::geometry::intersection_shape {
+
+// namespace {
 
     inline constexpr auto GetNotNULLMask(
         glm::vec3 va,
@@ -74,9 +76,8 @@ namespace {
     }
     
 
-}
+// }
 
-namespace wmath::geometry::intersection_shape {
 
     inline constexpr std::optional<glm::vec3> PlaneSegment(
         wmath::geometry::shape::Plane plane,
@@ -100,7 +101,8 @@ namespace wmath::geometry::intersection_shape {
         return segment.p0 + l * t;
     }
 
-    inline constexpr std::optional<wmath::geometry::shape::Line> PlanePlane(
+    inline constexpr std::optional<wmath::geometry::shape::Line>
+    PlanePlane(
         wmath::geometry::shape::Plane p0,
         wmath::geometry::shape::Plane p1
         ) {
@@ -164,7 +166,7 @@ namespace wmath::geometry::intersection_shape {
                     .dir=glm::vec3{0.f, 1.f, 0.f},
                     .point=p
                 };
-            case 3:
+            case 3: // TODO can be default?
                 return wmath::geometry::shape::Line {
                     .dir=glm::vec3{1.f, 0.f, 0.f},
                     .point=p

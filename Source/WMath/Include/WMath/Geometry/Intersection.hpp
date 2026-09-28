@@ -332,6 +332,67 @@ namespace wmath::geometry {
     }
 
     inline bool Intersects(
+        wmath::geometry::shape::Plane a_pln,
+        wmath::geometry::shape::Plane b_pln
+        ) {
+
+        auto intrsct_1 = [&a_pln, &b_pln]() -> bool {
+            float denom = (a_pln.n.x * b_pln.n.y - b_pln.n.x * a_pln.n.y);
+
+            float u = a_pln.ConstantTerm();
+            float v = b_pln.ConstantTerm();
+
+            if (wmath::numerical::AreEqual(denom, 0.f)) {
+                // parallel planes
+                return false;
+            }
+
+            return true;
+
+        };
+
+        auto intrsct_2 = [](
+            wmath::geometry::shape::Plane const & pa,
+            wmath::geometry::shape::Plane const & pb,
+            std::uint8_t axis_0,
+            std::uint8_t axis_1
+            ) -> bool {
+            glm::vec3 p{0.f};
+                
+            float u = pa.ConstantTerm();
+            float v = pb.ConstantTerm();
+
+            float denom = pb.n[axis_1]*pa.n[axis_0] - pa.n[axis_0] * pb.n[axis_1];
+
+            if (wmath::numerical::AreEqual(denom, 0.f))
+                return false;
+
+            return true;
+        };
+
+        auto [pa, pb, mask_a, mask_b] =
+            wmath::geometry::intersection_shape::GetNotNULLMask(
+                a_pln,
+                b_pln
+                );
+
+        auto [axis_1, axis_2] =
+            wmath::geometry::intersection_shape
+            ::GetAxisIndexFromNotNULLMask(mask_a, mask_b);
+
+        switch(mask_a | mask_b) {
+        case 5:
+        case 6:
+        case 3:
+            return intrsct_2(pa, pb, axis_1, axis_2);
+        case 7:
+            return intrsct_1();
+        default:
+            return false;
+        }
+    }
+
+    inline bool Intersects(
         wmath::geometry::shape::Tri tri,
         wmath::geometry::shape::Sphere sphere,
         glm::vec3 sphere_pos
