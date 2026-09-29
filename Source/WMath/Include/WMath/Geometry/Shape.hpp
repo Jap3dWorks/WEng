@@ -30,6 +30,24 @@ namespace wmath::geometry::shape {
         constexpr float ConstantTerm() const {
             return glm::dot(n,n) * offset;
         }
+
+        /**
+         * 
+         */
+        constexpr glm::vec3 Point() const {
+            return n * offset;
+        }
+
+        static inline constexpr
+        Plane Transform(Plane const & plane, glm::mat4 const & transform) {
+            glm::vec3 n = glm::mat3(transform) * plane.n;
+            float offset = glm::dot(n, n * plane.offset + glm::vec3(transform[3]));
+
+            return Plane{
+                .n=n,
+                .offset=offset
+            };
+        }
     };
 
     struct Sphere{

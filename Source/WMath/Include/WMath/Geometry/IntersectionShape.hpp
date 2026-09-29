@@ -75,10 +75,6 @@ namespace wmath::geometry::intersection_shape {
         }
     }
     
-
-// }
-
-
     inline constexpr std::optional<glm::vec3> PlaneSegment(
         wmath::geometry::shape::Plane plane,
         wmath::geometry::shape::Segment segment
@@ -142,7 +138,7 @@ namespace wmath::geometry::intersection_shape {
             float u = pa.ConstantTerm();
             float v = pb.ConstantTerm();
 
-            float denom = pb.n[axis_1]*pa.n[axis_0] - pa.n[axis_0] * pb.n[axis_1];
+            float denom = pb.n[axis_1] * pa.n[axis_0] - pa.n[axis_0] * pb.n[axis_1];
 
             if (wmath::numerical::AreEqual(denom, 0.f))
                 return std::nullopt;
@@ -166,14 +162,12 @@ namespace wmath::geometry::intersection_shape {
                     .dir=glm::vec3{0.f, 1.f, 0.f},
                     .point=p
                 };
-            case 3: // TODO can be default?
+            default:
                 return wmath::geometry::shape::Line {
                     .dir=glm::vec3{1.f, 0.f, 0.f},
                     .point=p
                 };
             }
-
-            return std::nullopt;
         };
 
         auto [pa, pb, mask_a, mask_b] = GetNotNULLMask(p0, p1);

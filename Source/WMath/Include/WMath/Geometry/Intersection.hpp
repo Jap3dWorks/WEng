@@ -336,32 +336,12 @@ namespace wmath::geometry {
         wmath::geometry::shape::Plane b_pln
         ) {
 
-        auto intrsct_1 = [&a_pln, &b_pln]() -> bool {
-            float denom = (a_pln.n.x * b_pln.n.y - b_pln.n.x * a_pln.n.y);
-
-            float u = a_pln.ConstantTerm();
-            float v = b_pln.ConstantTerm();
-
-            if (wmath::numerical::AreEqual(denom, 0.f)) {
-                // parallel planes
-                return false;
-            }
-
-            return true;
-
-        };
-
-        auto intrsct_2 = [](
+        auto intrscts = [](
             wmath::geometry::shape::Plane const & pa,
             wmath::geometry::shape::Plane const & pb,
             std::uint8_t axis_0,
             std::uint8_t axis_1
             ) -> bool {
-            glm::vec3 p{0.f};
-                
-            float u = pa.ConstantTerm();
-            float v = pb.ConstantTerm();
-
             float denom = pb.n[axis_1]*pa.n[axis_0] - pa.n[axis_0] * pb.n[axis_1];
 
             if (wmath::numerical::AreEqual(denom, 0.f))
@@ -384,9 +364,8 @@ namespace wmath::geometry {
         case 5:
         case 6:
         case 3:
-            return intrsct_2(pa, pb, axis_1, axis_2);
         case 7:
-            return intrsct_1();
+            return intrscts(pa, pb, axis_1, axis_2);
         default:
             return false;
         }
@@ -466,6 +445,33 @@ namespace wmath::geometry {
             (s0.p0 + (s0.p1 - s0.p0) * s_min) - (s1.p0 + (s1.p1 - s1.p0) * t_min);
 
         return glm::dot(len_vec, len_vec) <= std::pow(axis_capsule.radius + capsule.radius, 2);
+    }
+
+    inline bool Intersects(
+        wmath::geometry::shape::Capsule axis_capsule,
+        wmath::geometry::shape::Plane plane
+        ){
+
+        auto segment = wmath::geometry::shape
+            ::AsSegment(axis_capsule);
+
+        auto ppnt = plane.Point();
+
+        std::uint32_t sign = 1;
+
+        float dt0 = glm::dot(plane.n, segment.p0 - ppnt);
+        float dt1 = glm::dot(plane.n, segment.p1 - ppnt);
+
+        // Check if points are one in each plane side
+        if (dt0 * dt1 < 0 ) return true;
+
+        // Check square distances
+        float dtn = glm::dot(plane.n, plane.n);
+
+        float dst0 = std::abs((dt0*dt0) / dtn);
+        float dst1 = std::abs((dt1*dt1) / dtn);
+
+        return std::min(dst0, dst1) <= axis_capsule.radius * axis_capsule.radius;
     }
 
     inline bool Intersects(
@@ -621,6 +627,42 @@ namespace wmath::geometry {
         return wmath::numerical::RangesOverlap(
             s0.value(), s1.value()
             );
+    }
+
+    inline constexpr bool Intersects(
+        wmath::geometry::shape::Tri const & tri,
+        wmath::geometry::shape::Plane const & plane
+        ) {
+        glm::vec3 point = plane.Point();
+
+        std::uint8_t m=0;
+
+        for (auto & t : tri) {
+            float d = glm::dot(t - point, plane.n);
+            if (d > 0) m |= 1;
+            else if (d < 0) m |= 2;
+            else m |= 3;
+        }
+
+        return m == 3;
+    }
+
+    inline constexpr bool Intersects(
+        wmath::geometry::shape::Mesh const & axis_mesh,
+        wmath::geometry::shape::Plane const & plane
+        ) {
+        for(std::uint32_t i=0; i<axis_mesh.indices.size(); i+=3) {
+            if (
+                Intersects(
+                    wmath::geometry::shape::Tri{
+                        axis_mesh.points[axis_mesh.indices[i]],
+                        axis_mesh.points[axis_mesh.indices[i+1]],
+                        axis_mesh.points[axis_mesh.indices[i+2]]},
+                    plane)
+                ) return true;
+        }
+
+        return false;
     }
 
     inline constexpr bool Intersects(

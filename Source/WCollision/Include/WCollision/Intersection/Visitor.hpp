@@ -196,8 +196,12 @@ namespace wcl::intersection {
             glm::mat4 const & b_transform,
             glm::mat4 const & b_inv_transform
             ) {
-            // TODO intersection capsule plane
-            return false;
+            auto b_tpln = wmath::geometry::shape
+                ::Plane::Transform(b_pln, a_inv_transform);
+
+            return wmath::geometry::Intersects(
+                a_cap, b_tpln
+                );
         }
 
         // --------------
@@ -229,7 +233,6 @@ namespace wcl::intersection {
             glm::mat4 const & b_transform,
             glm::mat4 const & b_inv_transform
             ) {
-
             wmath::geometry::shape::Plane a_tpln =
                 wmath::geometry::shape::Transform(a_pln,
                                                   a_transform);
@@ -255,7 +258,13 @@ namespace wcl::intersection {
             glm::mat4 const & b_transform,
             glm::mat4 const & b_inv_transform
             ) {
-            // TODO
+            auto b_tpln = wmath::geometry::shape::Plane
+                ::Transform(b_pln, a_inv_transform);
+
+            return wmath::geometry::Intersects(
+                a_msh, b_tpln
+                );
+
             return false;
         }
 
@@ -291,9 +300,7 @@ namespace wcl::intersection {
             {
                 return Visit(b_shp, b_transform, b_inv_transform,
                              a_shp, a_transform, a_inv_transform);
-            }        
-        
-
+            }
 
     };
 
