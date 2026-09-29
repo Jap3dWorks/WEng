@@ -2,6 +2,8 @@
 
 #include "WObjects/WComponent.hpp"
 #include "WMath/Geometry/Shape.hpp"
+#include "WCore/TEvent.hpp"
+#include "WCollision/DataTypes.hpp"
 
 #include <variant>
 
@@ -25,5 +27,12 @@ namespace wcl::component {
 
         WPROPERTY(CollisionShape, collision_shape, wmath::geometry::shape::Box{});
 
+        WPROPERTY(wmath::geometry::shape::AABB, aabb, {});
+
+        TEvent<void(wcl::types::IntersectionData)> OnIniIntersection;
+        TEvent<void(wcl::types::IntersectionData)> WhileIntersection;
+        TEvent<void(wcl::types::IntersectionData)> OnEndIntersection;
+
     };
+
 }
