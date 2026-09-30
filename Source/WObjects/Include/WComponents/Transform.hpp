@@ -23,7 +23,8 @@ namespace wcm {
                   rotation_order,
                   wmath::lin_algbr::ERotationOrder::zxy);
         WPROPERTY(glm::mat4, transform_matrix, 1.0);
-    
+        WPROPERTY(glm::mat4, inv_transform_matrix, 1.0);
+
     public:
 
         void SetTransformMatrix(glm::mat4 in_transform_matrix) {

@@ -11,12 +11,58 @@ namespace wmath::geometry::shape {
     struct AABB {
         glm::vec3 min{-5.f, -5.f, -5.f};
         glm::vec3 max{5.f, 5.f, 5.f};
+
+        /**
+         * @brief treats aabb as a solid block, transform it and recalculates a new AABB.
+         */
+        inline constexpr AABB Transform(AABB aabb, glm::mat4 const & transform) {
+            // TODO
+            return {};
+        }
     };
 
     struct Box{
         float x{5.f};  // half side length
         float y{5.f};
         float z{5.f};
+
+        static inline constexpr
+        std::array<glm::vec3,8> Vertices(Box box, glm::mat4 cube_transform) {
+
+            std::array<glm::vec3, 8> result{};
+
+            result[0] = cube_transform * glm::vec4{box.x, box.y, box.z, 1.f};
+            result[1] = cube_transform * glm::vec4{-box.x, box.y, box.z, 1.f};
+            result[2] = cube_transform * glm::vec4{box.x, -box.y, box.z, 1.f};
+            result[3] = cube_transform * glm::vec4{box.x, box.y, -box.z, 1.f};
+            result[4] = cube_transform * glm::vec4{-box.x, -box.y, box.z, 1.f};
+            result[5] = cube_transform * glm::vec4{-box.x, box.y, -box.z, 1.f};
+            result[6] = cube_transform * glm::vec4{box.x, -box.y, -box.z, 1.f};
+            result[7] = cube_transform * glm::vec4{-box.x, -box.y, -box.z, 1.f};
+
+            return result;
+        }
+
+        static inline constexpr
+        std::array<glm::vec3,8> Radii(Box box, glm::mat4 cube_transform) {
+
+            std::array<glm::vec3,8> result{};
+
+            glm::mat3 rot = cube_transform;
+
+            result[0] = rot * glm::vec3{box.x, box.y, box.z};
+            result[1] = rot * glm::vec3{-box.x, box.y, box.z};
+            result[2] = rot * glm::vec3{box.x, -box.y, box.z};
+            result[3] = rot * glm::vec3{box.x, box.y, -box.z};
+            result[4] = rot * glm::vec3{-box.x, -box.y, box.z};
+            result[5] = rot * glm::vec3{-box.x, box.y, -box.z};
+            result[6] = rot * glm::vec3{box.x, -box.y, -box.z};
+            result[7] = rot * glm::vec3{-box.x, -box.y, -box.z};
+
+            return result;
+        
+        }
+
     };
 
     struct Plane{
@@ -32,7 +78,7 @@ namespace wmath::geometry::shape {
         }
 
         /**
-         * 
+         * returns p = n * offset, p is a point in the plane.
          */
         constexpr glm::vec3 Point() const {
             return n * offset;
@@ -49,6 +95,19 @@ namespace wmath::geometry::shape {
             };
         }
     };
+
+    /**
+     * Simple plane
+     */
+    struct SPlane {
+        glm::vec3 n;    
+    };
+
+    // TODO Square, like a plane but surface is limited by a square
+    struct Square {
+        float x{5.f};           // Half side length
+        float y{5.f};
+    };  
 
     struct Sphere{
         float radius{5.f};
@@ -77,11 +136,7 @@ namespace wmath::geometry::shape {
     struct Mesh{
         std::vector<glm::vec3> points{};
         std::vector<std::uint32_t> indices{};
-        AABB aabb{};
-
-        void GenerateAABB(){}
-
-        void UpdateAABB(std::vector<std::uint32_t> point_index) {}
+        AABB aabb{};            // Local mesh aabb
     };
 
     /**
@@ -89,47 +144,6 @@ namespace wmath::geometry::shape {
      */
     using Tri = std::array<glm::vec3, 3>;
 
-    inline constexpr std::array<glm::vec3,8> BoxVertices(Box cube, glm::mat4 cube_transform) {
-
-        std::array<glm::vec3, 8> result{};
-
-        result[0] = cube_transform * glm::vec4{cube.x, cube.y, cube.z, 1.f};
-        result[1] = cube_transform * glm::vec4{-cube.x, cube.y, cube.z, 1.f};
-        result[2] = cube_transform * glm::vec4{cube.x, -cube.y, cube.z, 1.f};
-        result[3] = cube_transform * glm::vec4{cube.x, cube.y, -cube.z, 1.f};
-        result[4] = cube_transform * glm::vec4{-cube.x, -cube.y, cube.z, 1.f};
-        result[5] = cube_transform * glm::vec4{-cube.x, cube.y, -cube.z, 1.f};
-        result[6] = cube_transform * glm::vec4{cube.x, -cube.y, -cube.z, 1.f};
-        result[7] = cube_transform * glm::vec4{-cube.x, -cube.y, -cube.z, 1.f};
-
-        return result;
-    }
-
-    inline constexpr AABB ToAABB(Box box) {
-        return {
-            .min{-box.x, -box.y, -box.z},
-            .max{box.x, box.y, box.z}
-        };
-    }
-
-    inline constexpr std::array<glm::vec3,8> BoxRadii(Box box, glm::mat4 cube_transform) {
-
-        std::array<glm::vec3,8> result{};
-
-        glm::mat3 rot = cube_transform;
-
-        result[0] = rot * glm::vec3{box.x, box.y, box.z};
-        result[1] = rot * glm::vec3{-box.x, box.y, box.z};
-        result[2] = rot * glm::vec3{box.x, -box.y, box.z};
-        result[3] = rot * glm::vec3{box.x, box.y, -box.z};
-        result[4] = rot * glm::vec3{-box.x, -box.y, box.z};
-        result[5] = rot * glm::vec3{-box.x, box.y, -box.z};
-        result[6] = rot * glm::vec3{box.x, -box.y, -box.z};
-        result[7] = rot * glm::vec3{-box.x, -box.y, -box.z};
-
-        return result;
-        
-    }
 
     inline constexpr auto AsSegment(Capsule capsule) {
         return Segment{

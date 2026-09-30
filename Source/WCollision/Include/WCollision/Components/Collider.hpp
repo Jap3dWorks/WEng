@@ -3,7 +3,8 @@
 #include "WObjects/WComponent.hpp"
 #include "WMath/Geometry/Shape.hpp"
 #include "WCore/TEvent.hpp"
-#include "WCollision/DataTypes.hpp"
+#include "WCollision/DataTypes/ECollisionLayers.hpp"
+#include "WCollision/DataTypes/DataTypes.hpp"
 
 #include <variant>
 
@@ -27,7 +28,12 @@ namespace wcl::component {
 
         WPROPERTY(CollisionShape, collision_shape, wmath::geometry::shape::Box{});
 
-        WPROPERTY(wmath::geometry::shape::AABB, aabb, {});
+        /**
+         * world space aabb
+         */
+        WPROPERTY(wmath::geometry::shape::AABB, ws_aabb, {});
+
+        WPROPERTY(wcl::types::ECollisionLayers, layer_mask, 255);
 
         TEvent<void(wcl::types::IntersectionData)> OnIniIntersection;
         TEvent<void(wcl::types::IntersectionData)> WhileIntersection;

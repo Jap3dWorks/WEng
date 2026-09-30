@@ -2,6 +2,8 @@
 
 #include "WObjects/WComponent.hpp"
 #include "WMath/Geometry/Shape.hpp"
+#include "WCollision/CollisionTree.hpp"
+#include "WCollision/CollisionTrack.hpp"
 
 #include <variant>
 
@@ -14,6 +16,10 @@ namespace wcl::component {
         WOBJECT_BODY;
 
     public:
+
+        WPROPERTY(wcl::CollisionTree, tree, );
+        WPROPERTY(wcl::CollisionTrack, track, )
+        
 
     };
 }
